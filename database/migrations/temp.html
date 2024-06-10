@@ -1,0 +1,337 @@
+                            <th>@lang('profile.action')</th>
+<form action="{{ route('guidings.store') }}" name="f1" method="POST" enctype="multipart/form-data">
+        @csrf
+        @if ($errors->any())
+            @foreach ($errors->all() as $error)
+                <div>{{$error}}</div>
+            @endforeach
+        @endif
+        {{-- <h3>1. @lang('profile.one')</h3> --}}
+        {{-- <div class="row">
+            <div class="form-group col-md-12">
+                    @if (Session::has('success'))
+                        <div class="alert alert-success text-center">
+                            <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+                            <p>{{ Session::get('success') }}</p>
+                        </div>
+                    @endif
+                        <div class="alert alert-primary" role="alert">
+                        @lang('profile.onemsg')
+                        </div>
+                    <table class="table table-bordered" id="dynamicAddRemove">
+                        <tr>
+                            <th>@lang('profile.bild')</th>
+                            <th>@lang('profile.action')</th>
+                            <th>@lang('profile.display')</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input type="file" class="form-control" id="thumbnail" name="gallery[0][image_name]" accept="image/png, image/jpeg, image/jpg" placeholder="test" required>
+                            </td>
+                            <td><button type="button" name="add" id="add-btn" class="btn btn-success">@lang('profile.addanother')</button></td>
+                            <td>
+                                <input type="radio" id="avatar" name="gallery[0][avatar]" checked>
+                            </td>
+                        </tr>
+                    </table>
+                    <hr>
+            </div>
+        </div> --}}
+     {{-- <div class="row">
+         <div class="form-group col-md-12">
+             <label for="title">@lang('profile.guidetitle')<span style="color:red;">*</span>
+                 <span style="color:red; font-size: 12px;">
+                    @lang('profile.guidetitlemsg')
+                 </span>
+             </label>
+             <input type="text" class="form-control" id="title" placeholder="@lang('profile.guidetitle')" name="title" required>
+         </div>
+     </div>
+     <div class="row">
+         <div class="form-group col-md-12">
+             <label for="searchPlace">@lang('profile.location')<span style="color:red;">*</span></label>
+             <input type="text" class="form-control" id="searchPlace" placeholder="@lang('profile.location')" name="location" required>
+             <input type="hidden" id="placeLat" name="lat"/>
+             <input type="hidden" id="placeLng" name="lng"/>
+         </div>
+     </div> --}}
+     <hr>
+     {{-- <div class="row">
+         <div class="form-group col-md-12">
+             <h4 style="margin-bottom: 15px;">@lang('profile.designfor')<span style="color:red;">*</span></h4>
+             <input type="hidden" value="0" name="recommended_for_anfaenger">
+             <input class="form-check-input" type="checkbox" value=1 id="recommended_for_anfaenger"
+                    name="recommended_for_anfaenger">
+             <label class="form-check-label" for="flexCheckDefault">
+                 @lang('profile.begginer')
+             </label>
+             <br>
+             <input type="hidden" value="0" name="recommended_for_fortgeschrittene">
+             <input class="form-check-input" type="checkbox" value=1 id="recommended_for_fortgeschrittene"
+                    name="recommended_for_fortgeschrittene">
+             <label class="form-check-label" for="flexCheckDefault">
+                 @lang('profile.advanced')
+             </label>
+             <br>
+             <input type="hidden" value="0" name="recommended_for_profis">
+             <input class="form-check-input" type="checkbox" value=1 id="recommended_for_profis" name="recommended_for_profis">
+             <label class="form-check-label" for="flexCheckDefault">
+                 @lang('profile.professionals')
+             </label>
+         </div>
+
+         <div class="form-group col-md-12">
+             <label for="duration">@lang('profile.duration')<span style="color:red;">*</span>
+                 <span style="color:red; font-size: 12px;">
+                    @lang('profile.durationmsg')
+                 </span>
+             </label>
+             <input type="number" class="form-control" id="duration" name="duration" placeholder="@lang('profile.duration')" required>
+         </div>
+     </div> --}}
+     <div class="row">
+         <div class="form-group col-md-12">
+             <label for="required_special_license">@lang('profile.specificguestcard')<span style="color:red;">*</span>
+                 <br>
+                 <span style="color:red; font-size: 12px;">
+                    @lang('profile.specificguestcardmsg')
+                 </span>
+             </label>
+             <select class="form-control" id="special_license_needed" name="special_license_needed" required>
+                 <option value="Nein">@lang('profile.no')</option>
+                 <option value="Ja">@lang('profile.yes')</option>
+             </select>
+         </div>
+         <div class="form-group col-md-12" id="special_lizence" hidden>
+             <label for="required_special_license">Bitte gib die Gastkarte oder den Gewässerschein an der benötigt wird*</label>
+             <input type="text" class="form-control" id="required_special_license"
+                    placeholder="Gewässerkarte/Gewässerschein" name="required_special_license">
+         </div>
+     </div>
+     <hr>
+     <h3>2. @lang('profile.two')</h3>
+     <div class="form-group col-md-6">
+         <label for="fishing_type">@lang('profile.angelType')?<span style="color:red;">*</span></label>
+         <select class="form-control" id="fishing_type" name="fishing_type" required>
+             <option>@lang('profile.active')</option>
+             <option>@lang('profile.passive')</option>
+             <option>@lang('profile.actAndPass')</option>
+         </select>
+     </div>
+     <div class="row">
+         <div class="form-group col-md-6 mb-3">
+             <label for="fishing_from">@lang('profile.WhereFrom')?<span style="color:red;">*</span></label>
+             <select class="form-control" id="fishing_from" name="fishing_from" required>
+                 <option>@lang('profile.WhereFromChoice1')</option>
+                 <option>@lang('profile.WhereFromChoice2')</option>
+             </select>
+         </div>
+         <hr>
+         <div class="form-group col-md-12">
+             <h4 style="margin-bottom: 15px;">@lang('profile.waterType')<span style="color:red;">*</span><span style="color:red; font-size: 12px;">*@lang('profile.waterTypeMsg')</span></h4>
+
+             @foreach($waters as $water)
+             <input class="form-check-input" type="checkbox" value="{{$water->name}}" id="{{$water->name}}" name="water[]">
+
+                 @switch(app()->getLocale())
+                    @case('de')
+                        <label class="form-check-label" for="{{$water->name}}">
+                            {{$water->name}}
+                        </label>
+                    @break;
+                    @case('en')
+                        <label class="form-check-label" for="{{$water->name}}">
+                            {{$water->name_en ? $water->name_en: $water->name}}
+                        </label>
+                    @break
+                    @default
+                    {{$water->name}}
+                @endswitch
+
+                 {{-- <input class="form-check-input" type="checkbox" value="{{$water->name}}" id="{{$water->name}}" name="water[]">
+                 <label class="form-check-label" for="{{$water->name}}">
+                     {{$water->name}}
+                 </label> --}}
+             @endforeach
+         </div>
+
+         <div class="form-group col-md-12">
+             <label class="form-check-label" for="water_sonstiges">
+                @lang('profile.otherWaterTypes')
+             </label>
+             <input class="form-control" type="text" id="water_sonstiges" placeholder="@lang('profile.otherWaterTypes')" name="water_sonstiges">
+         </div>
+
+         <hr style="margin-top: 15px;">
+         <div class="form-group col-md-12">
+             <h4 style="margin-bottom: 15px;">@lang('profile.targetFish')<span style="color:red;">*</span><span style="color:red; font-size: 12px;">*@lang('profile.targetFishMsg')</span></h4>
+             <!-- <div class="d-flex flex-grow-1"> -->
+                @foreach($targets as $target)
+                <input class="form-check-input" type="checkbox" value="{{$target->name}}" id="{{$target->name}}" name="targets[]">
+                @switch(app()->getLocale())
+                    @case('de')
+                        <label class="form-check-label" for="{{$target->name}}">
+                            {{$target->name}}
+                        </label>
+                    @break
+                    @case('en')
+                        <label class="form-check-label" for="{{$target->name}}">
+                            {{$target->name_en ? $target->name_en: $target->name}}
+                        </label>
+                    @break
+                    @default
+                    {{$target->name}}
+                @endswitch
+         
+                    {{-- <label class="form-check-label" for="{{$target->name}}">
+                        {{$target->name}}
+                    </label> --}}
+                @endforeach
+             <!-- </div> -->
+         </div>
+         <div class="form-group col-md-12">
+             <label class="form-check-label" for="target_fish_sonstiges">
+                @lang('profile.otherTargetFish')
+             </label>
+             <input class="form-control" type="text" id="target_fish_sonstiges" placeholder="@lang('profile.otherTargetFish')" name="target_fish_sonstiges">
+         </div>
+
+         <hr style="margin-top: 15px;">
+         <div class="form-group col-md-12">
+             <h4 style="margin-bottom: 15px;">@lang('profile.techniqueMethod')<span style="color:red;">*</span><span style="color:red; font-size: 12px;">*@lang('profile.techniqueMethodMsg')</span></h4>
+
+             @foreach($methods as $method)
+                 <input class="form-check-input" type="checkbox" value="{{$method->name}}" id="{{$method->name}}"
+                        name="methods[]">
+
+                     @switch(app()->getLocale())
+                        @case('de')
+                            <label class="form-check-label" for="{{$method->name}}">
+                                {{$method->name}}
+                            </label>
+                        @break
+                        @case('en')
+                            <label class="form-check-label" for="{{$method->name}}">
+                                {{$method->name_en ? $method->name_en: $method->name}}
+                            </label>
+                        @break
+                        @default
+                        {{$method->name}}
+                     @endswitch
+                 {{-- <label class="form-check-label" for="{{$method->name}}">
+                     {{$method->name}}
+                 </label> --}}
+                 <br>
+             @endforeach
+         </div>
+         <div class="form-group col-md-12">
+             <label class="form-check-label" for="methods_sonstiges">
+             @lang('profile.otherTechniqueMethod')
+             </label>
+             <input class="form-control" type="text" id="methods_sonstiges" placeholder="@lang('profile.otherTechniqueMethod')" name="methods_sonstiges">
+         </div>
+
+         {{-- <div class="row">
+             <div class="form-group col-md-12 mb-4 mt-3">
+                 <label for="water_name">@lang('profile.bodyOfWater')<span style="color:red;">*</span><span style="color:red; font-size: 12px;"> @lang('profile.bodyOfWaterMsg')</span></label>
+                 <input type="text" class="form-control" id="water_name" placeholder="@lang('profile.bodyOfWater')"
+                        name="water_name">
+             </div>
+         </div> --}}
+         <hr>
+         <h3>3. @lang('profile.three')<span style="color:red;">*</span></h3>
+
+         <hr style="margin-top: 20px">
+         <h3>4. @lang('profile.four')</h3>
+         <div class="row">
+             <div class="form-group col-md-12">
+                 <label for="required_equipment">@lang('profile.gearandeq')<span style="color:red;">*</span></label>
+                 <select class="form-control" id="required_equipment" name="required_equipment">
+                     <option>@lang('profile.pleaseSelect')</option>
+                     <option value="is_needed">@lang('profile.broughtBySelf')</option>
+                     <option value="is_there">@lang('profile.avail')</option>
+                 </select>
+             </div>
+             <div class="form-group col-md-12" id="needed_equipment" hidden>
+                 <label>@lang('profile.four')Benötigtes Equipment<span style="color:red;">*</span></label>
+                 <input type="text" class="form-control" placeholder="@lang('profile.four')Benötigtes Equipment" name="needed_equipment">
+             </div>
+         </div>
+         {{-- <div class="row">
+             <div class="form-group col-md-12">
+                 <label for="provided_equipment">@lang('profile.meetingPoint')<span style="color:red;">*</span></label>
+                 <input type="text" class="form-control" id="meeting_point" placeholder="@lang('profile.meetingPoint')"
+                        name="meeting_point">
+             </div>
+         </div> --}}
+         <div class="row">
+             <div class="form-group col-md-12">
+                 <label for="additional_information">@lang('profile.four')</label>
+                 <input type="text" class="form-control" id="additional_information" placeholder="@lang('profile.four')"
+                        name="additional_information">
+             </div>
+         </div>
+         <div class="row">
+             <div class="form-group col-md-12">
+                 <label for="catering">@lang('profile.meals')</label>
+                 <input type="text" class="form-control" id="catering" placeholder="@lang('profile.meals')" name="catering">
+             </div>
+         </div>
+         {{--
+         <div class="row">
+             <div class="form-group col-md-12">
+                 <label for="payment_point">Buchung oder Anfrage*<br/><span style="color:red; font-size: 12px;">*Wähle aus, ob dein Guiding direkt gebucht werden kann (soweit verfügbar) oder ob der Gast erst eine Anfrage stellen soll.</span></label>
+                 <select class="form-control" id="payment_point" name="payment_point">
+                     <option>bitte auswählen..</option>
+                     <option value="with_booking">Guiding kann direkt gebucht werden</option>
+                     <option value="after_inquiry">Nur Anfrage möglich</option>
+                 </select>
+             </div>
+         </div>
+           --}}
+            <hr style="margin-top: 20px">
+            <h3>@lang('profile.five')</h3>
+            <p>@lang('profile.fees'):<span style="color:red;">*</span><br>
+                <span style="color:red; font-size: 12px;">*@lang('profile.feeMsg')</span><br>
+                @lang('profile.feeMsg1')<br>
+                @lang('profile.feeMsg2')<br>
+                @lang('profile.feeMsg3')<br>
+            </p>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="max_guests">@lang('profile.maxGuest')<span style="color:red;">*</span></label>
+                    <select class="form-control" id="max_guests" name="max_guests" required>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-4" id="one-person">
+                    <label for="price">@lang('profile.totalPrice')<span style="color:red;">*</span></label>
+                    <input type="number" class="form-control" id="price" name="price" placeholder="{{ translate('Gesamtpreis für eine Person') }}" required>
+                </div>
+                <div class="form-group col-md-4" id="two-person" hidden>
+                    <label for="price_two_persons">{{ translate('Gesamtpreis für zwei Personen') }}</label>
+                    <input type="number" class="form-control" id="price_two_persons" placeholder="{{ translate('Gesamtpreis für zwei Personen') }}" name="price_two_persons">
+                </div>
+
+                <div class="form-group col-md-4" id="three-person" hidden>
+                    <label for="price_three_persons">{{ translate('Gesamtpreis für drei Personen') }}</label>
+                    <input type="number" class="form-control" id="price_three_persons" placeholder="{{ translate('Gesamtpreis für drei Personen') }}" name="price_three_persons">
+                </div>
+                <div class="form-group col-md-4" id="four-person" hidden>
+                    <label for="price_four_persons">{{ translate('Gesamtpreis für vier Personen') }}</label>
+                    <input type="number" class="form-control" id="price_four_persons" placeholder="{{ translate('Gesamtpreis für vier Personen') }}" name="price_four_persons">
+                </div>
+                <div class="form-group col-md-4" id="five-person" hidden>
+                    <label for="price_five_persons">{{ translate('Gesamtpreis für fünf Personen') }}</label>
+                    <input type="number" class="form-control" id="price_five_persons" placeholder="{{ translate('Gesamtpreis für fünf Personen') }}" name="price_five_persons">
+                </div>
+            </div>
+            <hr style="margin-top: 20px">
+            <button type="submit" class="btn btn-primary">@lang('profile.btnSave')</button>
+        </div>

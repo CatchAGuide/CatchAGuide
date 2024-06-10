@@ -1,0 +1,106 @@
+.news-list {
+  position: relative;
+  display: block;
+  padding: 120px 0;
+
+  &__single {
+    // Whole element
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid map-get($colors, "border");
+  }
+
+  &__single__img {
+    position: relative;
+    display: block;
+    overflow: hidden;
+
+    figure {
+      margin: 0 auto;
+      overflow: hidden;
+      position: relative;
+      height: 200px;
+    }
+
+    a {
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(var(--thm-black-rgb), 0.4);
+      position: absolute;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 30px;
+      color: var(--thm-base);
+      transition: opacity 500ms ease, visibility 500ms ease,
+        transform 500ms ease;
+      visibility: hidden;
+      opacity: 0;
+      transform: translateY(-30%);
+    }
+
+    img {
+      transition: scale 0.25s ease-in-out;
+    }
+
+    &:is(:hover, :focus) {
+      figure img {
+        scale: 1.1;
+      }
+    }
+  }
+
+  &__single__content {
+    // Content
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 15px;
+    min-height: 185px;
+
+    @include media(">=tablet") {
+      padding: 20px 15px 10px;
+    }
+  }
+
+  &__single__title {
+    font-size: 20px;
+    line-height: 30px;
+    font-weight: 700;
+    text-align: left;
+
+    @include media(">=L-desktop") {
+      font-size: 24px;
+      line-height: 34px;
+    }
+
+    a {
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      color: map-get($colors, "dark");
+      transition: color 0.25s ease-in-out;
+
+      &:is(:hover, :focus) {
+        color: map-get($colors, "dark");
+      }
+    }
+  }
+
+  &__single__author {
+    margin: auto 0 0;
+    font-size: 0.7rem;
+    line-height: 1rem;
+    text-align: left;
+  }
+}
+
+.news-one__date {
+  border-bottom-right-radius: 0;
+}

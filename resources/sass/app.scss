@@ -1,0 +1,33 @@
+// Fonts
+@import "./settings/fonts";
+
+// Settings
+@import "./settings/variables";
+@import "./settings/breakpoints";
+@import "./settings/colors";
+@import "./settings/helpers";
+
+// Bootstrap
+// @import "~bootstrap/scss/bootstrap";
+
+// Custom layout
+@import "./layout/pill";
+@import "./layout/btn";
+@import "./layout/main-menu";
+@import "./layout/pagination";
+
+// Page
+@import "./page/guiding";
+
+// Custom components
+@import "./components/tour-search"; // The search bar in homepage
+@import "./components/tours-list"; // The one in /guidings
+@import "./components/popular-tours"; // The first slider in homepage
+@import "./components/news-list"; // The news list slider in homepage
+@import "./components/carousel"; // The news list slider in homepage
+@import "./components/testimonial"; // The news list slider in homepage
+@import "./components/litepicker"; // The picker for selecting dates
+@import "./components/video-one"; // The bullet point list in homepage
+@import "./components/tour-details"; // The detail page of a guide
+@import "./components/map"; // The map of the guiding page
+@import "./components/about"; // The img and about component in the /homepage

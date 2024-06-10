@@ -1,0 +1,5 @@
+.testimonial {
+  &-one {
+    background-color: map-get($colors, "dark");
+  }
+}

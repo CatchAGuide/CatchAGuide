@@ -1,0 +1,75 @@
+image: misterio92/ci-php-node:6.0
+
+variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+
+stages:
+    - deploy
+
+before_script:
+    - cd ~
+    - pwd
+    - mkdir -p ~/.ssh
+    - ls ~/.ssh -lsh
+    - echo "$SSH_PRIVATE_KEY_GITLAB" > ~/.ssh/id_rsa
+    - echo "$SSH_PUBLIC_KEY_GITLAB" > ~/.ssh/id_rsa.pub
+    - echo "$SSH_PUBLIC_KEY_GITLAB"
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+    - echo -e "HOST ssh.strato.de\n  HostName ssh.strato.de\n  IdentityFile ~/.ssh/staging" >> ~/.ssh/config
+    - echo "Configcheck"
+    - echo "$(<~/.ssh/config)"
+    - echo "Configcheck End"
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/staging
+    - chmod 700 -R ~/.ssh/
+    - echo "$STAGING_HOSTKEY" > ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - ls ~/.ssh -lsh
+    - cat ~/.ssh/config
+    - curl --silent -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.2/install.sh | bash
+    - . ~/.nvm/nvm.sh
+    - nvm install 14
+    - nvm use 14
+    - npm -v
+    - node -v
+    - cd $CI_PROJECT_DIR
+    - echo "$CI_PROJECT_DIR"
+    - curl -sS https://getcomposer.org/installer | sudo php -- --version=2.1.3 --filename=composer2 && php composer2 -v
+
+cache:
+    paths:
+        - node_modules/
+        - vendor/
+
+# Deploy
+deploy_staging:
+    stage: deploy
+
+    only:
+        refs:
+            - branches
+        variables:
+            - $CI_COMMIT_REF_SLUG == "staging"
+
+    script:
+        - php composer2 install
+        - npm install
+        - npm run production
+        - ls
+        - echo "deploy neueseite staging"
+        - rsync -a -e ssh ./ $STAGING_USER@$STAGING_HOST:$STAGING_DIR
+
+deploy_prod:
+    stage: deploy
+
+    only:
+        refs:
+            - tags
+
+    script:
+        - php composer2 install
+        - npm install
+        - npm run production
+        - ls
+        - echo "deploy prod"
+        - rsync -a -e ssh ./ $PROD_USER@$PROD_HOST:$PROD_DIR
+        - ssh $PROD_USER@$PROD_HOST "cd $PROD_DIR && php artisan migrate"

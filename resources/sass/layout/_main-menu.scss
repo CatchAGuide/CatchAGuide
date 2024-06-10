@@ -1,0 +1,59 @@
+body .main-menu {
+  .main-menu__list li a::before {
+    bottom: -5px;
+  }
+
+  .main-menu-wrapper__left {
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .main-menu-wrapper__right {
+    margin-left: auto;
+  }
+
+  .main-menu-wrapper__user {
+    font-size: 0.85rem;
+    transition: color 0.2s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+
+    &:hover,
+    &:focus {
+      color: map-get($colors, "dark");
+
+      .main-menu__user {
+        background-color: map-get($colors, "primary");
+        color: map-get($colors, "light");
+      }
+    }
+  }
+
+  .main-menu-wrapper__nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+  }
+}
+
+.mobile-nav__content .main-menu__list li a button {
+  pointer-events: none;
+}
+
+@media screen and (min-width: 1200px) {
+  .main-menu__list,
+  .main-menu-wrapper__left,
+  .main-menu-wrapper__main-menu {
+    display: flex;
+    width: 100%;
+  }
+
+  .main-menu-wrapper__right {
+    margin-left: auto;
+  }
+
+  .main-menu-wrapper__user {
+    font-size: 1.2rem;
+  }
+}

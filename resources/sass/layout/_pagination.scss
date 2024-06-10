@@ -1,0 +1,9 @@
+.pagination {
+  padding: 20px 0 50px;
+  display: flex;
+  justify-content: center;
+
+  @include media(">=desktop") {
+    justify-content: flex-start;
+  }
+}

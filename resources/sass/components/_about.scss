@@ -1,0 +1,7 @@
+.about {
+  &-one__right-text {
+    @include media(">=L-phone") {
+      text-align: justify;
+    }
+  }
+}

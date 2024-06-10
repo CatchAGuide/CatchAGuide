@@ -1,0 +1,92 @@
+.tour-search {
+  &-box {
+    position: relative;
+  }
+
+  &-one__inner {
+    align-items: inherit;
+  }
+
+  &-one__favorites {
+    position: absolute;
+    left: 0;
+    bottom: -120px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    @include media(">=L-phone") {
+      bottom: -75px;
+    }
+
+    @include media(">=desktop") {
+      width: initial;
+      left: 50%;
+      translate: -50%;
+    }
+
+    .pill {
+      font-size: 0.8rem;
+
+      @include media(">=tablet") {
+        font-size: 0.9rem;
+      }
+    }
+
+    span {
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      font-weight: 700;
+
+      @include media(">=L-phone") {
+        margin-right: 30px;
+        font-size: 1.1rem;
+        justify-content: flex-start;
+      }
+    }
+
+    &__buttons {
+      display: grid;
+      place-items: center;
+      gap: 10px;
+      grid-template-areas:
+        "one one one one one one"
+        ". . twoLeft twoRight . .";
+
+      @include media(">=L-phone") {
+        flex-wrap: nowrap;
+        display: flex;
+      }
+    }
+
+    .one {
+      grid-area: one;
+    }
+
+    .two-left {
+      grid-area: twoLeft;
+    }
+
+    .two-right {
+      grid-area: twoRight;
+    }
+  }
+
+  .tour-search-one__input-box {
+    label {
+      font-size: 1rem;
+      border-bottom: 1px solid map-get($colors, "gray");
+      padding-bottom: 3px;
+      max-width: max-content;
+    }
+  }
+
+  .tour-search-box {
+    input[type="text"] {
+      padding-left: 0;
+    }
+  }
+}

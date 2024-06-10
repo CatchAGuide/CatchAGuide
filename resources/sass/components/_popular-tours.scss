@@ -1,0 +1,79 @@
+// Path: resources/sass/components/_tours-list.scss
+
+.popular-tours {
+  margin-top: 12rem;
+
+  @include media(">=L-desktop") {
+    margin-top: 10rem;
+  }
+
+  &__single {
+    border: 1px solid map-get($colors, "border");
+    border-radius: 5px;
+  }
+
+  &__content {
+    border: 1px solid transparent;
+    padding: 10px 15px;
+    min-height: 190px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    @include media(">=tablet") {
+      padding: 10px 15px 10px;
+    }
+
+    @include media(">=L-desktop") {
+      min-height: 205px;
+      padding: 15px 25px 30px;
+    }
+  }
+
+  &__title {
+    text-align: left;
+  }
+
+  &__title a {
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+  }
+
+  &__img {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom: 1px solid map-get($colors, "border");
+
+    &__wrapper {
+      //   width: 400px;
+      margin: 0 auto;
+      overflow: hidden;
+      position: relative;
+      height: 300px;
+    }
+
+    img {
+      min-height: 300px;
+      max-width: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .popular-tours__time {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    img {
+      width: initial;
+      display: initial;
+    }
+  }
+}
+
+.popular-tours__carousel.owl-carousel .owl-dots {
+  display: initial !important;
+}
