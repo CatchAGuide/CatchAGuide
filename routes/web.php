@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\AuthenticationController;
+use App\Http\Controllers\Auth\LoginAuthController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Admin\Blog\CategoriesController as AdminCategoriesController;
 use App\Http\Controllers\Admin\Blog\ThreadsController as AdminThreadsController;
 use App\Http\Controllers\Admin\BookingsController;
@@ -74,7 +76,7 @@ Route::get('/all-countries',function(){
     return view('pages.countries.index');
 })->name('allcountries');
 
-Auth::routes();
+#Auth::routes();
 
 Route::post('/upload/{guiding?}', [FileUploadController::class, 'upload'])->name('upload');
 Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(function () {
@@ -205,11 +207,14 @@ Route::name('law.')->group(function() {
     Route::get('/faq', [FAQController::class, 'index'])->name('faq');
 });
 
+Route::get('login', [LoginAuthController::class, 'index'])->name('logins');//->middleware('guest:employees');
+Route::post('login', [LoginAuthController::class, 'login'])->name('login');//->middleware('guest:employees');
+Route::post('register', [RegisterController::class, 'register'])->name('register');//->middleware('guest:employees');
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::name('auth.')->group(function () {
-        Route::get('logins', [AuthenticationController::class, 'index'])->name('logins')->middleware('guest:employees');
-        Route::post('login', [AuthenticationController::class, 'login'])->name('login')->middleware('guest:employees');
-        Route::post('logout', [AuthenticationController::class, 'logout'])->name('logout')->middleware('auth:employees');
+        //Route::get('logins', [LoginAuthController::class, 'index'])->name('logins');//->middleware('guest:employees');
+        //Route::post('login', [LoginAuthController::class, 'login'])->name('login');//->middleware('guest:employees');
+        Route::post('logout', [LoginAuthController::class, 'logout'])->name('logout');//->middleware('auth:employees');
     });
 
     Route::middleware('auth:employees')->group(function () {

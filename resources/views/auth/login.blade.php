@@ -139,24 +139,23 @@
                                 <button style="margin: 5px;" type="submit" class="btnSubmit">
                                     {{ __('Login') }}
                                 </button>
-                                <a class="btnForgetPwd mt-3" style="color: #FFFFFF" href="{{ route('password.request') }}">@lang('forms.forgotPass')</a>
+                                <a class="btnForgetPwd mt-3" style="color: #FFFFFF" href="#}">@lang('forms.forgotPass')</a>
                             </div>
                         </div>
                     </form>
                 </div>
                 <div class="col-lg-6 mb-5 mt-3">
-                    <form method="POST" action="{{ route('register') }}">
+                    <form method="POST" action="{{ route('register') }}" id="regForm">
                         @csrf
 
                         <div class="col-12 login-form-2">
 
-                            {!! ReCaptcha::htmlScriptTagJsApi() !!}
                             <h3 style="color: #FFFFFF">@lang('forms.register')</h3>
                             <div class="d-flex justify-content-center align-items-center flex-column">
                                 <div class="form-group w-50">
                                     <input style="margin: 5px;" id="firstname" type="text"
                                             class="form-control @error('firstname') is-invalid @enderror"
-                                            name="firstname" value="{{ old('firstname') }}" required
+                                            name="firstname" value="{{ old('firstname') }}" 
                                             autocomplete="firstname"
                                             autofocus
                                             placeholder="@lang('forms.fname')" value="{{ old('firstname') }}"/>
@@ -167,7 +166,7 @@
                                 <div class="form-group w-50">
                                     <input style="margin: 5px;" id="lastname" type="text"
                                             class="form-control @error('lastname') is-invalid @enderror"
-                                            name="lastname" value="{{ old('lastname') }}" required
+                                            name="lastname" value="{{ old('lastname') }}" 
                                             autocomplete="lastname"
                                             autofocus
                                             placeholder="@lang('forms.lname')" value="{{old('lastname') }}"/>
@@ -180,7 +179,7 @@
                                 <div class="form-group w-50">
                                     <input style="margin: 5px;" id="email" type="email"
                                             class="form-control @error('email') is-invalid @enderror"
-                                            name="email" value="{{ old('email') }}" required
+                                            name="email" value="{{ old('email') }}" 
                                             autocomplete="email"
                                             placeholder="@lang('forms.email')" value="old('email') }}"/>
                                     @error('email')
@@ -192,7 +191,7 @@
                                 <div class="form-group w-50">
                                     <input style="margin: 5px;" type="password" id="password" class="form-control"
                                             placeholder="@lang('forms.pass') @error('password') is-invalid @enderror"
-                                            name="password" required autocomplete="new-password" value=""/>
+                                            name="password"  autocomplete="new-password" value=""/>
                                     @error('password')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
@@ -201,11 +200,11 @@
                                 </div>
                                 <div class="form-group w-50">
                                     <input style="margin: 5px;" id="password-confirm" type="password" class="form-control"
-                                            name="password_confirmation" required autocomplete="new-password"
+                                            name="password_confirmation"  autocomplete="new-password"
                                             placeholder="@lang('forms.rpass')" value=""/>
                                 </div>
                                 <div class="form-group w-50">
-                                    <input style="margin: 5px;" type="checkbox" class="form-check-inline" id="agb" required>
+                                    <input style="margin: 5px;" type="checkbox" class="form-check-inline" id="agb" >
                                     <label for="agb" class="text-white">
                                         {{ translate('Ich akzeptiere die') }}
                                         <a href="law/{{ route('law.agb') }}">{{ translate('AGB') }}</a>
@@ -213,7 +212,6 @@
                                         <a href="{{ route('law.data-protection') }}">{{ translate('Datenschutzbestimmungen') }} </a>
                                     </label>
                                 </div>
-                                 {!! htmlFormSnippet() !!}
                                 <button style="margin: 5px;" type="submit" class="btn btnSubmit">
                                     @lang('forms.register')
                                 </button>
