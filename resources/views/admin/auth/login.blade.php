@@ -17,7 +17,7 @@
 
                 <div class="container-login100">
                     <div class="wrap-login100 p-6">
-                        <form class="login100-form validate-form" method="POST" action="{{ route('login') }}">
+                        <form class="login100-form validate-form" method="POST" action="{{ route('admin.auth.login') }}">
                             @csrf
                             <span class="login100-form-title pb-5">
                                 Anmelden
