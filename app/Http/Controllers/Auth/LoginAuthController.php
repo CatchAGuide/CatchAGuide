@@ -34,7 +34,7 @@ class LoginAuthController extends Controller
         Auth::guard('employees')->logout();
         Auth::logout();
 
-        return redirect()->route('logins'); // Login
+        return redirect()->route('login'); // Login
     }
 
     /**

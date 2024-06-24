@@ -207,13 +207,13 @@ Route::name('law.')->group(function() {
     Route::get('/faq', [FAQController::class, 'index'])->name('faq');
 });
 
-Route::get('login', [LoginAuthController::class, 'index'])->name('logins');//->middleware('guest:employees');
+Route::get('login', [LoginAuthController::class, 'index'])->name('login');//->middleware('guest:employees');
 Route::post('login', [LoginAuthController::class, 'login'])->name('login');//->middleware('guest:employees');
 Route::post('register', [RegisterController::class, 'register'])->name('register');//->middleware('guest:employees');
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::name('auth.')->group(function () {
-        //Route::get('logins', [LoginAuthController::class, 'index'])->name('logins');//->middleware('guest:employees');
-        //Route::post('login', [LoginAuthController::class, 'login'])->name('login');//->middleware('guest:employees');
+        Route::get('logins', [AuthenticationController::class, 'index'])->name('logins');//->middleware('guest:employees');
+        Route::post('login', [AuthenticationController::class, 'login'])->name('login');//->middleware('guest:employees');
         Route::post('logout', [LoginAuthController::class, 'logout'])->name('logout');//->middleware('auth:employees');
     });
 

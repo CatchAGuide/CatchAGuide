@@ -85,7 +85,7 @@ class RegisterController extends Controller
     
     public function register(Request $request)
     {
-        //$this->validator($request->all())->validate();
+        $this->validator($request->all())->validate();
 
         event(new Registered($user = $this->create($request->all())));
 
@@ -108,5 +108,19 @@ class RegisterController extends Controller
     protected function registered(Request $request, $user)
     {
         //
+    }
+    
+    /**
+     * Get the post register / login redirect path.
+     *
+     * @return string
+     */
+    public function redirectPath()
+    {
+        if (method_exists($this, 'redirectTo')) {
+            return $this->redirectTo();
+        }
+
+        return property_exists($this, 'redirectTo') ? $this->redirectTo : '/home';
     }
 }
