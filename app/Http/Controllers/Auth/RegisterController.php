@@ -145,10 +145,9 @@ class RegisterController extends Controller
         $user = User::where('id', $id)->whereNull('email_verified_at')->first();
 
         if (is_null($user)) {
-            abort(404);
+            User::where('id', $id)->update([ 'email_verified_at' => DB::raw('NOW()') ]);
         }
 
-        User::where('id', $id)->update([ 'email_verified_at' => DB::raw('NOW()') ]);
         return view('auth.register-verification');
     }
 }
