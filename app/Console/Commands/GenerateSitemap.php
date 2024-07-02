@@ -7,6 +7,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 use Illuminate\Filesystem\Filesystem;
+use Spatie\Sitemap\Sitemap;
+use Spatie\Sitemap\Tags\Url;
 
 class GenerateSitemap extends Command
 {
@@ -36,6 +38,76 @@ class GenerateSitemap extends Command
         parent::__construct();
     }
 
+    public function handle(){
+
+        $this->info('Start...');
+        $sitemap = Sitemap::create()
+            ->add(Url::create('/')
+                ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
+                ->setPriority(0.5)
+                ->addAlternate('/contact', 'de')
+                ->addAlternate('/contact', 'en')
+            )
+            ->add(Url::create('/guidings')
+                ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
+                ->setPriority(0.5)
+                ->addAlternate('/contact', 'de')
+                ->addAlternate('/contact', 'en')
+            )
+            ->add(Url::create('/angelmagazin')
+                ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
+                ->setPriority(0.5)
+                ->addAlternate('/contact', 'de')
+                ->addAlternate('/contact', 'en')
+            )
+            ->add(Url::create('/login')
+                ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
+                ->setPriority(0.5)
+                ->addAlternate('/contact', 'de')
+                ->addAlternate('/contact', 'en')
+            )
+            ->add(Url::create('/imprint')
+                ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
+                ->setPriority(0.5)
+                ->addAlternate('/contact', 'de')
+                ->addAlternate('/contact', 'en')
+            )
+            ->add(Url::create('/data-protection')
+                ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
+                ->setPriority(0.5)
+                ->addAlternate('/contact', 'de')
+                ->addAlternate('/contact', 'en')
+            )
+            ->add(Url::create('/agb')
+                ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
+                ->setPriority(0.5)
+                ->addAlternate('/contact', 'de')
+                ->addAlternate('/contact', 'en')
+            )
+            ->add(Url::create('/faq')
+                ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
+                ->setPriority(0.5)
+                ->addAlternate('/contact', 'de')
+                ->addAlternate('/contact', 'en')
+            )
+            ->add(Url::create('/about-us')
+                ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
+                ->setPriority(0.5)
+                ->addAlternate('/contact', 'de')
+                ->addAlternate('/contact', 'en')
+            )
+            ->add(Url::create('/contact')
+                ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
+                ->setPriority(0.5)
+                ->addAlternate('/contact', 'de')
+                ->addAlternate('/contact', 'en')
+            );
+        $this->info('Listing...');
+
+        $sitemap->writeTofile(public_path('sitemap_index.xml'));
+        $this->info('Done Generating Sitemap');
+    }
+
     public function generateXmlContent(){
 
         $sxml = '<?xml version="1.0" encoding="UTF-8"?>';
@@ -53,7 +125,6 @@ class GenerateSitemap extends Command
         $sxml .= '</urlset>';
         return $sxml;
     }
-
 
     public function addItem($loc, $lastmod = null, $changefreq = 'daily', $priority = 0.8){
 
