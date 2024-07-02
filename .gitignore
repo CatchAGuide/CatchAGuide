@@ -7,7 +7,6 @@ package-lock.json
 /public/storage
 /public/images
 /public/images2
-/public/sitemap_index.xml
 /storage/*.key
 /public
 /vendor
