@@ -4,13 +4,17 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
+use App\Mail\RegistrationVerification;
 use App\Models\User;
+use Crypt;
+use DB;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class RegisterController extends Controller
@@ -95,6 +99,9 @@ class RegisterController extends Controller
             return $response;
         }
 
+        Mail::send(new RegistrationVerification($user));
+        $request->session()->flash('success-message', 'Success!');
+
         return $request->wantsJson()
                     ? new JsonResponse([], 201)
                     : redirect($this->redirectPath());
@@ -117,10 +124,30 @@ class RegisterController extends Controller
      */
     public function redirectPath()
     {
+        Auth::guard('employees')->logout();
+        Auth::logout();
+
+        return url('/login');//->with('success-message', 'Success!');
+
         if (method_exists($this, 'redirectTo')) {
             return $this->redirectTo();
         }
-
         return property_exists($this, 'redirectTo') ? $this->redirectTo : '/home';
+    }
+
+    public function verfication(Request $request)
+    {
+        if(!$request->has('hash')) {
+            abort(404);
+        }
+
+        $id = Crypt::decrypt($request->hash);
+        $user = User::where('id', $id)->whereNull('email_verified_at')->first();
+
+        if (is_null($user)) {
+            User::where('id', $id)->update([ 'email_verified_at' => DB::raw('NOW()') ]);
+        }
+
+        return view('auth.register-verification');
     }
 }

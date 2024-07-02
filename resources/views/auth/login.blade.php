@@ -149,9 +149,11 @@
                         @csrf
 
                         <div class="col-12 login-form-2">
-
                             {!! ReCaptcha::htmlScriptTagJsApi() !!}
                             <h3 style="color: #FFFFFF">@lang('forms.register')</h3>
+                            @if(Session::has('success-message'))
+                            <div class="alert alert-success"><small>@lang('registration-verification.success_message')</small></div>
+                            @endif
                             <div class="d-flex justify-content-center align-items-center flex-column">
                                 <div class="form-group w-50">
                                     <input style="margin: 5px;" id="firstname" type="text"
