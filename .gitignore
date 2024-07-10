@@ -7,6 +7,7 @@ package-lock.json
 /public/storage
 /public/images
 /public/images2
+/public/sitemap_index.xml
 /storage/*.key
 /public
 /vendor
@@ -20,6 +21,7 @@ Homestead.json
 Homestead.yaml
 npm-debug.log
 yarn-error.log
+composer.lock
 /.idea
 /.vscode
 *.sql.gz
