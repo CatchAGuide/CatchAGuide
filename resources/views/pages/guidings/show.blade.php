@@ -578,14 +578,17 @@ transform: translate3d(0,0,0); width: 100%;">
             calendar.render();
         });
     </script>
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q&libraries=places,geocoder"></script>
+    <!-- <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q&libraries=places,geocoder"></script> -->
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q"></script>
+    <!-- <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/@googlemaps/markerclustererplus/dist/index.min.js"></script>
     <script>
         
         
         initMap();
  
             // Initialize and add the map
-            function initMap() {
+            /*function initMap() {
                 // The location of guiding
                 const location = {lat: {{$guiding->lat}}, lng: {{$guiding->lng}}};
                 // The map, centered at location
@@ -602,6 +605,38 @@ transform: translate3d(0,0,0); width: 100%;">
                 marker.addListener("click", () => {
                     $('#guidingModal{{$guiding->id}}').modal('show');
                 })
+            }*/
+
+            function initMap() {
+                const location = {lat: {{$guiding->lat}}, lng: {{$guiding->lng}}};
+                // The map, centered at the center location
+                const map = new google.maps.Map(document.getElementById("map"), {
+                    zoom: 10,
+                    center: location,
+                });
+                /*
+                // The marker locations
+                const locations = [
+                    { lat: {{$guiding->lat}}, lng: {{$guiding->lng}} }
+                ];
+
+                // Create markers and add to the map
+                const markers = locations.map((location, i) => {
+                    return new google.maps.Marker({
+                        position: location,
+                        label: `${i + 1}`,
+                    });
+                });
+                */
+                const markers = new google.maps.Marker({
+                    position: location,
+                    map: map,
+                });
+
+                // Add a marker clusterer to manage the markers.
+                new MarkerClusterer(map, markers, {
+                    imagePath: "https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m"
+                });
             }
 
         $('#person').on('change',function(){
