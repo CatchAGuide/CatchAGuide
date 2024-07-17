@@ -139,7 +139,7 @@
                                 <button style="margin: 5px;" type="submit" class="btnSubmit">
                                     {{ __('Login') }}
                                 </button>
-                                <a class="btnForgetPwd mt-3" style="color: #FFFFFF" href="#}">@lang('forms.forgotPass')</a>
+                                <a class="btnForgetPwd mt-3" style="color: #FFFFFF" href="{{ route('password.request') }}">@lang('forms.forgotPass')</a>
                             </div>
                         </div>
                     </form>

@@ -278,7 +278,7 @@ class GuidingsController extends Controller
 
     
 
-        $guiding = Guiding::where('id',$id)->where('slug',$slug)->where('status',1)->first();
+        $guiding = Guiding::where('id',$id)->where('slug',$slug)->where('status',1)->first();dd($guiding);
 
         if(!$guiding){
             abort(404);

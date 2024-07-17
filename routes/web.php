@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AuthenticationController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginAuthController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Admin\Blog\CategoriesController as AdminCategoriesController;
@@ -212,6 +213,10 @@ Route::post('login', [LoginAuthController::class, 'login'])->name('login');//->m
 Route::post('register', [RegisterController::class, 'register'])->name('register');//->middleware('guest:employees');
 Route::post('register', [RegisterController::class, 'register'])->name('register');//->middleware('guest:employees');
 Route::get('registration-verfication', [RegisterController::class, 'verfication'])->name('registration-verfication');//->middleware('guest:employees');
+Route::get('password/reset', [ForgotPasswordController::class, 'index'])->name('password.request');
+Route::post('password/reset', [ForgotPasswordController::class, 'reset'])->name('password.update');
+Route::get('password/reset/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::name('auth.')->group(function () {
         Route::get('logins', [AuthenticationController::class, 'index'])->name('logins');//->middleware('guest:employees');

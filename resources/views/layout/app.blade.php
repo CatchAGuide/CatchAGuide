@@ -5,6 +5,8 @@
     <title>@yield('title', 'Bitte den Title setzen!')</title>
     <!-- mobile responsive meta -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="online catch guide" >
+    <meta name="robots" content="INDEX,FOLLOW" >
 
     <link  rel="icon" type="image/x-icon"  href="{{asset('assets/img/favicon.png')}}">
     <link rel="manifest" href="img/favicon/manifest.json">
