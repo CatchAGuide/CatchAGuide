@@ -101,17 +101,17 @@ class Booking extends Model
    
         $prices = unserialize($this->extras);
 
-        dd($prices);
+        // dd($prices);
         $total = 0;
         if($this->extras){
             $prices = unserialize($this->extras);
             foreach($prices as $price){
-                dd($price);
+                // dd($price);
             }
             
         }
 
-        dd($total);
+        // dd($total);
 
         
      

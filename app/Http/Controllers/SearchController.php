@@ -57,7 +57,7 @@ class SearchController extends Controller
 
         $guidings = $query->paginate(24);
 
-        dd($guidings);
+        // dd($guidings);
 
  
 
