@@ -51,28 +51,28 @@ class GenerateSitemap extends Command
 
         
         $sitemap_listing_en = $this->listing($english, 'en');
-        $sitemap_listing_de = $this->listing($german, 'de');
+        #$sitemap_listing_de = $this->listing($german, 'de');
 
         $sitemap_magazine_en = $this->magazine($english, 'en');
-        $sitemap_magazine_de = $this->magazine($german, 'de');
+        #$sitemap_magazine_de = $this->magazine($german, 'de');
 
         $sitemap_category_en = $this->categories($english, 'en');
-        $sitemap_category_de = $this->categories($german, 'de');
+        #$sitemap_category_de = $this->categories($german, 'de');
 
         $sitemap_en = $this->sitemap($english, 'en');
-        $sitemap_de = $this->sitemap($german, 'de');
+        #$sitemap_de = $this->sitemap($german, 'de');
 
         $this->info('Sitemap Indexing...');
 
         $sitemap = SitemapIndex::create()
         ->add($english . '/sitemaps' . $sitemap_listing_en)
-        ->add($german . '/sitemaps' . $sitemap_listing_de)
+        #->add($german . '/sitemaps' . $sitemap_listing_de)
 
         ->add($english . '/sitemaps' . $sitemap_magazine_en)
-        ->add($german . '/sitemaps' . $sitemap_magazine_de)
+        #->add($german . '/sitemaps' . $sitemap_magazine_de)
 
         ->add($english . '/sitemaps' . $sitemap_category_en)
-        ->add($german . '/sitemaps' . $sitemap_category_de)
+        #->add($german . '/sitemaps' . $sitemap_category_de)
 
         ->add($english . '/sitemaps/sitemap_en.xml')
         ->add($german . '/sitemaps/sitemap_de.xml')
@@ -116,7 +116,7 @@ class GenerateSitemap extends Command
             $sUrl = $url . '/' . $row->slug;
             $xml .= "\t".'<url>' ."\n" .
                     "\t\t".'<loc>' . $sUrl . '</loc>' ."\n" .
-                    //"\t\t".'<xhtml:link rel="alternate" hreflang="' . $lang . '" href="' . $sUrl . '" />' ."\n" .
+                    "\t\t".'<xhtml:link rel="alternate" hreflang="' . $lang . '" href="' . $sUrl . '" />' ."\n" .
                     "\t\t".'<changefreq>monthly</changefreq>' ."\n" .
                     "\t\t".'<priority>0.5</priority>' ."\n" .
                     "\t".'</url>' ."\n" ;
@@ -141,7 +141,7 @@ class GenerateSitemap extends Command
             $sUrl = $url . '/' . $row->slug;
             $xml .= "\t".'<url>' ."\n" .
                     "\t\t".'<loc>' . $sUrl . '</loc>' ."\n" .
-                    //"\t\t".'<xhtml:link rel="alternate" hreflang="' . $lang . '" href="' . $sUrl . '" />' ."\n" .
+                    "\t\t".'<xhtml:link rel="alternate" hreflang="' . $lang . '" href="' . $sUrl . '" />' ."\n" .
                     "\t\t".'<changefreq>monthly</changefreq>' ."\n" .
                     "\t\t".'<priority>0.5</priority>' ."\n" .
                     "\t".'</url>' ."\n" ;
