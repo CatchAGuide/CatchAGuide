@@ -924,7 +924,8 @@ function initializeSelect2() {
     const { Map, InfoWindow } = await google.maps.importLibrary("maps");
     const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
 
-    map = new google.maps.Map(document.getElementById("map"), {
+    //map = new google.maps.Map(document.getElementById("map"), {
+    const map = new Map(document.getElementById("map"), {
         zoom: 5,
         center: position,
         styles: mapStyle,
