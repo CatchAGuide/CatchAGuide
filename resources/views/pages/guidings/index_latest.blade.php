@@ -720,12 +720,9 @@
 @section('js_after')
 
 
-<!-- <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q&libraries=places,geocoder"></script>
-<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script> -->
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q&libraries=places,geocoder"></script>
-<script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
-    ({key: "AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q", v: "weekly"});
-</script>
+<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
+
 <script>
     $('#sortby').on('change',function(){
         $('#form-sortby').submit();
@@ -850,93 +847,81 @@ function initializeSelect2() {
 </script>
 
 
-<script type="module">
-    import { MarkerClusterer } from "https://cdn.skypack.dev/@googlemaps/markerclusterer@2.3.1";
+<script>
      initializeMap();
 
 
      async function initializeMap() {
 
         var mapStyle = [
-          {
-            featureType: "poi",
-            elementType: "labels",
-            stylers: [
-              {
-                visibility: "off",
-              },
-            ],
-          },
-          {
-            featureType: "transit",
-            elementType: "labels",
-            stylers: [
-              {
-                visibility: "off",
-              },
-            ],
-          },
-          {
-            featureType: "road",
-            elementType: "labels.icon",
-            stylers: [
-              {
-                visibility: "off",
-              },
-            ],
-          },
-          {
-            featureType: "road",
-            elementType: "labels.text",
-            stylers: [
-              {
-                visibility: "on",
-              },
-            ],
-          },
-          {
-            featureType: "road",
-            elementType: "labels.text.fill",
-            stylers: [
-              {
-                visibility: "on",
-              },
-            ],
-          },
-          {
-            featureType: "administrative.locality",
-            elementType: "labels",
-            stylers: [
-              {
-                visibility: "on",
-              },
-            ],
-          },
-        ];
+  {
+    featureType: "poi",
+    elementType: "labels",
+    stylers: [
+      {
+        visibility: "off",
+      },
+    ],
+  },
+  {
+    featureType: "transit",
+    elementType: "labels",
+    stylers: [
+      {
+        visibility: "off",
+      },
+    ],
+  },
+  {
+    featureType: "road",
+    elementType: "labels.icon",
+    stylers: [
+      {
+        visibility: "off",
+      },
+    ],
+  },
+  {
+    featureType: "road",
+    elementType: "labels.text",
+    stylers: [
+      {
+        visibility: "on",
+      },
+    ],
+  },
+  {
+    featureType: "road",
+    elementType: "labels.text.fill",
+    stylers: [
+      {
+        visibility: "on",
+      },
+    ],
+  },
+  {
+    featureType: "administrative.locality",
+    elementType: "labels",
+    stylers: [
+      {
+        visibility: "on",
+      },
+    ],
+  },
+];
 
-    //const { Map } = await google.maps.importLibrary("maps");
+    const { Map } = await google.maps.importLibrary("maps");
 
     @php
         $lat = isset($guidings[0]) ? $guidings[0]->lat : 51.165691;
         $lng = isset($guidings[0]) ? $guidings[0]->lng : 10.451526;
     @endphp
-    const position = { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }} , lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} };
-    const { Map, InfoWindow } = await google.maps.importLibrary("maps");
-    const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
 
     map = new google.maps.Map(document.getElementById("map"), {
         zoom: 5,
-        center: position,
-        styles: mapStyle,
-        mapId: "DEMO_MAP_ID",
+        center: { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }} , lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} },
+        styles: mapStyle
     });
-
-    // The marker, positioned at Uluru
-    const marker = new AdvancedMarkerElement({
-        map: map,
-        position: position,
-    });
-
 
 
     const markers = [];
@@ -957,15 +942,13 @@ function initializeSelect2() {
     }
 
 
-    /* 
     // Create the MarkerClusterer
     const markerCluster = new MarkerClusterer(map, markers, {
         imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m',
         maxZoom: 12,
     });
-    */
-   
-    const markerCluster = new MarkerClusterer({ markers, map, mapStyle });
+
+    
     // Add click event listeners to individual markers inside the cluster
     google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
         // You can control the zoom level here
@@ -973,6 +956,7 @@ function initializeSelect2() {
         map.setZoom(map.getZoom() + 2);
         map.setCenter(cluster.getCenter());
     });
+
 
 }
 
