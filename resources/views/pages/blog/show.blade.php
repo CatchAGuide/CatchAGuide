@@ -41,7 +41,7 @@
                             <div class="news-details__social-list {{$agent->ismobile() ? 'text-center' : ''}}"
                                  style=" {{$agent->ismobile() ? 'justify-content: center;' : ''}}">
                                 <a href="#"><i class="fab fa-facebook" ></i></a>
-                                <a href="tel: +4915752996580"><i class="fab fa-whatsapp"></i></a>
+                                <a href="tel:+49{{env('CONTACT_NUM')}}"><i class="fab fa-whatsapp"></i></a>
                                 <a href="https://www.instagram.com/catchaguide_official/"><i class="fab fa-instagram"></i></a>
                             </div>
                         </div>

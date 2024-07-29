@@ -56,6 +56,6 @@ class AuthenticationController extends Controller
      */
     public function loginFailed(): RedirectResponse
     {
-        return redirect()->back()->withInput();
+        return redirect()->back()->withInput()->with('error', 'Login failed. Please try again.');
     }
 }
