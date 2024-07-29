@@ -5,8 +5,6 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="keywords" content="online catch guide" >
-    <meta name="robots" content="INDEX,FOLLOW" >
 
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -16,6 +14,9 @@
     })(window,document,'script','dataLayer','GTM-K6VGF9NQ');</script>
     <!-- End Google Tag Manager -->
     
+    <meta name="keywords" content="online catch guide" >
+    <meta name="robots" content="INDEX,FOLLOW" >
+
     @if(count($attributes))
         @foreach($attributes as $attribute)
             @if($attribute->meta_type == 'title')
