@@ -88,7 +88,7 @@
                 </div>
             </div>
             <!-- End Creating -->
-            @foreach($attributes as $index => $attribute)
+            @foreach($pageattributes as $index => $attribute)
             <!-- Updating -->
             <div class="modal fade" id="updateAttribute{{$index}}" tabindex="-1" aria-labelledby="addAttributeLabel" aria-hidden="true">
                 <div class="modal-dialog">
