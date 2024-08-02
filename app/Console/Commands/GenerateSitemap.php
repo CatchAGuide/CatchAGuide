@@ -48,37 +48,71 @@ class GenerateSitemap extends Command
         $url = url('/');
         $english = ENV('EN_APP_URL');
         $german = ENV('DE_APP_URL');
-
         
         $sitemap_listing_en = $this->listing($english, 'en');
-        $sitemap_listing_de = $this->listing($german, 'de');
-
         $sitemap_magazine_en = $this->magazine($english, 'en');
-        $sitemap_magazine_de = $this->magazine($german, 'de');
-
         $sitemap_category_en = $this->categories($english, 'en');
-        $sitemap_category_de = $this->categories($german, 'de');
-
         $sitemap_en = $this->sitemap($english, 'en');
+
+        $sitemap_listing_de = $this->listing($german, 'de');
+        $sitemap_magazine_de = $this->magazine($german, 'de');
+        $sitemap_category_de = $this->categories($german, 'de');
         $sitemap_de = $this->sitemap($german, 'de');
 
         $this->info('Sitemap Indexing...');
 
+        $en_arr = [
+            $english . '/sitemaps' . $sitemap_listing_en, 
+            $english . '/sitemaps' . $sitemap_magazine_en, 
+            //$english . '/sitemaps' . $sitemap_category_en, 
+            $english . '/sitemaps/sitemap_en.xml'
+        ];
+        $this->sitemap_index($english, 'en', $en_arr);
+
+        $de_arr = [
+            $german . '/sitemaps' . $sitemap_listing_de, 
+            $german . '/sitemaps' . $sitemap_magazine_de, 
+            //$german . '/sitemaps' . $sitemap_category_de, 
+            $german . '/sitemaps/sitemap_de.xml'
+        ];
+        $this->sitemap_index($german, 'de', $en_arr);
+
+        /*
         $sitemap = SitemapIndex::create()
         ->add($english . '/sitemaps' . $sitemap_listing_en)
-        ->add($german . '/sitemaps' . $sitemap_listing_de)
-
         ->add($english . '/sitemaps' . $sitemap_magazine_en)
-        ->add($german . '/sitemaps' . $sitemap_magazine_de)
-
         ->add($english . '/sitemaps' . $sitemap_category_en)
-        ->add($german . '/sitemaps' . $sitemap_category_de)
-
         ->add($english . '/sitemaps/sitemap_en.xml')
+        ->writeToFile(public_path('/sitemaps/sitemap_index_en.xml'));
+
+        $sitemap = SitemapIndex::create()
+        ->add($german . '/sitemaps' . $sitemap_listing_de)
+        ->add($german . '/sitemaps' . $sitemap_magazine_de)
+        ->add($german . '/sitemaps' . $sitemap_category_de)
         ->add($german . '/sitemaps/sitemap_de.xml')
-        ->writeToFile(public_path('/sitemaps/sitemap_index.xml'));
+        ->writeToFile(public_path('/sitemaps/sitemap_index_de.xml'));
+        */
 
         $this->info('Done SitemapIndex');
+    }
+
+    public function sitemap_index($url, $lang, $list)
+    {
+        $xml = '<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+
+        foreach ($list as $item) {
+            $xml .= '<sitemap>' .
+                    '<loc>' . $item . '</loc>' .
+                    '</sitemap>' ;
+        }
+        $xml .= '</sitemapindex>';
+
+        $file_path = '/sitemap_index_' . $lang . '.xml';
+        Storage::disk('sitemaps')->put($file_path, $xml);
+
+        $this->info('Done Generating Sitemap Index ' . strtoupper($lang));
+
+        return $file_path;
     }
 
     public function listing($url, $lang)
@@ -91,7 +125,8 @@ class GenerateSitemap extends Command
             $sUrl = $url . '/' . $row->id . '/' . $row->slug;
             $xml .= "\t".'<url>' ."\n" .
                     "\t\t".'<loc>' . $sUrl . '</loc>' ."\n" .
-                    "\t\t".'<xhtml:link rel="alternate" hreflang="' . $lang . '" href="' . $sUrl . '" />' ."\n" .
+                    //"\t\t".'<xhtml:link rel="alternate" hreflang="' . $lang . '" href="' . $sUrl . '" />' ."\n" .
+                    //"\t\t".'<xhtml:link rel="alternate" hreflang="' . $lang_de . '" href="' . $sUrl_de . '" />' ."\n" .
                     "\t\t".'<changefreq>monthly</changefreq>' ."\n" .
                     "\t\t".'<priority>0.5</priority>' ."\n" .
                     "\t".'</url>' ."\n" ;
@@ -117,6 +152,7 @@ class GenerateSitemap extends Command
             $xml .= "\t".'<url>' ."\n" .
                     "\t\t".'<loc>' . $sUrl . '</loc>' ."\n" .
                     //"\t\t".'<xhtml:link rel="alternate" hreflang="' . $lang . '" href="' . $sUrl . '" />' ."\n" .
+                    //"\t\t".'<xhtml:link rel="alternate" hreflang="' . $lang_de . '" href="' . $sUrl_de . '" />' ."\n" .
                     "\t\t".'<changefreq>monthly</changefreq>' ."\n" .
                     "\t\t".'<priority>0.5</priority>' ."\n" .
                     "\t".'</url>' ."\n" ;
@@ -126,7 +162,7 @@ class GenerateSitemap extends Command
         $file_path = '/sitemap_fishing_magazine_' . $lang . '.xml';
         Storage::disk('sitemaps')->put($file_path, $xml);
 
-        $this->info('Done Generating Sitemap Listing ' . strtoupper($lang));
+        $this->info('Done Generating Sitemap Magazine ' . strtoupper($lang));
 
         return $file_path;
     }
@@ -141,7 +177,6 @@ class GenerateSitemap extends Command
             $sUrl = $url . '/' . $row->slug;
             $xml .= "\t".'<url>' ."\n" .
                     "\t\t".'<loc>' . $sUrl . '</loc>' ."\n" .
-                    //"\t\t".'<xhtml:link rel="alternate" hreflang="' . $lang . '" href="' . $sUrl . '" />' ."\n" .
                     "\t\t".'<changefreq>monthly</changefreq>' ."\n" .
                     "\t\t".'<priority>0.5</priority>' ."\n" .
                     "\t".'</url>' ."\n" ;
@@ -158,57 +193,79 @@ class GenerateSitemap extends Command
 
     public function sitemap($url, $lang)
     {
-        
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>'.
+                '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">';
+        $uris = [
+            '/',
+            '/contact',
+            '/guidings',
+            '/login',
+            '/imprint',
+            '/data-protection',
+            '/agb',
+            '/faq',
+            '/about-us'
+        ];
+
+        foreach ($uris as $uri) {
+            $xml .= '<url>'.
+                        '<loc>' . $url . '' . $uri . '</loc>'.
+                        '<changefreq>monthlys</changefreq>'.
+                        '<priority>0.5</priority>'.
+                    '</url>';
+        }
+
+            $xml .= '</urlset>';
+        $file_path = '/sitemap_' . $lang . '.xml';
+        Storage::disk('sitemaps')->put($file_path, $xml);
+
+        $this->info('Done Generating Sitemap '.strtoupper($lang));
+
+        return $file_path;
+    }
+
+    public function sitemap_old($url, $lang)
+    {
         $sitemap = Sitemap::create()
             ->add(Url::create($url . '/')
                 ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
                 ->setPriority(0.5)
-                ->addAlternate($url . '/', $lang)
             )
             ->add(Url::create($url . '/contact')
                 ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
                 ->setPriority(0.5)
-                ->addAlternate($url . '/contact', $lang)
             )
             ->add(Url::create($url . '/guidings')
                 ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
                 ->setPriority(0.5)
-                ->addAlternate($url . '/guidings', $lang)
             )
             ->add(Url::create($url . '/angelmagazin')
                 ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
                 ->setPriority(0.5)
-                ->addAlternate($url . '/angelmagazin', $lang)
             )
             ->add(Url::create($url . '/login')
                 ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
                 ->setPriority(0.5)
-                ->addAlternate($url . '/login', $lang)
             )
             ->add(Url::create($url . '/imprint')
                 ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
                 ->setPriority(0.5)
-                ->addAlternate($url . '/imprint', $lang)
             )
             ->add(Url::create($url . '/data-protection')
                 ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
                 ->setPriority(0.5)
-                ->addAlternate($url . '/data-protection', $lang)
             )
             ->add(Url::create($url . '/agb')
                 ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
                 ->setPriority(0.5)
-                ->addAlternate($url . '/agb', $lang)
             )
             ->add(Url::create($url . '/faq')
                 ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
                 ->setPriority(0.5)
-                ->addAlternate($url . '/faq', $lang)
             )
             ->add(Url::create($url . '/about-us')
                 ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
                 ->setPriority(0.5)
-                ->addAlternate($url . '/about-us', $lang)
             );
 
         $file_path = public_path('/sitemaps/sitemap_' . $lang . '.xml');
