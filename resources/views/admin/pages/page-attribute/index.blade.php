@@ -36,6 +36,7 @@
                                         <th class="wd-10p border-bottom-0">Uri</th>
                                         <th class="wd-10p border-bottom-0">Type</th>
                                         <th class="wd-10p border-bottom-0">Content</th>
+                                        <th class="wd-10p border-bottom-0">Deleted At</th>
                                         <th class="wd-25p border-bottom-0">Aktionen</th>
                                     </tr>
                                 </thead>
@@ -47,6 +48,7 @@
                                         <td>{{$attribute->uri}}</td>
                                         <td>{{$attribute->meta_type}}</td>
                                         <td>{{$attribute->content}}</td>
+                                        <td>{{$attribute->deleted_at_format}}</td>
                                         <td class="text-center">
                                             <div class="btn-group">
                                                 <button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#updateAttribute{{$index}}"><i class="fa fa-pencil"></i></button>
