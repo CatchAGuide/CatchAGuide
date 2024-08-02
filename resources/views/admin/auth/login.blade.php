@@ -23,6 +23,15 @@
                                 Anmelden
                             </span>
                             <div class="panel panel-primary">
+                                @if ($errors->any())
+                                    <div class="alert alert-danger">
+                                        <ul>
+                                            @foreach ($errors->all() as $error)
+                                                <li>{{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
                                 <div class="wrap-input100 validate-input input-group">
                                     <a href="#" class="input-group-text bg-white text-muted">
                                         <i class="zmdi zmdi-email text-muted" aria-hidden="true"></i>
