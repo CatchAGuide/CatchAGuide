@@ -70,7 +70,7 @@ class GuidingsSettingController extends Controller
     public function storetarget(Request $request)
     {
         $target = new Target();
-        $target->name = $request->name;
+        $target->name = mb_convert_encoding($request->name, 'UTF-8', 'auto');
         $target->name_en = $request->name_en;
         $target->save();
         return back()->with('success', 'Der Zielfisch wurde erfolgreich angelegt');
