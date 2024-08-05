@@ -11,7 +11,7 @@ let marker{{$guiding->id}};
 if (isDuplicateCoordinate) {
     // If the coordinate is a duplicate, slightly adjust the position to avoid overlapping
     const randomOffset = Math.random() / 1000; // Adjust this value based on your requirement
-    marker{{$guiding->id}} = new google.maps.Marker({
+    marker{{$guiding->id}} = new google.maps.marker.AdvancedMarkerElement({
         position: {
             lat: location{{$guiding->id}}.lat + getRandomOffset(),
             lng: location{{$guiding->id}}.lng + getRandomOffset(),
@@ -20,7 +20,7 @@ if (isDuplicateCoordinate) {
     });
 } else {
     // If the coordinate is unique, create the marker as usual
-    marker{{$guiding->id}} = new google.maps.Marker({
+    marker{{$guiding->id}} = new google.maps.marker.AdvancedMarkerElement({
         position: location{{$guiding->id}},
         map: map,
     });

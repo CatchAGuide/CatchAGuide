@@ -246,7 +246,7 @@
                     </div>
                     <div class="information__text">
                         <h4>
-                            <a href="tel:+4915752996580" class="information__number-1">+4915752996580</a>
+                            <a href="tel:+49{{env('CONTACT_NUM')}}" class="information__number-1">+49 (0) {{env('CONTACT_NUM')}}</a>
 
                         </h4>
                     </div>

@@ -11,7 +11,7 @@
                                     <i class="fas fa-phone-square-alt"></i>
                                 </div>
                                 <div class="text">
-                                    <a href="tel: +4915752996580"> +4915752996580</a>
+                                    <a href="tel:+49{{env('CONTACT_NUM')}}">+49 (0) {{env('CONTACT_NUM')}}</a>
                                 </div>
                             </li>
                             <li>
@@ -45,7 +45,7 @@
                                             <i class="fas fa-phone-square-alt"></i>
                                         </div>
                                         <div class="text">
-                                            <a href="tel: +4915752996580"> +4915752996580</a>
+                                            <a href="tel:+49{{env('CONTACT_NUM')}}">+49 (0) {{env('CONTACT_NUM')}}</a>
                                         </div>
                                     </li>
                                     <li>
@@ -99,7 +99,7 @@
                         <div class="site-footer__bottom-left">
                             <div class="footer-widget__social">
                                 <a href="https://www.facebook.com/CatchAGuide" target="_blank"><i class="fab fa-facebook"></i></a>
-                                <a href="https://wa.me/+4915752996580" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                                <a href="https://wa.me/+49{{env('CONTACT_NUM')}}" target="_blank"><i class="fab fa-whatsapp"></i></a>
                                 <a href="https://www.instagram.com/catchaguide_official/" target="_blank"><i
                                         class="fab fa-instagram"></i></a>
                             </div>

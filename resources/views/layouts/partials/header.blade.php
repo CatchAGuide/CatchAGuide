@@ -10,7 +10,7 @@
                                 <span class="icon-phone-call"></span>
                             </div>
                             <div class="text">
-                                <a href="tel: +4915752996580"> +4915752996580</a>
+                                <a href="tel:+49{{env('CONTACT_NUM')}}">+49 (0) {{env('CONTACT_NUM')}}</a>
                             </div>
                         </li>
                         <li>
@@ -27,7 +27,7 @@
                     <div class="main-header__top-right-inner">
                         <div class="main-header__top-right-social">
                             <a href="https://www.facebook.com/CatchAGuide"><i class="fab fa-facebook"></i></a>
-                            <a href="https://wa.me/+4915752996580"><i class="fab fa-whatsapp"></i></a>
+                            <a href="https://wa.me/+49{{env('CONTACT_NUM')}}"><i class="fab fa-whatsapp"></i></a>
                             <a href="https://www.instagram.com/catchaguide_official/"><i class="fab fa-instagram"></i></a>
                         </div>
                         <div class="main-header__top-right-btn-box">

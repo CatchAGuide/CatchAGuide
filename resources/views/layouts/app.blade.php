@@ -5,8 +5,18 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-K6VGF9NQ');</script>
+    <!-- End Google Tag Manager -->
+    
     <meta name="keywords" content="online catch guide" >
     <meta name="robots" content="INDEX,FOLLOW" >
+
     @if(count($attributes))
         @foreach($attributes as $attribute)
             @if($attribute->meta_type == 'title')
@@ -143,13 +153,13 @@
             </li>
             <li>
                 <i class="fa fa-phone-alt"></i>
-                <a href="tel:+4915752996580">+4915752996580</a>
+                <a href="tel:+49{{env('CONTACT_NUM')}}">+49 (0) {{env('CONTACT_NUM')}}</a>
             </li>
         </ul><!-- /.mobile-nav__contact -->
         <div class="mobile-nav__top">
             <div class="mobile-nav__social">
                 <a href="https://www.facebook.com/CatchAGuide" class="fab fa-facebook-square"></a>
-                <a href="https://wa.me/+4915752996580" class="fab fa-whatsapp"></a>
+                <a href="https://wa.me/+49{{env('CONTACT_NUM')}}" class="fab fa-whatsapp"></a>
                 <a href="https://www.instagram.com/catchaguide_official/" class="fab fa-instagram"></a>
                 <div class="language-wrapper">
                     <form action="{{ route('language.switch') }}" method="POST">
