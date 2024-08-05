@@ -51,12 +51,12 @@ class GenerateSitemap extends Command
         
         $sitemap_listing_en = $this->listing($english, 'en');
         $sitemap_magazine_en = $this->magazine($english, 'en');
-        $sitemap_category_en = $this->categories($english, 'en');
+        //$sitemap_category_en = $this->categories($english, 'en');
         $sitemap_en = $this->sitemap($english, 'en');
 
         $sitemap_listing_de = $this->listing($german, 'de');
         $sitemap_magazine_de = $this->magazine($german, 'de');
-        $sitemap_category_de = $this->categories($german, 'de');
+        //$sitemap_category_de = $this->categories($german, 'de');
         $sitemap_de = $this->sitemap($german, 'de');
 
         $this->info('Sitemap Indexing...');
@@ -125,8 +125,6 @@ class GenerateSitemap extends Command
             $sUrl = $url . '/' . $row->id . '/' . $row->slug;
             $xml .= "\t".'<url>' ."\n" .
                     "\t\t".'<loc>' . $sUrl . '</loc>' ."\n" .
-                    //"\t\t".'<xhtml:link rel="alternate" hreflang="' . $lang . '" href="' . $sUrl . '" />' ."\n" .
-                    //"\t\t".'<xhtml:link rel="alternate" hreflang="' . $lang_de . '" href="' . $sUrl_de . '" />' ."\n" .
                     "\t\t".'<changefreq>monthly</changefreq>' ."\n" .
                     "\t\t".'<priority>0.5</priority>' ."\n" .
                     "\t".'</url>' ."\n" ;
@@ -151,8 +149,6 @@ class GenerateSitemap extends Command
             $sUrl = $url . '/' . $row->slug;
             $xml .= "\t".'<url>' ."\n" .
                     "\t\t".'<loc>' . $sUrl . '</loc>' ."\n" .
-                    //"\t\t".'<xhtml:link rel="alternate" hreflang="' . $lang . '" href="' . $sUrl . '" />' ."\n" .
-                    //"\t\t".'<xhtml:link rel="alternate" hreflang="' . $lang_de . '" href="' . $sUrl_de . '" />' ."\n" .
                     "\t\t".'<changefreq>monthly</changefreq>' ."\n" .
                     "\t\t".'<priority>0.5</priority>' ."\n" .
                     "\t".'</url>' ."\n" ;
@@ -210,7 +206,7 @@ class GenerateSitemap extends Command
         foreach ($uris as $uri) {
             $xml .= '<url>'.
                         '<loc>' . $url . '' . $uri . '</loc>'.
-                        '<changefreq>monthlys</changefreq>'.
+                        '<changefreq>monthly</changefreq>'.
                         '<priority>0.5</priority>'.
                     '</url>';
         }
