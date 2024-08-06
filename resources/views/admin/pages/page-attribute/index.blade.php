@@ -50,11 +50,21 @@
                                         <td>{{$attribute->content}}</td>
                                         <td>{{$attribute->deleted_at_format}}</td>
                                         <td class="text-center">
+                                            @php
+                                            $button_disabled = '';
+                                            $button_delete_url = route('admin.page-attribute.destroy',$attribute);
+                                            $button_delete_url_disabled = '';
+                                            if (!is_null($attribute->deleted_at)) {
+                                                $button_disabled = 'disabled="disabled"';
+                                                $button_delete_url = 'javascript:void(0)';
+                                                $button_delete_url_disabled = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="btn-group">
-                                                <button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#updateAttribute{{$index}}"><i class="fa fa-pencil"></i></button>
+                                                <button {!! $button_disabled !!} class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#updateAttribute{{$index}}"><i class="fa fa-pencil"></i></button>
                                             </div>
                                             <div class="btn-group">
-                                                <a href="{{route('admin.page-attribute.destroy',$attribute)}}" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></a>
+                                                <a {!! $button_disabled !!} href="{{ $button_delete_url }}" class="btn btn-sm btn-danger {{ $button_delete_url_disabled }}"><i class="fa fa-trash"></i></a>
                                             </div>
                                         </td>
                                     </tr>
