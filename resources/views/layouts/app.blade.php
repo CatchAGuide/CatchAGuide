@@ -16,40 +16,47 @@
     
     <meta name="keywords" content="online catch guide" >
     <meta name="robots" content="INDEX,FOLLOW" >
-
     @if(count($attributes))
         @foreach($attributes as $attribute)
             @if($attribute->meta_type == 'title')
+            <!-- 1 -->
                 <title>{{$attribute->content}} - {{ config('app.name') }}</title>
             @else
+            <!-- 2 -->
                 <title>@yield('title', 'Bitte Title setzen') - {{ config('app.name') }}</title>
             @endif
             
             @if($attribute->meta_type == 'description')
                 <meta name="description" content="{{$attribute->content}}">
-            @else
-                <meta name="description" content="@yield('description','Catch A Guide bietet Dir die erste Plattform für private Angelguidings innerhalb Deiner Community. Hier können passionierte Angler ein privates, flexibles und kostengünstiges Guiding finden sowie in jeder Region auch selber anbieten.')">
             @endif
 
             @if($attribute->meta_type == 'keywords')
                 <meta name="keywords" content="{{$attribute->content}}">
-            @else
-                <meta name="keywords" content="Angelguide, Guides, Angelguiding buchen, Angeltouren, Angeltour, Angeltour, Angeltouren, Angelguiding Hamburg,
-                Angelguiding NRW, Angelguiding Holland, Geführte Angeltouren, Angelguiding Rhein,Angeln mit Guide, Guided Fishing Tours Deutschland,
-                Guided fishing Deutschland, Angelguide in Deutschland, Angelausflug, Angelausflüge, Angelguiding Wels, Angelguiding Zander, Angelguiding Hecht,
-                Angelguiding Barsch, Angelguiding Karpfen, Zander Guiding, Wels Guiding, Forellen Guiding, Meerforellenguiding, Guiding Forellensee, Guiding
-                Forellensee NRW">
             @endif
         @endforeach
     @else
+        @php
+        $page_attr = App\Models\PageAttribute::whereDomain(request()->getHost())->whereUri(request()->path())->get();
 
+        $page_title = $page_attr->where('meta_type', 'title')->first();
+        $page_meta_desc = $page_attr->where('meta_type', 'description')->first();
+        $page_keywords = $page_attr->where('meta_type', 'keywords')->first();
+        @endphp
+
+        @if(is_null($page_title))
         <title>@yield('title', 'Bitte Title setzen') - {{ config('app.name') }}</title>
-        <meta name="description" content="@yield('description','Catch A Guide bietet Dir die erste Plattform für private Angelguidings innerhalb Deiner Community. Hier können passionierte Angler ein privates, flexibles und kostengünstiges Guiding finden sowie in jeder Region auch selber anbieten.')">
-        <meta name="keywords" content="Angelguide, Guides, Angelguiding buchen, Angeltouren, Angeltour, Angeltour, Angeltouren, Angelguiding Hamburg,
-        Angelguiding NRW, Angelguiding Holland, Geführte Angeltouren, Angelguiding Rhein,Angeln mit Guide, Guided Fishing Tours Deutschland,
-        Guided fishing Deutschland, Angelguide in Deutschland, Angelausflug, Angelausflüge, Angelguiding Wels, Angelguiding Zander, Angelguiding Hecht,
-        Angelguiding Barsch, Angelguiding Karpfen, Zander Guiding, Wels Guiding, Forellen Guiding, Meerforellenguiding, Guiding Forellensee, Guiding
-        Forellensee NRW">
+        @else
+        <title>@yield('title', 'Bitte Title setzen') - {{ $page_title->content }}</title>
+        @endif
+
+        @if(!is_null($page_meta_desc))
+        <meta name="description" content="{{ $page_meta_desc->content }}">
+        @endif
+
+        @if(!is_null($page_keywords))
+        <meta name="keywords" content="{{ $page_keywords->content }}">
+        @endif
+
     @endif
 
     <!-- favicons Icons -->

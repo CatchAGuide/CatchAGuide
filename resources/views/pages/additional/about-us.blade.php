@@ -17,7 +17,7 @@
 
             <div class="container">
                 <div class="page-header__top-inner">
-                    <h2>@lang('message.about-us')</h2>
+                    <h1 class="h2">@lang('message.about-us')</h1>
                 </div>
             </div>
         </div>

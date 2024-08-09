@@ -12,7 +12,7 @@
             <div class="page-header-bg-overly"></div>
             <div class="container">
                 <div class="page-header__top-inner">
-                    <h2>@lang('message.contact')</h2>
+                    <h1 class="h2">@lang('message.contact')</h1>
                 </div>
             </div>
         </div>

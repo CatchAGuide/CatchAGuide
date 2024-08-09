@@ -12,7 +12,7 @@
             <div class="page-header-bg-overly"></div>
             <div class="container">
                 <div class="page-header__top-inner">
-                    <h2>@lang('message.imprint')</h2>
+                    <h1 class="h2">@lang('message.imprint')</h1>
                 </div>
             </div>
         </div>
