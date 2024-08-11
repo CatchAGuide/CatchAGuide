@@ -33,7 +33,7 @@ use Livewire\Component;
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\PaymentsController as AdminPaymentsController;
-use App\Http\Controllers\Admin\FaqController as AdminFaqController;
+use App\Http\Controllers\Admin\FAQController as AdminFAQController;
 use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThreadsController;
 
 /*
@@ -200,7 +200,6 @@ Route::name('ratings.')->prefix('ratings')->group(function () {
     Route::get('/review/{id}',[RatingsController::class, 'review'])->name('review');
 });
 
-
 Route::name('law.')->group(function() {
     Route::view('/imprint', 'pages.law.imprint')->name('imprint');
     Route::view('/data-protection', 'pages.law.data-protection')->name('data-protection');
@@ -241,13 +240,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('faq')->name('faq.')->group(function () {
-            Route::get('/home', [AdminFaqController::class,'home'])->name('home');
-            Route::get('/search-request', [AdminFaqController::class,'searchRequest'])->name('searchrequest');
-            Route::get('/create/{page}', [AdminFaqController::class,'create'])->name('create');
-            Route::get('/edit/{faq}/{page}', [AdminFaqController::class,'edit'])->name('edit');
-            Route::post('/store', [AdminFaqController::class,'store'])->name('store');
-            Route::post('/update/{faq}', [AdminFaqController::class,'update'])->name('update');
-            Route::get('/destroy/{faq}', [AdminFaqController::class,'destroy'])->name('destroy');
+            Route::get('/home', [AdminFAQController::class,'home'])->name('home');
+            Route::get('/search-request', [AdminFAQController::class,'searchRequest'])->name('searchrequest');
+            Route::get('/create/{page}', [AdminFAQController::class,'create'])->name('create');
+            Route::get('/edit/{faq}/{page}', [AdminFAQController::class,'edit'])->name('edit');
+            Route::post('/store', [AdminFAQController::class,'store'])->name('store');
+            Route::post('/update/{faq}', [AdminFAQController::class,'update'])->name('update');
+            Route::get('/destroy/{faq}', [AdminFAQController::class,'destroy'])->name('destroy');
         });
 
 
