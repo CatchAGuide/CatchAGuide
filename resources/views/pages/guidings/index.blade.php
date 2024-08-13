@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', __('message.guidings_meta_title'))
+@section('title', __('message.guidings_meta_title') .' '. (((request()->has('country'))) ? request()->get('country') : ''))
 @section('description',__('message.guidings_meta_description'))
 @section('css_after')
 {{-- <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" /> --}}

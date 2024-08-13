@@ -122,7 +122,10 @@
 
                                             <select class="form-control" name="filters[target_fish][]" id="target-fish" multiple="multiple">
                                                 @foreach($alltargets as $target)
-                                                    <option value="{{$target->id}}" {{in_array($target->id,$filters->target_fish) ? 'selected' : ''}}>{{$target->name}}</option>
+                                                    <option value="{{$target->id}}" 
+                                                        {{ isset($filters->target_fish) && in_array($target->id, $filters->target_fish) ? 'selected' : '' }}>
+                                                        {{$target->name}}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -133,7 +136,9 @@
 
                                             <select class="form-control" name="filters[methods][]" id="methods" multiple="multiple">
                                                 @foreach($allmethods as $method)
-                                                    <option value="{{$method->id}}" {{in_array($method->id,$filters->methods) ? 'selected' : ''}}>{{$method->name}}</option>
+                                                    <option value="{{$method->id}}" 
+                                                        {{ isset($filters->methods) && in_array($method->id,$filters->methods) ? 'selected' : ''}}>{{$method->name}}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                         </div>

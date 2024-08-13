@@ -309,7 +309,12 @@ class Checkout extends Component
             'token' => $this->generateBookingToken($blockedEvent->id),
         ]);
 
-        SendCheckoutEmail::dispatch($booking,$user,$this->guiding,$this->guiding->user);
+        if (isset($user->phone) && $user->phone !== $booking->phone) {
+            $user->phone = $booking->phone;
+            $user->save();
+        }
+
+        // SendCheckoutEmail::dispatch($booking,$user,$this->guiding,$this->guiding->user);
         
         sleep(5);
 

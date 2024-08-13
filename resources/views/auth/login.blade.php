@@ -27,7 +27,7 @@
         rgba(0, 0, 0, 0.19);
         }
 
-        .login-form-2 h3 {
+        .login-form-2 h1 {
             text-align: center;
             margin-bottom: 12%;
             color: #111111;
@@ -126,7 +126,7 @@
                     <form method="POST" action="{{ route('login') }}">
                         @csrf
                         <div class="col-lg-12 login-form-2">
-                            <h3 style="color: #FFFFFF">@lang('forms.login')</h3>
+                            <h1 style="color: #FFFFFF">@lang('forms.login')</h1>
                             <div class="d-flex justify-content-center align-items-center flex-column">
                                 <div class="form-group w-50">
                                     <input style="margin: 5px;" type="email" class="form-control" placeholder="@lang('forms.user')"
