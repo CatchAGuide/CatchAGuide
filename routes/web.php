@@ -34,6 +34,7 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\PaymentsController as AdminPaymentsController;
 use App\Http\Controllers\Admin\FAQController as AdminFaqController;
+use App\Http\Controllers\Admin\Category\AdminCategoryCountryController;
 use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThreadsController;
 
 /*
@@ -333,6 +334,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('newblog')->name('newblog.')->group(function () {
             Route::resource('threads', AdminGuideThreadsController::class);
             Route::get('threads/{thread}/delete', [AdminGuideThreadsController::class, 'delete'])->name('delete');
+        });
+
+        Route::prefix('category')->name('category.')->group(function () {
+            Route::resource('country', AdminCategoryCountryController::class);
         });
 
 
