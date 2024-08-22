@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreGuidingRequest;
+use App\Models\FishType;
 use App\Models\Gallery;
 use App\Models\Guiding;
 use App\Models\Method;
 use App\Models\Target;
 use App\Models\Water;
 use Auth;
+use Config;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Redirect;
@@ -22,7 +24,9 @@ class GuidingsController extends Controller
      */
     public function index(Request $request)
     {
+        $locale = Config::get('app.locale');
 
+        $title = '';
         $randomSeed = Session::get('random_seed');
         if (!$randomSeed) {
             $randomSeed = rand();
@@ -36,8 +40,12 @@ class GuidingsController extends Controller
             // Request has at least one parameter (input data)
         } 
           
-        if($request->has('num_guests') && !empty($request->get('num_guests'))){
+        if($request->has('page')){
+            $title .= __('guidings.Page') . ' ' . $request->page . ' - ';
+        }
 
+        if($request->has('num_guests') && !empty($request->get('num_guests'))){
+            $title .= __('guidings.Guest') . ' ' . $request->num_guests . ' | ';
             $q = $query->where('max_guests','>=',$request->get('num_guests'));
         }
 
@@ -74,6 +82,14 @@ class GuidingsController extends Controller
             $requestMethods = array_filter($request->get('methods'));
 
             if(count($requestMethods)){
+                $title .= __('guidings.Method') . ' (';
+                $method_rows = Method::whereIn('id', $request->methods)->get();
+                $title_row = '';
+                foreach ($method_rows as $row) {
+                    $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
+                }
+                $title .= substr($title_row, 0, -2);
+                $title .= ') | ';
                 $query->whereHas('guidingMethods', function ($query) use ($requestMethods) {
                     $query->whereIn('method_id', $requestMethods);
                 });
@@ -86,6 +102,16 @@ class GuidingsController extends Controller
             $requestFishingTypes = $request->get('fishing_type');
 
             if($requestFishingTypes){
+
+                $title .= __('guidings.Fishing_Type') . 'Fishing Type (';
+                $method_rows = FishType::whereIn('id', $request->fishing_type)->get();
+                $title_row = '';
+                foreach ($method_rows as $row) {
+                    $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
+                }
+                $title .= substr($title_row, 0, -2);
+                $title .= ') | ';
+
                 $query->whereHas('fishingTypes', function ($query) use ($requestFishingTypes) {
                     $query->where('id', $requestFishingTypes);
                 });
@@ -93,6 +119,7 @@ class GuidingsController extends Controller
         }
 
         if($request->has('duration') && !empty($request->get('duration'))){
+            $title .= __('guidings.Duration') . ' ' . $request->duration . ' | ';
 
             $q = $query->where('duration','>=',$request->get('duration'));
         }
@@ -114,6 +141,16 @@ class GuidingsController extends Controller
             $requestWater = array_filter($request->get('water'));
 
             if(count($requestWater)){
+
+                $title .= __('guidings.Water') . ' (';
+                $method_rows = Water::whereIn('id', $request->water)->get();
+                $title_row = '';
+                foreach ($method_rows as $row) {
+                    $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
+                }
+                $title .= substr($title_row, 0, -2);
+                $title .= ') | ';
+
                 $query->whereHas('guidingWaters', function ($query) use ($requestWater) {
                     $query->whereIn('water_id', $requestWater);
                 });
@@ -125,6 +162,16 @@ class GuidingsController extends Controller
             $requestFish = array_filter($request->get('target_fish'));
 
             if(count($requestFish)){
+
+                $title .= __('guidings.Target_Fish') . ' (';
+                $method_rows = Target::whereIn('id', $request->target_fish)->get();
+                $title_row = '';
+                foreach ($method_rows as $row) {
+                    $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
+                }
+                $title .= substr($title_row, 0, -2);
+                $title .= ') | ';
+
                 $query->whereHas('guidingTargets', function ($query) use ($requestFish) {
                     $query->whereIn('target_id', $requestFish);
                 });
@@ -133,11 +180,14 @@ class GuidingsController extends Controller
         }
 
         if($request->has('country')){
+            $title .= __('guidings.Country') . ' ' . $request->country . ' | ';
             $query->where('country',$request->get('country'));
         }
 
         $radius = null; // Radius in miles
         if($request->has('radius')){
+
+            $title .= __('guidings.Radius') . ' ' . $request->radius . 'km | ';
             $radius = $request->get('radius');
         }
 
@@ -145,6 +195,7 @@ class GuidingsController extends Controller
         $placeLng = $request->get('placeLng');
 
         if($request->has('place') && empty($request->get('place'))){
+            $title .= __('guidings.Place') . ' ' . $request->place . ' | ';
             return redirect()->route('guidings.index', $request->except([
                 'placeLng',
                 'placeLat'
@@ -153,7 +204,7 @@ class GuidingsController extends Controller
 
         if(!empty($placeLat) && !empty($placeLng) && !empty($request->get('place'))){
 
-
+            $title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
             $query->select(['guidings.*'])
             ->selectRaw("(6371 * acos(cos(radians($placeLat)) * cos(radians(lat)) * cos(radians(lng) - radians($placeLng)) + sin(radians($placeLat)) * sin(radians(lat)))) AS distance")
             ->where('status', 1)
@@ -189,6 +240,7 @@ class GuidingsController extends Controller
         $guidings->appends(request()->except('page'));
 
         return view('pages.guidings.index', [
+            'title' => $title,
             'guidings' => $guidings,
             'radius' => $radius,
             'allGuidings' => $allGuidings,

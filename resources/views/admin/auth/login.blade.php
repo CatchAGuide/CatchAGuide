@@ -32,6 +32,12 @@
                                         </ul>
                                     </div>
                                 @endif
+                                
+                                @if (session('error'))
+                                    <div class="alert alert-danger">
+                                        {{ session('error') }}
+                                    </div>
+                                @endif
                                 <div class="wrap-input100 validate-input input-group">
                                     <a href="#" class="input-group-text bg-white text-muted">
                                         <i class="zmdi zmdi-email text-muted" aria-hidden="true"></i>

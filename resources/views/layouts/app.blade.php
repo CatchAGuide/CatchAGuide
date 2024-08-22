@@ -35,28 +35,37 @@
             @endif
         @endforeach
     @else
-        @php
-        $page_attr = App\Models\PageAttribute::whereDomain(request()->getHost())->whereUri(request()->path())->get();
-
-        $page_title = $page_attr->where('meta_type', 'title')->first();
-        $page_meta_desc = $page_attr->where('meta_type', 'description')->first();
-        $page_keywords = $page_attr->where('meta_type', 'keywords')->first();
-        @endphp
-
-        @if(is_null($page_title))
-        <title>@yield('title', 'Bitte Title setzen') - {{ config('app.name') }}</title>
+        @if(Request::segment(1) == 'guidings')
+            @if(empty($__env->yieldContent('title')))
+            <title>Guidings - {{ config('app.name') }}</title>
+            <meta name="description" content="{{ config('app.name') }} Guidings">
+            @else
+            <title>@yield('title', 'Bitte Title setzen') - {{ config('app.name') }}</title>
+            <meta name="description" content="{{ config('app.name') }} - @yield('title')">
+            @endif
         @else
-        <title>@yield('title', 'Bitte Title setzen') - {{ $page_title->content }}</title>
-        @endif
+            @php
+            $page_attr = App\Models\PageAttribute::whereDomain(request()->getHost())->whereUri(request()->path())->get();
 
-        @if(!is_null($page_meta_desc))
-        <meta name="description" content="{{ $page_meta_desc->content }}">
-        @endif
+            $page_title = $page_attr->where('meta_type', 'title')->first();
+            $page_meta_desc = $page_attr->where('meta_type', 'description')->first();
+            $page_keywords = $page_attr->where('meta_type', 'keywords')->first();
+            @endphp
 
-        @if(!is_null($page_keywords))
-        <meta name="keywords" content="{{ $page_keywords->content }}">
-        @endif
+            @if(is_null($page_title))
+            <title>@yield('title', 'Bitte Title setzen') - {{ config('app.name') }}</title>
+            @else
+            <title>@yield('title', 'Bitte Title setzen') - {{ $page_title->content }}</title>
+            @endif
 
+            @if(!is_null($page_meta_desc))
+            <meta name="description" content="{{ $page_meta_desc->content }}">
+            @endif
+
+            @if(!is_null($page_keywords))
+            <meta name="keywords" content="{{ $page_keywords->content }}">
+            @endif
+        @endif
     @endif
 
     <!-- favicons Icons -->

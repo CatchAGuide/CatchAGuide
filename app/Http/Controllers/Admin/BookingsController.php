@@ -11,7 +11,7 @@ class BookingsController extends Controller
     public function index()
     {
         return view('admin.pages.bookings.index', [
-            'bookings' => Booking::all()
+            'bookings' => Booking::orderBy('created_at', 'DESC')->get()
         ]);
     }
 

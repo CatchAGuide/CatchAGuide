@@ -121,8 +121,8 @@
                     <form method="POST" action="{{ route('password.email') }}">
                         @csrf
                         <div class="col-lg-8 offset-2 login-form-2 text-center">
-                            <h3 style="color: #FFFFFF">{{ translate('Passwort vergessen') }}</h3>
-                            <div class="form-group" style="margin-bottom: 25px;">
+                            <h1 class="h2" style="color: #FFFFFF; margin-bottom: 30px;">{{ translate('Passwort vergessen') }}</h1>
+                            <div class="form-group" style="padding-bottom: 25px;">
                                 <input id="email" type="email" class="form-control @error('email') is-invalid @enderror"
                                        name="email" value="{{ old('email') }}" required autocomplete="email" autofocus
                                        placeholder="{{ translate('Deine Email') }}*" />

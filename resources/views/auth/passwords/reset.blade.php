@@ -117,7 +117,7 @@
                 <div class="col-md-8 login-form-2">
 
 
-                    <h3 style="color: #FFFFFF">{{ __('Passwort zurücksetzen') }}</h3>
+                    <h1 class="h2" style="color: #FFFFFF">{{ __('Passwort zurücksetzen') }}</h1>
 
                         <form method="POST" action="{{ route('password.update') }}">
                             @csrf

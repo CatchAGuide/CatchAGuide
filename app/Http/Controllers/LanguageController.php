@@ -11,16 +11,20 @@ class LanguageController extends Controller
         $validatedData = $request->validate([
             'language' => 'required|in:' . implode(',', config('app.locales')),
         ]);
+        
+        $english = ENV('EN_APP_URL', 'https://catchaguide.com');
+        $german = ENV('DE_APP_URL', 'https://catchaguide.de');
+
         $previousUrl = url()->previous();
         $previousUrlComponents = parse_url($previousUrl);
 
         $previousPath = isset($previousUrlComponents['path']) ? $previousUrlComponents['path'] : '';
 
         if($validatedData['language'] == 'de'){
-            return redirect('https://catchaguide.de'.$previousPath);
+            return redirect($german.$previousPath);
         }
         if($validatedData['language'] == 'en'){
-            return redirect('https://catchaguide.com'.$previousPath);
+            return redirect($english.$previousPath);
         }
         // app()->setLocale($validatedData['language']);
         // session()->put('locale', $validatedData['language']);
