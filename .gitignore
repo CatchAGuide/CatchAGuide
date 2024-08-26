@@ -29,3 +29,10 @@ composer.lock
 /bootstrap/cache/*.php
 
 /storage/app/public/*
+.htaccess
+.well-known/*
+4690525.sql
+DB.sql
+logs/*
+php.ini
+public_html_original/*
