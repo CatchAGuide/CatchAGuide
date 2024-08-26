@@ -47,5 +47,24 @@ class StoreGuidingRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
+    }    
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'title' => mb_convert_encoding($this->input('title'), 'UTF-8', 'auto'),
+            'location' => mb_convert_encoding($this->input('location'), 'UTF-8', 'auto'),
+            'description' => mb_convert_encoding($this->input('description'), 'UTF-8', 'auto'),
+            'water_sonstiges' => mb_convert_encoding($this->input('water_sonstiges'), 'UTF-8', 'auto'),
+            'methods_sonstiges' => mb_convert_encoding($this->input('methods_sonstiges'), 'UTF-8', 'auto'),
+            'required_special_license' => mb_convert_encoding($this->input('required_special_license'), 'UTF-8', 'auto'),
+            'water_name' => mb_convert_encoding($this->input('water_name'), 'UTF-8', 'auto'),
+            'meeting_point' => mb_convert_encoding($this->input('meeting_point'), 'UTF-8', 'auto'),
+            'target_fish_sonstiges' => mb_convert_encoding($this->input('target_fish_sonstiges'), 'UTF-8', 'auto'),
+            'required_equipment' => mb_convert_encoding($this->input('required_equipment'), 'UTF-8', 'auto'),
+            'additional_information' => mb_convert_encoding($this->input('additional_information'), 'UTF-8', 'auto'),
+            'catering' => mb_convert_encoding($this->input('catering'), 'UTF-8', 'auto'),
+            'needed_equipment' => mb_convert_encoding($this->input('needed_equipment'), 'UTF-8', 'auto'),
+        ]);
     }
 }

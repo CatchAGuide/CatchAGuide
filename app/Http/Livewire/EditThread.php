@@ -83,7 +83,7 @@ class EditThread extends Component
         $thumbnail_path = $this->threadImage->store('public');
 
         Thread::create([
-            'title' => $this->title,
+            'title' => mb_convert_encoding($this->title, 'UTF-8', 'auto'),
             'body' => $this->body,
             'author' => $this->author,
             'category_id' => $this->category_id,

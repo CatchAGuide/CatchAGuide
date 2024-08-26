@@ -19,7 +19,8 @@ class Thread extends Model
         'body',
         'author',
         'thumbnail_path',
-        'category_id'
+        'category_id',
+        'cache'
     ];
 
     /**

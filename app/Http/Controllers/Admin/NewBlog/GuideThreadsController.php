@@ -53,7 +53,7 @@ class GuideThreadsController extends Controller
 
         GuideThread::create([
             'language' => $request->lang,
-            'title' => $request->title,
+            'title' => mb_convert_encoding($request->title, 'UTF-8', 'auto'),
             'excerpt' => $request->excerpt,
             'body' => $request->body,
             'author' => $request->author,

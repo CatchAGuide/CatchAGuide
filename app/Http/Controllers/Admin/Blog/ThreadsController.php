@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Blog\StoreThreadRequest;
 use App\Http\Requests\Admin\Blog\UpdateThreadRequest;
+use App\Models\Cache;
+use App\Models\CacheList;
 use App\Models\Category;
 use App\Models\Thread;
 use Illuminate\Http\Request;
@@ -48,17 +50,42 @@ class ThreadsController extends Controller
     
         }
 
-        Thread::create([
+        $thread = Thread::create([
             'language' => $request->lang,
-            'title' => $request->title,
+            'title' => mb_convert_encoding($request->title, 'UTF-8', 'auto'),
             'excerpt' => $request->excerpt,
             'body' => $request->body,
             'author' => $request->author,
             'category_id' => $request->category_id,
-            'thumbnail_path' => $webp_path
+            'thumbnail_path' => $webp_path,
+            'cache' => $request->cache
         ]);
 
+        $this->cacheMode($request->cache, 'threads', $thread->id);
+
         return redirect()->route('admin.blog.threads.index');
+    }
+
+    public function cacheMode($cache_val, $table, $id)
+    {
+        $check = CacheList::whereTable($table)->whereTableId($id)->count();
+
+        if ($cache_val == 1) {
+            if ($check <= 0) {
+                CacheList::create([
+                    'table' => $table,
+                    'table_id' => $id
+                ]);
+            } else {
+                $cache_key = $table . ':' . $id . '=' . url('');
+                Cache::where('key', $cache_key)->delete();
+            }
+        } else {
+            if ($check >= 1) {
+                CacheList::whereTable($table)->whereTableId($id)->delete();
+            }
+        }
+
     }
 
     public function update($id, Request $request)
@@ -94,6 +121,7 @@ class ThreadsController extends Controller
                 'author' => $request->author,
                 'category_id' => $request->category_id,
                 'thumbnail_path' => $webp_path,
+                'cache' => $request->cache
             ]);
         } else {
             $thread->update([
@@ -103,8 +131,11 @@ class ThreadsController extends Controller
                 'body' => $request->body,
                 'author' => $request->author,
                 'category_id' => $request->category_id,
+                'cache' => $request->cache
             ]);
         }
+
+        $this->cacheMode($request->cache, 'threads', $id);
 
         return back();
     }
