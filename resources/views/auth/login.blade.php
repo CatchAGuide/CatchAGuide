@@ -210,7 +210,7 @@
                                     <input style="margin: 5px;" type="checkbox" class="form-check-inline" id="agb" required>
                                     <label for="agb" class="text-white">
                                         {{ translate('Ich akzeptiere die') }}
-                                        <a href="law/{{ route('law.agb') }}">{{ translate('AGB') }}</a>
+                                        <a href="{{ route('law.agb') }}">{{ translate('AGB') }}</a>
                                         {{ translate('und') }}
                                         <a href="{{ route('law.data-protection') }}">{{ translate('Datenschutzbestimmungen') }} </a>
                                     </label>
