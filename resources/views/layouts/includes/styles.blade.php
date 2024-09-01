@@ -48,6 +48,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.6.6/css/flag-icons.min.css"/>
 <link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet" />
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 <style>
     .pagination .page-item .page-link {
@@ -206,4 +207,5 @@
 </style>
 @livewireStyles
 
+@stack('styles')
 @yield('css_after')

@@ -123,8 +123,8 @@
 @endsection
 @section('profile-content')
 <div class="container shadow-lg p-4">
-  @livewire('multi-step-form')
-
+  {{-- @livewire('multi-step-form') --}}
+  @include('pages.guidings.multi-step-form')
 </div>
 
 @endsection

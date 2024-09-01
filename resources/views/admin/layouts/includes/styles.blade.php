@@ -29,8 +29,9 @@
 <!-- INTERNAL Data table css -->
 <link href="{{ asset('assets/admin/plugins/datatable/css/dataTables.bootstrap5.css') }}" rel="stylesheet" />
 <link href="{{ asset('assets/admin/plugins/datatable/responsive.bootstrap5.css') }}" rel="stylesheet" />
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <!-- COLOR SKIN CSS -->
 <link id="theme" rel="stylesheet" type="text/css" media="all" href="{{ asset('assets/admin/colors/color1.css') }}" />
-
 @livewireStyles
+
+@stack('styles')
