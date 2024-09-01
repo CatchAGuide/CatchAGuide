@@ -16,10 +16,12 @@ use App\Models\User;
 use App\Models\Water;
 use Auth;
 use Hash;
+use Config;
 use Illuminate\Http\Request;
 use Mail;
 
 use App\Events\BookingStatusChanged;
+use App\Models\Inclussion;
 
 class ProfileController extends Controller
 {
@@ -147,8 +149,51 @@ class ProfileController extends Controller
         $targets = Target::all();
         $methods = Method::all();
         $waters = Water::all();
+        $inclussions = Inclussion::all();
 
-        return view('pages.profile.newguiding', compact('waters', 'methods', 'targets'));
+        $locale = Config::get('app.locale');
+        if($locale == 'en') {
+            $targets = $targets->pluck('name_en');
+            $methods = $methods->pluck('name_en');
+            $waters = $waters->pluck('name_en');
+            $inclussions = $inclussions->pluck('name_en');
+        } else {
+            $targets = $targets->pluck('name');
+            $methods = $methods->pluck('name');
+            $waters = $waters->pluck('name');
+            $inclussions = $inclussions->pluck('name');
+        }
+
+        return view('pages.profile.newguiding', compact('waters', 'methods', 'targets', 'inclussions'));
+    }
+
+    public function newguidingStore(Request $request) {
+
+        $validatedData = $request->validate([
+            'titel' => 'required|string|max:255',
+            'title_image' => 'required|array',
+            'title_image.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'location' => 'required|string|max:255',
+            'type_of_fishing' => 'required|string',
+            'target_fish' => 'required|array',
+            'methods' => 'required|array',
+            'water_types' => 'required|array',
+            'experience_level' => 'required|string',
+            'style_of_fishing' => 'required|string',
+            'course_of_action' => 'required|string',
+            'special_about' => 'required|string',
+            'tour_unique' => 'required|string',
+            'starting_time' => 'required|string',
+            'private' => 'required|string',
+            'duration' => 'required|string',
+            'no_guest' => 'required|integer|min:1',
+            'price' => 'required|string',
+            'allowed_booking_advance' => 'required|string',
+            'booking_window' => 'required|string',
+            'seasonal_trip' => 'required|string',
+        ]);
+        dd($request->all());
+
     }
     
     public function postGuidingStepOne(Request $request){

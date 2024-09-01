@@ -249,6 +249,17 @@ class GuidingsController extends Controller
         
     }
 
+    public function newShow($id,$slug)
+    {
+        $locale = Config::get('app.locale');
+
+        $title = '';
+        
+        return view('pages.guidings.newIndex', [
+            'title' => $title,
+        ]);
+    }
+
     public function otherGuidings(){
         $otherguidings = Guiding::inRandomOrder('1234')->where('status',1)->limit(10)->get();
 

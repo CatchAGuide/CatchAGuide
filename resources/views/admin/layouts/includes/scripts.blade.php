@@ -1,8 +1,9 @@
 
 <!-- JQUERY JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+
 <!-- BOOTSTRAP JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 <script src="{{ asset('assets/admin/plugins/bootstrap/js/popper.min.js') }}"></script>
 <script src="{{ asset('assets/admin/plugins/bootstrap/js/bootstrap.min.js') }}"></script>
 
@@ -71,12 +72,10 @@
 <!-- Color Theme js -->
 <script src="{{ asset('assets/admin/js/themeColors.js') }}"></script>
 
+<script src="https://cdn.ckeditor.com/4.17.1/standard/ckeditor.js"></script>
 <!-- CUSTOM JS -->
 <script src="{{ asset('assets/admin/js/custom.js') }}"></script>
-<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.ckeditor.com/4.17.1/standard/ckeditor.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+{{-- <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script> --}}
 
 {{-- <script>
     tinymce.init({
@@ -86,6 +85,6 @@
 </script> --}}
 
 @livewireScripts
-@stack('js_push')
 @yield('js_after')
 @stack('js_after')
+@stack('js_push')

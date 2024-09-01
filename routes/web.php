@@ -104,6 +104,7 @@ Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(functi
     
 
     Route::get('/newguiding', [App\Http\Controllers\ProfileController::class, 'newguiding'])->name('newguiding');
+    Route::post('/newguiding', [App\Http\Controllers\ProfileController::class, 'newguidingStore'])->name('newguiding.store');
 
     Route::get('/payments', [App\Http\Controllers\ProfileController::class, 'payments'])->name('payments');
     Route::get('/calendar', [App\Http\Controllers\ProfileController::class, 'calendar'])->name('calendar');
@@ -181,6 +182,7 @@ Route::post('guidings/{guiding}/update', [GuidingsController::class, 'update'])-
 Route::get('guidings', [GuidingsController::class, 'index'])->name('guidings.index');
 Route::get('guidings/{slug?}', [GuidingsController::class, 'redirectToNewFormat']);
 Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'show'])->name('guidings.show');
+Route::get('newguidings/{id}/{slug}', [GuidingsController::class, 'newShow'])->name('guidings.newShow');
 
 Route::get('searchrequest', [GuidingsController::class, 'bookingrequest'])->name('guidings.request');
 Route::post('searchrequest/store', [GuidingsController::class, 'bookingRequestStore'])->name('store.request');

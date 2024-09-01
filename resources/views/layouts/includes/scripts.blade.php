@@ -1,4 +1,4 @@
-<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+{{-- <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script> --}}
 
 {{-- <script>
     tinymce.init({
@@ -46,9 +46,12 @@
 <script src="{{ asset('assets/js/select2.min.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 
+@stack('js_push')
+
 <script>
     @if(Session::has('message'))
         toastr.options =
+        
         {
             "closeButton" : true,
             "progressBar" : true
@@ -89,6 +92,5 @@
 <script type="module" src="{{ asset('js/app.js') }}"></script>
 
 @livewireScripts
-
 @yield('js_after')
 @stack('js_push')
