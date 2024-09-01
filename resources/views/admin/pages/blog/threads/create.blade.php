@@ -89,6 +89,17 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                <div class="row">
+                                    <div class="col-lg-2 col-md-4">
+                                        <div class="form-group">
+                                            <label for="cache">Cache</label>
+                                            <select id="cache" name="cache" class="form-control">
+                                                <option value="0">No</option>
+                                                <option value="1">Yes</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="card-footer text-end">
                                 <button type="submit" class="btn btn-success my-1">Speichern</button>

@@ -467,7 +467,7 @@ transform: translate3d(0,0,0); width: 100%;">
                                     <div class="tour-details__review-comment-top-content mt-5">
                                         <h3>{{$received_rating ->user->firstname }}</h3>
                                     
-                                        <p>{{ Carbon\Carbon::parse($received_rating->created_at)->format('F j, Y') }}</p>
+                                        <p>{{ ($received_rating->created_at != null ) ? Carbon\Carbon::parse($received_rating->created_at)->format('F j, Y') : "-"}}</p>
                                         <p>{{$received_rating ->description }}</p>
                                     </div>
                                 </div>
