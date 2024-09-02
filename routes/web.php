@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\PageAttributeController;
 use App\Http\Controllers\Blog\BlogController;
 use App\Http\Controllers\Blog\CategoriesController;
 use App\Http\Controllers\Blog\ThreadsController;
+use App\Http\Controllers\Category\DestinationCountryController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\FAQController;
@@ -191,6 +192,11 @@ Route::name('additional.')->group(function () {
     Route::view('/contact', 'pages.additional.contact')->name('contact');
     Route::view('/about-us', 'pages.additional.about-us')->name('about_us');
 });
+
+/*Route::prefix('destination')->name('desitination.')->group(function () {
+    Route::get('country', [DestinationCountryController::class, 'index'])->name('country');
+});*/
+Route::get('destination/{country}', [DestinationCountryController::class, 'index'])->name('destination.country');
 
 Route::post('sendcontact', [\App\Http\Controllers\ZoisController::class, 'sendcontact'])->name('sendcontactmail');
 Route::post('sendnewsletter', [\App\Http\Controllers\ZoisController::class, 'sendnewsletter'])->name('sendnewsletter');

@@ -1,11 +1,11 @@
 <?php
 
-use App\Models\CategoryCountry;
+use App\Models\Destination;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCategoryCountryFishChartTable extends Migration
+class CreateDestinationFishChartTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,15 +14,10 @@ class CreateCategoryCountryFishChartTable extends Migration
      */
     public function up()
     {
-        Schema::create('category_country_fish_chart', function (Blueprint $table) {
+        Schema::create('destination_fish_charts', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(CategoryCountry::class)->constrained()->cascadeOnDelete();
-            $table->string('fish_en');
-            $table->string('fish_de');
-            $table->string('withdrawal_window_en');
-            $table->string('withdrawal_window_de');
-            $table->string('closed_season_en');
-            $table->string('closed_season_de');
+            $table->foreignIdFor(Destination::class)->constrained()->cascadeOnDelete();
+            $table->string('fish');
             $table->tinyInteger('jan');
             $table->tinyInteger('feb');
             $table->tinyInteger('mar');
@@ -36,7 +31,6 @@ class CreateCategoryCountryFishChartTable extends Migration
             $table->tinyInteger('nov');
             $table->tinyInteger('dec');
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
@@ -47,6 +41,6 @@ class CreateCategoryCountryFishChartTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('category_country_fish_chart');
+        Schema::dropIfExists('destination_fish_charts');
     }
 }

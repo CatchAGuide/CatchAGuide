@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Land')
+@section('title', 'Country')
 
 @section('custom_style')
 <style type="text/css">
@@ -18,12 +18,12 @@ input[type=number] {
 
             <!-- PAGE-HEADER -->
             <div class="page-header">
-                <h1 class="page-title">@yield('title')</h1>
+                <h1 class="page-title">Country</h1>
                 <div>
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="#">System</a></li>
                         <li class="breadcrumb-item"><a href="#">Blog</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">@yield('title')</li>
+                        <li class="breadcrumb-item active" aria-current="page">Country</li>
                     </ol>
                 </div>
 
@@ -36,31 +36,39 @@ input[type=number] {
                         <div class="card-header">
                             <h3 class="card-title">@yield('title')</h3>
                         </div>
-                        <form action="{{route('admin.category.country.store')}}" method="post" enctype="multipart/form-data">
+                        <form action="{{ $route }}" method="post" enctype="multipart/form-data">
                             @method('post')
                             @csrf
                             <div class="card-body">
                                 @if ($errors->any())
+                                    <div class="alert alert-warning" role="alert">
                                     @foreach ($errors->all() as $error)
-                                        <div>{{$error}}</div>
+                                        {{ $error }}<br>
                                     @endforeach
+                                    </div>
+                                @endif
+
+                                @if($method != '')
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <img src="{{ $thumbnail }}" style="width: 300px;">
+                                    </div>
+                                </div>
                                 @endif
 
                                 <div class="row">
-                                    <div class="col">
+                                    <div class="col-lg-6 col-md-12">
                                         <div class="form-group">
-                                            <label for="title">Language</label>
-                                            <span class="fi fi-de"></span>
-                                            <select class="form-control" name="lang" id="language">
-                                                @foreach(config('app.locales') as $key => $locale)
-                                                    <option value="{{$locale}}">@if($locale == 'de') Deutsch @elseif($locale == 'en') English @endif</option>
-                                                @endforeach
-                                            </select>
+                                            <label for="name">Name</label>
+                                            <input type="text" class="form-control" id="name" name="name" placeholder="Name" value="{{ $name }}" required>
                                         </div>
                                     </div>
+                                </div>
+
+                                <div class="row mb-2">
                                     <div class="col-12">
                                         <div class="form-group">
-                                            <label for="thumbnailImage">{{ __('guidings.Thumbnail') }}</label><br/>
+                                            <label for="thumbnailImage">Thumbnail</label><br/>
                                             <input id="thumbnailImage" type="file" name="thumbnailImage">
                                         </div>
                                     </div>
@@ -68,26 +76,26 @@ input[type=number] {
                                 <div class="row">
                                     <div class="col-lg-6 col-md-12">
                                         <div class="form-group">
-                                            <label for="title">{{ __('guidings.Title') }}</label>
-                                            <input type="text" class="form-control" id="title" name="title" placeholder="Titel des Beitrags" required>
+                                            <label for="title">Title</label>
+                                            <input type="text" class="form-control" id="title" name="title" placeholder="Title" value="{{ $title }}" required>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-lg-6 col-md-12">
                                         <div class="form-group">
-                                            <label for="title">Sub {{ __('guidings.Title') }}</label>
-                                            <input type="text" class="form-control" id="title" name="title" placeholder="Titel des Beitrags" required>
+                                            <label for="sub_title">Sub Title</label>
+                                            <input type="text" class="form-control" id="sub_title" name="sub_title" placeholder="Sub Title" value="{{ $sub_title }}" required>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="introduction">{{ __('guidings.Introduction') }}</label>
-                                    <textarea id="introduction" cols="20" rows="4" class="form-control" name="introduction"></textarea>
+                                    <label for="introduction">Introduction</label>
+                                    <textarea id="introduction" cols="20" rows="4" class="form-control" name="introduction">{{ $introduction }}</textarea>
                                 </div>
                                 <div class="form-group">
-                                    <label for="body">{{ __('guidings.Content') }}</label>
-                                    <textarea id="body" cols="30" rows="10" class="form-control" name="body"></textarea>
+                                    <label for="body">Content</label>
+                                    <textarea id="body" cols="30" rows="10" class="form-control" name="body">{{ $body }}</textarea>
                                 </div>
                                 <div class="my-2">
                                     <span><strong>Filter</strong></span>
@@ -96,23 +104,24 @@ input[type=number] {
                                 <div class="row">
                                     <div class="col-4">
                                         <div class="form-group">
-                                            <label for="location">{{ __('guidings.Location') }}</label>
-                                            <input id="searchPlace" class="form-control" type="text" placeholder="Search Location" name="filters[place]" autocomplete="on">
-                                            <input type="hidden" id="placeLat" name="filters[placeLat]"/>
-                                            <input type="hidden" id="placeLng" name="filters[placeLng]"/>
-                                            <input type="hidden" id="country" name="filters[country]"/>
+                                            <label for="location">Location</label>
+                                            <input id="searchPlace" class="form-control" type="text" placeholder="Search Location" name="filters[place]" value="{{ $place }}" autocomplete="on">
+                                            <input type="hidden" id="placeLat"  value="{{ $placeLat }}" name="filters[placeLat]"/>
+                                            <input type="hidden" id="placeLng" value="{{ $placeLng }}" name="filters[placeLng]"/>
+                                            <input type="hidden" id="country" value="{{ $country }}"  name="filters[country]"/>
                                         </div>
 
                                     </div>
                                 </div>
 
                                 <div class="form-group pb-3">
-                                    <button class="btn btn-secondary mb-1" onclick="add_fish_chart_item()" type="button">{{ __('guidings.Add') . ' ' . __('guidings.FishChart') }}</button>
+                                    <h4><button class="btn btn-secondary btn-sm mb-1" onclick="add_fish_chart_item()" type="button"><i class="fa fa-plus"></i></button> Availability of Fish</h4>
 
                                     <table class="table table-bordered table-striped" id="fish_chart_table">
                                         <thead>
                                         <tr>
-                                            <th width="28%">{{ __('guidings.Fish') }}</th>
+                                            <th width="5%">Fish</th>
+                                            <th width="23%">Fish</th>
                                             @for($i = 1; $i <= 12; $i++)
                                             <th width="6%" class="text-center">{{ date('M', strtotime(date("Y-$i-d"))) }}</th>
                                             @endfor
@@ -122,15 +131,45 @@ input[type=number] {
                                     </table>
                                 </div>
 
+                                <div class="form-group pb-3">
+                                    <h4><button class="btn btn-secondary btn-sm mb-1" onclick="add_fish_size_limit_item()" type="button"><i class="fa fa-plus"></i></button> Size Limit</h4>
+
+                                    <table class="table table-bordered table-striped" id="fish_size_limit_table">
+                                        <thead>
+                                        <tr>
+                                            <th width="5%"></th>
+                                            <th width="20%">Fish</th>
+                                            <th width="75%">Size Limit</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+
+                                <div class="form-group pb-3">
+                                    <h4><button class="btn btn-secondary btn-sm mb-1" onclick="add_fish_time_limit_item()" type="button"><i class="fa fa-plus"></i></button> Time Limit</h4>
+
+                                    <table class="table table-bordered table-striped" id="fish_time_limit_table">
+                                        <thead>
+                                        <tr>
+                                            <th width="5%"></th>
+                                            <th width="20%">Fish</th>
+                                            <th width="75%">Time Limit</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+
                                 <div class="form-group">
-                                    <button class="btn btn-secondary mb-1" onclick="add_faq_item()" type="button">{{ __('guidings.Add') }} FAQ</button>
+                                    <h4><button class="btn btn-secondary btn-sm mb-1" onclick="add_faq_item()" type="button"><i class="fa fa-plus"></i></button> FAQ</h4>
 
                                     <table class="table table-bordered table-striped" id="faq_table">
                                         <thead>
                                         <tr>
                                             <th width="4%"></th>
-                                            <th width="48%">German</th>
-                                            <th width="48%">English</th>
+                                            <th width="48%">Question</th>
+                                            <th width="48%">Answer</th>
                                         </tr>
                                         </thead>
                                         <tbody></tbody>
@@ -139,7 +178,10 @@ input[type=number] {
                             </div>
 
                             <div class="card-footer text-end">
-                                <button type="submit" class="btn btn-success my-1">Speichern</button>
+                                @if($method != '')
+                                    @method('PUT')
+                                @endif
+                                <button type="submit" class="btn btn-success my-1">Submit</button>
                             </div>
                         </form>
                     </div>
@@ -188,6 +230,31 @@ input[type=number] {
     </script>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q&loading=async&libraries=places,geocoder"></script>
     <script>
+        $(function(){
+
+        @if(isset($fish_chart))
+            @foreach($fish_chart as $row)
+                add_fish_chart_item({{ $row->id }}, '{{ $row->fish }}', {{ $row->jan }}, {{ $row->feb }}, {{ $row->mar }}, {{ $row->apr }}, {{ $row->may }}, {{ $row->jun }}, {{ $row->jul }}, {{ $row->aug }}, {{ $row->sep }}, {{ $row->oct }}, {{ $row->nov }}, {{ $row->dec }});
+            @endforeach
+        @endif
+        @if(isset($fish_size_limit))
+            @foreach($fish_size_limit as $row)
+                add_fish_size_limit_item({{ $row->id }}, '{{ $row->fish }}', '{{ $row->data }}');
+            @endforeach
+        @endif
+        @if(isset($fish_time_limit))
+            @foreach($fish_time_limit as $row)
+                add_fish_time_limit_item({{ $row->id }}, '{{ $row->fish }}', '{{ $row->data }}');
+            @endforeach
+        @endif
+
+        @if(isset($faq))
+            @foreach($faq as $row)
+                add_faq_item({{ $row->id }}, '{{ $row->question }}', '{{ $row->answer }}');
+            @endforeach
+        @endif
+        });
+
         function initialize() {
             var input = document.getElementById('searchPlace');
             var autocomplete = new google.maps.places.Autocomplete(input);
@@ -223,55 +290,6 @@ input[type=number] {
             });
         });
 
-        function add_fish_chart_item_input(fish_chart_item_counter, month) {
-            return '<input class="form-control form-control-sm text-center" type="text" oninput="onlyNumber(\'fish_chart_' + fish_chart_item_counter + '_' + month + '\', value)" id="fish_chart_' + fish_chart_item_counter + '_' + month + '" min="0" max="3" maxlength="1" name="fish_chart[' + fish_chart_item_counter + '][' + month + '][\'ratio\']">';
-        }
-
-        let fish_chart_item_counter = 0;
-        function add_fish_chart_item() {
-            let onclick = '';
-            /*let row = '<tr id="fish_chart_item_item_' + fish_chart_item_counter + '">' +
-                            '<td>' +
-                            '<input class="form-control form-control-sm mb-1" placeholder="Fish" name="fish_chart[' + fish_chart_item_counter + ']" type="text" value="">' +
-                            '<input class="form-control form-control-sm mb-1" placeholder="Withdrawal Window" name="withdrawal_window[' + fish_chart_item_counter + ']" type="text" value="">' +
-                            '<input class="form-control form-control-sm mb-1" placeholder="Closed Season" name="closed_season[' + fish_chart_item_counter + ']" type="text" value="">' +
-                            '<a class="btn btn-link btn-sm" href="javascript:void(0)" onclick="remove_fish_chart_item(' + fish_chart_item_counter + ')"><i class="fa fa-times fa-lg"></i> Remove</a>' + 
-                            '</td>' +
-                            '<td><input class="form-control form-control-sm text-center" type="text" oninput="onlyNumber(\'fish_chart_' + fish_chart_item_counter + '_1\', value)" id="fish_chart_' + fish_chart_item_counter + '_1" min="0" max="3" maxlength="1" name="fish_chart[' + fish_chart_item_counter + '][\'1\'][\'ratio\']"></td>' +
-                            '<td><input class="form-control form-control-sm text-center" type="text" oninput="onlyNumber(\'fish_chart_' + fish_chart_item_counter + '_2\', value)" id="fish_chart_' + fish_chart_item_counter + '_2" min="0" max="3" maxlength="1" name="fish_chart[' + fish_chart_item_counter + '][\'2\'][\'ratio\']"></td>' +
-                            '<td><input class="form-control form-control-sm text-center" type="text" oninput="onlyNumber(\'fish_chart_' + fish_chart_item_counter + '_3\', value)" id="fish_chart_' + fish_chart_item_counter + '_3" min="0" max="3" maxlength="1" name="fish_chart[' + fish_chart_item_counter + '][\'3\'][\'ratio\']"></td>' +
-                            '<td><input class="form-control form-control-sm text-center" type="text" oninput="onlyNumber(\'fish_chart_' + fish_chart_item_counter + '_4\', value)" id="fish_chart_' + fish_chart_item_counter + '_4" min="0" max="3" maxlength="1" name="fish_chart[' + fish_chart_item_counter + '][\'4\'][\'ratio\']"></td>' +
-                            '<td><input class="form-control form-control-sm text-center" type="text" oninput="onlyNumber(\'fish_chart_' + fish_chart_item_counter + '_5\', value)" id="fish_chart_' + fish_chart_item_counter + '_5" min="0" max="3" maxlength="1" name="fish_chart[' + fish_chart_item_counter + '][\'5\'][\'ratio\']"></td>' +
-                            '<td><input class="form-control form-control-sm text-center" type="text" oninput="onlyNumber(\'fish_chart_' + fish_chart_item_counter + '_6\', value)" id="fish_chart_' + fish_chart_item_counter + '_6" min="0" max="3" maxlength="1" name="fish_chart[' + fish_chart_item_counter + '][\'6\'][\'ratio\']"></td>' +
-                            '<td><input class="form-control form-control-sm text-center" type="text" oninput="onlyNumber(\'fish_chart_' + fish_chart_item_counter + '_7\', value)" id="fish_chart_' + fish_chart_item_counter + '_7" min="0" max="3" maxlength="1" name="fish_chart[' + fish_chart_item_counter + '][\'7\'][\'ratio\']"></td>' +
-                            '<td><input class="form-control form-control-sm text-center" type="text" oninput="onlyNumber(\'fish_chart_' + fish_chart_item_counter + '_8\', value)" id="fish_chart_' + fish_chart_item_counter + '_8" min="0" max="3" maxlength="1" name="fish_chart[' + fish_chart_item_counter + '][\'8\'][\'ratio\']"></td>' +
-                            '<td><input class="form-control form-control-sm text-center" type="text" oninput="onlyNumber(\'fish_chart_' + fish_chart_item_counter + '_9\', value)" id="fish_chart_' + fish_chart_item_counter + '_9" min="0" max="3" maxlength="1" name="fish_chart[' + fish_chart_item_counter + '][\'9\'][\'ratio\']"></td>' +
-                            '<td><input class="form-control form-control-sm text-center" type="text" oninput="onlyNumber(\'fish_chart_' + fish_chart_item_counter + '_10\', value)" id="fish_chart_' + fish_chart_item_counter + '_10" min="0" max="3" maxlength="1" name="fish_chart[' + fish_chart_item_counter + '][\'10\'][\'ratio\']"></td>' +
-                            '<td><input class="form-control form-control-sm text-center" type="text" oninput="onlyNumber(\'fish_chart_' + fish_chart_item_counter + '_11\', value)" id="fish_chart_' + fish_chart_item_counter + '_11" min="0" max="3" maxlength="1" name="fish_chart[' + fish_chart_item_counter + '][\'11\'][\'ratio\']"></td>' +
-                            '<td><input class="form-control form-control-sm text-center" type="text" oninput="onlyNumber(\'fish_chart_' + fish_chart_item_counter + '_12\', value)" id="fish_chart_' + fish_chart_item_counter + '_12" min="0" max="3" maxlength="1" name="fish_chart[' + fish_chart_item_counter + '][\'12\'][\'ratio\']"></td></tr>';*/
-            let row = '<tr id="fish_chart_item_item_' + fish_chart_item_counter + '">' +
-                            '<td>' +
-                            '<input class="form-control form-control-sm mb-1" placeholder="Fish" name="fish_chart[' + fish_chart_item_counter + ']" type="text" value="">' +
-                            '<input class="form-control form-control-sm mb-1" placeholder="Withdrawal Window" name="withdrawal_window[' + fish_chart_item_counter + ']" type="text" value="">' +
-                            '<input class="form-control form-control-sm mb-1" placeholder="Closed Season" name="closed_season[' + fish_chart_item_counter + ']" type="text" value="">' +
-                            '<a class="btn btn-link btn-sm" href="javascript:void(0)" onclick="remove_fish_chart_item(' + fish_chart_item_counter + ')"><i class="fa fa-times fa-lg"></i> Remove</a>' + 
-                            '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 1) + '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 2) + '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 3) + '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 4) + '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 5) + '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 6) + '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 7) + '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 8) + '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 9) + '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 10) + '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 11) + '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 12) + '</td></tr>';
-            $('#fish_chart_table tbody').append(row);
-            fish_chart_item_counter++;
-        }
-
         function onlyNumber(fish_chart, inputVal) {
             var patt=/^[0-9]+$/;
             var txt = inputVal.slice(0, -1);
@@ -286,26 +304,92 @@ input[type=number] {
             }
         }
 
+        function add_fish_chart_item_input(fish_chart_item_counter, month, value) {
+            return '<input class="form-control form-control-sm text-center" type="text" oninput="onlyNumber(\'fish_chart_' + fish_chart_item_counter + '_' + month + '\', value)" id="fish_chart_' + fish_chart_item_counter + '_' + month + '" min="1" max="3" maxlength="1" name="fish_chart[' + fish_chart_item_counter + '][' + month + ']" value="' + value + '">';
+        }
+
+        let fish_chart_item_counter = 0;
+        function add_fish_chart_item(id = 0, fish = '', jan = 1, feb = 1, mar = 1, apr = 1, may = 1, jun = 1, jul = 1, aug = 1, sep = 1, oct = 1, nov = 1, dec = 1) {
+            let onclick = '';
+            let row = '<tr id="fish_chart_item_item_' + fish_chart_item_counter + '"><td>' +
+                            '<a class="btn btn-link btn-sm" href="javascript:void(0)" onclick="remove_fish_chart_item(' + fish_chart_item_counter + ')"><i class="fa fa-times fa-lg"></i></a>' +
+                            '</td><td>' +
+                            '<input class="form-control form-control-sm mb-1" placeholder="Fish" name="fish_chart[' + fish_chart_item_counter + '][fish]" type="text" value="' + fish + '">' +
+                            '<input name="fish_chart[' + fish_chart_item_counter + '][id]" type="hidden" value="' + id + '">' +
+                            '</td>' +
+                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'jan', jan) + '</td>' +
+                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'feb', feb) + '</td>' +
+                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'mar', mar) + '</td>' +
+                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'apr', apr) + '</td>' +
+                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'may', may) + '</td>' +
+                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'jun', jun) + '</td>' +
+                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'jul', jul) + '</td>' +
+                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'aug', aug) + '</td>' +
+                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'sep', sep) + '</td>' +
+                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'oct', oct) + '</td>' +
+                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'nov', nov) + '</td>' +
+                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'dec', dec) + '</td></tr>';
+            $('#fish_chart_table tbody').append(row);
+            fish_chart_item_counter++;
+        }
+
         function remove_fish_chart_item(counter) {
             $('#fish_chart_item_item_' + counter).remove();
         }
 
+        let fish_size_limit_item_counter = 0;
+        function add_fish_size_limit_item(id = 0, fish = '', data = '') {
+            let onclick = '';
+            let row = '<tr id="fish_size_limit_item_' + fish_size_limit_item_counter + '">' +
+                            '<td>' +
+                            '<a class="btn btn-link btn-sm" href="javascript:void(0)" onclick="remove_fish_size_limit_item(' + fish_size_limit_item_counter + ')"><i class="fa fa-times fa-lg"></i></a>' + 
+                            '</td><td>' +
+                            '<input name="fish_size_limit[' + fish_size_limit_item_counter + '][id]" type="hidden" value="' + id + '">' +
+                            '<input class="form-control form-control-sm mb-1" placeholder="Fish" name="fish_size_limit[' + fish_size_limit_item_counter + '][fish]" type="text" value="' + fish + '">' +
+                            '</td><td>' +
+                            '<input class="form-control form-control-sm mb-1" placeholder="Input" name="fish_size_limit[' + fish_size_limit_item_counter + '][data]" type="text" value="' + data + '">' +
+                            '</td></tr>';
+            $('#fish_size_limit_table tbody').append(row);
+            fish_size_limit_item_counter++;
+        }
+
+        function remove_fish_size_limit_item(counter) {
+            $('#fish_size_limit_item_' + counter).remove();
+        }
+
+        let fish_time_limit_item_counter = 0;
+        function add_fish_time_limit_item(id = 0, fish = '', data = '') {
+            let onclick = '';
+            let row = '<tr id="fish_time_limit_item_' + fish_time_limit_item_counter + '">' +
+                            '<td>' +
+                            '<a class="btn btn-link btn-sm" href="javascript:void(0)" onclick="remove_fish_size_limit_item(' + fish_time_limit_item_counter + ')"><i class="fa fa-times fa-lg"></i></a>' + 
+                            '</td><td>' +
+                            '<input name="fish_time_limit[' + fish_time_limit_item_counter + '][id]" type="hidden" value="' + id + '">' +
+                            '<input class="form-control form-control-sm mb-1" placeholder="Fish" name="fish_time_limit[' + fish_time_limit_item_counter + '][fish]" type="text" value="' + fish + '">' +
+                            '</td><td>' +
+                            '<input class="form-control form-control-sm mb-1" placeholder="Input" name="fish_time_limit[' + fish_time_limit_item_counter + '][data]" type="text" value="' + data + '">' +
+                            '</td></tr>';
+            $('#fish_time_limit_table tbody').append(row);
+            fish_time_limit_item_counter++;
+        }
+
+        function remove_fish_time_limit_item(counter) {
+            $('#fish_time_limit_item_' + counter).remove();
+        }
+
         let faq_item_counter = 0;
-        function add_faq_item() {
-            /*let faq_row = '<tr id="faq_item_' + counter + '">' +
-                            '<td><a class="btn btn-link btn-sm" href="javascript:void(0)" onclick="remove_faq_item(' + counter + ')"><i class="fa fa-times fa-lg"></i></a></td>' +
-                            '<td><input class="form-control form-control-sm" type="text" name="faq[' + counter + '][\'de\'][\'question\']" value=""></td>' +
-                            '<td><input class="form-control form-control-sm" type="text" name="faq[' + counter + '][\'de\'][\'answer\']" value=""></td>' +
-                            '<td><input class="form-control form-control-sm" type="text" name="faq[' + counter + '][\'en\'][\'question\']" value=""></td>' +
-                            '<td><input class="form-control form-control-sm" type="text" name="faq[' + counter + '][\'en\'][\'answer\']" value=""></td></tr>';*/
+        function add_faq_item(id = 0, question = '', answer = '') {
             let faq_row = '<tr id="faq_item_' + faq_item_counter + '">' +
-                            '<td><a class="btn btn-link btn-sm" href="javascript:void(0)" onclick="remove_faq_item(' + faq_item_counter + ')"><i class="fa fa-times fa-lg"></i></a></td>' +
-                            '<td><label>Question (DE)</label><input class="form-control form-control-sm" type="text" name="faq[' + faq_item_counter + '][\'de\'][\'question\']" value="">' +
-                            '<label>Answer (DE)</label><input class="form-control form-control-sm" type="text" name="faq[' + faq_item_counter + '][\'de\'][\'answer\']" value=""></td>' +
-                            '<td><label>Question (EN)</label><input class="form-control form-control-sm" type="text" name="faq[' + faq_item_counter + '][\'en\'][\'question\']" value="">' +
-                            '<label>Answer (EN)</label><input class="form-control form-control-sm" type="text" name="faq[' + faq_item_counter + '][\'en\'][\'answer\']" value=""></td></tr>';
+                            '<td>' +
+                            '<a class="btn btn-link btn-sm" href="javascript:void(0)" onclick="remove_faq_item(' + faq_item_counter + ')"><i class="fa fa-times fa-lg"></i></a>' +
+                            '</td><td>' +
+                            '<input name="faq[' + faq_item_counter + '][id]" type="hidden" value="' + id + '">' +
+                            '<input class="form-control form-control-sm" name="faq[' + faq_item_counter + '][question]" value="' + question + '" type="text" placeholder="Question">' +
+                            '</td><td>' +
+                            '<input class="form-control form-control-sm" name="faq[' + faq_item_counter + '][answer]" value="' + answer + '" type="text" placeholder="Answer">' +
+                            '</td></tr>';
             $('#faq_table tbody').append(faq_row);
-            counter++;
+            faq_item_counter++;
         }
 
         function remove_faq_item(counter) {
