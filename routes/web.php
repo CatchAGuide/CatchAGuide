@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\PageAttributeController;
 use App\Http\Controllers\Blog\BlogController;
 use App\Http\Controllers\Blog\CategoriesController;
 use App\Http\Controllers\Blog\ThreadsController;
+use App\Http\Controllers\Category\DestinationCountryController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\FAQController;
@@ -34,6 +35,7 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\PaymentsController as AdminPaymentsController;
 use App\Http\Controllers\Admin\FAQController as AdminFaqController;
+use App\Http\Controllers\Admin\Category\AdminCategoryCountryController;
 use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThreadsController;
 
 /*
@@ -193,6 +195,11 @@ Route::name('additional.')->group(function () {
     Route::view('/about-us', 'pages.additional.about-us')->name('about_us');
 });
 
+/*Route::prefix('destination')->name('desitination.')->group(function () {
+    Route::get('country', [DestinationCountryController::class, 'index'])->name('country');
+});*/
+Route::get('destination/{country}', [DestinationCountryController::class, 'index'])->name('destination.country');
+
 Route::post('sendcontact', [\App\Http\Controllers\ZoisController::class, 'sendcontact'])->name('sendcontactmail');
 Route::post('sendnewsletter', [\App\Http\Controllers\ZoisController::class, 'sendnewsletter'])->name('sendnewsletter');
 
@@ -335,6 +342,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('newblog')->name('newblog.')->group(function () {
             Route::resource('threads', AdminGuideThreadsController::class);
             Route::get('threads/{thread}/delete', [AdminGuideThreadsController::class, 'delete'])->name('delete');
+        });
+
+        Route::prefix('category')->name('category.')->group(function () {
+            Route::resource('country', AdminCategoryCountryController::class);
         });
 
 

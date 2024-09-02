@@ -11,4 +11,14 @@ return [
     'Radius' => 'Radius',
     'Place' => 'Place',
     'Coordinates' => 'Coordinates',
+
+    'Thumbnail' => 'Thumbnail',
+    'Title' => 'Title',
+    'Introduction' => 'Introduction',
+    'Content' => 'Content',
+    'Fish' => 'Fish',
+    'FishChart' => 'Fish Chart',
+    'Content' => 'Content',
+    'Add' => 'Add',
+    'Location' => 'Location',
 ];  
