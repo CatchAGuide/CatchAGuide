@@ -243,11 +243,9 @@ class AdminCategoryRegionController extends Controller
             return redirect()->back()->with('success', 'Region Successfully Updated!');
         } catch (Exception $e) {
             DB::rollBack();
-            dd($e);
             return redirect()->back()->withErrors(['message' => 'Ooops Something went wrong. Please reload the page.']);
         } catch (\Illuminate\Database\QueryException $e) {
             DB::rollBack();
-            dd($e);
             return redirect()->back()->withErrors(['message' => 'Ooops Something went wrong. Please reload the page.']);
         }
     }
@@ -273,9 +271,15 @@ class AdminCategoryRegionController extends Controller
         $webpImageName = pathinfo($thumbnail_path, PATHINFO_FILENAME) . '.webp';
         $webpImage = $image->encode('webp', 75);
 
-        $webp_path = 'blog/country/' . $webpImageName;
+        $webp_path = 'blog/region/';
 
-        Storage::disk('public')->put($webp_path, $webpImage->encoded);
+        if (!Storage::disk('public_path')->exists($webp_path)) {
+            Storage::disk('public_path')->makeDirectory($webp_path);
+        }
+
+        $webp_path .= $webpImageName;
+
+        Storage::disk('public_path')->put($webp_path, $webpImage->encoded);
         $webpImage->save(public_path($webp_path));
 
         return $webp_path;
