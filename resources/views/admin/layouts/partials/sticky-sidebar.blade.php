@@ -77,9 +77,9 @@
                 <a class="side-menu__item {{ request()->routeIs('admin.newblog.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#"><i class="side-menu__icon fe fe-book-open"></i><span class="side-menu__label">Category</span><i class="angle fe fe-chevron-right"></i></a>
                 <ul class="slide-menu">
                     <li><a href="{{ route('admin.newblog.threads.index') }}" class="slide-item  {{ request()->routeIs('admin.newblog.threads.*') ? 'active' : '' }}"> Beiträge</a></li>
-                    <li><a href="{{ route('admin.category.country.index') }}" class="slide-item  {{ request()->routeIs('admin.category.country.index') ? 'active' : '' }}"> Country</a></li>
-                    <li><a href="{{ route('admin.category.country.index') }}" class="slide-item  {{ request()->routeIs('admin.category.country.index') ? 'active' : '' }}"> Region</a></li>
-                    <li><a href="{{ route('admin.category.country.index') }}" class="slide-item  {{ request()->routeIs('admin.category.country.index') ? 'active' : '' }}"> City</a></li>
+                    <li><a href="{{ route('admin.category.country.index') }}" class="slide-item  {{ request()->routeIs('admin.category.country.*') ? 'active' : '' }}"> Country</a></li>
+                    <li><a href="{{ route('admin.category.region.index') }}" class="slide-item  {{ request()->routeIs('admin.category.region.*') ? 'active' : '' }}"> Region</a></li>
+                    <li><a href="{{ route('admin.category.city.index') }}" class="slide-item  {{ request()->routeIs('admin.category.city.*') ? 'active' : '' }}"> City</a></li>
                 </ul>
             </li>
                 <li class="slide {{ request()->routeIs('admin.page-attribute.*') ? 'is-expanded' : '' }}">

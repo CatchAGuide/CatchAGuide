@@ -67,41 +67,82 @@
     }
 
     @media (max-width: 767px) {
-        .carousel-inner .carousel-item > div {
+        #carousel-regions .carousel-inner .carousel-item > div {
             display: none;
         }
-        .carousel-inner .carousel-item > div:first-child {
+        #carousel-regions .carousel-inner .carousel-item > div:first-child {
             display: block;
         }
     }
 
-    .carousel-inner .carousel-item.active,
-    .carousel-inner .carousel-item-next,
-    .carousel-inner .carousel-item-prev {
+    #carousel-regions .carousel-inner .carousel-item.active,
+    #carousel-regions .carousel-inner .carousel-item-next,
+    #carousel-regions .carousel-inner .carousel-item-prev,
+    #carousel-cities .carousel-inner .carousel-item.active,
+    #carousel-cities .carousel-inner .carousel-item-next,
+    #carousel-cities .carousel-inner .carousel-item-prev {
         display: flex;
     }
 
     /* medium and up screens */
     @media (min-width: 768px) {
-        .carousel-inner .carousel-item img {
+        #carousel-regions .carousel-inner .carousel-item img,
+        #carousel-cities .carousel-inner .carousel-item img {
             margin-right: 2px;
         }
         
-        .carousel-inner .carousel-item-end.active,
-        .carousel-inner .carousel-item-next {
+        #carousel-regions .carousel-inner .carousel-item-end.active,
+        #carousel-regions .carousel-inner .carousel-item-next,
+        #carousel-cities .carousel-inner .carousel-item-end.active,
+        #carousel-cities .carousel-inner .carousel-item-next {
           transform: translateX(25%);
         }
         
-        .carousel-inner .carousel-item-start.active, 
-        .carousel-inner .carousel-item-prev {
+        #carousel-regions .carousel-inner .carousel-item-start.active, 
+        #carousel-regions .carousel-inner .carousel-item-prev,
+        #carousel-cities .carousel-inner .carousel-item-start.active, 
+        #carousel-cities .carousel-inner .carousel-item-prev {
           transform: translateX(-25%);
         }
     }
 
-    .carousel-inner .carousel-item-end,
-    .carousel-inner .carousel-item-start { 
+    #carousel-regions .carousel-inner .carousel-item-end,
+    #carousel-regions .carousel-inner .carousel-item-start,
+    #carousel-cities .carousel-inner .carousel-item-end,
+    #carousel-cities .carousel-inner .carousel-item-start { 
       transform: translateX(0);
-    }</style>
+    }
+
+    #map-placeholder {
+        width:100%;
+        height: 200px;
+        background-image: url(../assets/images/map-bg.png);
+        text-align: center;
+        padding-top: 40%;
+    }
+
+    /*.country-listing-item .carousel-inner {
+        height: 256px;
+    }*/
+
+    .country-listing-item .carousel-control-prev,
+    .country-listing-item .carousel-control-next {
+        width: 30px!important;
+        height: 30px!important;
+    }
+
+    .country-listing-item .carousel-item,
+    .country-listing-item .carousel-item img {
+        width: 256px!important;
+        height: 300px!important;
+        object-fit: cover;
+    }
+
+    .btn-outline-theme {
+        color: #E8604C!important;
+        border-color: #E8604C!important;
+    }
+</style>
 @endsection
 
 @section('content')
@@ -145,10 +186,10 @@
                     </div> 
                 </form>
 
-                <div class="mb-3">{!! $row->introduction !!}</div>
+                <div class="mb-3">{!! nl2br($row->introduction) !!}</div>
 
                 <h5 class="mb-2">All Region</h5>
-                <div id="carouselExample" class="carousel slide mb-4" data-bs-ride="carousel">
+                <div id="carousel-regions" class="carousel slide mb-4" data-bs-ride="carousel">
                     <div class="carousel-inner" role="listbox">
                         <div class="carousel-item active">
                             <div class="col-md-3">
@@ -211,17 +252,17 @@
                             </div>
                         </div>
                     </div>
-                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carousel-regions" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Previous</span>
                     </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+                    <button class="carousel-control-next" type="button" data-bs-target="#carousel-regions" data-bs-slide="next">
                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Next</span>
                     </button>
                 </div>
                 <h5 class="mb-2">All Cities</h5>
-                <div id="carouselExample2" class="carousel slide mb-4" data-bs-ride="carousel">
+                <div id="carousel-cities" class="carousel slide mb-4" data-bs-ride="carousel">
                     <div class="carousel-inner" role="listbox">
                         <div class="carousel-item active">
                             <div class="col-md-3">
@@ -284,11 +325,11 @@
                             </div>
                         </div>
                     </div>
-                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample2" data-bs-slide="prev">
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carousel-cities" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Previous</span>
                     </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExample2" data-bs-slide="next">
+                    <button class="carousel-control-next" type="button" data-bs-target="#carousel-cities" data-bs-slide="next">
                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Next</span>
                     </button>
@@ -297,168 +338,323 @@
                 <div class="row mb-2">
                     <div class="col-sm-12 col-lg-3">
                         <div class="card mb-2">
-                            <div id="map" style="width:100%; height: 200px;"></div>
+                            <div id="map-placeholder">
+                                <button class="btn btn-primary" data-bs-target="#mapModal" data-bs-toggle="modal">Show on map</button>
+                            </div>
                         </div>
                         <div class="card">
                             <div class="card-header">
                                 Filter By:
                             </div>
                             <div class="card-body border-bottom">
-                                <h6>Popular Filters</h6>
-                                <label class="d-block"><input class="form-check-input" type="checkbox"> Filter 1</label>
-                                <label class="d-block"><input class="form-check-input" type="checkbox"> Filter 2</label>
-                                <label class="d-block"><input class="form-check-input" type="checkbox"> Filter 3</label>
-                            </div>
-                            <div class="card-body border-bottom">
-                                <h6>Location</h6>
-                                <label class="d-block"><input class="form-check-input" type="checkbox"> Filter 1</label>
-                                <label class="d-block"><input class="form-check-input" type="checkbox"> Filter 2</label>
-                                <label class="d-block"><input class="form-check-input" type="checkbox"> Filter 3</label>
-                            </div>
-                            <div class="card-body">
-                                <h6>Fish</h6>
-                                <label class="d-block"><input class="form-check-input" type="checkbox"> Filter 1</label>
-                                <label class="d-block"><input class="form-check-input" type="checkbox"> Filter 2</label>
-                                <label class="d-block"><input class="form-check-input" type="checkbox"> Filter 3</label>
+
+                                <label for="number_of_guests" class="form-label">Number of Guests</label>
+                                <select class="form-select mb-3" id="number_of_guests" name="number_of_guests">
+                                    <option>--</option>
+                                </select>
+
+                                <label for="target_fish" class="form-label">Target Fish</label>
+                                <select class="form-select mb-3" id="target_fish" name="target_fish">
+                                    <option>--</option>
+                                </select>
+
+                                <label for="water_type" class="form-label">Target Fish</label>
+                                <select class="form-select mb-3" id="water_type" name="water_type">
+                                    <option>--</option>
+                                </select>
+
+                                <label for="fishing_technique" class="form-label">Fishing Technique</label>
+                                <select class="form-select" id="fishing_technique" name="fishing_technique">
+                                    <option>--</option>
+                                </select>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-12 col-lg-9 country-listing-item">
-                        <div class="card mb-2">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-sm-12 col-lg-3 pe-0">
-                                        <img src="https://place-hold.it/202x202" class="img-fluid" width="202px" height="202px" alt="...">
-                                    </div>
-                                    <div class="col-sm-12 col-lg-7 pe-0">
-                                        <a href=""><h5>Title Title</h5></a>
-                                        <p class="h6">5.5 km</p>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eu imperdiet mi. Etiam quis lectus est. Morbi sit amet ligula ornare lectus pellentesque rutrum vel sit amet sapien. Maecenas ipsum magna, congue at ornare eget, tristique non urna. Nullam at placerat est, in aliquam enim.</p>
-                                    </div>
-                                    <div class="col-sm-12 col-lg-2 country-listing-item-rating">
-                                        <div class="row">
-                                            <div class="col-lg-6 p-0 pt-2">
-                                                <p>
-                                                    <small>Very Good</small>
-                                                    <small>1,001 reviews</small>
-                                                </p>
+                        @foreach($guidings as $guiding)
+                        <div class="row m-0 mb-2">
+                            <div class="col-md-12">
+                                <div class="row p-2 border shadow-sm bg-white rounded">
+                                    <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1">
+                                        <div id="carouselExampleControls-{{$guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
+                                            <div class="carousel-inner">
+                                                @if(count(get_galleries_image_link($guiding)))
+                                                    @foreach(get_galleries_image_link($guiding) as $index => $gallery_image_link)
+                                                        <div class="object-fit-cover carousel-item @if($index == 0) active @endif">
+                                                            <img class="d-block object-fit-cover w-100" src="{{ asset($gallery_image_link) }}">
+                                                        </div>
+                                                    @endforeach
+                                                @endif
                                             </div>
-                                            <div class="col-lg-6 py-1 ps-0">
-                                                <div class="alert alert-primary text-center p-1">5.8</div>
-                                            </div>
+
+                                            @if(count(get_galleries_image_link($guiding)) > 1)
+                                                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls-{{$guiding->id}}" data-bs-slide="prev">
+                                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                                    <span class="visually-hidden">Previous</span>
+                                                </button>
+                                                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls-{{$guiding->id}}" data-bs-slide="next">
+                                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                                    <span class="visually-hidden">Next</span>
+                                                </button>
+                                            @endif
                                         </div>
-                                        
-                                        <p>
-                                            <a class="btn btn-primary">Show prices</a>
-                                        </p>
+                                
+                                    </div>
+                                    <div class="col-11 col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 mt-1">
+                                        <h5 class="fw-bolder text-truncate"><a class="text-dark" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">{{translate($guiding->title)}}</a></h5>
+                                        <div class="ratings mr-2 color-primary my-1" style="font-size:0.80rem">
+                                            @if(count($guiding->user->received_ratings) > 0)
+                                            @switch(two($guiding->user->average_rating()))
+                                                @case(two($guiding->user->average_rating()) >= 5)
+                                                    - {{one($guiding->user->average_rating())}}
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    @break
+                                                @case(two($guiding->user->average_rating()) >= 4.5)
+                                                    - {{one($guiding->user->average_rating())}}
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star-half"></i>
+                                                    @break
+                                                @case(two($guiding->user->average_rating()) >= 4)
+                                                    - {{one($guiding->user->average_rating())}}
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    @break
+                                                @case(two($guiding->user->average_rating()) >= 3.5)
+                                                    - {{one($guiding->user->average_rating())}}
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star-half"></i>
+                                                    @break
+                                                @case(two($guiding->user->average_rating()) >= 3)
+                                                    - {{one($guiding->user->average_rating())}}
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    @break
+                                                @case(two($guiding->user->average_rating()) >= 2.5)
+                                                    - {{one($guiding->user->average_rating())}}
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star-half"></i>
+                                                    @break
+                                                @case(two($guiding->user->average_rating()) >= 2)
+                                                    - {{one($guiding->user->average_rating())}}
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    @break
+                                                @case(two($guiding->user->average_rating()) >= 1.5)
+                                                    - {{one($guiding->user->average_rating())}}
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star-half"></i>
+                                                    @break
+                                                @case(two($guiding->user->average_rating()) >= 1)
+                                                    - {{one($guiding->user->average_rating())}}
+                                                    <i class="fa fa-star"></i>
+                                                    @break
+                                                @default
+                                                    - {{one($guiding->user->average_rating())}}
+                                                    <i class="fa fa-star"></i>
+                                            @endswitch
+
+                                            @if(count($guiding->user->received_ratings) >= 2) 
+                                                ({{count($guiding->user->received_ratings)}} Bewertungen)
+                                            @else 
+                                                ({{count($guiding->user->received_ratings)}} Bewertung)
+                                            @endif
+
+                                        @endif     
+                                        </div>
+                                        <span class="text-center" style="font-size:1rem;color:rgb(28, 28, 28)"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($guiding->location) }}</span>                                      
+                                        <div class="row mt-2">
+                                            <div class="col-6 col-sm-6 col-md-6">
+                                                <div class="d-flex align-items-center">
+                                                    <div>
+                                                        <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
+                                                    </div>
+                                                    <div class="mx-2">
+                                                        <div class="tours-list__content__trait__text" style="font-size:0.75rem">
+                                                            @php
+                                                            $guidingTargets = $guiding->guidingTargets->pluck('name')->toArray();
+                                                            if(app()->getLocale() == 'en'){
+                                                                $guidingTargets =  $guiding->guidingTargets->pluck('name_en')->toArray();
+                                                            }
+                                                            @endphp
+                                                            
+                                                            @if(!empty($guidingTargets))
+                                                                {{ implode(', ', $guidingTargets) }}
+                                                            @else
+                                                            {{ translate($guiding->threeTargets()) }}
+                                                            {{$guiding->target_fish_sonstiges ? " & " . translate($guiding->target_fish_sonstiges) : ""}}
+                                                            @endif
+                                                        </div>
+                                                    
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-sm-6 col-md-6">
+                                                <div class="d-flex align-items-center">
+                                                    <div>
+                                                        <img src="{{asset('assets/images/icons/water-waves.png')}}" height="20" width="20" alt="" />
+                                                    </div>
+                                                    <div class="mx-2">
+                                                        <div class="tours-list__content__trait__text" style="font-size:0.75rem">
+                                                            @php
+                                                            $guidingWaters = $guiding->guidingWaters->pluck('name')->toArray();
+                                                            if(app()->getLocale() == 'en'){
+                                                                $guidingWaters =  $guiding->guidingWaters->pluck('name_en')->toArray();
+                                                            }
+                                                            @endphp
+                                                            
+                                                            @if(!empty($guidingWaters))
+                                                                {{ implode(', ', $guidingWaters) }}
+                                                            @else
+                                                            {{ translate($guiding->threeWaters()) }}
+                                                            {{$guiding->water_sonstiges ? " & " . translate($guiding->water_sonstiges) : ""}}
+                                                            @endif
+                                                        </div>
+                                                    
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-sm-6 col-md-6">
+                                                <div class="d-flex align-items-center">
+                                                    <div>
+                                                        <img src="{{asset('assets/images/icons/fishing-tool.png')}}" height="20" width="20" alt="" />
+                                                    </div>
+                                                    <div class="mx-2">
+                                                        <div class="tours-list__content__trait__text" style="font-size:0.75rem">
+                                                            @php
+                                                            $fishingtype = null;
+                                                            if($guiding->fishingTypes){
+                                                                if(app()->getLocale() == 'en'){
+                                                                    $fishingtype = $guiding->fishingTypes->name_en;
+                                                                }else{
+                                                                   $fishingtype =  $guiding->fishingTypes->name;
+                                                                }
+                                                            }
+                                                        
+                                                            @endphp
+                
+                                                            @if($fishingtype) {{$fishingtype}}  @else {{$guiding->fishing_type}}@endif
+                                                        </div>
+                                                    
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-sm-6 col-md-6">
+                                                <div class="d-flex align-items-center">
+                                                    <div>
+                                                        <img src="{{asset('assets/images/icons/fishing.png')}}" height="20" width="20" alt="" />
+                                                    </div>
+                                                    <div class="mx-2">
+                                                        <div class="tours-list__content__trait__text" style="font-size:0.75rem">
+                                                            @php
+                                                            $guidingMethods = $guiding->guidingMethods->pluck('name')->toArray();
+                                                            if(app()->getLocale() == 'en'){
+                                                                $guidingMethods =  $guiding->guidingMethods->pluck('name_en')->toArray();
+                                                            }
+                                                            @endphp
+                                                            
+                                                            @if(!empty($guidingMethods))
+                                                                {{ implode(', ', $guidingMethods) }}
+                                                            @else
+                                                            {{ $guiding->threeMethods() }}
+                                                            {{$guiding->methods_sonstiges && $guiding->threeMethods() > 0 ? " & " . translate($guiding->methods_sonstiges) : null}}
+                                                            @endif
+                                                        </div>
+                                                    
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-sm-6 col-md-6">
+                                                <div class="d-flex align-items-center">
+                                                    <div>
+                                                        <img src="{{asset('assets/images/icons/fishing-man.png')}}" height="20" width="20" alt="" />
+                                                    </div>
+                                                    <div class="mx-2">
+                                                        <div class="tours-list__content__trait__text" style="font-size:0.75rem">
+                                                            @php
+                                                            $whereFishing = null;
+                                                            if($guiding->fishingFrom){
+                                                                if(app()->getLocale() == 'en'){
+                                                                    $whereFishing = $guiding->fishingFrom->name_en;
+                                                                }else{
+                                                                   $whereFishing =  $guiding->fishingFrom->name;
+                                                                }
+                                                            }
+                                                        
+                                                            @endphp
+                                                            @if($whereFishing) {{$whereFishing}} @else {{$guiding->fishing_from}} @endif    
+                                                        </div>
+                                                    
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-sm-6 col-md-6">
+                                                <div class="d-flex align-items-center mt-2">
+                                                    <div class="icon-small">
+                                                        <span class="icon-user"></span>
+                                                    </div>
+                                                    <div class="mx-2" style="font-size:0.75rem">
+                                                    {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-sm-6 col-md-6">
+                                                <div class="d-flex align-items-center">
+                                                    <div>
+                                                        <img src="{{asset('assets/images/icons/clock.svg')}}" height="20" width="20" alt="" />
+                                                    </div>
+                                                    <div class="mx-2" style="font-size:0.75rem">
+                                                        {{ $guiding->duration }} @if($guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="mt-3">
+                                                    @if($guiding->user->profil_image)
+                                                    <img class="center-block rounded-circle"
+                                                    src="{{asset('images/'. $guiding->user->profil_image)}}" alt="" width="20"
+                                                    height="20">
+                                                    @else
+                                                        <img class="center-block rounded-circle"
+                                                            src="{{asset('images/placeholder_guide.jpg')}}" alt="" width="20"
+                                                            height="20">
+                                                    @endif
+                                                    <span class="color-primary" style="font-size:1rem">{{$guiding->user->firstname}}</span>
+                                                </div>
+                                            </div>
+     
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-sm-12 col-md-2 col-lg-3 col-xl-2 col-xxl-2  mt-3">
+                                        <div class="text-center">
+                                            <h5 class="mr-1 color-primary fw-bold text-center">@lang('message.from') {{$guiding->price}}€</h4>
+                                        </div>
+                                        <div class="d-flex flex-column mt-4">
+                                            <a class="btn theme-primary btn-theme-new btn-sm" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">Details</a>
+                                            <a class="btn btn-sm mt-2   {{ (auth()->check() ? (auth()->user()->isWishItem($guiding->id) ? 'btn-danger' : 'btn-outline-theme ') : 'btn-outline-theme') }}" href="{{ route('wishlist.add-or-remove', $guiding->id) }}">
+                                                {{ (auth()->check() ? (auth()->user()->isWishItem($guiding->id) ? 'Added to Favorites' : 'Add to Favorites') : 'Add to Favorites') }}
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-
-                        <div class="card mb-2">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-sm-12 col-lg-3 pe-0">
-                                        <img src="https://place-hold.it/202x202" class="img-fluid" width="202px" height="202px" alt="...">
-                                    </div>
-                                    <div class="col-sm-12 col-lg-7 pe-0">
-                                        <a href=""><h5>Title Title</h5></a>
-                                        <p class="h6">5.5 km</p>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eu imperdiet mi. Etiam quis lectus est. Morbi sit amet ligula ornare lectus pellentesque rutrum vel sit amet sapien. Maecenas ipsum magna, congue at ornare eget, tristique non urna. Nullam at placerat est, in aliquam enim.</p>
-                                    </div>
-                                    <div class="col-sm-12 col-lg-2 country-listing-item-rating">
-                                        <div class="row">
-                                            <div class="col-lg-6 p-0 pt-2">
-                                                <p>
-                                                    <small>Very Good</small>
-                                                    <small>1,001 reviews</small>
-                                                </p>
-                                            </div>
-                                            <div class="col-lg-6 py-1 ps-0">
-                                                <div class="alert alert-primary text-center p-1">5.8</div>
-                                            </div>
-                                        </div>
-                                        
-                                        <p>
-                                            <a class="btn btn-primary">Show prices</a>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card mb-2">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-sm-12 col-lg-3 pe-0">
-                                        <img src="https://place-hold.it/202x202" class="img-fluid" width="202px" height="202px" alt="...">
-                                    </div>
-                                    <div class="col-sm-12 col-lg-7 pe-0">
-                                        <a href=""><h5>Title Title</h5></a>
-                                        <p class="h6">5.5 km</p>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eu imperdiet mi. Etiam quis lectus est. Morbi sit amet ligula ornare lectus pellentesque rutrum vel sit amet sapien. Maecenas ipsum magna, congue at ornare eget, tristique non urna. Nullam at placerat est, in aliquam enim.</p>
-                                    </div>
-                                    <div class="col-sm-12 col-lg-2 country-listing-item-rating">
-                                        <div class="row">
-                                            <div class="col-lg-6 p-0 pt-2">
-                                                <p>
-                                                    <small>Very Good</small>
-                                                    <small>1,001 reviews</small>
-                                                </p>
-                                            </div>
-                                            <div class="col-lg-6 py-1 ps-0">
-                                                <div class="alert alert-primary text-center p-1">5.8</div>
-                                            </div>
-                                        </div>
-                                        
-                                        <p>
-                                            <a class="btn btn-primary">Show prices</a>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card mb-2">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-sm-12 col-lg-3 pe-0">
-                                        <img src="https://place-hold.it/202x202" class="img-fluid" width="202px" height="202px" alt="...">
-                                    </div>
-                                    <div class="col-sm-12 col-lg-7 pe-0">
-                                        <a href=""><h5>Title Title</h5></a>
-                                        <p class="h6">5.5 km</p>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eu imperdiet mi. Etiam quis lectus est. Morbi sit amet ligula ornare lectus pellentesque rutrum vel sit amet sapien. Maecenas ipsum magna, congue at ornare eget, tristique non urna. Nullam at placerat est, in aliquam enim.</p>
-                                    </div>
-                                    <div class="col-sm-12 col-lg-2 country-listing-item-rating">
-                                        <div class="row">
-                                            <div class="col-lg-6 p-0 pt-2">
-                                                <p>
-                                                    <small>Very Good</small>
-                                                    <small>1,001 reviews</small>
-                                                </p>
-                                            </div>
-                                            <div class="col-lg-6 py-1 ps-0">
-                                                <div class="alert alert-primary text-center p-1">5.8</div>
-                                            </div>
-                                        </div>
-                                        
-                                        <p>
-                                            <a class="btn btn-primary">Show prices</a>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
+                        @endforeach
+                        {!! $guidings->links('vendor.pagination.default') !!}
                     </div>
                 </div>
-                <!-- 
-                <p>[Connected to Admin FILTER Field that set on form] [Ex. Germany]</p>
-                <p>Listing Reference Design</p>
-                <p>https://www.booking.com/searchresults.de.html?ss=Berlin%2C+Deutschland&label=gen173nr-1FCAEoggI46AdIM1gEaDuIAQGYAQe4ARfIAQzYAQHoAQH4AQOIAgGoAgO4ApWht7YGwAIB0gIkZGQyYmE5YjUtYjY0YS00N2I2LWE1MDUtMjUxZTZkZjc4MWU42AIG4AIB&aid=304142&lang=de&sb=1&src_elem=sb&src=searchresults&dest_id=-1746443&dest_type=city&checkin=2024-08-27&checkout=2024-08-28&group_adults=2&no_rooms=1&group_children=0#map_closed</p>
-                -->
 
                 <div class="mb-3">{!! $row->content !!}</div>
 
@@ -565,6 +761,18 @@
         </div>
     </div>
     <!--News One End-->
+
+    <div class="modal show" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="mapModalLabel">Map</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div id="map" class="modal-body" style="height:500px;"></div>
+            </div>
+        </div>
+    </div>
 
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q&libraries=places,geocoder"></script>
     <script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
