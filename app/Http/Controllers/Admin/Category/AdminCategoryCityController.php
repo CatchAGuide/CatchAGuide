@@ -12,23 +12,26 @@ use App\Models\DestinationFishSizeLimit;
 use App\Models\DestinationFishTimeLimit;
 use DB;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
 
-class AdminCategoryCountryController extends Controller
+class AdminCategoryCityController extends Controller
 {
     public function index()
     {
-        $rows = Destination::whereType('country')->paginate(25);
+        $rows = Destination::whereType('city')->paginate(25);
         $data = compact('rows');
-        return view('admin.pages.category.country', $data);
+        return view('admin.pages.category.city', $data);
     }
 
     public function create()
     {
-        $form = 'Country';
-        $route = route('admin.category.country.store');
+        $form = 'City';
+        $route = route('admin.category.city.store');
         $method = '';
+        $country_id = old('country_id');
+        $region_id = old('region_id');
         $name = old('name');
         $thumbnail = 'https://place-hold.it/300x300';
         $title = old('title');
@@ -47,7 +50,12 @@ class AdminCategoryCountryController extends Controller
         $fish_time_limit = old('fish_time_limit');
         $faq = old('faq');
 
-        $data = compact('form', 'route', 'method', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'country', 'fish_chart', 'fish_size_limit', 'fish_time_limit', 'faq');
+        $destination = Destination::where('type', '<>', 'city')->orderBy('name', 'ASC')->get(['id', 'name', 'country_id', 'region_id', 'type']);
+        $countries = $destination->where('type', 'country');
+        $regions = json_encode($destination->where('type', 'region')->toArray());
+        #dd(json_encode($regions));
+
+        $data = compact('form', 'route', 'method', 'country_id', 'region_id', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'country', 'fish_chart', 'fish_size_limit', 'fish_time_limit', 'faq', 'countries', 'regions');
 
         return view('admin.pages.category.form', $data);
     }
@@ -55,16 +63,21 @@ class AdminCategoryCountryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|max:255|unique:destinations,name,null,null,type,country,deleted_at,null',
-            'title' => 'required|max:255',
-            'sub_title' => 'required|max:255',
-            'filters' => 'required'
+            'country_id' => [ 'required' ],
+            'name' => [
+                'required',
+                'max:255',
+                Rule::unique('destinations')->where('name', $request->name)->where('type', 'city')->where('country_id', $request->country_id)->where('region_id', $request->region_id)->where('deleted_at', null)
+            ],
+            'title' => [ 'required', 'max:255' ],
+            'sub_title' => [ 'required', 'max:255' ],
+            'filters' => [ 'required' ],
         ]);
 
         try {
             DB::beginTransaction();
-            $data = $request->only(['name', 'title', 'sub_title', 'introduction']);
-            $data['type'] = 'country';
+            $data = $request->only(['country_id', 'region_id', 'name', 'title', 'sub_title', 'introduction']);
+            $data['type'] = 'city';
             $data['filters'] = json_encode($request->filters);
             $data['content'] = $request->body;
             $webp_path = null;
@@ -106,14 +119,12 @@ class AdminCategoryCountryController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Country Successfully Added!');
+            return redirect()->back()->with('success', 'City Successfully Added!');
         } catch (Exception $e) {
             DB::rollBack();
-            dd($e);
             return redirect()->back()->withErrors(['message' => 'Ooops Something went wrong. Please reload the page.']);
         } catch (\Illuminate\Database\QueryException $e) {
             DB::rollBack();
-            dd($e);
             return redirect()->back()->withErrors(['message' => 'Ooops Something went wrong. Please reload the page.']);
         }
     }
@@ -126,9 +137,11 @@ class AdminCategoryCountryController extends Controller
             return redirect()->back();
         }
 
-        $form = 'Country';
-        $route = route('admin.category.country.update', $id);
+        $form = 'City';
+        $route = route('admin.category.city.update', $id);
         $method = 'PUT';
+        $country_id = $row->country_id;
+        $region_id = $row->region_id;
         $name = $row->name;
         $thumbnail = $row->getThumbnailPath();
         $title = $row->title;
@@ -148,8 +161,11 @@ class AdminCategoryCountryController extends Controller
         $fish_time_limit = $row->fish_time_limit;
         $faq = $row->faq;
 
-        //dump($row->fish_chart);
-        $data = compact('form', 'route', 'method', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'country', 'fish_chart', 'fish_size_limit', 'fish_time_limit', 'faq');
+        $destination = Destination::where('type', '<>', 'city')->orderBy('name', 'ASC')->get(['id', 'name', 'country_id', 'region_id', 'type']);
+        $countries = $destination->where('type', 'country');
+        $regions = json_encode($destination->where('type', 'region')->toArray());
+
+        $data = compact('form', 'route', 'method', 'country_id', 'region_id', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'country', 'fish_chart', 'fish_size_limit', 'fish_time_limit', 'faq', 'countries', 'regions');
 
         return view('admin.pages.category.form', $data);
     }
@@ -157,13 +173,17 @@ class AdminCategoryCountryController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required|max:255|unique:destinations,name,'.$id.',id,type,country,deleted_at,null',
-            'title' => 'required|max:255',
-            'sub_title' => 'required|max:255',
-            'filters' => 'required'
+            'country_id' => [ 'required' ],
+            'name' => [
+                'required',
+                'max:255',
+                Rule::unique('destinations')->where('name', $request->name)->where('type', 'city')->where('country_id', $request->country_id)->where('region_id', $request->region_id)->where('deleted_at', null)->ignore($id)
+            ],
+            'title' => [ 'required', 'max:255' ],
+            'sub_title' => [ 'required', 'max:255' ],
+            'filters' => [ 'required' ]
         ]);
 
-        #dd($request->all());
         try {
             DB::beginTransaction();
             $data = $request->only(['name', 'title', 'sub_title', 'introduction']);
@@ -227,14 +247,12 @@ class AdminCategoryCountryController extends Controller
             }
             DB::commit();
 
-            return redirect()->back()->with('success', 'Country Successfully Updated!');
+            return redirect()->back()->with('success', 'City Successfully Updated!');
         } catch (Exception $e) {
             DB::rollBack();
-            dd($e);
             return redirect()->back()->withErrors(['message' => 'Ooops Something went wrong. Please reload the page.']);
         } catch (\Illuminate\Database\QueryException $e) {
             DB::rollBack();
-            dd($e);
             return redirect()->back()->withErrors(['message' => 'Ooops Something went wrong. Please reload the page.']);
         }
     }

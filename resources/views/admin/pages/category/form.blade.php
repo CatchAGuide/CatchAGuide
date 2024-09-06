@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Country')
+@section('title', $form)
 
 @section('custom_style')
 <style type="text/css">
@@ -18,12 +18,12 @@ input[type=number] {
 
             <!-- PAGE-HEADER -->
             <div class="page-header">
-                <h1 class="page-title">Country</h1>
+                <h1 class="page-title">{{ $form }}</h1>
                 <div>
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="#">System</a></li>
                         <li class="breadcrumb-item"><a href="#">Blog</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Country</li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ $form }}</li>
                     </ol>
                 </div>
 
@@ -55,7 +55,40 @@ input[type=number] {
                                     </div>
                                 </div>
                                 @endif
-
+                                
+                                @if(isset($countries))
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-12">
+                                        <div class="form-group">
+                                            <label for="country_id">Country</label>
+                                            <select class="form-select" name="country_id" id="country_id" required>
+                                                <option>-- Select --</option>
+                                            @foreach($countries as $row)
+                                                <option value="{{ $row->id }}" {{ ($row->id == $country_id)? 'selected="selected"' : '' }}>{{ $row->name }}</option>
+                                            @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
+                                
+                                @if(isset($regions))
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-12">
+                                        <div class="form-group">
+                                            <label for="region_id">Region</label>
+                                            <select class="form-select" name="region_id" id="region_id">
+                                                <option>-- Select --</option>
+                                        <?php
+                                            #@foreach($regions as $row)
+                                            #    <option value="{{ $row->id }}" {{ ($row->id == $region_id)? 'selected="selected"' : '' }}>{{ $row->name }}</option>
+                                            #@endforeach
+                                        ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
                                 <div class="row">
                                     <div class="col-lg-6 col-md-12">
                                         <div class="form-group">
@@ -211,6 +244,27 @@ input[type=number] {
         allowClear: true
     });
 
+    @if(isset($regions))
+    $(function(){
+        countryRegions($('#country_id').val());
+        $('#region_id').val('{!! $region_id !!}');
+        $('#country_id').change(function(){
+            let selected = parseInt($(this).val());
+            countryRegions(selected);
+        });
+    });
+
+    function countryRegions(selected) {
+        var regions = $.parseJSON('{!! $regions !!}');
+        var region_selections = '<option value="">-- Select --</option>';
+        $.each(regions, function(key, value){
+            if (selected == value.country_id) {
+                region_selections += '<option value="' + value.id + '">' + value.name + '</option>';
+            }
+        });
+        $('#region_id').html(region_selections);
+    }
+    @endif
 </script>
 
     <script>

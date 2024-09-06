@@ -36,6 +36,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\PaymentsController as AdminPaymentsController;
 use App\Http\Controllers\Admin\FAQController as AdminFaqController;
 use App\Http\Controllers\Admin\Category\AdminCategoryCountryController;
+use App\Http\Controllers\Admin\Category\AdminCategoryRegionController;
+use App\Http\Controllers\Admin\Category\AdminCategoryCityController;
 use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThreadsController;
 
 /*
@@ -344,6 +346,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('category')->name('category.')->group(function () {
             Route::resource('country', AdminCategoryCountryController::class);
+            Route::resource('region', AdminCategoryRegionController::class);
+            Route::resource('city', AdminCategoryCityController::class);
         });
 
 

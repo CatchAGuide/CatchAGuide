@@ -58,4 +58,24 @@ class Destination extends Model
 
         return '/' . $thumbnail_path;
     }
+
+    public function getCountryNameAttribute()
+    {
+        $row = self::whereType('country')->whereId($this->country_id)->first();
+        if (!empty($row)) {
+            return $row->name;
+        }
+
+        return 'N/A';
+    }
+
+    public function getRegionNameAttribute()
+    {
+        $row = self::whereType('region')->whereId($this->region_id)->first();
+        if (!empty($row)) {
+            return $row->name;
+        }
+
+        return 'N/A';
+    }
 }
