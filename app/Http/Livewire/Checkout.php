@@ -86,7 +86,6 @@ class Checkout extends Component
 
     public function render()
     {
-
         $formattedDate = Carbon::parse($this->selectedDate)->format('F d, Y');
 
         return view('livewire.checkout', [
@@ -309,12 +308,15 @@ class Checkout extends Component
             'token' => $this->generateBookingToken($blockedEvent->id),
         ]);
 
-        if (isset($user->phone) && $user->phone !== $booking->phone) {
+        if (!$user->is_guide) {
             $user->phone = $booking->phone;
             $user->save();
         }
 
-        // SendCheckoutEmail::dispatch($booking,$user,$this->guiding,$this->guiding->user);
+        $user->information->phone = $booking->phone;
+        $user->information->save();
+
+        SendCheckoutEmail::dispatch($booking,$user,$this->guiding,$this->guiding->user);
         
         sleep(5);
 

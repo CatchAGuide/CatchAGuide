@@ -20,4 +20,12 @@ class StoreFaqRequest extends FormRequest
     {
         return true;
     }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'answer' => mb_convert_encoding($this->input('answer'), 'UTF-8', 'auto'),
+            'question' => mb_convert_encoding($this->input('question'), 'UTF-8', 'auto'),
+        ]);
+    }
 }

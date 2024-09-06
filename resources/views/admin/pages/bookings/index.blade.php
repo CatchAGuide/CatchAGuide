@@ -26,12 +26,12 @@
                     <div class="card">
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-bordered text-nowrap border-bottom" id="responsive-datatable">
+                                <table class="table table-bordered text-nowrap border-bottom" id="booking-datatable">
                                     <thead>
                                     <tr>
                                         <th class="wd-20p border-bottom-0">ID</th>
                                         <th class="wd-20p border-bottom-0">Kunde</th>
-                                        <th class="wd-15p border-bottom-0">Guide</th>
+                                        <th class="wd-15p border-bottom-0">Phone #</th>
                                         <th class="wd-15p border-bottom-0">Preis</th>
                                         <th class="wd-15p border-bottom-0">Anteil Guide</th>
                                         <th class="wd-15p border-bottom-0">Anteil CaG</th>
@@ -48,7 +48,7 @@
                                             <tr>
                                                 <td>{{ $booking->id }}</td>
                                                 <td>{{ $booking->user->full_name }}</td>
-                                                <td>{{ $booking->guiding->user->full_name }}</td>
+                                                <td>{{ $booking->phone }}</td>
                                                 <td>{{ two($booking->price) }} €</td>
                                                 <td>{{ two($booking->price - $booking->cag_percent) }} €</td>
                                                 <td>{{ two($booking->cag_percent) }} €</td>

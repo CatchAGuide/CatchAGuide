@@ -18,4 +18,11 @@ class StoreCategoryRequest extends FormRequest
     {
         return true;
     }
+    
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'name' => mb_convert_encoding($this->input('name'), 'UTF-8', 'auto'),
+        ]);
+    }
 }

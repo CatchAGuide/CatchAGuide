@@ -584,7 +584,7 @@
                 minDate: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
                 lockDays: [
                     @foreach($guiding->user->blocked_events as $blocked)
-                        ["{{ substr($blocked->from,0,-9) }}", "{{ substr($blocked->due,0,-9) }}"],
+                        ["{{ substr($blocked->from,0,-9) }}", "{{ substr($blocked->from,0,-9) }}"],
                     @endforeach
                     new Date(),
                 ],
