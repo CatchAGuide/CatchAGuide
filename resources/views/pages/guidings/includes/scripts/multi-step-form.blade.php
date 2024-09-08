@@ -64,17 +64,50 @@
 
     // Next and Previous buttons
     document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('nextBtn').addEventListener('click', function() {
-            if (currentStep < totalSteps) {
-                showStep(currentStep + 1);
-            }
-        });
+        const nextBtn = document.getElementById('nextBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const submitBtn = document.getElementById('submitBtn');
 
-        document.getElementById('prevBtn').addEventListener('click', function() {
-            if (currentStep > 1) {
-                showStep(currentStep - 1);
+        if (nextBtn) {
+            nextBtn.addEventListener('click', function() {
+                if (currentStep < totalSteps) {
+                    showStep(currentStep + 1);
+                }
+            });
+        }
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', function() {
+                if (currentStep > 1) {
+                    showStep(currentStep - 1);
+                }
+            });
+        }
+
+        function showStep(stepNumber) {
+            $('.step').removeClass('active');
+            $(`#step${stepNumber}`).addClass('active');
+            $('.step-button').removeClass('active');
+            $(`.step-button[data-step="${stepNumber}"]`).addClass('active');
+            currentStep = stepNumber;
+
+            if (currentStep === 1) {
+                $('#prevBtn').hide();
+            } else {
+                $('#prevBtn').show();
             }
-        });
+
+            if (currentStep === totalSteps) {
+                $('#nextBtn').hide();
+                $('#submitBtn').show();
+            } else {
+                $('#nextBtn').show();
+                $('#submitBtn').hide();
+            }
+        }
+
+        // Initialize the first step
+        showStep(1);
     });
 
     // Initialize Tagify for tag inputs
@@ -372,6 +405,7 @@
     function setPrimaryImage(wrapper, index) {
         $('.image-preview-wrapper').removeClass('primary');
         wrapper.classList.add('primary');
+        console.log(index);
         document.getElementById('primaryImageInput').value = index;
     }
 

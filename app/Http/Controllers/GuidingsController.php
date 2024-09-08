@@ -11,6 +11,8 @@ use App\Models\Target;
 use App\Models\Method;
 use App\Models\Water;
 use App\Models\GuidingRequest;
+use App\Models\GuidingExtra;
+use App\Models\GuidingPrice;
 use App\Models\GuidingTargetFish;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -278,94 +280,50 @@ class GuidingsController extends Controller
 
         return $nearestlisting;
     }
+    
     public function guidingsStore(StoreNewGuidingRequest $request)
     {
         DB::beginTransaction();
 
         try {
             $guiding = new Guiding();
+            $guiding->fill($request->validated());
             $guiding->user_id = auth()->id();
-            $guiding->title = $request->title;
-            $guiding->slug = Str::slug($request->title);
-            $guiding->location = $request->location;
-            $guiding->type_of_fishing = $request->type_of_fishing;
-            $guiding->is_boat = $request->type_of_fishing === 'boat';
-            $guiding->boat_type = $request->boat_type;
-            $guiding->experience_level = $request->experience_level;
-            $guiding->style_of_fishing = $request->style_of_fishing;
-            $guiding->tour_type = $request->tour_type;
-            $guiding->duration = $request->duration;
-            $guiding->no_guest = $request->no_guest;
-            $guiding->description = $this->generateLongDescription($request);
-            $guiding->additional_info = json_encode([
-                'comment1' => $request->comment1,
-                'comment2' => $request->comment2,
-                'comment3' => $request->comment3,
-            ]);
-            $guiding->allowed_booking_advance = $request->allowed_booking_advance;
-            $guiding->booking_window = $request->booking_window;
-            $guiding->seasonal_trip = $request->seasonal_trip;
-            $guiding->months = $request->months;
-
             $guiding->save();
 
-            // Handle image uploads
-            if ($request->hasFile('title_image')) {
-                foreach ($request->file('title_image') as $index => $image) {
-                    $path = $image->store('guiding_images', 'public');
-                    $isPrimary = $index == $request->primary_image_index;
-                    $guiding->images()->create([
-                        'image_name' => $path,
-                        'is_primary' => $isPrimary
+            $this->saveDescriptions($guiding, $request);
+            $this->saveAdditionalInformation($guiding, $request);
+            $this->saveRequirements($guiding, $request);
+            $this->saveRecommendations($guiding, $request);
+            $this->handleFileUploads($guiding, $request);
+
+            // Handle target fish, methods, water types, and inclusions
+            $guiding->targetFish()->sync(json_decode($request->input('target_fish'), true));
+            $guiding->methods()->sync(json_decode($request->input('methods'), true));
+            $guiding->waterTypes()->sync(json_decode($request->input('water_types'), true));
+            $guiding->inclusions()->sync(json_decode($request->input('inclussions'), true));
+
+            // Handle pricing
+            if ($request->input('price') === 'per_person') {
+                foreach ($request->input('price_per_person') as $guests => $price) {
+                    $guiding->prices()->create([
+                        'guests' => $guests,
+                        'price' => $price,
                     ]);
-
-                    if ($isPrimary) {
-                        $guiding->thumbnail_path = $path;
-                        $guiding->save();
-                    }
                 }
-            }
-
-            // Sync relationships
-            $guiding->targets()->sync($request->target_fish);
-            $guiding->methods()->sync($request->methods);
-            $guiding->waters()->sync($request->water_types);
-            $guiding->levels()->sync([$request->experience_level]);
-            $guiding->inclusions()->sync($request->inclusions);
-
-            // Handle custom target fish
-            if ($request->has('target_fish_sonstiges')) {
-                GuidingTargetFish::create([
-                    'name' => $request->target_fish_sonstiges,
-                    'guiding_id' => $guiding->id
+            } else {
+                $guiding->prices()->create([
+                    'guests' => null,
+                    'price' => $request->input('price_per_boat'),
                 ]);
             }
 
             // Handle extras
-            if ($request->has('extras')) {
-                foreach ($request->extras as $extra) {
-                    GuidingExtra::create([
-                        'guiding_id' => $guiding->id,
-                        'name' => $extra
-                    ]);
-                }
-            }
-
-            // Handle pricing
-            $priceType = $request->price_type;
-            if ($priceType === 'per_person') {
-                foreach ($request->price_per_person as $guestCount => $price) {
-                    GuidingPrice::create([
-                        'guiding_id' => $guiding->id,
-                        'guest_count' => $guestCount,
-                        'price' => $price
-                    ]);
-                }
-            } else {
-                GuidingPrice::create([
-                    'guiding_id' => $guiding->id,
-                    'guest_count' => null,
-                    'price' => $request->price_per_boat
+            $extras = json_decode($request->input('extras'), true);
+            foreach ($extras as $extra) {
+                $guiding->extras()->create([
+                    'name' => $extra['value'],
+                    'price' => $request->input('extra_price_' . ($key + 1), 0),
                 ]);
             }
 
@@ -373,7 +331,7 @@ class GuidingsController extends Controller
             return redirect()->route('profile.myguidings')->with('success', 'Guiding created successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'An error occurred while creating the guiding: ' . $e->getMessage());
+            return back()->with('error', 'An error occurred while creating the guiding: ' . $e->getMessage())->withInput();
         }
     }
 
@@ -389,6 +347,79 @@ class GuidingsController extends Controller
         );
 
         return $description;
+    }
+
+    private function handleFileUploads($guiding, $request)
+    {
+        if ($request->hasFile('title_image')) {
+            foreach ($request->file('title_image') as $index => $file) {
+                $path = $file->store('public/guidings/' . $guiding->id);
+                $guiding->images()->create([
+                    'path' => $path,
+                    'is_primary' => $index == $request->input('primary_image_index', 0),
+                ]);
+            }
+        }
+    }
+
+    private function saveDescriptions($guiding, $request)
+    {
+        $descriptions = $request->input('descriptions', []);
+        $descriptionData = [];
+
+        foreach ($descriptions as $description) {
+            $descriptionData[$description] = $request->input($description);
+        }
+
+        $guiding->description_details = json_encode($descriptionData);
+        $guiding->save();
+    }
+
+    private function saveAdditionalInformation($guiding, $request)
+    {
+        $additionalInfo = [
+            'child_friendly' => $request->input('child_friendly'),
+            'disability_friendly' => $request->input('disability_friendly'),
+            'other_information' => $request->input('other_information'),
+            'no_smoking' => $request->input('no_smoking'),
+            'no_alcohol' => $request->input('no_alcohol'),
+            'keep_catch' => $request->input('keep_catch'),
+            'catch_release_allowed' => $request->input('catch_release_allowed'),
+            'catch_release_only' => $request->input('catch_release_only'),
+            'accomodation' => $request->input('accomodation'),
+            'campsite' => $request->input('campsite'),
+            'pick_up_service' => $request->input('pick_up_service'),
+            'license_required' => $request->input('license_required'),
+        ];
+
+        $guiding->additional_information = json_encode($additionalInfo);
+        $guiding->save();
+    }
+
+    private function saveRequirements($guiding, $request)
+    {
+        $requirements = $request->input('requiements_taking_part', []);
+        $requirementData = [];
+
+        foreach ($requirements as $requirement) {
+            $requirementData[$requirement] = $request->input($requirement);
+        }
+
+        $guiding->requirements = json_encode($requirementData);
+        $guiding->save();
+    }
+
+    private function saveRecommendations($guiding, $request)
+    {
+        $recommendations = $request->input('recommended_preparation', []);
+        $recommendationData = [];
+
+        foreach ($recommendations as $recommendation) {
+            $recommendationData[$recommendation] = $request->input($recommendation);
+        }
+
+        $guiding->recommendations = json_encode($recommendationData);
+        $guiding->save();
     }
 
     public function store(StoreGuidingRequest $request)

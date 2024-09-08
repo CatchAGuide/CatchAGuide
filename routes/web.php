@@ -108,7 +108,8 @@ Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(functi
     
 
     Route::get('/newguiding', [App\Http\Controllers\ProfileController::class, 'newguiding'])->name('newguiding');
-    Route::post('/newguiding', [App\Http\Controllers\ProfileController::class, 'newguidingStore'])->name('newguiding.store');
+    Route::post('/newguiding', [GuidingsController::class, 'guidingsStore'])->name('newguiding.store');
+    // Route::post('/newguiding', [App\Http\Controllers\ProfileController::class, 'newguidingStore'])->name('newguiding.store');
 
     Route::get('/payments', [App\Http\Controllers\ProfileController::class, 'payments'])->name('payments');
     Route::get('/calendar', [App\Http\Controllers\ProfileController::class, 'calendar'])->name('calendar');

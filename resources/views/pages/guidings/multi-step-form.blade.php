@@ -45,6 +45,16 @@
         <form action="{{ route('profile.newguiding.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <!-- Step 1 -->
             <div class="step active" id="step1">
                 <h5>Basic Information</h5>
