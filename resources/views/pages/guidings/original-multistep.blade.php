@@ -1,37 +1,436 @@
-@include('pages.guidings.includes.styles.multi-step-form')
+@push('styles')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css">
+@endpush
+
+@section('css_after')
+    <style>
+        .step {
+            display: none;
+        }
+        .step.active {
+            display: block;
+        }
+        
+        h5 {
+            position: relative;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        h5::after {
+            content: "";
+            display: block;
+            width: 100%;
+            height: 2px;
+            background-color: #e8604c;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
+        
+        /* Container for step buttons and steps */
+        .step-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        /* Container for the step buttons */
+        .step-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 80%;
+            margin: 0 auto;
+            position: relative;
+            gap: 10px;
+        }
+        
+        /* Step buttons style (Icon and Text Only) */
+        .step-buttons .step-button {
+            color: #787780;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 5px;
+            z-index: 2;
+        }
+        
+        /* Active step button */
+        .step-buttons .step-button.active {
+            color: #e8604c; /* Red color for active steps */
+        }
+        
+        /* Icon and text alignment */
+        .step-buttons .step-button i {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .step-buttons .step-button p {
+            font-size: 14px; /* Adjust text size */
+            margin: 0;
+        }
+        
+        /* Line between steps */
+        .step-line {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            left: 10%;
+            right: 10%;
+            height: 4px;
+            background-color: #ddd;
+            z-index: 1;
+        }
+        
+        /* Invisible circle effect to cut the line between each step */
+        .step-buttons .step-button::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background-color: white;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        
+        /* Styles for the image preview */
+        .image-area {
+            margin-top: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            gap: 15px;
+        }
+        
+        .image-card {
+            position: relative;
+            width: 180px;
+            margin: 10px;
+            overflow: visible;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .image-card img {
+            width: 100%;
+            height: auto; /* Ensure the entire image is visible */
+            object-fit: contain;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .primary-label {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background-color: #f2856d;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 5px;
+        }
+        
+        .btn.set-primary-btn {
+            background-color: #f2856d;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 5px 10px;
+            margin: 10px auto 0 auto;
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .delete-image-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #e8604c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        /* Styles for the file input and buttons */
+        .file-upload-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .file-upload-wrapper input {
+            display: none;
+        }
+        
+        .file-upload-btn {
+            background-color: #f2856d;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 30px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .file-upload-btn:hover {
+            background-color: #e8604c;
+        }
+        
+        .option-card {
+            border: 2px solid #ddd;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .option-card.active {
+            border-color: #e8604c;
+            background-color: #fef5f3;
+        }
+        
+        .option-card:hover {
+            border-color: #e8604c;
+        }
+
+        .btn-group-toggle input[type="radio"],
+        .btn-group-toggle input[type="checkbox"] {
+            display: none;
+        }
+        
+        .btn-group-toggle .btn-checkbox {
+            border: 2px solid #e8604c; /* Set your desired border color */
+            color: #e8604c;
+            background-color: transparent;
+            border-radius: 10px;
+            padding: 10px 20px;
+            transition: all 0.3s;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;    
+        }
+
+        .btn-group-toggle input[type="radio"]:checked + .btn-checkbox,
+        .btn-group-toggle input[type="checkbox"]:checked + .btn-checkbox {
+            background-color: #fef5f3;
+            color: #e8604c;
+            border-color: #e8604c;
+        }
+        
+        .btn-group-toggle .btn-checkbox:hover {
+            background-color: #fef5f3;
+            color: #e8604c;
+            border-color: #e8604c;
+        }
+
+        .btn-group-toggle .btn-checkbox {
+            color: #787780; /* Match the text color of the page */
+        }
+
+        .btn-group-toggle .btn-checkbox.active {
+            color: #e8604c; /* Match the active text color */
+            background-color: #fef5f3; /* Match the active background color */
+            border-color: #e8604c; /* Match the active border color */
+        }
+        
+        .extra-input {
+            display: none;
+            margin-top: 10px;
+        }
+        
+        .extra-input.active {
+            display: block;
+        }
+        
+        /* Centering the icon inside the card */
+        .option-icon {
+            font-size: 40px;
+            color: #e8604c;
+        }
+        
+        .option-label {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #787780;
+        }
+        
+        #submitBtn {
+            background-color: #f2856d;
+            color: white;
+            border-color: #f2856d;
+        }
+        
+        #submitBtn:hover {
+            background-color: #e8604c;
+            border-color: #e8604c;
+        }
+        
+        #prevBtn, #nextBtn {
+            background-color: #787780;
+            color: white;
+            border-color: #787780;
+            margin-top: 15px;
+        }
+        
+        #prevBtn:hover, #nextBtn:hover {
+            background-color: #e8604c;
+            border-color: #e8604c;
+        }
+        
+        /* Full-width form container for all screen sizes */
+        .step-form-container {
+            flex-grow: 1;
+            width: 100%;
+        }
+        
+        /* Make the card and container fluid for desktop */
+        .container-fluid {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        .bootstrap-tagsinput {
+            width: 100%;
+            padding: 0.5rem;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            color: #000;
+            display: block;
+            min-height: 40px;
+            font-size: 16px;
+        }
+
+        .bootstrap-tagsinput .tag {
+            margin-right: 5px;
+            background-color: #e8604c;
+            color: white;
+            border-radius: 3px;
+            padding: 5px;
+            font-weight: bold;
+        }
+
+        .bootstrap-tagsinput input {
+            border: none;
+            outline: none;
+            width: auto;
+            max-width: 100%;
+            color: #000;
+        }
+
+        .bootstrap-tagsinput .tag [data-role="remove"] {
+            margin-left: 8px;
+            cursor: pointer;
+        }
+
+        .dropdown-menu {
+            max-height: 300px; /* Limit the height */
+            overflow-y: auto;  /* Enable scrolling */
+        }
+
+        /* Adjust for larger screen sizes */
+        @media (min-width: 768px) {
+            .step-buttons .step-button i {
+                font-size: 30px; /* Larger icon size for bigger screens */
+            }
+        
+            .step-buttons {
+                gap: 30px; /* Increased gap on larger screens */
+            }
+        
+            .btn-group-toggle .btn {
+                flex-basis: calc(50% - 20px); /* Two buttons per row */
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .btn-group-toggle .btn {
+                flex-basis: 100%; /* Full-width buttons */
+            }
+        }
+
+        /* Styles for the checkbox container and input alignment */
+        .btn-checkbox-container {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .btn-checkbox {
+            width: 30%; /* Checkbox column width */
+            text-align: left; /* Align text to the left */
+        }
+
+        .extra-input {
+            display: none;
+            width: 70%; /* Input box column width */
+        }
+
+        .extra-input.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+    </style>
+@endsection
 <div class="card">
     <div class="card-body">
         <div class="step-wrapper">
             <div class="step-buttons">
-                <div class="step-button active" data-step="1" data-bs-toggle="tooltip" title="Upload images and set basic information">
+                <div class="step-button active" data-step="1">
                     <i class="fas fa-ship"></i>
                     <p>Gallery</p>
                 </div>
-                <div class="step-button" data-step="2" data-bs-toggle="tooltip" title="Provide details about your guiding service">
+                <div class="step-button" data-step="2">
                     <i class="fas fa-info-circle"></i>
                     <p>Information</p>
                 </div>
-                <div class="step-button" data-step="3" data-bs-toggle="tooltip" title="Specify fish species and fishing details">
+                <div class="step-button" data-step="3">
                     <i class="fas fa-fish"></i>
                     <p>Fish Details</p>
                 </div>
-                <div class="step-button" data-step="4" data-bs-toggle="tooltip" title="Describe your expertise and experience">
+                <div class="step-button" data-step="4">
                     <i class="fas fa-chart-line"></i>
                     <p>Expertise</p>
                 </div>
-                <div class="step-button" data-step="5" data-bs-toggle="tooltip" title="Write a detailed description of your service">
+                <div class="step-button" data-step="5">
                     <i class="fas fa-file-alt"></i>
                     <p>Description</p>
                 </div>
-                <div class="step-button" data-step="6" data-bs-toggle="tooltip" title="Add any additional information">
+                <div class="step-button" data-step="6">
                     <i class="fas fa-info-circle"></i>
                     <p>Other</p>
                 </div>
-                <div class="step-button" data-step="7" data-bs-toggle="tooltip" title="Set your pricing structure">
+                <div class="step-button" data-step="7">
                     <i class="fas fa-dollar-sign"></i>
                     <p>Pricing</p>
                 </div>
-                <div class="step-button" data-step="8" data-bs-toggle="tooltip" title="Define your availability and booking options">
+                <div class="step-button" data-step="8">
                     <i class="fas fa-calendar-alt"></i>
                     <p>Schedule</p>
                 </div>
@@ -39,8 +438,6 @@
 
             <div class="step-line"></div>
         </div>
-        
-        <button id="saveDraftBtn" class="btn btn-outline-primary btn-sm">Save to Draft</button>
 
         <form action="{{ route('profile.newguiding.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
@@ -56,12 +453,12 @@
                     <div id="croppedImagesContainer"></div>
                 </div>
 
-                <div class="image-area" id="imagePreviewContainer"></div>
+                <div class="image-area" id="imagePreview"></div>
                 <input type="hidden" name="primaryImage" id="primaryImageInput">
 
                 <div class="form-group">
                     <label for="location">Location</label>
-                    <input type="search" class="form-control" id="location" name="location" placeholder="Enter city or country" data-bs-toggle="tooltip" title="Enter the location where you offer your guiding service">
+                    <input type="search" class="form-control" id="location" name="location" placeholder="Enter city or country">
                 </div>
 
                 <div class="form-group">
@@ -175,7 +572,7 @@
 
                     <div class="form-group">
                         <label for="extras">Extras</label>
-                        <input  class="form-control" name="extras" id="extras" placeholder="Add extras..." data-bs-toggle="tooltip" title="Add any additional features or services you offer">
+                        <input  class="form-control" name="extras" id="extras" placeholder="Add extras..." required>
                     </div>
                 </div>
 
@@ -189,17 +586,17 @@
                 
                 <div class="form-group">
                     <label for="target_fish">Target Fish</label>
-                    <input type="text" class="form-control" name="target_fish" id="target_fish" data-role="tagsinput" placeholder="Add Target Fish...">
+                    <input  class="form-control" name="target_fish" id="target_fish" placeholder="Add Target Fish..." required>
                 </div>
                 
                 <div class="form-group">
                     <label for="methods">Methods</label>
-                    <input type="text" class="form-control" name="methods" id="methods" data-role="tagsinput" placeholder="Select Methods...">
+                    <input  class="form-control" name="methods" id="methods" placeholder="Select Methods..." required>
                 </div>
                 
                 <div class="form-group">
                     <label for="water_types">Water Types</label>
-                    <input type="text" class="form-control" name="water_types" id="water_types" data-role="tagsinput" placeholder="Select Water Tyles...">
+                    <input  class="form-control" name="water_types" id="water_types" placeholder="Select Water Tyles..." required>
                 </div>
 
                 <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
@@ -223,7 +620,7 @@
                 
                 <div class="form-group">
                     <label for="inclussions">Inclussions</label>
-                    <input type="text" class="form-control" name="inclussions" id="inclussions" data-role="tagsinput" placeholder="Select inclussions...">
+                    <input  class="form-control" name="inclussions" id="inclussions" placeholder="Select inclussions..." required>
                 </div>
                 
                 <div class="form-group">
@@ -468,8 +865,8 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="extra_pricing">Extras <button type="button" id="add-extra" class="btn btn-sm btn-secondary"><i class="fas fa-plus"></i></button></label>
-                    <div id="extras-container"></div>
+                    <label for="extra_pricing">Extras</label>
+                    <input type="number" class="form-control" id="extra_pricing" name="extra_pricing" placeholder="0">
                 </div>
 
                 <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
@@ -535,4 +932,425 @@
         </form>
     </div>
 </div>
-@include('pages.guidings.includes.scripts.multi-step-form')
+
+@push('js_push')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY') }}&libraries=places"></script>
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+<script src="https://cdn.ckeditor.com/4.22.0/standard/ckeditor.js"></script>
+
+<script>
+    let croppers = {}; // Object to store Cropper instances by image index
+    let croppedImages = []; // Array to store cropped images as base64 strings
+    let primaryImageIndex = null; // Store the index of the primary image
+    let autocomplete;
+    
+    function initialize() {
+        autocomplete = new google.maps.places.Autocomplete(
+            document.getElementById('location'),
+            {
+                types: ['(regions)']
+            }
+        );
+
+        autocomplete.addListener('place_changed', function () {
+            const place = autocomplete.getPlace();
+
+            let city = '';
+            let country = '';
+            let postal_code = '';
+
+            place.address_components.forEach(component => {
+                const types = component.types;
+
+                if (types.includes('locality')) {
+                    city = component.long_name; // This is the city name
+                } else if (types.includes('country')) {
+                    country = component.long_name; // This is the country name
+                } else if (types.includes('postal_code')) {
+                    postal_code = component.long_name; // This is the postal code
+                }
+            });
+        });
+    }
+    
+    $(document).ready(function() {
+        initialize();
+        
+        var extrasInput = document.querySelector('input[name=extras]');
+        var extraTags = new Tagify(extrasInput, {
+            whitelist: [
+                'GPS', 'Echolot', 'Live Scope', 'Radar', 'Funk', 'Flybridge', 'WC', 
+                'Roofing', 'Dusche', 'Küche', 'Bett', 'Wifi', 'Ice box/ Kühlschrank', 
+                'Air conditioning', 'Fighting chair', 'E-Motor', 'Felitiertisch'
+            ],
+            maxTags: 10, // Maximum number of tags
+            dropdown: {
+                maxItems: 20,           // Maximum items to show in the suggestions dropdown
+                classname: "tagify__dropdown", // Class name for styling
+                enabled: 0,             // Always show the dropdown
+                closeOnSelect: false    // Keep dropdown open after selecting a suggestion
+            }
+        });
+
+        targetFishList = {!! json_encode($targets->toArray()) !!};
+
+        var targetFishInput = document.querySelector('input[name=target_fish]');
+        var targetFishTags = new Tagify(targetFishInput, {
+            whitelist: targetFishList,
+            maxTags: 10, // Maximum number of tags
+            dropdown: {
+                maxItems: 20,           // Maximum items to show in the suggestions dropdown
+                classname: "tagify__dropdown", // Class name for styling
+                enabled: 0,             // Always show the dropdown
+                closeOnSelect: false    // Keep dropdown open after selecting a suggestion
+            }
+        });
+
+        methodsList = {!! json_encode($methods->toArray()) !!};
+
+        var methodsListInput = document.querySelector('input[name=methods]');
+        var methodsListTags = new Tagify(methodsListInput, {
+            whitelist: methodsList,
+            maxTags: 10, // Maximum number of tags
+            dropdown: {
+                maxItems: 20,           // Maximum items to show in the suggestions dropdown
+                classname: "tagify__dropdown", // Class name for styling
+                enabled: 0,             // Always show the dropdown
+                closeOnSelect: false    // Keep dropdown open after selecting a suggestion
+            }
+        });
+
+        waterTypesList = {!! json_encode($waters->toArray()) !!};
+
+        var waterTypesListInput = document.querySelector('input[name=water_types]');
+        var waterTypesListTags = new Tagify(waterTypesListInput, {
+            whitelist: waterTypesList,
+            maxTags: 10,
+            dropdown: {
+                maxItems: 20,
+                classname: "tagify__dropdown",
+                enabled: 0,
+                closeOnSelect: false
+            }
+        });
+
+        inclussionList = {!! json_encode($inclussions->toArray()) !!};
+
+        var inclussionListInput = document.querySelector('input[name=inclussions]');
+        var inclussionListTags = new Tagify(inclussionListInput, {
+            whitelist: inclussionList,
+            maxTags: 10,
+            dropdown: {
+                maxItems: 20,
+                classname: "tagify__dropdown",
+                enabled: 0,
+                closeOnSelect: false
+            }
+        });
+
+        $('input[name="seasonal_trip"]').change(function() {
+            if ($(this).val() === 'season_monthly') {
+                $('#monthly_selection').show();
+            } else {
+                $('#monthly_selection').hide();
+            }
+        });
+
+        var monthsInput = document.querySelector('input[name=season_monthly]');
+        var monthsTags = new Tagify(monthsInput, {
+            whitelist: [
+                'January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'
+            ],
+            dropdown: {
+                maxItems: 12, // All 12 months
+                enabled: 0,   // Show suggestions on focus
+                closeOnSelect: false // Keep dropdown open after selecting a month
+            }
+        });
+
+        var currentStep = 1;
+        var totalSteps = $('.step').length;
+
+        $('input[type="checkbox"]').on('change', function() {
+            const extraInput = $(this).closest('.btn-checkbox-container').find('.extra-input');
+            
+            if ($(this).is(':checked')) {
+                extraInput.addClass('active');
+            } else {
+                extraInput.removeClass('active');
+            }
+        });
+
+        $('input[name="price"]').change(function () {
+            const selectedPriceOption = $(this).val();
+            const dynamicFieldsContainer = $('#dynamic-price-fields-container');
+
+            dynamicFieldsContainer.empty(); // Clear any existing fields
+
+            if (selectedPriceOption === 'per_person') {
+                const addButton = $('<button>')
+                    .attr('type', 'button')
+                    .addClass('btn btn-outline-primary mb-3 d-flex align-items-center')
+                    .attr('data-bs-toggle', 'tooltip')
+                    .attr('data-bs-placement', 'right')
+                    .attr('title', 'Add Person')
+                    .html('<i class="fas fa-plus"></i>')
+                    .on('click', function () {
+                        checkAndAddPersonField();
+                    });
+
+                dynamicFieldsContainer.append(addButton);
+                $('[data-bs-toggle="tooltip"]').tooltip();
+
+                checkAndAddPersonField();
+            } else if (selectedPriceOption === 'per_boat') {
+                const boatPriceField = $('<div>')
+                    .addClass('form-group row align-items-center')
+                    .append('<label for="boat_price" class="col-sm-3 col-form-label">Total Price</label>')
+                    .append('<div class="col-sm-9"><input type="number" class="form-control" name="boat_price" placeholder="Enter total price"></div>');
+
+                dynamicFieldsContainer.append(boatPriceField);
+            }
+        });
+
+        function checkAndAddPersonField() {
+            const noGuest = $('#no_guest').val();
+            const personFieldCount = $('.person-price-field').length;
+
+            $('#guest-warning').remove();
+
+            if (noGuest === '' || parseInt(noGuest) === 0) {
+                const warning = $('<p>')
+                    .attr('id', 'guest-warning')
+                    .addClass('text-danger')
+                    .text('Please enter the number of guests before adding person price fields.');
+                $('#dynamic-price-fields-container').prepend(warning);
+            } else if (personFieldCount < parseInt(noGuest)) {
+                addPersonField(personFieldCount + 1);
+            } else {
+                const warning = $('<p>')
+                    .attr('id', 'guest-warning')
+                    .addClass('text-danger')
+                    .text('The number of persons cannot exceed the number of guests.');
+                $('#dynamic-price-fields-container').prepend(warning);
+            }
+        }
+
+        function addPersonField(personNumber) {
+            const labelText = personNumber === 1 ? 'Price for 1 person' : `Price for ${personNumber} persons`;
+
+            const personField = $('<div>')
+                .addClass('form-group row align-items-center person-price-field mb-3')
+                .append(`<label for="person_price_${personNumber}" class="col-sm-3 col-form-label">${labelText}</label>`)
+                .append(
+                    `<div class="col-sm-7">
+                        <input type="number" class="form-control" name="person_price_${personNumber}" placeholder="Enter price for ${personNumber} person${personNumber > 1 ? 's' : ''}">
+                    </div>`
+                )
+                .append(
+                    `<div class="col-sm-2">
+                        <button type="button" class="btn btn-outline-danger remove-person-field">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>`
+                );
+
+            $('#dynamic-price-fields-container').append(personField);
+
+            personField.find('.remove-person-field').on('click', function () {
+                $(this).closest('.person-price-field').remove();
+                updatePersonFieldLabels();
+            });
+        }
+
+        function updatePersonFieldLabels() {
+            $('.person-price-field').each(function (index) {
+                const personNumber = index + 1;
+                const labelText = personNumber === 1 ? 'Price for 1 person' : `Price for ${personNumber} persons`;
+                $(this).find('label').text(labelText);
+                $(this).find('input').attr('name', `person_price_${personNumber}`);
+                $(this).find('input').attr('placeholder', `Enter price for ${personNumber} person${personNumber > 1 ? 's' : ''}`);
+            });
+        }
+
+        function showStep(step) {
+            $('.step').removeClass('active');
+            $('#step' + step).addClass('active');
+            
+            $('.step-button').removeClass('active');
+            $('.step-button[data-step="' + step + '"]').addClass('active');
+
+            if (step === 1) {
+                $('#prevBtn').hide();
+            } else {
+                $('#prevBtn').show();
+            }
+
+            if (step === totalSteps) {
+                $('#nextBtn').hide();
+                $('#submitBtn').show();
+            } else {
+                $('#nextBtn').show();
+                $('#submitBtn').hide();
+            }
+        }
+
+        if (currentStep === 1) {
+            $('#prevBtn').hide();
+        }
+
+        $('#submitBtn').hide();
+
+        $(document).on('click', '#nextBtn', function() {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                showStep(currentStep);
+            }
+        });
+
+        $(document).on('click', '#prevBtn', function() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        });
+
+        $('.step-button').click(function () {
+            var step = $(this).data('step');
+            currentStep = step;
+            showStep(step);
+        });
+
+        showStep(currentStep);
+    });
+
+    function previewImages(input) {
+        var imagePreviewContainer = $('#imagePreview');
+        imagePreviewContainer.html("");
+
+        if (input.files) {
+            $.each(input.files, function(index, file) {
+                if (!file.type.match('image.*')) {
+                    alert('Only images are allowed!');
+                    return;
+                }
+
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var imgContainer = $('<div>').addClass('card image-card').attr('data-image-index', index);
+                    var img = $('<img>').attr('src', e.target.result).addClass('croppable-image');
+                    var deleteBtn = $('<button>').addClass('delete-image-btn').html('&times;');
+                    var primaryBtn = $('<button>').addClass('btn btn-primary btn-sm set-primary-btn').text('Set as Primary');
+
+                    primaryBtn.on('click', function() {
+                        setPrimaryImage(index, img.attr('src'));
+                    });
+
+                    deleteBtn.on('click', function() {
+                        removeImage(index, imgContainer);
+                    });
+
+                    imgContainer.append(img).append(deleteBtn).append(primaryBtn);
+                    imagePreviewContainer.append(imgContainer);
+
+                    img.on('load', function() {
+                        croppers[index] = new Cropper(this, {
+                            aspectRatio: 5 / 4,
+                            viewMode: 1,
+                            autoCropArea: 1,
+                            movable: true,
+                            zoomable: true,
+                            rotatable: true,
+                            scalable: true,
+                        });
+                    });
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+    }
+
+    function setPrimaryImage(index, imageUrl) {
+        event.preventDefault();
+
+        $('.image-card').removeClass('primary-image').find('.primary-label').remove();
+
+        let selectedImageContainer = $('.image-card[data-image-index="' + index + '"]');
+        selectedImageContainer.addClass('primary-image');
+
+        let primaryLabel = $('<span>').addClass('primary-label').text('Primary');
+        selectedImageContainer.append(primaryLabel);
+
+        primaryImageIndex = index;
+
+        $('#primaryImageInput').val(imageUrl);
+    }
+
+    function removeImage(index, imgContainer) {
+        if (croppers[index]) {
+            croppers[index].destroy();
+            delete croppers[index];
+        }
+
+        imgContainer.remove();
+
+        if ($('#imagePreview').children().length === 0) {
+            primaryImageIndex = null;
+            $('#primaryImageInput').val(""); // Reset the primary image input
+        }
+    }
+
+    function selectOption(option) {
+        $('#boatOption, #shoreOption').removeClass('active');
+
+        if (option === 'boat') {
+            $('#boatOption').addClass('active');
+            $('input[name="type_of_fishing"][value="boat"]').prop('checked', true);
+            $('#extraFields').slideDown();  // Show extra fields for boat
+            $('#nextBtn').hide(); // Hide Next button
+        } else if (option === 'shore') {
+            $('#shoreOption').addClass('active');
+            $('input[name="type_of_fishing"][value="shore"]').prop('checked', true);
+            $('#extraFields').slideUp();  // Hide extra fields for boat
+            $('#nextBtn').trigger('click'); // Automatically move to next step
+        }
+    }
+
+    $(document).on('submit', 'form', function(e) {
+        e.preventDefault(); // Prevent default form submission
+
+        // Clear out previous cropped images in case the form is being submitted again
+        croppedImages = [];
+        $('#croppedImagesContainer').html(""); // Clear out previous hidden inputs
+
+        // Iterate over the croppers and get cropped images as base64 strings
+        Object.keys(croppers).forEach(function(index) {
+            let cropper = croppers[index];
+            let croppedCanvas = cropper.getCroppedCanvas();
+            let croppedImageDataURL = croppedCanvas.toDataURL('image/jpeg'); // Get the cropped image as base64
+
+            // Create a hidden input to store the base64 image data
+            let hiddenInput = $('<input>').attr({
+                type: 'hidden',
+                name: 'croppedImages[]',
+                value: croppedImageDataURL
+            });
+
+            // Append hidden input to a container in the form
+            $('#croppedImagesContainer').append(hiddenInput);
+
+            // Push base64 image data to the array (optional if needed elsewhere)
+            croppedImages.push(croppedImageDataURL);
+
+            if (index === primaryImageIndex) {
+                $('#primaryImageInput').val(croppedImageDataURL);
+            }
+        });
+
+        // Submit the form after adding all the cropped images
+        this.submit();
+    });
+</script>
+@endpush

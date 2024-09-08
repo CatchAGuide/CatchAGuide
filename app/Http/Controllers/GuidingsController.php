@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreGuidingRequest;
+use App\Http\Requests\StoreNewGuidingRequest;
 use App\Models\FishType;
 use App\Models\Gallery;
 use App\Models\Guiding;
@@ -275,6 +276,10 @@ class GuidingsController extends Controller
         ->get();
 
         return $nearestlisting;
+    }
+    
+    public function guidingsStore(StoreNewGuidingRequest $request) {
+
     }
 
     public function store(StoreGuidingRequest $request)

@@ -165,16 +165,14 @@ Route::middleware('auth:web')->group(function () {
 
     Route::get('wishlist/add-or-remove/{guiding}', [\App\Http\Controllers\WishlistController::class, 'addOrRemove'])->name('wishlist.add-or-remove');
 
+    Route::post('delete-image/{id}', [GuidingsController::class, 'deleteimage'])->name('delete-image');
+
+    Route::get('deleteguiding/{id}', [GuidingsController::class, 'deleteguiding'])->name('deleteguiding');
+    Route::get('delete-image/{guiding}/{img?}', [GuidingsController::class, 'deleteImage'])->name('deleteImage');
 
 
-Route::post('delete-image/{id}', [GuidingsController::class, 'deleteimage'])->name('delete-image');
-
-Route::get('deleteguiding/{id}', [GuidingsController::class, 'deleteguiding'])->name('deleteguiding');
-Route::get('delete-image/{guiding}/{img?}', [GuidingsController::class, 'deleteImage'])->name('deleteImage');
-
-
-Route::get('guidings/{guiding}/edit', [GuidingsController::class, 'edit'])->name('guidings.edit');
-Route::post('guidings/{guiding}/update', [GuidingsController::class, 'update'])->name('guidings.update');
+    Route::get('guidings/{guiding}/edit', [GuidingsController::class, 'edit'])->name('guidings.edit');
+    Route::post('guidings/{guiding}/update', [GuidingsController::class, 'update'])->name('guidings.update');
 });
 
 
@@ -187,10 +185,10 @@ Route::get('guidings', [GuidingsController::class, 'index'])->name('guidings.ind
 Route::get('guidings/{slug?}', [GuidingsController::class, 'redirectToNewFormat']);
 Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'show'])->name('guidings.show');
 Route::get('newguidings/{id}/{slug}', [GuidingsController::class, 'newShow'])->name('guidings.newShow');
+Route::post('newguidings', [GuidingsController::class, 'guidingsStore'])->name('guidings.store');
 
 Route::get('searchrequest', [GuidingsController::class, 'bookingrequest'])->name('guidings.request');
 Route::post('searchrequest/store', [GuidingsController::class, 'bookingRequestStore'])->name('store.request');
-
 
 Route::name('additional.')->group(function () {
     Route::view('/contact', 'pages.additional.contact')->name('contact');
