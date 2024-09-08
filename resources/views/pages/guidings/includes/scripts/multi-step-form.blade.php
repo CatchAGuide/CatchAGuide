@@ -81,15 +81,17 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Extras
         var extrasInput = document.querySelector('input[name="extras"]');
+        var extrasWhitelist = [
+            'GPS', 'Echolot', 'Live Scope', 'Radar', 'Funk', 'Flybridge', 'WC', 
+            'Roofing', 'Dusche', 'Küche', 'Bett', 'Wifi', 'Ice box/ Kühlschrank', 
+            'Air conditioning', 'Fighting chair', 'E-Motor', 'Felitiertisch'
+        ].sort(); // Sort the whitelist alphabetically
+
         new Tagify(extrasInput, {
-            whitelist: [
-                'GPS', 'Echolot', 'Live Scope', 'Radar', 'Funk', 'Flybridge', 'WC', 
-                'Roofing', 'Dusche', 'Küche', 'Bett', 'Wifi', 'Ice box/ Kühlschrank', 
-                'Air conditioning', 'Fighting chair', 'E-Motor', 'Felitiertisch'
-            ],
-            maxTags: 10,
+            whitelist: extrasWhitelist,
+            // maxTags: extrasWhitelist.length, // Set maxTags to the total number of options
             dropdown: {
-                maxItems: 20,
+                maxItems: extrasWhitelist.length, // Show all items in the dropdown
                 classname: "tagify__dropdown",
                 enabled: 0,
                 closeOnSelect: false
@@ -98,11 +100,12 @@
 
         // Target Fish
         var targetFishInput = document.querySelector('input[name="target_fish"]');
+        var targetFishList = {!! json_encode($targets->toArray()) !!};
         new Tagify(targetFishInput, {
-            whitelist: {!! json_encode($targets->toArray()) !!},
-            maxTags: 10,
+            whitelist: targetFishList.sort(),
+            // maxTags: 10,
             dropdown: {
-                maxItems: 20,
+                maxItems: targetFishInput.length,
                 classname: "tagify__dropdown",
                 enabled: 0,
                 closeOnSelect: false
@@ -111,11 +114,12 @@
 
         // Methods
         var methodsInput = document.querySelector('input[name="methods"]');
+        var methodsList = {!! json_encode($methods->toArray()) !!};
         new Tagify(methodsInput, {
-            whitelist: {!! json_encode($methods->toArray()) !!},
+            whitelist: methodsList.sort(),
             maxTags: 10,
             dropdown: {
-                maxItems: 20,
+                maxItems: methodsInput.length,
                 classname: "tagify__dropdown",
                 enabled: 0,
                 closeOnSelect: false
@@ -124,11 +128,12 @@
 
         // Water Types
         var waterTypesInput = document.querySelector('input[name="water_types"]');
+        var waterTypesList = {!! json_encode($waters->toArray()) !!};
         new Tagify(waterTypesInput, {
-            whitelist: {!! json_encode($waters->toArray()) !!},
+            whitelist: waterTypesList.sort(),
             maxTags: 10,
             dropdown: {
-                maxItems: 20,
+                maxItems: waterTypesInput.length,
                 classname: "tagify__dropdown",
                 enabled: 0,
                 closeOnSelect: false
@@ -137,11 +142,12 @@
 
         // Inclusions
         var inclusionsInput = document.querySelector('input[name="inclussions"]');
+        var inclusionsList = {!! json_encode($inclussions->toArray()) !!};
         new Tagify(inclusionsInput, {
-            whitelist: {!! json_encode($inclussions->toArray()) !!},
+            whitelist: inclusionsList.sort(),
             maxTags: 10,
             dropdown: {
-                maxItems: 20,
+                maxItems: inclusionsInput.length,
                 classname: "tagify__dropdown",
                 enabled: 0,
                 closeOnSelect: false
@@ -158,7 +164,8 @@
                 classname: "tagify__dropdown",
                 enabled: 0,
                 closeOnSelect: false
-            }
+            },
+            enforceWhitelist: true
         });
 
         // Show/hide monthly selection based on seasonal trip selection
@@ -190,8 +197,8 @@
 
     // Boat/Shore selection
     function selectOption(option) {
-        $('#boatOption, #shoreOption').removeClass('selected');
-        $(`#${option}Option`).addClass('selected');
+        $('#boatOption, #shoreOption').removeClass('active');
+        $(`#${option}Option`).addClass('active');
         $('input[name="type_of_fishing"]').val(option);
         
         if (option === 'boat') {
@@ -400,6 +407,22 @@
         });
 
         initAutocomplete();
+
+        // Duration selection logic
+        $('input[name="duration"]').change(function() {
+            var durationType = $(this).val();
+            $('#duration_details').show();
+            
+            if (durationType === 'half_day' || durationType === 'full_day') {
+                $('#hours_input').show();
+                $('#days_input').hide();
+            } else if (durationType === 'multi_day') {
+                $('#hours_input').hide();
+                $('#days_input').show();
+            } else {
+                $('#duration_details').hide();
+            }
+        });
     });
 </script>
 @endpush

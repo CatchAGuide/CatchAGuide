@@ -7,22 +7,23 @@ use App\Http\Requests\StoreNewGuidingRequest;
 use App\Models\FishType;
 use App\Models\Gallery;
 use App\Models\Guiding;
-use App\Models\Method;
 use App\Models\Target;
+use App\Models\Method;
 use App\Models\Water;
-use Auth;
-use Config;
+use App\Models\GuidingRequest;
+use App\Models\GuidingTargetFish;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Redirect;
+use Auth;
+use Config;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\GuidingRequestMail;
+use App\Mail\SearchRequestUserMail;
 
 class GuidingsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
-     */
     public function index(Request $request)
     {
         $locale = Config::get('app.locale');
@@ -277,9 +278,117 @@ class GuidingsController extends Controller
 
         return $nearestlisting;
     }
-    
-    public function guidingsStore(StoreNewGuidingRequest $request) {
+    public function guidingsStore(StoreNewGuidingRequest $request)
+    {
+        DB::beginTransaction();
 
+        try {
+            $guiding = new Guiding();
+            $guiding->user_id = auth()->id();
+            $guiding->title = $request->title;
+            $guiding->slug = Str::slug($request->title);
+            $guiding->location = $request->location;
+            $guiding->type_of_fishing = $request->type_of_fishing;
+            $guiding->is_boat = $request->type_of_fishing === 'boat';
+            $guiding->boat_type = $request->boat_type;
+            $guiding->experience_level = $request->experience_level;
+            $guiding->style_of_fishing = $request->style_of_fishing;
+            $guiding->tour_type = $request->tour_type;
+            $guiding->duration = $request->duration;
+            $guiding->no_guest = $request->no_guest;
+            $guiding->description = $this->generateLongDescription($request);
+            $guiding->additional_info = json_encode([
+                'comment1' => $request->comment1,
+                'comment2' => $request->comment2,
+                'comment3' => $request->comment3,
+            ]);
+            $guiding->allowed_booking_advance = $request->allowed_booking_advance;
+            $guiding->booking_window = $request->booking_window;
+            $guiding->seasonal_trip = $request->seasonal_trip;
+            $guiding->months = $request->months;
+
+            $guiding->save();
+
+            // Handle image uploads
+            if ($request->hasFile('title_image')) {
+                foreach ($request->file('title_image') as $index => $image) {
+                    $path = $image->store('guiding_images', 'public');
+                    $isPrimary = $index == $request->primary_image_index;
+                    $guiding->images()->create([
+                        'image_name' => $path,
+                        'is_primary' => $isPrimary
+                    ]);
+
+                    if ($isPrimary) {
+                        $guiding->thumbnail_path = $path;
+                        $guiding->save();
+                    }
+                }
+            }
+
+            // Sync relationships
+            $guiding->targets()->sync($request->target_fish);
+            $guiding->methods()->sync($request->methods);
+            $guiding->waters()->sync($request->water_types);
+            $guiding->levels()->sync([$request->experience_level]);
+            $guiding->inclusions()->sync($request->inclusions);
+
+            // Handle custom target fish
+            if ($request->has('target_fish_sonstiges')) {
+                GuidingTargetFish::create([
+                    'name' => $request->target_fish_sonstiges,
+                    'guiding_id' => $guiding->id
+                ]);
+            }
+
+            // Handle extras
+            if ($request->has('extras')) {
+                foreach ($request->extras as $extra) {
+                    GuidingExtra::create([
+                        'guiding_id' => $guiding->id,
+                        'name' => $extra
+                    ]);
+                }
+            }
+
+            // Handle pricing
+            $priceType = $request->price_type;
+            if ($priceType === 'per_person') {
+                foreach ($request->price_per_person as $guestCount => $price) {
+                    GuidingPrice::create([
+                        'guiding_id' => $guiding->id,
+                        'guest_count' => $guestCount,
+                        'price' => $price
+                    ]);
+                }
+            } else {
+                GuidingPrice::create([
+                    'guiding_id' => $guiding->id,
+                    'guest_count' => null,
+                    'price' => $request->price_per_boat
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->route('profile.myguidings')->with('success', 'Guiding created successfully!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'An error occurred while creating the guiding: ' . $e->getMessage());
+        }
+    }
+
+    private function generateLongDescription($request)
+    {
+        $longDescriptions = json_decode(file_get_contents(public_path('assets/prompts/long_description.json')), true);
+        $randomDescription = $longDescriptions['options'][array_rand($longDescriptions['options'])];
+
+        $description = str_replace(
+            ['{course_of_action}', '{meeting_point}', '{special_about}', '{tour_unique}', '{starting_time}'],
+            [$request->course_of_action, $request->meeting_point, $request->special_about, $request->tour_unique, $request->starting_time],
+            $randomDescription['text']
+        );
+
+        return $description;
     }
 
     public function store(StoreGuidingRequest $request)
@@ -337,8 +446,6 @@ class GuidingsController extends Controller
                 }
             }
         }
-
-        return redirect()->route('profile.myguidings')->with(['message' => 'Das Guiding wurde erfolgreich erstellt!']);
     }
     
     public function show($id,$slug)

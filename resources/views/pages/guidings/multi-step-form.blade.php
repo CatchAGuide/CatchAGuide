@@ -61,7 +61,7 @@
 
                 <div class="form-group">
                     <label for="location">Location</label>
-                    <input type="search" class="form-control" id="location" name="location" placeholder="Enter city or country" data-bs-toggle="tooltip" title="Enter the location where you offer your guiding service">
+                    <input type="search" class="form-control" id="location" name="location" placeholder="Enter a city or any other location close to the area your fishing tour takes place" data-bs-toggle="tooltip" title="Enter the location where you offer your guiding service">
                 </div>
 
                 <div class="form-group">
@@ -222,7 +222,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="inclussions">Inclussions</label>
+                    <label for="inclussions">Included without surcharge</label>
                     <input type="text" class="form-control" name="inclussions" id="inclussions" data-role="tagsinput" placeholder="Select inclussions...">
                 </div>
                 
@@ -249,28 +249,23 @@
                 <h5>Long Description</h5>
                 
                 <div class="form-group">
-                    <label for="desc_course_of_action">What Does the Course of actions look like?</label>
+                    <label for="desc_course_of_action">Tell your guests what they can expect from your fishing tour. How does a typical fishing tour look like?</label>
                     <textarea name="desc_course_of_action" id="desc_course_of_action" class="form-control" placeholder="course of action. . . ."></textarea>
                 </div>
                 
                 <div class="form-group">
-                    <label for="desc_meeting_point">Where will be the meeting point?</label>
+                    <label for="desc_starting_time">Let your guest know when you typically begin with the fishing tour.</label>
+                    <textarea name="desc_starting_time" id="desc_starting_time" class="form-control" placeholder="starting time. . . ."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="desc_meeting_point">Give your guests some information, where they will meet you after they have booked your fishing tour</label>
                     <textarea name="desc_meeting_point" id="desc_meeting_point" class="form-control" placeholder="meeting point. . . ."></textarea>
                 </div>
                 
                 <div class="form-group">
-                    <label for="desc_special_about">What is special about the waters you fish in and the fish a guest can catch with you?</label>
-                    <textarea name="desc_special_about" id="desc_special_about" class="form-control" placeholder="specialty. . . ."></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="desc_tour_unique">What makes your tour unique?</label>
+                    <label for="desc_tour_unique">Tell your guests about special highlights they can experience on a fishing tour with you</label>
                     <textarea name="desc_tour_unique" id="desc_tour_unique" class="form-control" placeholder="uniqueness. . . ."></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="desc_starting_time">When is typically the starting time of your tour (morning / evening)?</label>
-                    <textarea name="desc_starting_time" id="desc_starting_time" class="form-control" placeholder="startime time. . . ."></textarea>
                 </div>
 
                 <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
@@ -282,7 +277,7 @@
                 <h5>Other Information</h5>
 
                 <div class="form-group">
-                    <label for="other_information">Other Information</label>
+                    <label for="other_information">Add a comment or additional information for your guests.</label>
                     <div class="btn-group-toggle">
                         <div class="btn-checkbox-container">
                             <input type="checkbox" name="other_information[]" value="child_friendly" id="child_friendly_checkbox">
@@ -353,7 +348,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="requiements_taking_part">Requirements for taking part</label>
+                    <label for="requiements_taking_part">Add a comment or additional information for your guests.</label>
                     <div class="btn-group-toggle">
                         <div class="btn-checkbox-container">
                             <input type="checkbox" name="requiements_taking_part[]" value="license_required" id="license_required_checkbox">
@@ -382,7 +377,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="recommended_preparation">Recommended Preparation</label>
+                    <label for="recommended_preparation">Add a comment or additional information for your guests.</label>
                     <div class="btn-group-toggle">
                         <div class="btn-checkbox-container">
                             <input type="checkbox" name="recommended_preparation[]" value="sun_protection" id="sun_protection_checkbox">
@@ -428,10 +423,10 @@
                     <label for="tour_type">Tour Type</label>
                     <div class="d-flex flex-wrap btn-group-toggle">
                         <input type="radio" name="tour_type" value="private" id="private">
-                        <label for="private" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Private</label>
+                        <label for="private" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Private tours only</label>
                         
                         <input type="radio" name="tour_type" value="shared" id="shared">
-                        <label for="shared" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Shared</label>
+                        <label for="shared" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Shared tours possible</label>
                     </div>
                 </div>
                 
@@ -447,6 +442,16 @@
                         <input type="radio" name="duration" value="multi_day" id="multi_day">
                         <label for="multi_day" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Multi Day</label>
                     </div>
+                    <div id="duration_details" class="mt-3" style="display: none;">
+                        <div id="hours_input" style="display: none;">
+                            <label for="duration_hours">Number of hours:</label>
+                            <input type="number" id="duration_hours" name="duration_hours" class="form-control" min="1" max="24">
+                        </div>
+                        <div id="days_input" style="display: none;">
+                            <label for="duration_days">Number of days:</label>
+                            <input type="number" id="duration_days" name="duration_days" class="form-control" min="2">
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -455,7 +460,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="price">Tour Type / Pricing</label>
+                    <label for="price">Pricing</label>
                     <div class="d-flex flex-wrap btn-group-toggle">
                         <input type="radio" name="price" value="per_person" id="per_person_checkbox">
                         <label for="per_person_checkbox" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">per Person</label>
@@ -483,33 +488,32 @@
                     <label for="allowed_booking_advance">Allowance of min. booking days in advance</label>
                     <div class="d-flex flex-wrap btn-group-toggle">
                         <input type="radio" name="allowed_booking_advance" value="same_day" id="same_day">
-                        <label for="same_day" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Same Day</label>
+                        <label for="same_day" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">On the same day</label>
                         
                         <input type="radio" name="allowed_booking_advance" value="three_days" id="three_days">
-                        <label for="three_days" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Three Days Upfront</label>
+                        <label for="three_days" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Three days upfront</label>
                         
                         <input type="radio" name="allowed_booking_advance" value="one_week" id="one_week">
-                        <label for="one_week" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">One Week</label>
+                        <label for="one_week" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">One week upfront</label>
                         
                         <input type="radio" name="allowed_booking_advance" value="one_month" id="one_month">
-                        <label for="one_month" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">One Month</label>
+                        <label for="one_month" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">One month upfront</label>
                     </div>
                 </div>
-                
                 <div class="form-group">
-                    <label for="booking_window">Booking Window</label>
+                    <label for="booking_window">Booking window for how long in advance you allow bookings</label>
                     <div class="d-flex flex-wrap btn-group-toggle">
-                        <input type="radio" name="booking_window" value="none" id="none">
-                        <label for="none" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">None</label>
+                        <input type="radio" name="booking_window" value="no_limitation" id="no_limitation">
+                        <label for="no_limitation" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">No limitation</label>
                         
                         <input type="radio" name="booking_window" value="six_months" id="six_months">
-                        <label for="six_months" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Six(6) Months</label>
+                        <label for="six_months" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Six months in advance</label>
                         
                         <input type="radio" name="booking_window" value="nine_months" id="nine_months">
-                        <label for="nine_months" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Nine(9) Months</label>
+                        <label for="nine_months" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Nine months in advance</label>
                         
-                        <input type="radio" name="booking_window" value="one_year" id="one_year">
-                        <label for="one_year" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Twelve(1 Year) Months</label>
+                        <input type="radio" name="booking_window" value="twelve_months" id="twelve_months">
+                        <label for="twelve_months" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">12 months in advance</label>
                     </div>
                 </div>
                 
@@ -517,10 +521,10 @@
                     <label for="seasonal_trip">Seasonal Trip</label>
                     <div class="d-flex flex-wrap btn-group-toggle">
                         <input type="radio" name="seasonal_trip" value="season_year" id="season_year">
-                        <label for="season_year" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">All Year</label>
+                        <label for="season_year" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(50% - 20px);">Available all year</label>
                         
                         <input type="radio" name="seasonal_trip" value="season_monthly" id="season_monthly">
-                        <label for="season_monthly" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Monthly</label>
+                        <label for="season_monthly" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(50% - 20px);">Available on certain months only</label>
                     </div>
                     <div id="monthly_selection" style="display: none;">
                         <label for="months">Select Months</label>

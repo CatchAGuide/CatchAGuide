@@ -273,8 +273,8 @@
             color: white;
             border-color: #f2856d;
             margin-top: 15px;
-            display: block;
-            width: 100%;
+            flex: 0 0 auto;
+            margin-left: auto;
         }
         
         #submitBtn:hover {
@@ -608,6 +608,48 @@
             padding: 2px 5px;
             border-radius: 3px;
             font-size: 12px;
+        }
+
+        .form-group label {
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .option-card {
+            border: 2px solid #313041;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            background-color: #313041;
+            color: white;
+        }
+        
+        .option-card:hover {
+            background-color: #fef5f3;
+            color: #f2856d;
+            border-color: #f2856d;
+        }
+        
+        .option-card.active {
+            background-color: #f2856d;
+            color: white;
+            border-color: #f2856d;
+        }
+
+        .option-card .option-icon {
+            font-size: 50px;
+            margin-bottom: 5px;
+        }
+
+        .option-card .option-label {
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .row.justify-content-center {
+            margin-bottom: 20px;
         }
     </style>
 @endsection
