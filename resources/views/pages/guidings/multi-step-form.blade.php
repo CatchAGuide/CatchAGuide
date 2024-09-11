@@ -1,37 +1,40 @@
 @include('pages.guidings.includes.styles.multi-step-form')
 <div class="card">
     <div class="card-body">
+        
+        <div id="error-container" class="alert alert-danger" style="display: none;"></div>
+        
         <div class="step-wrapper">
             <div class="step-buttons">
-                <div class="step-button active" data-step="1" data-bs-toggle="tooltip" title="Upload images and set basic information">
+                <div class="step-button active" data-step="1">
                     <i class="fas fa-ship"></i>
                     <p>Gallery</p>
                 </div>
-                <div class="step-button" data-step="2" data-bs-toggle="tooltip" title="Provide details about your guiding service">
+                <div class="step-button" data-step="2">
                     <i class="fas fa-info-circle"></i>
                     <p>Information</p>
                 </div>
-                <div class="step-button" data-step="3" data-bs-toggle="tooltip" title="Specify fish species and fishing details">
+                <div class="step-button" data-step="3">
                     <i class="fas fa-fish"></i>
                     <p>Fish Details</p>
                 </div>
-                <div class="step-button" data-step="4" data-bs-toggle="tooltip" title="Describe your expertise and experience">
+                <div class="step-button" data-step="4">
                     <i class="fas fa-chart-line"></i>
                     <p>Expertise</p>
                 </div>
-                <div class="step-button" data-step="5" data-bs-toggle="tooltip" title="Write a detailed description of your service">
+                <div class="step-button" data-step="5">
                     <i class="fas fa-file-alt"></i>
                     <p>Description</p>
                 </div>
-                <div class="step-button" data-step="6" data-bs-toggle="tooltip" title="Add any additional information">
+                <div class="step-button" data-step="6">
                     <i class="fas fa-info-circle"></i>
                     <p>Other</p>
                 </div>
-                <div class="step-button" data-step="7" data-bs-toggle="tooltip" title="Set your pricing structure">
+                <div class="step-button" data-step="7">
                     <i class="fas fa-dollar-sign"></i>
                     <p>Pricing</p>
                 </div>
-                <div class="step-button" data-step="8" data-bs-toggle="tooltip" title="Define your availability and booking options">
+                <div class="step-button" data-step="8">
                     <i class="fas fa-calendar-alt"></i>
                     <p>Schedule</p>
                 </div>
@@ -39,8 +42,6 @@
 
             <div class="step-line"></div>
         </div>
-        
-        <button id="saveDraftBtn" class="btn btn-outline-primary btn-sm">Save to Draft</button>
 
         <form action="{{ route('profile.newguiding.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
@@ -57,7 +58,7 @@
 
             <!-- Step 1 -->
             <div class="step active" id="step1">
-                <h5>Basic Information</h5>
+                <h5>Upload images and set basic information</h5>
 
                 <label for="title_image">Galery Images</label>
                 <div class="file-upload-wrapper">
@@ -70,37 +71,45 @@
                 <input type="hidden" name="primaryImage" id="primaryImageInput">
 
                 <div class="form-group">
-                    <label for="location">Location</label>
-                    <input type="search" class="form-control" id="location" name="location" placeholder="Enter a city or any other location close to the area your fishing tour takes place" data-bs-toggle="tooltip" title="Enter the location where you offer your guiding service">
+                    <div class="input-group mt-2">
+                        <span class="input-group-text">Location</span>
+                        <input type="search" class="form-control" id="location" name="location" placeholder="Enter a city or any other location close to the area your fishing tour takes place" data-bs-toggle="tooltip" title="Enter the location where you offer your guiding service">
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="title">Title</label>
-                    <input type="text" class="form-control" id="title" name="title">
+                    <div class="input-group mt-2">
+                        <span class="input-group-text">Title</span>
+                        <input type="text" class="form-control" id="title" name="title">
+                    </div>
                 </div>
 
-                <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
+                <div class="button-group">
+                    <button type="button" class="btn btn-primary" id="nextBtn" onclick="validateStep(currentStep)">Next</button>
+                    <button type="button" class="btn btn-outline-primary" id="saveDraftBtn">Leave & Save to Draft</button>
+                </div>
             </div>
 
             <!-- Step 2 -->
             <div class="step" id="step2">
-                <h5>Guiding Information</h5>
+                <h5>Provide details about your guiding service</h5>
 
                 <div class="row justify-content-center">
                     <div class="col-md-6">
                         <div class="option-card" id="boatOption" onclick="selectOption('boat')">
                             <i class="fas fa-ship option-icon"></i>
                             <p class="option-label">Boat</p>
-                            <input type="radio" name="type_of_fishing" value="boat" class="d-none">
+                            <input type="radio" name="type_of_fishing_radio" value="boat" class="d-none">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="option-card" id="shoreOption" onclick="selectOption('shore')">
                             <i class="fas fa-water option-icon"></i>
                             <p class="option-label">Shore</p>
-                            <input type="radio" name="type_of_fishing" value="shore" class="d-none">
+                            <input type="radio" name="type_of_fishing_radio" value="shore" class="d-none">
                         </div>
                     </div>
+                    <input type="hidden" name="type_of_fishing" id="type_of_fishing">
                 </div>
 
                 <div id="extraFields" style="display: none;">
@@ -184,56 +193,72 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="extras">Extras</label>
-                        <input  class="form-control" name="extras" id="extras" placeholder="Add extras..." data-bs-toggle="tooltip" title="Add any additional features or services you offer">
+                        <div class="input-group mt-2">
+                            <span class="input-group-text">Extras</span>
+                            <input  class="form-control" name="extras" id="extras" placeholder="Add extras..." data-bs-toggle="tooltip" title="Add any additional features or services you offer">
+                        </div>
                     </div>
                 </div>
 
-                <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
-                <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
+                <div class="button-group">
+                    <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
+                    <button type="button" class="btn btn-primary" id="nextBtn" onclick="validateStep(currentStep)">Next</button>
+                    <button type="button" class="btn btn-outline-primary" id="saveDraftBtn">Leave & Save to Draft</button>
+                </div>
             </div>
 
             <!-- Step 3 -->
             <div class="step" id="step3">
-                <h5>Fish Details</h5>
+                <h5>Specify fish species and fishing details</h5>
                 
                 <div class="form-group">
-                    <label for="target_fish">Target Fish</label>
-                    <input type="text" class="form-control" name="target_fish" id="target_fish" data-role="tagsinput" placeholder="Add Target Fish...">
+                    <div class="input-group mt-2">
+                        <span class="input-group-text">Target Fish</span>
+                        <input type="text" class="form-control" name="target_fish" id="target_fish" data-role="tagsinput" placeholder="Add Target Fish...">
+                    </div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="methods">Methods</label>
-                    <input type="text" class="form-control" name="methods" id="methods" data-role="tagsinput" placeholder="Select Methods...">
+                    <div class="input-group mt-2">
+                        <span class="input-group-text">Methods</span>
+                        <input type="text" class="form-control" name="methods" id="methods" data-role="tagsinput" placeholder="Select Methods...">
+                    </div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="water_types">Water Types</label>
-                    <input type="text" class="form-control" name="water_types" id="water_types" data-role="tagsinput" placeholder="Select Water Tyles...">
+                    <div class="input-group mt-2">
+                        <span class="input-group-text">Water Types</span>
+                        <input type="text" class="form-control" name="water_types" id="water_types" data-role="tagsinput" placeholder="Select Water Tyles...">
+                    </div>
                 </div>
 
-                <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
-                <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
+                <div class="button-group">
+                    <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
+                    <button type="button" class="btn btn-primary" id="nextBtn" onclick="validateStep(currentStep)">Next</button>
+                    <button type="button" class="btn btn-outline-primary" id="saveDraftBtn">Leave & Save to Draft</button>
+                </div>
             </div>
 
             <!-- Step 4 -->
             <div class="step" id="step4">
-                <h5>Expertise</h5>
-                
+                <h5>Describe your expertise and experience</h5>
+
                 <div class="form-group">
                     <label for="experience_level">Experience Level</label>
                     <div class="d-flex flex-wrap btn-group-toggle">
-                        <input type="radio" name="experience_level" value="beginner" id="beginner">
+                        <input type="checkbox" name="experience_level[]" value="beginner" id="beginner">
                         <label for="beginner" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Beginner</label>
                         
-                        <input type="radio" name="experience_level" value="advance" id="advance">
+                        <input type="checkbox" name="experience_level[]" value="advance" id="advance">
                         <label for="advance" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Advance</label>
                     </div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="inclussions">Included without surcharge</label>
-                    <input type="text" class="form-control" name="inclussions" id="inclussions" data-role="tagsinput" placeholder="Select inclussions...">
+                    <div class="input-group mt-2">
+                        <span class="input-group-text">Included without surcharge</span>
+                        <input type="text" class="form-control" name="inclussions" id="inclussions" data-role="tagsinput" placeholder="Select inclussions...">
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -250,13 +275,16 @@
                     </div>
                 </div>
 
-                <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
-                <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
+                <div class="button-group">
+                    <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
+                    <button type="button" class="btn btn-primary" id="nextBtn" onclick="validateStep(currentStep)">Next</button>
+                    <button type="button" class="btn btn-outline-primary" id="saveDraftBtn">Leave & Save to Draft</button>
+                </div>
             </div>
 
             <!-- Step 5 -->
             <div class="step" id="step5">
-                <h5>Long Description</h5>
+                <h5>Write a detailed description of your service</h5>
                 
                 <div class="form-group">
                     <label for="desc_course_of_action">Tell your guests what they can expect from your fishing tour. How does a typical fishing tour look like?</label>
@@ -278,13 +306,16 @@
                     <textarea name="desc_tour_unique" id="desc_tour_unique" class="form-control" placeholder="uniqueness. . . ."></textarea>
                 </div>
 
-                <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
-                <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
+                <div class="button-group">
+                    <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
+                    <button type="button" class="btn btn-primary" id="nextBtn" onclick="validateStep(currentStep)">Next</button>
+                    <button type="button" class="btn btn-outline-primary" id="saveDraftBtn">Leave & Save to Draft</button>
+                </div>
             </div>
 
             <!-- Step 6 -->
             <div class="step" id="step6">
-                <h5>Other Information</h5>
+                <h5>Add any additional information</h5>
 
                 <div class="form-group">
                     <label for="other_information">Add a comment or additional information for your guests.</label>
@@ -421,14 +452,16 @@
                     </div>
                 </div>
 
-                <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
-                <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
-
+                <div class="button-group">
+                    <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
+                    <button type="button" class="btn btn-primary" id="nextBtn" onclick="validateStep(currentStep)">Next</button>
+                    <button type="button" class="btn btn-outline-primary" id="saveDraftBtn">Leave & Save to Draft</button>
+                </div>
             </div>
 
             <!-- Step 7 -->
             <div class="step" id="step7">
-                <h5>Pricing</h5>
+                <h5>Set your pricing structure</h5>
                 <div class="form-group">
                     <label for="tour_type">Tour Type</label>
                     <div class="d-flex flex-wrap btn-group-toggle">
@@ -453,29 +486,31 @@
                         <label for="multi_day" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Multi Day</label>
                     </div>
                     <div id="duration_details" class="mt-3" style="display: none;">
-                        <div id="hours_input" style="display: none;">
-                            <label for="duration_hours">Number of hours:</label>
+                        <div class="input-group mt-2">
+                            <span class="input-group-text">Number of hours:</span>
                             <input type="number" id="duration_hours" name="duration_hours" class="form-control" min="1" max="24">
                         </div>
-                        <div id="days_input" style="display: none;">
-                            <label for="duration_days">Number of days:</label>
+                        <div class="input-group mt-2">
+                            <span class="input-group-text">Number of days:</span>
                             <input type="number" id="duration_days" name="duration_days" class="form-control" min="2">
                         </div>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="no_guest">Number of guest</label>
-                    <input type="number" class="form-control" id="no_guest" name="no_guest" placeholder="0">
+                    <div class="input-group mt-2">
+                        <span class="input-group-text">Number of guest</span>
+                        <input type="number" class="form-control" id="no_guest" name="no_guest" placeholder="0">
+                    </div>
                 </div>
                 
                 <div class="form-group">
                     <label for="price">Pricing</label>
                     <div class="d-flex flex-wrap btn-group-toggle">
-                        <input type="radio" name="price" value="per_person" id="per_person_checkbox">
+                        <input type="radio" name="price_type" value="per_person" id="per_person_checkbox">
                         <label for="per_person_checkbox" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">per Person</label>
                         
-                        <input type="radio" name="price" value="per_boat" id="per_boat_checkbox">
+                        <input type="radio" name="price_type" value="per_boat" id="per_boat_checkbox">
                         <label for="per_boat_checkbox" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">per Boat</label>
                     </div>
                     
@@ -487,13 +522,16 @@
                     <div id="extras-container"></div>
                 </div>
 
-                <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
-                <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
+                <div class="button-group">
+                    <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
+                    <button type="button" class="btn btn-primary" id="nextBtn" onclick="validateStep(currentStep)">Next</button>
+                    <button type="button" class="btn btn-outline-primary" id="saveDraftBtn">Leave & Save to Draft</button>
+                </div>
             </div>
 
             <!-- Step 8 -->
             <div class="step" id="step8">
-                <h5>Schedules</h5>
+                <h5>Define your availability and booking options</h5>
                 <div class="form-group">
                     <label for="allowed_booking_advance">Allowance of min. booking days in advance</label>
                     <div class="d-flex flex-wrap btn-group-toggle">
@@ -536,16 +574,25 @@
                         <input type="radio" name="seasonal_trip" value="season_monthly" id="season_monthly">
                         <label for="season_monthly" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(50% - 20px);">Available on certain months only</label>
                     </div>
+                    
                     <div id="monthly_selection" style="display: none;">
-                        <label for="months">Select Months</label>
-                        <input type="text" id="months" name="months" class="form-control" placeholder="Select months">
+                        <div class="d-flex flex-wrap btn-group-toggle">
+                            @foreach(['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] as $month)
+                                <div class="btn-checkbox-container" style="flex: 0 0 20%; max-width: 20%; padding: 5px;">
+                                    <input type="checkbox" name="available_month[]" value="{{ strtolower($month) }}" id="avail_{{ strtolower($month) }}">
+                                    <label for="avail_{{ strtolower($month) }}" class="btn btn-outline-primary btn-checkbox w-100">{{ $month }}</label>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
 
-                <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
-                <button type="submit" class="btn btn-success" id="submitBtn">Submit</button>
+                <div class="button-group">
+                    <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
+                    <button type="submit" class="btn btn-success" id="submitBtn">Submit</button>
+                    <button type="button" class="btn btn-outline-primary" id="saveDraftBtn">Leave & Save to Draft</button>
+                </div>
             </div>
-
         </form>
     </div>
 </div>

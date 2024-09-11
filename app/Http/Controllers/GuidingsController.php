@@ -289,9 +289,14 @@ class GuidingsController extends Controller
             $guiding = new Guiding();
             $guiding->fill($request->validated());
             $guiding->user_id = auth()->id();
+            $guiding->location = $request->input('location');
+            $guiding->title = $request->input('title');
+            $guiding->style_of_fishing = $request->input('style_of_fishing');
+
             $guiding->save();
 
             $this->saveDescriptions($guiding, $request);
+            $this->generateLongDescription($request);
             $this->saveAdditionalInformation($guiding, $request);
             $this->saveRequirements($guiding, $request);
             $this->saveRecommendations($guiding, $request);
@@ -304,7 +309,7 @@ class GuidingsController extends Controller
             $guiding->inclusions()->sync(json_decode($request->input('inclussions'), true));
 
             // Handle pricing
-            if ($request->input('price') === 'per_person') {
+            if ($request->input('price_type') === 'per_person') {
                 foreach ($request->input('price_per_person') as $guests => $price) {
                     $guiding->prices()->create([
                         'guests' => $guests,
@@ -320,9 +325,9 @@ class GuidingsController extends Controller
 
             // Handle extras
             $extras = json_decode($request->input('extras'), true);
-            foreach ($extras as $extra) {
+            foreach ($extras as $key => $extra) {
                 $guiding->extras()->create([
-                    'name' => $extra['value'],
+                    'name' => $request->input('extra_name_' . ($key + 1), 0),
                     'price' => $request->input('extra_price_' . ($key + 1), 0),
                 ]);
             }
@@ -341,8 +346,8 @@ class GuidingsController extends Controller
         $randomDescription = $longDescriptions['options'][array_rand($longDescriptions['options'])];
 
         $description = str_replace(
-            ['{course_of_action}', '{meeting_point}', '{special_about}', '{tour_unique}', '{starting_time}'],
-            [$request->course_of_action, $request->meeting_point, $request->special_about, $request->tour_unique, $request->starting_time],
+            ['{desc_course_of_action}', '{desc_meeting_point}', '{special_about}', '{desc_tour_unique}', '{desc_starting_time}'],
+            [$request->desc_course_of_action, $request->desc_meeting_point, "", $request->desc_tour_unique, $request->desc_starting_time],
             $randomDescription['text']
         );
 
@@ -356,7 +361,7 @@ class GuidingsController extends Controller
                 $path = $file->store('public/guidings/' . $guiding->id);
                 $guiding->images()->create([
                     'path' => $path,
-                    'is_primary' => $index == $request->input('primary_image_index', 0),
+                    'is_primary' => $index == $request->input('primaryImage', 0),
                 ]);
             }
         }
