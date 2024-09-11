@@ -25,7 +25,15 @@ class Destination extends Model
         'introduction',
         'content',
         'filters',
-        'thumbnail_path'
+        'thumbnail_path',
+
+        'fish_avail_title',
+        'fish_avail_intro',
+        'size_limit_title',
+        'size_limit_intro',
+        'time_limit_title',
+        'time_limit_intro',
+        'faq_title'
     ];
 
     public function faq()

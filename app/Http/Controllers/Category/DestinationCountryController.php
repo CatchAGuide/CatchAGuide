@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Category;
 use App\Http\Controllers\Controller;
 use App\Models\Destination;
 use App\Models\Guiding;
+use App\Models\Method;
+use App\Models\Target;
+use App\Models\Water;
 use Config;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
@@ -13,29 +16,37 @@ use Spatie\Geocoder\Geocoder;
 
 class DestinationCountryController extends Controller
 {
-    public function getCoordinates($country)
+    public function index()
     {
-        $client = new \GuzzleHttp\Client();
-        $geocoder = new Geocoder($client);
-
-        $geocoder->setApiKey('AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q');
-
-        $geocoder->setCountry($country);
-
-        $coordinates = $geocoder->getCoordinatesForAddress($country);
-
-        return $coordinates;
+        return view('pages.countries.index');
     }
 
-    public function index(Request $request, $country)
+    public function country(Request $request, $country, $region=null, $city=null)
     {
+        $destination_type = 'country';
+        $address_name = $country;
 
-        $row = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->whereName($country)->first();
+        if (!is_null($city)) {
+            $destination_type = 'city';
+            $address_name = $city;
+        } elseif (!is_null($region)) {
+            $destination_type = 'region';
+            $address_name = $region;
+        }
 
-        $faq = $row->faq;
-        $fish_chart = $row->fish_chart;
-        $fish_size_limit = $row->fish_size_limit;
-        $fish_time_limit = $row->fish_time_limit;
+        $row_data = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->whereType($destination_type)->whereName($address_name)->first();
+
+        if (is_null($row_data)) {
+            abort(404);
+        }
+        $regions = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->whereType('region')->whereCountryId($row_data->id)->get();
+        $cities = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->whereType('city')->whereCountryId($row_data->id)->get();
+
+        
+        $faq = $row_data->faq;
+        $fish_chart = $row_data->fish_chart;
+        $fish_size_limit = $row_data->fish_size_limit;
+        $fish_time_limit = $row_data->fish_time_limit;
 
         //$guidings = Guiding::where('status', 1)->whereNotNull('lat')->whereNotNull('lng')->paginate(10);
 
@@ -203,7 +214,8 @@ class DestinationCountryController extends Controller
             $title .= __('guidings.Radius') . ' ' . $request->radius . 'km | ';
             $radius = $request->get('radius');
         }
-        $geocode = $this->getCoordinates($country);
+        $geocode = $this->getCoordinates($country, $region, $city);
+        
         $placeLat = $geocode['lat'];
         $placeLng = $geocode['lng'];
 
@@ -252,7 +264,7 @@ class DestinationCountryController extends Controller
 
         $guidings->appends(request()->except('page'));
 
-        $data = compact('row', 'faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit', 'guidings', 'radius', 'allGuidings', 'otherguidings', 'title');
+        $data = compact('row_data', 'regions', 'cities', 'faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit', 'guidings', 'radius', 'allGuidings', 'otherguidings', 'title');
 
         return view('pages.category.country', $data);
     }
@@ -274,4 +286,25 @@ class DestinationCountryController extends Controller
         return $nearestlisting;
     }
 
+    public function getCoordinates($country, $region=null, $city=null)
+    {
+        $client = new \GuzzleHttp\Client();
+        $geocoder = new Geocoder($client);
+
+        $geocoder->setApiKey('AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q');
+
+        $geocoder->setCountry($country);
+
+        $address = $country;
+
+        if (!is_null($city)) {
+            $address = $city . ', ' . $region . ', ' . $country;
+        } elseif (!is_null($region)) {
+            $address = $region . ', ' .$country;
+        }
+
+        $coordinates = $geocoder->getCoordinatesForAddress($address);
+
+        return $coordinates;
+    }
 }
