@@ -149,11 +149,12 @@ input[type=number] {
 
                                 <div class="form-group pb-3">
                                     <h4><button class="btn btn-secondary btn-sm mb-1" onclick="add_fish_chart_item()" type="button"><i class="fa fa-plus"></i></button> Availability of Fish</h4>
-
+                                    <input type="text" class="form-control mb-2" placeholder="Title" name="fish_avail_title" id="fish_avail_title" value="{{ $fish_avail_title }}">
+                                    <textarea class="form-control mb-2" cols="20" rows="4" placeholder="Content" name="fish_avail_intro" id="fish_avail_intro">{{ $fish_avail_intro }}</textarea>
                                     <table class="table table-bordered table-striped" id="fish_chart_table">
                                         <thead>
                                         <tr>
-                                            <th width="5%">Fish</th>
+                                            <th width="5%"></th>
                                             <th width="23%">Fish</th>
                                             @for($i = 1; $i <= 12; $i++)
                                             <th width="6%" class="text-center">{{ date('M', strtotime(date("Y-$i-d"))) }}</th>
@@ -166,7 +167,8 @@ input[type=number] {
 
                                 <div class="form-group pb-3">
                                     <h4><button class="btn btn-secondary btn-sm mb-1" onclick="add_fish_size_limit_item()" type="button"><i class="fa fa-plus"></i></button> Size Limit</h4>
-
+                                    <input type="text" class="form-control mb-2" placeholder="Title" name="size_limit_title" id="size_limit_title" value="{{ $size_limit_title }}">
+                                    <textarea class="form-control mb-2" cols="20" rows="4" placeholder="Content" name="size_limit_intro" id="size_limit_intro">{{ $size_limit_intro }}</textarea>
                                     <table class="table table-bordered table-striped" id="fish_size_limit_table">
                                         <thead>
                                         <tr>
@@ -181,7 +183,8 @@ input[type=number] {
 
                                 <div class="form-group pb-3">
                                     <h4><button class="btn btn-secondary btn-sm mb-1" onclick="add_fish_time_limit_item()" type="button"><i class="fa fa-plus"></i></button> Time Limit</h4>
-
+                                    <input type="text" class="form-control mb-2" placeholder="Title" name="time_limit_title" id="time_limit_title" value="{{ $time_limit_title }}">
+                                    <textarea class="form-control mb-2" cols="20" rows="4" placeholder="Content" name="time_limit_intro" id="time_limit_intro">{{ $time_limit_intro }}</textarea>
                                     <table class="table table-bordered table-striped" id="fish_time_limit_table">
                                         <thead>
                                         <tr>
@@ -196,7 +199,7 @@ input[type=number] {
 
                                 <div class="form-group">
                                     <h4><button class="btn btn-secondary btn-sm mb-1" onclick="add_faq_item()" type="button"><i class="fa fa-plus"></i></button> FAQ</h4>
-
+                                    <input type="text" class="form-control mb-2" placeholder="Title" name="faq_title" id="faq_title" value="{{ $faq_title }}">
                                     <table class="table table-bordered table-striped" id="faq_table">
                                         <thead>
                                         <tr>
@@ -229,11 +232,37 @@ input[type=number] {
 
 
 @push('js_after')
-    <script>
-        CKEDITOR.replace( 'body' );
-    </script>
-
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q&loading=async&libraries=places,geocoder&callback=initialize"></script>
+<script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
+    ({key: "AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q", v: "weekly"});
+</script>
 <script>
+    CKEDITOR.replace( 'body' );
+
+    function initialize() {
+        var input = document.getElementById('searchPlace');
+        var autocomplete = new google.maps.places.Autocomplete(input);
+        google.maps.event.addListener(autocomplete, 'place_changed', function () {
+            var place = autocomplete.getPlace();
+            document.getElementById('placeLat').value = place.geometry.location.lat();
+            document.getElementById('placeLng').value = place.geometry.location.lng();
+            var country = null;
+            for (var i = 0; i < place.address_components.length; i++) {
+                for (var j = 0; j < place.address_components[i].types.length; j++) {
+                    if (place.address_components[i].types[j] === 'country') {
+                        country = place.address_components[i].long_name;
+                        break;
+                    }
+                }
+                if (country) {
+                    break;
+                }
+            }
+            document.getElementById('country').value = country;
+        });
+    }
+
+    //window.addEventListener('load', initialize);
 
     $('#target-fish').select2({
         placeholder: "Select",
@@ -267,188 +296,149 @@ input[type=number] {
     @endif
 </script>
 
-    <script>
-        $(document).ready(function(){
-            $('#language').change(function(){
-                var x = $(this).val();
+<script>
 
-                if(x == 'en'){
-                    x = 'gb';
-                }
-                $('.fi').removeClass (function (index, className) {
-                    return (className.match (/(^|\s)fi-\S+/g) || []).join(' ');
-                });
-                $('.fi').addClass('fi-' + x);
-            })
+    $(function(){
+
+    @if(isset($fish_chart))
+        @foreach($fish_chart as $row)
+            add_fish_chart_item({{ $row->id }}, '{{ $row->fish }}', {{ $row->jan }}, {{ $row->feb }}, {{ $row->mar }}, {{ $row->apr }}, {{ $row->may }}, {{ $row->jun }}, {{ $row->jul }}, {{ $row->aug }}, {{ $row->sep }}, {{ $row->oct }}, {{ $row->nov }}, {{ $row->dec }});
+        @endforeach
+    @endif
+    @if(isset($fish_size_limit))
+        @foreach($fish_size_limit as $row)
+            add_fish_size_limit_item({{ $row->id }}, '{{ $row->fish }}', '{{ $row->data }}');
+        @endforeach
+    @endif
+    @if(isset($fish_time_limit))
+        @foreach($fish_time_limit as $row)
+            add_fish_time_limit_item({{ $row->id }}, '{{ $row->fish }}', '{{ $row->data }}');
+        @endforeach
+    @endif
+
+    @if(isset($faq))
+        @foreach($faq as $row)
+            add_faq_item({{ $row->id }}, '{{ $row->question }}', '{{ $row->answer }}');
+        @endforeach
+    @endif
+    });
+
+    $(function(){
+        $('.ttt').keyup(function(e){
+            //console.log(this.value);
+          if (/\D/g.test(this.value)){
+            //console.log(this.value);
+            this.value = this.value.replace(/\D/g, '');
+          }
         });
-    </script>
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q&loading=async&libraries=places,geocoder"></script>
-    <script>
-        $(function(){
+    });
 
-        @if(isset($fish_chart))
-            @foreach($fish_chart as $row)
-                add_fish_chart_item({{ $row->id }}, '{{ $row->fish }}', {{ $row->jan }}, {{ $row->feb }}, {{ $row->mar }}, {{ $row->apr }}, {{ $row->may }}, {{ $row->jun }}, {{ $row->jul }}, {{ $row->aug }}, {{ $row->sep }}, {{ $row->oct }}, {{ $row->nov }}, {{ $row->dec }});
-            @endforeach
-        @endif
-        @if(isset($fish_size_limit))
-            @foreach($fish_size_limit as $row)
-                add_fish_size_limit_item({{ $row->id }}, '{{ $row->fish }}', '{{ $row->data }}');
-            @endforeach
-        @endif
-        @if(isset($fish_time_limit))
-            @foreach($fish_time_limit as $row)
-                add_fish_time_limit_item({{ $row->id }}, '{{ $row->fish }}', '{{ $row->data }}');
-            @endforeach
-        @endif
-
-        @if(isset($faq))
-            @foreach($faq as $row)
-                add_faq_item({{ $row->id }}, '{{ $row->question }}', '{{ $row->answer }}');
-            @endforeach
-        @endif
-        });
-
-        function initialize() {
-            var input = document.getElementById('searchPlace');
-            var autocomplete = new google.maps.places.Autocomplete(input);
-            google.maps.event.addListener(autocomplete, 'place_changed', function () {
-                var place = autocomplete.getPlace();
-                document.getElementById('placeLat').value = place.geometry.location.lat();
-                document.getElementById('placeLng').value = place.geometry.location.lng();
-                var country = null;
-                for (var i = 0; i < place.address_components.length; i++) {
-                    for (var j = 0; j < place.address_components[i].types.length; j++) {
-                        if (place.address_components[i].types[j] === 'country') {
-                            country = place.address_components[i].long_name;
-                            break;
-                        }
-                    }
-                    if (country) {
-                        break;
-                    }
-                }
-                document.getElementById('country').value = country;
-            });
-        }
-
-        window.addEventListener('load', initialize);
-
-        $(function(){
-            $('.ttt').keyup(function(e){
-                //console.log(this.value);
-              if (/\D/g.test(this.value)){
-                //console.log(this.value);
-                this.value = this.value.replace(/\D/g, '');
-              }
-            });
-        });
-
-        function onlyNumber(fish_chart, inputVal) {
-            var patt=/^[0-9]+$/;
-            var txt = inputVal.slice(0, -1);
-            if(patt.test(inputVal)) {
-                if (inputVal >= 0 && inputVal <= 3) {
-                    document.getElementById(fish_chart).value = inputVal;
-                } else {
-                    document.getElementById(fish_chart).value = txt;
-                }
+    function onlyNumber(fish_chart, inputVal) {
+        var patt=/^[0-9]+$/;
+        var txt = inputVal.slice(0, -1);
+        if(patt.test(inputVal)) {
+            if (inputVal >= 0 && inputVal <= 3) {
+                document.getElementById(fish_chart).value = inputVal;
             } else {
                 document.getElementById(fish_chart).value = txt;
             }
+        } else {
+            document.getElementById(fish_chart).value = txt;
         }
+    }
 
-        function add_fish_chart_item_input(fish_chart_item_counter, month, value) {
-            return '<input class="form-control form-control-sm text-center" type="text" oninput="onlyNumber(\'fish_chart_' + fish_chart_item_counter + '_' + month + '\', value)" id="fish_chart_' + fish_chart_item_counter + '_' + month + '" min="1" max="3" maxlength="1" name="fish_chart[' + fish_chart_item_counter + '][' + month + ']" value="' + value + '">';
-        }
+    function add_fish_chart_item_input(fish_chart_item_counter, month, value) {
+        return '<input class="form-control form-control-sm text-center" type="text" oninput="onlyNumber(\'fish_chart_' + fish_chart_item_counter + '_' + month + '\', value)" id="fish_chart_' + fish_chart_item_counter + '_' + month + '" min="1" max="3" maxlength="1" name="fish_chart[' + fish_chart_item_counter + '][' + month + ']" value="' + value + '">';
+    }
 
-        let fish_chart_item_counter = 0;
-        function add_fish_chart_item(id = 0, fish = '', jan = 1, feb = 1, mar = 1, apr = 1, may = 1, jun = 1, jul = 1, aug = 1, sep = 1, oct = 1, nov = 1, dec = 1) {
-            let onclick = '';
-            let row = '<tr id="fish_chart_item_item_' + fish_chart_item_counter + '"><td>' +
-                            '<a class="btn btn-link btn-sm" href="javascript:void(0)" onclick="remove_fish_chart_item(' + fish_chart_item_counter + ')"><i class="fa fa-times fa-lg"></i></a>' +
-                            '</td><td>' +
-                            '<input class="form-control form-control-sm mb-1" placeholder="Fish" name="fish_chart[' + fish_chart_item_counter + '][fish]" type="text" value="' + fish + '">' +
-                            '<input name="fish_chart[' + fish_chart_item_counter + '][id]" type="hidden" value="' + id + '">' +
-                            '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'jan', jan) + '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'feb', feb) + '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'mar', mar) + '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'apr', apr) + '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'may', may) + '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'jun', jun) + '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'jul', jul) + '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'aug', aug) + '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'sep', sep) + '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'oct', oct) + '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'nov', nov) + '</td>' +
-                            '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'dec', dec) + '</td></tr>';
-            $('#fish_chart_table tbody').append(row);
-            fish_chart_item_counter++;
-        }
+    let fish_chart_item_counter = 0;
+    function add_fish_chart_item(id = 0, fish = '', jan = 1, feb = 1, mar = 1, apr = 1, may = 1, jun = 1, jul = 1, aug = 1, sep = 1, oct = 1, nov = 1, dec = 1) {
+        let onclick = '';
+        let row = '<tr id="fish_chart_item_item_' + fish_chart_item_counter + '"><td>' +
+                        '<a class="btn btn-link btn-sm" href="javascript:void(0)" onclick="remove_fish_chart_item(' + fish_chart_item_counter + ')"><i class="fa fa-times fa-lg"></i></a>' +
+                        '</td><td>' +
+                        '<input class="form-control form-control-sm mb-1" placeholder="Fish" name="fish_chart[' + fish_chart_item_counter + '][fish]" type="text" value="' + fish + '">' +
+                        '<input name="fish_chart[' + fish_chart_item_counter + '][id]" type="hidden" value="' + id + '">' +
+                        '</td>' +
+                        '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'jan', jan) + '</td>' +
+                        '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'feb', feb) + '</td>' +
+                        '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'mar', mar) + '</td>' +
+                        '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'apr', apr) + '</td>' +
+                        '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'may', may) + '</td>' +
+                        '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'jun', jun) + '</td>' +
+                        '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'jul', jul) + '</td>' +
+                        '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'aug', aug) + '</td>' +
+                        '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'sep', sep) + '</td>' +
+                        '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'oct', oct) + '</td>' +
+                        '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'nov', nov) + '</td>' +
+                        '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'dec', dec) + '</td></tr>';
+        $('#fish_chart_table tbody').append(row);
+        fish_chart_item_counter++;
+    }
 
-        function remove_fish_chart_item(counter) {
-            $('#fish_chart_item_item_' + counter).remove();
-        }
+    function remove_fish_chart_item(counter) {
+        $('#fish_chart_item_item_' + counter).remove();
+    }
 
-        let fish_size_limit_item_counter = 0;
-        function add_fish_size_limit_item(id = 0, fish = '', data = '') {
-            let onclick = '';
-            let row = '<tr id="fish_size_limit_item_' + fish_size_limit_item_counter + '">' +
-                            '<td>' +
-                            '<a class="btn btn-link btn-sm" href="javascript:void(0)" onclick="remove_fish_size_limit_item(' + fish_size_limit_item_counter + ')"><i class="fa fa-times fa-lg"></i></a>' + 
-                            '</td><td>' +
-                            '<input name="fish_size_limit[' + fish_size_limit_item_counter + '][id]" type="hidden" value="' + id + '">' +
-                            '<input class="form-control form-control-sm mb-1" placeholder="Fish" name="fish_size_limit[' + fish_size_limit_item_counter + '][fish]" type="text" value="' + fish + '">' +
-                            '</td><td>' +
-                            '<input class="form-control form-control-sm mb-1" placeholder="Input" name="fish_size_limit[' + fish_size_limit_item_counter + '][data]" type="text" value="' + data + '">' +
-                            '</td></tr>';
-            $('#fish_size_limit_table tbody').append(row);
-            fish_size_limit_item_counter++;
-        }
+    let fish_size_limit_item_counter = 0;
+    function add_fish_size_limit_item(id = 0, fish = '', data = '') {
+        let onclick = '';
+        let row = '<tr id="fish_size_limit_item_' + fish_size_limit_item_counter + '">' +
+                        '<td>' +
+                        '<a class="btn btn-link btn-sm" href="javascript:void(0)" onclick="remove_fish_size_limit_item(' + fish_size_limit_item_counter + ')"><i class="fa fa-times fa-lg"></i></a>' + 
+                        '</td><td>' +
+                        '<input name="fish_size_limit[' + fish_size_limit_item_counter + '][id]" type="hidden" value="' + id + '">' +
+                        '<input class="form-control form-control-sm mb-1" placeholder="Fish" name="fish_size_limit[' + fish_size_limit_item_counter + '][fish]" type="text" value="' + fish + '">' +
+                        '</td><td>' +
+                        '<input class="form-control form-control-sm mb-1" placeholder="Input" name="fish_size_limit[' + fish_size_limit_item_counter + '][data]" type="text" value="' + data + '">' +
+                        '</td></tr>';
+        $('#fish_size_limit_table tbody').append(row);
+        fish_size_limit_item_counter++;
+    }
 
-        function remove_fish_size_limit_item(counter) {
-            $('#fish_size_limit_item_' + counter).remove();
-        }
+    function remove_fish_size_limit_item(counter) {
+        $('#fish_size_limit_item_' + counter).remove();
+    }
 
-        let fish_time_limit_item_counter = 0;
-        function add_fish_time_limit_item(id = 0, fish = '', data = '') {
-            let onclick = '';
-            let row = '<tr id="fish_time_limit_item_' + fish_time_limit_item_counter + '">' +
-                            '<td>' +
-                            '<a class="btn btn-link btn-sm" href="javascript:void(0)" onclick="remove_fish_size_limit_item(' + fish_time_limit_item_counter + ')"><i class="fa fa-times fa-lg"></i></a>' + 
-                            '</td><td>' +
-                            '<input name="fish_time_limit[' + fish_time_limit_item_counter + '][id]" type="hidden" value="' + id + '">' +
-                            '<input class="form-control form-control-sm mb-1" placeholder="Fish" name="fish_time_limit[' + fish_time_limit_item_counter + '][fish]" type="text" value="' + fish + '">' +
-                            '</td><td>' +
-                            '<input class="form-control form-control-sm mb-1" placeholder="Input" name="fish_time_limit[' + fish_time_limit_item_counter + '][data]" type="text" value="' + data + '">' +
-                            '</td></tr>';
-            $('#fish_time_limit_table tbody').append(row);
-            fish_time_limit_item_counter++;
-        }
+    let fish_time_limit_item_counter = 0;
+    function add_fish_time_limit_item(id = 0, fish = '', data = '') {
+        let onclick = '';
+        let row = '<tr id="fish_time_limit_item_' + fish_time_limit_item_counter + '">' +
+                        '<td>' +
+                        '<a class="btn btn-link btn-sm" href="javascript:void(0)" onclick="remove_fish_size_limit_item(' + fish_time_limit_item_counter + ')"><i class="fa fa-times fa-lg"></i></a>' + 
+                        '</td><td>' +
+                        '<input name="fish_time_limit[' + fish_time_limit_item_counter + '][id]" type="hidden" value="' + id + '">' +
+                        '<input class="form-control form-control-sm mb-1" placeholder="Fish" name="fish_time_limit[' + fish_time_limit_item_counter + '][fish]" type="text" value="' + fish + '">' +
+                        '</td><td>' +
+                        '<input class="form-control form-control-sm mb-1" placeholder="Input" name="fish_time_limit[' + fish_time_limit_item_counter + '][data]" type="text" value="' + data + '">' +
+                        '</td></tr>';
+        $('#fish_time_limit_table tbody').append(row);
+        fish_time_limit_item_counter++;
+    }
 
-        function remove_fish_time_limit_item(counter) {
-            $('#fish_time_limit_item_' + counter).remove();
-        }
+    function remove_fish_time_limit_item(counter) {
+        $('#fish_time_limit_item_' + counter).remove();
+    }
 
-        let faq_item_counter = 0;
-        function add_faq_item(id = 0, question = '', answer = '') {
-            let faq_row = '<tr id="faq_item_' + faq_item_counter + '">' +
-                            '<td>' +
-                            '<a class="btn btn-link btn-sm" href="javascript:void(0)" onclick="remove_faq_item(' + faq_item_counter + ')"><i class="fa fa-times fa-lg"></i></a>' +
-                            '</td><td>' +
-                            '<input name="faq[' + faq_item_counter + '][id]" type="hidden" value="' + id + '">' +
-                            '<input class="form-control form-control-sm" name="faq[' + faq_item_counter + '][question]" value="' + question + '" type="text" placeholder="Question">' +
-                            '</td><td>' +
-                            '<input class="form-control form-control-sm" name="faq[' + faq_item_counter + '][answer]" value="' + answer + '" type="text" placeholder="Answer">' +
-                            '</td></tr>';
-            $('#faq_table tbody').append(faq_row);
-            faq_item_counter++;
-        }
+    let faq_item_counter = 0;
+    function add_faq_item(id = 0, question = '', answer = '') {
+        let faq_row = '<tr id="faq_item_' + faq_item_counter + '">' +
+                        '<td>' +
+                        '<a class="btn btn-link btn-sm" href="javascript:void(0)" onclick="remove_faq_item(' + faq_item_counter + ')"><i class="fa fa-times fa-lg"></i></a>' +
+                        '</td><td>' +
+                        '<input name="faq[' + faq_item_counter + '][id]" type="hidden" value="' + id + '">' +
+                        '<input class="form-control form-control-sm" name="faq[' + faq_item_counter + '][question]" value="' + question + '" type="text" placeholder="Question">' +
+                        '</td><td>' +
+                        '<input class="form-control form-control-sm" name="faq[' + faq_item_counter + '][answer]" value="' + answer + '" type="text" placeholder="Answer">' +
+                        '</td></tr>';
+        $('#faq_table tbody').append(faq_row);
+        faq_item_counter++;
+    }
 
-        function remove_faq_item(counter) {
-            $('#faq_item_' + counter).remove();
-        }
-    </script>
+    function remove_faq_item(counter) {
+        $('#faq_item_' + counter).remove();
+    }
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 
 @endpush

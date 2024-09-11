@@ -45,13 +45,28 @@ class AdminCategoryRegionController extends Controller
         $country = $filter['country'] ?? '';
 
         $fish_chart = old('fish_chart');
+        $fish_avail_title = old('fish_avail_title');
+        $fish_avail_intro = old('fish_avail_intro');
+
         $fish_size_limit = old('fish_size_limit');
+        $size_limit_title = old('size_limit_title');
+        $size_limit_intro = old('size_limit_intro');
+
         $fish_time_limit = old('fish_time_limit');
+        $time_limit_title = old('time_limit_title');
+        $time_limit_intro = old('time_limit_intro');
+
         $faq = old('faq');
+        $faq_title = old('faq_title');
 
         $countries = Destination::whereType('country')->orderBy('name', 'ASC')->get();
 
-        $data = compact('form', 'route', 'method', 'country_id', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'country', 'fish_chart', 'fish_size_limit', 'fish_time_limit', 'faq', 'countries');
+        $data = compact('form', 'route', 'method', 'country_id', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'country', 
+            'fish_chart', 'fish_avail_title', 'fish_avail_intro', 
+            'fish_size_limit', 'size_limit_title', 'size_limit_intro', 
+            'fish_time_limit', 'time_limit_title', 'time_limit_intro', 
+            'faq', 'faq_title', 
+            'countries');
 
         return view('admin.pages.category.form', $data);
     }
@@ -72,7 +87,7 @@ class AdminCategoryRegionController extends Controller
 
         try {
             DB::beginTransaction();
-            $data = $request->only(['country_id', 'name', 'title', 'sub_title', 'introduction']);
+            $data = $request->only(['country_id', 'name', 'title', 'sub_title', 'introduction', 'fish_avail_title', 'fish_avail_intro', 'size_limit_title', 'size_limit_intro', 'time_limit_title', 'time_limit_intro', 'faq_title']);
             $data['type'] = 'region';
             $data['filters'] = json_encode($request->filters);
             $data['content'] = $request->body;
@@ -152,13 +167,28 @@ class AdminCategoryRegionController extends Controller
         $country = $filter->country ?? '';
 
         $fish_chart = $row->fish_chart;
+        $fish_avail_title = $row->fish_avail_title;
+        $fish_avail_intro = $row->fish_avail_intro;
+
         $fish_size_limit = $row->fish_size_limit;
+        $size_limit_title = $row->size_limit_title;
+        $size_limit_intro = $row->size_limit_intro;
+
         $fish_time_limit = $row->fish_time_limit;
+        $time_limit_title = $row->time_limit_title;
+        $time_limit_intro = $row->time_limit_intro;
+
         $faq = $row->faq;
+        $faq_title = $row->faq_title;
 
         $countries = Destination::whereType('country')->orderBy('name', 'ASC')->get();
 
-        $data = compact('form', 'route', 'method', 'country_id', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'country', 'fish_chart', 'fish_size_limit', 'fish_time_limit', 'faq', 'countries');
+        $data = compact('form', 'route', 'method', 'country_id', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'country', 
+            'fish_chart', 'fish_avail_title', 'fish_avail_intro', 
+            'fish_size_limit', 'size_limit_title', 'size_limit_intro', 
+            'fish_time_limit', 'time_limit_title', 'time_limit_intro', 
+            'faq', 'faq_title', 
+            'countries');
 
         return view('admin.pages.category.form', $data);
     }
@@ -179,7 +209,7 @@ class AdminCategoryRegionController extends Controller
 
         try {
             DB::beginTransaction();
-            $data = $request->only(['country_id', 'name', 'title', 'sub_title', 'introduction']);
+            $data = $request->only(['country_id', 'name', 'title', 'sub_title', 'introduction', 'fish_avail_title', 'fish_avail_intro', 'size_limit_title', 'size_limit_intro', 'time_limit_title', 'time_limit_intro', 'faq_title']);
             $data['filters'] = json_encode($request->filters);
             $data['content'] = $request->body;
             $webp_path = null;

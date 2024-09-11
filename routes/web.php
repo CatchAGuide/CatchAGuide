@@ -200,7 +200,10 @@ Route::name('additional.')->group(function () {
 /*Route::prefix('destination')->name('desitination.')->group(function () {
     Route::get('country', [DestinationCountryController::class, 'index'])->name('country');
 });*/
-Route::get('destination/{country}', [DestinationCountryController::class, 'index'])->name('destination.country');
+Route::get('destination', [DestinationCountryController::class, 'index'])->name('destination');
+#Route::get('destination/{country}', [DestinationCountryController::class, 'country'])->name('destination.country');
+#Route::get('destination/{country}/{region}', [DestinationCountryController::class, 'region'])->name('destination.region');
+Route::get('destination/{country}/{region?}/{city?}', [DestinationCountryController::class, 'country'])->name('destination.country');
 
 Route::post('sendcontact', [\App\Http\Controllers\ZoisController::class, 'sendcontact'])->name('sendcontactmail');
 Route::post('sendnewsletter', [\App\Http\Controllers\ZoisController::class, 'sendnewsletter'])->name('sendnewsletter');

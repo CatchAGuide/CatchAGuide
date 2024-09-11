@@ -45,17 +45,31 @@ class AdminCategoryCityController extends Controller
         $placeLng = $filter['placeLng'] ?? '';
         $country = $filter['country'] ?? '';
 
-        $fish_chart = old('fish_chart');
-        $fish_size_limit = old('fish_size_limit');
-        $fish_time_limit = old('fish_time_limit');
-        $faq = old('faq');
+        $fish_chart = $row->fish_chart;
+        $fish_avail_title = $row->fish_avail_title;
+        $fish_avail_intro = $row->fish_avail_intro;
+
+        $fish_size_limit = $row->fish_size_limit;
+        $size_limit_title = $row->size_limit_title;
+        $size_limit_intro = $row->size_limit_intro;
+
+        $fish_time_limit = $row->fish_time_limit;
+        $time_limit_title = $row->time_limit_title;
+        $time_limit_intro = $row->time_limit_intro;
+
+        $faq = $row->faq;
+        $faq_title = $row->faq_title;
 
         $destination = Destination::where('type', '<>', 'city')->orderBy('name', 'ASC')->get(['id', 'name', 'country_id', 'region_id', 'type']);
         $countries = $destination->where('type', 'country');
         $regions = json_encode($destination->where('type', 'region')->toArray());
         #dd(json_encode($regions));
 
-        $data = compact('form', 'route', 'method', 'country_id', 'region_id', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'country', 'fish_chart', 'fish_size_limit', 'fish_time_limit', 'faq', 'countries', 'regions');
+        $data = compact('form', 'route', 'method', 'country_id', 'region_id', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'country', 
+            'fish_chart', 'fish_avail_title', 'fish_avail_intro', 
+            'fish_size_limit', 'size_limit_title', 'size_limit_intro', 
+            'fish_time_limit', 'time_limit_title', 'time_limit_intro', 
+            'faq', 'faq_title', 'countries', 'regions');
 
         return view('admin.pages.category.form', $data);
     }
@@ -76,7 +90,7 @@ class AdminCategoryCityController extends Controller
 
         try {
             DB::beginTransaction();
-            $data = $request->only(['country_id', 'region_id', 'name', 'title', 'sub_title', 'introduction']);
+            $data = $request->only(['country_id', 'region_id', 'name', 'title', 'sub_title', 'introduction', 'fish_avail_title', 'fish_avail_intro', 'size_limit_title', 'size_limit_intro', 'time_limit_title', 'time_limit_intro', 'faq_title']);
             $data['type'] = 'city';
             $data['filters'] = json_encode($request->filters);
             $data['content'] = $request->body;
@@ -157,15 +171,30 @@ class AdminCategoryCityController extends Controller
         $country = $filter->country ?? '';
 
         $fish_chart = $row->fish_chart;
+        $fish_avail_title = $row->fish_avail_title;
+        $fish_avail_intro = $row->fish_avail_intro;
+
         $fish_size_limit = $row->fish_size_limit;
+        $size_limit_title = $row->size_limit_title;
+        $size_limit_intro = $row->size_limit_intro;
+
         $fish_time_limit = $row->fish_time_limit;
+        $time_limit_title = $row->time_limit_title;
+        $time_limit_intro = $row->time_limit_intro;
+
         $faq = $row->faq;
+        $faq_title = $row->faq_title;
 
         $destination = Destination::where('type', '<>', 'city')->orderBy('name', 'ASC')->get(['id', 'name', 'country_id', 'region_id', 'type']);
         $countries = $destination->where('type', 'country');
         $regions = json_encode($destination->where('type', 'region')->toArray());
 
-        $data = compact('form', 'route', 'method', 'country_id', 'region_id', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'country', 'fish_chart', 'fish_size_limit', 'fish_time_limit', 'faq', 'countries', 'regions');
+        $data = compact('form', 'route', 'method', 'country_id', 'region_id', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'country', 
+            'fish_chart', 'fish_avail_title', 'fish_avail_intro', 
+            'fish_size_limit', 'size_limit_title', 'size_limit_intro', 
+            'fish_time_limit', 'time_limit_title', 'time_limit_intro', 
+            'faq', 'faq_title', 
+            'countries', 'regions');
 
         return view('admin.pages.category.form', $data);
     }
@@ -186,7 +215,7 @@ class AdminCategoryCityController extends Controller
 
         try {
             DB::beginTransaction();
-            $data = $request->only(['name', 'title', 'sub_title', 'introduction']);
+            $data = $request->only(['country_id', 'region_id', 'name', 'title', 'sub_title', 'introduction', 'fish_avail_title', 'fish_avail_intro', 'size_limit_title', 'size_limit_intro', 'time_limit_title', 'time_limit_intro', 'faq_title']);
             $data['filters'] = json_encode($request->filters);
             $data['content'] = $request->body;
             $webp_path = null;

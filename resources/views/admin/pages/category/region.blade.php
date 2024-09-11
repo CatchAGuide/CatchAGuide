@@ -49,7 +49,7 @@
                                                 <td>{{ $row->country_name }}</td>
                                                 <td>{{ $row->name }}</td>
                                                 <td>
-                                                    <a href="{{ route('admin.category.region.edit', $row->id) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pencil"></i></a>
+                                                    <a href="{{ route('admin.category.region.edit', $row->id) }}" class="btn btn-sm btn-secondary"><i class="fa fa-edit"></i></a>
                                                     <form class="frm-btn-delete" action="{{ route('admin.category.region.destroy', $row->id) }}" method="post">
                                                         @method('DELETE')
                                                         @csrf()
