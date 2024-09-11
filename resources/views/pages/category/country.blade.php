@@ -341,7 +341,7 @@
                                         <div class="px-2 select2-icon">
                                             <img src="{{asset('assets/images/icons/water-waves.png')}}" height="20" width="20" alt="" />
                                         </div>
-                                        <select class="form-select mb-3" id="water_type" name="water_type[]"></select>
+                                        <select class="form-select mb-3" id="water" name="water[]"></select>
                                     </div>
                                     <div class="form-group mb-3 d-flex align-items-center border-bottom">
                                         <!-- <label for="fishing_technique" class="form-label">Fishing Technique</label> -->
@@ -835,18 +835,18 @@ function initializeSelect2() {
     });
 
     @foreach($allwaters as $water)
-    var watername = '{{$water->name}}';
+        var watername = '{{$water->name}}';
 
-    @if(app()->getLocale() == 'en')
-    watername = '{{$water->name_en}}'
-    @endif
+        @if(app()->getLocale() == 'en')
+        watername = '{{$water->name_en}}'
+        @endif
 
-    var waterOption = new Option(watername, '{{ $water->id }}');
-    selectWater.append(waterOption);
+        var waterOption = new Option(watername, '{{ $water->id }}');
+        selectWater.append(waterOption);
 
-    @if(request()->get('water'))
-        @if(in_array($water->id, request()->get('water')))
-        $(waterOption).prop('selected', true);
+        @if(request()->get('water'))
+            @if(in_array($water->id, request()->get('water')))
+            $(waterOption).prop('selected', true);
         @endif
     @endif
 
