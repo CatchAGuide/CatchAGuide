@@ -163,7 +163,6 @@ class ProfileController extends Controller
             $waters = $waters->pluck('name');
             $inclussions = $inclussions->pluck('name');
         }
-
         return view('pages.profile.newguiding', compact('waters', 'methods', 'targets', 'inclussions'));
     }
     

@@ -3,7 +3,6 @@
     <div class="card-body">
         
         <div id="error-container" class="alert alert-danger" style="display: none;"></div>
-        
         <div class="step-wrapper">
             <div class="step-buttons">
                 <div class="step-button active" data-step="1">
