@@ -23,6 +23,7 @@ use Config;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\GuidingRequestMail;
 use App\Mail\SearchRequestUserMail;
+use Illuminate\Support\Facades\Log;
 
 class GuidingsController extends Controller
 {
@@ -287,15 +288,29 @@ class GuidingsController extends Controller
 
         try {
             $guiding = new Guiding();
+
+            $guiding->user_id = auth()->id();
+            $guiding->slug = slugify($request->input('title') . "-" . $request->input('location') . "-" . auth()->id());
+
+            //step 1
+            $guiding->location = $request->input('location');
+            $guiding->title = $request->input('title');
+            $guiding->lat = $request->input('latitude');
+            $guiding->lng = $request->input('longitude');
+            $guiding->country = $request->input('country');
+            $this->handleFileUploads($guiding, $request);
+
             $guiding->fill($request->validated());
             $guiding->user_id = auth()->id();
+            $guiding->style_of_fishing = $request->input('style_of_fishing');
+
             $guiding->save();
 
             $this->saveDescriptions($guiding, $request);
+            $this->generateLongDescription($request);
             $this->saveAdditionalInformation($guiding, $request);
             $this->saveRequirements($guiding, $request);
             $this->saveRecommendations($guiding, $request);
-            $this->handleFileUploads($guiding, $request);
 
             // Handle target fish, methods, water types, and inclusions
             $guiding->targetFish()->sync(json_decode($request->input('target_fish'), true));
@@ -304,7 +319,7 @@ class GuidingsController extends Controller
             $guiding->inclusions()->sync(json_decode($request->input('inclussions'), true));
 
             // Handle pricing
-            if ($request->input('price') === 'per_person') {
+            if ($request->input('price_type') === 'per_person') {
                 foreach ($request->input('price_per_person') as $guests => $price) {
                     $guiding->prices()->create([
                         'guests' => $guests,
@@ -320,9 +335,9 @@ class GuidingsController extends Controller
 
             // Handle extras
             $extras = json_decode($request->input('extras'), true);
-            foreach ($extras as $extra) {
+            foreach ($extras as $key => $extra) {
                 $guiding->extras()->create([
-                    'name' => $extra['value'],
+                    'name' => $request->input('extra_name_' . ($key + 1), 0),
                     'price' => $request->input('extra_price_' . ($key + 1), 0),
                 ]);
             }
@@ -335,14 +350,43 @@ class GuidingsController extends Controller
         }
     }
 
+    public function saveDraft(Request $request)
+    {
+        $user = Auth::user();
+        $data = $request->all();
+        Log::info($data);
+        $currentStep = $request->input('current_step', 1);
+
+        // Remove any empty arrays or null values
+        // $data = array_filter($data, function ($value) {
+        //     return $value !== null && $value !== '';
+        // });
+
+        // // Handle file uploads
+        // if ($request->hasFile('title_image')) {
+        //     $data['title_image'] = $this->handleFileUploads($request->file('title_image'));
+        // }
+
+        // // Save or update the draft
+        // $draft = Guiding::updateOrCreate(
+        //     ['user_id' => $user->id, 'is_draft' => true],
+        //     [
+        //         'data' => json_encode($data),
+        //         'current_step' => $currentStep,
+        //     ]
+        // );
+
+        return response()->json(['success' => true, 'message' => 'Draft saved successfully']);
+    }
+
     private function generateLongDescription($request)
     {
         $longDescriptions = json_decode(file_get_contents(public_path('assets/prompts/long_description.json')), true);
         $randomDescription = $longDescriptions['options'][array_rand($longDescriptions['options'])];
 
         $description = str_replace(
-            ['{course_of_action}', '{meeting_point}', '{special_about}', '{tour_unique}', '{starting_time}'],
-            [$request->course_of_action, $request->meeting_point, $request->special_about, $request->tour_unique, $request->starting_time],
+            ['{desc_course_of_action}', '{desc_meeting_point}', '{special_about}', '{desc_tour_unique}', '{desc_starting_time}'],
+            [$request->desc_course_of_action, $request->desc_meeting_point, "", $request->desc_tour_unique, $request->desc_starting_time],
             $randomDescription['text']
         );
 
@@ -353,10 +397,11 @@ class GuidingsController extends Controller
     {
         if ($request->hasFile('title_image')) {
             foreach ($request->file('title_image') as $index => $file) {
+                $webp_path = media_upload($request->file('image'), 'blog');
                 $path = $file->store('public/guidings/' . $guiding->id);
                 $guiding->images()->create([
                     'path' => $path,
-                    'is_primary' => $index == $request->input('primary_image_index', 0),
+                    'is_primary' => $index == $request->input('primaryImage', 0),
                 ]);
             }
         }

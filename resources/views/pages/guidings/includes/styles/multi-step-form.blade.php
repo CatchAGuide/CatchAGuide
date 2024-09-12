@@ -31,7 +31,6 @@
             left: 0;
         }
         
-        /* Container for step buttons and steps */
         .step-wrapper {
             display: flex;
             justify-content: center;
@@ -40,7 +39,6 @@
             position: relative;
         }
         
-        /* Container for the step buttons */
         .step-buttons {
             display: flex;
             justify-content: space-between;
@@ -51,7 +49,6 @@
             gap: 10px;
         }
         
-        /* Step buttons style (Icon and Text Only) */
         .step-buttons .step-button {
             color: #787780;
             cursor: pointer;
@@ -64,23 +61,20 @@
             z-index: 2;
         }
         
-        /* Active step button */
         .step-buttons .step-button.active {
-            color: #e8604c; /* Red color for active steps */
+            color: #e8604c;
         }
         
-        /* Icon and text alignment */
         .step-buttons .step-button i {
             font-size: 24px;
             margin-bottom: 5px;
         }
         
         .step-buttons .step-button p {
-            font-size: 14px; /* Adjust text size */
+            font-size: 14px;
             margin: 0;
         }
         
-        /* Line between steps */
         .step-line {
             position: absolute;
             top: 50%;
@@ -92,12 +86,10 @@
             z-index: 1;
         }
         
-        /* Invisible circle effect to cut the line between each step */
         .step-buttons .step-button::before {
-            content: none; /* Remove the pseudo-element causing the white circle */
+            content: none;
         }
         
-        /* Styles for the image preview */
         .image-area {
             margin-top: 15px;
             display: flex;
@@ -117,7 +109,7 @@
         
         .image-card img {
             width: 100%;
-            height: auto; /* Ensure the entire image is visible */
+            height: auto;
             object-fit: contain;
             border-radius: 10px 10px 0 0;
         }
@@ -160,7 +152,6 @@
             cursor: pointer;
         }
         
-        /* Styles for the file input and buttons */
         .file-upload-wrapper {
             display: flex;
             align-items: center;
@@ -210,7 +201,7 @@
         }
         
         .btn-group-toggle .btn-checkbox {
-            border: 2px solid #e8604c; /* Set your desired border color */
+            border: 2px solid #e8604c;
             color: #e8604c;
             background-color: transparent;
             border-radius: 10px;
@@ -237,13 +228,13 @@
         }
 
         .btn-group-toggle .btn-checkbox {
-            color: #787780; /* Match the text color of the page */
+            color: #787780;
         }
 
         .btn-group-toggle .btn-checkbox.active {
-            color: #e8604c; /* Match the active text color */
-            background-color: #fef5f3; /* Match the active background color */
-            border-color: #e8604c; /* Match the active border color */
+            color: #e8604c;
+            background-color: #fef5f3;
+            border-color: #e8604c;
         }
         
         .extra-input {
@@ -255,7 +246,6 @@
             display: block;
         }
         
-        /* Centering the icon inside the card */
         .option-icon {
             font-size: 40px;
             color: #e8604c;
@@ -274,7 +264,7 @@
             border-color: #f2856d;
             margin-top: 15px;
             flex: 0 0 auto;
-            margin-left: auto;
+            order: 2;
         }
         
         #submitBtn:hover {
@@ -282,6 +272,18 @@
             border-color: #e8604c;
         }
         
+        #saveDraftBtn {
+            margin-left: auto;
+            background-color: #f2856d;
+            color: white;
+            border-color: #f2856d;
+            order: 3;
+        }
+
+        #saveDraftBtn:hover {
+            background-color: #e8604c;
+            border-color: #e8604c;
+        }
         #prevBtn, #nextBtn {
             background-color: #787780;
             color: white;
@@ -294,13 +296,11 @@
             border-color: #e8604c;
         }
         
-        /* Full-width form container for all screen sizes */
         .step-form-container {
             flex-grow: 1;
             width: 100%;
         }
         
-        /* Make the card and container fluid for desktop */
         .container-fluid {
             padding-left: 10px;
             padding-right: 10px;
@@ -341,46 +341,25 @@
         }
 
         .dropdown-menu {
-            max-height: 300px; /* Limit the height */
-            overflow-y: auto;  /* Enable scrolling */
+            max-height: 300px;
+            overflow-y: auto;
         }
 
-        /* Adjust for larger screen sizes */
-        @media (min-width: 768px) {
-            .step-buttons .step-button i {
-                font-size: 30px; /* Larger icon size for bigger screens */
-            }
-        
-            .step-buttons {
-                gap: 30px; /* Increased gap on larger screens */
-            }
-        
-            .btn-group-toggle .btn {
-                flex-basis: calc(50% - 20px); /* Two buttons per row */
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .btn-group-toggle .btn {
-                flex-basis: 100%; /* Full-width buttons */
-            }
-        }
-
-        /* Styles for the checkbox container and input alignment */
         .btn-checkbox-container {
-            display: flex;
-            align-items: center;
-            width: 100%;
+            flex: 1 1 calc(20% - 10px); /* 5 columns */
+            margin: 5px; /* Adjust margin */
+            display: flex; /* Flexbox for alignment */
+            align-items: center; /* Center items vertically */
         }
 
         .btn-checkbox {
-            width: 30%; /* Checkbox column width */
-            text-align: left; /* Align text to the left */
+            width: 30%;
+            text-align: left;
         }
 
         .extra-input {
             display: none;
-            width: 70%; /* Input box column width */
+            width: 70%;
         }
 
         .extra-input.active {
@@ -391,7 +370,6 @@
             margin-bottom: 20px;
         }
 
-        /* Blue color for active checkboxes, radio buttons, and steps */
         .btn-group-toggle input[type="radio"]:checked + .btn-checkbox,
         .btn-group-toggle input[type="checkbox"]:checked + .btn-checkbox,
         .step-buttons .step-button.active {
@@ -400,21 +378,18 @@
             border-color: #f2856d;
         }
 
-        /* Color for inactive steps */
         .step-buttons .step-button {
             background-color: #313041;
             color: white;
             border-color: #313041;
         }
 
-        /* Hover effect for inactive steps */
         .step-buttons .step-button:hover:not(.active) {
-            background-color: #fef5f3; /* Lighter version of #f2856d */
+            background-color: #fef5f3;
             color: #f2856d;
             border-color: #f2856d;
         }
 
-        /* Round circle background for step buttons */
         .step-buttons .step-button {
             width: 70px;
             height: 70px;
@@ -444,26 +419,22 @@
             white-space: nowrap;
         }
 
-        /* Adjust step line color */
         .step-line {
             background-color: #313041;
         }
 
-        /* Style for inactive checkboxes and radio buttons */
         .btn-group-toggle .btn-checkbox {
             background-color: #313041;
             color: white;
             border-color: #313041;
         }
 
-        /* Hover effect for inactive checkboxes and radio buttons */
         .btn-group-toggle .btn-checkbox:hover {
             background-color: #fef5f3;
             color: #f2856d;
             border-color: #f2856d;
         }
 
-        /* Style for active checkboxes and radio buttons */
         .btn-group-toggle input[type="radio"]:checked + .btn-checkbox,
         .btn-group-toggle input[type="checkbox"]:checked + .btn-checkbox {
             background-color: #f2856d;
@@ -471,48 +442,9 @@
             border-color: #f2856d;
         }
 
-        /* Save to Draft button */
-        #saveDraftBtn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-            background-color: #f2856d;
-            color: white;
-            border-color: #f2856d;
-        }
-
-        #saveDraftBtn:hover {
-            background-color: #e8604c;
-            border-color: #e8604c;
-        }
-
-        /* Adjust card position to make room for the button */
         .card-body {
             position: relative;
             padding-top: 50px;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .step-buttons .step-button {
-                width: 60px;
-                height: 60px;
-                padding: 3px;
-            }
-
-            .step-buttons .step-button i {
-                font-size: 20px;
-                margin-bottom: 2px;
-            }
-
-            .step-buttons .step-button p {
-                font-size: 8px;
-            }
-
-            .step-line {
-                top: 30px;
-            }
         }
 
         .tooltip {
@@ -531,7 +463,7 @@
 
         .image-preview-wrapper {
             width: 300px;
-            height: 240px; /* 5:4 aspect ratio */
+            height: 240px;
             margin: 10px;
             position: relative;
             overflow: hidden;
@@ -573,7 +505,6 @@
             background-color: #f2856d;
         }
 
-        /* Hide overlapping parts */
         .cropper-container {
             width: 100% !important;
             height: 100% !important;
@@ -598,8 +529,20 @@
             box-shadow: 0 0 10px rgba(242, 133, 109, 0.5);
         }
 
+        .image-preview-wrapper.primary::after {
+            content: 'Title Image';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #f2856d;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 12px;
+            z-index: 1000;
+        }
         .image-preview-wrapper.primary::before {
-            content: 'Primary';
+            content: 'Primary';            content: 'Primary';
             position: absolute;
             top: 5px;
             left: 5px;
@@ -608,48 +551,93 @@
             padding: 2px 5px;
             border-radius: 3px;
             font-size: 12px;
+            z-index: 1000;
         }
 
-        .form-group label {
-            margin-bottom: 10px;
-            display: block;
+        .monthly-selection-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            gap: 10px;
         }
 
-        .option-card {
-            border: 2px solid #313041;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
+        .monthly-selection-item {
+            position: relative;
+            width: calc(20% - 10px);
+        }
+
+        .monthly-selection-checkbox {
+            position: absolute;
+            opacity: 0;
             cursor: pointer;
-            transition: 0.3s;
+            height: 0;
+            width: 0;
+        }
+
+        .monthly-selection-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 5px;
             background-color: #313041;
             color: white;
+            border: 1px solid #313041;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-align: center;
         }
-        
-        .option-card:hover {
-            background-color: #fef5f3;
-            color: #f2856d;
-            border-color: #f2856d;
-        }
-        
-        .option-card.active {
+
+        .monthly-selection-checkbox:checked + .monthly-selection-label {
             background-color: #f2856d;
             color: white;
             border-color: #f2856d;
         }
 
-        .option-card .option-icon {
-            font-size: 50px;
-            margin-bottom: 5px;
+        .monthly-selection-label:hover {
+            background-color: #fef5f3;
+            color: #e8604c;
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
         }
 
-        .option-card .option-label {
-            font-size: 14px;
-            margin: 0;
+        .button-group button {
+            margin-right: 10px;
         }
 
-        .row.justify-content-center {
-            margin-bottom: 20px;
+        .button-group button:last-child {
+            margin-right: 0;
+            margin-left: auto;
+        }
+
+        @media (max-width: 1200px) {
+            .monthly-selection-item {
+                width: calc(25% - 10px);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .monthly-selection-item {
+                width: calc(33.33% - 10px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .monthly-selection-item {
+                width: calc(50% - 10px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .monthly-selection-item {
+                width: 100%;
+            }
         }
     </style>
 @endsection

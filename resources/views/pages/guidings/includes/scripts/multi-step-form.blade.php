@@ -11,6 +11,60 @@
     let currentStep = 1;
     const totalSteps = 8; 
     let autocomplete;
+    let city = '';
+    let country = '';
+    let postal_code = '';
+    
+    document.getElementById('saveDraftBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        saveDraft();
+    });
+
+    function saveDraft() {
+        const form = document.getElementById('guidingForm');
+        if (!form || !(form instanceof HTMLFormElement)) {
+            console.error('Form not found or invalid');
+            return;
+        }
+
+        const formData = new FormData(form);
+        formData.append('is_draft', 'true');
+        
+        // Get the current step
+        const currentStep = document.querySelector('.step:not([style*="display: none"])');
+        const currentStepIndex = currentStep ? Array.from(currentStep.parentNode.children).indexOf(currentStep) + 1 : 1;
+        formData.append('current_step', currentStepIndex.toString());
+
+        // Append cropped images data
+        Object.keys(croppers).forEach((key) => {
+            const cropper = croppers[key];
+            if (cropper) {
+                cropper.getCroppedCanvas().toBlob((blob) => {
+                    formData.append(`cropped_image_${key}`, blob, `image_${key}.png`);
+                });
+            }
+        });
+
+        fetch('{{ route("profile.newguiding.save-draft") }}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Draft saved successfully!');
+            } else {
+                alert('Error saving draft. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while saving the draft.');
+        });
+    }
 
     function initAutocomplete() {
         autocomplete = new google.maps.places.Autocomplete(
@@ -22,20 +76,20 @@
 
         autocomplete.addListener('place_changed', function () {
             const place = autocomplete.getPlace();
-
-            let city = '';
-            let country = '';
-            let postal_code = '';
-
             place.address_components.forEach(component => {
                 const types = component.types;
+
+                $('#latitude').val(place.geometry.location.lat());
+                $('#longitude').val(place.geometry.location.lng());
 
                 if (types.includes('locality')) {
                     city = component.long_name; // This is the city name
                 } else if (types.includes('country')) {
                     country = component.long_name; // This is the country name
+                    $('#country').val(country);
                 } else if (types.includes('postal_code')) {
                     postal_code = component.long_name; // This is the postal code
+                    $('#postal_code').val(postal_code);
                 }
             });
         });
@@ -44,15 +98,17 @@
 
     // Step navigation
     function showStep(stepNumber) {
+        if (stepNumber > currentStep && !validateStep(currentStep)) {
+            return;
+        }
+
         $('.step').removeClass('active');
         $(`#step${stepNumber}`).addClass('active');
         $('.step-button').removeClass('active');
         $(`.step-button[data-step="${stepNumber}"]`).addClass('active');
         currentStep = stepNumber;
-        updateButtons();
-    }
 
-    function updateButtons() {
+        // Update button visibility
         $('#prevBtn').toggle(currentStep > 1);
         $('#nextBtn').toggle(currentStep < totalSteps);
         $('#submitBtn').toggle(currentStep === totalSteps);
@@ -62,56 +118,8 @@
         showStep($(this).data('step'));
     });
 
-    // Next and Previous buttons
-    document.addEventListener('DOMContentLoaded', function() {
-        const nextBtn = document.getElementById('nextBtn');
-        const prevBtn = document.getElementById('prevBtn');
-        const submitBtn = document.getElementById('submitBtn');
-
-        if (nextBtn) {
-            nextBtn.addEventListener('click', function() {
-                if (currentStep < totalSteps) {
-                    showStep(currentStep + 1);
-                }
-            });
-        }
-
-        if (prevBtn) {
-            prevBtn.addEventListener('click', function() {
-                if (currentStep > 1) {
-                    showStep(currentStep - 1);
-                }
-            });
-        }
-
-        function showStep(stepNumber) {
-            $('.step').removeClass('active');
-            $(`#step${stepNumber}`).addClass('active');
-            $('.step-button').removeClass('active');
-            $(`.step-button[data-step="${stepNumber}"]`).addClass('active');
-            currentStep = stepNumber;
-
-            if (currentStep === 1) {
-                $('#prevBtn').hide();
-            } else {
-                $('#prevBtn').show();
-            }
-
-            if (currentStep === totalSteps) {
-                $('#nextBtn').hide();
-                $('#submitBtn').show();
-            } else {
-                $('#nextBtn').show();
-                $('#submitBtn').hide();
-            }
-        }
-
-        // Initialize the first step
-        showStep(1);
-    });
-
     // Initialize Tagify for tag inputs
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {        
         // Extras
         var extrasInput = document.querySelector('input[name="extras"]');
         var extrasWhitelist = [
@@ -205,6 +213,49 @@
         $('input[name="seasonal_trip"]').change(function() {
             $('#monthly_selection').toggle($(this).val() === 'season_monthly');
         });
+        
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Initialize checkbox states
+        $('.btn-checkbox-container input[type="checkbox"]').each(function() {
+            var $container = $(this).closest('.btn-checkbox-container');
+            var $textarea = $container.find('textarea');
+            $textarea.toggle(this.checked);
+        });
+
+        initAutocomplete();
+
+        // Duration selection logic
+        $('input[name="duration"]').change(function() {
+            var durationType = $(this).val();
+            $('#duration_details').show();
+            
+            if (durationType === 'half_day' || durationType === 'full_day') {
+                $('#hours_input').show();
+                $('#days_input').hide();
+            } else if (durationType === 'multi_day') {
+                $('#hours_input').hide();
+                $('#days_input').show();
+            } else {
+                $('#duration_details').hide();
+            }
+        });
+
+        // Next button functionality
+        $(document).on('click', '#nextBtn', function() {
+            if (validateStep(currentStep)) {
+                showStep(currentStep + 1);
+            }
+        });
+
+        // Previous button functionality
+        $(document).on('click', '#prevBtn', function() {
+            showStep(currentStep - 1);
+        });
     });
 
     // Radio button functionality
@@ -238,11 +289,13 @@
             $('#extraFields').show();
         } else {
             $('#extraFields').hide();
+            // Proceed to step 3 when 'shore' is selected
+            showStep(3);
         }
     }
 
     // Dynamic price fields
-    $('input[name="price"]').change(function() {
+    $('input[name="price_type"]').change(function() {
         var priceType = $(this).val();
         var container = $('#dynamic-price-fields-container');
         container.empty();
@@ -250,16 +303,16 @@
         if (priceType === 'per_person') {
             var guestCount = parseInt($('#no_guest').val()) || 1;
             for (var i = 1; i <= guestCount; i++) {
-                container.append(`<input type="number" class="form-control mt-2" name="price_per_person_${i}" placeholder="Price for ${i} person(s)">`);
+                container.append(`<div class="input-group mt-2"><span class="input-group-text">Price</span><input type="number" class="form-control" name="price_per_person_${i}" placeholder="Price for ${i} person(s)"><span class="input-group-text">€ per Person</span></div>`);
             }
         } else if (priceType === 'per_boat') {
-            container.append('<input type="number" class="form-control mt-2" name="price_per_boat" placeholder="Price per boat">');
+            container.append('<div class="input-group mt-2"><span class="input-group-text">Price</span><input type="number" class="form-control " name="price_per_boat" placeholder="Price per boat"><span class="input-group-text">€ per Boat</span></div>');
         }
     });
 
     $('#no_guest').change(function() {
-        if ($('input[name="price"]:checked').val() === 'per_person') {
-            $('input[name="price"]:checked').change();
+        if ($('input[name="price_type"]:checked').val() === 'per_person') {
+            $('input[name="price_type"]:checked').change();
         }
     });
 
@@ -282,8 +335,13 @@
         extraCount++;
         const newRow = `
             <div class="extra-row d-flex mb-2">
-                <input type="text" class="form-control mr-2" name="extra_name_${extraCount}" placeholder="Extra name">
-                <input type="number" class="form-control mr-2" name="extra_price_${extraCount}" placeholder="Price">
+                <div class="input-group mt-2">
+                    <span class="input-group-text">Additional Offer</span>
+                    <input type="text" class="form-control mr-2" name="extra_name_${extraCount}" placeholder="Extra name">
+                    <span class="input-group-text">Price</span>
+                    <input type="number" class="form-control mr-2" name="extra_price_${extraCount}" placeholder="100.00">
+                    <span class="input-group-text">€ per Person</span>
+                </div>
                 <button type="button" class="btn btn-danger btn-sm remove-extra"><i class="fas fa-trash"></i></button>
             </div>
         `;
@@ -294,13 +352,14 @@
         $(this).closest('.extra-row').remove();
     });
 
-    // Image preview functionality
-    function createButton(innerHTML, onClick) {
+    function createButton(innerHTML, onClick, tooltip) {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'image-control-btn';
         button.innerHTML = innerHTML;
         button.onclick = onClick;
+        button.setAttribute('data-bs-toggle', 'tooltip');
+        button.setAttribute('title', tooltip);
         return button;
     }
 
@@ -313,7 +372,7 @@
         }
 
         if (input.files) {
-            Array.from(input.files).forEach((file) => {
+            Array.from(input.files).forEach((file, index) => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const wrapper = document.createElement('div');
@@ -330,12 +389,12 @@
 
                     const currentIndex = imageIndex;  // Capture the current index
 
-                    // Create control buttons
-                    const zoomInBtn = createButton('<i class="fas fa-search-plus"></i>', () => croppers[currentIndex].zoom(0.1));
-                    const zoomOutBtn = createButton('<i class="fas fa-search-minus"></i>', () => croppers[currentIndex].zoom(-0.1));
-                    const rotateBtn = createButton('<i class="fas fa-redo"></i>', () => croppers[currentIndex].rotate(90));
-                    const deleteBtn = createButton('<i class="fas fa-trash"></i>', () => deleteImage(wrapper, currentIndex));
-                    const setPrimaryBtn = createButton('<i class="fas fa-star"></i>', () => setPrimaryImage(wrapper, currentIndex));
+                    // Create control buttons with tooltips
+                    const zoomInBtn = createButton('<i class="fas fa-search-plus"></i>', () => croppers[currentIndex].zoom(0.1), 'Zoom In');
+                    const zoomOutBtn = createButton('<i class="fas fa-search-minus"></i>', () => croppers[currentIndex].zoom(-0.1), 'Zoom Out');
+                    const rotateBtn = createButton('<i class="fas fa-redo"></i>', () => croppers[currentIndex].rotate(90), 'Rotate');
+                    const deleteBtn = createButton('<i class="fas fa-trash"></i>', () => deleteImage(wrapper, currentIndex), 'Delete');
+                    const setPrimaryBtn = createButton('<i class="fas fa-star"></i>', () => setPrimaryImage(wrapper, currentIndex), 'Set as Title Image');
 
                     controls.appendChild(zoomInBtn);
                     controls.appendChild(zoomOutBtn);
@@ -390,6 +449,11 @@
                         }
                     });
 
+                    // Set the first image as the title image by default
+                    if (index === 0) {
+                        setPrimaryImage(wrapper, currentIndex);
+                    }
+
                     imageIndex++;
                 }
                 reader.readAsDataURL(file);
@@ -404,6 +468,7 @@
 
     function setPrimaryImage(wrapper, index) {
         $('.image-preview-wrapper').removeClass('primary');
+        $('.image-preview-wrapper').find('.primary-label').remove(); // Remove existing labels
         wrapper.classList.add('primary');
         console.log(index);
         document.getElementById('primaryImageInput').value = index;
@@ -423,40 +488,147 @@
         }
     });
 
-    // Initialize everything when the DOM is ready
-    document.addEventListener('DOMContentLoaded', function() {
-        showStep(1);
-        
-        // Initialize tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
-        });
+    function validateStep(step) {
+        const errorContainer = document.getElementById('error-container');
+        errorContainer.style.display = 'none';
+        errorContainer.innerHTML = '';
 
-        // Initialize checkbox states
-        $('.btn-checkbox-container input[type="checkbox"]').each(function() {
-            var $container = $(this).closest('.btn-checkbox-container');
-            var $textarea = $container.find('textarea');
-            $textarea.toggle(this.checked);
-        });
+        let isValid = true;
+        let errors = [];
+        return true;
 
-        initAutocomplete();
+        switch(step) {
+            case 1:
+                if (!document.getElementById('title_image').files.length) {
+                    errors.push('Please upload at least one image.');
+                    isValid = false;
+                }
+                if (!document.getElementById('location').value.trim()) {
+                    errors.push('Location is required.');
+                    isValid = false;
+                }
+                if (!document.getElementById('title').value.trim()) {
+                    errors.push('Title is required.');
+                    isValid = false;
+                }
+                break;
+            case 2:
+                if (!document.querySelector('input[name="type_of_fishing_radio"]:checked')) {
+                    errors.push('Please select a type of fishing.');
+                    // isValid = false;
+                } 
+                if (document.getElementById('type_of_fishing').value === 'boat' && !document.querySelector('input[name="type_of_boat"]:checked')) {
+                    errors.push('Please select a type of boat.');
+                    isValid = false;
+                }
+                break;
+            case 3:
+                if (!document.getElementById('target_fish').value.trim()) {
+                    errors.push('Target fish is required.');
+                    isValid = false;
+                }
+                if (!document.getElementById('methods').value.trim()) {
+                    errors.push('Methods are required.');
+                    isValid = false;
+                }
+                if (!document.getElementById('water_types').value.trim()) {
+                    errors.push('Water types are required.');
+                    isValid = false;
+                }
+                break;
+            case 4:
+                if (!document.querySelector('input[name="experience_level[]"]:checked')) {
+                    errors.push('Please select at least one experience level.');
+                    isValid = false;
+                }
+                if (!document.getElementById('inclussions').value.trim()) {
+                    errors.push('Inclusions are required.');
+                    isValid = false;
+                }
+                if (!document.querySelector('input[name="style_of_fishing"]:checked')) {
+                    errors.push('Please select a style of fishing.');
+                    isValid = false;
+                }
+                break;
+            case 5:
+                if (!document.getElementById('desc_course_of_action').value.trim()) {
+                    errors.push('Course of action description is required.');
+                    isValid = false;
+                }
+                if (!document.getElementById('desc_starting_time').value.trim()) {
+                    errors.push('Starting time description is required.');
+                    isValid = false;
+                }
+                if (!document.getElementById('desc_meeting_point').value.trim()) {
+                    errors.push('Meeting point description is required.');
+                    isValid = false;
+                }
+                if (!document.getElementById('desc_tour_unique').value.trim()) {
+                    errors.push('Tour uniqueness description is required.');
+                    isValid = false;
+                }
+                break;
+            case 6:
+                // No specific validation for this step
+                break;
+            case 7:
+                if (!document.querySelector('input[name="tour_type"]:checked')) {
+                    errors.push('Please select a tour type.');
+                    isValid = false;
+                }
+                if (!document.querySelector('input[name="duration"]:checked')) {
+                    errors.push('Please select a duration.');
+                    isValid = false;
+                }
+                if (!document.getElementById('no_guest').value.trim()) {
+                    errors.push('Number of guests is required.');
+                    isValid = false;
+                }
+                if (!document.querySelector('input[name="price_type"]:checked')) {
+                    errors.push('Please select a price type.');
+                    isValid = false;
+                }
+                // Add more price validation based on the selected price type
+                break;
+            case 8:
+                if (!document.querySelector('input[name="allowed_booking_advance"]:checked')) {
+                    errors.push('Please select an allowed booking advance.');
+                    isValid = false;
+                }
+                if (!document.querySelector('input[name="booking_window"]:checked')) {
+                    errors.push('Please select a booking window.');
+                    isValid = false;
+                }
+                if (!document.querySelector('input[name="seasonal_trip"]:checked')) {
+                    errors.push('Please select a seasonal trip option.');
+                    isValid = false;
+                }
+                if (document.querySelector('input[name="seasonal_trip"]:checked').value === 'season_monthly' && !document.querySelector('input[name="available_month[]"]:checked')) {
+                    errors.push('Please select at least one month for seasonal trips.');
+                    isValid = false;
+                }
+                break;
+        }
 
-        // Duration selection logic
-        $('input[name="duration"]').change(function() {
-            var durationType = $(this).val();
-            $('#duration_details').show();
-            
-            if (durationType === 'half_day' || durationType === 'full_day') {
-                $('#hours_input').show();
-                $('#days_input').hide();
-            } else if (durationType === 'multi_day') {
-                $('#hours_input').hide();
-                $('#days_input').show();
-            } else {
-                $('#duration_details').hide();
-            }
-        });
-    });
+        if (!isValid) {
+            errorContainer.style.display = 'block';
+            errorContainer.innerHTML = '<ul>' + errors.map(error => `<li>${error}</li>`).join('') + '</ul>';
+            return false;
+        }
+
+        return true;
+    }
+
+
+    // Add this function to handle form submission
+    function handleSubmit(event) {
+        event.preventDefault();
+        if (validateStep(currentStep)) {
+            document.querySelector('form').submit();
+        }
+    }
+
+    // Add this line to attach the handleSubmit function to the form's submit event
+    document.querySelector('form').addEventListener('submit', handleSubmit);
 </script>
 @endpush
