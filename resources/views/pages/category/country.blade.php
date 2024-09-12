@@ -50,6 +50,20 @@
     #mobileherofilter .new-filter-btn:hover{
         background-color:#313041;
     }*/
+    #page-main-intro {
+        /*white-space: nowrap;*/
+        /*overflow: hidden;
+        text-overflow: ellipsis;
+        height: 190px;
+        width: 100%;*/
+        /*display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        -webkit-line-clamp: 9; 
+        height: 13.5em; 
+        max-height: 13.5em; */
+    }
     #carousel-regions,
     #carousel-cities {
         min-height: 301.6px;
@@ -191,6 +205,12 @@
         border-left: 4px solid transparent;
         border-right: 4px solid transparent;
     }
+    .see-more {
+        display: inline-block;
+        color: blue;
+        cursor: pointer;
+        text-decoration: underline;
+    }
 </style>
 @endsection
 
@@ -235,27 +255,41 @@
                     </div> 
                 </form>
 
-                <div class="mb-3">{!! nl2br($row_data->introduction) !!}asdf</div>
+                <div id="page-main-intro" class="mb-3">
+                    <span class="page-main-intro-text mb-1">{!! nl2br($row_data->introduction) !!}</span>
+                    <a href="#" class="see-more">See More</a>
+                </div>
+                @php
+                $region_count = $regions->count();
+                $city_count = $cities->count();
+                $region_counter = 0;
+                $city_counter = 0;
+                //dump($cities);
+                @endphp
 
-                @if($regions->count() > 0)
+                @if($region_count > 0)
                 <h5 class="mb-2">All Region</h5>
                 <div id="carousel-regions" class="carousel slide mb-4" data-bs-ride="carousel">
                     <div class="carousel-inner" role="listbox">
                         @foreach($regions as $region)
-                        <div class="carousel-item active">
+                        <div class="carousel-item {{ (($region_counter == 0)? 'active' : '') }}">
                             <div class="col-md-3">
-                                <div class="card">
-                                    <div class="card-img">
-                                        <!-- <img src="https://place-hold.it/300x300" class="dimg-fluid" width="300px" alt="..."> -->
-                                        <img src="{{ $region->getThumbnailPath() }}" class="dimg-fluid" width="300px" alt="...">
+                                <a href="{{ route('destination.country', ['country' => $region->country_name, 'region' => $region->name]) }}">
+                                    <div class="card">
+                                        <div class="card-img">
+                                            <img src="{{ $region->getThumbnailPath() }}" class="dimg-fluid" width="300px" alt="...">
+                                        </div>
+                                        <div class="card-img-overlay">{{ $region->name }}</div>
                                     </div>
-                                    <div class="card-img-overlay">{{ $region->name }}</div>
-                                </div>
+                                </a>
                             </div>
                         </div>
+                            @php
+                                $region_counter++;
+                            @endphp
                         @endforeach
                     </div>
-                    @if($regions->count() > 4)
+                    @if($region_count > 4)
                     <button class="carousel-control-prev" type="button" data-bs-target="#carousel-regions" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Previous</span>
@@ -267,25 +301,29 @@
                     @endif
                 </div>
                 @endif
-                @if($cities->count() > 0)
+                @if($city_count > 0)
                 <h5 class="mb-2">All Cities</h5>
                 <div id="carousel-cities" class="carousel slide mb-4" data-bs-ride="carousel">
                     <div class="carousel-inner" role="listbox">
                         @foreach($cities as $city)
-                        <div class="carousel-item active">
+                        <div class="carousel-item {{ (($city_counter == 0)? 'active' : '') }}">
                             <div class="col-md-3">
-                                <div class="card">
-                                    <div class="card-img">
-                                        <!-- <img src="https://place-hold.it/300x300" class="dimg-fluid" width="300px" alt="..."> -->
-                                        <img src="{{ $city->getThumbnailPath() }}" class="dimg-fluid" width="300px" alt="...">
+                                <a href="{{ route('destination.country', ['country' => $city->country_name, 'region' => $city->region_name, 'city' => $city->name]) }}">
+                                    <div class="card">
+                                        <div class="card-img">
+                                            <img src="{{ $city->getThumbnailPath() }}" class="dimg-fluid" width="300px" alt="...">
+                                        </div>
+                                        <div class="card-img-overlay">{{ $city->name }}</div>
                                     </div>
-                                    <div class="card-img-overlay">{{ $city->name }}</div>
-                                </div>
+                                </a>
                             </div>
                         </div>
+                            @php
+                                $city_counter++;
+                            @endphp
                         @endforeach
                     </div>
-                    @if($cities->count() > 4)
+                    @if($city_count > 4)
                     <button class="carousel-control-prev" type="button" data-bs-target="#carousel-cities" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Previous</span>
@@ -775,6 +813,59 @@
 <script>
     $('#sortby').on('change',function(){
         $('#form-sortby').submit();
+    });
+
+    $(function(){
+        let items = document.querySelectorAll('.carousel .carousel-item');
+        
+        items.forEach((el) => {
+            const minPerSlide = 4
+            let next = el.nextElementSibling
+            for (var i=1; i<minPerSlide; i++) {
+                if (!next) {
+                    // wrap carousel by using first child
+                    next = items[0]
+                }
+                let cloneChild = next.cloneNode(true)
+                el.appendChild(cloneChild.children[0])
+                next = next.nextElementSibling
+            }
+        });
+
+        var word_char_count_allowed = 1200;
+        var page_main_intro = $('.page-main-intro-text');
+        var page_main_intro_text = page_main_intro.html();
+        var page_main_intro_count = page_main_intro.text().length;
+        var ellipsis = "..."; 
+        var moreText = "See More";
+        var lessText = "See Less";
+
+        var visible_text = page_main_intro_text.substring(0, word_char_count_allowed);
+        var hidden_text  = page_main_intro_text.substring(word_char_count_allowed);
+
+        if (page_main_intro_count >= word_char_count_allowed) {
+            $('.page-main-intro-text').html(visible_text + '<span class="more-ellipsis">' + ellipsis + '</span><span class="more-text" style="display:none;">' + hidden_text + '</span>');
+            //$('.more-text').show();
+            $('.see-more').click(function(e) {
+                e.preventDefault();
+                var textContainer = $(this).prev('.page-main-intro-text'); // Get the content element
+
+                if ($(this).hasClass('less')) {
+                    $(this).removeClass('less');
+                    $(this).html(moreText);
+                    textContainer.find('.more-text').hide();
+                    textContainer.find('.more-ellipsis').show();
+                } else {
+                    $(this).addClass('less');
+                    $(this).html(lessText);
+                    textContainer.find('.more-text').show();
+                    textContainer.find('.more-ellipsis').hide();
+                }
+            });
+        } else {
+            $('.see-more').hide();
+        }
+
     });
 </script>
 <script>
