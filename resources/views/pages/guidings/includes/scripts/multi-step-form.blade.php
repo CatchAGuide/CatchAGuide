@@ -22,13 +22,28 @@
 
     function saveDraft() {
         const form = document.getElementById('guidingForm');
+        if (!form || !(form instanceof HTMLFormElement)) {
+            console.error('Form not found or invalid');
+            return;
+        }
+
         const formData = new FormData(form);
-        formData.append('is_draft', true);
+        formData.append('is_draft', 'true');
         
         // Get the current step
         const currentStep = document.querySelector('.step:not([style*="display: none"])');
-        const currentStepIndex = Array.from(currentStep.parentNode.children).indexOf(currentStep) + 1;
-        formData.append('current_step', currentStepIndex);
+        const currentStepIndex = currentStep ? Array.from(currentStep.parentNode.children).indexOf(currentStep) + 1 : 1;
+        formData.append('current_step', currentStepIndex.toString());
+
+        // Append cropped images data
+        Object.keys(croppers).forEach((key) => {
+            const cropper = croppers[key];
+            if (cropper) {
+                cropper.getCroppedCanvas().toBlob((blob) => {
+                    formData.append(`cropped_image_${key}`, blob, `image_${key}.png`);
+                });
+            }
+        });
 
         fetch('{{ route("profile.newguiding.save-draft") }}', {
             method: 'POST',
@@ -480,6 +495,7 @@
 
         let isValid = true;
         let errors = [];
+        return true;
 
         switch(step) {
             case 1:

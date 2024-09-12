@@ -489,17 +489,17 @@
                         <label for="multi_day" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Multi Day</label>
                     </div>
                     <div id="duration_details" class="mt-3" style="display: none;">
-                        <div class="input-group mt-2">
+                        <div id="hours_input" class="input-group mt-2">
                             <span class="input-group-text">Number of hours:</span>
                             <input type="number" id="duration_hours" name="duration_hours" class="form-control" min="1" max="24">
                         </div>
-                        <div class="input-group mt-2">
+                        <div id="days_input" class="input-group mt-2" style="display: none;">
                             <span class="input-group-text">Number of days:</span>
                             <input type="number" id="duration_days" name="duration_days" class="form-control" min="2">
                         </div>
                     </div>
                 </div>
-
+                
                 <div class="form-group">
                     <div class="input-group mt-2">
                         <span class="input-group-text">Number of guest</span>

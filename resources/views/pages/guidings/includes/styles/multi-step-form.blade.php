@@ -264,7 +264,7 @@
             border-color: #f2856d;
             margin-top: 15px;
             flex: 0 0 auto;
-            margin-left: auto;
+            order: 2;
         }
         
         #submitBtn:hover {
@@ -277,6 +277,7 @@
             background-color: #f2856d;
             color: white;
             border-color: #f2856d;
+            order: 3;
         }
 
         #saveDraftBtn:hover {
