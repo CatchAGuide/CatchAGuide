@@ -90,7 +90,25 @@
 <!-- template js -->
 <script src="{{ asset('assets/js/tevily.js') }}"></script>
 <script type="module" src="{{ asset('js/app.js') }}"></script>
+<script>
+    function changeGuestCount(type, value) {
+        var input = document.getElementById(type);
+        var currentValue = parseInt(input.value);
+        var newValue = currentValue + value;
 
+        if (newValue >= 0) {
+            input.value = newValue;
+            updateGuestText();
+        }
+    }
+
+    function updateGuestText() {
+        var adults = document.getElementById('adults').value;
+        var children = document.getElementById('children').value;
+        var text = adults + " adult" + (adults > 1 ? "s" : "") + " • " + children + " child" + (children > 1 ? "ren" : "");
+        document.getElementById('guestDropdown').innerText = text;
+    }
+</script>
 @livewireScripts
 @yield('js_after')
 @stack('js_push')

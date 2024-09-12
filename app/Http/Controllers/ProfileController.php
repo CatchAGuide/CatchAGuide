@@ -163,37 +163,7 @@ class ProfileController extends Controller
             $waters = $waters->pluck('name');
             $inclussions = $inclussions->pluck('name');
         }
-
         return view('pages.profile.newguiding', compact('waters', 'methods', 'targets', 'inclussions'));
-    }
-
-    public function newguidingStore(Request $request) {
-
-        $validatedData = $request->validate([
-            'titel' => 'required|string|max:255',
-            'title_image' => 'required|array',
-            'title_image.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'location' => 'required|string|max:255',
-            'type_of_fishing' => 'required|string',
-            'target_fish' => 'required|array',
-            'methods' => 'required|array',
-            'water_types' => 'required|array',
-            'experience_level' => 'required|string',
-            'style_of_fishing' => 'required|string',
-            'course_of_action' => 'required|string',
-            'special_about' => 'required|string',
-            'tour_unique' => 'required|string',
-            'starting_time' => 'required|string',
-            'private' => 'required|string',
-            'duration' => 'required|string',
-            'no_guest' => 'required|integer|min:1',
-            'price' => 'required|string',
-            'allowed_booking_advance' => 'required|string',
-            'booking_window' => 'required|string',
-            'seasonal_trip' => 'required|string',
-        ]);
-        dd($request->all());
-
     }
     
     public function postGuidingStepOne(Request $request){

@@ -204,7 +204,100 @@
           display:none;
         }
     }
- 
+    
+    .header {
+        background-image: url('https://static.fishingbooker.com/public/images/home/background-lg.jpg');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        position: relative;
+        padding-bottom: 100px; /* Ensures space for the floating search bar */
+    }
+    .header .overlay {
+        background: rgba(0, 0, 0, 0.5);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
+    .header-content {
+        position: relative;
+        z-index: 2;
+        padding: 20px;
+    }
+    .navbar-custom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        position: relative;
+        z-index: 2;
+    }
+    .navbar-custom .logo img {
+        width: 150px;
+        height: auto;
+    }
+    .navbar-custom .nav-links a {
+        color: white;
+        margin-left: 15px;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    .navbar-custom .nav-links a.button {
+        padding: 8px 15px;
+        background-color: #ffc107;
+        color: black;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+    .navbar-custom .nav-links a.button:hover {
+        background-color: #e0a800;
+        color: white;
+    }
+    .search-form {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 15px rgba(0,0,0,0.1);
+        position: absolute;
+        bottom: -50px; /* Position the search bar at the bottom of the banner */
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80%;
+        max-width: 1200px;
+        z-index: 3;
+    }
+    .header-content h1 {
+        margin-top: 0;
+        color: #f8f9fa; /* Changed text color */
+    }
+    .header-content p {
+        font-size: 1.2rem;
+        color: #e9ecef; /* Changed text color */
+        margin-top: 10px; /* Adds space between H1 and description */
+    }
+    .dropdown-menu {
+        padding: 10px;
+    }
+    .counter-box {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .counter-box span {
+        font-size: 16px;
+        font-weight: bold;
+    }
+    .counter-box input {
+        width: 40px;
+        text-align: center;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin: 0 10px;
+    }
 </style>
 @livewireStyles
 

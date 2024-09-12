@@ -42,10 +42,10 @@ return [
             'visibility' => 'public',
         ],
 
-        'sitemaps' => [
+        'public_path' => [
             'driver' => 'local',
-            'root' => public_path().'/sitemaps',
-            'url' => env('APP_URL').'/sitemaps',
+            'root' => public_path().'/',
+            'url' => env('APP_URL').'/',
             'visibility' => 'public',
         ],
 

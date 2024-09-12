@@ -183,6 +183,7 @@ return [
         App\Providers\AgentServiceProvider::class,
         App\Providers\ViewServiceProvider::class,
 
+        Spatie\Geocoder\GeocoderServiceProvider::class,
     ],
 
     /*
@@ -242,6 +243,7 @@ return [
         'Sentinel'   => Cartalyst\Sentinel\Laravel\Facades\Sentinel::class,
         'GoogleTranslate' => Stichoza\GoogleTranslate\GoogleTranslate::class,
 
+        'Geocoder' => Spatie\Geocoder\Facades\Geocoder::class,
     ],
 
 ];

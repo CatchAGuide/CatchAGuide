@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image;
+
 if (!function_exists('two')) {
     function two($number) {
         return number_format($number, 2, ',', '.');
@@ -61,6 +64,32 @@ if (!function_exists('getLocalizedValue')) {
             }
         }
 
+    }
+}
+
+if (!function_exists('media_upload')) {
+    function media_upload($file, $directory = 'uploads', $quality = 75)
+    {
+        if (filter_var($file, FILTER_VALIDATE_URL)) {
+            $image = Image::make($file);
+            $filename = basename(parse_url($file, PHP_URL_PATH));
+        } elseif ($file instanceof \Illuminate\Http\UploadedFile) {
+            $thumbnail_path = $file->store('public/' . $directory);
+            $imagePath = Storage::disk()->path($thumbnail_path);
+            $image = Image::make($imagePath);
+            $filename = $file->getClientOriginalName();
+        } else {
+            throw new \InvalidArgumentException('Invalid input: must be a URL or an uploaded file');
+        }
+        
+        $webpImageName = pathinfo($filename, PATHINFO_FILENAME) . '.webp';
+        $webpImage = $image->encode('webp', $quality);
+        
+        $webp_path = $directory . '/' . $webpImageName;
+        Storage::disk('public')->put($webp_path, $webpImage->encoded);
+        $webpImage->save(public_path($webp_path));
+        
+        return $webp_path;
     }
 }
 

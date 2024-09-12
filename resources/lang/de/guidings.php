@@ -11,4 +11,14 @@ return [
     'Radius' => 'Radius',
     'Place' => 'Ort',
     'Coordinates' => 'Koordinaten',
+
+    'Thumbnail' => 'Miniaturansicht',
+    'Title' => 'Titel',
+    'Introduction' => 'Einführung',
+    'Content' => 'Inhalt',
+    'Fish' => 'Fisch',
+    'FishChart' => 'Fisch karte',
+    'Content' => 'Inhalt',
+    'Add' => 'Hinzufügen',
+    'Location' => 'Standort',
 ];  

@@ -466,23 +466,6 @@
                                             <select class="form-control form-select" id="home_target_fish" name="target_fish[]" style="width:100%">
                                                 
                                             </select>
-                                            {{-- <select class="form-control" name="target_fish[]" style="width:100%">
-                                                <option value="">@lang('message.all')...</option>
-                                                @foreach($alltargets as $target)
-                                                    <option value="{{$target->id}}">
-                                                        @switch(app()->getLocale())
-                                                        @case('de')
-                                                        {{$target->name}}
-                                                        @break;
-                                                        @case('en')
-                                                        {{$target->name_en ? $target->name_en : $target->name }}
-                                                        @break
-                                                        {{$target->name}}
-                                                        @default
-                                                    @endswitch
-                                                    </option>
-                                                @endforeach
-                                            </select> --}}
                                         </div>
                                     </div>
                                     <div class="col-md-2 column-input">

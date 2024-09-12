@@ -38,6 +38,11 @@ return [
         'duration' => 9999999,
     ],
 
+    'key' => env('GOOGLE_MAPS_GEOCODING_API_KEY', 'AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q'),
+    'language' => '',
+    'region' => '',
+    'bounds' => '',
+    'country' => '',
     /*
     |---------------------------------------------------------------------------
     | Providers

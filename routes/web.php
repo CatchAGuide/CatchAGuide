@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\PageAttributeController;
 use App\Http\Controllers\Blog\BlogController;
 use App\Http\Controllers\Blog\CategoriesController;
 use App\Http\Controllers\Blog\ThreadsController;
+use App\Http\Controllers\Category\DestinationCountryController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\FAQController;
@@ -34,6 +35,9 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\PaymentsController as AdminPaymentsController;
 use App\Http\Controllers\Admin\FAQController as AdminFaqController;
+use App\Http\Controllers\Admin\Category\AdminCategoryCountryController;
+use App\Http\Controllers\Admin\Category\AdminCategoryRegionController;
+use App\Http\Controllers\Admin\Category\AdminCategoryCityController;
 use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThreadsController;
 
 /*
@@ -104,7 +108,9 @@ Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(functi
     
 
     Route::get('/newguiding', [App\Http\Controllers\ProfileController::class, 'newguiding'])->name('newguiding');
-    Route::post('/newguiding', [App\Http\Controllers\ProfileController::class, 'newguidingStore'])->name('newguiding.store');
+    Route::post('/newguiding', [GuidingsController::class, 'guidingsStore'])->name('newguiding.store');
+    Route::post('/newguiding/save-draft', [GuidingsController::class, 'saveDraft'])->name('newguiding.save-draft');
+    // Route::post('/newguiding', [App\Http\Controllers\ProfileController::class, 'newguidingStore'])->name('newguiding.store');
 
     Route::get('/payments', [App\Http\Controllers\ProfileController::class, 'payments'])->name('payments');
     Route::get('/calendar', [App\Http\Controllers\ProfileController::class, 'calendar'])->name('calendar');
@@ -161,16 +167,14 @@ Route::middleware('auth:web')->group(function () {
 
     Route::get('wishlist/add-or-remove/{guiding}', [\App\Http\Controllers\WishlistController::class, 'addOrRemove'])->name('wishlist.add-or-remove');
 
+    Route::post('delete-image/{id}', [GuidingsController::class, 'deleteimage'])->name('delete-image');
+
+    Route::get('deleteguiding/{id}', [GuidingsController::class, 'deleteguiding'])->name('deleteguiding');
+    Route::get('delete-image/{guiding}/{img?}', [GuidingsController::class, 'deleteImage'])->name('deleteImage');
 
 
-Route::post('delete-image/{id}', [GuidingsController::class, 'deleteimage'])->name('delete-image');
-
-Route::get('deleteguiding/{id}', [GuidingsController::class, 'deleteguiding'])->name('deleteguiding');
-Route::get('delete-image/{guiding}/{img?}', [GuidingsController::class, 'deleteImage'])->name('deleteImage');
-
-
-Route::get('guidings/{guiding}/edit', [GuidingsController::class, 'edit'])->name('guidings.edit');
-Route::post('guidings/{guiding}/update', [GuidingsController::class, 'update'])->name('guidings.update');
+    Route::get('guidings/{guiding}/edit', [GuidingsController::class, 'edit'])->name('guidings.edit');
+    Route::post('guidings/{guiding}/update', [GuidingsController::class, 'update'])->name('guidings.update');
 });
 
 
@@ -183,15 +187,23 @@ Route::get('guidings', [GuidingsController::class, 'index'])->name('guidings.ind
 Route::get('guidings/{slug?}', [GuidingsController::class, 'redirectToNewFormat']);
 Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'show'])->name('guidings.show');
 Route::get('newguidings/{id}/{slug}', [GuidingsController::class, 'newShow'])->name('guidings.newShow');
+Route::post('newguidings', [GuidingsController::class, 'guidingsStore'])->name('guidings.store');
 
 Route::get('searchrequest', [GuidingsController::class, 'bookingrequest'])->name('guidings.request');
 Route::post('searchrequest/store', [GuidingsController::class, 'bookingRequestStore'])->name('store.request');
-
 
 Route::name('additional.')->group(function () {
     Route::view('/contact', 'pages.additional.contact')->name('contact');
     Route::view('/about-us', 'pages.additional.about-us')->name('about_us');
 });
+
+/*Route::prefix('destination')->name('desitination.')->group(function () {
+    Route::get('country', [DestinationCountryController::class, 'index'])->name('country');
+});*/
+Route::get('destination', [DestinationCountryController::class, 'index'])->name('destination');
+#Route::get('destination/{country}', [DestinationCountryController::class, 'country'])->name('destination.country');
+#Route::get('destination/{country}/{region}', [DestinationCountryController::class, 'region'])->name('destination.region');
+Route::get('destination/{country}/{region?}/{city?}', [DestinationCountryController::class, 'country'])->name('destination.country');
 
 Route::post('sendcontact', [\App\Http\Controllers\ZoisController::class, 'sendcontact'])->name('sendcontactmail');
 Route::post('sendnewsletter', [\App\Http\Controllers\ZoisController::class, 'sendnewsletter'])->name('sendnewsletter');
@@ -335,6 +347,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('newblog')->name('newblog.')->group(function () {
             Route::resource('threads', AdminGuideThreadsController::class);
             Route::get('threads/{thread}/delete', [AdminGuideThreadsController::class, 'delete'])->name('delete');
+        });
+
+        Route::prefix('category')->name('category.')->group(function () {
+            Route::resource('country', AdminCategoryCountryController::class);
+            Route::resource('region', AdminCategoryRegionController::class);
+            Route::resource('city', AdminCategoryCityController::class);
         });
 
 

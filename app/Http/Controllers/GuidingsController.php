@@ -3,25 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreGuidingRequest;
+use App\Http\Requests\StoreNewGuidingRequest;
 use App\Models\FishType;
 use App\Models\Gallery;
 use App\Models\Guiding;
-use App\Models\Method;
 use App\Models\Target;
+use App\Models\Method;
 use App\Models\Water;
-use Auth;
-use Config;
+use App\Models\GuidingRequest;
+use App\Models\GuidingExtra;
+use App\Models\GuidingPrice;
+use App\Models\GuidingTargetFish;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Redirect;
+use Auth;
+use Config;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\GuidingRequestMail;
+use App\Mail\SearchRequestUserMail;
+use Illuminate\Support\Facades\Log;
 
 class GuidingsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
-     */
     public function index(Request $request)
     {
         $locale = Config::get('app.locale');
@@ -276,6 +281,191 @@ class GuidingsController extends Controller
 
         return $nearestlisting;
     }
+    
+    public function guidingsStore(StoreNewGuidingRequest $request)
+    {
+        DB::beginTransaction();
+
+        try {
+            $guiding = new Guiding();
+
+            $guiding->user_id = auth()->id();
+            $guiding->slug = slugify($request->input('title') . "-" . $request->input('location') . "-" . auth()->id());
+
+            //step 1
+            $guiding->location = $request->input('location');
+            $guiding->title = $request->input('title');
+            $guiding->lat = $request->input('latitude');
+            $guiding->lng = $request->input('longitude');
+            $guiding->country = $request->input('country');
+            $this->handleFileUploads($guiding, $request);
+
+            $guiding->fill($request->validated());
+            $guiding->user_id = auth()->id();
+            $guiding->style_of_fishing = $request->input('style_of_fishing');
+
+            $guiding->save();
+
+            $this->saveDescriptions($guiding, $request);
+            $this->generateLongDescription($request);
+            $this->saveAdditionalInformation($guiding, $request);
+            $this->saveRequirements($guiding, $request);
+            $this->saveRecommendations($guiding, $request);
+
+            // Handle target fish, methods, water types, and inclusions
+            $guiding->targetFish()->sync(json_decode($request->input('target_fish'), true));
+            $guiding->methods()->sync(json_decode($request->input('methods'), true));
+            $guiding->waterTypes()->sync(json_decode($request->input('water_types'), true));
+            $guiding->inclusions()->sync(json_decode($request->input('inclussions'), true));
+
+            // Handle pricing
+            if ($request->input('price_type') === 'per_person') {
+                foreach ($request->input('price_per_person') as $guests => $price) {
+                    $guiding->prices()->create([
+                        'guests' => $guests,
+                        'price' => $price,
+                    ]);
+                }
+            } else {
+                $guiding->prices()->create([
+                    'guests' => null,
+                    'price' => $request->input('price_per_boat'),
+                ]);
+            }
+
+            // Handle extras
+            $extras = json_decode($request->input('extras'), true);
+            foreach ($extras as $key => $extra) {
+                $guiding->extras()->create([
+                    'name' => $request->input('extra_name_' . ($key + 1), 0),
+                    'price' => $request->input('extra_price_' . ($key + 1), 0),
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->route('profile.myguidings')->with('success', 'Guiding created successfully!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'An error occurred while creating the guiding: ' . $e->getMessage())->withInput();
+        }
+    }
+
+    public function saveDraft(Request $request)
+    {
+        $user = Auth::user();
+        $data = $request->all();
+        Log::info($data);
+        $currentStep = $request->input('current_step', 1);
+
+        // Remove any empty arrays or null values
+        // $data = array_filter($data, function ($value) {
+        //     return $value !== null && $value !== '';
+        // });
+
+        // // Handle file uploads
+        // if ($request->hasFile('title_image')) {
+        //     $data['title_image'] = $this->handleFileUploads($request->file('title_image'));
+        // }
+
+        // // Save or update the draft
+        // $draft = Guiding::updateOrCreate(
+        //     ['user_id' => $user->id, 'is_draft' => true],
+        //     [
+        //         'data' => json_encode($data),
+        //         'current_step' => $currentStep,
+        //     ]
+        // );
+
+        return response()->json(['success' => true, 'message' => 'Draft saved successfully']);
+    }
+
+    private function generateLongDescription($request)
+    {
+        $longDescriptions = json_decode(file_get_contents(public_path('assets/prompts/long_description.json')), true);
+        $randomDescription = $longDescriptions['options'][array_rand($longDescriptions['options'])];
+
+        $description = str_replace(
+            ['{desc_course_of_action}', '{desc_meeting_point}', '{special_about}', '{desc_tour_unique}', '{desc_starting_time}'],
+            [$request->desc_course_of_action, $request->desc_meeting_point, "", $request->desc_tour_unique, $request->desc_starting_time],
+            $randomDescription['text']
+        );
+
+        return $description;
+    }
+
+    private function handleFileUploads($guiding, $request)
+    {
+        if ($request->hasFile('title_image')) {
+            foreach ($request->file('title_image') as $index => $file) {
+                $webp_path = media_upload($request->file('image'), 'blog');
+                $path = $file->store('public/guidings/' . $guiding->id);
+                $guiding->images()->create([
+                    'path' => $path,
+                    'is_primary' => $index == $request->input('primaryImage', 0),
+                ]);
+            }
+        }
+    }
+
+    private function saveDescriptions($guiding, $request)
+    {
+        $descriptions = $request->input('descriptions', []);
+        $descriptionData = [];
+
+        foreach ($descriptions as $description) {
+            $descriptionData[$description] = $request->input($description);
+        }
+
+        $guiding->description_details = json_encode($descriptionData);
+        $guiding->save();
+    }
+
+    private function saveAdditionalInformation($guiding, $request)
+    {
+        $additionalInfo = [
+            'child_friendly' => $request->input('child_friendly'),
+            'disability_friendly' => $request->input('disability_friendly'),
+            'other_information' => $request->input('other_information'),
+            'no_smoking' => $request->input('no_smoking'),
+            'no_alcohol' => $request->input('no_alcohol'),
+            'keep_catch' => $request->input('keep_catch'),
+            'catch_release_allowed' => $request->input('catch_release_allowed'),
+            'catch_release_only' => $request->input('catch_release_only'),
+            'accomodation' => $request->input('accomodation'),
+            'campsite' => $request->input('campsite'),
+            'pick_up_service' => $request->input('pick_up_service'),
+            'license_required' => $request->input('license_required'),
+        ];
+
+        $guiding->additional_information = json_encode($additionalInfo);
+        $guiding->save();
+    }
+
+    private function saveRequirements($guiding, $request)
+    {
+        $requirements = $request->input('requiements_taking_part', []);
+        $requirementData = [];
+
+        foreach ($requirements as $requirement) {
+            $requirementData[$requirement] = $request->input($requirement);
+        }
+
+        $guiding->requirements = json_encode($requirementData);
+        $guiding->save();
+    }
+
+    private function saveRecommendations($guiding, $request)
+    {
+        $recommendations = $request->input('recommended_preparation', []);
+        $recommendationData = [];
+
+        foreach ($recommendations as $recommendation) {
+            $recommendationData[$recommendation] = $request->input($recommendation);
+        }
+
+        $guiding->recommendations = json_encode($recommendationData);
+        $guiding->save();
+    }
 
     public function store(StoreGuidingRequest $request)
     {
@@ -332,8 +522,6 @@ class GuidingsController extends Controller
                 }
             }
         }
-
-        return redirect()->route('profile.myguidings')->with(['message' => 'Das Guiding wurde erfolgreich erstellt!']);
     }
     
     public function show($id,$slug)
