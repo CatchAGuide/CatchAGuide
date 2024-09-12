@@ -23,6 +23,7 @@ use Config;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\GuidingRequestMail;
 use App\Mail\SearchRequestUserMail;
+use Illuminate\Support\Facades\Log;
 
 class GuidingsController extends Controller
 {
@@ -287,10 +288,20 @@ class GuidingsController extends Controller
 
         try {
             $guiding = new Guiding();
-            $guiding->fill($request->validated());
+
             $guiding->user_id = auth()->id();
+            $guiding->slug = slugify($request->input('title') . "-" . $request->input('location') . "-" . auth()->id());
+
+            //step 1
             $guiding->location = $request->input('location');
             $guiding->title = $request->input('title');
+            $guiding->lat = $request->input('latitude');
+            $guiding->lng = $request->input('longitude');
+            $guiding->country = $request->input('country');
+            $this->handleFileUploads($guiding, $request);
+
+            $guiding->fill($request->validated());
+            $guiding->user_id = auth()->id();
             $guiding->style_of_fishing = $request->input('style_of_fishing');
 
             $guiding->save();
@@ -300,7 +311,6 @@ class GuidingsController extends Controller
             $this->saveAdditionalInformation($guiding, $request);
             $this->saveRequirements($guiding, $request);
             $this->saveRecommendations($guiding, $request);
-            $this->handleFileUploads($guiding, $request);
 
             // Handle target fish, methods, water types, and inclusions
             $guiding->targetFish()->sync(json_decode($request->input('target_fish'), true));
@@ -340,6 +350,35 @@ class GuidingsController extends Controller
         }
     }
 
+    public function saveDraft(Request $request)
+    {
+        $user = Auth::user();
+        $data = $request->all();
+        Log::info($data);
+        $currentStep = $request->input('current_step', 1);
+
+        // Remove any empty arrays or null values
+        // $data = array_filter($data, function ($value) {
+        //     return $value !== null && $value !== '';
+        // });
+
+        // // Handle file uploads
+        // if ($request->hasFile('title_image')) {
+        //     $data['title_image'] = $this->handleFileUploads($request->file('title_image'));
+        // }
+
+        // // Save or update the draft
+        // $draft = Guiding::updateOrCreate(
+        //     ['user_id' => $user->id, 'is_draft' => true],
+        //     [
+        //         'data' => json_encode($data),
+        //         'current_step' => $currentStep,
+        //     ]
+        // );
+
+        return response()->json(['success' => true, 'message' => 'Draft saved successfully']);
+    }
+
     private function generateLongDescription($request)
     {
         $longDescriptions = json_decode(file_get_contents(public_path('assets/prompts/long_description.json')), true);
@@ -358,6 +397,7 @@ class GuidingsController extends Controller
     {
         if ($request->hasFile('title_image')) {
             foreach ($request->file('title_image') as $index => $file) {
+                $webp_path = media_upload($request->file('image'), 'blog');
                 $path = $file->store('public/guidings/' . $guiding->id);
                 $guiding->images()->create([
                     'path' => $path,

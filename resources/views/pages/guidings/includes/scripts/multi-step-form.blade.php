@@ -11,6 +11,45 @@
     let currentStep = 1;
     const totalSteps = 8; 
     let autocomplete;
+    let city = '';
+    let country = '';
+    let postal_code = '';
+    
+    document.getElementById('saveDraftBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        saveDraft();
+    });
+
+    function saveDraft() {
+        const form = document.getElementById('guidingForm');
+        const formData = new FormData(form);
+        formData.append('is_draft', true);
+        
+        // Get the current step
+        const currentStep = document.querySelector('.step:not([style*="display: none"])');
+        const currentStepIndex = Array.from(currentStep.parentNode.children).indexOf(currentStep) + 1;
+        formData.append('current_step', currentStepIndex);
+
+        fetch('{{ route("profile.newguiding.save-draft") }}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Draft saved successfully!');
+            } else {
+                alert('Error saving draft. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while saving the draft.');
+        });
+    }
 
     function initAutocomplete() {
         autocomplete = new google.maps.places.Autocomplete(
@@ -22,20 +61,20 @@
 
         autocomplete.addListener('place_changed', function () {
             const place = autocomplete.getPlace();
-
-            let city = '';
-            let country = '';
-            let postal_code = '';
-
             place.address_components.forEach(component => {
                 const types = component.types;
+
+                $('#latitude').val(place.geometry.location.lat());
+                $('#longitude').val(place.geometry.location.lng());
 
                 if (types.includes('locality')) {
                     city = component.long_name; // This is the city name
                 } else if (types.includes('country')) {
                     country = component.long_name; // This is the country name
+                    $('#country').val(country);
                 } else if (types.includes('postal_code')) {
                     postal_code = component.long_name; // This is the postal code
+                    $('#postal_code').val(postal_code);
                 }
             });
         });
@@ -193,17 +232,14 @@
 
         // Next button functionality
         $(document).on('click', '#nextBtn', function() {
-            if (currentStep < totalSteps) {
-                console.log(totalSteps);
+            if (validateStep(currentStep)) {
                 showStep(currentStep + 1);
             }
         });
 
         // Previous button functionality
         $(document).on('click', '#prevBtn', function() {
-            if (currentStep > 1) {
-                showStep(currentStep - 1);
-            }
+            showStep(currentStep - 1);
         });
     });
 
@@ -463,8 +499,8 @@
             case 2:
                 if (!document.querySelector('input[name="type_of_fishing_radio"]:checked')) {
                     errors.push('Please select a type of fishing.');
-                    isValid = false;
-                }
+                    // isValid = false;
+                } 
                 if (document.getElementById('type_of_fishing').value === 'boat' && !document.querySelector('input[name="type_of_boat"]:checked')) {
                     errors.push('Please select a type of boat.');
                     isValid = false;
@@ -564,7 +600,6 @@
             return false;
         }
 
-        showStep(currentStep + 1);
         return true;
     }
 

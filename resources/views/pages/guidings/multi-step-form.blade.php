@@ -74,6 +74,10 @@
                     <div class="input-group mt-2">
                         <span class="input-group-text">Location</span>
                         <input type="search" class="form-control" id="location" name="location" placeholder="Enter a city or any other location close to the area your fishing tour takes place" data-bs-toggle="tooltip" title="Enter the location where you offer your guiding service">
+                        <input type="hidden" name="latitude" id="latitude">
+                        <input type="hidden" name="longitude" id="longitude">
+                        <input type="hidden" name="country" id="country">
+                        <input type="hidden" name="postal_code" id="postal_code">
                     </div>
                 </div>
 
