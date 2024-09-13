@@ -264,7 +264,7 @@
                 $city_count = $cities->count();
                 $region_counter = 0;
                 $city_counter = 0;
-                //dump($cities);
+                dump($regions);
                 @endphp
 
                 @if($region_count > 0)
@@ -817,7 +817,7 @@
 
     $(function(){
         let items = document.querySelectorAll('.carousel .carousel-item');
-        
+
         items.forEach((el) => {
             const minPerSlide = 4
             let next = el.nextElementSibling
