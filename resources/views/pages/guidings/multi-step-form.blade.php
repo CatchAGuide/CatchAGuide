@@ -42,7 +42,7 @@
             <div class="step-line"></div>
         </div>
 
-        <form action="{{ route('profile.newguiding.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('profile.newguiding.store') }}" method="POST" id="newGuidingForm" enctype="multipart/form-data">
             @csrf
 
             @if ($errors->any())
@@ -384,9 +384,9 @@
                         </div>
                         
                         <div class="btn-checkbox-container">
-                            <input type="checkbox" name="other_information[]" value="other_information" id="others_information_checkbox">
+                            <input type="checkbox" name="other_information[]" value="recommended_others" id="others_information_checkbox">
                             <label for="others_information_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">Others</label>
-                            <textarea class="form-control extra-input" name="other_information" placeholder="Other information"></textarea>
+                            <textarea class="form-control extra-input" name="recommended_others" placeholder="Other information"></textarea>
                         </div>
                     </div>
                 </div>
@@ -582,7 +582,7 @@
                         <div class="d-flex flex-wrap btn-group-toggle">
                             @foreach(['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] as $month)
                                 <div class="btn-checkbox-container" style="flex: 0 0 20%; max-width: 20%; padding: 5px;">
-                                    <input type="checkbox" name="available_month[]" value="{{ strtolower($month) }}" id="avail_{{ strtolower($month) }}">
+                                    <input type="checkbox" name="months[]" value="{{ strtolower($month) }}" id="avail_{{ strtolower($month) }}">
                                     <label for="avail_{{ strtolower($month) }}" class="btn btn-outline-primary btn-checkbox w-100">{{ $month }}</label>
                                 </div>
                             @endforeach
@@ -592,8 +592,8 @@
 
                 <div class="button-group">
                     <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
-                    <button type="submit" class="btn btn-success" id="submitBtn">Submit</button>
-                    <button type="button" class="btn btn-outline-primary" id="saveDraftBtn">Leave & Save to Draft</button>
+                    {{-- <button type="submit" class="btn btn-success" id="submitBtn">Submit</button> --}}
+                    <button type="button" class="btn btn-outline-primary" id="saveDraftBtn">Save</button>
                 </div>
             </div>
         </form>
