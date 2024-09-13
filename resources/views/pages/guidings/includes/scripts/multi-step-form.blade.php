@@ -15,55 +15,59 @@
     let country = '';
     let postal_code = '';
     
-    document.getElementById('saveDraftBtn').addEventListener('click', function(e) {
+    $(document).on('click', '#saveDraftBtn', function(e) {
         e.preventDefault();
         saveDraft();
     });
 
+    function showLoadingScreen() {
+        const loadingScreen = document.createElement('div');
+        loadingScreen.id = 'loadingScreen';
+        loadingScreen.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        `;
+        
+        const spinner = document.createElement('div');
+        spinner.style.cssText = `
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        `;
+        
+        loadingScreen.appendChild(spinner);
+        document.body.appendChild(loadingScreen);
+    }
+
     function saveDraft() {
-        const form = document.getElementById('guidingForm');
-        if (!form || !(form instanceof HTMLFormElement)) {
-            console.error('Form not found or invalid');
+        const form = document.getElementById('newGuidingForm');
+        if (!form) {
+            console.error('Form not found');
             return;
         }
 
-        const formData = new FormData(form);
-        formData.append('is_draft', 'true');
-        
-        // Get the current step
-        const currentStep = document.querySelector('.step:not([style*="display: none"])');
-        const currentStepIndex = currentStep ? Array.from(currentStep.parentNode.children).indexOf(currentStep) + 1 : 1;
-        formData.append('current_step', currentStepIndex.toString());
+        if (currentStep !== totalSteps) {
+            const draftInput = document.createElement('input');
+            draftInput.type = 'hidden';
+            draftInput.name = 'is_draft';
+            draftInput.value = '1';
+            form.appendChild(draftInput);
 
-        // Append cropped images data
-        Object.keys(croppers).forEach((key) => {
-            const cropper = croppers[key];
-            if (cropper) {
-                cropper.getCroppedCanvas().toBlob((blob) => {
-                    formData.append(`cropped_image_${key}`, blob, `image_${key}.png`);
-                });
-            }
-        });
+            form.noValidate = true;
+        }
 
-        fetch('{{ route("profile.newguiding.save-draft") }}', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Draft saved successfully!');
-            } else {
-                alert('Error saving draft. Please try again.');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while saving the draft.');
-        });
+        form.submit();
     }
 
     function initAutocomplete() {
@@ -112,6 +116,7 @@
         $('#prevBtn').toggle(currentStep > 1);
         $('#nextBtn').toggle(currentStep < totalSteps);
         $('#submitBtn').toggle(currentStep === totalSteps);
+        console.log(currentStep);
     }
 
     $('.step-button').click(function() {
@@ -193,20 +198,6 @@
                 enabled: 0,
                 closeOnSelect: false
             }
-        });
-
-        // Months (for seasonal trip)
-        var monthsInput = document.querySelector('input[name="months"]');
-        new Tagify(monthsInput, {
-            whitelist: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-            maxTags: 12,
-            dropdown: {
-                maxItems: 12,
-                classname: "tagify__dropdown",
-                enabled: 0,
-                closeOnSelect: false
-            },
-            enforceWhitelist: true
         });
 
         // Show/hide monthly selection based on seasonal trip selection
@@ -320,10 +311,6 @@
     $('input[name="seasonal_trip"]').change(function() {
         if ($(this).val() === 'season_monthly') {
             $('#monthly_selection').show();
-            new Tagify(document.getElementById('months'), {
-                whitelist: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-                maxTags: 12
-            });
         } else {
             $('#monthly_selection').hide();
         }
@@ -363,6 +350,8 @@
         return button;
     }
 
+    let imageFiles = []; // Array to store all selected image files
+
     function previewImages(input) {
         const container = document.getElementById('imagePreviewContainer');
         
@@ -373,6 +362,7 @@
 
         if (input.files) {
             Array.from(input.files).forEach((file, index) => {
+                imageFiles.push(file); // Add new file to the array
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const wrapper = document.createElement('div');
@@ -408,7 +398,7 @@
                     // Initialize Cropper
                     croppers[imageIndex] = new Cropper(img, {
                         aspectRatio: 5 / 4,
-                        viewMode: 3, // Changed to viewMode 3
+                        viewMode: 3,
                         dragMode: 'move',
                         autoCropArea: 1,
                         restore: false,
@@ -425,16 +415,13 @@
                             const imageData = cropper.getImageData();
                             const containerData = cropper.getContainerData();
 
-                            // Calculate the scaling factor
                             const scale = Math.max(
                                 containerData.width / imageData.naturalWidth,
                                 containerData.height / imageData.naturalHeight
                             );
 
-                            // Scale the image to fit the container
                             cropper.zoomTo(scale);
 
-                            // Center the image
                             const scaledWidth = imageData.naturalWidth * scale;
                             const scaledHeight = imageData.naturalHeight * scale;
                             const left = (containerData.width - scaledWidth) / 2;
@@ -450,7 +437,7 @@
                     });
 
                     // Set the first image as the title image by default
-                    if (index === 0) {
+                    if (imageIndex === 0) {
                         setPrimaryImage(wrapper, currentIndex);
                     }
 
@@ -458,12 +445,28 @@
                 }
                 reader.readAsDataURL(file);
             });
+
+            // Update the file input with all selected files
+            updateFileInput();
         }
+    }
+
+    function updateFileInput() {
+        const fileInput = document.getElementById('title_image');
+        const dataTransfer = new DataTransfer();
+        
+        imageFiles.forEach(file => {
+            dataTransfer.items.add(file);
+        });
+        
+        fileInput.files = dataTransfer.files;
     }
 
     function deleteImage(wrapper, index) {
         wrapper.remove();
         delete croppers[index];
+        imageFiles.splice(index, 1); // Remove the file from the array
+        updateFileInput(); // Update the file input after deletion
     }
 
     function setPrimaryImage(wrapper, index) {
@@ -475,16 +478,19 @@
     }
 
     // Add this event listener to prevent form submission on enter key
-    document.querySelector('form').addEventListener('keypress', function(e) {
+    document.getElementById('newGuidingForm').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
         }
     });
 
-    // Modify the form submission logic
-    document.querySelector('form').addEventListener('submit', function(e) {
-        if (currentStep !== totalSteps) {
+    // Update the form submission logic
+    document.getElementById('newGuidingForm').addEventListener('submit', function(e) {
+        if (currentStep !== totalSteps && !this.noValidate) {
             e.preventDefault();
+            if (validateStep(currentStep)) {
+                showStep(currentStep + 1);
+            }
         }
     });
 
@@ -495,7 +501,13 @@
 
         let isValid = true;
         let errors = [];
-        return true;
+
+        // Check if it's a draft submission
+        const isDraft = document.querySelector('input[name="is_draft"]');
+        if (isDraft && isDraft.value === '1') {
+            console.log('draft state');
+            return true; // Skip validation for drafts
+        }
 
         switch(step) {
             case 1:
@@ -603,7 +615,7 @@
                     errors.push('Please select a seasonal trip option.');
                     isValid = false;
                 }
-                if (document.querySelector('input[name="seasonal_trip"]:checked').value === 'season_monthly' && !document.querySelector('input[name="available_month[]"]:checked')) {
+                if (document.querySelector('input[name="seasonal_trip"]:checked').value === 'season_monthly' && !document.querySelector('input[name="months[]"]:checked')) {
                     errors.push('Please select at least one month for seasonal trips.');
                     isValid = false;
                 }
@@ -620,15 +632,24 @@
     }
 
 
-    // Add this function to handle form submission
+    // Modify the handleSubmit function
     function handleSubmit(event) {
         event.preventDefault();
-        if (validateStep(currentStep)) {
-            document.querySelector('form').submit();
+        const form = event.target;
+        const isDraft = form.querySelector('input[name="is_draft"]');
+        
+        console.log('form submitted before loading screen');
+        showLoadingScreen();
+        console.log('form submitted after loading screen');
+        
+        if (isDraft && isDraft.value === '1') {
+            form.submit();
+        } else if (form.noValidate || validateStep(currentStep)) {
+            form.submit();
         }
     }
 
-    // Add this line to attach the handleSubmit function to the form's submit event
-    document.querySelector('form').addEventListener('submit', handleSubmit);
+    // Update the form's submit event listener
+    document.getElementById('newGuidingForm').addEventListener('submit', handleSubmit);
 </script>
 @endpush
