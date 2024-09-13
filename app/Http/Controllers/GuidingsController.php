@@ -306,7 +306,7 @@ class GuidingsController extends Controller
             $galeryImages = [];
             if ($request->has('title_image')) {
                 foreach($request->title_image as $index => $image){
-                    $webp_path = media_upload($image, 'guidings', $guiding->slug. "-". $index);
+                    $webp_path = media_upload($image, 'guidings-images', $guiding->slug. "-". $index);
 
                     if ($index == $request->input('primaryImage', 0)) {
                         $guiding->thumbnail_path = $webp_path;
@@ -396,13 +396,15 @@ class GuidingsController extends Controller
                         'name' => $request->input($nameKey),
                         'price' => $request->input($priceKey)
                     ];
+                    if ($i == 1) {
+                        $guiding->price = $request->input($priceKey);
+                    }
                     $i++;
                 } else {
                     break;
                 }
             }
             $guiding->pricing_extra = json_encode($pricingExtras);
-            $guiding->price = 1;
 
             //step 8    
             $guiding->allowed_booking_advance = $request->has('allowed_booking_advance') ? $request->input('allowed_booking_advance') : '';
