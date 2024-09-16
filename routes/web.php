@@ -174,6 +174,7 @@ Route::middleware('auth:web')->group(function () {
 
 
     Route::get('guidings/{guiding}/edit', [GuidingsController::class, 'edit'])->name('guidings.edit');
+    Route::get('guidings/{guiding}/edit_newguiding', [GuidingsController::class, 'edit_newguiding'])->name('guidings.edit_newguiding');
     Route::post('guidings/{guiding}/update', [GuidingsController::class, 'update'])->name('guidings.update');
 });
 
