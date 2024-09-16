@@ -91,6 +91,7 @@ class AdminCategoryRegionController extends Controller
             $data['type'] = 'region';
             $data['filters'] = json_encode($request->filters);
             $data['content'] = $request->body;
+            $data['slug'] = $this->slug_format($request->name);
             $webp_path = null;
 
             if($request->has('thumbnailImage')) {
@@ -212,6 +213,7 @@ class AdminCategoryRegionController extends Controller
             $data = $request->only(['country_id', 'name', 'title', 'sub_title', 'introduction', 'fish_avail_title', 'fish_avail_intro', 'size_limit_title', 'size_limit_intro', 'time_limit_title', 'time_limit_intro', 'faq_title']);
             $data['filters'] = json_encode($request->filters);
             $data['content'] = $request->body;
+            $data['slug'] = $this->slug_format($request->name);
             $webp_path = null;
 
             if($request->has('thumbnailImage')) {
@@ -313,5 +315,10 @@ class AdminCategoryRegionController extends Controller
         $webpImage->save(public_path($webp_path));
 
         return $webp_path;
+    }
+
+    public function slug_format($value)
+    {
+        return str_replace(' ', '-', strtolower($value));
     }
 }

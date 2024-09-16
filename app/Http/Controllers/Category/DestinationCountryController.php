@@ -34,7 +34,7 @@ class DestinationCountryController extends Controller
             $address_name = $region;
         }
 
-        $row_data = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->whereType($destination_type)->whereName($address_name)->first();
+        $row_data = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->whereType($destination_type)->whereSlug($address_name)->first();
 
         if (is_null($row_data)) {
             abort(404);
