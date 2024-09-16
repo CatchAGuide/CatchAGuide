@@ -33,7 +33,8 @@ class Destination extends Model
         'size_limit_intro',
         'time_limit_title',
         'time_limit_intro',
-        'faq_title'
+        'faq_title',
+        'slug'
     ];
 
     public function faq()
@@ -56,6 +57,11 @@ class Destination extends Model
         return $this->hasMany(DestinationFishTimeLimit::class);
     }
 
+    /*public function setSlugAttribute($value)
+    {
+        $this->attributes['slug'] = str_replace(' ', '-', strtolower($value));
+    }*/
+
     public function getThumbnailPath()
     {
         if (empty($this->thumbnail_path)) {
@@ -77,11 +83,31 @@ class Destination extends Model
         return 'N/A';
     }
 
+    public function getCountrySlugAttribute()
+    {
+        $row = self::whereType('country')->whereId($this->country_id)->first();
+        if (!empty($row)) {
+            return $row->slug;
+        }
+
+        return 'N/A';
+    }
+
     public function getRegionNameAttribute()
     {
         $row = self::whereType('region')->whereId($this->region_id)->first();
         if (!empty($row)) {
             return $row->name;
+        }
+
+        return 'N/A';
+    }
+
+    public function getRegionSlugAttribute()
+    {
+        $row = self::whereType('region')->whereId($this->region_id)->first();
+        if (!empty($row)) {
+            return $row->slug;
         }
 
         return 'N/A';

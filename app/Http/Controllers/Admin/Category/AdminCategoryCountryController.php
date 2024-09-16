@@ -80,6 +80,7 @@ class AdminCategoryCountryController extends Controller
             DB::beginTransaction();
             $data = $request->only(['name', 'title', 'sub_title', 'introduction', 'fish_avail_title', 'fish_avail_intro', 'size_limit_title', 'size_limit_intro', 'time_limit_title', 'time_limit_intro', 'faq_title']);
             $data['type'] = 'country';
+            $data['slug'] = $this->slug_format($request->name);
             $data['filters'] = json_encode($request->filters);
             $data['content'] = $request->body;
             $webp_path = null;
@@ -193,6 +194,7 @@ class AdminCategoryCountryController extends Controller
         try {
             DB::beginTransaction();
             $data = $request->only(['name', 'title', 'sub_title', 'introduction', 'fish_avail_title', 'fish_avail_intro', 'size_limit_title', 'size_limit_intro', 'time_limit_title', 'time_limit_intro', 'faq_title']);
+            $data['slug'] = $this->slug_format($request->name);
             $data['filters'] = json_encode($request->filters);
             $data['content'] = $request->body;
             $webp_path = null;
@@ -298,5 +300,10 @@ class AdminCategoryCountryController extends Controller
         $webpImage->save(public_path($webp_path));
 
         return $webp_path;
+    }
+
+    public function slug_format($value)
+    {
+        return str_replace(' ', '-', strtolower($value));
     }
 }

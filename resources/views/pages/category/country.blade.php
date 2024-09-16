@@ -205,12 +205,12 @@
         border-left: 4px solid transparent;
         border-right: 4px solid transparent;
     }
-    .see-more {
+    /*.see-more {
         display: inline-block;
         color: blue;
         cursor: pointer;
         text-decoration: underline;
-    }
+    }*/
 </style>
 @endsection
 
@@ -256,25 +256,25 @@
                 </form>
 
                 <div id="page-main-intro" class="mb-3">
-                    <span class="page-main-intro-text mb-1">{!! nl2br($row_data->introduction) !!}</span>
-                    <a href="#" class="see-more">See More</a>
+                    <div class="page-main-intro-text mb-1">{!! nl2br($row_data->introduction) !!}</div>
+                    <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm">Read More</a></p>
                 </div>
                 @php
                 $region_count = $regions->count();
                 $city_count = $cities->count();
                 $region_counter = 0;
                 $city_counter = 0;
-                dump($regions);
+                //dump($regions);
                 @endphp
 
                 @if($region_count > 0)
                 <h5 class="mb-2">All Region</h5>
-                <div id="carousel-regions" class="carousel slide mb-4" data-bs-ride="carousel">
+                <div id="carousel-regions" class="carousel slide mb-4" data-bs-ride="carousel" {!! ($region_count <= 4) ? 'data-bs-interval="false"' : '' !!}>
                     <div class="carousel-inner" role="listbox">
                         @foreach($regions as $region)
                         <div class="carousel-item {{ (($region_counter == 0)? 'active' : '') }}">
                             <div class="col-md-3">
-                                <a href="{{ route('destination.country', ['country' => $region->country_name, 'region' => $region->name]) }}">
+                                <a href="{{ route('destination.country', ['country' => $region->country_slug, 'region' => $region->slug]) }}">
                                     <div class="card">
                                         <div class="card-img">
                                             <img src="{{ $region->getThumbnailPath() }}" class="dimg-fluid" width="300px" alt="...">
@@ -303,12 +303,12 @@
                 @endif
                 @if($city_count > 0)
                 <h5 class="mb-2">All Cities</h5>
-                <div id="carousel-cities" class="carousel slide mb-4" data-bs-ride="carousel">
+                <div id="carousel-cities" class="carousel slide mb-4" data-bs-ride="carousel" {!! ($city_count <= 4) ? 'data-bs-interval="false"' : '' !!}>
                     <div class="carousel-inner" role="listbox">
                         @foreach($cities as $city)
                         <div class="carousel-item {{ (($city_counter == 0)? 'active' : '') }}">
                             <div class="col-md-3">
-                                <a href="{{ route('destination.country', ['country' => $city->country_name, 'region' => $city->region_name, 'city' => $city->name]) }}">
+                                <a href="{{ route('destination.country', ['country' => $city->country_slug, 'region' => $city->region_slug, 'city' => $city->slug]) }}">
                                     <div class="card">
                                         <div class="card-img">
                                             <img src="{{ $city->getThumbnailPath() }}" class="dimg-fluid" width="300px" alt="...">
@@ -723,7 +723,7 @@
                 </table>
 
                 <div class="row">
-                    <div class="col-sm-12 col-md-6 col-lg-6">
+                    <div class="col-sm-12 col-md-12 col-lg-12">
                         <h4>{{ $row_data->size_limit_title }}</h4>
                         <p>{!! $row_data->size_limit_intro !!}</p>
                         <table class="table table-bordered table-striped">
@@ -745,7 +745,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 mb-3">
+                    <div class="col-sm-12 col-md-12 col-lg-12">
                         <h4>{{ $row_data->time_limit_title }}</h4>
                         <p>{!! $row_data->time_limit_intro !!}</p>
                         <table class="table table-bordered table-striped">
@@ -771,18 +771,16 @@
                 <h4 class="mb-2">{{ $row_data->faq_title }}</h4>
                 <div class="accordion mb-5" id="faq">
                     @foreach($faq as $row)
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                        <button class="accordion-button p-2" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ $row->id }}" aria-expanded="true" aria-controls="faq{{ $row->id }}">{{ $row->question }}</button>
-                        </h2>
-                        <div class="accordion-collapse collapse" id="faq{{ $row->id }}" data-bs-parent="#accordionExample">
-                            <div class="accordion-body p-2">{{ $row->answer }}</div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ $row->id }}" aria-expanded="true" aria-controls="faq{{ $row->id }}">{{ $row->question }}</button>
+                            </h2>
+                            <div class="accordion-collapse collapse" id="faq{{ $row->id }}" data-bs-parent="#faq">
+                                <div class="accordion-body p-2">{{ $row->answer }}</div>
+                            </div>
                         </div>
-                    </div>
                     @endforeach
                 </div>
-            </div>
-            <div class="col-12">
             </div>
         </div>
     </div>
@@ -815,30 +813,58 @@
         $('#form-sortby').submit();
     });
 
-    $(function(){
-        let items = document.querySelectorAll('.carousel .carousel-item');
+    /*let itemsCollapse = document.querySelectorAll('.carousel .carousel-item');
 
-        items.forEach((el) => {
-            const minPerSlide = 4
-            let next = el.nextElementSibling
-            for (var i=1; i<minPerSlide; i++) {
-                if (!next) {
-                    // wrap carousel by using first child
-                    next = items[0]
-                }
-                let cloneChild = next.cloneNode(true)
-                el.appendChild(cloneChild.children[0])
-                next = next.nextElementSibling
+    itemsCollapse.forEach((el) => {
+        const minPerSlide = 4
+        let next = el.nextElementSibling
+        for (var i=1; i<minPerSlide; i++) {
+            if (!next) {
+                // wrap carousel by using first child
+                next = itemsCollapse[0]
             }
-        });
+            let cloneChild = next.cloneNode(true)
+            el.appendChild(cloneChild.children[0])
+            next = next.nextElementSibling
+        }
+    });*/
+    let itemsCollapseRegions = document.querySelectorAll('#carousel-regions .carousel-item');
+    itemsCollapseRegions.forEach((el) => {
+        const minPerSlide = (itemsCollapseRegions.length >= 4) ? 4 : itemsCollapseRegions.length;
+        let next = el.nextElementSibling
+        for (var i=1; i<minPerSlide; i++) {
+            if (!next) {
+                next = itemsCollapseRegions[0]
+            }
+            let cloneChild = next.cloneNode(true)
+            el.appendChild(cloneChild.children[0])
+            next = next.nextElementSibling
+        }
+    });
+
+    let itemsCollapseCities = document.querySelectorAll('#carousel-cities .carousel-item');
+    itemsCollapseCities.forEach((el) => {
+        const minPerSlide = (itemsCollapseCities.length >= 4) ? 4 : itemsCollapseCities.length;
+        let next = el.nextElementSibling
+        for (var i=1; i<minPerSlide; i++) {
+            if (!next) {
+                next = itemsCollapseCities[0]
+            }
+            let cloneChild = next.cloneNode(true)
+            el.appendChild(cloneChild.children[0])
+            next = next.nextElementSibling
+        }
+    });
+    
+    $(function(){
 
         var word_char_count_allowed = 1200;
         var page_main_intro = $('.page-main-intro-text');
         var page_main_intro_text = page_main_intro.html();
         var page_main_intro_count = page_main_intro.text().length;
         var ellipsis = "..."; 
-        var moreText = "See More";
-        var lessText = "See Less";
+        var moreText = '<a href="#" class="btn btn-primary btn-sm">Read More</a>';
+        var lessText = '<a href="#" class="btn btn-primary btn-sm">Read Less</a>';
 
         var visible_text = page_main_intro_text.substring(0, word_char_count_allowed);
         var hidden_text  = page_main_intro_text.substring(word_char_count_allowed);
