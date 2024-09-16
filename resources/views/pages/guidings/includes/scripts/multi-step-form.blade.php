@@ -247,7 +247,234 @@
         $(document).on('click', '#prevBtn', function() {
             showStep(currentStep - 1);
         });
+
+        //If edit is requested, set the form data
+        setFormDataIfEdit();
     });
+
+    function setFormDataIfEdit() {
+        console.log('Form Data:', {!! json_encode($formData ?? []) !!});
+
+        const typeOfFishingData = '{{ $formData['type_of_fishing'] ?? '' }}';
+        if (typeOfFishingData) {
+            const radioButton = document.querySelector(`input[name="type_of_fishing_radio"][value="${typeOfFishingData}"]`);
+            if (radioButton) {
+                radioButton.checked = true;
+                selectOption(typeOfFishingData);
+            }
+        }
+
+        const boatTypeData = '{{ $formData['boat_type'] ?? '' }}';
+        if (boatTypeData) {
+            const boatRadio = document.querySelector(`input[name="type_of_boat"][value="${boatTypeData}"]`);
+            if (boatRadio) {
+                boatRadio.checked = true;
+                const label = boatRadio.closest('label');
+                if (label) {
+                    label.classList.add('active');
+                }
+            }
+        }
+
+        const boatInformationData = {!! json_encode($formData['boat_information'] ?? []) !!};
+        Object.entries(boatInformationData).forEach(([key, value]) => {
+            const checkbox = document.querySelector(`input[name="descriptions[]"][value="${key}"]`);
+            if (checkbox) {
+                checkbox.checked = true;
+                const container = checkbox.closest('.btn-checkbox-container');
+                if (container) {
+                    container.classList.add('active');
+                    const textarea = container.querySelector('textarea');
+                    if (textarea) {
+                        textarea.value = value;
+                        textarea.style.display = 'block';
+                    }
+                }
+            }
+        });
+
+        const extrasInputData = document.querySelector('input[name="extras"]');
+        if (extrasInputData) {
+            const extrasTagify = new Tagify(extrasInputData);
+            const extrasData = {!! json_encode($formData['boat_extras'] ?? []) !!};
+            extrasTagify.addTags(extrasData);
+        }
+
+        const targetFishInputData = document.querySelector('input[name="target_fish"]');
+        if (targetFishInputData) {
+            const targetFishTagify = new Tagify(targetFishInputData);
+            const targetFishData = {!! json_encode($formData['target_fish'] ?? []) !!};
+            targetFishTagify.addTags(targetFishData);
+        }
+
+        const methodsInputData = document.querySelector('input[name="methods"]');
+        if (methodsInputData) {
+            const methodsTagify = new Tagify(methodsInputData);
+            const methodsData = {!! json_encode($formData['methods'] ?? []) !!};
+            methodsTagify.addTags(methodsData);
+        }
+
+        const waterTypesInputData = document.querySelector('input[name="water_types"]');
+        if (waterTypesInputData) {
+            const waterTypesTagify = new Tagify(waterTypesInputData);
+            const waterTypesData = {!! json_encode($formData['water_types'] ?? []) !!};
+            waterTypesTagify.addTags(waterTypesData);
+        }
+        
+        const experinceLevelData = {!! json_encode($formData['experience_level'] ?? []) !!};
+        Object.entries(experinceLevelData).forEach(([key, value]) => {
+            const checkbox = document.querySelector(`input[name="experience_level[]"][value="${value}"]`);
+            if (checkbox) {
+                checkbox.checked = true;
+                const container = checkbox.closest('.btn-checkbox-container');
+                if (container) {
+                    container.classList.add('active');
+                }
+            }
+        });
+
+        const inclussionsInputData = document.querySelector('input[name="inclussions"]');
+        if (inclussionsInputData) {
+            const inclussionsTagify = new Tagify(inclussionsInputData);
+            const inclussionsData = {!! json_encode($formData['inclussions'] ?? []) !!};
+            inclussionsTagify.addTags(inclussionsData);
+        }
+
+        const styleOfFishingData = '{{ $formData['style_of_fishing'] ?? '' }}';
+        if (styleOfFishingData) {
+            const styleOfFishing = document.querySelector(`input[name="style_of_fishing"][value="${styleOfFishingData}"]`);
+            if (styleOfFishing) {
+                styleOfFishing.checked = true;
+                const label = styleOfFishing.closest('label');
+                if (label) {
+                    label.classList.add('active');
+                }
+            }
+        }
+
+        const otherInformationData = {!! json_encode($formData['other_information'] ?? []) !!};
+        Object.entries(otherInformationData).forEach(([key, value]) => {
+            const checkbox = document.querySelector(`input[name="other_information[]"][value="${key}"]`);
+            if (checkbox) {
+                checkbox.checked = true;
+                const container = checkbox.closest('.btn-checkbox-container');
+                if (container) {
+                    container.classList.add('active');
+                    const textarea = container.querySelector('textarea');
+                    if (textarea) {
+                        textarea.value = value;
+                        textarea.style.display = 'block';
+                    }
+                }
+            }
+        });
+
+        const requirementsData = {!! json_encode($formData['requirements'] ?? []) !!};
+        Object.entries(requirementsData).forEach(([key, value]) => {
+            const checkbox = document.querySelector(`input[name="requiements_taking_part[]"][value="${key}"]`);
+            if (checkbox) {
+                checkbox.checked = true;
+                const container = checkbox.closest('.btn-checkbox-container');
+                if (container) {
+                    container.classList.add('active');
+                    const textarea = container.querySelector('textarea');
+                    if (textarea) {
+                        textarea.value = value;
+                        textarea.style.display = 'block';
+                    }
+                }
+            }
+        });
+
+        const recommendationsData = {!! json_encode($formData['recommendations'] ?? []) !!};
+        Object.entries(recommendationsData).forEach(([key, value]) => {
+            const checkbox = document.querySelector(`input[name="recommended_preparation[]"][value="${key}"]`);
+            if (checkbox) {
+                checkbox.checked = true;
+                const container = checkbox.closest('.btn-checkbox-container');
+                if (container) {
+                    container.classList.add('active');
+                    const textarea = container.querySelector('textarea');
+                    if (textarea) {
+                        textarea.value = value;
+                        textarea.style.display = 'block';
+                    }
+                }
+            }
+        });
+
+        const tourTypeData = '{{ $formData['tour_type'] ?? '' }}';
+        if (tourTypeData) {
+            const tourRadio = document.querySelector(`input[name="tour_type"][value="${tourTypeData}"]`);
+            if (tourRadio) {
+                tourRadio.checked = true;
+                const label = tourRadio.closest('label');
+                if (label) {
+                    label.classList.add('active');
+                }
+            }
+        }
+        
+        const durationType = '{{ $formData['duration_type'] ?? '' }}';
+        const durationCount = '{{ $formData['duration'] ?? '' }}';
+        if (durationType) {
+            const durationRadio = document.querySelector(`input[name="duration"][value="${durationType}"]`);
+            if (durationRadio) {
+                durationRadio.checked = true;
+                document.getElementById('duration_details').style.display = 'block';
+                if (duration === 'multi_day') {
+                    document.getElementById('days_input').style.display = 'block';
+                    document.getElementById('hours_input').style.display = 'none';
+                    document.getElementById('duration_hours').value = durationCount;
+                } else {
+                    document.getElementById('hours_input').style.display = 'block';
+                    document.getElementById('days_input').style.display = 'none';
+                    document.getElementById('duration_days').value = durationCount;
+                }
+            }
+        }
+        
+        const priceType = '{{ $formData['price_type'] ?? '' }}';
+        if (price_type) {
+            const durationRadio = document.querySelector(`input[name="duration"][value="${price_type}"]`);
+            if (durationRadio) {
+                durationRadio.checked = true;
+                document.getElementById('duration_details').style.display = 'block';
+                if (duration === 'multi_day') {
+                    document.getElementById('days_input').style.display = 'block';
+                    document.getElementById('hours_input').style.display = 'none';
+                    document.getElementById('duration_hours').value = durationCount;
+                } else {
+                    document.getElementById('hours_input').style.display = 'block';
+                    document.getElementById('days_input').style.display = 'none';
+                    document.getElementById('duration_days').value = durationCount;
+                }
+            }
+        }
+        const priceType = '{{ $formData['price_type'] ?? '' }}';
+        const prices = {{ $formData['prices'] ?? [] }};
+        if (priceType) {
+            const priceTypeRadio = document.querySelector(`input[name="price_type"][value="${priceType}"]`);
+            if (priceTypeRadio) {
+                priceTypeRadio.checked = true;
+                if (prices && Object.keys(prices).length > 0) {
+                    if (priceType === 'per_person') {
+                        Object.entries(prices).forEach(([key, value]) => {
+                            const input = document.querySelector(`input[name="price_per_person[${key}]"]`);
+                            if (input) {
+                                input.value = value;
+                            }
+                        });
+                    } else if (priceType === 'per_boat') {
+                        const input = document.querySelector('input[name="price_per_boat"]');
+                        if (input) {
+                            input.value = prices.amount;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     // Radio button functionality
     $('input[type="radio"]').change(function() {
@@ -563,21 +790,28 @@
                 }
                 break;
             case 5:
-                if (!document.getElementById('desc_course_of_action').value.trim()) {
-                    errors.push('Course of action description is required.');
-                    isValid = false;
-                }
-                if (!document.getElementById('desc_starting_time').value.trim()) {
-                    errors.push('Starting time description is required.');
-                    isValid = false;
-                }
-                if (!document.getElementById('desc_meeting_point').value.trim()) {
-                    errors.push('Meeting point description is required.');
-                    isValid = false;
-                }
-                if (!document.getElementById('desc_tour_unique').value.trim()) {
-                    errors.push('Tour uniqueness description is required.');
-                    isValid = false;
+                if (!document.getElementById('is_update').value.trim() || document.getElementById('is_update').value.trim() === '0') {
+                    if (!document.getElementById('desc_course_of_action').value.trim()) {
+                        errors.push('Course of action description is required.');
+                        isValid = false;
+                    }
+                    if (!document.getElementById('desc_starting_time').value.trim()) {
+                        errors.push('Starting time description is required.');
+                        isValid = false;
+                    }
+                    if (!document.getElementById('desc_meeting_point').value.trim()) {
+                        errors.push('Meeting point description is required.');
+                        isValid = false;
+                    }
+                    if (!document.getElementById('desc_tour_unique').value.trim()) {
+                        errors.push('Tour uniqueness description is required.');
+                        isValid = false;
+                    }
+                } else {
+                    if (!document.getElementById('long_description').value.trim()) {
+                        errors.push('description is required.');
+                        isValid = false;
+                    }
                 }
                 break;
             case 6:

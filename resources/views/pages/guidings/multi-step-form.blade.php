@@ -55,15 +55,23 @@
                 </div>
             @endif
 
+            <input type="hidden" name="is_update" id="is_update" value="{{ $formData['is_update'] ?? 0 }}">    
+
             <!-- Step 1 -->
             <div class="step active" id="step1">
                 <h5>Upload images and set basic information</h5>
 
-                <label for="title_image">Galery Images</label>
+                <label for="title_image">Gallery Images</label>
                 <div class="file-upload-wrapper">
                     <input id="title_image" name="title_image[]" type="file" multiple onchange="previewImages(this);" />
                     <label for="title_image" class="file-upload-btn">Choose Files</label>
-                    <div id="croppedImagesContainer"></div>
+                    <div id="croppedImagesContainer">
+                        {{-- @if(isset($formData['images']))
+                            @foreach($formData['images'] as $image)
+                                <img src="{{ $image }}" alt="Existing image" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
+                            @endforeach
+                        @endif --}}
+                    </div>
                 </div>
 
                 <div class="image-area" id="imagePreviewContainer"></div>
@@ -72,18 +80,19 @@
                 <div class="form-group">
                     <div class="input-group mt-2">
                         <span class="input-group-text">Location</span>
-                        <input type="search" class="form-control" id="location" name="location" placeholder="Enter a city or any other location close to the area your fishing tour takes place" data-bs-toggle="tooltip" title="Enter the location where you offer your guiding service">
-                        <input type="hidden" name="latitude" id="latitude">
-                        <input type="hidden" name="longitude" id="longitude">
-                        <input type="hidden" name="country" id="country">
-                        <input type="hidden" name="postal_code" id="postal_code">
+                        <input type="search" class="form-control" id="location" name="location" value="{{ $formData['location'] ?? '' }}" placeholder="Enter a city or any other location close to the area your fishing tour takes place">
+                        <input type="hidden" name="latitude" id="latitude" value="{{ $formData['latitude'] ?? '' }}">
+                        <input type="hidden" name="longitude" id="longitude" value="{{ $formData['longitude'] ?? '' }}">
+                        <input type="hidden" name="country" id="country" value="{{ $formData['country'] ?? '' }}">
+                        <input type="hidden" name="postal_code" id="postal_code" value="{{ $formData['postal_code'] ?? '' }}">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <div class="input-group mt-2">
                         <span class="input-group-text">Title</span>
-                        <input type="text" class="form-control" id="title" name="title">
+                        {{-- <input type="text" class="form-control" id="title" name="title"> --}}
+                        <input type="text" class="form-control" id="title" name="title" value="{{ $formData['title'] ?? '' }}">
                     </div>
                 </div>
 
@@ -289,25 +298,32 @@
             <div class="step" id="step5">
                 <h5>Write a detailed description of your service</h5>
                 
-                <div class="form-group">
-                    <label for="desc_course_of_action">Tell your guests what they can expect from your fishing tour. How does a typical fishing tour look like?</label>
-                    <textarea name="desc_course_of_action" id="desc_course_of_action" class="form-control" placeholder="course of action. . . ."></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="desc_starting_time">Let your guest know when you typically begin with the fishing tour.</label>
-                    <textarea name="desc_starting_time" id="desc_starting_time" class="form-control" placeholder="starting time. . . ."></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="desc_meeting_point">Give your guests some information, where they will meet you after they have booked your fishing tour</label>
-                    <textarea name="desc_meeting_point" id="desc_meeting_point" class="form-control" placeholder="meeting point. . . ."></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="desc_tour_unique">Tell your guests about special highlights they can experience on a fishing tour with you</label>
-                    <textarea name="desc_tour_unique" id="desc_tour_unique" class="form-control" placeholder="uniqueness. . . ."></textarea>
-                </div>
+                @if($formData['is_update'] == 1)
+                    <div class="form-group">
+                        <label for="long_description">Tell your guests what they can expect from your fishing tour. How does a typical fishing tour look like?</label>
+                        <textarea name="long_description" id="long_description" class="form-control" placeholder="course of action. . . .">{{ $formData['long_description'] ?? '' }}</textarea>
+                    </div>
+                @else
+                    <div class="form-group">
+                        <label for="desc_course_of_action">Tell your guests what they can expect from your fishing tour. How does a typical fishing tour look like?</label>
+                        <textarea name="desc_course_of_action" id="desc_course_of_action" class="form-control" placeholder="course of action. . . ."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="desc_starting_time">Let your guest know when you typically begin with the fishing tour.</label>
+                        <textarea name="desc_starting_time" id="desc_starting_time" class="form-control" placeholder="starting time. . . ."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="desc_meeting_point">Give your guests some information, where they will meet you after they have booked your fishing tour</label>
+                        <textarea name="desc_meeting_point" id="desc_meeting_point" class="form-control" placeholder="meeting point. . . ."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="desc_tour_unique">Tell your guests about special highlights they can experience on a fishing tour with you</label>
+                        <textarea name="desc_tour_unique" id="desc_tour_unique" class="form-control" placeholder="uniqueness. . . ."></textarea>
+                    </div>
+                @endif
 
                 <div class="button-group">
                     <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
@@ -491,11 +507,11 @@
                     <div id="duration_details" class="mt-3" style="display: none;">
                         <div id="hours_input" class="input-group mt-2">
                             <span class="input-group-text">Number of hours:</span>
-                            <input type="number" id="duration_hours" name="duration_hours" class="form-control" min="1" max="24">
+                            <input type="number" id="duration_hours" name="duration_hours" class="form-control" value="{{ $formData['duration_hours'] ?? '' }}" min="1" max="24">
                         </div>
                         <div id="days_input" class="input-group mt-2" style="display: none;">
                             <span class="input-group-text">Number of days:</span>
-                            <input type="number" id="duration_days" name="duration_days" class="form-control" min="2">
+                            <input type="number" id="duration_days" name="duration_days" class="form-control" value="{{ $formData['duration_days'] ?? '' }}" min="2">
                         </div>
                     </div>
                 </div>
@@ -503,7 +519,7 @@
                 <div class="form-group">
                     <div class="input-group mt-2">
                         <span class="input-group-text">Number of guest</span>
-                        <input type="number" class="form-control" id="no_guest" name="no_guest" placeholder="0">
+                        <input type="number" class="form-control" id="no_guest" name="no_guest" value="{{ $formData['no_guest'] ?? '' }}" placeholder="0">
                     </div>
                 </div>
                 
