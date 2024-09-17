@@ -435,24 +435,7 @@
         }
         
         const priceType = '{{ $formData['price_type'] ?? '' }}';
-        if (price_type) {
-            const durationRadio = document.querySelector(`input[name="duration"][value="${price_type}"]`);
-            if (durationRadio) {
-                durationRadio.checked = true;
-                document.getElementById('duration_details').style.display = 'block';
-                if (duration === 'multi_day') {
-                    document.getElementById('days_input').style.display = 'block';
-                    document.getElementById('hours_input').style.display = 'none';
-                    document.getElementById('duration_hours').value = durationCount;
-                } else {
-                    document.getElementById('hours_input').style.display = 'block';
-                    document.getElementById('days_input').style.display = 'none';
-                    document.getElementById('duration_days').value = durationCount;
-                }
-            }
-        }
-        const priceType = '{{ $formData['price_type'] ?? '' }}';
-        const prices = {{ $formData['prices'] ?? [] }};
+        const prices = {!! json_encode($formData['prices'] ?? []) !!};
         if (priceType) {
             const priceTypeRadio = document.querySelector(`input[name="price_type"][value="${priceType}"]`);
             if (priceTypeRadio) {

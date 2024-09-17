@@ -259,11 +259,9 @@ class GuidingsController extends Controller
     {
         $locale = Config::get('app.locale');
 
-        $title = '';
-        
-        return view('pages.guidings.newIndex', [
-            'title' => $title,
-        ]);
+        $guiding = Guiding::where('id',$id)->where('slug',$slug)->where('status',1)->first();
+
+        return view('pages.guidings.newIndex', compact('guiding'));
     }
 
     public function otherGuidings(){

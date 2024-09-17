@@ -128,25 +128,25 @@
                     <div class="form-group">
                         <label for="type_of_boat">Type of boat</label>
                         <div class="d-flex flex-wrap btn-group-toggle">
-                            <input type="radio" name="type_of_boat" value="kayak" id="kayak">
+                            <input type="radio" name="type_of_boat" value="Kayak" id="kayak">
                             <label for="kayak" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Kayak</label>
                             
-                            <input type="radio" name="type_of_boat" value="belly_boat" id="belly_boat">
+                            <input type="radio" name="type_of_boat" value="Belly Boat" id="belly_boat">
                             <label for="belly_boat" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Belly boat</label>
                             
-                            <input type="radio" name="type_of_boat" value="rowing_boat" id="rowing_boat">
+                            <input type="radio" name="type_of_boat" value="Rowing Boat" id="rowing_boat">
                             <label for="rowing_boat" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Rowing boat</label>
                             
-                            <input type="radio" name="type_of_boat" value="drift_boat" id="drift_boat">
+                            <input type="radio" name="type_of_boat" value="Drift Boat" id="drift_boat">
                             <label for="drift_boat" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Drift boat</label>
                             
-                            <input type="radio" name="type_of_boat" value="sportfishing_boat" id="sportfishing_boat">
+                            <input type="radio" name="type_of_boat" value="Sport Fishing Boat" id="sportfishing_boat">
                             <label for="sportfishing_boat" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Sportfishing boat</label>
                             
-                            <input type="radio" name="type_of_boat" value="yacht" id="yacht">
+                            <input type="radio" name="type_of_boat" value="Yacht" id="yacht">
                             <label for="yacht" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Yacht</label>
                             
-                            <input type="radio" name="type_of_boat" value="sailing_boat" id="sailing_boat">
+                            <input type="radio" name="type_of_boat" value="Sailing Boat" id="sailing_boat">
                             <label for="sailing_boat" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Sailing boat</label>
                         </div>
                     </div>

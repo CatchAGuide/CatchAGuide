@@ -434,7 +434,11 @@
                                                 <div class="col-12 col-sm-12 col-md-2 col-lg-3 col-xl-2 col-xxl-2 position-relative">
 
                                                         <div class="d-flex flex-column my-5 py-2">
-                                                                <a class="btn btn-outline-theme  btn-sm my-1" href="{{route('guidings.show', [$guiding->id,$guiding->slug])}}">View</a>
+                                                                @if($guiding->is_newguiding == 0)
+                                                                    <a class="btn btn-outline-theme  btn-sm my-1" href="{{route('guidings.show', [$guiding->id,$guiding->slug])}}">View</a>
+                                                                @else
+                                                                    <a class="btn btn-outline-theme  btn-sm my-1" href="{{route('guidings.newShow', [$guiding->id,$guiding->slug])}}">View</a>
+                                                                @endif
                                                                 @if($guiding->is_newguiding == 0)
                                                                     <a class="btn btn-outline-theme  btn-sm my-1" href="{{route('guidings.edit', $guiding->id)}}">@lang('profile.edit')</a>
                                                                 @else
