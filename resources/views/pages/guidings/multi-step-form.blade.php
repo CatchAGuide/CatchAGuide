@@ -55,8 +55,9 @@
                 </div>
             @endif
 
-            <input type="hidden" name="is_update" id="is_update" value="{{ $formData['is_update'] ?? 0 }}">    
-
+            <input type="hidden" name="is_update" id="is_update" value="{{ $formData['is_update'] ?? 0 }}">
+            <input type="hidden" name="thumbnail_path" id="thumbnail_path" value="{{ $formData['thumbnail_path'] ?? '' }}">
+            
             <!-- Step 1 -->
             <div class="step active" id="step1">
                 <h5>Upload images and set basic information</h5>
@@ -65,13 +66,8 @@
                 <div class="file-upload-wrapper">
                     <input id="title_image" name="title_image[]" type="file" multiple onchange="previewImages(this);" />
                     <label for="title_image" class="file-upload-btn">Choose Files</label>
-                    <div id="croppedImagesContainer">
-                        {{-- @if(isset($formData['images']))
-                            @foreach($formData['images'] as $image)
-                                <img src="{{ $image }}" alt="Existing image" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
-                            @endforeach
-                        @endif --}}
-                    </div>
+                </div>
+                <div id="croppedImagesContainer">
                 </div>
 
                 <div class="image-area" id="imagePreviewContainer"></div>
@@ -298,7 +294,7 @@
             <div class="step" id="step5">
                 <h5>Write a detailed description of your service</h5>
                 
-                @if($formData['is_update'] == 1)
+                @if(isset($formData) && $formData['is_update'] == 1)
                     <div class="form-group">
                         <label for="long_description">Tell your guests what they can expect from your fishing tour. How does a typical fishing tour look like?</label>
                         <textarea name="long_description" id="long_description" class="form-control" placeholder="course of action. . . .">{{ $formData['long_description'] ?? '' }}</textarea>

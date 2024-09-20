@@ -422,7 +422,7 @@
             if (durationRadio) {
                 durationRadio.checked = true;
                 document.getElementById('duration_details').style.display = 'block';
-                if (duration === 'multi_day') {
+                if (durationType === 'multi_day') {
                     document.getElementById('days_input').style.display = 'block';
                     document.getElementById('hours_input').style.display = 'none';
                     document.getElementById('duration_hours').value = durationCount;
@@ -456,6 +456,66 @@
                     }
                 }
             }
+        }
+
+        // Handle existing images
+        const existingImages = {!! json_encode($formData['images'] ?? []) !!};
+        const thumbnailPath = '{{ $formData['thumbnail_path'] ?? '' }}';
+        
+        if (existingImages && existingImages.length > 0) {
+            const croppedImagesContainer = document.getElementById('croppedImagesContainer');
+            const dataTransfer = new DataTransfer();
+
+            existingImages.forEach((imagePath, index) => {
+                const fullImagePath = `/${imagePath}`; // Adjust this path as needed
+                const wrapper = document.createElement('div');
+                wrapper.className = 'image-preview-wrapper';
+                wrapper.dataset.index = index;
+
+                const img = document.createElement('img');
+                img.src = fullImagePath;
+                img.className = 'image-preview';
+                wrapper.appendChild(img);
+
+                const controls = document.createElement('div');
+                controls.className = 'image-controls';
+
+                // Create control buttons with tooltips
+                const zoomInBtn = createButton('<i class="fas fa-search-plus"></i>', () => {}, 'Zoom In');
+                const zoomOutBtn = createButton('<i class="fas fa-search-minus"></i>', () => {}, 'Zoom Out');
+                const rotateBtn = createButton('<i class="fas fa-redo"></i>', () => {}, 'Rotate');
+                const deleteBtn = createButton('<i class="fas fa-trash"></i>', () => deleteImage(wrapper, index), 'Delete');
+                const setPrimaryBtn = createButton('<i class="fas fa-star"></i>', () => setPrimaryImage(wrapper, index), 'Set as Title Image');
+
+                controls.appendChild(zoomInBtn);
+                controls.appendChild(zoomOutBtn);
+                controls.appendChild(rotateBtn);
+                controls.appendChild(deleteBtn);
+                controls.appendChild(setPrimaryBtn);
+
+                wrapper.appendChild(controls);
+                croppedImagesContainer.appendChild(wrapper);
+
+                // Set as primary if it matches the thumbnail_path
+                if (imagePath === thumbnailPath) {
+                    setPrimaryImage(wrapper, index);
+                }
+
+                // Add the image to the title_image[] input
+                fetch(fullImagePath)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        const file = new File([blob], imagePath.split('/').pop(), { type: 'image/jpeg' });
+                        dataTransfer.items.add(file);
+                        imageFiles.push(file);
+                        
+                        // Update the file input after each file is added
+                        document.getElementById('title_image').files = dataTransfer.files;
+                    });
+            });
+
+            // Update the file input
+            updateFileInput();
         }
     }
 
@@ -572,6 +632,12 @@
 
         if (input.files) {
             Array.from(input.files).forEach((file, index) => {
+                // Check if the image is already in the croppedImagesContainer
+                const existingImage = document.querySelector(`.image-preview-wrapper[data-index="${imageIndex}"]`);
+                if (existingImage) {
+                    return; // Skip this image if it already exists
+                }
+
                 imageFiles.push(file); // Add new file to the array
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -680,10 +746,9 @@
     }
 
     function setPrimaryImage(wrapper, index) {
-        $('.image-preview-wrapper').removeClass('primary');
-        $('.image-preview-wrapper').find('.primary-label').remove(); // Remove existing labels
+        document.querySelectorAll('.image-preview-wrapper').forEach(w => w.classList.remove('primary'));
         wrapper.classList.add('primary');
-        console.log(index);
+        // You may want to update a hidden input field with the primary image index or path
         document.getElementById('primaryImageInput').value = index;
     }
 
@@ -773,7 +838,7 @@
                 }
                 break;
             case 5:
-                if (!document.getElementById('is_update').value.trim() || document.getElementById('is_update').value.trim() === '0') {
+                if (!document.getElementById('is_update').value.trim() || document.getElementById('is_update').value.trim() === 0) {
                     if (!document.getElementById('desc_course_of_action').value.trim()) {
                         errors.push('Course of action description is required.');
                         isValid = false;

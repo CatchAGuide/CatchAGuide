@@ -676,7 +676,6 @@ class GuidingsController extends Controller
             'latitude' => $guiding->latitude,
             'longitude' => $guiding->longitude,
             'country' => $guiding->country,
-            // 'images' => $guiding->getMedia('guidings-images')->map->getUrl(),
             'images' => json_decode($guiding->galery_images),
 
             //step 2
@@ -717,30 +716,6 @@ class GuidingsController extends Controller
             'booking_window' => $guiding->booking_window,
             'seasonal_trip' => $guiding->seasonal_trip,
             'months' => json_decode($guiding->months, true),
-
-            // 'type_of_fishing' => $guiding->type_of_fishing,
-            // 'type_of_boat' => $guiding->type_of_boat,
-            // 'max_guests' => $guiding->max_guests,
-            // 'target_fish' => $guiding->guidingTargets->pluck('name')->toArray(),
-            // 'methods' => $guiding->guidingMethods->pluck('name')->toArray(),
-            // 'water_types' => $guiding->guidingWaters->pluck('name')->toArray(),
-            // 'experience_level' => json_decode($guiding->experience_level, true),
-            // 'inclusions' => $guiding->inclusions->pluck('name')->toArray(),
-            // 'extras' => json_decode($guiding->extras, true),
-            // 'style_of_fishing' => $guiding->style_of_fishing,
-            // 'desc_course_of_action' => $guiding->desc_course_of_action,
-            // 'desc_starting_time' => $guiding->desc_starting_time,
-            // 'desc_meeting_point' => $guiding->desc_meeting_point,
-            // 'desc_tour_unique' => $guiding->desc_tour_unique,
-            // 'other_information' => json_decode($guiding->other_information, true),
-            // 'tour_type' => $guiding->tour_type,
-            // 'duration' => $guiding->duration,
-            // 'duration_hours' => $guiding->duration_hours,
-            // 'duration_days' => $guiding->duration_days,
-            // 'price' => $guiding->price,
-            // 'booking_window' => $guiding->booking_window,
-            // 'seasonal_trip' => $guiding->seasonal_trip,
-            // 'months' => json_decode($guiding->months, true),
         ];
 
         // Get necessary data for dropdowns

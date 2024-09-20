@@ -469,6 +469,7 @@
             overflow: hidden;
             border: 2px solid #313041;
             border-radius: 5px;
+            display: inline-block;
         }
 
         .croppable-image {
@@ -522,6 +523,11 @@
 
         .cropper-face {
             background-color: transparent;
+        }
+        .image-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .image-preview-wrapper.primary {
