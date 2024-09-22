@@ -260,8 +260,32 @@ class GuidingsController extends Controller
         $locale = Config::get('app.locale');
 
         $guiding = Guiding::where('id',$id)->where('slug',$slug)->where('status',1)->first();
+        
+        $targetId = $guiding->guidingTargets->pluck('id')->toArray();
+        $fishingfrom = $guiding->fishingFrom->id;
+        $fishingtype = $guiding->fishingTypes->id;
 
-        return view('pages.guidings.newIndex', compact('guiding'));
+        $ratings = $guiding->user->received_ratings;
+        $ratingCount = $ratings->count();
+        $averageRating = $ratingCount > 0 ? $ratings->avg('rating') : 0;
+        $otherGuidings = Guiding::whereHas('guidingTargets',function($query) use ($targetId){
+            $query->wherein('target_id',$targetId);
+        })->whereHas('fishingFrom',function($query) use($fishingfrom){
+            $query->where('id',$fishingfrom);
+        })->whereHas('fishingTypes',function($query) use($fishingtype){
+            $query->where('id',$fishingtype);
+        })
+        ->where('status', 1)
+        ->limit(4)
+        ->get();
+
+        return view('pages.guidings.newIndex', [
+            'guiding' => $guiding,
+            'ratings' => $ratings,
+            'other_guidings' => $otherGuidings,
+            'average_rating' => $averageRating,
+        ]);
+        // return view('pages.guidings.newIndex', compact('guiding'));
     }
 
     public function otherGuidings(){
@@ -310,7 +334,6 @@ class GuidingsController extends Controller
                     if ($index == $request->input('primaryImage', 0)) {
                         $guiding->thumbnail_path = $webp_path;
                     }
-
                     $galeryImages[] = $webp_path;
                 }
             }
@@ -332,7 +355,7 @@ class GuidingsController extends Controller
 
             //step 4
             $guiding->experience_level = $request->has('experience_level') ? json_encode($request->input('experience_level')) : '';
-            $guiding->inclusions = $request->has('inclussions') ? json_encode($request->input('inclussions')) : '';
+            $guiding->inclusions = $request->has('inclussions') ? $request->input('inclussions') : '';
             if ($request->has('type_of_fishing')) {
                 $guiding->style_of_fishing = $request->input('style_of_fishing');
 
@@ -346,11 +369,13 @@ class GuidingsController extends Controller
             }
 
             //step 5
-            if ($request->has('is_update') && $request->input('is_update') == 1) { 
-                $guiding->description = $request->input('long_description');
-            } else {
-                $guiding->description = $this->generateLongDescription($request);
-            }
+            $guiding->desc_course_of_action = $request->has('desc_course_of_action') ? $request->input('desc_course_of_action') : '';
+            $guiding->desc_meeting_point = $request->has('desc_meeting_point') ? $request->input('desc_meeting_point') : '';
+            $guiding->desc_starting_time = $request->has('desc_starting_time') ? $request->input('desc_starting_time') : '';
+            $guiding->desc_tour_unique = $request->has('desc_tour_unique') ? $request->input('desc_tour_unique') : '';
+            $guiding->description = $this->generateLongDescription($request);
+
+
 
             //step 6
             $guiding->requirements = $this->saveRequirements($request);
@@ -677,6 +702,7 @@ class GuidingsController extends Controller
             'longitude' => $guiding->longitude,
             'country' => $guiding->country,
             'images' => json_decode($guiding->galery_images),
+            'thumbnail_path' => json_decode($guiding->galery_thumbnails),
 
             //step 2
             'type_of_fishing' => $guiding->is_boat ? 'boat' : 'shore',
@@ -696,6 +722,10 @@ class GuidingsController extends Controller
 
             //step 5
             'long_description' => $guiding->description,
+            'desc_course_of_action' => $guiding->desc_course_of_action,
+            'desc_starting_time' => $guiding->desc_starting_time,
+            'desc_meeting_point' => $guiding->desc_meeting_point,
+            'desc_tour_unique' => $guiding->desc_tour_unique,
             
             //step 6
             'requirements' => json_decode($guiding->requirements, true),
