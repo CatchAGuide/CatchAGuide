@@ -75,16 +75,23 @@
     </div>
     <div class="row">
         <div class="mb-3">
-            <h1>{{$guiding->title}}</h1>
+            <h1>
+                <a href="#" class="fs-5 text-decoration-none text-muted">
+                    <i class="bi bi-geo-alt"></i> Fishing trip in {{$guiding->location}} - 
+                    <span class="text-primary">Show on map</span>
+                </a>
+                <br>
+                {{$guiding->title}}
+            </h1>
             <p class="mb-1">
                 <span class="text-warning">★</span> 3.9/5 (4 reviews)
             </p>
-            <p>
+            {{-- <p>
                 <a href="#" class="text-decoration-none text-muted">
                     <i class="bi bi-geo-alt"></i> {{$guiding->location}} - 
                     <span class="text-primary">Show map</span>
                 </a>
-            </p>
+            </p> --}}
         </div>
 
         <!-- Image Gallery -->
@@ -94,14 +101,51 @@
             </div>
             <div class="col-5">
                 <div class="row g-2">
-                    @foreach (json_decode($guiding->galery_images) as $index => $image)
-                        <div class="col-6">
-                            <img src="{{asset($image)}}" class="img-fluid" alt="Gallery Image {{ $index + 1 }}">
-                        </div>
+                    @php
+                        $galleryImages = json_decode($guiding->galery_images);
+                        $thumbnailPath = asset($guiding->thumbnail_path);
+                        $filteredImages = array_filter($galleryImages, function($image) use ($thumbnailPath) {
+                            return asset($image) !== $thumbnailPath; // Exclude thumbnail from gallery
+                        });
+                        $hiddenCount = count($galleryImages) > 4 ? count($galleryImages) - 4 : 0;
+                    @endphp
+                    @foreach ($filteredImages as $index => $image)
+                        @if ($index < 4)
+                            <div class="col-6 position-relative">
+                                <img src="{{asset($image)}}" class="img-fluid" alt="Gallery Image {{ $index + 1 }}" data-bs-toggle="modal" data-bs-target="#galleryModal" data-image="{{ asset($image) }}">
+                            </div>
+                        @elseif ($index == 4)
+                            <div class="col-6 position-relative">
+                                <img src="{{asset($image)}}" class="img-fluid" alt="Gallery Image {{ $index + 1 }} (and {{ $hiddenCount }} more)" data-bs-toggle="modal" data-bs-target="#galleryModal" data-image="{{ asset($image) }}">
+                                <span class="text-muted position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">+{{ $hiddenCount }} more</span>
+                            </div>
+                        @endif
                     @endforeach
                 </div>
             </div>
         </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="galleryModal" tabindex="-1" aria-labelledby="galleryModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="galleryModalLabel">Gallery</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            @foreach ($galleryImages as $image)
+                                <div class="col-12 mb-3">
+                                    <img src="{{ asset($image) }}" class="img-fluid" alt="Gallery Image" />
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Left Column -->
         <div class="col-md-8">
             <!-- Title, Rating, and Location -->
@@ -339,6 +383,47 @@
                     </ul>
                 </div>
             </div>
+
+            <div class="card mb-3">
+                <div class="card-header">Essential details</div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            @if(!empty($guiding->experience_level))
+                                <h6>Experience Level:</h6>
+                                <ul>
+                                    @foreach(json_decode($guiding->experience_level) as $value)
+                                        <li>{{$value}}</li>
+                                    @endforeach
+                                </ul>
+                            @endif
+                        </div>
+                        <div class="col-md-6">
+                            @if(!empty($guiding->style_of_fishing))
+                                <div class="row">
+                                    <div class="col">
+                                        <h6 style="display: inline;">Style of Fishing:</h6> <span class="badge bg-primary">{{ $guiding->style_of_fishing }}</span>
+                                    </div>
+                                </div>
+                            @endif
+                            @if(!empty($guiding->tour_type))
+                                <div class="row">
+                                    <div class="col">
+                                        <h6 style="display: inline;">Tour Type:</h6> <span class="badge bg-primary">{{ $guiding->tour_type }}</span>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                        </div>
+                    </div>
+                    @if(empty($guiding->experience_level) && empty($guiding->tour_type) && empty($guiding->style_of_fishing))
+                        <p>No information specified</p>
+                    @endif
+                </div>
+            </div>
         </div>
 
         <!-- Right Column -->
@@ -422,9 +507,6 @@
             <span class="color-primary" style="font-size:1rem">{{$guiding->user->firstname}}</span>
         </div>
 
-        
-        
-
         <div class="my-5">
             <div class="tour-details-two__about">
                 <div class="row">
@@ -494,54 +576,65 @@
                 </div>
             </div>
         </div>
-
-        <div class="tour-details-two__related-tours {{$agent->ismobile() ? 'text-center' : ''}}">
-            <h3 class="tour-details-two__title">{{ translate('Ähnliche Guidings') }}</h3>
-            <div class="popular-tours__carousel owl-theme owl-carousel">
-                @foreach($other_guidings as $other_guiding)
-            
-                    <div class="popular-tours__single">
-                        <a class="popular-tours__img" href="{{ route('guidings.show',[$other_guiding->id,$other_guiding->slug]) }}" title="Guide aufmachen">
-                            <figure class="popular-tours__img__wrapper">
-                                @if(isset(app('guiding')->getImagesUrl($other_guiding)['image_0']))
-                                    <img src="{{app('guiding')->getImagesUrl($other_guiding)['image_0']}}" alt="{{$other_guiding->title}}"/>
-                                @endif
-                                <div class="popular-tours__icon">
-                                    <a href="{{ route('wishlist.add-or-remove', $other_guiding->id) }}">
-                                        <i class="fa fa-heart {{ (auth()->check() ? (auth()->user()->isWishItem($other_guiding->id) ? 'text-danger' : '') : '') }}"></i>
-                                    </a>
+        
+        <div class="card mb-3">
+            <div class="card-header">Similar Guidings</div>
+            <div class="card-body">
+                <div class="row" id="same-guidings-container">
+                    @foreach($same_guiding->take(3) as $sameGuiding)
+                        <div class="col-md-4 mb-3">
+                            <div class="card">
+                                <img src="{{ asset( !$sameGuiding->is_newguiding ? "assets/guides/".$sameGuiding->thumbnail_path : $sameGuiding->thumbnail_path  ) }}" class="card-img-top" alt="{{ $sameGuiding->title }}">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ $sameGuiding->title }}</h5>
+                                    <p class="card-text">{{ $sameGuiding->location }}</p>
+                                    <a href="{{ route('guidings.show', [$sameGuiding->id, $sameGuiding->slug]) }}" class="btn btn-primary">Details</a>
                                 </div>
-                            </figure>
-                        </a>
-
-                        <div class="popular-tours__content">
-                            <h3 class="popular-tours__title"><a href="{{ route('guidings.show', [$other_guiding->id,$other_guiding->slug]) }}">{{  $other_guiding->title ?  translate( $other_guiding->title) :  $other_guiding->title }}</a>
-                            </h3>
-                            <span>{{ $other_guiding->location ? translate($other_guiding->location) : $other_guiding->location }}</span>
-                            <p class="popular-tours__rate">
-                                <span>@lang('message.from') {{ two($other_guiding->price) }}€</span>
-                            </p>
-                            <span><i class="far fa-hourglass"></i>{{ translate('Dauer') }}: {{ two($other_guiding->duration) }} {{ translate('Stunden') }}</span>
+                            </div>
                         </div>
-                    </div>
-                @endforeach
+                    @endforeach
+                </div>
+                @if($same_guiding->count() > 3)
+                    <button id="show-more" class="btn btn-secondary mt-3">Show More</button>
+                @endif
             </div>
         </div>
-    </div>
 
-    <!-- More Charters Section -->
-    <div class="card mt-5">
-        <div class="card-header">More charters like this</div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-sm-4 mb-3">
-                    <!-- Similar Charter 1 -->
-                </div>
-                <div class="col-sm-4 mb-3">
-                    <!-- Similar Charter 2 -->
-                </div>
-                <div class="col-sm-4 mb-3">
-                    <!-- Similar Charter 3 -->
+        <!-- Other Guidings Carousel Section -->
+        <div class="card mb-3">
+            <div class="card-header">More charters like {{$guiding->title}} in {{$guiding->location}}</div>
+            <div class="card-body">
+                <div id="otherGuidingsCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        @foreach($other_guidings->chunk(4) as $chunkIndex => $chunk)
+                            <div class="carousel-item {{ $chunkIndex === 0 ? 'active' : '' }}">
+                                <div class="row">
+                                    @foreach($chunk as $otherGuiding)
+                                        <div class="col-md-3">
+                                            <div class="card">
+                                                <img src="{{ asset($otherGuiding->thumbnail_path) }}" class="card-img-top" alt="{{ $otherGuiding->title }}">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">{{ $otherGuiding->title }}</h5>
+                                                    <p class="card-text">{{ $otherGuiding->location }}</p>
+                                                    <p class="card-text"><small class="text-muted">★ {{ $otherGuiding->rating }} ({{ $otherGuiding->reviews_count }} reviews)</small></p>
+                                                    <p class="card-text">Trips from {{ $otherGuiding->price }}€</p>
+                                                    <a href="{{ route('guidings.show', [$otherGuiding->id, $otherGuiding->slug]) }}" class="btn btn-primary">Details</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#otherGuidingsCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#otherGuidingsCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -594,6 +687,40 @@
                 });
             },
         });
+    });
+    
+    let currentCount = 3; // Initial count of displayed items
+    const totalItems = {{ $same_guiding->count() }};
+    
+    document.getElementById('show-more').addEventListener('click', function() {
+        const container = document.getElementById('same-guidings-container');
+        
+        // Fetch the next set of items
+        for (let i = currentCount; i < currentCount + 3 && i < totalItems; i++) {
+            const guiding = @json($same_guiding); // Convert PHP variable to JavaScript
+            const newGuiding = guiding[i];
+
+            const colDiv = document.createElement('div');
+            colDiv.className = 'col-md-6 mb-3';
+            colDiv.innerHTML = `
+                <div class="card">
+                    <img src="${newGuiding.is_newguiding ? newGuiding.thumbnail_path : 'assets/guides/' + newGuiding.thumbnail_path}" class="card-img-top" alt="${newGuiding.title}">
+                    <div class="card-body">
+                        <h5 class="card-title">${newGuiding.title}</h5>
+                        <p class="card-text">${newGuiding.location}</p>
+                        <a href="/guidings/${newGuiding.id}/${newGuiding.slug}" class="btn btn-primary">Details</a>
+                    </div>
+                </div>
+            `;
+            container.appendChild(colDiv);
+        }
+
+        currentCount += 3; // Update the count of displayed items
+
+        // Hide the button if all items are displayed
+        if (currentCount >= totalItems) {
+            this.style.display = 'none';
+        }
     });
 </script>
 @endsection

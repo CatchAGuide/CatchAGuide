@@ -62,6 +62,14 @@
         e.preventDefault();
         saveDraft();
     });
+    
+    function scrollToFormCenter() {
+        const form = document.getElementById('newGuidingForm');
+        if (form) {
+            form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
 
     function showLoadingScreen() {
         const loadingScreen = document.createElement('div');
@@ -620,6 +628,8 @@
         $('.step-button').removeClass('active');
         $(`.step-button[data-step="${stepNumber}"]`).addClass('active');
         currentStep = stepNumber;
+
+        scrollToFormCenter();
 
         // Update button visibility
         $('#prevBtn').toggle(currentStep > 1);

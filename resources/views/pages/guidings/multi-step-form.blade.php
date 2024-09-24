@@ -64,7 +64,7 @@
 
                 <label for="title_image" class="form-label fw-bold fs-5">
                     Gallery Image
-                    <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Upload images for your fishing tour gallery"></i>
+                    <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Move an uploaded image to center what you like to show. Zoom or turn the image if required and chose your favorite as a title image."></i>
                 </label>
                 <div class="card mb-4">
                     <div class="card-body">
@@ -85,7 +85,7 @@
                 <div class="form-group">
                     <label for="location" class="form-label fw-bold fs-5">
                         Location
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter a city or any other location close to the area your fishing tour takes place"></i>
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter a city or a region which is close to the place where your fishing tour takes place."></i>
                     </label>
                     <input type="search" class="form-control" id="location" name="location" value="{{ $formData['location'] ?? '' }}" placeholder="Enter a city or any other location close to the area your fishing tour takes place">
                     <input type="hidden" name="latitude" id="latitude" value="{{ $formData['latitude'] ?? '' }}">
@@ -99,7 +99,7 @@
                 <div class="form-group">
                     <label for="title" class="form-label fw-bold fs-5">
                         Title
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter a catchy title for your fishing tour"></i>
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Chose a title which describes your tour best. Include for example the location, the target fish, the water name, etc. Example: "Fishing tour in Amsterdam for Perch & Zander"."></i>
                     </label>
                     <input type="text" class="form-control" id="title" name="title" value="{{ $formData['title'] ?? '' }}" placeholder="Enter a catchy title for your fishing tour">
                 </div>
@@ -122,7 +122,7 @@
                 <div class="form-group">
                     <label for="type_of_fishing" class="form-label fw-bold fs-5">
                         Type of Fishing
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Select the type of fishing you offer"></i>
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Will your fishing tour take place from the shore or will you take your guests fishing from a boat/ watercraft?"></i>
                     </label>
                     <div class="row justify-content-center">
                         <div class="col-md-6">
@@ -148,7 +148,7 @@
                         
                         <label for="type_of_boat" class="form-label fw-bold fs-5">
                             Type of boat
-                            <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Select only one of the types of boats you offer"></i>
+                            <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="On what kind of boat or watercraft does your fishing tour take place?"></i>
                         </label>
                         <div class="d-flex flex-wrap btn-group-toggle">
                             <input type="radio" name="type_of_boat" value="Kayak" id="kayak">
@@ -179,7 +179,7 @@
                     <div class="form-group">
                         <label for="descriptions" class="form-label fw-bold fs-5">
                             Description
-                            <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Select any additional information you want to provide about your boat and add details on the input box provided "></i>
+                            <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title='"Change title to "Boat information" Tell your guests more about your boat by adding detailed information for each aspect. "''></i>
                         </label>
                         <div class="btn-group-toggle">
                             <div class="btn-checkbox-container">
@@ -237,9 +237,9 @@
                     <div class="form-group">
                         <label for="extras" class="form-label fw-bold fs-5">
                             Extras
-                            <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Add extra information about your boat"></i>
+                            <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Here you can add extra equipment which the guests can find on your boat."></i>
                         </label>
-                        <input  class="form-control" name="extras" id="extras" placeholder="Add extras..." data-bs-toggle="tooltip" title="Add any additional features or services you offer">
+                        <input  class="form-control" name="extras" id="extras" placeholder="Add extras..." data-bs-toggle="tooltip" title="Here you can add extra equipment which the guests can find on your boat.">
                     </div>
                 </div>
 
@@ -262,7 +262,7 @@
                 <div class="form-group">
                     <label for="target_fish" class="form-label fw-bold fs-5">
                         Target Fish
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Add the fish species you target on your tours"></i>
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Add all target fish which a guest will likely to catch during your fishing tour."></i>
                     </label>
                     <input type="text" class="form-control" name="target_fish" id="target_fish" data-role="tagsinput" placeholder="Add Target Fish...">
                 </div>
@@ -272,7 +272,7 @@
                 <div class="form-group">
                     <label for="methods" class="form-label fw-bold fs-5">
                         Fishing Methods
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Select the fishing methods you use on your tours"></i>
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Fishing with which methods can guests expect during a fishing tour with you? Add all fishing methods which apply."></i>
                     </label>
                     <input type="text" class="form-control" name="methods" id="methods" data-role="tagsinput" placeholder="Select Methods...">
                 </div>
@@ -282,7 +282,7 @@
                 <div class="form-group">
                     <label for="water_types" class="form-label fw-bold fs-5">
                         Water Types
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Select the types of water bodies where you conduct your tours"></i>
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Chose the water type on which your fishing tour takes place most of the time. "></i>
                     </label>
                     <input type="text" class="form-control" name="water_types" id="water_types" data-role="tagsinput" placeholder="Select Water Tyles...">
                 </div>
@@ -308,7 +308,7 @@
                 <div class="form-group">
                     <label for="experience_level" class="form-label fw-bold fs-5">
                         Experience Level
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Select the experience level of your fishing tour"></i>
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="What experience level is your guiding designed for? Your fishing trip can also be designed for beginners and advanced anglers together. "></i>
                     </label>
                     <div class="d-flex flex-wrap btn-group-toggle">
                         <input type="checkbox" name="experience_level[]" value="beginner" id="beginner">
@@ -324,7 +324,7 @@
                 <div class="form-group">
                     <label for="inclussions" class="form-label fw-bold fs-5">
                         Inclusions
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Select the inclussions you offer on your tours"></i>
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Chose all extras which are included in your fishing tour without additional price charges."></i>
                     </label>
                     <input type="text" class="form-control" name="inclussions" id="inclussions" data-role="tagsinput" placeholder="Select inclussions...">
                 </div>
@@ -334,7 +334,7 @@
                 <div class="form-group">
                     <label for="style_of_fishing" class="form-label fw-bold fs-5">
                         Style Of Fishing
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Select the style of fishing you use on your tours"></i>
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="What style of fishing is your guiding designed for? Your fishing trip can also be designed foractive and passive fishing together. "></i>
                     </label>
                     <div class="d-flex flex-wrap btn-group-toggle">
                         <input type="radio" name="style_of_fishing" value="active" id="active">
@@ -430,7 +430,7 @@
                 <div class="form-group">
                     <label for="group" class="form-label fw-bold fs-5">
                         Other Information
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Select and add any additional information that you want to share with your guests."></i>
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Add all other information about your fishing tour which you like to tell your guests about."></i>
                     </label>
                     <div class="btn-group-toggle">
                         <div class="btn-checkbox-container">
@@ -506,7 +506,7 @@
                 <div class="form-group">
                     <label for="requiements_taking_part" class="form-label fw-bold fs-5">
                         Requirements for taking part
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Select and add any requirements for taking part in your service."></i>
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Mention all requirements which your guests need to take part in your fishing tour such as specific licenses, equipment, a special experience level or skill, etc."></i>
                     </label>
                     <div class="btn-group-toggle">
                         <div class="btn-checkbox-container">
@@ -540,7 +540,7 @@
                 <div class="form-group">
                     <label for="recommended_preparation" class="form-label fw-bold fs-5">
                         Recommended preparation
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Select and add any recommended preparation for your guests."></i>
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="How can your guests prepare themselves for a fishing tour with you? Chose all things your guests should keep in mind when planning the tour."></i>
                     </label>
                     <div class="btn-group-toggle">
                         <div class="btn-checkbox-container">
@@ -593,7 +593,7 @@
                 <div class="form-group">
                     <label for="tour_type" class="form-label fw-bold fs-5">
                         Tour Type
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Select the type of tour you offer."></i>
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Is your fishing tour a private tour or will it be possible that other guests can join the same tour so that your guests fish together in a group?"></i>
                     </label>
                     <div class="d-flex flex-wrap btn-group-toggle">
                         <input type="radio" name="tour_type" value="private" id="private">
@@ -609,7 +609,7 @@
                 <div class="form-group">
                     <label for="duration" class="form-label fw-bold fs-5">
                         Duration Type
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Select the duration of your tour."></i>
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Tell your guests whether your tour will take a half, a full or more than one day. Enter the amout of hours or days."></i>
                     </label>
                     <div class="d-flex flex-wrap btn-group-toggle">
                         <input type="radio" name="duration" value="half_day" id="half_day">
@@ -638,7 +638,7 @@
                 <div class="form-group">
                     <label for="no_guest" class="form-label fw-bold fs-5">
                         Number of guest
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Input the number of guest you allow to book your tour."></i>
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="How many guests can take part on your fishing tour max? "></i>
                     </label>
                     <input type="number" class="form-control" id="no_guest" name="no_guest" value="{{ $formData['no_guest'] ?? '' }}" placeholder="0">
                 </div>
@@ -648,7 +648,7 @@
                 <div class="form-group">
                     <label for="price" class="form-label fw-bold fs-5">
                         Pricing
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Input the pricing for your tour."></i>
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Do you have one fixed price for a tour no matter how many guests take part or will the price depend on how many guests take part?"></i>
                     </label>
                     <div class="d-flex flex-wrap btn-group-toggle">
                         <input type="radio" name="price_type" value="per_person" id="per_person_checkbox">
@@ -665,7 +665,7 @@
                 <div class="form-group">
                     <label for="extra_pricing" class="form-label fw-bold fs-5">
                         Extras
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Add any extra services or items you offer with your tour."></i>
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Here you can add extras which can be booked with an additional surecharge. Enter the name and the price per person and add extras by clicking the plus symbol below. Example: Lunch for 15€ per person. These extras can actively be chosen by your guests during a reservation request. "></i>
                         <button type="button" id="add-extra" class="btn btn-sm btn-secondary ms-2"><i class="fas fa-plus"></i></button>
                     </label>
                     <div id="extras-container"></div>
@@ -689,7 +689,7 @@
                 <div class="form-group">
                     <label for="allowed_booking_advance" class="form-label fw-bold fs-5">
                         Allowance of min. booking days in advance
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Select the minimum number of days in advance that bookings are allowed"></i>
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="How many days in advance do you allow a booking of your fishing trip? "></i>
                     </label>
                     <div class="d-flex flex-wrap btn-group-toggle">
                         <input type="radio" name="allowed_booking_advance" value="same_day" id="same_day">
@@ -711,7 +711,7 @@
                 <div class="form-group">
                     <label for="booking_window" class="form-label fw-bold fs-5">
                         Booking window for how long in advance you allow bookings
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Select the booking window for how long in advance you allow bookings"></i>
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="How many months into the future do you allow the booking of your fishing tour?"></i>
                     </label>
                     <div class="d-flex flex-wrap btn-group-toggle">
                         <input type="radio" name="booking_window" value="no_limitation" id="no_limitation">
@@ -733,7 +733,7 @@
                 <div class="form-group">
                     <label for="seasonal_trip" class="form-label fw-bold fs-5">
                         Seasonal Trip
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Select whether the fishing tour is available all year or only during certain months"></i>
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Is your fishing tour available the whole year or are there any restrictions such as fish protection period, ice fishing only in winter, etc.?"></i>
                     </label>
                     <div class="d-flex flex-wrap btn-group-toggle">
                         <input type="radio" name="seasonal_trip" value="season_year" id="season_year">

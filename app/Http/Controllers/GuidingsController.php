@@ -279,8 +279,11 @@ class GuidingsController extends Controller
         ->limit(4)
         ->get();
 
+        $sameGuidings = Guiding::where('user_id',$guiding->user_id)->limit(10)->get();
+
         return view('pages.guidings.newIndex', [
             'guiding' => $guiding,
+            'same_guiding' => $sameGuidings,
             'ratings' => $ratings,
             'other_guidings' => $otherGuidings,
             'average_rating' => $averageRating,
