@@ -1,55 +1,13 @@
-@extends('layouts.app')
+@extends('layouts.app-v2')
 
 @section('title', $row_data->name)
 @section('description', $row_data->title)
-
+@section('header_title', $row_data->title)
+@section('header_sub_title', $row_data->sub_title)
 
 @section('custom_style')
 <style>
 
-    /*#mobileherofilter .column-input input{
-        border-bottom:1px solid #a7a7a7 !important;
-        border:none;
-        outline:none !important;
-    }
-    #mobileherofilter .column-input i{
-        color:#E8604C !important;
-    }
-    #mobileherofilter .column-input input,select{
-       padding-left:30px !important;
-    }
-    #mobileherofilter .form-control:focus {
-        border-color: inherit;
-        -webkit-box-shadow: none;
-        box-shadow: none;
-        outline:none !important;
-    }
-    #mobileherofilter .myselect2{
-        border-bottom:1px solid #a7a7a7 !important;
-        padding:2px 0px;
-        border-width: 1px !important;
-        background-color: white;
-    }
-    #mobileherofilter .myselect2 li.select2-selection__choice{
-            background-color: #313041 !important;
-            color: #fff !important;
-            border: 0 !important;
-            font-size:14px;
-            vertical-align: middle !important;
-            margin-top:0 !important;
-         
-    }
-    #mobileherofilter .myselect2 button.select2-selection__choice__remove{
-        border: 0 !important;
-        color: #fff !important;
-    }
-    #mobileherofilter .new-filter-btn{
-        background-color:#E8604C;
-        color:#fff;
-    }
-    #mobileherofilter .new-filter-btn:hover{
-        background-color:#313041;
-    }*/
     #page-main-intro {
         /*white-space: nowrap;*/
         /*overflow: hidden;
@@ -211,6 +169,24 @@
         cursor: pointer;
         text-decoration: underline;
     }*/
+    #fish_size_limit_table th:first-child, 
+    #fish_size_limit_table td:first-child,
+    #fish_time_limit_table th:first-child, 
+    #fish_time_limit_table td:first-child
+    {
+        /*background-color: #fad4b9;*/
+    }
+    @media (min-width: 400px) {
+        #fish_chart_table th:first-child, 
+        #fish_chart_table td:first-child
+        {
+            position:sticky;
+            left:0px;
+            background-color: #fff;
+            min-width: 156px !important;
+        }
+    }
+
 </style>
 @endsection
 
@@ -219,42 +195,6 @@
     <div class="container" id="destination">
         <div class="row">
             <div class="col-12">
-                <h1>{{ $row_data->title }} <p class="h4">{{ $row_data->sub_title }}</p></h1>
-
-                <form class="mt-3 mb-4" action="" method="get" id="destination-form">
-                    <div class="card p-3">
-                        <div class="row">
-                            <div class="col-lg-3 p-1">
-                                <div class="form-group">
-                                    <div class="d-flex align-items-center small">
-                                        <i class="fa fa-search fa-fw text-muted position-absolute ps-2"></i>
-                                        <input  id="searchPlace" name="place" type="text" class="form-control rounded-0" placeholder="@lang('homepage.searchbar-destination')"  autocomplete="on">
-                                        <input type="hidden" id="placeLat" name="placeLat"/>
-                                        <input type="hidden" id="placeLng" name="placeLng"/>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-3 p-1">
-                                <div class="form-group">
-                                    <div class="d-flex align-items-center small">
-                                        <i class="fa fa-user fa-fw text-muted position-absolute ps-2"></i>
-                                        <input type="number" min="1" max="5" class="form-control rounded-0" name="num_guests" placeholder="@lang('homepage.searchbar-person')" />
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-3 p-1">
-                                <div class="d-flex align-items-center small myselect2">
-                                    <i class="fa fa-fish fa-fw text-muted position-absolute ps-1"></i>
-                                    <select class="form-control form-select" id="home_target_fish" name="target_fish[]" style="width:100%"></select>
-                                </div>
-                            </div>
-                            <div class="col-lg-3 p-1">
-                                <button type="submit" class="btn btn-danger form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
-                            </div>
-                        </div>
-                    </div> 
-                </form>
-
                 <div id="page-main-intro" class="mb-3">
                     <div class="page-main-intro-text mb-1">{!! nl2br($row_data->introduction) !!}</div>
                     <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm">Read More</a></p>
@@ -289,7 +229,6 @@
                             @endphp
                         @endforeach
                     </div>
-                    @if($region_count > 4)
                     <button class="carousel-control-prev" type="button" data-bs-target="#carousel-regions" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Previous</span>
@@ -298,7 +237,6 @@
                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Next</span>
                     </button>
-                    @endif
                 </div>
                 @endif
                 @if($city_count > 0)
@@ -323,7 +261,6 @@
                             @endphp
                         @endforeach
                     </div>
-                    @if($city_count > 4)
                     <button class="carousel-control-prev" type="button" data-bs-target="#carousel-cities" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Previous</span>
@@ -332,7 +269,6 @@
                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Next</span>
                     </button>
-                    @endif
                 </div>
                 @endif
                 <h5 class="mb-2">Listing </h5>
@@ -683,54 +619,56 @@
 
                 <h4 class="mb-2">{{ $row_data->fish_avail_title }}</h4>
                 <p>{!! $row_data->fish_avail_intro !!}</p>
-                <table class="table table-bordered" id="fish_chart_table">
-                    <thead>
-                        <tr>
-                            <th width="28%">Fish</th>
-                            <th width="6%" class="text-center">Jan</th>
-                            <th width="6%" class="text-center">Feb</th>
-                            <th width="6%" class="text-center">Mar</th>
-                            <th width="6%" class="text-center">Apr</th>
-                            <th width="6%" class="text-center">May</th>
-                            <th width="6%" class="text-center">Jun</th>
-                            <th width="6%" class="text-center">Jul</th>
-                            <th width="6%" class="text-center">Aug</th>
-                            <th width="6%" class="text-center">Sep</th>
-                            <th width="6%" class="text-center">Oct</th>
-                            <th width="6%" class="text-center">Nov</th>
-                            <th width="6%" class="text-center">Dec</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($fish_chart as $row)
-                        <tr>
-                            <td>{{ $row->fish }}</td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->jan) }}"></td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->feb) }}"></td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->mar) }}"></td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->apr) }}"></td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->may) }}"></td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->jun) }}"></td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->jul) }}"></td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->aug) }}"></td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->sep) }}"></td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->oct) }}"></td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->nov) }}"></td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->dec) }}"></td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-bordered " id="fish_chart_table">
+                        <thead>
+                            <tr>
+                                <th width="28%">Fish</th>
+                                <th width="6%" class="text-center">Jan</th>
+                                <th width="6%" class="text-center">Feb</th>
+                                <th width="6%" class="text-center">Mar</th>
+                                <th width="6%" class="text-center">Apr</th>
+                                <th width="6%" class="text-center">May</th>
+                                <th width="6%" class="text-center">Jun</th>
+                                <th width="6%" class="text-center">Jul</th>
+                                <th width="6%" class="text-center">Aug</th>
+                                <th width="6%" class="text-center">Sep</th>
+                                <th width="6%" class="text-center">Oct</th>
+                                <th width="6%" class="text-center">Nov</th>
+                                <th width="6%" class="text-center">Dec</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($fish_chart as $row)
+                            <tr>
+                                <td>{{ $row->fish }}</td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->jan) }}"></td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->feb) }}"></td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->mar) }}"></td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->apr) }}"></td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->may) }}"></td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->jun) }}"></td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->jul) }}"></td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->aug) }}"></td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->sep) }}"></td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->oct) }}"></td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->nov) }}"></td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->dec) }}"></td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
 
                 <div class="row">
                     <div class="col-sm-12 col-md-12 col-lg-12">
                         <h4>{{ $row_data->size_limit_title }}</h4>
                         <p>{!! $row_data->size_limit_intro !!}</p>
-                        <table class="table table-bordered table-striped">
+                        <table class="table table-bordered table-striped" id="fish_size_limit_table">
                             <thead>
                                 <tr>
                                     <th width="20%">Fish</th>
-                                    <th width="80%">Size Limit</th>
+                                    <th width="80%"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -748,11 +686,11 @@
                     <div class="col-sm-12 col-md-12 col-lg-12">
                         <h4>{{ $row_data->time_limit_title }}</h4>
                         <p>{!! $row_data->time_limit_intro !!}</p>
-                        <table class="table table-bordered table-striped">
+                        <table class="table table-bordered table-striped" id="fish_time_limit_table">
                             <thead>
                                 <tr>
                                     <th width="20%">Fish</th>
-                                    <th width="80%">Time Limit</th>
+                                    <th width="80%"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -907,7 +845,7 @@ toggleBtn.addEventListener('click', function() {
 </script>
 
 <script>
-    initializeSelect2();
+/*    initializeSelect2();
 
 function initializeSelect2() {
 
@@ -1006,7 +944,7 @@ function initializeSelect2() {
 
 
 
-}
+}*/
 
 
 

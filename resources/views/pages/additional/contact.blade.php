@@ -1,11 +1,11 @@
-@extends('layouts.app')
+@extends('layouts.app-v2-1')
 
 @section('title', __('message.contact'))
 
 @section('content')
     {!! ReCaptcha::htmlScriptTagJsApi() !!}
     <!--Page Header Start-->
-    <section class="page-header">
+    <!-- <section class="page-header">
         <div class="page-header__top">
             <div class="page-header-bg" style="background-image: url({{asset('assets/images/Titelbild_Kontakt.jpg')}})">
             </div>
@@ -27,12 +27,13 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> -->
     <!--Page Header End-->
 
     <!--Contact Page Start-->
-    <section class="contact-page">
+    <section class="contact-pages">
         <div class="container">
+                    <h1 class="h2">@lang('message.contact')</h1>
             <div class="row">
                 <div class="col-xl-4 col-lg-5">
                     <div class="contact-page__left">

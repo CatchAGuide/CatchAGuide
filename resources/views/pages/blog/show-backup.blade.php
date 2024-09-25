@@ -1,10 +1,8 @@
-@extends('layouts.app-v2')
+@extends('layouts.app')
 
 @section('title', $thread->title)
 @section('description',$thread->excerpt)
 
-@section('header_title', $thread->title)
-@section('header_sub_title', '')
 
 @section('share_tags')
 <meta property="og:title" content="{{ $thread->title }}" />
@@ -13,12 +11,6 @@
 @endsection
 
 @section('content')
-<style>
-    
-.header {
-    margin-bottom: 0!important;
-}
-</style>
     <!--News One Start-->
     <section class="news-details">
         <div class="container">

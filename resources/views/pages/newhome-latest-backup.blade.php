@@ -1,13 +1,10 @@
-@extends('layouts.app-v2')
+@extends('layouts.app')
 
 @if(app()->getLocale() == 'en')
     @section('title','Find & book guided fishing trips online')
 @else
     @section('title','Geführte Angeltouren finden & online buchen')
 @endif
-
-@section('header_title', __('homepage.header-title'))
-@section('header_sub_title', __('homepage.header-message'))
 
 @section('custom_style')
 
@@ -384,6 +381,106 @@
 
 @endsection
 @section('content')
+<section id="hero" class="theme-primary" style="background: linear-gradient(0deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url({{asset('assets/2024/header_banner.webp')}}); background-size:cover;background-position:center;height:50vh;">
+    @if($agent->ismobile())
+    <div class="p-5 mx-5 hero-container row h-100 align-items-center">
+        <div class="m-0 text-white col-md-12">
+            <h1 class="my-2 text-white fw-bold">@lang('homepage.header-title')</h1>
+            <div class="row">
+                <div class="col-md-12">
+                    <form action="{{route('guidings.index')}}" method="get">
+                        <div id="mobileherofilter" class="p-2 bg-white rounded shadow-lg">
+                            <div class="row">
+                                <div class="my-2 col-md-4 column-input">
+                                    <div class="form-group">
+                                        <div class="d-flex align-items-center small">
+                                            <i class="fa fa-search fa-fw text-muted position-absolute ps-2"></i>
+                                            <input  id="searchPlace" name="place" type="text" class="form-control rounded-0" placeholder="@lang('homepage.searchbar-destination')"  autocomplete="on">
+                                            <input type="hidden" id="placeLat" name="placeLat"/>
+                                            <input type="hidden" id="placeLng" name="placeLng"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="my-2 col-md-2 column-input">
+                                    <div class="form-group">
+                                        <div class="d-flex align-items-center small">
+                                            <i class="fa fa-user fa-fw text-muted position-absolute ps-2"></i>
+                                            <input type="number" min="1" max="5" class="form-control rounded-0" name="num_guests" placeholder="@lang('homepage.searchbar-person')" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="my-2 col-md-4 column-input">
+                                    <div class="d-flex align-items-center small myselect2">
+                                        <i class="fa fa-fish fa-fw text-muted position-absolute ps-1"></i>
+                                        <select class="form-control form-select" id="home_target_fish" name="target_fish[]" style="width:100%">
+                                            
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="my-2 col-md-2 column-input">
+                                    <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
+                                </div>
+                            </div>
+                        </div> 
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    @else
+    <div class="container h-100">
+        <div class="hero-container row h-100 align-items-center">
+            <div class="m-0 text-white col-md-12">
+                <div class="d-flex justify-content-start">
+                    <div>
+                        <h1 class="text-white fw-bold">@lang('homepage.header-title')</h1>
+                        <p>@lang('homepage.header-message')</p>
+                    </div>
+                </div>
+                <div class="my-2 row">
+                    <div class="col-md-12">
+                        <form action="{{route('guidings.index')}}" method="get">
+                            <div id="herofilter">
+                                <div class="px-3 row">
+                                    <div class="col-md-4 column-input">
+                                        <div class="form-group">
+                                            <div class="d-flex align-items-center small">
+                                                <i class="fa fa-search fa-fw text-muted position-absolute ps-2"></i>
+                                                <input  id="searchPlace" name="place" type="text" class="form-control rounded-0" placeholder="@lang('homepage.searchbar-destination')"  autocomplete="on">
+                                                <input type="hidden" id="placeLat" name="placeLat"/>
+                                                <input type="hidden" id="placeLng" name="placeLng"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 column-input">
+                                        <div class="form-group">
+                                            <div class="d-flex align-items-center small">
+                                                <i class="fa fa-user fa-fw text-muted position-absolute ps-2"></i>
+                                                <input type="number" min="1" max="5" class="form-control rounded-0" name="num_guests" placeholder="@lang('homepage.searchbar-person')" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 column-input">
+                                        <div class="d-flex align-items-center small myselect2">
+                                            <i class="fa fa-fish fa-fw text-muted position-absolute ps-1"></i>
+                                            <select class="form-control form-select" id="home_target_fish" name="target_fish[]" style="width:100%">
+                                                
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 column-input">
+                                        <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
+                                    </div>
+                                </div>
+                            </div>    
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+</section>
 <section id="usps" class="my-5">
     <div class="container">
         <div class="my-2 row fs-6">

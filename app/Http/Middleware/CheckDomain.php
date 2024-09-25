@@ -22,7 +22,7 @@ class CheckDomain
 
         // Check if the current domain matches the allowed domain
         if ($currentDomain !== $allowedDomain) {
-            abort(404); // Or you can redirect to a 404 page
+            //abort(404); // Or you can redirect to a 404 page
         }
 
         return $next($request);

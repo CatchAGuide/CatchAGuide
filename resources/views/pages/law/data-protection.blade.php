@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-v2-1')
 
 @section('title', __('data-protection.dataProt'))
 

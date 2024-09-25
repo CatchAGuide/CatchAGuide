@@ -262,10 +262,24 @@
         border-radius: 10px;
         box-shadow: 0px 0px 15px rgba(0,0,0,0.1);
         position: absolute;
-        bottom: -50px; /* Position the search bar at the bottom of the banner */
+        bottom: -26px; /* Position the search bar at the bottom of the banner */
         left: 50%;
         transform: translateX(-50%);
         width: 80%;
+        max-width: 1200px;
+        z-index: 3;
+    }
+    .search-form-short {
+        background-color: #fff;
+        /*padding: 20px;*/
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 15px rgba(0,0,0,0.1);
+        position: absolute;
+        bottom: -26px; /* Position the search bar at the bottom of the banner */
+        left: 50%;
+        transform: translateX(-50%);
+        width: 70%;
         max-width: 1200px;
         z-index: 3;
     }
