@@ -1,13 +1,11 @@
 @push('js_push')
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY') }}&libraries=places&callback=initAutocomplete" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+<script src="{{ asset('assets/js/ImageManager.js') }}"></script>
 
 <script>
-    let croppers = {};
-    let croppedImages = [];
-    let imageIndex = 0;
+    let imageManager;
     let currentStep = 1;
     const totalSteps = 8; 
     let autocomplete;
@@ -15,10 +13,63 @@
     let country = '';
     let postal_code = '';
     
+    function initAutocomplete() {
+        autocomplete = new google.maps.places.Autocomplete(
+            document.getElementById('location'),
+            {
+                types: ['(regions)']
+            }
+        );
+
+        autocomplete.addListener('place_changed', function () {
+            const place = autocomplete.getPlace();
+            place.address_components.forEach(component => {
+                const types = component.types;
+
+                $('#latitude').val(place.geometry.location.lat());
+                $('#longitude').val(place.geometry.location.lng());
+
+                if (types.includes('locality')) {
+                    city = component.long_name;
+                } else if (types.includes('country')) {
+                    country = component.long_name;
+                    $('#country').val(country);
+                } else if (types.includes('postal_code')) {
+                    postal_code = component.long_name;
+                    $('#postal_code').val(postal_code);
+                }
+            });
+        });
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        imageManager = new ImageManager('#croppedImagesContainer', '#title_image');
+        
+        // Call setFormDataIfEdit here, after imageManager is initialized
+        setFormDataIfEdit();
+        
+        // Prevent form submission on enter key
+        document.getElementById('newGuidingForm').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+            }
+        });
+
+        // ... (rest of your existing DOMContentLoaded code)
+    });
+
     $(document).on('click', '#saveDraftBtn', function(e) {
         e.preventDefault();
         saveDraft();
     });
+    
+    function scrollToFormCenter() {
+        const form = document.getElementById('newGuidingForm');
+        if (form) {
+            form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
 
     function showLoadingScreen() {
         const loadingScreen = document.createElement('div');
@@ -70,191 +121,7 @@
         form.submit();
     }
 
-    function initAutocomplete() {
-        autocomplete = new google.maps.places.Autocomplete(
-            document.getElementById('location'),
-            {
-                types: ['(regions)']
-            }
-        );
-
-        autocomplete.addListener('place_changed', function () {
-            const place = autocomplete.getPlace();
-            place.address_components.forEach(component => {
-                const types = component.types;
-
-                $('#latitude').val(place.geometry.location.lat());
-                $('#longitude').val(place.geometry.location.lng());
-
-                if (types.includes('locality')) {
-                    city = component.long_name; // This is the city name
-                } else if (types.includes('country')) {
-                    country = component.long_name; // This is the country name
-                    $('#country').val(country);
-                } else if (types.includes('postal_code')) {
-                    postal_code = component.long_name; // This is the postal code
-                    $('#postal_code').val(postal_code);
-                }
-            });
-        });
-    }
-
-
-    // Step navigation
-    function showStep(stepNumber) {
-        if (stepNumber > currentStep && !validateStep(currentStep)) {
-            return;
-        }
-
-        $('.step').removeClass('active');
-        $(`#step${stepNumber}`).addClass('active');
-        $('.step-button').removeClass('active');
-        $(`.step-button[data-step="${stepNumber}"]`).addClass('active');
-        currentStep = stepNumber;
-
-        // Update button visibility
-        $('#prevBtn').toggle(currentStep > 1);
-        $('#nextBtn').toggle(currentStep < totalSteps);
-        $('#submitBtn').toggle(currentStep === totalSteps);
-        console.log(currentStep);
-    }
-
-    $('.step-button').click(function() {
-        showStep($(this).data('step'));
-    });
-
-    // Initialize Tagify for tag inputs
-    document.addEventListener('DOMContentLoaded', function() {        
-        // Extras
-        var extrasInput = document.querySelector('input[name="extras"]');
-        var extrasWhitelist = [
-            'GPS', 'Echolot', 'Live Scope', 'Radar', 'Funk', 'Flybridge', 'WC', 
-            'Roofing', 'Dusche', 'Küche', 'Bett', 'Wifi', 'Ice box/ Kühlschrank', 
-            'Air conditioning', 'Fighting chair', 'E-Motor', 'Felitiertisch'
-        ].sort(); // Sort the whitelist alphabetically
-
-        new Tagify(extrasInput, {
-            whitelist: extrasWhitelist,
-            // maxTags: extrasWhitelist.length, // Set maxTags to the total number of options
-            dropdown: {
-                maxItems: extrasWhitelist.length, // Show all items in the dropdown
-                classname: "tagify__dropdown",
-                enabled: 0,
-                closeOnSelect: false
-            }
-        });
-
-        // Target Fish
-        var targetFishInput = document.querySelector('input[name="target_fish"]');
-        var targetFishList = {!! json_encode($targets->toArray()) !!};
-        new Tagify(targetFishInput, {
-            whitelist: targetFishList.sort(),
-            // maxTags: 10,
-            dropdown: {
-                maxItems: targetFishInput.length,
-                classname: "tagify__dropdown",
-                enabled: 0,
-                closeOnSelect: false
-            }
-        });
-
-        // Methods
-        var methodsInput = document.querySelector('input[name="methods"]');
-        var methodsList = {!! json_encode($methods->toArray()) !!};
-        new Tagify(methodsInput, {
-            whitelist: methodsList.sort(),
-            maxTags: 10,
-            dropdown: {
-                maxItems: methodsInput.length,
-                classname: "tagify__dropdown",
-                enabled: 0,
-                closeOnSelect: false
-            }
-        });
-
-        // Water Types
-        var waterTypesInput = document.querySelector('input[name="water_types"]');
-        var waterTypesList = {!! json_encode($waters->toArray()) !!};
-        new Tagify(waterTypesInput, {
-            whitelist: waterTypesList.sort(),
-            maxTags: 10,
-            dropdown: {
-                maxItems: waterTypesInput.length,
-                classname: "tagify__dropdown",
-                enabled: 0,
-                closeOnSelect: false
-            }
-        });
-
-        // Inclusions
-        var inclusionsInput = document.querySelector('input[name="inclussions"]');
-        var inclusionsList = {!! json_encode($inclussions->toArray()) !!};
-        new Tagify(inclusionsInput, {
-            whitelist: inclusionsList.sort(),
-            maxTags: 10,
-            dropdown: {
-                maxItems: inclusionsInput.length,
-                classname: "tagify__dropdown",
-                enabled: 0,
-                closeOnSelect: false
-            }
-        });
-
-        // Show/hide monthly selection based on seasonal trip selection
-        $('input[name="seasonal_trip"]').change(function() {
-            $('#monthly_selection').toggle($(this).val() === 'season_monthly');
-        });
-        
-        // Initialize tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
-        });
-
-        // Initialize checkbox states
-        $('.btn-checkbox-container input[type="checkbox"]').each(function() {
-            var $container = $(this).closest('.btn-checkbox-container');
-            var $textarea = $container.find('textarea');
-            $textarea.toggle(this.checked);
-        });
-
-        initAutocomplete();
-
-        // Duration selection logic
-        $('input[name="duration"]').change(function() {
-            var durationType = $(this).val();
-            $('#duration_details').show();
-            
-            if (durationType === 'half_day' || durationType === 'full_day') {
-                $('#hours_input').show();
-                $('#days_input').hide();
-            } else if (durationType === 'multi_day') {
-                $('#hours_input').hide();
-                $('#days_input').show();
-            } else {
-                $('#duration_details').hide();
-            }
-        });
-
-        // Next button functionality
-        $(document).on('click', '#nextBtn', function() {
-            if (validateStep(currentStep)) {
-                showStep(currentStep + 1);
-            }
-        });
-
-        // Previous button functionality
-        $(document).on('click', '#prevBtn', function() {
-            showStep(currentStep - 1);
-        });
-
-        //If edit is requested, set the form data
-        setFormDataIfEdit();
-    });
-
     function setFormDataIfEdit() {
-        console.log('Form Data:', {!! json_encode($formData ?? []) !!});
-
         const typeOfFishingData = '{{ $formData['type_of_fishing'] ?? '' }}';
         if (typeOfFishingData) {
             const radioButton = document.querySelector(`input[name="type_of_fishing_radio"][value="${typeOfFishingData}"]`);
@@ -422,7 +289,7 @@
             if (durationRadio) {
                 durationRadio.checked = true;
                 document.getElementById('duration_details').style.display = 'block';
-                if (duration === 'multi_day') {
+                if (durationType === 'multi_day') {
                     document.getElementById('days_input').style.display = 'block';
                     document.getElementById('hours_input').style.display = 'none';
                     document.getElementById('duration_hours').value = durationCount;
@@ -435,24 +302,7 @@
         }
         
         const priceType = '{{ $formData['price_type'] ?? '' }}';
-        if (price_type) {
-            const durationRadio = document.querySelector(`input[name="duration"][value="${price_type}"]`);
-            if (durationRadio) {
-                durationRadio.checked = true;
-                document.getElementById('duration_details').style.display = 'block';
-                if (duration === 'multi_day') {
-                    document.getElementById('days_input').style.display = 'block';
-                    document.getElementById('hours_input').style.display = 'none';
-                    document.getElementById('duration_hours').value = durationCount;
-                } else {
-                    document.getElementById('hours_input').style.display = 'block';
-                    document.getElementById('days_input').style.display = 'none';
-                    document.getElementById('duration_days').value = durationCount;
-                }
-            }
-        }
-        const priceType = '{{ $formData['price_type'] ?? '' }}';
-        const prices = {{ $formData['prices'] ?? [] }};
+        const prices = {!! json_encode($formData['prices'] ?? []) !!};
         if (priceType) {
             const priceTypeRadio = document.querySelector(`input[name="price_type"][value="${priceType}"]`);
             if (priceTypeRadio) {
@@ -474,6 +324,29 @@
                 }
             }
         }
+
+        const existingImages = {!! json_encode($formData['images'] ?? []) !!};
+        const thumbnailPath = '{{ $formData['thumbnail_path'] ?? '' }}';
+        
+        if (existingImages.length > 0) {
+            existingImages.forEach((imagePath, index) => {
+                const file = dataURLtoFile(imagePath, `existing_image_${index}.jpg`);
+                imageManager.addExistingImage(file, imagePath === thumbnailPath);
+            });
+        }
+    }
+
+    // Helper function to convert data URL to File object
+    function dataURLtoFile(dataurl, filename) {
+        var arr = dataurl.split(','),
+            mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]), 
+            n = bstr.length, 
+            u8arr = new Uint8Array(n);
+        while(n--){
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new File([u8arr], filename, {type:mime});
     }
 
     // Radio button functionality
@@ -566,165 +439,45 @@
         $(this).closest('.extra-row').remove();
     });
 
-    function createButton(innerHTML, onClick, tooltip) {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'image-control-btn';
-        button.innerHTML = innerHTML;
-        button.onclick = onClick;
-        button.setAttribute('data-bs-toggle', 'tooltip');
-        button.setAttribute('title', tooltip);
-        return button;
-    }
-
-    let imageFiles = []; // Array to store all selected image files
-
-    function previewImages(input) {
-        const container = document.getElementById('imagePreviewContainer');
+    // Modify the handleSubmit function
+    function handleSubmit(event) {
+        event.preventDefault();
+        const form = event.target;
+        const isDraft = form.querySelector('input[name="is_draft"]');
         
-        if (!container) {
-            console.error('Image preview container not found');
+        // Check if the click originated from an image control button
+        if (event.submitter && event.submitter.closest('.image-controls')) {
             return;
         }
-
-        if (input.files) {
-            Array.from(input.files).forEach((file, index) => {
-                imageFiles.push(file); // Add new file to the array
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'image-preview-wrapper';
-                    wrapper.dataset.index = imageIndex;
-
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.className = 'image-preview';
-                    wrapper.appendChild(img);
-
-                    const controls = document.createElement('div');
-                    controls.className = 'image-controls';
-
-                    const currentIndex = imageIndex;  // Capture the current index
-
-                    // Create control buttons with tooltips
-                    const zoomInBtn = createButton('<i class="fas fa-search-plus"></i>', () => croppers[currentIndex].zoom(0.1), 'Zoom In');
-                    const zoomOutBtn = createButton('<i class="fas fa-search-minus"></i>', () => croppers[currentIndex].zoom(-0.1), 'Zoom Out');
-                    const rotateBtn = createButton('<i class="fas fa-redo"></i>', () => croppers[currentIndex].rotate(90), 'Rotate');
-                    const deleteBtn = createButton('<i class="fas fa-trash"></i>', () => deleteImage(wrapper, currentIndex), 'Delete');
-                    const setPrimaryBtn = createButton('<i class="fas fa-star"></i>', () => setPrimaryImage(wrapper, currentIndex), 'Set as Title Image');
-
-                    controls.appendChild(zoomInBtn);
-                    controls.appendChild(zoomOutBtn);
-                    controls.appendChild(rotateBtn);
-                    controls.appendChild(deleteBtn);
-                    controls.appendChild(setPrimaryBtn);
-
-                    wrapper.appendChild(controls);
-                    container.appendChild(wrapper);
-
-                    // Initialize Cropper
-                    croppers[imageIndex] = new Cropper(img, {
-                        aspectRatio: 5 / 4,
-                        viewMode: 3,
-                        dragMode: 'move',
-                        autoCropArea: 1,
-                        restore: false,
-                        guides: false,
-                        center: false,
-                        highlight: false,
-                        cropBoxMovable: false,
-                        cropBoxResizable: false,
-                        toggleDragModeOnDblclick: false,
-                        minCropBoxWidth: wrapper.offsetWidth,
-                        minCropBoxHeight: wrapper.offsetHeight,
-                        ready: function() {
-                            const cropper = this.cropper;
-                            const imageData = cropper.getImageData();
-                            const containerData = cropper.getContainerData();
-
-                            const scale = Math.max(
-                                containerData.width / imageData.naturalWidth,
-                                containerData.height / imageData.naturalHeight
-                            );
-
-                            cropper.zoomTo(scale);
-
-                            const scaledWidth = imageData.naturalWidth * scale;
-                            const scaledHeight = imageData.naturalHeight * scale;
-                            const left = (containerData.width - scaledWidth) / 2;
-                            const top = (containerData.height - scaledHeight) / 2;
-
-                            cropper.setCanvasData({
-                                left: left,
-                                top: top,
-                                width: scaledWidth,
-                                height: scaledHeight
-                            });
-                        }
-                    });
-
-                    // Set the first image as the title image by default
-                    if (imageIndex === 0) {
-                        setPrimaryImage(wrapper, currentIndex);
-                    }
-
-                    imageIndex++;
-                }
-                reader.readAsDataURL(file);
-            });
-
-            // Update the file input with all selected files
-            updateFileInput();
+        
+        showLoadingScreen();
+        
+        if (isDraft && isDraft.value === '1') {
+            submitForm(form);
+        } else if (form.noValidate || validateStep(currentStep)) {
+            submitForm(form);
         }
     }
 
-    function updateFileInput() {
-        const fileInput = document.getElementById('title_image');
-        const dataTransfer = new DataTransfer();
-        
-        imageFiles.forEach(file => {
-            dataTransfer.items.add(file);
+    // Add this function to handle form submission
+    function submitForm(form) {
+        const croppedImages = imageManager.getCroppedImages();
+        croppedImages.forEach((image, index) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = `cropped_images[${index}]`;
+            input.value = image.dataUrl;
+            form.appendChild(input);
         });
-        
-        fileInput.files = dataTransfer.files;
+
+        form.submit();
     }
-
-    function deleteImage(wrapper, index) {
-        wrapper.remove();
-        delete croppers[index];
-        imageFiles.splice(index, 1); // Remove the file from the array
-        updateFileInput(); // Update the file input after deletion
-    }
-
-    function setPrimaryImage(wrapper, index) {
-        $('.image-preview-wrapper').removeClass('primary');
-        $('.image-preview-wrapper').find('.primary-label').remove(); // Remove existing labels
-        wrapper.classList.add('primary');
-        console.log(index);
-        document.getElementById('primaryImageInput').value = index;
-    }
-
-    // Add this event listener to prevent form submission on enter key
-    document.getElementById('newGuidingForm').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-        }
-    });
-
-    // Update the form submission logic
-    document.getElementById('newGuidingForm').addEventListener('submit', function(e) {
-        if (currentStep !== totalSteps && !this.noValidate) {
-            e.preventDefault();
-            if (validateStep(currentStep)) {
-                showStep(currentStep + 1);
-            }
-        }
-    });
 
     function validateStep(step) {
         const errorContainer = document.getElementById('error-container');
         errorContainer.style.display = 'none';
         errorContainer.innerHTML = '';
+        return true;
 
         let isValid = true;
         let errors = [];
@@ -732,7 +485,6 @@
         // Check if it's a draft submission
         const isDraft = document.querySelector('input[name="is_draft"]');
         if (isDraft && isDraft.value === '1') {
-            console.log('draft state');
             return true; // Skip validation for drafts
         }
 
@@ -865,25 +617,178 @@
         return true;
     }
 
+    // Step navigation
+    function showStep(stepNumber) {
+        if (stepNumber > currentStep && !validateStep(currentStep)) {
+            return;
+        }
 
-    // Modify the handleSubmit function
-    function handleSubmit(event) {
-        event.preventDefault();
-        const form = event.target;
-        const isDraft = form.querySelector('input[name="is_draft"]');
+        $('.step').removeClass('active');
+        $(`#step${stepNumber}`).addClass('active');
+        $('.step-button').removeClass('active');
+        $(`.step-button[data-step="${stepNumber}"]`).addClass('active');
+        currentStep = stepNumber;
+
+        scrollToFormCenter();
+
+        // Update button visibility
+        $('#prevBtn').toggle(currentStep > 1);
+        $('#nextBtn').toggle(currentStep < totalSteps);
+        $('#submitBtn').toggle(currentStep === totalSteps);
         
-        console.log('form submitted before loading screen');
-        showLoadingScreen();
-        console.log('form submitted after loading screen');
+        // Hide nextBtn on last step
+        if (currentStep === totalSteps) {
+            $('#nextBtn').hide();
+        }
+    }
+
+    $('.step-button').click(function() {
+        showStep($(this).data('step'));
+    });
+    
+
+    // Add this function at the beginning of your script
+    function initTagify(selector, options = {}) {
+        const element = document.querySelector(selector);
+        if (element && !element.tagify) {
+            new Tagify(element, options);
+        }
+    }
+
+    // Then, in your DOMContentLoaded event listener, replace the existing Tagify initializations with:
+    document.addEventListener('DOMContentLoaded', function() {
+        // Extras
+        initTagify('input[name="extras"]', {
+            whitelist: [
+                'GPS', 'Echolot', 'Live Scope', 'Radar', 'Funk', 'Flybridge', 'WC', 
+                'Roofing', 'Dusche', 'Küche', 'Bett', 'Wifi', 'Ice box/ Kühlschrank', 
+                'Air conditioning', 'Fighting chair', 'E-Motor', 'Felitiertisch'
+            ].sort(),
+            dropdown: {
+                maxItems: Infinity,
+                classname: "tagify__dropdown",
+                enabled: 0,
+                closeOnSelect: false
+            }
+        });
+
+        // Target Fish
+        initTagify('input[name="target_fish"]', {
+            whitelist: {!! json_encode($targets->toArray()) !!}.sort(),
+            dropdown: {
+                maxItems: Infinity,
+                classname: "tagify__dropdown",
+                enabled: 0,
+                closeOnSelect: false
+            }
+        });
+
+        // Methods
+        initTagify('input[name="methods"]', {
+            whitelist: {!! json_encode($methods->toArray()) !!}.sort(),
+            maxTags: 10,
+            dropdown: {
+                maxItems: Infinity,
+                classname: "tagify__dropdown",
+                enabled: 0,
+                closeOnSelect: false
+            }
+        });
+
+        // Water Types
+        initTagify('input[name="water_types"]', {
+            whitelist: {!! json_encode($waters->toArray()) !!}.sort(),
+            maxTags: 10,
+            dropdown: {
+                maxItems: Infinity,
+                classname: "tagify__dropdown",
+                enabled: 0,
+                closeOnSelect: false
+            }
+        });
+
+        // Inclusions
+        initTagify('input[name="inclussions"]', {
+            whitelist: {!! json_encode($inclussions->toArray()) !!}.sort(),
+            maxTags: 10,
+            dropdown: {
+                maxItems: Infinity,
+                classname: "tagify__dropdown",
+                enabled: 0,
+                closeOnSelect: false
+            }
+        });
+
+        // Show/hide monthly selection based on seasonal trip selection
+        $('input[name="seasonal_trip"]').change(function() {
+            $('#monthly_selection').toggle($(this).val() === 'season_monthly');
+        });
         
-        if (isDraft && isDraft.value === '1') {
-            form.submit();
-        } else if (form.noValidate || validateStep(currentStep)) {
-            form.submit();
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Initialize checkbox states
+        $('.btn-checkbox-container input[type="checkbox"]').each(function() {
+            var $container = $(this).closest('.btn-checkbox-container');
+            var $textarea = $container.find('textarea');
+            $textarea.toggle(this.checked);
+        });
+
+        initAutocomplete();
+
+        // Duration selection logic
+        $('input[name="duration"]').change(function() {
+            var durationType = $(this).val();
+            $('#duration_details').show();
+            
+            if (durationType === 'half_day' || durationType === 'full_day') {
+                $('#hours_input').show();
+                $('#days_input').hide();
+            } else if (durationType === 'multi_day') {
+                $('#hours_input').hide();
+                $('#days_input').show();
+            } else {
+                $('#duration_details').hide();
+            }
+        });
+
+        // Next button functionality
+        $(document).on('click', '#nextBtn', function() {
+            if (validateStep(currentStep)) {
+                showStep(currentStep + 1);
+            }
+        });
+
+        // Previous button functionality
+        $(document).on('click', '#prevBtn', function() {
+            showStep(currentStep - 1);
+        });
+
+        //If edit is requested, set the form data
+        setFormDataIfEdit();
+    });
+
+    // In the setFormDataIfEdit function, replace the Tagify initializations with:
+    function setFormDataIfEdit() {
+        if (document.getElementById('is_update').value === '1') {
+            // ... existing code ...
+
+            initTagify('input[name="extras"]');
+            initTagify('input[name="target_fish"]');
+            initTagify('input[name="methods"]');
+            initTagify('input[name="water_types"]');
+            initTagify('input[name="inclussions"]');
+
+            // ... rest of your existing code ...
         }
     }
 
     // Update the form's submit event listener
     document.getElementById('newGuidingForm').addEventListener('submit', handleSubmit);
 </script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY') }}&libraries=places&callback=initAutocomplete" async defer></script>
 @endpush
