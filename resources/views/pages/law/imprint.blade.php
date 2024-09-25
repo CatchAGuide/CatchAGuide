@@ -1,10 +1,10 @@
-@extends('layouts.app')
+@extends('layouts.app-v2-1')
 
 @section('title',  ucwords(translate('Impressum')))
 
 @section('content')
     <!--Page Header Start-->
-    <section class="page-header">
+    <!-- <section class="page-header">
         <div class="page-header__top">
             <div class="page-header-bg"
                  style="background-image: url({{asset('assets/images/Coverbild_News_Blog_1.2.jpg')}})">
@@ -27,13 +27,14 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> -->
     <!--Page Header End-->
 
     <!--About Page Start-->
-    <section class="about-page">
+    <section class="about-pages">
         <div class="container">
             <div class="row">
+                <h1 class="h2">@lang('message.imprint')</h1>
                 @if(app()->getLocale() == 'de')
                 <p>
                     Catch A Guide UG (haftungsbeschränkt)<br>

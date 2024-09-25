@@ -1,73 +1,52 @@
+
+<nav class="navbar-custom container" style="backgorund-color:#fff;">
+    <div class="logo">
+        <a href="{{ route('welcome') }}"><img src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}" alt="Logo"></a>
+    </div>
+    <div class="nav-links" style="color: #ccc;">
+        <a href="#" class="button new-filter-btn">Become a guide</a>
+        <a class="header-login-link" href="{{ route('login') }}">Log in</a>
+        <a class="header-signup-link" href="{{ route('login') }}">Sign up</a>
+    </div>
+</nav>
 <header class="header" style="background-image: url('{{ asset('assets/images/allguidings.jpg') }}'); background-size: cover; background-position: center;">
     <div class="overlay"></div>
-    <nav class="navbar-custom container">
-        <div class="logo">
-            <a href="https://sg.catchaguide.de"><img src="https://sg.catchaguide.de/assets/images/logo_mobil.jpg" alt="Logo"></a>
-        </div>
-        <div class="nav-links">
-            <a href="#" class="button">List Your Boat</a>
-            <a href="{{route('login')}}">Log in</a>
-            <a href="{{route('login')}}">Sign up</a>
-        </div>
-    </nav>
     <div class="header-content container">
-        <h1 class="h2">{{ucwords(isset($place) ? translate('Alle Guidings bei ') . $place : translate('Alle Guidings') )}}</h1>
-        <p>Discover top-rated fishing charters</p>
+        <h1 class="h2 mt-5">@yield('header_title')</h1>
+        <p>@yield('header_sub_title')</p>
     </div>
-    <form class="search-form row gx-2">
         
-        <form action="{{route('guidings.index')}}" method="get">
-            <div class="col-md-3">
-                <input type="text" id="searchLocation" name="location" class="form-control" placeholder="@lang('homepage.searchbar-destination')">
-                <input type="hidden" id="LocationLat" name="LocationLat"/>
-                <input type="hidden" id="LocationLng" name="LocationLng"/>
-            </div>
-            <div class="col-md-3">
-                <input type="date" class="form-control" placeholder="Select date">
-            </div>
-            <div class="col-md-3">
-                <div class="dropdown">
-                    <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" id="guestDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        2 adults • 0 children
-                    </button>
-                    <div class="dropdown-menu p-3">
-                        <div class="counter-box">
-                            <span>Adults</span>
-                            <button type="button" class="btn btn-light" onclick="changeGuestCount('adults', -1)">-</button>
-                            <input type="text" id="adults" value="2" readonly>
-                            <button type="button" class="btn btn-light" onclick="changeGuestCount('adults', 1)">+</button>
-                        </div>
-                        <div class="counter-box">
-                            <span>Children</span>
-                            <button type="button" class="btn btn-light" onclick="changeGuestCount('children', -1)">-</button>
-                            <input type="text" id="children" value="0" readonly>
-                            <button type="button" class="btn btn-light" onclick="changeGuestCount('children', 1)">+</button>
-                        </div>
+    <form class="search-form row gx-2 pe-0" id="global-search" action="{{route('guidings.index')}}" method="get">
+        <div class="row" style="padding-right: 0;">
+            <div class="col-lg-4 column-input mx-0 pt-1 px-0">
+                <div class="form-group">
+                    <div class="d-flex align-items-center small">
+                        <i class="fa fa-search fa-fw text-muted position-absolute px-2"></i>
+                        <input  id="searchPlace" name="place" type="text" class="form-control rounded-0 ps-4" placeholder="@lang('homepage.searchbar-destination')"  autocomplete="on">
+                        <input type="hidden" id="placeLat" name="placeLat"/>
+                        <input type="hidden" id="placeLng" name="placeLng"/>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <button type="submit" class="btn btn-warning w-100">Check availability</button>
+            <div class="col-lg-2 column-input my-1 px-1">
+                <div class="form-group">
+                    <div class="d-flex align-items-center small">
+                        <i class="fa fa-user fa-fw text-muted position-absolute px-2"></i>
+                        <input type="number" min="1" max="5" class="form-control rounded-0 ps-4" name="num_guests" placeholder="@lang('homepage.searchbar-person')" />
+                    </div>
+                </div>
             </div>
-        </form>
+            <div class="col-lg-4 column-input my-1 px-0">
+                <div class="d-flex align-items-center small myselect2 p-0">
+                    <i class="fa fa-fish fa-fw text-muted position-absolute px-2"></i>
+                    <select class="form-control form-select rounded-0 ps-4" id="home_target_fish" name="target_fish[]" style="width:100%">
+                        
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-2 my-1 px-1">
+                <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
+            </div>
+        </div>
     </form>
 </header>
-
-@section('js_after')
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q&libraries=places,geocoder"></script>
-<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
-
-<script>
-    function initialize() {
-        var input = document.getElementById('searchPlace');
-        var autocomplete = new google.maps.places.Autocomplete(input);
-        google.maps.event.addListener(autocomplete, 'place_changed', function () {
-            var place = autocomplete.getPlace();
-            document.getElementById('LocationLat').value = place.geometry.location.lat();
-            document.getElementById('LocationLng').value = place.geometry.location.lng();
-        });
-    }
-
-    window.addEventListener('load', initialize);
-</script>
-@endsection

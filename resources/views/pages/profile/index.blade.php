@@ -27,14 +27,14 @@
                     </div>
                 </a>
             </div>
-            <div class="col-md-3">
+            <!-- <div class="col-md-3">
                 <a href="{{ route('chat') }}">
                     <div class="box">
                         <i class="fa fa-2x fa-paper-plane"></i>
                         <span class="box-title">@lang('profile.mess') ({{Auth::user()->countunreadmessages()}})</span>
                     </div>
                 </a>
-            </div>
+            </div> -->
             @if(Auth::user()->is_guide)
                 <div class="col-md-3">
                     <a href="{{ route('profile.newguiding') }}">

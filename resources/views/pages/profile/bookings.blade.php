@@ -4,6 +4,14 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
 <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<style type="text/css">
+    .container {
+        max-width: 1200px!important;
+    }
+    .form-group {
+        margin-bottom: 0!important;
+    }
+</style>
 @endsection
 @section('profile-content')
 <!-- Button trigger modal -->

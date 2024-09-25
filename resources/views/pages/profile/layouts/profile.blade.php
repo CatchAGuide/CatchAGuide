@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-v2-1')
 
 @section('css_after')
     <style>
@@ -61,7 +61,7 @@
 
 @section('content')
     <!--Page Header Start-->
-    <section class="page-header">
+    <!-- <section class="page-header">
         <div class="page-header__top">
             <div class="page-header-bg"
                  style="background-image: url({{asset('assets/images/allguidings.jpg')}}); ">
@@ -96,11 +96,12 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> -->
     <!--Page Header End-->
     <div class="container" style=" margin-bottom: 20px;">
         <div class="row mt-3">
             <div class="{{!$agent->isMobile() ? 'col-12' : 'col-12'}}">
+                    <h2>@yield('title')</h2>
                 @yield('profile-content')
             </div>
         </div>

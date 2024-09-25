@@ -1,4 +1,4 @@
-@extends('layouts.app-v2-1')
+@extends('layouts.app')
 
 @if(app()->getLocale() == 'en')
 @section('title',translate($guiding->title))
@@ -7,6 +7,7 @@
 @endif
 
 @section('description',$guiding->excerpt)
+
 
 @section('share_tags')
 <meta property="og:title" content="{{translate($guiding->title)}}" />
