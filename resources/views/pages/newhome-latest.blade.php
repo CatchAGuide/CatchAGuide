@@ -1191,7 +1191,7 @@
                             <div class="card-body">
                             <h5 class="crop-text-2 card-title h6">{{translate($most_booked_guiding->title)}}</h5>
                             <small class="crop-text-1 small-text text-muted">{{translate($most_booked_guiding->location)}}</small>
-                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{$most_booked_guiding->price}}€</span></small>
+                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{ $most_booked_guiding->getLowestPrice() }}€</span></small>
                             </div>
                         </div>
                     </a>
@@ -1212,7 +1212,7 @@
                             <div class="card-body">
                             <h5 class="crop-text-2 card-title h6">{{translate($most_booked_guiding->title)}}</h5>
                             <small class="crop-text-1 small-text text-muted">{{translate($most_booked_guiding->location)}}</small>
-                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{$most_booked_guiding->price}}€</span></small>
+                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{ $most_booked_guiding->getLowestPrice() }}€</span></small>
                             </div>
                         </div>
                     </a>
@@ -1405,7 +1405,7 @@
                                 <div class="card-body">
                                 <h5 class="crop-text-2 card-title h6">{{translate($newGuiding->title)}}</h5>
                                 <small class="crop-text-1 small-text text-muted">{{translate($newGuiding->location)}}</small>
-                                <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{$newGuiding->price}}€</span></small>
+                                <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{ $newGuiding->getLowestPrice() }}€</span></small>
                                 </div>
                             </div>
                         </a>
@@ -1426,7 +1426,7 @@
                             <div class="card-body">
                             <h5 class="crop-text-2 card-title h6">{{translate($newGuiding->title)}}</h5>
                             <small class="crop-text-1 small-text text-muted">{{translate($newGuiding->location)}}</small>
-                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{$newGuiding->price}}€</span></small>
+                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{ $newGuiding->getLowestPrice() }}€</span></small>
                             </div>
                         </div>
                     </a>

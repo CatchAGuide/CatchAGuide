@@ -634,7 +634,7 @@
                                                 </div>
                                                 <div class="col-12 col-sm-12 col-md-2 col-lg-3 col-xl-2 col-xxl-2  mt-3">
                                                     <div class="text-center">
-                                                        <h5 class="mr-1 color-primary fw-bold text-center">@lang('message.from') {{$guiding->price}}€</h4>
+                                                        <h5 class="mr-1 color-primary fw-bold text-center">@lang('message.from') {{$guiding->getLowestPrice()}}€</h5>
                                                     </div>
                                                     <div class="d-flex flex-column mt-4">
                                                         <a class="btn theme-primary btn-theme-new btn-sm" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">Details</a>
