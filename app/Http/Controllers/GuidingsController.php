@@ -685,10 +685,6 @@ class GuidingsController extends Controller
         }
 
         // Load necessary relationships
-        // $guiding->load([
-        //     'guidingTargets', 'guidingWaters', 'guidingMethods', 
-        //     'fishingTypes', 'fishingFrom', 'inclusions', 'equipments'
-        // ]);
         $guiding->load([
             'guidingTargets', 'guidingWaters', 'guidingMethods', 
             'fishingTypes', 'fishingFrom'
@@ -701,11 +697,11 @@ class GuidingsController extends Controller
             //step1
             'title' => $guiding->title,
             'location' => $guiding->location,
-            'latitude' => $guiding->latitude,
-            'longitude' => $guiding->longitude,
+            'latitude' => $guiding->lat,
+            'longitude' => $guiding->lng,
             'country' => $guiding->country,
-            'images' => json_decode($guiding->galery_images),
-            'thumbnail_path' => json_decode($guiding->galery_thumbnails),
+            'galery_images' => $guiding->galery_images,
+            'thumbnail_path' => $guiding->thumbnail_path,
 
             //step 2
             'type_of_fishing' => $guiding->is_boat ? 'boat' : 'shore',

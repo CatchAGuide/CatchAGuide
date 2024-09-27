@@ -17,7 +17,7 @@
                                 {{ Auth::user()->firstname }} {{ Auth::user()->lastname }}
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="userDropdown">
-                                <li><a class="dropdown-item" href="{{ route('profile.account') }}" style="color: #787780;">Profile</a></li>
+                                <li><a class="dropdown-item" href="{{ route('profile.index') }}" style="color: #787780;">Profile</a></li>
                                 <li><a class="dropdown-item" href="{{ route('admin.auth.logout') }}" style="color: #787780;">Logout</a></li>
                             </ul>
                         </div>

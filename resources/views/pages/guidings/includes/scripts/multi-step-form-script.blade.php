@@ -42,11 +42,27 @@
         });
     }
     
-    document.addEventListener('DOMContentLoaded', function() {
+    function initializeImageManager() {
+        if (typeof ImageManager === 'undefined') {
+            console.error('ImageManager is not defined. Retrying in 100ms...');
+            setTimeout(initializeImageManager, 100);
+            return;
+        }
+
         imageManager = new ImageManager('#croppedImagesContainer', '#title_image');
         
+        // Load existing images if editing
+        if (document.getElementById('is_update').value === '1') {
+            const existingImagesInput = document.getElementById('existing_images');
+            const thumbnailPath = document.getElementById('thumbnail_path').value;
+            
+            if (existingImagesInput && existingImagesInput.value) {
+                imageManager.loadExistingImages(existingImagesInput.value, thumbnailPath);
+            }
+        }
         // Call setFormDataIfEdit here, after imageManager is initialized
         setFormDataIfEdit();
+        
         
         // Prevent form submission on enter key
         document.getElementById('newGuidingForm').addEventListener('keypress', function(e) {
@@ -56,7 +72,7 @@
         });
 
         // ... (rest of your existing DOMContentLoaded code)
-    });
+    }
 
     $(document).on('click', '#saveDraftBtn', function(e) {
         e.preventDefault();
@@ -122,217 +138,227 @@
     }
 
     function setFormDataIfEdit() {
-        const typeOfFishingData = '{{ $formData['type_of_fishing'] ?? '' }}';
-        if (typeOfFishingData) {
-            const radioButton = document.querySelector(`input[name="type_of_fishing_radio"][value="${typeOfFishingData}"]`);
-            if (radioButton) {
-                radioButton.checked = true;
-                selectOption(typeOfFishingData);
-            }
-        }
-
-        const boatTypeData = '{{ $formData['boat_type'] ?? '' }}';
-        if (boatTypeData) {
-            const boatRadio = document.querySelector(`input[name="type_of_boat"][value="${boatTypeData}"]`);
-            if (boatRadio) {
-                boatRadio.checked = true;
-                const label = boatRadio.closest('label');
-                if (label) {
-                    label.classList.add('active');
+        if (document.getElementById('is_update').value === '1') {
+            const typeOfFishingData = '{{ $formData['type_of_fishing'] ?? '' }}';
+            if (typeOfFishingData) {
+                console.log(typeOfFishingData);
+                const radioButton = document.querySelector(`input[name="type_of_fishing_radio"][value="${typeOfFishingData}"]`);
+                if (radioButton) {
+                    radioButton.checked = true;
+                    selectOption(typeOfFishingData);
                 }
             }
-        }
 
-        const boatInformationData = {!! json_encode($formData['boat_information'] ?? []) !!};
-        Object.entries(boatInformationData).forEach(([key, value]) => {
-            const checkbox = document.querySelector(`input[name="descriptions[]"][value="${key}"]`);
-            if (checkbox) {
-                checkbox.checked = true;
-                const container = checkbox.closest('.btn-checkbox-container');
-                if (container) {
-                    container.classList.add('active');
-                    const textarea = container.querySelector('textarea');
-                    if (textarea) {
-                        textarea.value = value;
-                        textarea.style.display = 'block';
+            const boatTypeData = '{{ $formData['boat_type'] ?? '' }}';
+            if (boatTypeData) {
+                const boatRadio = document.querySelector(`input[name="type_of_boat"][value="${boatTypeData}"]`);
+                if (boatRadio) {
+                    boatRadio.checked = true;
+                    const label = boatRadio.closest('label');
+                    if (label) {
+                        label.classList.add('active');
                     }
                 }
             }
-        });
 
-        const extrasInputData = document.querySelector('input[name="extras"]');
-        if (extrasInputData) {
-            const extrasTagify = new Tagify(extrasInputData);
-            const extrasData = {!! json_encode($formData['boat_extras'] ?? []) !!};
-            extrasTagify.addTags(extrasData);
-        }
-
-        const targetFishInputData = document.querySelector('input[name="target_fish"]');
-        if (targetFishInputData) {
-            const targetFishTagify = new Tagify(targetFishInputData);
-            const targetFishData = {!! json_encode($formData['target_fish'] ?? []) !!};
-            targetFishTagify.addTags(targetFishData);
-        }
-
-        const methodsInputData = document.querySelector('input[name="methods"]');
-        if (methodsInputData) {
-            const methodsTagify = new Tagify(methodsInputData);
-            const methodsData = {!! json_encode($formData['methods'] ?? []) !!};
-            methodsTagify.addTags(methodsData);
-        }
-
-        const waterTypesInputData = document.querySelector('input[name="water_types"]');
-        if (waterTypesInputData) {
-            const waterTypesTagify = new Tagify(waterTypesInputData);
-            const waterTypesData = {!! json_encode($formData['water_types'] ?? []) !!};
-            waterTypesTagify.addTags(waterTypesData);
-        }
-        
-        const experinceLevelData = {!! json_encode($formData['experience_level'] ?? []) !!};
-        Object.entries(experinceLevelData).forEach(([key, value]) => {
-            const checkbox = document.querySelector(`input[name="experience_level[]"][value="${value}"]`);
-            if (checkbox) {
-                checkbox.checked = true;
-                const container = checkbox.closest('.btn-checkbox-container');
-                if (container) {
-                    container.classList.add('active');
+            const boatInformationData = {!! json_encode($formData['boat_information'] ?? []) !!};
+            Object.entries(boatInformationData).forEach(([key, value]) => {
+                const checkbox = document.querySelector(`input[name="descriptions[]"][value="${key}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    const container = checkbox.closest('.btn-checkbox-container');
+                    if (container) {
+                        container.classList.add('active');
+                        const textarea = container.querySelector('textarea');
+                        if (textarea) {
+                            textarea.value = value;
+                            textarea.style.display = 'block';
+                        }
+                    }
                 }
+            });
+
+            const extrasInputData = document.querySelector('input[name="extras"]');
+            if (extrasInputData) {
+                const extrasTagify = new Tagify(extrasInputData);
+                const extrasData = {!! json_encode($formData['boat_extras'] ?? []) !!};
+                extrasTagify.addTags(extrasData);
             }
-        });
 
-        const inclussionsInputData = document.querySelector('input[name="inclussions"]');
-        if (inclussionsInputData) {
-            const inclussionsTagify = new Tagify(inclussionsInputData);
-            const inclussionsData = {!! json_encode($formData['inclussions'] ?? []) !!};
-            inclussionsTagify.addTags(inclussionsData);
-        }
+            const targetFishInputData = document.querySelector('input[name="target_fish"]');
+            if (targetFishInputData) {
+                const targetFishTagify = new Tagify(targetFishInputData);
+                const targetFishData = {!! json_encode($formData['target_fish'] ?? []) !!};
+                targetFishTagify.addTags(targetFishData);
+            }
 
-        const styleOfFishingData = '{{ $formData['style_of_fishing'] ?? '' }}';
-        if (styleOfFishingData) {
-            const styleOfFishing = document.querySelector(`input[name="style_of_fishing"][value="${styleOfFishingData}"]`);
-            if (styleOfFishing) {
-                styleOfFishing.checked = true;
-                const label = styleOfFishing.closest('label');
-                if (label) {
-                    label.classList.add('active');
+            const methodsInputData = document.querySelector('input[name="methods"]');
+            if (methodsInputData) {
+                const methodsTagify = new Tagify(methodsInputData);
+                const methodsData = {!! json_encode($formData['methods'] ?? []) !!};
+                methodsTagify.addTags(methodsData);
+            }
+
+            const waterTypesInputData = document.querySelector('input[name="water_types"]');
+            if (waterTypesInputData) {
+                const waterTypesTagify = new Tagify(waterTypesInputData);
+                const waterTypesData = {!! json_encode($formData['water_types'] ?? []) !!};
+                waterTypesTagify.addTags(waterTypesData);
+            }
+
+            const inclussionsInputData = document.querySelector('input[name="inclussions"]');
+            if (inclussionsInputData) {
+                const inclussionsTagify = new Tagify(inclussionsInputData);
+                const inclussionsData = {!! json_encode($formData['inclussions'] ?? []) !!};
+                inclussionsTagify.addTags(inclussionsData);
+            }
+            
+            const experinceLevelData = {!! json_encode($formData['experience_level'] ?? []) !!};
+            Object.entries(experinceLevelData).forEach(([key, value]) => {
+                const checkbox = document.querySelector(`input[name="experience_level[]"][value="${value}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    const container = checkbox.closest('.btn-checkbox-container');
+                    if (container) {
+                        container.classList.add('active');
+                    }
                 }
-            }
-        }
+            });
 
-        const otherInformationData = {!! json_encode($formData['other_information'] ?? []) !!};
-        Object.entries(otherInformationData).forEach(([key, value]) => {
-            const checkbox = document.querySelector(`input[name="other_information[]"][value="${key}"]`);
-            if (checkbox) {
-                checkbox.checked = true;
-                const container = checkbox.closest('.btn-checkbox-container');
-                if (container) {
-                    container.classList.add('active');
-                    const textarea = container.querySelector('textarea');
-                    if (textarea) {
-                        textarea.value = value;
-                        textarea.style.display = 'block';
+            const styleOfFishingData = '{{ $formData['style_of_fishing'] ?? '' }}';
+            if (styleOfFishingData) {
+                const styleOfFishing = document.querySelector(`input[name="style_of_fishing"][value="${styleOfFishingData}"]`);
+                if (styleOfFishing) {
+                    styleOfFishing.checked = true;
+                    const label = styleOfFishing.closest('label');
+                    if (label) {
+                        label.classList.add('active');
                     }
                 }
             }
-        });
 
-        const requirementsData = {!! json_encode($formData['requirements'] ?? []) !!};
-        Object.entries(requirementsData).forEach(([key, value]) => {
-            const checkbox = document.querySelector(`input[name="requiements_taking_part[]"][value="${key}"]`);
-            if (checkbox) {
-                checkbox.checked = true;
-                const container = checkbox.closest('.btn-checkbox-container');
-                if (container) {
-                    container.classList.add('active');
-                    const textarea = container.querySelector('textarea');
-                    if (textarea) {
-                        textarea.value = value;
-                        textarea.style.display = 'block';
+            const otherInformationData = {!! json_encode($formData['other_information'] ?? []) !!};
+            Object.entries(otherInformationData).forEach(([key, value]) => {
+                const checkbox = document.querySelector(`input[name="other_information[]"][value="${key}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    const container = checkbox.closest('.btn-checkbox-container');
+                    if (container) {
+                        container.classList.add('active');
+                        const textarea = container.querySelector('textarea');
+                        if (textarea) {
+                            textarea.value = value;
+                            textarea.style.display = 'block';
+                        }
+                    }
+                }
+            });
+
+            const requirementsData = {!! json_encode($formData['requirements'] ?? []) !!};
+            Object.entries(requirementsData).forEach(([key, value]) => {
+                const checkbox = document.querySelector(`input[name="requiements_taking_part[]"][value="${key}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    const container = checkbox.closest('.btn-checkbox-container');
+                    if (container) {
+                        container.classList.add('active');
+                        const textarea = container.querySelector('textarea');
+                        if (textarea) {
+                            textarea.value = value;
+                            textarea.style.display = 'block';
+                        }
+                    }
+                }
+            });
+
+            const recommendationsData = {!! json_encode($formData['recommendations'] ?? []) !!};
+            Object.entries(recommendationsData).forEach(([key, value]) => {
+                const checkbox = document.querySelector(`input[name="recommended_preparation[]"][value="${key}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    const container = checkbox.closest('.btn-checkbox-container');
+                    if (container) {
+                        container.classList.add('active');
+                        const textarea = container.querySelector('textarea');
+                        if (textarea) {
+                            textarea.value = value;
+                            textarea.style.display = 'block';
+                        }
+                    }
+                }
+            });
+
+            const tourTypeData = '{{ $formData['tour_type'] ?? '' }}';
+            if (tourTypeData) {
+                const tourRadio = document.querySelector(`input[name="tour_type"][value="${tourTypeData}"]`);
+                if (tourRadio) {
+                    tourRadio.checked = true;
+                    const label = tourRadio.closest('label');
+                    if (label) {
+                        label.classList.add('active');
                     }
                 }
             }
-        });
-
-        const recommendationsData = {!! json_encode($formData['recommendations'] ?? []) !!};
-        Object.entries(recommendationsData).forEach(([key, value]) => {
-            const checkbox = document.querySelector(`input[name="recommended_preparation[]"][value="${key}"]`);
-            if (checkbox) {
-                checkbox.checked = true;
-                const container = checkbox.closest('.btn-checkbox-container');
-                if (container) {
-                    container.classList.add('active');
-                    const textarea = container.querySelector('textarea');
-                    if (textarea) {
-                        textarea.value = value;
-                        textarea.style.display = 'block';
+            
+            const durationType = '{{ $formData['duration_type'] ?? '' }}';
+            const durationCount = '{{ $formData['duration'] ?? '' }}';
+            if (durationType) {
+                const durationRadio = document.querySelector(`input[name="duration"][value="${durationType}"]`);
+                if (durationRadio) {
+                    durationRadio.checked = true;
+                    durationRadio.dispatchEvent(new Event('change')); // Trigger change event
+                    
+                    document.getElementById('duration_details').style.display = 'block';
+                    if (durationType === 'multi_day') {
+                        document.getElementById('days_input').style.display = 'block';
+                        document.getElementById('hours_input').style.display = 'none';
+                        document.getElementById('duration_days').value = durationCount;
+                    } else {
+                        document.getElementById('hours_input').style.display = 'block';
+                        document.getElementById('days_input').style.display = 'none';
+                        document.getElementById('duration_hours').value = durationCount;
                     }
                 }
             }
-        });
-
-        const tourTypeData = '{{ $formData['tour_type'] ?? '' }}';
-        if (tourTypeData) {
-            const tourRadio = document.querySelector(`input[name="tour_type"][value="${tourTypeData}"]`);
-            if (tourRadio) {
-                tourRadio.checked = true;
-                const label = tourRadio.closest('label');
-                if (label) {
-                    label.classList.add('active');
-                }
-            }
-        }
-        
-        const durationType = '{{ $formData['duration_type'] ?? '' }}';
-        const durationCount = '{{ $formData['duration'] ?? '' }}';
-        if (durationType) {
-            const durationRadio = document.querySelector(`input[name="duration"][value="${durationType}"]`);
-            if (durationRadio) {
-                durationRadio.checked = true;
-                document.getElementById('duration_details').style.display = 'block';
-                if (durationType === 'multi_day') {
-                    document.getElementById('days_input').style.display = 'block';
-                    document.getElementById('hours_input').style.display = 'none';
-                    document.getElementById('duration_hours').value = durationCount;
-                } else {
-                    document.getElementById('hours_input').style.display = 'block';
-                    document.getElementById('days_input').style.display = 'none';
-                    document.getElementById('duration_days').value = durationCount;
-                }
-            }
-        }
-        
-        const priceType = '{{ $formData['price_type'] ?? '' }}';
-        const prices = {!! json_encode($formData['prices'] ?? []) !!};
-        if (priceType) {
-            const priceTypeRadio = document.querySelector(`input[name="price_type"][value="${priceType}"]`);
-            if (priceTypeRadio) {
-                priceTypeRadio.checked = true;
-                if (prices && Object.keys(prices).length > 0) {
-                    if (priceType === 'per_person') {
-                        Object.entries(prices).forEach(([key, value]) => {
-                            const input = document.querySelector(`input[name="price_per_person[${key}]"]`);
+            
+            const priceType = '{{ $formData['price_type'] ?? '' }}';
+            const prices = {!! json_encode($formData['prices'] ?? []) !!};
+            if (priceType) {
+                const priceTypeRadio = document.querySelector(`input[name="price_type"][value="${priceType}"]`);
+                if (priceTypeRadio) {
+                    priceTypeRadio.checked = true;
+                    if (prices && Object.keys(prices).length > 0) {
+                        if (priceType === 'per_person') {
+                            Object.entries(prices).forEach(([key, value]) => {
+                                const input = document.querySelector(`input[name="price_per_person[${key}]"]`);
+                                if (input) {
+                                    input.value = value;
+                                }
+                            });
+                        } else if (priceType === 'per_boat') {
+                            const input = document.querySelector('input[name="price_per_boat"]');
                             if (input) {
-                                input.value = value;
+                                input.value = prices.amount;
                             }
-                        });
-                    } else if (priceType === 'per_boat') {
-                        const input = document.querySelector('input[name="price_per_boat"]');
-                        if (input) {
-                            input.value = prices.amount;
                         }
                     }
                 }
             }
-        }
 
-        const existingImages = {!! json_encode($formData['images'] ?? []) !!};
-        const thumbnailPath = '{{ $formData['thumbnail_path'] ?? '' }}';
-        
-        if (existingImages.length > 0) {
-            existingImages.forEach((imagePath, index) => {
-                const file = dataURLtoFile(imagePath, `existing_image_${index}.jpg`);
-                imageManager.addExistingImage(file, imagePath === thumbnailPath);
-            });
+            const extras = {!! json_encode($formData['pricing_extra'] ?? []) !!};
+            if (extras && extras.length > 0) {
+                extras.forEach((extra, index) => {
+                    if (index > 0) {
+                        $('#add-extra').click();
+                    }
+                    const nameInput = document.querySelector(`input[name="extra_name_${index + 1}"]`);
+                    const priceInput = document.querySelector(`input[name="extra_price_${index + 1}"]`);
+                    if (nameInput && priceInput) {
+                        nameInput.value = extra.name;
+                        priceInput.value = extra.price;
+                    }
+                });
+            }
         }
     }
 
@@ -657,6 +683,8 @@
 
     // Then, in your DOMContentLoaded event listener, replace the existing Tagify initializations with:
     document.addEventListener('DOMContentLoaded', function() {
+        initializeImageManager();
+
         // Extras
         initTagify('input[name="extras"]', {
             whitelist: [
@@ -770,21 +798,6 @@
         //If edit is requested, set the form data
         setFormDataIfEdit();
     });
-
-    // In the setFormDataIfEdit function, replace the Tagify initializations with:
-    function setFormDataIfEdit() {
-        if (document.getElementById('is_update').value === '1') {
-            // ... existing code ...
-
-            initTagify('input[name="extras"]');
-            initTagify('input[name="target_fish"]');
-            initTagify('input[name="methods"]');
-            initTagify('input[name="water_types"]');
-            initTagify('input[name="inclussions"]');
-
-            // ... rest of your existing code ...
-        }
-    }
 
     // Update the form's submit event listener
     document.getElementById('newGuidingForm').addEventListener('submit', handleSubmit);

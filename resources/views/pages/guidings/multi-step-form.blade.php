@@ -1,4 +1,4 @@
-@include('pages.guidings.includes.styles.multi-step-form')
+@include('pages.guidings.includes.styles.multi-step-form-style')
 <div class="card">
     <div class="card-body">
         
@@ -7,35 +7,27 @@
             <div class="step-buttons">
                 <div class="step-button active" data-step="1">
                     <i class="fas fa-ship"></i>
-                    {{-- <p>Gallery</p> --}}
                 </div>
                 <div class="step-button" data-step="2">
                     <i class="fas fa-info-circle"></i>
-                    {{-- <p>Information</p> --}}
                 </div>
                 <div class="step-button" data-step="3">
                     <i class="fas fa-fish"></i>
-                    {{-- <p>Fish Details</p> --}}
                 </div>
                 <div class="step-button" data-step="4">
                     <i class="fas fa-chart-line"></i>
-                    {{-- <p>Expertise</p> --}}
                 </div>
                 <div class="step-button" data-step="5">
                     <i class="fas fa-file-alt"></i>
-                    {{-- <p>Description</p> --}}
                 </div>
                 <div class="step-button" data-step="6">
                     <i class="fas fa-info-circle"></i>
-                    {{-- <p>Other</p> --}}
                 </div>
                 <div class="step-button" data-step="7">
                     <i class="fas fa-dollar-sign"></i>
-                    {{-- <p>Pricing</p> --}}
                 </div>
                 <div class="step-button" data-step="8">
                     <i class="fas fa-calendar-alt"></i>
-                    {{-- <p>Schedule</p> --}}
                 </div>
             </div>
 
@@ -57,7 +49,8 @@
 
             <input type="hidden" name="is_update" id="is_update" value="{{ $formData['is_update'] ?? 0 }}">
             <input type="hidden" name="thumbnail_path" id="thumbnail_path" value="{{ $formData['thumbnail_path'] ?? '' }}">
-            
+            <input type="hidden" name="existing_images" id="existing_images" value="{{ $formData['galery_images'] ?? "" }}">
+
             <!-- Step 1 -->
             <div class="step active" id="step1">
                 <h5>Upload images and set basic information</h5>
@@ -78,6 +71,7 @@
 
                     <div class="image-area" id="imagePreviewContainer"></div>
                     <input type="hidden" name="primaryImage" id="primaryImageInput">
+
                 </div>
 
                 <hr>
@@ -769,15 +763,5 @@
         </form>
     </div>
 </div>
-@include('pages.guidings.includes.scripts.multi-step-form')
-
-    </div>
-</div>
-@include('pages.guidings.includes.scripts.multi-step-form')
-
-    </div>
-</div>
-@include('pages.guidings.includes.scripts.multi-step-form')
-
-@include('pages.guidings.includes.scripts.multi-step-form')
+@include('pages.guidings.includes.scripts.multi-step-form-script')
 
