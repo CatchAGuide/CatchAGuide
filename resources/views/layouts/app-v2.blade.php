@@ -167,6 +167,12 @@
         .header-signup-link {
             color:#000!important;
         }
+        #bs-select-1 {
+            overflow: hidden;
+        }
+        .language-wrapper form div.dropdown button.dropdown-toggle {
+            border: none;
+        }
     </style>
 
     @include('layouts.includes.styles')
