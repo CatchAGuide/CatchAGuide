@@ -602,44 +602,45 @@
         </div>
 
         <!-- Other Guidings Carousel Section -->
-        <div class="card mb-3">
-            <div class="card-header">More charters like {{$guiding->title}} in {{$guiding->location}}</div>
-            <div class="card-body">
-                <div id="otherGuidingsCarousel" class="carousel slide" data-bs-ride="carousel">
-                    <div class="carousel-inner">
-                        @foreach($other_guidings->chunk(4) as $chunkIndex => $chunk)
-                            <div class="carousel-item {{ $chunkIndex === 0 ? 'active' : '' }}">
-                                <div class="row">
-                                    @foreach($chunk as $otherGuiding)
-                                        <div class="col-md-3">
-                                            <div class="card">
-                                                <img src="{{ asset($otherGuiding->thumbnail_path) }}" class="card-img-top" alt="{{ $otherGuiding->title }}">
-                                                <div class="card-body">
-                                                    <h5 class="card-title">{{ $otherGuiding->title }}</h5>
-                                                    <p class="card-text">{{ $otherGuiding->location }}</p>
-                                                    <p class="card-text"><small class="text-muted">★ {{ $otherGuiding->rating }} ({{ $otherGuiding->reviews_count }} reviews)</small></p>
-                                                    <p class="card-text">Trips from {{ $otherGuiding->price }}€</p>
-                                                    <a href="{{ route('guidings.show', [$otherGuiding->id, $otherGuiding->slug]) }}" class="btn btn-primary">Details</a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
+        
+    <section class="tour-details-two mt-md-5 mt-4">
+        <div class="container">
+
+            <div class="tour-details-two__related-tours {{$agent->ismobile() ? 'text-center' : ''}}">
+                <h3 class="tour-details-two__title">{{ translate('Ähnliche Guidings') }}</h3>
+                <div class="popular-tours__carousel owl-theme owl-carousel">
+                    @foreach($other_guidings as $other_guiding)
+                
+                        <div class="popular-tours__single">
+                            <a class="popular-tours__img" href="{{ route('guidings.show',[$other_guiding->id,$other_guiding->slug]) }}" title="Guide aufmachen">
+                                <figure class="popular-tours__img__wrapper">
+                                    @if(isset(app('guiding')->getImagesUrl($other_guiding)['image_0']))
+                                        <img src="{{app('guiding')->getImagesUrl($other_guiding)['image_0']}}" alt="{{$other_guiding->title}}"/>
+                                    @endif
+                                    <div class="popular-tours__icon">
+                                        <a href="{{ route('wishlist.add-or-remove', $other_guiding->id) }}">
+                                            <i class="fa fa-heart {{ (auth()->check() ? (auth()->user()->isWishItem($other_guiding->id) ? 'text-danger' : '') : '') }}"></i>
+                                        </a>
+                                    </div>
+                                </figure>
+                            </a>
+
+                            <div class="popular-tours__content">
+                                <h3 class="popular-tours__title"><a href="{{ route('guidings.show', [$other_guiding->id,$other_guiding->slug]) }}">{{  $other_guiding->title ?  translate( $other_guiding->title) :  $other_guiding->title }}</a>
+                                </h3>
+                                <span>{{ $other_guiding->location ? translate($other_guiding->location) : $other_guiding->location }}</span>
+                                <p class="popular-tours__rate">
+                                    <span>@lang('message.from') {{ two($other_guiding->price) }}€</span>
+                                </p>
+                                <span><i class="far fa-hourglass"></i>{{ translate('Dauer') }}: {{ two($other_guiding->duration) }} {{ translate('Stunden') }}</span>
                             </div>
-                        @endforeach
-                    </div>
-                    <button class="carousel-control-prev" type="button" data-bs-target="#otherGuidingsCarousel" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#otherGuidingsCarousel" data-bs-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
-                    </button>
+                        </div>
+                    @endforeach
                 </div>
             </div>
         </div>
-    </div>
+    </section>
+ </div>
 </div>
 @endsection
 

@@ -396,7 +396,7 @@
                                             
                                                 </div>
                                                 <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 mt-1">
-                                                    <h5 class="fw-bolder text-truncate"><a class="text-dark" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">{{translate($guiding->title)}}</a></h5>
+                                                    <h5 class="fw-bolder text-truncate"><a class="text-dark" href="{{ $guiding->is_newguiding ? route('guidings.newShow', [$guiding->id, $guiding->slug]) : route('guidings.show', [$guiding->id, $guiding->slug]) }}">{{translate($guiding->title)}}</a></h5>
                                                     <div class="ratings mr-2 color-primary my-1" style="font-size:0.80rem">
                                                         @if(count($guiding->user->received_ratings) > 0)
                                                         @switch(two($guiding->user->average_rating()))
