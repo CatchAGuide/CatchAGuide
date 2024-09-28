@@ -1,7 +1,21 @@
-@extends('layouts.app')
+@extends('layouts.app-v2-1')
 
-@section('title', substr($guiding->title, 0, -3))
-@section('description', $guiding->title)
+@if(app()->getLocale() == 'en')
+    @section('title',translate($guiding->title))
+@else
+    @section('title',$guiding->title)
+@endif
+
+@section('description',$guiding->excerpt)
+
+@section('share_tags')
+    <meta property="og:title" content="{{translate($guiding->title)}}" />
+    <meta property="og:description" content="{{translate($guiding->excerpt)}}" />
+    @if(count(app('guiding')->getImagesUrl($guiding)))
+    <meta property="og:image" content="{{app('guiding')->getImagesUrl($guiding)['image_0']}}"/>
+    @endif
+
+@endsection
 
 @section('css_after')
     <style>
@@ -54,50 +68,6 @@
 
 @section('content')
  <div class="container">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="col-12">
-                <form class="d-flex">
-                    <select class="form-select me-2">
-                        <option>Spain</option>
-                        <!-- Other options... -->
-                    </select>
-                    <input type="date" class="form-control me-2" value="2024-07-10">
-                    <select class="form-select me-2">
-                        <option>1 day</option>
-                        <!-- Other options... -->
-                    </select>
-                    <select class="form-select me-2">
-                        <option>2 adults · 0 children</option>
-                        <!-- Other options... -->
-                    </select>
-                    <button type="submit" class="btn btn-primary">Search</button>
-                </form>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="mb-3">
-            {{-- <h1>Fishing trip in {{$guiding->location}} - {{$guiding->title}}</h1> --}}
-            <h1>
-                <a href="#" class="fs-5 text-decoration-none text-muted">
-                    <i class="bi bi-geo-alt"></i> Fishing trip in <strong>{{$guiding->location}}</strong>
-                </a>
-                <br>
-                {{$guiding->title}}
-            </h1>
-            <span class="text-primary">Show on map</span>
-            <p class="mb-1">
-                <span class="text-warning">★</span> 3.9/5 (4 reviews)
-            </p>
-            {{-- <p>
-                <a href="#" class="text-decoration-none text-muted">
-                    <i class="bi bi-geo-alt"></i> {{$guiding->location}} - 
-                    <span class="text-primary">Show map</span>
-                </a>
-            </p> --}}
-        </div>
-
         <!-- Image Gallery -->
         <div class="row mb-3">
             <div class="col-7">
@@ -627,7 +597,7 @@
             <div class="container">
 
                 <div class="tour-details-two__related-tours {{$agent->ismobile() ? 'text-center' : ''}}">
-                    <h3 class="tour-details-two__title">{{ translate('Matching Guides') }}</h3>
+                    <h3 class="tour-details-two__title">{{ translate('Matching Guidings') }}</h3>
                     <div class="popular-tours__carousel owl-theme owl-carousel">
                         @foreach($other_guidings as $other_guiding)
                     

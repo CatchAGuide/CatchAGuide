@@ -261,8 +261,8 @@ class GuidingsController extends Controller
 
         $guiding = Guiding::where('id',$id)->where('slug',$slug)->where('status',1)->first();
         $targetFish = $guiding->is_newguiding ? json_decode($guiding->target_fish, true) : $guiding->guidingTargets->pluck('id')->toArray();
-        $fishingFrom = $guiding->is_newguiding ? $guiding->fishing_from_id : $guiding->fishingFrom->id;
-        $fishingType = $guiding->is_newguiding ? $guiding->fishing_type_id : $guiding->fishingTypes->id;
+        $fishingFrom = $guiding->fishing_from_id;
+        $fishingType = $guiding->fishing_type_id;
 
         $ratings = $guiding->user->received_ratings;
         $ratingCount = $ratings->count();
@@ -313,7 +313,6 @@ class GuidingsController extends Controller
             'other_guidings' => $otherGuidings,
             'average_rating' => $averageRating,
         ]);
-        // return view('pages.guidings.newIndex', compact('guiding'));
     }
 
     public function otherGuidings(){
