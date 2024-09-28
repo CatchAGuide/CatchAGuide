@@ -260,26 +260,51 @@ class GuidingsController extends Controller
         $locale = Config::get('app.locale');
 
         $guiding = Guiding::where('id',$id)->where('slug',$slug)->where('status',1)->first();
-        
-        $targetId = $guiding->guidingTargets->pluck('id')->toArray();
-        $fishingfrom = $guiding->fishingFrom->id;
-        $fishingtype = $guiding->fishingTypes->id;
+        $targetFish = $guiding->is_newguiding ? json_decode($guiding->target_fish, true) : $guiding->guidingTargets->pluck('id')->toArray();
+        $fishingFrom = $guiding->is_newguiding ? $guiding->fishing_from_id : $guiding->fishingFrom->id;
+        $fishingType = $guiding->is_newguiding ? $guiding->fishing_type_id : $guiding->fishingTypes->id;
 
         $ratings = $guiding->user->received_ratings;
         $ratingCount = $ratings->count();
         $averageRating = $ratingCount > 0 ? $ratings->avg('rating') : 0;
-        $otherGuidings = Guiding::whereHas('guidingTargets',function($query) use ($targetId){
-                    $query->wherein('target_id',$targetId);
-                })->whereHas('fishingFrom',function($query) use($fishingfrom){
-                    $query->where('id',$fishingfrom);
-                })->whereHas('fishingTypes',function($query) use($fishingtype){
-                    $query->where('id',$fishingtype);
+        
+        $otherGuidings = Guiding::where('status', 1)
+            ->where('id', '!=', $guiding->id)
+            ->where(function($query) use ($guiding, $targetFish, $fishingFrom, $fishingType) {
+                $query->where(function($q) use ($guiding, $targetFish) {
+                    if ($guiding->is_newguiding) {
+                        $q->where('is_newguiding', 1)
+                          ->where(function($subQ) use ($targetFish) {
+                              foreach ($targetFish as $fish) {
+                                  $subQ->orWhereJsonContains('target_fish', $fish);
+                              }
+                          });
+                    } else {
+                        $q->whereHas('guidingTargets', function($subQ) use ($targetFish) {
+                            $subQ->whereIn('target_id', $targetFish);
+                        });
+                    }
                 })
-        ->where('status', 1)
-        ->limit(4)
-        ->get();
+                ->where(function($q) use ($guiding, $fishingFrom) {
+                    $q->where('fishing_from_id', $fishingFrom)
+                      ->orWhereHas('fishingFrom', function($subQ) use ($fishingFrom) {
+                          $subQ->where('id', $fishingFrom);
+                      });
+                })
+                ->where(function($q) use ($guiding, $fishingType) {
+                    $q->where('fishing_type_id', $fishingType)
+                      ->orWhereHas('fishingTypes', function($subQ) use ($fishingType) {
+                          $subQ->where('id', $fishingType);
+                      });
+                });
+            })
+            ->limit(4)
+            ->get();
 
-        $sameGuidings = Guiding::where('user_id',$guiding->user_id)->limit(10)->get();
+        $sameGuidings = Guiding::where('user_id', $guiding->user_id)
+            ->where('id', '!=', $guiding->id)
+            ->limit(10)
+            ->get();
 
         return view('pages.guidings.newIndex', [
             'guiding' => $guiding,
