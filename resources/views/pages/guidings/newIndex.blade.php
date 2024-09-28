@@ -68,6 +68,27 @@
 
 @section('content')
  <div class="container">
+    <div class="row">
+        <div class="mb-3">
+            {{-- <h1>Fishing trip in {{$guiding->location}} - {{$guiding->title}}</h1> --}}
+            <h1>
+                <a href="#" class="fs-5 text-decoration-none text-muted">
+                    <i class="bi bi-geo-alt"></i> Fishing trip in <strong>{{$guiding->location}}</strong>
+                </a>
+                <br>
+                {{$guiding->title}}
+            </h1>
+            <span class="text-primary">Show on map</span>
+            <p class="mb-1">
+                <span class="text-warning">★</span> 3.9/5 (4 reviews)
+            </p>
+            {{-- <p>
+                <a href="#" class="text-decoration-none text-muted">
+                    <i class="bi bi-geo-alt"></i> {{$guiding->location}} - 
+                    <span class="text-primary">Show map</span>
+                </a>
+            </p> --}}
+        </div>
         <!-- Image Gallery -->
         <div class="row mb-3">
             <div class="col-7">

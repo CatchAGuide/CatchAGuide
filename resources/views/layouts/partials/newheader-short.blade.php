@@ -10,7 +10,7 @@
                 <div class="nav-links text-right d-flex justify-content-end align-items-center">
                     @if(Auth::check())
                         <a href="{{ route('profile.bookings') }}" class="me-3" style="color: #787780;">Bookings</a>
-                        <a href="#" class="me-3" style="color: #787780;">Inbox</a>
+                        {{-- <a href="#" class="me-3" style="color: #787780;">Inbox</a> --}}
                         <a href="#" class="me-3" style="color: #787780;">Get Help</a>   
                         <div class="dropdown">
                             <a class="dropdown-toggle" href="#" role="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="color: #787780;">
