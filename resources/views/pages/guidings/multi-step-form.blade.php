@@ -135,6 +135,7 @@
                         </div>
                         <input type="hidden" name="type_of_fishing" id="type_of_fishing">
                     </div>
+                    <input type="hidden" name="type_of_fishing" id="type_of_fishing">
                 </div>
 
                 <div id="extraFields" style="display: none;">
