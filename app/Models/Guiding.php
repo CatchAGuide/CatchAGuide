@@ -69,7 +69,29 @@ class Guiding extends Model
         'galleries',
         'needed_equipment',
         'meeting_point',
-        'payment_point'
+        'payment_point',
+        'is_boat',
+        'boat_type',
+        'boat_extras',
+        'target_fish',
+        'fishing_methods',
+        'water_types',
+        'experience_level',
+        'inclusions',
+        'requirements',
+        'recommendations',
+        'other_information',
+        'style_of_fishing',
+        'tour_type',
+        'duration_type',
+        'price_type',
+        'prices',
+        'pricing_extra',
+        'months',
+        'seasonal_trip',
+        'allowed_booking_advance',
+        'booking_window',
+        'galery_images',
     ];
 
     public const LATITUDE  = 'lat';
@@ -356,7 +378,7 @@ class Guiding extends Model
     public function scopeFilterByRequestValue($query, $requestValue)
     {
         if ($requestValue) {
-            $query->whereHas('columnsWithValueCount', function ($query) {
+            $query->whereHas('columnsWithValueCount', function ($query) use ($requestValue) {
                 $query->where('columns_with_value_count', $requestValue);
             });
         }
@@ -392,6 +414,30 @@ class Guiding extends Model
 
     public function ratings(){
         return $this->hasMany(Rating::class,'guide_id','id');
+    }
+
+    public function getLowestPrice()
+    {
+        if ($this->is_newguiding) {
+            if ($this->price_type == 'per_person') {
+                $prices = json_decode($this->prices, true);
+                return $prices ? min(array_map(function($price) {
+                    return $price['person'] > 1 ? round($price['amount'] / $price['person']) : $price['amount'];
+                }, $prices)) : 0;
+            }
+            // Add handling for other price types if needed
+            return 0;
+        } else {
+            $validPrices = array_filter([
+                $this->price,
+                $this->price_two_persons / 2,
+                $this->price_three_persons / 3,
+                $this->price_four_persons / 4,
+                $this->price_five_persons / 5
+            ], function($value) { return $value > 0; });
+
+            return !empty($validPrices) ? min(array_map('round', $validPrices)) : 0;
+        }
     }
 
 }

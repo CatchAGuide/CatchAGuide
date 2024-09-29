@@ -166,12 +166,18 @@
                                                 <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-1">
                                                     <div id="carouselExampleControls-{{$guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
                                                         <div class="carousel-inner">
-                                                            @if(count(get_galleries_image_link($guiding)))
-                                                                @foreach(get_galleries_image_link($guiding) as $index => $gallery_image_link)
-                                                                    <div class="carousel-item @if($index == 0) active @endif">
-                                                                        <img  class="d-block w-100" src="{{$gallery_image_link}}">
-                                                                    </div>
-                                                                @endforeach
+                                                            @if($guiding->is_newguiding == 0)
+                                                                @if(count(get_galleries_image_link($guiding)))
+                                                                    @foreach(get_galleries_image_link($guiding) as $index => $gallery_image_link)
+                                                                        <div class="carousel-item @if($index == 0) active @endif">
+                                                                            <img  class="d-block w-100" src="{{$gallery_image_link}}">
+                                                                        </div>
+                                                                    @endforeach
+                                                                @endif
+                                                            @else
+                                                                <div class="carousel-item @if($index == 0) active @endif">
+                                                                    <img  class="d-block w-100" src="{{asset($guiding->thumbnail_path)}}">
+                                                                </div>
                                                             @endif
                                                         </div>
 
@@ -190,7 +196,11 @@
                                             
                                                 </div>
                                                 <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 mt-1 p-1">
-                                                    <h5 class="fw-bolder text-truncate"><a class="text-dark" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">{{$guiding->title}}</a></h5>
+                                                    @if ($guiding->is_newguiding == 0)
+                                                        <h5 class="fw-bolder text-truncate"><a class="text-dark" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">{{$guiding->title}}</a></h5>
+                                                    @else
+                                                        <h5 class="fw-bolder text-truncate"><a class="text-dark" href="{{ route('guidings.newShow',[$guiding->id,$guiding->slug]) }}">{{$guiding->title}}</a></h5>
+                                                    @endif
                                                     <div class="ratings mr-2 color-primary my-1" style="font-size:0.80rem">
                                                         @if(count($guiding->user->received_ratings) > 0)
                                                         @switch(two($guiding->user->average_rating()))
@@ -272,11 +282,16 @@
                                                                 </div>
                                                                 <div class="mx-2">
                                                                     <div class="tours-list__content__trait__text" style="font-size:0.75rem">
+                                                                        
                                                                         @php
-                                                                        $guidingTargets = $guiding->guidingTargets->pluck('name')->toArray();
-                                                                        if(app()->getLocale() == 'en'){
-                                                                            $guidingTargets =  $guiding->guidingTargets->pluck('name_en')->toArray();
-                                                                        }
+                                                                            if($guiding->is_newguiding == 0) {
+                                                                                $guidingTargets = $guiding->guidingTargets->pluck('name')->toArray();
+                                                                                if(app()->getLocale() == 'en') {
+                                                                                    $guidingTargets =  $guiding->guidingTargets->pluck('name_en')->toArray();
+                                                                                }
+                                                                            } else {
+                                                                                $guidingTargets = array_column(json_decode($guiding->target_fish, true), 'value');
+                                                                            }
                                                                         @endphp
                                                                         
                                                                         @if(!empty($guidingTargets))
@@ -298,10 +313,14 @@
                                                                 <div class="mx-2">
                                                                     <div class="tours-list__content__trait__text" style="font-size:0.75rem">
                                                                         @php
-                                                                        $guidingWaters = $guiding->guidingWaters->pluck('name')->toArray();
-                                                                        if(app()->getLocale() == 'en'){
-                                                                            $guidingWaters =  $guiding->guidingWaters->pluck('name_en')->toArray();
-                                                                        }
+                                                                            if($guiding->is_newguiding == 0) {
+                                                                                $guidingWaters = $guiding->guidingWaters->pluck('name')->toArray();
+                                                                                if(app()->getLocale() == 'en') {
+                                                                                    $guidingWaters =  $guiding->guidingWaters->pluck('name_en')->toArray();
+                                                                                }
+                                                                            } else {
+                                                                                $guidingWaters = array_column(json_decode($guiding->water_types, true), 'value');
+                                                                            }
                                                                         @endphp
                                                                         
                                                                         @if(!empty($guidingWaters))
@@ -348,10 +367,14 @@
                                                                 <div class="mx-2">
                                                                     <div class="tours-list__content__trait__text" style="font-size:0.75rem">
                                                                         @php
-                                                                        $guidingMethods = $guiding->guidingMethods->pluck('name')->toArray();
-                                                                        if(app()->getLocale() == 'en'){
-                                                                            $guidingMethods =  $guiding->guidingMethods->pluck('name_en')->toArray();
-                                                                        }
+                                                                            if($guiding->is_newguiding == 0) {
+                                                                                $guidingMethods = $guiding->guidingMethods->pluck('name')->toArray();
+                                                                                if(app()->getLocale() == 'en'){
+                                                                                    $guidingMethods =  $guiding->guidingMethods->pluck('name_en')->toArray();
+                                                                                }
+                                                                            } else {
+                                                                                $guidingMethods = array_column(json_decode($guiding->fishing_methods, true), 'value');
+                                                                            }
                                                                         @endphp
                                                                         
                                                                         @if(!empty($guidingMethods))
@@ -430,8 +453,16 @@
                                                 <div class="col-12 col-sm-12 col-md-2 col-lg-3 col-xl-2 col-xxl-2 position-relative">
 
                                                         <div class="d-flex flex-column my-5 py-2">
-                                                                <a class="btn btn-outline-theme  btn-sm my-1" href="{{route('guidings.show', [$guiding->id,$guiding->slug])}}">View</a>
-                                                                <a class="btn btn-outline-theme  btn-sm my-1" href="{{route('guidings.edit', $guiding->id)}}">@lang('profile.edit')</a>
+                                                                @if($guiding->is_newguiding == 0)
+                                                                    <a class="btn btn-outline-theme  btn-sm my-1" href="{{route('guidings.show', [$guiding->id,$guiding->slug])}}">View</a>
+                                                                @else
+                                                                    <a class="btn btn-outline-theme  btn-sm my-1" href="{{route('guidings.newShow', [$guiding->id,$guiding->slug])}}">View</a>
+                                                                @endif
+                                                                @if($guiding->is_newguiding == 0)
+                                                                    <a class="btn btn-outline-theme  btn-sm my-1" href="{{route('guidings.edit', $guiding->id)}}">@lang('profile.edit')</a>
+                                                                @else
+                                                                    <a class="btn btn-outline-theme  btn-sm my-1" href="{{route('guidings.edit_newguiding', $guiding->id)}}">@lang('profile.edit')</a>
+                                                                @endif
                                                                 @if($guiding->status == 1)
                                                                     <a class="btn btn-outline-theme btn-sm my-1" href="{{route('profile.guiding.deactivate', $guiding)}}">@lang('profile.deactivateGuide')</a>
                                                                 @else

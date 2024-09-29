@@ -112,3 +112,52 @@
 @livewireScripts
 @yield('js_after')
 @stack('js_push')
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q&libraries=places,geocoder"></script>
+<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
+
+
+<script>
+    // asdffff
+     var selectTarget = $('#home_target_fish');
+      $("#home_target_fish").select2({
+        multiple: true,
+        placeholder: '@lang('message.target-fish')',
+        width: 'resolve', // need to override the changed default
+    });
+
+    @foreach($alltargets as $target)
+        var targetname = '{{$target->name}}';
+
+        @if(app()->getLocale() == 'en')
+        targetname = '{{$target->name_en}}'
+        @endif
+
+        var targetOption = new Option(targetname, '{{ $target->id }}');
+
+        selectTarget.append(targetOption);
+
+        @if(request()->get('target_fish'))
+            @if(in_array($target->id, request()->get('target_fish')))
+            $(targetOption).prop('selected', true);
+            @endif
+        @endif
+
+
+    @endforeach
+  
+    // Trigger change event to update Select2 display
+    selectTarget.trigger('change');
+</script>
+<script>
+    function initialize() {
+        var input = document.getElementById('searchPlace');
+        var autocomplete = new google.maps.places.Autocomplete(input);
+        google.maps.event.addListener(autocomplete, 'place_changed', function () {
+            var place = autocomplete.getPlace();
+            document.getElementById('LocationLat').value = place.geometry.location.lat();
+            document.getElementById('LocationLng').value = place.geometry.location.lng();
+        });
+    }
+
+    window.addEventListener('load', initialize);
+</script>

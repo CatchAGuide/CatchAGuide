@@ -1,14 +1,34 @@
-@extends('layouts.app-v2')
+@extends('layouts.app')
 
 @section('title', __('message.magazine_meta_title'))
 @section('description',__('message.magazine_meta_description'))
 
-@section('header_title', __('message.Magazine'))
-@section('header_sub_title', '')
-
-
 @section('content')
 
+    <!--Page Header Start-->
+    <section class="page-header">
+        <div class="page-header__top">
+            <div class="page-header-bg-magazin" style="background-image: url({{asset('assets/images/shutterstock_620805824.jpg')}}); "></div>
+            <div class="page-header-bg-overly-magazin"></div>
+            <div class="container">
+                <div class="page-header__top-inner">
+                    <h1 class="h2">{{isset($category) ? $category->name : __('message.Magazine')}}</h1>
+                </div>
+            </div>
+        </div>
+        <div class="page-header__bottom">
+            <div class="container">
+                <div class="page-header__bottom-inner">
+                    <ul class="thm-breadcrumb list-unstyled">
+                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                        <li><span>&#183;</span></li>
+                        <li class="active">{{isset($category) ? $category->name : __('message.Magazine')}}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--Page Header End-->
 
     <!--News One Start-->
     <section class="news-one" style="padding: 25px;">

@@ -9,25 +9,25 @@ class StoreNewGuidingRequest extends FormRequest
 {
     public function rules(): array
     {
-        Log::info($this->all());
-        return [
+        $rules = [
+            'is_draft' => 'sometimes|boolean',
             'title' => 'required|string|max:255',
             'title_image' => 'required|array',
             'title_image.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'primaryImage' => 'required|integer|min:0',
             'location' => 'required|string|max:255',
             'type_of_fishing' => 'required|string|in:shore,boat',
-            'boat_type' => 'required_if:type_of_fishing,boat|string',
+            'type_of_boat' => 'required_if:type_of_fishing,boat|string',
             'target_fish' => 'required|string',
             'methods' => 'required|string',
             'water_types' => 'required|string',
-            'experience_level' => 'nullable|string',
+            'experience_level' => 'nullable|array',
             'inclusions' => 'nullable|array',
             'style_of_fishing' => 'required|string',
-            'desc_course_of_action' => 'required|string',
-            'desc_meeting_point' => 'required|string',
-            'desc_tour_unique' => 'required|string',
-            'desc_starting_time' => 'required|string',
+            'desc_course_of_action' => 'required_if:is_update,0|string',
+            'desc_meeting_point' => 'required_if:is_update,0|string',
+            'desc_tour_unique' => 'required_if:is_update,0|string',
+            'desc_starting_time' => 'required_if:is_update,0|string',
             'tour_type' => 'required|string',
             'duration' => 'required|string',
             'duration_hours' => 'required_if:duration,half_day,full_day|nullable|integer|min:1|max:24',
@@ -40,8 +40,28 @@ class StoreNewGuidingRequest extends FormRequest
             'allowed_booking_advance' => 'required|string',
             'booking_window' => 'required|string',
             'seasonal_trip' => 'required|string',
-            'months' => 'required_if:seasonal_trip,season_monthly|nullable|string',
+            'months' => 'required_if:seasonal_trip,season_monthly|nullable|array',
         ];
+
+        // If it's a draft submission, make all fields optional
+        if ($this->input('is_draft') == 1) {
+            foreach ($rules as $field => $rule) {
+                if (is_string($rule)) {
+                    if (strpos($rule, 'required_if') !== false) {
+                        $rules[$field] = str_replace('required_if', 'nullable', $rule);
+                    } else {
+                        $rules[$field] = str_replace('required', 'nullable', $rule);
+                    }
+                } elseif (is_array($rule)) {
+                    $rules[$field] = array_filter($rule, function($item) {
+                        return $item !== 'required';
+                    });
+                    array_unshift($rules[$field], 'nullable');
+                }
+            }
+        }
+
+        return $rules;
     }
 
     public function authorize(): bool

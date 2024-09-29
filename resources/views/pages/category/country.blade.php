@@ -1,55 +1,28 @@
-@extends('layouts.app')
+@extends('layouts.app-v2')
 
 @section('title', $row_data->name)
 @section('description', $row_data->title)
-
+@section('header_title', $row_data->title)
+@section('header_sub_title', $row_data->sub_title)
 
 @section('custom_style')
 <style>
 
-    /*#mobileherofilter .column-input input{
-        border-bottom:1px solid #a7a7a7 !important;
-        border:none;
-        outline:none !important;
+    #page-main-intro {
+        /*white-space: nowrap;*/
+        /*overflow: hidden;
+        text-overflow: ellipsis;
+        height: 190px;
+        width: 100%;*/
+        /*display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        -webkit-line-clamp: 9; 
+        height: 13.5em; 
+        max-height: 13.5em; */
     }
-    #mobileherofilter .column-input i{
-        color:#E8604C !important;
-    }
-    #mobileherofilter .column-input input,select{
-       padding-left:30px !important;
-    }
-    #mobileherofilter .form-control:focus {
-        border-color: inherit;
-        -webkit-box-shadow: none;
-        box-shadow: none;
-        outline:none !important;
-    }
-    #mobileherofilter .myselect2{
-        border-bottom:1px solid #a7a7a7 !important;
-        padding:2px 0px;
-        border-width: 1px !important;
-        background-color: white;
-    }
-    #mobileherofilter .myselect2 li.select2-selection__choice{
-            background-color: #313041 !important;
-            color: #fff !important;
-            border: 0 !important;
-            font-size:14px;
-            vertical-align: middle !important;
-            margin-top:0 !important;
-         
-    }
-    #mobileherofilter .myselect2 button.select2-selection__choice__remove{
-        border: 0 !important;
-        color: #fff !important;
-    }
-    #mobileherofilter .new-filter-btn{
-        background-color:#E8604C;
-        color:#fff;
-    }
-    #mobileherofilter .new-filter-btn:hover{
-        background-color:#313041;
-    }*/
+
     #carousel-regions,
     #carousel-cities {
         min-height: 301.6px;
@@ -191,6 +164,30 @@
         border-left: 4px solid transparent;
         border-right: 4px solid transparent;
     }
+    /*.see-more {
+        display: inline-block;
+        color: blue;
+        cursor: pointer;
+        text-decoration: underline;
+    }*/
+    #fish_size_limit_table th:first-child, 
+    #fish_size_limit_table td:first-child,
+    #fish_time_limit_table th:first-child, 
+    #fish_time_limit_table td:first-child
+    {
+        /*background-color: #fad4b9;*/
+    }
+    @media (min-width: 400px) {
+        #fish_chart_table th:first-child, 
+        #fish_chart_table td:first-child
+        {
+            position:sticky;
+            left:0px;
+            background-color: #fff;
+            min-width: 156px !important;
+        }
+    }
+
 </style>
 @endsection
 
@@ -199,63 +196,41 @@
     <div class="container" id="destination">
         <div class="row">
             <div class="col-12">
-                <h1>{{ $row_data->title }} <p class="h4">{{ $row_data->sub_title }}</p></h1>
+                <div id="page-main-intro" class="mb-3">
+                    <div class="page-main-intro-text mb-1">{!! nl2br($row_data->introduction) !!}</div>
+                    <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm">Read More</a></p>
+                </div>
+                @php
+                $region_count = $regions->count();
+                $city_count = $cities->count();
+                $region_counter = 0;
+                $city_counter = 0;
+                //dump($regions);
+                @endphp
 
-                <form class="mt-3 mb-4" action="" method="get" id="destination-form">
-                    <div class="card p-3">
-                        <div class="row">
-                            <div class="col-lg-3 p-1">
-                                <div class="form-group">
-                                    <div class="d-flex align-items-center small">
-                                        <i class="fa fa-search fa-fw text-muted position-absolute ps-2"></i>
-                                        <input  id="searchPlace" name="place" type="text" class="form-control rounded-0" placeholder="@lang('homepage.searchbar-destination')"  autocomplete="on">
-                                        <input type="hidden" id="placeLat" name="placeLat"/>
-                                        <input type="hidden" id="placeLng" name="placeLng"/>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-3 p-1">
-                                <div class="form-group">
-                                    <div class="d-flex align-items-center small">
-                                        <i class="fa fa-user fa-fw text-muted position-absolute ps-2"></i>
-                                        <input type="number" min="1" max="5" class="form-control rounded-0" name="num_guests" placeholder="@lang('homepage.searchbar-person')" />
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-3 p-1">
-                                <div class="d-flex align-items-center small myselect2">
-                                    <i class="fa fa-fish fa-fw text-muted position-absolute ps-1"></i>
-                                    <select class="form-control form-select" id="home_target_fish" name="target_fish[]" style="width:100%"></select>
-                                </div>
-                            </div>
-                            <div class="col-lg-3 p-1">
-                                <button type="submit" class="btn btn-danger form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
-                            </div>
-                        </div>
-                    </div> 
-                </form>
-
-                <div class="mb-3">{!! nl2br($row_data->introduction) !!}asdf</div>
-
-                @if($regions->count() > 0)
+                @if($region_count > 0)
                 <h5 class="mb-2">All Region</h5>
-                <div id="carousel-regions" class="carousel slide mb-4" data-bs-ride="carousel">
+                <div id="carousel-regions" class="carousel slide mb-4" data-bs-ride="carousel" {!! ($region_count <= 4) ? 'data-bs-interval="false"' : '' !!}>
                     <div class="carousel-inner" role="listbox">
                         @foreach($regions as $region)
-                        <div class="carousel-item active">
+                        <div class="carousel-item {{ (($region_counter == 0)? 'active' : '') }}">
                             <div class="col-md-3">
-                                <div class="card">
-                                    <div class="card-img">
-                                        <!-- <img src="https://place-hold.it/300x300" class="dimg-fluid" width="300px" alt="..."> -->
-                                        <img src="{{ $region->getThumbnailPath() }}" class="dimg-fluid" width="300px" alt="...">
+                                <a href="{{ route('destination.country', ['country' => $region->country_slug, 'region' => $region->slug]) }}">
+                                    <div class="card">
+                                        <div class="card-img">
+                                            <img src="{{ $region->getThumbnailPath() }}" class="dimg-fluid" width="300px" alt="...">
+                                        </div>
+                                        <div class="card-img-overlay">{{ $region->name }}</div>
                                     </div>
-                                    <div class="card-img-overlay">{{ $region->name }}</div>
-                                </div>
+                                </a>
                             </div>
                         </div>
+                            @php
+                                $region_counter++;
+                            @endphp
                         @endforeach
                     </div>
-                    @if($regions->count() > 4)
+
                     <button class="carousel-control-prev" type="button" data-bs-target="#carousel-regions" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Previous</span>
@@ -264,28 +239,31 @@
                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Next</span>
                     </button>
-                    @endif
                 </div>
                 @endif
-                @if($cities->count() > 0)
+                @if($city_count > 0)
                 <h5 class="mb-2">All Cities</h5>
-                <div id="carousel-cities" class="carousel slide mb-4" data-bs-ride="carousel">
+                <div id="carousel-cities" class="carousel slide mb-4" data-bs-ride="carousel" {!! ($city_count <= 4) ? 'data-bs-interval="false"' : '' !!}>
                     <div class="carousel-inner" role="listbox">
                         @foreach($cities as $city)
-                        <div class="carousel-item active">
+                        <div class="carousel-item {{ (($city_counter == 0)? 'active' : '') }}">
                             <div class="col-md-3">
-                                <div class="card">
-                                    <div class="card-img">
-                                        <!-- <img src="https://place-hold.it/300x300" class="dimg-fluid" width="300px" alt="..."> -->
-                                        <img src="{{ $city->getThumbnailPath() }}" class="dimg-fluid" width="300px" alt="...">
+                                <a href="{{ route('destination.country', ['country' => $city->country_slug, 'region' => $city->region_slug, 'city' => $city->slug]) }}">
+                                    <div class="card">
+                                        <div class="card-img">
+                                            <img src="{{ $city->getThumbnailPath() }}" class="dimg-fluid" width="300px" alt="...">
+                                        </div>
+                                        <div class="card-img-overlay">{{ $city->name }}</div>
                                     </div>
-                                    <div class="card-img-overlay">{{ $city->name }}</div>
-                                </div>
+                                </a>
                             </div>
                         </div>
+                            @php
+                                $city_counter++;
+                            @endphp
                         @endforeach
                     </div>
-                    @if($cities->count() > 4)
+
                     <button class="carousel-control-prev" type="button" data-bs-target="#carousel-cities" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Previous</span>
@@ -294,7 +272,6 @@
                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Next</span>
                     </button>
-                    @endif
                 </div>
                 @endif
                 <h5 class="mb-2">Listing </h5>
@@ -645,54 +622,57 @@
 
                 <h4 class="mb-2">{{ $row_data->fish_avail_title }}</h4>
                 <p>{!! $row_data->fish_avail_intro !!}</p>
-                <table class="table table-bordered" id="fish_chart_table">
-                    <thead>
-                        <tr>
-                            <th width="28%">Fish</th>
-                            <th width="6%" class="text-center">Jan</th>
-                            <th width="6%" class="text-center">Feb</th>
-                            <th width="6%" class="text-center">Mar</th>
-                            <th width="6%" class="text-center">Apr</th>
-                            <th width="6%" class="text-center">May</th>
-                            <th width="6%" class="text-center">Jun</th>
-                            <th width="6%" class="text-center">Jul</th>
-                            <th width="6%" class="text-center">Aug</th>
-                            <th width="6%" class="text-center">Sep</th>
-                            <th width="6%" class="text-center">Oct</th>
-                            <th width="6%" class="text-center">Nov</th>
-                            <th width="6%" class="text-center">Dec</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($fish_chart as $row)
-                        <tr>
-                            <td>{{ $row->fish }}</td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->jan) }}"></td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->feb) }}"></td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->mar) }}"></td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->apr) }}"></td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->may) }}"></td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->jun) }}"></td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->jul) }}"></td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->aug) }}"></td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->sep) }}"></td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->oct) }}"></td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->nov) }}"></td>
-                            <td class="text-center" style="background-color: {{ $row->bg_color($row->dec) }}"></td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-bordered " id="fish_chart_table">
+                        <thead>
+                            <tr>
+                                <th width="28%">Fish</th>
+                                <th width="6%" class="text-center">Jan</th>
+                                <th width="6%" class="text-center">Feb</th>
+                                <th width="6%" class="text-center">Mar</th>
+                                <th width="6%" class="text-center">Apr</th>
+                                <th width="6%" class="text-center">May</th>
+                                <th width="6%" class="text-center">Jun</th>
+                                <th width="6%" class="text-center">Jul</th>
+                                <th width="6%" class="text-center">Aug</th>
+                                <th width="6%" class="text-center">Sep</th>
+                                <th width="6%" class="text-center">Oct</th>
+                                <th width="6%" class="text-center">Nov</th>
+                                <th width="6%" class="text-center">Dec</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($fish_chart as $row)
+                            <tr>
+                                <td>{{ $row->fish }}</td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->jan) }}"></td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->feb) }}"></td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->mar) }}"></td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->apr) }}"></td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->may) }}"></td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->jun) }}"></td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->jul) }}"></td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->aug) }}"></td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->sep) }}"></td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->oct) }}"></td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->nov) }}"></td>
+                                <td class="text-center" style="background-color: {{ $row->bg_color($row->dec) }}"></td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
 
                 <div class="row">
-                    <div class="col-sm-12 col-md-6 col-lg-6">
+                    <div class="col-sm-12 col-md-12 col-lg-12">
                         <h4>{{ $row_data->size_limit_title }}</h4>
                         <p>{!! $row_data->size_limit_intro !!}</p>
-                        <table class="table table-bordered table-striped">
+                        <table class="table table-bordered table-striped" id="fish_size_limit_table">
                             <thead>
                                 <tr>
                                     <th width="20%">Fish</th>
-                                    <th width="80%">Size Limit</th>
+                                    <th width="80%"></th>
+
                                 </tr>
                             </thead>
                             <tbody>
@@ -707,14 +687,14 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 mb-3">
+                    <div class="col-sm-12 col-md-12 col-lg-12">
                         <h4>{{ $row_data->time_limit_title }}</h4>
                         <p>{!! $row_data->time_limit_intro !!}</p>
-                        <table class="table table-bordered table-striped">
+                        <table class="table table-bordered table-striped" id="fish_time_limit_table">
                             <thead>
                                 <tr>
                                     <th width="20%">Fish</th>
-                                    <th width="80%">Time Limit</th>
+                                    <th width="80%"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -733,18 +713,16 @@
                 <h4 class="mb-2">{{ $row_data->faq_title }}</h4>
                 <div class="accordion mb-5" id="faq">
                     @foreach($faq as $row)
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                        <button class="accordion-button p-2" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ $row->id }}" aria-expanded="true" aria-controls="faq{{ $row->id }}">{{ $row->question }}</button>
-                        </h2>
-                        <div class="accordion-collapse collapse" id="faq{{ $row->id }}" data-bs-parent="#accordionExample">
-                            <div class="accordion-body p-2">{{ $row->answer }}</div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ $row->id }}" aria-expanded="true" aria-controls="faq{{ $row->id }}">{{ $row->question }}</button>
+                            </h2>
+                            <div class="accordion-collapse collapse" id="faq{{ $row->id }}" data-bs-parent="#faq">
+                                <div class="accordion-body p-2">{{ $row->answer }}</div>
+                            </div>
                         </div>
-                    </div>
                     @endforeach
                 </div>
-            </div>
-            <div class="col-12">
             </div>
         </div>
     </div>
@@ -776,6 +754,88 @@
     $('#sortby').on('change',function(){
         $('#form-sortby').submit();
     });
+
+    /*let itemsCollapse = document.querySelectorAll('.carousel .carousel-item');
+
+    itemsCollapse.forEach((el) => {
+        const minPerSlide = 4
+        let next = el.nextElementSibling
+        for (var i=1; i<minPerSlide; i++) {
+            if (!next) {
+                // wrap carousel by using first child
+                next = itemsCollapse[0]
+            }
+            let cloneChild = next.cloneNode(true)
+            el.appendChild(cloneChild.children[0])
+            next = next.nextElementSibling
+        }
+    });*/
+    let itemsCollapseRegions = document.querySelectorAll('#carousel-regions .carousel-item');
+    itemsCollapseRegions.forEach((el) => {
+        const minPerSlide = (itemsCollapseRegions.length >= 4) ? 4 : itemsCollapseRegions.length;
+        let next = el.nextElementSibling
+        for (var i=1; i<minPerSlide; i++) {
+            if (!next) {
+                next = itemsCollapseRegions[0]
+            }
+            let cloneChild = next.cloneNode(true)
+            el.appendChild(cloneChild.children[0])
+            next = next.nextElementSibling
+        }
+    });
+
+    let itemsCollapseCities = document.querySelectorAll('#carousel-cities .carousel-item');
+    itemsCollapseCities.forEach((el) => {
+        const minPerSlide = (itemsCollapseCities.length >= 4) ? 4 : itemsCollapseCities.length;
+        let next = el.nextElementSibling
+        for (var i=1; i<minPerSlide; i++) {
+            if (!next) {
+                next = itemsCollapseCities[0]
+            }
+            let cloneChild = next.cloneNode(true)
+            el.appendChild(cloneChild.children[0])
+            next = next.nextElementSibling
+        }
+    });
+    
+    $(function(){
+
+        var word_char_count_allowed = 1200;
+        var page_main_intro = $('.page-main-intro-text');
+        var page_main_intro_text = page_main_intro.html();
+        var page_main_intro_count = page_main_intro.text().length;
+        var ellipsis = "..."; 
+        var moreText = '<a href="#" class="btn btn-primary btn-sm">Read More</a>';
+        var lessText = '<a href="#" class="btn btn-primary btn-sm">Read Less</a>';
+
+        var visible_text = page_main_intro_text.substring(0, word_char_count_allowed);
+        var hidden_text  = page_main_intro_text.substring(word_char_count_allowed);
+
+        if (page_main_intro_count >= word_char_count_allowed) {
+            $('.page-main-intro-text').html(visible_text + '<span class="more-ellipsis">' + ellipsis + '</span><span class="more-text" style="display:none;">' + hidden_text + '</span>');
+            //$('.more-text').show();
+            $('.see-more').click(function(e) {
+                e.preventDefault();
+                var textContainer = $(this).prev('.page-main-intro-text'); // Get the content element
+
+                if ($(this).hasClass('less')) {
+                    $(this).removeClass('less');
+                    $(this).html(moreText);
+                    textContainer.find('.more-text').hide();
+                    textContainer.find('.more-ellipsis').show();
+                } else {
+                    $(this).addClass('less');
+                    $(this).html(lessText);
+                    textContainer.find('.more-text').show();
+                    textContainer.find('.more-ellipsis').hide();
+                }
+            });
+        } else {
+            $('.see-more').hide();
+        }
+
+    });
+
 </script>
 <script>
 // Get the toggle button and filter container elements
@@ -790,7 +850,7 @@ toggleBtn.addEventListener('click', function() {
 </script>
 
 <script>
-    initializeSelect2();
+/*    initializeSelect2();
 
 function initializeSelect2() {
 
@@ -889,7 +949,7 @@ function initializeSelect2() {
 
 
 
-}
+}*/
 
 
 

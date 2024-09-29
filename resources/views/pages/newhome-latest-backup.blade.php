@@ -1,13 +1,10 @@
-@extends('layouts.app-v2')
+@extends('layouts.app')
 
 @if(app()->getLocale() == 'en')
     @section('title','Find & book guided fishing trips online')
 @else
     @section('title','Geführte Angeltouren finden & online buchen')
 @endif
-
-@section('header_title', __('homepage.header-title'))
-@section('header_sub_title', __('homepage.header-message'))
 
 @section('custom_style')
 
@@ -384,6 +381,106 @@
 
 @endsection
 @section('content')
+<section id="hero" class="theme-primary" style="background: linear-gradient(0deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url({{asset('assets/2024/header_banner.webp')}}); background-size:cover;background-position:center;height:50vh;">
+    @if($agent->ismobile())
+    <div class="p-5 mx-5 hero-container row h-100 align-items-center">
+        <div class="m-0 text-white col-md-12">
+            <h1 class="my-2 text-white fw-bold">@lang('homepage.header-title')</h1>
+            <div class="row">
+                <div class="col-md-12">
+                    <form action="{{route('guidings.index')}}" method="get">
+                        <div id="mobileherofilter" class="p-2 bg-white rounded shadow-lg">
+                            <div class="row">
+                                <div class="my-2 col-md-4 column-input">
+                                    <div class="form-group">
+                                        <div class="d-flex align-items-center small">
+                                            <i class="fa fa-search fa-fw text-muted position-absolute ps-2"></i>
+                                            <input  id="searchPlace" name="place" type="text" class="form-control rounded-0" placeholder="@lang('homepage.searchbar-destination')"  autocomplete="on">
+                                            <input type="hidden" id="placeLat" name="placeLat"/>
+                                            <input type="hidden" id="placeLng" name="placeLng"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="my-2 col-md-2 column-input">
+                                    <div class="form-group">
+                                        <div class="d-flex align-items-center small">
+                                            <i class="fa fa-user fa-fw text-muted position-absolute ps-2"></i>
+                                            <input type="number" min="1" max="5" class="form-control rounded-0" name="num_guests" placeholder="@lang('homepage.searchbar-person')" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="my-2 col-md-4 column-input">
+                                    <div class="d-flex align-items-center small myselect2">
+                                        <i class="fa fa-fish fa-fw text-muted position-absolute ps-1"></i>
+                                        <select class="form-control form-select" id="home_target_fish" name="target_fish[]" style="width:100%">
+                                            
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="my-2 col-md-2 column-input">
+                                    <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
+                                </div>
+                            </div>
+                        </div> 
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    @else
+    <div class="container h-100">
+        <div class="hero-container row h-100 align-items-center">
+            <div class="m-0 text-white col-md-12">
+                <div class="d-flex justify-content-start">
+                    <div>
+                        <h1 class="text-white fw-bold">@lang('homepage.header-title')</h1>
+                        <p>@lang('homepage.header-message')</p>
+                    </div>
+                </div>
+                <div class="my-2 row">
+                    <div class="col-md-12">
+                        <form action="{{route('guidings.index')}}" method="get">
+                            <div id="herofilter">
+                                <div class="px-3 row">
+                                    <div class="col-md-4 column-input">
+                                        <div class="form-group">
+                                            <div class="d-flex align-items-center small">
+                                                <i class="fa fa-search fa-fw text-muted position-absolute ps-2"></i>
+                                                <input  id="searchPlace" name="place" type="text" class="form-control rounded-0" placeholder="@lang('homepage.searchbar-destination')"  autocomplete="on">
+                                                <input type="hidden" id="placeLat" name="placeLat"/>
+                                                <input type="hidden" id="placeLng" name="placeLng"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 column-input">
+                                        <div class="form-group">
+                                            <div class="d-flex align-items-center small">
+                                                <i class="fa fa-user fa-fw text-muted position-absolute ps-2"></i>
+                                                <input type="number" min="1" max="5" class="form-control rounded-0" name="num_guests" placeholder="@lang('homepage.searchbar-person')" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 column-input">
+                                        <div class="d-flex align-items-center small myselect2">
+                                            <i class="fa fa-fish fa-fw text-muted position-absolute ps-1"></i>
+                                            <select class="form-control form-select" id="home_target_fish" name="target_fish[]" style="width:100%">
+                                                
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 column-input">
+                                        <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
+                                    </div>
+                                </div>
+                            </div>    
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+</section>
 <section id="usps" class="my-5">
     <div class="container">
         <div class="my-2 row fs-6">
@@ -1180,7 +1277,7 @@
         <div class="new-custom-owl owl-carousel owl-theme">
             @foreach($bookedGuidings as $most_booked_guiding)
                 <div class="item">
-                    <a href="{{ $most_booked_guiding->is_newguiding ? route('guidings.newShow', [$most_booked_guiding->id, $most_booked_guiding->slug]) : route('guidings.show', [$most_booked_guiding->id, $most_booked_guiding->slug]) }}">
+                    <a href="{{route('guidings.show',[$most_booked_guiding->id,$most_booked_guiding->slug])}}">
                         <div class="card" style="min-height:360px;">
                             @if(get_featured_image_link($most_booked_guiding))
                             <img src="{{get_featured_image_link($most_booked_guiding)}}" class="card-img-top">
@@ -1191,7 +1288,7 @@
                             <div class="card-body">
                             <h5 class="crop-text-2 card-title h6">{{translate($most_booked_guiding->title)}}</h5>
                             <small class="crop-text-1 small-text text-muted">{{translate($most_booked_guiding->location)}}</small>
-                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{ $most_booked_guiding->getLowestPrice() }}€</span></small>
+                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{$most_booked_guiding->price}}€</span></small>
                             </div>
                         </div>
                     </a>
@@ -1202,7 +1299,7 @@
         <div class="custom-owl owl-carousel owl-theme">
             @foreach($bookedGuidings as $most_booked_guiding)
                 <div class="item">
-                    <a href="{{ $most_booked_guiding->is_newguiding ? route('guidings.newShow', [$most_booked_guiding->id, $most_booked_guiding->slug]) : route('guidings.show', [$most_booked_guiding->id, $most_booked_guiding->slug]) }}">
+                    <a href="{{route('guidings.show',[$most_booked_guiding->id,$most_booked_guiding->slug])}}">
                         <div class="card" style="min-height:360px;">
                             @if(get_featured_image_link($most_booked_guiding))
                             <img src="{{get_featured_image_link($most_booked_guiding)}}" class="card-img-top">
@@ -1212,7 +1309,7 @@
                             <div class="card-body">
                             <h5 class="crop-text-2 card-title h6">{{translate($most_booked_guiding->title)}}</h5>
                             <small class="crop-text-1 small-text text-muted">{{translate($most_booked_guiding->location)}}</small>
-                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{ $most_booked_guiding->getLowestPrice() }}€</span></small>
+                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{$most_booked_guiding->price}}€</span></small>
                             </div>
                         </div>
                     </a>
@@ -1395,7 +1492,7 @@
             <div class="new-custom-owl owl-carousel owl-theme">
                 @foreach($newGuidings as $newGuiding)
                     <div class="item">
-                        <a href="{{ $newGuiding->is_newguiding ? route('guidings.newShow', [$newGuiding->id, $newGuiding->slug]) : route('guidings.show', [$newGuiding->id, $newGuiding->slug]) }}">
+                        <a href="{{route('guidings.show',[$newGuiding->id,$newGuiding->slug])}}">
                             <div class="card" style="min-height:360px;">
                                 @if(get_featured_image_link($newGuiding))
                                 <img src="{{get_featured_image_link($newGuiding)}}" class="card-img-top">
@@ -1405,7 +1502,7 @@
                                 <div class="card-body">
                                 <h5 class="crop-text-2 card-title h6">{{translate($newGuiding->title)}}</h5>
                                 <small class="crop-text-1 small-text text-muted">{{translate($newGuiding->location)}}</small>
-                                <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{ $newGuiding->getLowestPrice() }}€</span></small>
+                                <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{$newGuiding->price}}€</span></small>
                                 </div>
                             </div>
                         </a>
@@ -1416,7 +1513,7 @@
         <div class="custom-owl owl-carousel owl-theme">
             @foreach($newGuidings as $newGuiding)
                 <div class="item">
-                    <a href="{{ $newGuiding->is_newguiding ? route('guidings.newShow', [$newGuiding->id, $newGuiding->slug]) : route('guidings.show', [$newGuiding->id, $newGuiding->slug]) }}">
+                    <a href="{{route('guidings.show',[$newGuiding->id,$newGuiding->slug])}}">
                         <div class="card" style="min-height:360px;">
                             @if(get_featured_image_link($newGuiding))
                             <img src="{{get_featured_image_link($newGuiding)}}" class="card-img-top">
@@ -1426,7 +1523,7 @@
                             <div class="card-body">
                             <h5 class="crop-text-2 card-title h6">{{translate($newGuiding->title)}}</h5>
                             <small class="crop-text-1 small-text text-muted">{{translate($newGuiding->location)}}</small>
-                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{ $newGuiding->getLowestPrice() }}€</span></small>
+                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{$newGuiding->price}}€</span></small>
                             </div>
                         </div>
                     </a>
