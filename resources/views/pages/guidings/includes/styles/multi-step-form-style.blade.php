@@ -557,18 +557,6 @@
             font-size: 12px;
             z-index: 1000;
         }
-        .image-preview-wrapper.primary::before {
-            content: 'Primary';            content: 'Primary';
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            background-color: #f2856d;
-            color: white;
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-size: 12px;
-            z-index: 1000;
-        }
 
         .monthly-selection-container {
             display: flex;

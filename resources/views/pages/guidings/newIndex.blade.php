@@ -423,7 +423,10 @@
 
         <!-- Right Column -->
         <div class="col-md-4">
-            <div class="sticky-top" style="top: 20px;">
+            @if(!$agent->ismobile())
+                @include('pages.guidings.content.bookguiding')
+            @endif
+            {{-- <div class="sticky-top" style="top: 20px;">
                 <!-- Guiding Booking -->
                 <div class="card mb-3">
                     <div class="card-header">Guiding Buchen</div>
@@ -480,7 +483,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> --}}
         </div>
 
         <!-- Map Section -->

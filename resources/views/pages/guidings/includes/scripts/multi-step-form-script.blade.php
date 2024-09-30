@@ -59,6 +59,7 @@
             if (existingImagesInput && existingImagesInput.value) {
                 imageManager.loadExistingImages(existingImagesInput.value, thumbnailPath);
             }
+             
         }
         // Call setFormDataIfEdit here, after imageManager is initialized
         setFormDataIfEdit();
