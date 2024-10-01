@@ -55,6 +55,28 @@ input[type=number] {
                                     </div>
                                 </div>
                                 @endif
+
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-12">
+                                        <div class="form-group">
+                                            <label for="title">Language</label>
+                                            @php
+                                                $lang = 'de';
+                                                if($language == 'en'){
+                                                    $lang = 'gb';
+                                                }else{
+                                                    $lang = 'de';
+                                                }
+                                            @endphp
+                                            <span class="fi fi-{{ $lang }}"></span>
+                                            <select class="form-control" name="language" id="language">
+                                                @foreach(config('app.locales') as $key => $locale)
+                                                    <option value="{{$locale}}" @if($locale == $language) selected @endif>@if($locale == 'de') Deutsch @elseif($locale == 'en') English @endif</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
                                 
                                 @if(isset($countries))
                                 <div class="row">
@@ -79,11 +101,6 @@ input[type=number] {
                                             <label for="region_id">Region</label>
                                             <select class="form-select" name="region_id" id="region_id">
                                                 <option>-- Select --</option>
-                                        <?php
-                                            #@foreach($regions as $row)
-                                            #    <option value="{{ $row->id }}" {{ ($row->id == $region_id)? 'selected="selected"' : '' }}>{{ $row->name }}</option>
-                                            #@endforeach
-                                        ?>
                                             </select>
                                         </div>
                                     </div>

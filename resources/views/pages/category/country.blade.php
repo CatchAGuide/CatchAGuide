@@ -619,6 +619,7 @@
 
                 <h4 class="mb-2">{{ $row_data->fish_avail_title }}</h4>
                 <p>{!! $row_data->fish_avail_intro !!}</p>
+                @if($fish_chart->count() > 0)
                 <div class="table-responsive">
                     <table class="table table-bordered " id="fish_chart_table">
                         <thead>
@@ -659,11 +660,14 @@
                         </tbody>
                     </table>
                 </div>
+                @endif
 
                 <div class="row">
+                    @if($row_data->size_limit_title != '' || $row_data->size_limit_intro != '')
                     <div class="col-sm-12 col-md-12 col-lg-12">
                         <h4>{{ $row_data->size_limit_title }}</h4>
                         <p>{!! $row_data->size_limit_intro !!}</p>
+                        @if(!empty($fish_size_limit))
                         <table class="table table-bordered table-striped" id="fish_size_limit_table">
                             <thead>
                                 <tr>
@@ -682,10 +686,14 @@
                             @endif
                             </tbody>
                         </table>
+                        @endif
                     </div>
+                    @endif
+                    @if($row_data->time_limit_title != '' || $row_data->time_limit_intro != '')
                     <div class="col-sm-12 col-md-12 col-lg-12">
                         <h4>{{ $row_data->time_limit_title }}</h4>
                         <p>{!! $row_data->time_limit_intro !!}</p>
+                        @if(!empty($fish_time_limit))
                         <table class="table table-bordered table-striped" id="fish_time_limit_table">
                             <thead>
                                 <tr>
@@ -694,7 +702,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                            @if(!empty($fish_size_limit))
+                            @if(!empty($fish_time_limit))
                                 @foreach($fish_time_limit as $row)
                                 <tr>
                                     <td>{{ $row->fish }}</td>
@@ -704,21 +712,27 @@
                             @endif
                             </tbody>
                         </table>
+                        @endif
                     </div>
+                    @endif
                 </div>
+                @if($row_data->faq_title != '')
                 <h4 class="mb-2">{{ $row_data->faq_title }}</h4>
-                <div class="accordion mb-5" id="faq">
-                    @foreach($faq as $row)
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ $row->id }}" aria-expanded="true" aria-controls="faq{{ $row->id }}">{{ $row->question }}</button>
-                            </h2>
-                            <div class="accordion-collapse collapse" id="faq{{ $row->id }}" data-bs-parent="#faq">
-                                <div class="accordion-body p-2">{{ $row->answer }}</div>
+                    @if($faq->count() > 0)
+                    <div class="accordion mb-5" id="faq">
+                        @foreach($faq as $row)
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ $row->id }}" aria-expanded="true" aria-controls="faq{{ $row->id }}">{{ $row->question }}</button>
+                                </h2>
+                                <div class="accordion-collapse collapse" id="faq{{ $row->id }}" data-bs-parent="#faq">
+                                    <div class="accordion-body p-2">{{ $row->answer }}</div>
+                                </div>
                             </div>
-                        </div>
-                    @endforeach
-                </div>
+                        @endforeach
+                    </div>
+                    @endif
+                @endif
             </div>
         </div>
     </div>

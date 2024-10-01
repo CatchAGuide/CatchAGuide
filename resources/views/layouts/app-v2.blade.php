@@ -167,6 +167,15 @@
         .header-signup-link {
             color:#000!important;
         }
+        #bs-select-1 {
+            overflow: hidden;
+        }
+        .language-wrapper form div.dropdown button.dropdown-toggle {
+            border: none;
+        }
+        .bootstrap-select .dropdown-menu {
+            left: -25px!important;
+        }
     </style>
 
     @include('layouts.includes.styles')
@@ -217,10 +226,45 @@
         <span class="mobile-nav__close mobile-nav__toggler"><i class="fa fa-times"></i></span>
 
         <div class="logo-box">
-            <a href="{{ route('welcome') }}" aria-label="logo image"><img src="{{ asset('assets/images/logo/CatchAGuide_Logo_PNG.png') }}" width="155" alt=""/></a>
+            <!-- <a href="{{ route('welcome') }}" aria-label="logo image"><img src="{{ asset('assets/images/logo/CatchAGuide_Logo_PNG.png') }}" width="155" alt=""/></a> -->
         </div>
         <!-- /.logo-box -->
-        <div class="mobile-nav__container"></div>
+        <div class="mobile-nav__container">
+            <ul class="main-menu__list">
+                <li class="dropdown current">
+                    <a href="https://www.catchaguide.com">Startseite</a>
+                </li>
+                <li class="dropdown ">
+                    <a href="https://www.catchaguide.com/guidings">Alle Angelguidings</a>
+                </li>
+                <li class="dropdown ">
+                    <a href="https://www.catchaguide.com/angelmagazin">Angelmagazin</a>
+                </li>
+
+                <li class="magazine-nmb ">
+                    <a href="https://www.catchaguide.com/angelmagazin">Angelmagazin</a>
+                </li>
+
+
+
+                <nav class="main-menu-wrapper__nav d-flex`">
+                    <a class="main-menu-wrapper__user sm-hidden" href="https://www.catchaguide.com/profile" title="Einloggen/Registrieren"> 
+                        <span style="margin-right: 20px;">Einloggen/Registrieren</span>
+                        <div class="main-menu-wrapper__right main-menu__user icon-avatar"></div>
+                    </a>
+                    <div class="language-wrapper">
+                        <form action="{{ route('language.switch') }}" method="POST">
+                            @csrf
+                            <select name="language" class="selectpicker" data-width="fit" onchange="this.form.submit()">
+                                @foreach (config('app.locales') as $key => $locale)
+                                <option  value="{{ $locale }}" data-content='<span class="fi fi-{{$key}}"></span>' {{ app()->getLocale() == $locale ? 'selected' : '' }}></option>
+                                @endforeach
+                            </select>        
+                        </form>
+                    </div>
+                </nav>
+            </ul>
+        </div>
         <!-- /.mobile-nav__container -->
 
         <ul class="mobile-nav__contact list-unstyled">

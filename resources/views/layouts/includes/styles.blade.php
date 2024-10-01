@@ -312,6 +312,31 @@
         border-radius: 5px;
         margin: 0 10px;
     }
+    @media (max-width: 576px) {
+        .search-form {
+            background-color: none!important;
+            border-radius: none!important;
+            box-shadow: none!important;
+            position: inherit;
+            bottom: 0; /* Position the search bar at the bottom of the banner */
+            left: 0;
+            transform: none;
+            width: 88%;
+            max-width: 1200px;
+            z-index: 3;
+            margin: 0 auto;
+            padding: 0!important;
+        }
+        .search-form .row {
+            padding: 0!important;
+            margin: 0!important;
+        }
+        .search-form .row .col-lg-4,
+        .search-form .row .col-lg-2 {
+            padding: 0!important;
+            margin: 0!important;
+        }
+    }
 </style>
 @livewireStyles
 
