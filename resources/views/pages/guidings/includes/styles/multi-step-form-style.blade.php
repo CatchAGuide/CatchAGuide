@@ -193,6 +193,7 @@
         
         .option-card:hover {
             border-color: #e8604c;
+            background-color: #fef5f3;
         }
 
         .btn-group-toggle input[type="radio"],
@@ -259,42 +260,52 @@
         }
         
         #submitBtn {
-            background-color: #f2856d;
+            background-color: #1f8017;
             color: white;
-            border-color: #f2856d;
+            border-color: #1f8017;
             margin-top: 15px;
             flex: 0 0 auto;
-            margin-left: auto;
+            order: 2;
         }
         
         #submitBtn:hover {
-            background-color: #e8604c;
-            border-color: #e8604c;
+            background-color: #1f8017;
+            border-color: #1f8017;
         }
         
         #saveDraftBtn {
-            margin-left: auto;
+            /* margin-left: auto;
             background-color: #f2856d;
             color: white;
             border-color: #f2856d;
+            order: 3; */
+            background-color: #787780;
+            color: white;
+            border-color: #787780;
+            order: 2;
+            margin-left: auto;
         }
 
         #saveDraftBtn:hover {
             background-color: #e8604c;
             border-color: #e8604c;
         }
-        #prevBtn, #nextBtn {
-            background-color: #787780;
+        #prevBtn, #nextBtn, #submitBtn {
+            background-color: #262e35;
             color: white;
-            border-color: #787780;
+            border-color: #262e35;
             margin-top: 15px;
         }
         
-        #prevBtn:hover, #nextBtn:hover {
-            background-color: #e8604c;
-            border-color: #e8604c;
+        #nextBtn:hover, #submitBtn:hover {
+            background-color: #1f8017;
+            border-color: #1f8017;
         }
-        
+
+        #prevBtn:hover {
+            background-color: #d4c614;
+            border-color: #d4c614;
+        }
         .step-form-container {
             flex-grow: 1;
             width: 100%;
@@ -366,7 +377,7 @@
         }
         
         .form-group {
-            margin-bottom: 20px;
+            margin-top: 25px;
         }
 
         .btn-group-toggle input[type="radio"]:checked + .btn-checkbox,
@@ -403,7 +414,7 @@
         }
 
         .step-buttons .step-button i {
-            font-size: 24px;
+            font-size: 28px;
             margin-bottom: 4px;
         }
 
@@ -468,6 +479,7 @@
             overflow: hidden;
             border: 2px solid #313041;
             border-radius: 5px;
+            display: inline-block;
         }
 
         .croppable-image {
@@ -522,6 +534,11 @@
         .cropper-face {
             background-color: transparent;
         }
+        .image-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
         .image-preview-wrapper.primary {
             border-color: #f2856d;
@@ -533,18 +550,6 @@
             position: absolute;
             top: 5px;
             right: 5px;
-            background-color: #f2856d;
-            color: white;
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-size: 12px;
-            z-index: 1000;
-        }
-        .image-preview-wrapper.primary::before {
-            content: 'Primary';            content: 'Primary';
-            position: absolute;
-            top: 5px;
-            left: 5px;
             background-color: #f2856d;
             color: white;
             padding: 2px 5px;
@@ -600,19 +605,61 @@
             color: #e8604c;
         }
         .button-group {
+            /* display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px; */
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .button-group .left-buttons {
+            order: 1;
+        }
+
+        .button-group .right-buttons {
+            order: 2;
+            display: flex;
+            gap: 10px;
         }
 
         .button-group button {
             margin-right: 10px;
+            margin-bottom: 10px;
         }
 
         .button-group button:last-child {
             margin-right: 0;
             margin-left: auto;
+        }
+        
+        @media (max-width: 576px) {
+            .button-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .button-group .left-buttons,
+            .button-group .right-buttons {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .button-group .right-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            #saveDraftBtn {
+                order: 1;
+            }
+
+            .right-buttons {
+                order: 2;
+            }
         }
 
         @media (max-width: 1200px) {
@@ -637,6 +684,11 @@
             .monthly-selection-item {
                 width: 100%;
             }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 @endsection

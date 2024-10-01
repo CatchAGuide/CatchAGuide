@@ -1,7 +1,21 @@
-@extends('layouts.app')
+@extends('layouts.app-v2-1')
 
-@section('title', substr($guiding->title, 0, -3))
-@section('description', $guiding->title)
+@if(app()->getLocale() == 'en')
+    @section('title',translate($guiding->title))
+@else
+    @section('title',$guiding->title)
+@endif
+
+@section('description',$guiding->excerpt)
+
+@section('share_tags')
+    <meta property="og:title" content="{{translate($guiding->title)}}" />
+    <meta property="og:description" content="{{translate($guiding->excerpt)}}" />
+    @if(count(app('guiding')->getImagesUrl($guiding)))
+    <meta property="og:image" content="{{app('guiding')->getImagesUrl($guiding)['image_0']}}"/>
+    @endif
+
+@endsection
 
 @section('css_after')
     <style>
@@ -35,6 +49,9 @@
             background-color: #262e35;
             color: white;
         }
+        .similar-guides-section {
+            margin-bottom: 2rem; /* Adjust as needed */
+        }
       
         @media screen and (max-width: 767px) {
             .price-details{
@@ -51,28 +68,6 @@
 
 @section('content')
  <div class="container">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="col-12">
-                <form class="d-flex">
-                    <select class="form-select me-2">
-                        <option>Spain</option>
-                        <!-- Other options... -->
-                    </select>
-                    <input type="date" class="form-control me-2" value="2024-07-10">
-                    <select class="form-select me-2">
-                        <option>1 day</option>
-                        <!-- Other options... -->
-                    </select>
-                    <select class="form-select me-2">
-                        <option>2 adults · 0 children</option>
-                        <!-- Other options... -->
-                    </select>
-                    <button type="submit" class="btn btn-primary">Search</button>
-                </form>
-            </div>
-        </div>
-    </div>
     <div class="row">
         <div class="mb-3">
             {{-- <h1>Fishing trip in {{$guiding->location}} - {{$guiding->title}}</h1> --}}
@@ -94,7 +89,6 @@
                 </a>
             </p> --}}
         </div>
-
         <!-- Image Gallery -->
         <div class="row mb-3">
             <div class="col-7">
@@ -429,7 +423,10 @@
 
         <!-- Right Column -->
         <div class="col-md-4">
-            <div class="sticky-top" style="top: 20px;">
+            @if(!$agent->ismobile())
+                @include('pages.guidings.content.bookguiding')
+            @endif
+            {{-- <div class="sticky-top" style="top: 20px;">
                 <!-- Guiding Booking -->
                 <div class="card mb-3">
                     <div class="card-header">Guiding Buchen</div>
@@ -486,7 +483,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> --}}
         </div>
 
         <!-- Map Section -->
@@ -578,69 +575,92 @@
             </div>
         </div>
         
-        <div class="card mb-3">
-            <div class="card-header">Similar Guidings</div>
-            <div class="card-body">
-                <div class="row" id="same-guidings-container">
-                    @foreach($same_guiding->take(3) as $sameGuiding)
-                        <div class="col-md-4 mb-3">
-                            <div class="card">
-                                <img src="{{ asset( !$sameGuiding->is_newguiding ? "assets/guides/".$sameGuiding->thumbnail_path : $sameGuiding->thumbnail_path  ) }}" class="card-img-top" alt="{{ $sameGuiding->title }}">
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ $sameGuiding->title }}</h5>
-                                    <p class="card-text">{{ $sameGuiding->location }}</p>
-                                    <a href="{{ route('guidings.show', [$sameGuiding->id, $sameGuiding->slug]) }}" class="btn btn-primary">Details</a>
+        <section class="tour-details-two mt-md-5 mt-4">
+            <div class="container">
+                <div class="tour-details-two__related-tours {{$agent->ismobile() ? 'text-center' : ''}}">
+                    <h3 class="tour-details-two__title">{{ translate('Similar Guidings') }}</h3>
+                    <div class="popular-tours__carousel owl-theme owl-carousel">
+                        @foreach($same_guiding as $other_guiding)
+                            <div class="popular-tours__single">
+                                <a class="popular-tours__img" href="{{ route('guidings.show',[$other_guiding->id,$other_guiding->slug]) }}" title="Guide aufmachen">
+                                    <figure class="popular-tours__img__wrapper">
+                                        @if($other_guiding->is_newguiding)
+                                            @if($other_guiding->thumbnail_path)
+                                                <img src="{{ asset(!$other_guiding->is_newguiding ? "assets/guides/".$other_guiding->thumbnail_path : $other_guiding->thumbnail_path) }}" alt="{{ $other_guiding->title }}"/>
+                                            @endif
+                                        @else
+                                            @if(isset(app('guiding')->getImagesUrl($other_guiding)['image_0']))
+                                                <img src="{{ app('guiding')->getImagesUrl($other_guiding)['image_0'] }}" alt="{{ $other_guiding->title }}"/>
+                                            @endif
+                                        @endif
+                                        <div class="popular-tours__icon">
+                                            <a href="{{ route('wishlist.add-or-remove', $other_guiding->id) }}">
+                                                <i class="fa fa-heart {{ (auth()->check() ? (auth()->user()->isWishItem($other_guiding->id) ? 'text-danger' : '') : '') }}"></i>
+                                            </a>
+                                        </div>
+                                    </figure>
+                                </a>
+
+                                <div class="popular-tours__content">
+                                    <h3 class="popular-tours__title"><a href="{{ route('guidings.show', [$other_guiding->id,$other_guiding->slug]) }}">{{  $other_guiding->title ?  translate( $other_guiding->title) :  $other_guiding->title }}</a>
+                                    </h3>
+                                    <span>{{ $other_guiding->location ? translate($other_guiding->location) : $other_guiding->location }}</span>
+                                    <p class="popular-tours__rate">
+                                        <span>@lang('message.from') {{ two($other_guiding->price) }}€</span>
+                                    </p>
+                                    <span><i class="far fa-hourglass"></i>{{ translate('Duration') }}: {{ two($other_guiding->duration) }} {{ translate('Hours') }}</span>
                                 </div>
                             </div>
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div>
                 </div>
-                @if($same_guiding->count() > 3)
-                    <button id="show-more" class="btn btn-secondary mt-3">Show More</button>
-                @endif
             </div>
-        </div>
-
-        <!-- Other Guidings Carousel Section -->
+        </section>
         
-    <section class="tour-details-two mt-md-5 mt-4">
-        <div class="container">
+        <section class="tour-details-two mt-md-5 mt-4">
+            <div class="container">
 
-            <div class="tour-details-two__related-tours {{$agent->ismobile() ? 'text-center' : ''}}">
-                <h3 class="tour-details-two__title">{{ translate('Ähnliche Guidings') }}</h3>
-                <div class="popular-tours__carousel owl-theme owl-carousel">
-                    @foreach($other_guidings as $other_guiding)
-                
-                        <div class="popular-tours__single">
-                            <a class="popular-tours__img" href="{{ route('guidings.show',[$other_guiding->id,$other_guiding->slug]) }}" title="Guide aufmachen">
-                                <figure class="popular-tours__img__wrapper">
-                                    @if(isset(app('guiding')->getImagesUrl($other_guiding)['image_0']))
-                                        <img src="{{app('guiding')->getImagesUrl($other_guiding)['image_0']}}" alt="{{$other_guiding->title}}"/>
-                                    @endif
-                                    <div class="popular-tours__icon">
-                                        <a href="{{ route('wishlist.add-or-remove', $other_guiding->id) }}">
-                                            <i class="fa fa-heart {{ (auth()->check() ? (auth()->user()->isWishItem($other_guiding->id) ? 'text-danger' : '') : '') }}"></i>
-                                        </a>
-                                    </div>
-                                </figure>
-                            </a>
+                <div class="tour-details-two__related-tours {{$agent->ismobile() ? 'text-center' : ''}}">
+                    <h3 class="tour-details-two__title">{{ translate('Matching Guidings') }}</h3>
+                    <div class="popular-tours__carousel owl-theme owl-carousel">
+                        @foreach($other_guidings as $other_guiding)
+                    
+                            <div class="popular-tours__single">
+                                <a class="popular-tours__img" href="{{ route('guidings.show',[$other_guiding->id,$other_guiding->slug]) }}" title="Guide aufmachen">
+                                    <figure class="popular-tours__img__wrapper">
+                                        @if($other_guiding->is_newguiding)
+                                            @if($other_guiding->thumbnail_path)
+                                                <img src="{{ asset(!$other_guiding->is_newguiding ? "assets/guides/".$other_guiding->thumbnail_path : $other_guiding->thumbnail_path) }}" alt="{{ $other_guiding->title }}"/>
+                                            @endif
+                                        @else
+                                            @if(isset(app('guiding')->getImagesUrl($other_guiding)['image_0']))
+                                                <img src="{{ app('guiding')->getImagesUrl($other_guiding)['image_0'] }}" alt="{{ $other_guiding->title }}"/>
+                                            @endif
+                                        @endif
+                                        <div class="popular-tours__icon">
+                                            <a href="{{ route('wishlist.add-or-remove', $other_guiding->id) }}">
+                                                <i class="fa fa-heart {{ (auth()->check() ? (auth()->user()->isWishItem($other_guiding->id) ? 'text-danger' : '') : '') }}"></i>
+                                            </a>
+                                        </div>
+                                    </figure>
+                                </a>
 
-                            <div class="popular-tours__content">
-                                <h3 class="popular-tours__title"><a href="{{ route('guidings.show', [$other_guiding->id,$other_guiding->slug]) }}">{{  $other_guiding->title ?  translate( $other_guiding->title) :  $other_guiding->title }}</a>
-                                </h3>
-                                <span>{{ $other_guiding->location ? translate($other_guiding->location) : $other_guiding->location }}</span>
-                                <p class="popular-tours__rate">
-                                    <span>@lang('message.from') {{ two($other_guiding->price) }}€</span>
-                                </p>
-                                <span><i class="far fa-hourglass"></i>{{ translate('Dauer') }}: {{ two($other_guiding->duration) }} {{ translate('Stunden') }}</span>
+                                <div class="popular-tours__content">
+                                    <h3 class="popular-tours__title"><a href="{{ route('guidings.show', [$other_guiding->id,$other_guiding->slug]) }}">{{  $other_guiding->title ?  translate( $other_guiding->title) :  $other_guiding->title }}</a>
+                                    </h3>
+                                    <span>{{ $other_guiding->location ? translate($other_guiding->location) : $other_guiding->location }}</span>
+                                    <p class="popular-tours__rate">
+                                        <span>@lang('message.from') {{ two($other_guiding->price) }}€</span>
+                                    </p>
+                                    <span><i class="far fa-hourglass"></i>{{ translate('Dauer') }}: {{ two($other_guiding->duration) }} {{ translate('Stunden') }}</span>
+                                </div>
                             </div>
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
- </div>
+        </section>
+    </div>
 </div>
 @endsection
 

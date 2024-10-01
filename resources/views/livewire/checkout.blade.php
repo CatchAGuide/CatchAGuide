@@ -113,9 +113,58 @@
                                                     <div class="col-sm-12">
                                                         <div class="form-group">
                                                             <label for="phone">@lang('forms.pNumber').<span style="color: #e8604c !important; font-size: 12px;">* @lang('forms.pNumberMsg')</span></label>
-                                                            <input type="text" class="form-control rounded @error('userData.phone') is-invalid @enderror" id="phone" wire:model="userData.phone" name="userData.phone" value="{{ old('userData.phone') }}" required>
+                                                            <div class="d-flex">
+                                                                <select class="form-control rounded w-25 me-2 @error('userData.countryCode') is-invalid @enderror" id="countryCode" wire:model="userData.countryCode" required>
+                                                                    <option value="+49">+49 (Germany)</option>
+                                                                    <option value="+1">+1 (USA/Canada)</option>
+                                                                    <option value="+44">+44 (UK)</option>
+                                                                    <option value="+33">+33 (France)</option>
+                                                                    <option value="+39">+39 (Italy)</option>
+                                                                    <option value="+34">+34 (Spain)</option>
+                                                                    <option value="+81">+81 (Japan)</option>
+                                                                    <option value="+86">+86 (China)</option>
+                                                                    <option value="+91">+91 (India)</option>
+                                                                    <option value="+61">+61 (Australia)</option>
+                                                                    <option value="+353">+353 (Ireland)</option>
+                                                                    <option value="+31">+31 (Netherlands)</option>
+                                                                    <option value="+46">+46 (Sweden)</option>
+                                                                    <option value="+47">+47 (Norway)</option>
+                                                                    <option value="+45">+45 (Denmark)</option>
+                                                                    <option value="+358">+358 (Finland)</option>
+                                                                    <option value="+32">+32 (Belgium)</option>
+                                                                    <option value="+41">+41 (Switzerland)</option>
+                                                                    <option value="+43">+43 (Austria)</option>
+                                                                    <option value="+48">+48 (Poland)</option>
+                                                                    <option value="+351">+351 (Portugal)</option>
+                                                                    <option value="+30">+30 (Greece)</option>
+                                                                    <option value="+420">+420 (Czech Republic)</option>
+                                                                    <option value="+36">+36 (Hungary)</option>
+                                                                    <option value="+7">+7 (Russia)</option>
+                                                                    <option value="+380">+380 (Ukraine)</option>
+                                                                    <option value="+90">+90 (Turkey)</option>
+                                                                    <option value="+20">+20 (Egypt)</option>
+                                                                    <option value="+27">+27 (South Africa)</option>
+                                                                    <option value="+55">+55 (Brazil)</option>
+                                                                    <option value="+52">+52 (Mexico)</option>
+                                                                    <option value="+54">+54 (Argentina)</option>
+                                                                    <option value="+56">+56 (Chile)</option>
+                                                                    <option value="+57">+57 (Colombia)</option>
+                                                                    <option value="+51">+51 (Peru)</option>
+                                                                    <option value="+64">+64 (New Zealand)</option>
+                                                                    <option value="+65">+65 (Singapore)</option>
+                                                                    <option value="+60">+60 (Malaysia)</option>
+                                                                    <option value="+66">+66 (Thailand)</option>
+                                                                    <option value="+62">+62 (Indonesia)</option>
+                                                                    <option value="+63">+63 (Philippines)</option>
+                                                                    <option value="+84">+84 (Vietnam)</option>
+                                                                    <option value="+82">+82 (South Korea)</option>
+                                                                    <option value="+972">+972 (Israel)</option>
+                                                                    <option value="+971">+971 (UAE)</option>
+                                                                    <option value="+966">+966 (Saudi Arabia)</option>
+                                                                </select>
+                                                                <input type="tel" class="form-control rounded @error('userData.phone') is-invalid @enderror" id="phone" wire:model="userData.phone" name="userData.phone" value="{{ old('userData.phone') }}" required>
+                                                            </div>
                                                         </div>
-        
                                                     </div>
                                                     <div class="col-sm-12">
                                                         <div class="form-group">
@@ -165,14 +214,7 @@
                                             <div class="col-lg-8 col-md-8 col-sm-5 my-2">
                                                 
                                                 <div class="row">
-                                                    <div class="col-md-4 my-2">
-                                                        @if(get_featured_image_link($guiding))
-                                                        <img src="{{get_featured_image_link($guiding)}}" class="card-img-top">
-                                                        @else
-                                                            <img src="{{asset('images/placeholder_guide.jpg')}}" class="card-img-top">
-                                                        @endif
-                                                    </div>
-                                                    <div class="col-md-8 my-2">
+                                                    <div class="my-2">
                                                         <div class="card">
                                                             <div class="card-body p-0">
                                                                 <h5 class="card-title">{{$guiding->title}}</h5>
@@ -189,12 +231,7 @@
                                                                     <div class="mx-2">
                                                                       <span>{{$guiding->user->firstname}}</span>
                                                                     </div>
-                                                                </div>
-
-                                                                <div class="guide-description-checkout my-2">
-                                                                    <p>{!!$guiding->description!!}</p>
-                                                                </div>
-                                                    
+                                                                </div>                                                    
                                                             </div>
                                                         </div>
                                                     </div>
@@ -206,6 +243,35 @@
                                                         <h5><span class="bordered-heading">Guiding Information</span></h5>
                                                     </div>
                                                     <div class="p-3 bg-light rounded">
+                                                        @if($guiding->is_newguiding && $guiding->is_boat)
+                                                            <div class="flex-column border-bottom">
+                                                                <div class="my-2">
+                                                                    <span class="text-dark fw-bold">{{ translate('Boat')}}:</span>
+                                                                </div>
+                                
+                                                                <div class="px-2 text-dark">
+                                                                    {{$guiding->is_boat ? $guiding->boat_type : ''}}
+                                                                </div>
+                                                            </div>
+                                                        @else
+                                                            <div class="flex-column border-bottom">
+                                                                <div class="my-2">
+                                                                    <span class="text-dark fw-bold">{{ translate('Shore') }}</span>
+                                                                </div>
+                                                            </div>
+                                                        @endif
+
+                                                        <div class="flex-column border-bottom">
+                                                            <div class="my-2">
+                                                                <span class="text-dark fw-bold">{{ translate('Location')}}:</span>
+                                                            </div>
+                            
+                                                            <div class="px-2 text-dark">
+                                                                {{$guiding->location ? $guiding->location : ''}}
+                                                            </div>
+                                                        </div>
+                                                        
+
                                                         <div class="flex-column border-bottom">
                                                             <div class="my-2">
                                                                 <span class="text-dark fw-bold">@lang('profile.duration'):</span>
@@ -215,6 +281,7 @@
                                                                 <p>{{$guiding->duration}} @lang('message.hours')</p>
                                                             </div>
                                                         </div>
+
                                                         <div class="flex-column border-bottom">
                                                             <div class="my-2">
                                                                 <span class="text-dark fw-bold">@lang('profile.targetFish'):</span>
@@ -222,49 +289,17 @@
     
                                                             <div class="px-2 text-dark">
                                                                 @php 
-                                                                $guidingTargets = $targets->pluck('name')->toArray();
-        
-                                                                if(app()->getLocale() == 'en'){
-                                                                    $guidingTargets = $targets->pluck('name_en')->toArray();
-                                                                }
-                                                            @endphp
-                                                            <p>
-                                                                {{implode(', ',$guidingTargets)}}
-                                                            </p>
-                                                            </div>
-                                                        </div>
-                                                        <div class="flex-column border-bottom">
-                                                            <div class="my-2">
-                                                                <span class="text-dark fw-bold">@lang('profile.angelType'):</span>
-                                                            </div>
-                                   
-                                                            <div class="px-2 text-dark">
-                                                                @if(app()->getLocale() == 'en')
-                                                                {{$guiding->fishingTypes ? $guiding->fishingTypes->name_en : $guiding->fishingTypes->name }}
-                                                                @else
-                                                                <p>
-                                                                    {{$guiding->fishingTypes ? $guiding->fishingTypes->name : '' }}
-                                                                </p>
-                                                              
-                                                                @endif
-                                                            </div>
-                                                        </div>
-    
-                                                        <div class="flex-column border-bottom">
-                                                            <div class="my-2">
-                                                                <span class="text-dark fw-bold">@lang('profile.techniqueMethod'):</span>
-                                                            </div>
-                                   
-                                                            <div class="px-2 text-dark">
-                                                                @php 
-                                                                $guidingMethods = $methods->pluck('name')->toArray();
-    
-                                                                if(app()->getLocale() == 'en'){
-                                                                    $guidingMethods = $methods->pluck('name_en')->toArray();
+                                                                if ($guiding->is_newguiding) {
+                                                                    $guidingTargets = array_column($targets, 'value');
+                                                                } else {
+                                                                    $guidingTargets = app()->getLocale() == 'en' 
+                                                                        ? $targets->pluck('name_en')->toArray() 
+                                                                        : $targets->pluck('name')->toArray();
                                                                 }
                                                                 @endphp
-    
-                                                                {{implode(', ',$guidingMethods)}}
+                                                                <p>
+                                                                    {{implode(', ', $guidingTargets)}}
+                                                                </p>
                                                             </div>
                                                         </div>
     
@@ -284,46 +319,33 @@
     
                                                         <div class="flex-column border-bottom">
                                                             <div class="my-2">
-                                                                <span class="text-dark fw-bold">@lang('profile.waterType'):</span>
-                                                            </div>
-                                   
-                                                            <div class="px-2 text-dark">
-                                                                @php 
-                                                                $guidingWaters = $waters->pluck('name')->toArray();
-    
-                                                                if(app()->getLocale() == 'en'){
-                                                                    $guidingWaters = $waters->pluck('name_en')->toArray();
-                                                                }
-                                                                @endphp
-    
-                                                                {{implode(', ',$guidingWaters)}}
-                                                            </div>
-                                                        </div>
-    
-                                                        <div class="flex-column border-bottom">
-                                                            <div class="my-2">
                                                                 <span class="text-dark fw-bold">@lang('profile.inclussion'):</span>
                                                             </div>
                                    
                                                             <div class="px-2 text-dark">
                                                                 @php
-                                                                $guidingInclusion = $guiding->inclussions->pluck('name')->toArray();
-                                                            
-                                                                if (app()->getLocale() == 'en') {
-                                                                    $guidingInclusion = $guiding->inclussions->pluck('name_en')->toArray();
-                                                            
+                                                                if ($guiding->is_newguiding) {
+                                                                    $guidingInclusions = json_decode($guiding->inclusions, true);
+                                                                    $guidingInclusions = array_column($guidingInclusions, 'value');
+                                                                } else {
+                                                                    $guidingInclusions = app()->getLocale() == 'en' 
+                                                                        ? $guiding->inclussions->pluck('name_en')->toArray() 
+                                                                        : $guiding->inclussions->pluck('name')->toArray();
+                                                                    
                                                                     // If name_en is empty, fallback to name
-                                                                    foreach ($guidingInclusion as $index => $name) {
-                                                                        if (empty($name)) {
-                                                                            $guidingInclusion[$index] = $guiding->inclussions[$index]->name;
+                                                                    if (app()->getLocale() == 'en') {
+                                                                        foreach ($guidingInclusions as $index => $name) {
+                                                                            if (empty($name)) {
+                                                                                $guidingInclusions[$index] = $guiding->inclussions[$index]->name;
+                                                                            }
                                                                         }
                                                                     }
                                                                 }
-                                                            @endphp
-    
-                                                            @if (!empty($guidingInclusion))
-                                                            {{ implode(', ', array_filter($guidingInclusion)) }}
-                                                            @endif
+                                                                @endphp
+
+                                                                @if (!empty($guidingInclusions))
+                                                                {{ implode(', ', array_filter($guidingInclusions)) }}
+                                                                @endif
                                                             </div>
                                                         </div>
 
@@ -345,6 +367,17 @@
                                                                 {{$guiding->meeting_point ? $guiding->meeting_point : null }}
                                                             </div>
                                                         </div>
+
+                                                        @if($guiding->is_newguiding)
+                                                        <div class="flex-column">
+                                                            <div class="my-2">
+                                                                <span class="text-dark fw-bold">{{ translate('Requirements for taking part')}}:</span>
+                                                            </div>
+                                                            <div class="px-2 text-dark">
+                                                                {{ implode(', ', array_filter(json_decode($guiding->requirements, true))) }}
+                                                            </div>
+                                                        </div>
+                                                        @endif
                                                     </div>
                                                   
                                                 </div>
@@ -375,27 +408,40 @@
                                                                 </div>
                                                                 <div class="row p-2">
                                                                     <div>
-                                                                        @foreach($extras as $extra)
+                                                                        @foreach($extras as $index => $extra)
                                                                         <div class="col-md-12">
                                                                             <div class="d-flex flex-column">
                                                                                 <div class="form-check p-0">
                                                                                     <label class="form-check-label text-dark">
-                                                                                        <input type="checkbox" class="form-check-input me-1" name="extra" value="{{$extra->id}}" wire:model.lazy="selectedExtras.{{$extra->id}}">
-                                                                                        {{$extra->name}} - €{{$extra->price}}
+                                                                                        @if($guiding->is_newguiding)
+                                                                                            <input type="checkbox" class="form-check-input me-1" name="extra" value="{{$index}}" wire:model.lazy="selectedExtras.{{$index}}">
+                                                                                            {{$extra['name']}} - €{{$extra['price']}}
+                                                                                        @else
+                                                                                            <input type="checkbox" class="form-check-input me-1" name="extra" value="{{$extra->id}}" wire:model.lazy="selectedExtras.{{$extra->id}}">
+                                                                                            {{$extra->name}} - €{{$extra->price}}
+                                                                                        @endif
                                                                                     </label>
                                                                                 </div>
                                                                                 <div>
                                                                                     @if(count($selectedExtras))
-                                                                                        @if(in_array($extra->id,$selectedExtras))
-                                                                                        <div class="d-flex align-items-center mb-2">
-                                                                                            <label for="">Quantity:</label>
-                                                                                            <input id="numericInput" class="w-25 form-control  form-control-sm mx-2" type="number" min="0" step="1" name="quantity" value="2" max="{{$persons}}" wire:model="extraQuantities.{{ $extra->id }}" wire:change="calculateTotalPrice" required>
-                                                                                        </div>
+                                                                                        @if($guiding->is_newguiding)
+                                                                                            @if($selectedExtras[$index])
+                                                                                            <div class="d-flex align-items-center mb-2">
+                                                                                                <label for="">Quantity:</label>
+                                                                                                <input id="numericInput" class="w-25 form-control form-control-sm mx-2" type="number" min="0" step="1" name="quantity" value="2" max="{{$persons}}" wire:model="extraQuantities.{{ $index }}" wire:change="calculateTotalPrice" required>
+                                                                                            </div>
+                                                                                            @endif
+                                                                                        @else
+                                                                                            @if(in_array($extra->id, $selectedExtras))
+                                                                                            <div class="d-flex align-items-center mb-2">
+                                                                                                <label for="">Quantity:</label>
+                                                                                                <input id="numericInput" class="w-25 form-control form-control-sm mx-2" type="number" min="0" step="1" name="quantity" value="2" max="{{$persons}}" wire:model="extraQuantities.{{ $extra->id }}" wire:change="calculateTotalPrice" required>
+                                                                                            </div>
+                                                                                            @endif
                                                                                         @endif
                                                                                     @endif
                                                                                 </div>
                                                                             </div>
-        
                                                                         </div>
                                                                         @endforeach
                                                                     </div>

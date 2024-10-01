@@ -101,11 +101,24 @@ class Checkout extends Component
         // $this->waters = unserialize($this->guiding->water);
         // $this->targets = unserialize($this->guiding->targets);
 
-        $this->extras = $this->guiding->extras;
-        $this->targets = $this->guiding->guidingTargets;
+        
+        if ($this->guiding->is_newguiding) {
+            $this->extras = json_decode($this->guiding->pricing_extra, true) ?? [];
+            $this->targets = json_decode($this->guiding->target_fish, true);
+        } else {
+            $this->extras = $this->guiding->extras;
+            $this->targets = $this->guiding->guidingTargets()->get();
+        }
+
+        foreach ($this->extras as $index => $extra) {
+            $extraId = $this->guiding->is_newguiding ? $index : $extra->id;
+            $this->selectedExtras[$extraId] = false;
+            $this->extraQuantities[$extraId] = $this->persons;
+        }
+
         $this->waters = $this->guiding->guidingWaters;
         $this->methods = $this->guiding->guidingMethods;
-
+    
         foreach ($this->extras as $extra) {
             $this->selectedExtras[$extra->id] = false; // Initialize as not selected
             $this->extraQuantities[$extra->id] = $this->persons; // Initialize quantity as 0
@@ -175,22 +188,30 @@ class Checkout extends Component
         $this->calculateTotalPrice();
     }
 
-
-    public function calculateTotalPrice(){
-        
-        $guidingExtras = $this->guiding->extras()->whereIn('id', $this->selectedExtras)->get();
-        
-        $this->validate([
-            'extraQuantities.*' => ['required', 'numeric', 'max:' . $this->persons],
-        ]);
-
+    public function calculateTotalPrice()
+    {
         $totalExtraPrice = 0;
-        
-        if(count($guidingExtras)){
-            foreach ($guidingExtras as $extra) {
-                $quantity = $this->extraQuantities[$extra->id] ?? 0; // Get the quantity for the current extra
-                $totalExtraPrice += $extra->price * $quantity; // Calculate the total price for this extra
+        $extraData = [];
     
+        if ($this->guiding->is_newguiding) {
+            foreach ($this->extras as $index => $extra) {
+                if ($this->selectedExtras[$index]) {
+                    $quantity = $this->extraQuantities[$index] ?? 0;
+                    $totalExtraPrice += $extra['price'] * $quantity;
+                    $extraData[] = [
+                        'extra_id' => $index,
+                        'extra_name' => $extra['name'],
+                        'extra_price' => $extra['price'],
+                        'extra_quantity' => $quantity,
+                        'extra_total_price' => $extra['price'] * $quantity,
+                    ];
+                }
+            }
+        } else {
+            $guidingExtras = $this->guiding->extras()->whereIn('id', array_keys(array_filter($this->selectedExtras)))->get();
+            foreach ($guidingExtras as $extra) {
+                $quantity = $this->extraQuantities[$extra->id] ?? 0;
+                $totalExtraPrice += $extra->price * $quantity;
                 $extraData[] = [
                     'extra_id' => $extra->id,
                     'extra_name' => $extra->name,
@@ -199,15 +220,11 @@ class Checkout extends Component
                     'extra_total_price' => $extra->price * $quantity,
                 ];
             }
-            $this->extraData = serialize($extraData);
-        }else{
-            $this->extraData = null;
         }
-
-        
+    
+        $this->extraData = !empty($extraData) ? serialize($extraData) : null;
         $this->totalExtraPrice = $totalExtraPrice;
-
-        $this->totalPrice =  $this->totalExtraPrice + $this->guidingprice;
+        $this->totalPrice = $this->totalExtraPrice + $this->guidingprice;
     }
 
     public function next()
