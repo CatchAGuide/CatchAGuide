@@ -512,7 +512,7 @@ transform: translate3d(0,0,0); width: 100%;">
                                 </h3>
                                 <span>{{ $other_guiding->location ? translate($other_guiding->location) : $other_guiding->location }}</span>
                                 <p class="popular-tours__rate">
-                                    <span>@lang('message.from') {{ two($other_guiding->price) }}€</span>
+                                    <span>@lang('message.from') {{ two($other_guiding->getLowestPrice()) }}€</span>
                                 </p>
                                 <span><i class="far fa-hourglass"></i>{{ translate('Dauer') }}: {{ two($other_guiding->duration) }} {{ translate('Stunden') }}</span>
                             </div>
