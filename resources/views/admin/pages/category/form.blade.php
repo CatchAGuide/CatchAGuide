@@ -255,6 +255,7 @@ input[type=number] {
 </script>
 <script>
     CKEDITOR.replace( 'body' );
+    CKEDITOR.replace( 'introduction' );
 
     function initialize() {
         var input = document.getElementById('searchPlace');
