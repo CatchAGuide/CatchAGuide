@@ -23,22 +23,42 @@ class DestinationCountryController extends Controller
 
     public function country(Request $request, $country, $region=null, $city=null)
     {
-        $destination_type = 'country';
-        $address_name = $country;
+        $query = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit']);
+
+        $country_row = Destination::whereSlug($country)->whereType('country')->first();
+        $region_row = Destination::whereSlug($region)->whereType('region')->first();
+        $city_row = Destination::whereSlug($city)->whereType('city')->first();
+
 
         if (!is_null($city)) {
-            $destination_type = 'city';
-            $address_name = $city;
+            if (is_null($city_row)) {
+                abort(404);
+            } elseif (is_null($region_row)) {
+                abort(404);
+            } elseif (is_null($country_row)) {
+                abort(404);
+            }
+            $query = $query->whereType('city')->whereCountryId($country_row->id)->whereRegionId($region_row->id)->whereId($city_row->id);
         } elseif (!is_null($region)) {
-            $destination_type = 'region';
-            $address_name = $region;
+            if (is_null($region_row)) {
+                abort(404);
+            } elseif (is_null($country_row)) {
+                abort(404);
+            }
+            $query = $query->whereType('region')->whereCountryId($country_row->id)->whereId($region_row->id);
+        } else {
+            if (is_null($country_row)) {
+                abort(404);
+            }
+            $query = $query->whereType('country')->whereId($country_row->id);
         }
 
-        $row_data = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->whereType($destination_type)->whereSlug($address_name)->first();
+        $row_data = $query->first();
 
         if (is_null($row_data)) {
             abort(404);
         }
+        
         $regions = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->whereType('region')->whereCountryId($row_data->id)->get();
         $cities = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->whereType('city')->whereCountryId($row_data->id)->get();
 

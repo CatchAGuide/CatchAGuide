@@ -14,7 +14,8 @@ class DestinationFishSizeLimit extends Model
     protected $fillable = [
         'destination_id',
         'fish',
-        'data'
+        'data',
+        'language'
     ];
 
     /**

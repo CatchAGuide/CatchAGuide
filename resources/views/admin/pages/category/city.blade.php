@@ -34,36 +34,44 @@
                             <a href="{{ route('admin.category.city.create') }}" class="btn btn-primary">Add City</a>
                         </div>
                         <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table blog-table table-bordered table-striped text-nowrap border-bottom">
-                                    <thead>
-                                    <tr>
-                                        <th class="wd-15p border-bottom-0">Country</th>
-                                        <th class="wd-15p border-bottom-0">Region</th>
-                                        <th class="wd-15p border-bottom-0">City</th>
-                                        <th class="wd-15p border-bottom-0">Aktionen</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($rows as $row)
-                                            <tr>
-                                                <td>{{ $row->country_name }}</td>
-                                                <td>{{ $row->region_name }}</td>
-                                                <td>{{ $row->name }}</td>
-                                                <td>
-                                                    <a href="{{ route('admin.category.city.edit', $row->id) }}" class="btn btn-sm btn-secondary"><i class="fa fa-edit"></i></a>
-                                                    <form class="frm-btn-delete" action="{{ route('admin.category.city.destroy', $row->id) }}" method="post">
-                                                        @method('DELETE')
-                                                        @csrf()
-                                                        <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Are you sure to delete this City?')"><i class="fa fa-trash"></i></button>
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                                {{ $rows->links() }}
-                            </div>
+                            <table class="table blog-table table-bordered table-striped text-nowrap border-bottom">
+                                <thead>
+                                <tr>
+                                    <th width="10%" class="border-bottom-0 text-center">Language</th>
+                                    <th width="20%" class="border-bottom-0">Country</th>
+                                    <th width="30%" class="border-bottom-0">Region</th>
+                                    <th width="30%" class="border-bottom-0">City</th>
+                                    <th width="10%" class="border-bottom-0">Aktionen</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($rows as $row)
+                                        <tr>
+                                            <td class="text-center">
+                                                @if($row->language == 'de')
+                                                <label><i class="fi fi-de"></i></label> 
+                                                @elseif($row->language == 'en')
+                                                <label><i class="fi fi-gb"></i></label>
+                                                @else
+                                                <label><i class="fi fi-de"></i></label>
+                                                @endif
+                                            </td>
+                                            <td>{{ $row->country_name }}</td>
+                                            <td>{{ $row->region_name }}</td>
+                                            <td>{{ $row->name }}</td>
+                                            <td>
+                                                <a href="{{ route('admin.category.city.edit', $row->id) }}" class="btn btn-sm btn-secondary"><i class="fa fa-edit"></i></a>
+                                                <form class="frm-btn-delete" action="{{ route('admin.category.city.destroy', $row->id) }}" method="post">
+                                                    @method('DELETE')
+                                                    @csrf()
+                                                    <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Are you sure to delete this City?')"><i class="fa fa-trash"></i></button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                            {{ $rows->links() }}
                         </div>
                     </div>
                 </div>

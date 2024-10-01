@@ -396,7 +396,7 @@
                                             
                                                 </div>
                                                 <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 mt-1">
-                                                    <h5 class="fw-bolder text-truncate"><a class="text-dark" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">{{translate($guiding->title)}}</a></h5>
+                                                    <h5 class="fw-bolder text-truncate"><a class="text-dark" href="{{ $guiding->is_newguiding ? route('guidings.newShow', [$guiding->id, $guiding->slug]) : route('guidings.show', [$guiding->id, $guiding->slug]) }}">{{translate($guiding->title)}}</a></h5>
                                                     <div class="ratings mr-2 color-primary my-1" style="font-size:0.80rem">
                                                         @if(count($guiding->user->received_ratings) > 0)
                                                         @switch(two($guiding->user->average_rating()))
@@ -634,7 +634,7 @@
                                                 </div>
                                                 <div class="col-12 col-sm-12 col-md-2 col-lg-3 col-xl-2 col-xxl-2  mt-3">
                                                     <div class="text-center">
-                                                        <h5 class="mr-1 color-primary fw-bold text-center">@lang('message.from') {{$guiding->price}}€</h4>
+                                                        <h5 class="mr-1 color-primary fw-bold text-center">@lang('message.from') {{$guiding->getLowestPrice()}}€</h5>
                                                     </div>
                                                     <div class="d-flex flex-column mt-4">
                                                         <a class="btn theme-primary btn-theme-new btn-sm" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">Details</a>

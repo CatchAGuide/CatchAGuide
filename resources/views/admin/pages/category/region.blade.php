@@ -34,18 +34,27 @@
                             <a href="{{ route('admin.category.region.create') }}" class="btn btn-primary">Add Region</a>
                         </div>
                         <div class="card-body">
-                            <div class="table-responsive">
                                 <table class="table blog-table table-bordered table-striped text-nowrap border-bottom">
                                     <thead>
                                     <tr>
-                                        <th class="wd-15p border-bottom-0">Country</th>
-                                        <th class="wd-15p border-bottom-0">Region Name</th>
-                                        <th class="wd-15p border-bottom-0">Aktionen</th>
+                                    <th width="10%" class="border-bottom-0 text-center">Language</th>
+                                    <th width="30%" class="border-bottom-0">Country</th>
+                                    <th width="45%" class="border-bottom-0">Region</th>
+                                    <th width="15%" class="border-bottom-0">Aktionen</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($rows as $row)
                                             <tr>
+                                                <td class="text-center">
+                                                    @if($row->language == 'de')
+                                                    <label><i class="fi fi-de"></i></label> 
+                                                    @elseif($row->language == 'en')
+                                                    <label><i class="fi fi-gb"></i></label>
+                                                    @else
+                                                    <label><i class="fi fi-de"></i></label>
+                                                    @endif
+                                                </td>
                                                 <td>{{ $row->country_name }}</td>
                                                 <td>{{ $row->name }}</td>
                                                 <td>
@@ -61,7 +70,6 @@
                                     </tbody>
                                 </table>
                                 {{ $rows->links() }}
-                            </div>
                         </div>
                     </div>
                 </div>

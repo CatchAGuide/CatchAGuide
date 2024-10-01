@@ -1,20 +1,32 @@
-
 <nav class="navbar-custom mb-5">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-8">
+        <div class="row align-items-center">
+            <div class="col-lg-4">
                 <div class="logo">
                     <a href="{{ route('welcome') }}"><img src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}" alt="Logo"></a>
                 </div>
             </div>
-            <div class="col-lg-4">
-                @if(Auth::check())
-                <div class="nav-links text-right" style="text-align: right;">
-                    <a href="#" class="button new-filter-btn">Become a guide</a>
-                    <a class="header-login-link" href="{{ route('login') }}">Log in</a>
-                    <a class="header-signup-link" href="{{ route('login') }}">Sign up</a>
+            <div class="col-lg-8">
+                <div class="nav-links text-right d-flex justify-content-end align-items-center">
+                    @if(Auth::check())
+                        <a href="{{ route('profile.bookings') }}" class="me-3" style="color: #787780;">Bookings</a>
+                        <a href="#" class="me-3" style="color: #787780;">Inbox</a>
+                        <a href="#" class="me-3" style="color: #787780;">Get Help</a>   
+                        <div class="dropdown">
+                            <a class="dropdown-toggle" href="#" role="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="color: #787780;">
+                                {{ Auth::user()->firstname }} {{ Auth::user()->lastname }}
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="{{ route('profile.account') }}" style="color: #787780;">Profile</a></li>
+                                <li><a class="dropdown-item" href="{{ route('admin.auth.logout') }}" style="color: #787780;">Logout</a></li>
+                            </ul>
+                        </div>
+                    @else
+                        <a href="#" class="button new-filter-btn me-3" style="color: #787780;">Become a guide</a>
+                        <a class="header-login-link me-3" href="{{ route('login') }}" style="color: #787780;">Log in</a>
+                        <a class="header-signup-link" href="{{ route('login') }}" style="color: #787780;">Sign up</a>
+                    @endif
                 </div>
-                @endif
             </div>
         </div>
 

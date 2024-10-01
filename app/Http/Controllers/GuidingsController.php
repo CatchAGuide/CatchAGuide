@@ -269,12 +269,12 @@ class GuidingsController extends Controller
         $ratingCount = $ratings->count();
         $averageRating = $ratingCount > 0 ? $ratings->avg('rating') : 0;
         $otherGuidings = Guiding::whereHas('guidingTargets',function($query) use ($targetId){
-            $query->wherein('target_id',$targetId);
-        })->whereHas('fishingFrom',function($query) use($fishingfrom){
-            $query->where('id',$fishingfrom);
-        })->whereHas('fishingTypes',function($query) use($fishingtype){
-            $query->where('id',$fishingtype);
-        })
+                    $query->wherein('target_id',$targetId);
+                })->whereHas('fishingFrom',function($query) use($fishingfrom){
+                    $query->where('id',$fishingfrom);
+                })->whereHas('fishingTypes',function($query) use($fishingtype){
+                    $query->where('id',$fishingtype);
+                })
         ->where('status', 1)
         ->limit(4)
         ->get();
@@ -759,15 +759,31 @@ class GuidingsController extends Controller
 
         $locale = Config::get('app.locale');
         if($locale == 'en') {
-            $targets = $targets->pluck('name_en');
-            $methods = $methods->pluck('name_en');
-            $waters = $waters->pluck('name_en');
-            $inclussions = $inclussions->pluck('name_en');
+            $targets = $targets->map(function ($item) {
+                return ['value' => $item->name_en, 'id' => $item->id];
+            });
+            $methods = $methods->map(function ($item) {
+                return ['value' => $item->name_en, 'id' => $item->id];
+            });
+            $waters = $waters->map(function ($item) {
+                return ['value' => $item->name_en, 'id' => $item->id];
+            });
+            $inclussions = $inclussions->map(function ($item) {
+                return ['value' => $item->name_en, 'id' => $item->id];
+            });
         } else {
-            $targets = $targets->pluck('name');
-            $methods = $methods->pluck('name');
-            $waters = $waters->pluck('name');
-            $inclussions = $inclussions->pluck('name');
+            $targets = $targets->map(function ($item) {
+                return ['value' => $item->name, 'id' => $item->id];
+            });
+            $methods = $methods->map(function ($item) {
+                return ['value' => $item->name, 'id' => $item->id];
+            });
+            $waters = $waters->map(function ($item) {
+                return ['value' => $item->name, 'id' => $item->id];
+            });
+            $inclussions = $inclussions->map(function ($item) {
+                return ['value' => $item->name, 'id' => $item->id];
+            });
         }
 
         return view('pages.profile.newguiding', compact('formData', 'waters', 'methods', 'targets', 'inclussions'));

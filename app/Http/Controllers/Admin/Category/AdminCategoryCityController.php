@@ -30,6 +30,7 @@ class AdminCategoryCityController extends Controller
         $form = 'City';
         $route = route('admin.category.city.store');
         $method = '';
+        $language = old('language');
         $country_id = old('country_id');
         $region_id = old('region_id');
         $name = old('name');
@@ -65,7 +66,7 @@ class AdminCategoryCityController extends Controller
         $regions = json_encode($destination->where('type', 'region')->toArray());
         #dd(json_encode($regions));
 
-        $data = compact('form', 'route', 'method', 'country_id', 'region_id', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'country', 
+        $data = compact('form', 'route', 'method', 'language', 'country_id', 'region_id', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'country', 
             'fish_chart', 'fish_avail_title', 'fish_avail_intro', 
             'fish_size_limit', 'size_limit_title', 'size_limit_intro', 
             'fish_time_limit', 'time_limit_title', 'time_limit_intro', 
@@ -90,7 +91,7 @@ class AdminCategoryCityController extends Controller
 
         try {
             DB::beginTransaction();
-            $data = $request->only(['country_id', 'region_id', 'name', 'title', 'sub_title', 'introduction', 'fish_avail_title', 'fish_avail_intro', 'size_limit_title', 'size_limit_intro', 'time_limit_title', 'time_limit_intro', 'faq_title']);
+            $data = $request->only(['language', 'country_id', 'region_id', 'name', 'title', 'sub_title', 'introduction', 'fish_avail_title', 'fish_avail_intro', 'size_limit_title', 'size_limit_intro', 'time_limit_title', 'time_limit_intro', 'faq_title']);
             $data['type'] = 'city';
             $data['filters'] = json_encode($request->filters);
             $data['content'] = $request->body;
@@ -107,6 +108,7 @@ class AdminCategoryCityController extends Controller
             if ($request->has('fish_chart')) {
                 foreach ($request->fish_chart as $key => $value) {
                     $value['destination_id'] = $country->id;
+                    $value['language'] = $request->language;
                     DestinationFishChart::create($value);
                 }
             }
@@ -114,6 +116,7 @@ class AdminCategoryCityController extends Controller
             if ($request->has('fish_size_limit')) {
                 foreach ($request->fish_size_limit as $key => $value) {
                     $value['destination_id'] = $country->id;
+                    $value['language'] = $request->language;
                     DestinationFishSizeLimit::create($value);
                 }
             }
@@ -121,6 +124,7 @@ class AdminCategoryCityController extends Controller
             if ($request->has('fish_time_limit')) {
                 foreach ($request->fish_time_limit as $key => $value) {
                     $value['destination_id'] = $country->id;
+                    $value['language'] = $request->language;
                     DestinationFishTimeLimit::create($value);
                 }
             }
@@ -128,6 +132,7 @@ class AdminCategoryCityController extends Controller
             if ($request->has('faq')) {
                 foreach ($request->faq as $key => $value) {
                     $value['destination_id'] = $country->id;
+                    $value['language'] = $request->language;
                     DestinationFaq::create($value);
                 }
             }
@@ -155,6 +160,7 @@ class AdminCategoryCityController extends Controller
         $form = 'City';
         $route = route('admin.category.city.update', $id);
         $method = 'PUT';
+        $language = $row->language;
         $country_id = $row->country_id;
         $region_id = $row->region_id;
         $name = $row->name;
@@ -190,7 +196,7 @@ class AdminCategoryCityController extends Controller
         $countries = $destination->where('type', 'country');
         $regions = json_encode($destination->where('type', 'region')->toArray());
 
-        $data = compact('form', 'route', 'method', 'country_id', 'region_id', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'country', 
+        $data = compact('form', 'route', 'method', 'language', 'country_id', 'region_id', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'country', 
             'fish_chart', 'fish_avail_title', 'fish_avail_intro', 
             'fish_size_limit', 'size_limit_title', 'size_limit_intro', 
             'fish_time_limit', 'time_limit_title', 'time_limit_intro', 
@@ -216,7 +222,7 @@ class AdminCategoryCityController extends Controller
 
         try {
             DB::beginTransaction();
-            $data = $request->only(['country_id', 'region_id', 'name', 'title', 'sub_title', 'introduction', 'fish_avail_title', 'fish_avail_intro', 'size_limit_title', 'size_limit_intro', 'time_limit_title', 'time_limit_intro', 'faq_title']);
+            $data = $request->only(['language', 'country_id', 'region_id', 'name', 'title', 'sub_title', 'introduction', 'fish_avail_title', 'fish_avail_intro', 'size_limit_title', 'size_limit_intro', 'time_limit_title', 'time_limit_intro', 'faq_title']);
             $data['filters'] = json_encode($request->filters);
             $data['content'] = $request->body;
             $data['slug'] = $this->slug_format($request->name);
@@ -231,6 +237,7 @@ class AdminCategoryCityController extends Controller
 
             if ($request->has('fish_chart')) {
                 foreach ($request->fish_chart as $key => $value) {
+                    $value['language'] = $request->language;
                     if ($value['id'] == 0) {
                         $value['destination_id'] = $id;
                         unset($value['id']);
@@ -243,6 +250,7 @@ class AdminCategoryCityController extends Controller
 
             if ($request->has('fish_size_limit')) {
                 foreach ($request->fish_size_limit as $key => $value) {
+                    $value['language'] = $request->language;
                     if ($value['id'] == 0) {
                         $value['destination_id'] = $id;
                         unset($value['id']);
@@ -255,6 +263,7 @@ class AdminCategoryCityController extends Controller
 
             if ($request->has('fish_time_limit')) {
                 foreach ($request->fish_time_limit as $key => $value) {
+                    $value['language'] = $request->language;
                     if ($value['id'] == 0) {
                         $value['destination_id'] = $id;
                         unset($value['id']);
@@ -267,6 +276,7 @@ class AdminCategoryCityController extends Controller
 
             if ($request->has('faq')) {
                 foreach ($request->faq as $key => $value) {
+                    $value['language'] = $request->language;
                     if ($value['id'] == 0) {
                         $value['destination_id'] = $id;
                         unset($value['id']);

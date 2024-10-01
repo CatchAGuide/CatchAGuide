@@ -153,15 +153,31 @@ class ProfileController extends Controller
 
         $locale = Config::get('app.locale');
         if($locale == 'en') {
-            $targets = $targets->pluck('name_en');
-            $methods = $methods->pluck('name_en');
-            $waters = $waters->pluck('name_en');
-            $inclussions = $inclussions->pluck('name_en');
+            $targets = $targets->map(function ($item) {
+                return ['value' => $item->name_en, 'id' => $item->id];
+            });
+            $methods = $methods->map(function ($item) {
+                return ['value' => $item->name_en, 'id' => $item->id];
+            });
+            $waters = $waters->map(function ($item) {
+                return ['value' => $item->name_en, 'id' => $item->id];
+            });
+            $inclussions = $inclussions->map(function ($item) {
+                return ['value' => $item->name_en, 'id' => $item->id];
+            });
         } else {
-            $targets = $targets->pluck('name');
-            $methods = $methods->pluck('name');
-            $waters = $waters->pluck('name');
-            $inclussions = $inclussions->pluck('name');
+            $targets = $targets->map(function ($item) {
+                return ['value' => $item->name, 'id' => $item->id];
+            });
+            $methods = $methods->map(function ($item) {
+                return ['value' => $item->name, 'id' => $item->id];
+            });
+            $waters = $waters->map(function ($item) {
+                return ['value' => $item->name, 'id' => $item->id];
+            });
+            $inclussions = $inclussions->map(function ($item) {
+                return ['value' => $item->name, 'id' => $item->id];
+            });
         }
         return view('pages.profile.newguiding', compact('waters', 'methods', 'targets', 'inclussions'));
     }

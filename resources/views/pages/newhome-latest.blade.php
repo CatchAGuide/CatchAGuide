@@ -1180,7 +1180,7 @@
         <div class="new-custom-owl owl-carousel owl-theme">
             @foreach($bookedGuidings as $most_booked_guiding)
                 <div class="item">
-                    <a href="{{route('guidings.show',[$most_booked_guiding->id,$most_booked_guiding->slug])}}">
+                    <a href="{{ $most_booked_guiding->is_newguiding ? route('guidings.newShow', [$most_booked_guiding->id, $most_booked_guiding->slug]) : route('guidings.show', [$most_booked_guiding->id, $most_booked_guiding->slug]) }}">
                         <div class="card" style="min-height:360px;">
                             @if(get_featured_image_link($most_booked_guiding))
                             <img src="{{get_featured_image_link($most_booked_guiding)}}" class="card-img-top">
@@ -1191,7 +1191,7 @@
                             <div class="card-body">
                             <h5 class="crop-text-2 card-title h6">{{translate($most_booked_guiding->title)}}</h5>
                             <small class="crop-text-1 small-text text-muted">{{translate($most_booked_guiding->location)}}</small>
-                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{$most_booked_guiding->price}}€</span></small>
+                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{ $most_booked_guiding->getLowestPrice() }}€</span></small>
                             </div>
                         </div>
                     </a>
@@ -1202,7 +1202,7 @@
         <div class="custom-owl owl-carousel owl-theme">
             @foreach($bookedGuidings as $most_booked_guiding)
                 <div class="item">
-                    <a href="{{route('guidings.show',[$most_booked_guiding->id,$most_booked_guiding->slug])}}">
+                    <a href="{{ $most_booked_guiding->is_newguiding ? route('guidings.newShow', [$most_booked_guiding->id, $most_booked_guiding->slug]) : route('guidings.show', [$most_booked_guiding->id, $most_booked_guiding->slug]) }}">
                         <div class="card" style="min-height:360px;">
                             @if(get_featured_image_link($most_booked_guiding))
                             <img src="{{get_featured_image_link($most_booked_guiding)}}" class="card-img-top">
@@ -1212,7 +1212,7 @@
                             <div class="card-body">
                             <h5 class="crop-text-2 card-title h6">{{translate($most_booked_guiding->title)}}</h5>
                             <small class="crop-text-1 small-text text-muted">{{translate($most_booked_guiding->location)}}</small>
-                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{$most_booked_guiding->price}}€</span></small>
+                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{ $most_booked_guiding->getLowestPrice() }}€</span></small>
                             </div>
                         </div>
                     </a>
@@ -1395,7 +1395,7 @@
             <div class="new-custom-owl owl-carousel owl-theme">
                 @foreach($newGuidings as $newGuiding)
                     <div class="item">
-                        <a href="{{route('guidings.show',[$newGuiding->id,$newGuiding->slug])}}">
+                        <a href="{{ $newGuiding->is_newguiding ? route('guidings.newShow', [$newGuiding->id, $newGuiding->slug]) : route('guidings.show', [$newGuiding->id, $newGuiding->slug]) }}">
                             <div class="card" style="min-height:360px;">
                                 @if(get_featured_image_link($newGuiding))
                                 <img src="{{get_featured_image_link($newGuiding)}}" class="card-img-top">
@@ -1405,7 +1405,7 @@
                                 <div class="card-body">
                                 <h5 class="crop-text-2 card-title h6">{{translate($newGuiding->title)}}</h5>
                                 <small class="crop-text-1 small-text text-muted">{{translate($newGuiding->location)}}</small>
-                                <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{$newGuiding->price}}€</span></small>
+                                <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{ $newGuiding->getLowestPrice() }}€</span></small>
                                 </div>
                             </div>
                         </a>
@@ -1416,7 +1416,7 @@
         <div class="custom-owl owl-carousel owl-theme">
             @foreach($newGuidings as $newGuiding)
                 <div class="item">
-                    <a href="{{route('guidings.show',[$newGuiding->id,$newGuiding->slug])}}">
+                    <a href="{{ $newGuiding->is_newguiding ? route('guidings.newShow', [$newGuiding->id, $newGuiding->slug]) : route('guidings.show', [$newGuiding->id, $newGuiding->slug]) }}">
                         <div class="card" style="min-height:360px;">
                             @if(get_featured_image_link($newGuiding))
                             <img src="{{get_featured_image_link($newGuiding)}}" class="card-img-top">
@@ -1426,7 +1426,7 @@
                             <div class="card-body">
                             <h5 class="crop-text-2 card-title h6">{{translate($newGuiding->title)}}</h5>
                             <small class="crop-text-1 small-text text-muted">{{translate($newGuiding->location)}}</small>
-                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{$newGuiding->price}}€</span></small>
+                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{ $newGuiding->getLowestPrice() }}€</span></small>
                             </div>
                         </div>
                     </a>

@@ -3,7 +3,7 @@
     <div class="logo">
         <a href="{{ route('welcome') }}"><img src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}" alt="Logo"></a>
     </div>
-    <div class="nav-links" style="color: #ccc;">
+    <div class="nav-links d-none d-sm-block" style="color: #ccc;">
         <a href="#" class="button new-filter-btn">Become a guide</a>
         <a class="header-login-link" href="{{ route('login') }}">Log in</a>
         <a class="header-signup-link" href="{{ route('login') }}">Sign up</a>
@@ -18,8 +18,11 @@
             </form>
         </div>
     </div>
+    <div class="d-flex justify-content-between align-items-center d-block d-sm-none">
+        <a href="#" class="mobile-nav__toggler" style="padding-top: 15px; padding-bottom: 15px;"><i class="fa fa-bars"></i></a>
+    </div>
 </nav>
-<header class="header" style="background-image: url('{{ asset('assets/images/allguidings.jpg') }}'); background-size: cover; background-position: center;">
+<header class="header" style="background-image: url('{{ asset('assets/images/allguidings.jpg') }}'); background-size: cover; background-position: center; z-index: 0;">
     <div class="overlay"></div>
     <div class="header-content container">
         <h1 class="h2 mt-5">@yield('header_title')</h1>

@@ -25,7 +25,8 @@ class DestinationFishChart extends Model
         'sep',
         'oct',
         'nov',
-        'dec'
+        'dec',
+        'language'
     ];
 
     /**
