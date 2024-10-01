@@ -204,7 +204,6 @@
                 $city_count = $cities->count();
                 $region_counter = 0;
                 $city_counter = 0;
-                //dump($regions);
                 @endphp
 
                 @if($region_count > 0)
@@ -229,6 +228,7 @@
                             @endphp
                         @endforeach
                     </div>
+                    @if($region_count > 4)
                     <button class="carousel-control-prev" type="button" data-bs-target="#carousel-regions" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Previous</span>
@@ -237,6 +237,7 @@
                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Next</span>
                     </button>
+                    @endif
                 </div>
                 @endif
                 @if($city_count > 0)
@@ -261,6 +262,7 @@
                             @endphp
                         @endforeach
                     </div>
+                    @if($city_count > 4)
                     <button class="carousel-control-prev" type="button" data-bs-target="#carousel-cities" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Previous</span>
@@ -269,6 +271,7 @@
                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Next</span>
                     </button>
+                    @endif
                 </div>
                 @endif
                 <h5 class="mb-2">Listing </h5>

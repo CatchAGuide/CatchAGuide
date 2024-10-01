@@ -33,6 +33,13 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
 <!-- COLOR SKIN CSS -->
 <link id="theme" rel="stylesheet" type="text/css" media="all" href="{{ asset('assets/admin/colors/color1.css') }}" />
+<style type="text/css">
+
+#cke_notifications_area_introduction, 
+#cke_notifications_area_body {
+    display: none!important;
+}
+</style>
 @livewireStyles
 
 @stack('styles')
