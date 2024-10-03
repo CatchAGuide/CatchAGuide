@@ -186,6 +186,12 @@
             min-width: 156px !important;
         }
     }
+    .card-img-overlay h5 {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        color: #fff;
+    }
 
 </style>
 @endsection
@@ -218,7 +224,17 @@
                                         <div class="card-img">
                                             <img src="{{ $region->getThumbnailPath() }}" class="dimg-fluid" width="300px" alt="...">
                                         </div>
-                                        <div class="card-img-overlay">{{ $region->name }}</div>
+                                        <div class="card-img-overlay">
+                                            <h5>{{ $region->name }}
+                                                @if($region->language == 'de')
+                                                <label><i class="fi fi-de"></i></label> 
+                                                @elseif($region->language == 'en')
+                                                <label><i class="fi fi-gb"></i></label>
+                                                @else
+                                                <label><i class="fi fi-de"></i></label>
+                                                @endif
+                                            </h5>
+                                        </div>
                                     </div>
                                 </a>
                             </div>
@@ -252,7 +268,17 @@
                                         <div class="card-img">
                                             <img src="{{ $city->getThumbnailPath() }}" class="dimg-fluid" width="300px" alt="...">
                                         </div>
-                                        <div class="card-img-overlay">{{ $city->name }}</div>
+                                        <div class="card-img-overlay">
+                                            <h5>{{ $city->name }}
+                                                @if($region->language == 'de')
+                                                <label><i class="fi fi-de"></i></label> 
+                                                @elseif($region->language == 'en')
+                                                <label><i class="fi fi-gb"></i></label>
+                                                @else
+                                                <label><i class="fi fi-de"></i></label>
+                                                @endif
+                                            </h5>
+                                        </div>
                                     </div>
                                 </a>
                             </div>
@@ -601,7 +627,7 @@
                                     </div>
                                     <div class="col-12 col-sm-12 col-md-2 col-lg-3 col-xl-2 col-xxl-2  mt-3">
                                         <div class="text-center">
-                                            <h5 class="mr-1 color-primary fw-bold text-center">@lang('message.from') {{ $guiding->getLowestPrice() }}€</h4>
+                                            <h5 class="mr-1 color-primary fw-bold text-center">@lang('message.from') {{ $guiding->getLowestPrice() }}€ p.p.</h4>
                                         </div>
                                         <div class="d-flex flex-column mt-4">
                                             <a class="btn theme-primary btn-theme-new btn-sm" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">Details</a>
