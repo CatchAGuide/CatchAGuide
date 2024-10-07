@@ -403,8 +403,6 @@ class GuidingsController extends Controller
             $guiding->desc_tour_unique = $request->has('desc_tour_unique') ? $request->input('desc_tour_unique') : '';
             $guiding->description = $this->generateLongDescription($request);
 
-
-
             //step 6
             $guiding->requirements = $this->saveRequirements($request);
             $guiding->recommendations = $this->saveRecommendations($request);   

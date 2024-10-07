@@ -4585,7 +4585,7 @@ select.list-dt:focus {
     <link rel="stylesheet" href="{{ asset('assets/css/tevily.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/tevily-responsive.css') }}" />
     <!--Page Header Start-->
-    <section class="page-header">
+    {{-- <section class="page-header">
         <div class="page-header__top">
             <div class="page-header-bg-magazin" style="background-image: url({{asset('assets/images/shutterstock_620805824.jpg')}}); "></div>
             <div class="page-header-bg-overly-magazin"></div>
@@ -4606,7 +4606,7 @@ select.list-dt:focus {
                 </div>
             </div>
         </div>
-    </section>
+    </section> --}}
     <!--Page Header End-->
     <livewire:checkout :guiding="$guiding" :persons="$persons" />
 @endsection

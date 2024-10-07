@@ -62,7 +62,7 @@
                 <div class="card mb-4">
                     <div class="card-body">
                         <div class="file-upload-wrapper">
-                            <input id="title_image" name="title_image[]" type="file" multiple onchange="previewImages(this);" />
+                            <input id="title_image" name="title_image[]" type="file" multiple />
                             <label for="title_image" class="file-upload-btn">Choose Files</label>
                         </div>
                         <div id="croppedImagesContainer">

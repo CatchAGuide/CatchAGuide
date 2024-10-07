@@ -44,14 +44,12 @@
     
     function initializeImageManager() {
         if (typeof ImageManager === 'undefined') {
-            console.error('ImageManager is not defined. Retrying in 100ms...');
             setTimeout(initializeImageManager, 100);
             return;
         }
 
         imageManager = new ImageManager('#croppedImagesContainer', '#title_image');
         
-        // Load existing images if editing
         if (document.getElementById('is_update').value === '1') {
             const existingImagesInput = document.getElementById('existing_images');
             const thumbnailPath = document.getElementById('thumbnail_path').value;
@@ -59,20 +57,20 @@
             if (existingImagesInput && existingImagesInput.value) {
                 imageManager.loadExistingImages(existingImagesInput.value, thumbnailPath);
             }
-             
         }
-        // Call setFormDataIfEdit here, after imageManager is initialized
+
         setFormDataIfEdit();
         
-        
-        // Prevent form submission on enter key
         document.getElementById('newGuidingForm').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
             }
         });
 
-        // ... (rest of your existing DOMContentLoaded code)
+        $('#title_image').on('change', function(event) {
+            console.log(event.target.files);
+            imageManager.previewImages(event.target.files);
+        });
     }
 
     $(document).on('click', '#saveDraftBtn', function(e) {
