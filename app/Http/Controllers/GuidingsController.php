@@ -443,8 +443,10 @@ class GuidingsController extends Controller
                         }
                     }
                     $guiding->prices = json_encode($pricePerPerson);
+                    $guiding->price = 0;
                 } else {
                     $guiding->prices = json_encode([ 'person' => 0, 'amount' => $request->input('price_per_boat')]);
+                    $guiding->price = $request->input('price_per_boat');
                 }
             }
             
@@ -519,16 +521,9 @@ class GuidingsController extends Controller
             return redirect()->route('profile.myguidings')->with('success', $isDraft ? 'Draft saved successfully!' : 'Guiding created successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Error saving guiding: ' . $e->getMessage());
-    
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'An error occurred while saving the guiding.',
-                ], 500);
-            }
-    
-            return redirect()->back()->with('error', 'An error occurred while saving the guiding.')->withInput();
+            Log::error('Error in guidingsStore: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            return response()->json(['error' => 'An error occurred while processing your request.'], 500);
         }
     }
 

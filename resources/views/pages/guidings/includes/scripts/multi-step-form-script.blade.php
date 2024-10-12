@@ -548,6 +548,7 @@
 
     // Add this function to handle form submission
     function submitForm(form) {
+        console.log('Submitting form...');
         const formData = new FormData(form);
 
         try {
@@ -571,10 +572,6 @@
             });
 
             const primaryImageIndex = imageManager.getPrimaryImageIndex();
-
-            for (let [key, value] of formData.entries()) {
-                console.log(key, value);
-            }
 
             fetch(form.action, {
                 method: 'POST',
@@ -611,6 +608,7 @@
                         console.error('Server returned an HTML error page. Check server logs for details.');
                         alert('An unexpected error occurred. Please try again later.');
                     } else {
+                        console.error(error.message);
                         alert(error.message);
                     }
                 } else if (typeof error === 'object' && error !== null) {
@@ -958,10 +956,8 @@
         const imageUploadInput = document.getElementById('title_image');
         if (imageUploadInput) {
             imageUploadInput.addEventListener('change', function(event) {
-                console.log('File input change event triggered');
                 if (imageManager) {
                     try {
-                        console.log('Calling handleFileSelect');
                         imageManager.handleFileSelect(event.target.files);
                     } catch (error) {
                         console.error('Error in handleFileSelect:', error);
