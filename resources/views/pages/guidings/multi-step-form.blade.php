@@ -36,6 +36,7 @@
 
         <form action="{{ route('profile.newguiding.store') }}" method="POST" id="newGuidingForm" enctype="multipart/form-data">
             @csrf
+            <meta name="csrf-token" content="{{ csrf_token() }}">
 
             @if ($errors->any())
                 <div class="alert alert-danger">
@@ -65,8 +66,7 @@
                             <input id="title_image" name="title_image[]" type="file" multiple />
                             <label for="title_image" class="file-upload-btn">Choose Files</label>
                         </div>
-                        <div id="croppedImagesContainer">
-                        </div>
+                        <div id="croppedImagesContainer"></div>
                     </div>
 
                     <div class="image-area" id="imagePreviewContainer"></div>
@@ -759,6 +759,11 @@
                         <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
                         <button type="submit" class="btn btn-primary" id="submitBtn">Submit & Publish</button>
                     </div>
+                </div>
+            </div>
+            <div id="loadingScreen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 9999;">
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 24px;">
+                    Loading...
                 </div>
             </div>
         </form>

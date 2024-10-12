@@ -86,6 +86,7 @@ class EventsController extends Controller
                     if ($currentDate->dayOfWeek == $day) {
                         BlockedEvent::create([
                             'user_id' => $data['user_id'],
+                            'source' => 'global',
                             'type' => 'blockiert',
                             'from' => $currentDate->toDateString(),
                             'due' => $currentDate->toDateString(),

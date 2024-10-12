@@ -41,9 +41,34 @@
             });
         });
     }
+
+    function handleImageUpload(event) {
+        const files = event.target.files;
+        const galleryContainer = document.getElementById('image-gallery');
+        
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.classList.add('gallery-image');
+                
+                const imgContainer = document.createElement('div');
+                imgContainer.classList.add('image-container');
+                imgContainer.appendChild(img);
+                
+                galleryContainer.appendChild(imgContainer);
+            }
+            
+            reader.readAsDataURL(file);
+        }
+    }
     
     function initializeImageManager() {
         if (typeof ImageManager === 'undefined') {
+            console.error('ImageManager class not found');
             setTimeout(initializeImageManager, 100);
             return;
         }
@@ -68,8 +93,7 @@
         });
 
         $('#title_image').on('change', function(event) {
-            console.log(event.target.files);
-            imageManager.previewImages(event.target.files);
+            imageManager.handleFileSelect(event.target.files);
         });
     }
 
@@ -140,7 +164,6 @@
         if (document.getElementById('is_update').value === '1') {
             const typeOfFishingData = '{{ $formData['type_of_fishing'] ?? '' }}';
             if (typeOfFishingData) {
-                console.log(typeOfFishingData);
                 const radioButton = document.querySelector(`input[name="type_of_fishing_radio"][value="${typeOfFishingData}"]`);
                 if (radioButton) {
                     radioButton.checked = true;
@@ -385,7 +408,7 @@
             const seasonalTripInputs = document.querySelectorAll('input[name="seasonal_trip"]');
             seasonalTripInputs.forEach(input => {
             if (input.checked && input.value === 'season_monthly') {
-                document.getElementById('monthly-selection').style.display = 'block';
+                document.getElementById('season_monthly').style.display = 'block';
                 }
             });
         }
@@ -505,27 +528,132 @@
             return;
         }
         
-        showLoadingScreen();
+        // Show loading screen
+        const loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen) {
+            loadingScreen.style.display = 'block';
+        }
         
         if (isDraft && isDraft.value === '1') {
             submitForm(form);
         } else if (form.noValidate || validateStep(currentStep)) {
             submitForm(form);
+        } else {
+            // Hide loading screen if validation fails
+            if (loadingScreen) {
+                loadingScreen.style.display = 'none';
+            }
         }
     }
 
     // Add this function to handle form submission
     function submitForm(form) {
-        const croppedImages = imageManager.getCroppedImages();
-        croppedImages.forEach((image, index) => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = `cropped_images[${index}]`;
-            input.value = image.dataUrl;
-            form.appendChild(input);
-        });
+        const formData = new FormData(form);
 
-        form.submit();
+        try {
+            if (!imageManager) {
+                console.error('ImageManager not initialized');
+                return;
+            }
+
+            // Get cropped images from ImageManager
+            const croppedImages = imageManager.getCroppedImages();
+
+            // Remove existing image files from formData
+            formData.delete('title_image[]');
+
+            // Add cropped images to formData
+            croppedImages.forEach((image, index) => {
+                if (image && image.dataUrl) {
+                    const blob = dataURItoBlob(image.dataUrl);
+                    formData.append(`title_image[]`, blob, `cropped_image_${index}.png`);
+                }
+            });
+
+            const primaryImageIndex = imageManager.getPrimaryImageIndex();
+
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        try {
+                            return JSON.parse(text);
+                        } catch (e) {
+                            throw new Error(text);
+                        }
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Form submitted successfully:', data);
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert('Form submitted successfully!');
+                }
+            })
+            .catch(error => {
+                console.error('Error submitting form:', error);
+                if (error instanceof Error) {
+                    if (error.message.startsWith('<!DOCTYPE html>')) {
+                        console.error('Server returned an HTML error page. Check server logs for details.');
+                        alert('An unexpected error occurred. Please try again later.');
+                    } else {
+                        alert(error.message);
+                    }
+                } else if (typeof error === 'object' && error !== null) {
+                    displayValidationErrors(error.errors || {});
+                } else {
+                    alert('An unexpected error occurred. Please try again.');
+                }
+            })
+            .finally(() => {
+                const loadingScreen = document.getElementById('loadingScreen');
+                if (loadingScreen) {
+                    loadingScreen.style.display = 'none';
+                }
+            });
+        } catch (error) {
+            console.error('Error preparing form data:', error);
+            alert('An error occurred while preparing the form data. Please try again.');
+        }
+    }
+
+    function displayValidationErrors(errors) {
+        const errorContainer = document.getElementById('error-container');
+        errorContainer.innerHTML = '';
+        errorContainer.style.display = 'block';
+
+        for (const field in errors) {
+            const errorMessage = errors[field][0]; // Get the first error message for each field
+            const errorElement = document.createElement('p');
+            errorElement.textContent = `${field}: ${errorMessage}`;
+            errorContainer.appendChild(errorElement);
+        }
+    }
+
+    // Helper function to convert data URI to Blob
+    function dataURItoBlob(dataURI) {
+        const byteString = atob(dataURI.split(',')[1]);
+        const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+        return new Blob([ab], {type: mimeString});
     }
 
     function validateStep(step) {
@@ -826,6 +954,25 @@
 
         //If edit is requested, set the form data
         setFormDataIfEdit();
+        
+        const imageUploadInput = document.getElementById('title_image');
+        if (imageUploadInput) {
+            imageUploadInput.addEventListener('change', function(event) {
+                console.log('File input change event triggered');
+                if (imageManager) {
+                    try {
+                        console.log('Calling handleFileSelect');
+                        imageManager.handleFileSelect(event.target.files);
+                    } catch (error) {
+                        console.error('Error in handleFileSelect:', error);
+                    }
+                } else {
+                    console.error('ImageManager not initialized');
+                }
+            });
+        } else {
+            console.error('File input element not found');
+        }
     });
 
     // Update the form's submit event listener

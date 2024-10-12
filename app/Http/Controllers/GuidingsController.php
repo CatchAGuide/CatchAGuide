@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\GuidingRequestMail;
 use App\Mail\SearchRequestUserMail;
 use Illuminate\Support\Facades\Log;
+use App\Models\BlockedEvent;
 
 class GuidingsController extends Controller
 {
@@ -355,14 +356,22 @@ class GuidingsController extends Controller
             
             $galeryImages = [];
             if ($request->has('title_image')) {
-                foreach($request->title_image as $index => $image){
+                foreach($request->file('title_image') as $index => $image){
                     $webp_path = media_upload($image, 'guidings-images', $guiding->slug. "-". $index);
-
+    
                     if ($index == $request->input('primaryImage', 0)) {
                         $guiding->thumbnail_path = $webp_path;
                     }
                     $galeryImages[] = $webp_path;
                 }
+                // foreach($request->title_image as $index => $image){
+                //     $webp_path = media_upload($image, 'guidings-images', $guiding->slug. "-". $index);
+
+                //     if ($index == $request->input('primaryImage', 0)) {
+                //         $guiding->thumbnail_path = $webp_path;
+                //     }
+                //     $galeryImages[] = $webp_path;
+                // }
             }
             $guiding->galery_images = json_encode($galeryImages);
 
@@ -466,10 +475,32 @@ class GuidingsController extends Controller
 
             if ($request->has('seasonal_trip')) {
                 $guiding->seasonal_trip = $request->input('seasonal_trip');
+                $allMonths = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+                
                 if ($request->input('seasonal_trip') == "season_monthly") {
-                    $guiding->months = json_encode($request->input('months'));
+                    $selectedMonths = $request->input('months');
+                    $guiding->months = json_encode($selectedMonths);
                 } else {
-                    $guiding->months = json_encode(['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december']);
+                    $selectedMonths = $allMonths;
+                    $guiding->months = json_encode($selectedMonths);
+                }
+
+                $blockedPeriods = [];
+                foreach ($allMonths as $index => $month) {
+                    if (!in_array($month, $selectedMonths)) {
+                        $year = date('Y');
+                        $monthNumber = str_pad($index + 1, 2, '0', STR_PAD_LEFT);
+                        $blockedFrom = date('Y-m-d', strtotime("$year-$monthNumber-01"));
+                        $blockedTo = date('Y-m-t', strtotime($blockedFrom));
+                        
+                        BlockedEvent::create([
+                            'user_id' => $guiding->user_id,
+                            'type' => 'blockiert',
+                            'source' => 'personal',
+                            'from' => $blockedFrom,
+                            'due' => $blockedTo,
+                        ]);
+                    }
                 }
             }
 

@@ -39,6 +39,7 @@ class EventService {
         return BlockedEvent::create([
             'from' => $from,
             'due' => $due,
+            'source' => 'global',
             'type' => 'booking',
             'user_id' => $guiding->user_id
         ]);
