@@ -141,6 +141,11 @@ class User extends Authenticatable
             $return = $amount / $count;
         }
 
+        /*$result = explode('.', $return);
+
+        if (isset($result[1])) {
+            return $result[0];
+        }*/
 
         return $return;
     }
