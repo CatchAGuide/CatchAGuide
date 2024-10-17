@@ -430,10 +430,10 @@ class Guiding extends Model
         } else {
             $validPrices = array_filter([
                 $this->price,
-                $this->price_two_persons / 2,
-                $this->price_three_persons / 3,
-                $this->price_four_persons / 4,
-                $this->price_five_persons / 5
+                $this->max_guests >= 2 ? $this->price_two_persons / 2 : null,
+                $this->max_guests >= 3 ? $this->price_three_persons / 3 : null,
+                $this->max_guests >= 4 ? $this->price_four_persons / 4 : null,
+                $this->max_guests >= 5 ? $this->price_five_persons / 5 : null
             ], function($value) { return $value > 0; });
 
             return !empty($validPrices) ? min(array_map('round', $validPrices)) : 0;

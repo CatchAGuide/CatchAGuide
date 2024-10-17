@@ -493,6 +493,13 @@ class GuidingsController extends Controller
                     if (!in_array($month, $selectedMonths)) {
                         $year = date('Y');
                         $monthNumber = str_pad($index + 1, 2, '0', STR_PAD_LEFT);
+                        $currentMonth = date('m');
+                        $year = date('Y');
+                        
+                        if ($monthNumber < $currentMonth) {
+                            $year++;
+                        }
+                        
                         $blockedFrom = date('Y-m-d', strtotime("$year-$monthNumber-01"));
                         $blockedTo = date('Y-m-t', strtotime($blockedFrom));
                         

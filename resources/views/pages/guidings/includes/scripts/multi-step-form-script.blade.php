@@ -344,26 +344,11 @@
             }
             
             const priceType = '{{ $formData['price_type'] ?? '' }}';
-            const prices = {!! json_encode($formData['prices'] ?? []) !!};
             if (priceType) {
                 const priceTypeRadio = document.querySelector(`input[name="price_type"][value="${priceType}"]`);
                 if (priceTypeRadio) {
                     priceTypeRadio.checked = true;
-                    if (prices && Object.keys(prices).length > 0) {
-                        if (priceType === 'per_person') {
-                            Object.entries(prices).forEach(([key, value]) => {
-                                const input = document.querySelector(`input[name="price_per_person[${key}]"]`);
-                                if (input) {
-                                    input.value = value;
-                                }
-                            });
-                        } else if (priceType === 'per_boat') {
-                            const input = document.querySelector('input[name="price_per_boat"]');
-                            if (input) {
-                                input.value = prices.amount;
-                            }
-                        }
-                    }
+                    priceTypeRadio.dispatchEvent(new Event('change')); // Trigger change event
                 }
             }
 
@@ -480,10 +465,19 @@
         if (priceType === 'per_person') {
             var guestCount = parseInt($('#no_guest').val()) || 1;
             for (var i = 1; i <= guestCount; i++) {
-                container.append(`<div class="input-group mt-2"><span class="input-group-text">Price</span><input type="number" class="form-control" name="price_per_person_${i}" placeholder="Price for ${i} person(s)"><span class="input-group-text">€ per Person</span></div>`);
+                container.append(`<div class="input-group mt-2">
+                    <span class="input-group-text">Price for ${i} person(s)</span>
+                    <input type="number" class="form-control" name="price_per_person_${i}" placeholder="Price for ${i} person(s)">
+                    <span class="input-group-text">€ per Person</span>
+                </div>`);
             }
         } else if (priceType === 'per_boat') {
-            container.append('<div class="input-group mt-2"><span class="input-group-text">Price</span><input type="number" class="form-control " name="price_per_boat" placeholder="Price per boat"><span class="input-group-text">€ per Boat</span></div>');
+            container.append('<div class="input-group mt-2"><span class="input-group-text">Price</span><input type="number" class="form-control" name="price_per_boat" placeholder="Price per boat"><span class="input-group-text">€ per Boat</span></div>');
+        }
+
+        // Populate fields if editing
+        if ($('#is_update').val() === '1') {
+            populatePriceFields(priceType);
         }
     });
 
@@ -492,6 +486,21 @@
             $('input[name="price_type"]:checked').change();
         }
     });
+
+    // Add this function to populate price fields when editing
+    function populatePriceFields(priceType) {
+        var prices = {!! json_encode($formData['prices'] ?? []) !!};
+        console.log(prices);
+        if (priceType === 'per_person') {
+            Object.entries(prices).forEach(([key, value]) => {
+                console.log(key);
+                console.log(value);
+                $(`input[name="price_per_person_${value.person}"]`).val(value.amount);
+            });
+        } else if (priceType === 'per_boat') {
+            $('input[name="price_per_boat"]').val(prices.amount);
+        }
+    }
 
     // Seasonal trip selection
     $('input[name="seasonal_trip"]').change(function() {
@@ -556,7 +565,6 @@
 
     // Add this function to handle form submission
     function submitForm(form) {
-        console.log('Submitting form...');
         const formData = new FormData(form);
 
         try {
