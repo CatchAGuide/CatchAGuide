@@ -1,0 +1,12 @@
+staging:
+    hostname: neueseite.eu
+    port: 22
+    user: neueseiteadmin
+    stage: staging
+    roles:
+        - app
+        - apache
+        - opcode-reset
+    deploy_path: /var/www/vhosts/neueseite.eu/subdomains/catchaguide.neueseite.eu/
+    htaccess_name: .htaccess.stage
+    bin_php: php80

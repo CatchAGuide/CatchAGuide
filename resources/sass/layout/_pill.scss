@@ -1,0 +1,22 @@
+.pill {
+  background-color: map-get($colors, "primary");
+  color: map-get($colors, "light");
+  border: 1px solid transparent;
+  border-radius: 5px;
+  padding: 0 13px;
+  font-size: 0.7rem;
+  line-height: 1.7rem;
+  letter-spacing: 0.07rem;
+  max-width: max-content;
+  transition-property: color, background-color, border-color;
+  transition-duration: 0.25s;
+  transition-timing-function: ease-in-out;
+  display: flex;
+  box-sizing: content-box;
+
+  &:is(:hover, :focus) {
+    border-color: map-get($colors, "primary");
+    background-color: map-get($colors, "light");
+    color: map-get($colors, "primary");
+  }
+}

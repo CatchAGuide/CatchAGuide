@@ -1,0 +1,24 @@
+<?php
+
+return [
+    'country' => 'Country',
+    'region' => 'Region',
+    'target_fish' => 'Target fish',
+    'num_of_guest' => 'Number of guest',
+    'time_frame' => 'Time frame',
+    'let_me_know' => 'let me know the best time to fish in the selected region for the selected target fish',
+    'do_you_like' => 'Do you like to have guided fishing tours on vacation?',
+    'yes' => 'Yes',
+    'no' => 'No',
+    'how_many_days' => 'how many days do you want guided fishing tours?',
+    'everyday' => 'Everyday',
+    'select' => 'Select',
+    'number_of_days_guided' => 'Number of days to be guided',
+    'do_you_want_boat_rental' => 'Do you want a rental boat?',
+    'boat_rental_days' => 'Number of days for boat rental',
+    'total_budget' => 'What is the total budget you want to spend?',
+    'phone' => 'Telefonnummer',
+    'mail_address' => 'Mailadresse',
+    'comments' => 'Kommentare',
+
+];

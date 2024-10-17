@@ -1,16 +1,19 @@
-## Hi there 👋
+# Catch A Guide
 
-<!--
-**CatchAGuide/CatchAGuide** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+[![pipeline status](https://gitlab.webschuppen.com/webschuppen/catch-a-guide/badges/staging/pipeline.svg)](https://gitlab.webschuppen.com/webschuppen/catch-a-guide/-/commits/staging)
 
-Here are some ideas to get you started:
+## Installation
+- Clone repository to your local machine
+- Go to root folder of repository
+- Execute ``ddev start``
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+## Deployment
+- Deploy to staging (https://catchaguide.neueseite.eu) with merging develop into staging
+- Deploy to production via SFTP
+
+## Commands
+- Console commands are available with ``ddev artisan ...``
+- Artisan options can be listed with ``ddev artisan``
+- Clear cache ``ddev artisan cache:clear``
+- Open Mailhog: ``ddev launch --mailhog``
+- Open PHPMyAdmin: ``ddev launch --phpmyadmin``

@@ -1,0 +1,8 @@
+.video-one {
+  &__list {
+    li {
+      color: map-get($colors, "primary");
+      text-align: left;
+    }
+  }
+}

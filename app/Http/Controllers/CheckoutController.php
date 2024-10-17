@@ -1,0 +1,73 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\CheckoutRequest;
+use App\Models\BlockedEvent;
+use App\Models\Booking;
+use App\Models\Guiding;
+use App\Models\User;
+use App\Services\HelperService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
+use App\Jobs\SendCheckoutEmail;
+
+class CheckoutController extends Controller
+{
+    /**
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|string
+     */
+    public function checkoutView()
+    {
+        if(Session::has('guiding_id')) {
+            return view('pages.checkout.index', [
+                'guiding' => Guiding::find(Session::get('guiding_id')),
+                'persons' => Session::get('person')
+            ]);
+        }
+        return route('welcome');
+    }
+
+    /**
+     * @param CheckoutRequest $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function checkout(CheckoutRequest $request)
+    {
+        Session::put(['guiding_id' => $request->guiding_id, 'person' => $request->person]);
+
+        return redirect()->route('checkout');
+    }
+
+
+    public function thankYou(Booking $booking)
+    {
+      
+        // Mail::to($user->email)->queue(new GuestBookingRequestMail($booking,$user,$guiding,$guide));
+        // Mail::to($guide->email)->queue(new GuideBookingRequestMail($booking,$user,$guiding,$guide));
+
+
+
+        // $booking->sendBookingConfirmationMail(Session::get('phone'));
+        // $booking->sendBookingConfirmationMailGuest(Session::get('phone'));
+        // $booking->sendBookingMailToCEO();
+        return view('pages.additional.thank_you',
+            [
+                'bookingid' => $booking->id,
+            ]
+        );
+    }
+
+
+    private function releaseBookingDate ($bookingId)
+    {
+        $booking = Booking::find($bookingId);
+
+        $blockedevent = BlockedEvent::find($booking->blocked_event_id);
+        if($booking->user_id != auth()->user()->id) {
+            return false;
+        }
+        $blockedevent->delete();
+        return true;
+    }
+}

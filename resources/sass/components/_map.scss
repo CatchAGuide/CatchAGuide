@@ -1,0 +1,13 @@
+.map {
+  &__wrap {
+    #map {
+      height: 400px;
+      width: 100%;
+      border: 1px solid map-get($colors, "dark");
+
+      @include media(">=tablet") {
+        height: 500px;
+      }
+    }
+  }
+}

@@ -1,0 +1,97 @@
+<!--APP-SIDEBAR-->
+<div class="sticky">
+    <div class="app-sidebar__overlay" data-bs-toggle="sidebar"></div>
+    <div class="app-sidebar">
+        <div class="side-header">
+            <a class="header-brand1" href="{{ route('welcome') }}">
+                <img src="{{ asset('assets/images/logo.png') }}" class="header-brand-img desktop-logo" alt="logo">
+                <img src="{{ asset('assets/images/logo.png') }}" class="header-brand-img toggle-logo" alt="logo">
+                <img src="{{ asset('assets/images/logo.png') }}" class="header-brand-img light-logo" alt="logo">
+                <img src="{{ asset('assets/images/logo.png') }}" class="header-brand-img light-logo1" alt="logo">
+            </a>
+            <!-- LOGO -->
+        </div>
+        <div class="main-sidemenu">
+            <div class="slide-left disabled" id="slide-left"><svg xmlns="http://www.w3.org/2000/svg" fill="#7b8191" width="24" height="24" viewBox="0 0 24 24"><path d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z"/></svg></div>
+            <ul class="side-menu">
+                <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.index') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.index') }}"><i class="side-menu__icon fe fe-home"></i><span class="side-menu__label">Dashboard</span></a>
+                </li>
+
+                <li class="sub-category">
+                    <h3>Verwaltung</h3>
+                </li>
+                <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.customers.index') }}"><i class="side-menu__icon fe fe-users"></i><span class="side-menu__label">Kunden</span></a>
+                    <a class="side-menu__item {{ request()->routeIs('admin.guides.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.guides.index') }}"><i class="side-menu__icon fe fe-anchor"></i><span class="side-menu__label">Guides</span></a>
+                    <a class="side-menu__item {{ request()->routeIs('admin.guidings.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.guidings.index') }}"><i class="side-menu__icon fe fe-briefcase"></i><span class="side-menu__label">Guidings</span></a>
+                    <a class="side-menu__item {{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.bookings.index') }}"><i class="side-menu__icon fe fe-dollar-sign"></i><span class="side-menu__label">Buchungen</span></a>
+                    <a class="side-menu__item {{ request()->routeIs('admin.payments.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.payments.index') }}"><i class="side-menu__icon fe fe-credit-card"></i><span class="side-menu__label">Zahlungen</span></a>
+                    <a class="side-menu__item {{ request()->routeIs('admin.guide-requests.index') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.guide-requests.index') }}"><i class="side-menu__icon fe fe-airplay"></i><span class="side-menu__label">Guide Anfragen</span></a>
+                </li>
+
+                <li class="sub-category">
+                    <h3>System</h3>
+                </li>
+
+                <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.employees.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.employees.index') }}"><i class="side-menu__icon fe fe-users"></i><span class="side-menu__label">Mitarbeiter</span></a>
+                </li>
+
+                <li class="slide {{ request()->routeIs('admin.settings.*') ? 'is-expanded' : '' }}">
+                    <a class="side-menu__item {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}  "
+                       data-bs-toggle="slide"
+                       href="">
+                        <i class="side-menu__icon fe fe-settings"></i>
+                        <span class="side-menu__label">Guidingeinstellungen</span>
+                    </a>
+                    <ul class="slide-menu ">
+                        <li><a href="{{route('admin.settings.levelindex')}}" class="slide-item  {{ request()->routeIs('admin.settings.levelindex') ? 'active' : '' }}" class="slide-item">Ausgelegt für</a></li>
+                        <li><a href="{{route('admin.settings.fishingtypeindex')}}" class="slide-item  {{ request()->routeIs('admin.settings.fishingtypeindex') ? 'active' : '' }}" class="slide-item">Angel-Art</a></li>
+                        <li><a href="{{route('admin.settings.equipmentindex')}}" class="slide-item " class="slide-item">Fishing  Equipment</a></li>
+                        <li><a href="{{route('admin.settings.fishingfromindex')}}" class="slide-item  {{ request()->routeIs('admin.settings.fishingfromindex') ? 'active' : '' }}" class="slide-item">Angeln von</a></li>
+                        <li><a href="{{route('admin.settings.inclussionindex')}}" class="slide-item  {{ request()->routeIs('admin.settings.inclussionindex') ? 'active' : '' }}" class="slide-item">Inbegriffen</a></li>
+                        <li><a href="{{route('admin.settings.methodindex')}}" class="slide-item  {{ request()->routeIs('admin.settings.methodindex') ? 'active' : '' }}" class="slide-item">Methode</a></li>
+                        <li><a href="{{route('admin.settings.waterindex')}}" class="slide-item  {{ request()->routeIs('admin.settings.waterindex') ? 'active' : '' }}" class="slide-item">Gewässertypen</a></li>
+                        <li><a href="{{route('admin.settings.targetindex')}}" class="slide-item  {{ request()->routeIs('admin.settings.targetindex') ? 'active' : '' }}"> Zielfisch</a></li>
+                    </ul>
+                </li>
+
+                {{-- <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.faq.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.faq.index') }}"><i class="side-menu__icon fe fe-help-circle"></i><span class="side-menu__label">Faq's</span></a>
+                </li> --}}
+                <li class="slide {{ request()->routeIs('admin.faq.*') ? 'is-expanded' : '' }}">
+                    <a class="side-menu__item {{ request()->routeIs('admin.faq.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#"><i class="side-menu__icon fe fe-book-open"></i><span class="side-menu__label">Faq</span><i class="angle fe fe-chevron-right"></i></a>
+                    <ul class="slide-menu">
+                        <li><a href="{{ route('admin.faq.home') }}" class="slide-item  {{ request()->routeIs('admin.faq.home') ? 'active' : '' }}">Home</a></li>
+                        <li><a href="{{ route('admin.faq.searchrequest') }}" class="slide-item  {{ request()->routeIs('admin.faq.search-request') ? 'active' : '' }}">Search Request</a></li>
+                    </ul>
+                </li>
+                <li class="slide {{ request()->routeIs('admin.blog.*') ? 'is-expanded' : '' }}">
+                    <a class="side-menu__item {{ request()->routeIs('admin.blog.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#"><i class="side-menu__icon fe fe-book-open"></i><span class="side-menu__label">Blog</span><i class="angle fe fe-chevron-right"></i></a>
+                    <ul class="slide-menu">
+                        <li><a href="{{ route('admin.blog.threads.index') }}" class="slide-item  {{ request()->routeIs('admin.blog.threads.*') ? 'active' : '' }}"> Beiträge</a></li>
+                        <li><a href="{{ route('admin.blog.categories.index') }}" class="slide-item  {{ request()->routeIs('admin.blog.categories.*') ? 'active' : '' }}"> Kategorien</a></li>
+                    </ul>
+                </li>
+                <a class="side-menu__item {{ request()->routeIs('admin.newblog.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#"><i class="side-menu__icon fe fe-book-open"></i><span class="side-menu__label">Category</span><i class="angle fe fe-chevron-right"></i></a>
+                <ul class="slide-menu">
+                    <li><a href="{{ route('admin.newblog.threads.index') }}" class="slide-item  {{ request()->routeIs('admin.newblog.threads.*') ? 'active' : '' }}"> Beiträge</a></li>
+                    <li><a href="{{ route('admin.category.country.index') }}" class="slide-item  {{ request()->routeIs('admin.category.country.*') ? 'active' : '' }}"> Country</a></li>
+                    <li><a href="{{ route('admin.category.region.index') }}" class="slide-item  {{ request()->routeIs('admin.category.region.*') ? 'active' : '' }}"> Region</a></li>
+                    <li><a href="{{ route('admin.category.city.index') }}" class="slide-item  {{ request()->routeIs('admin.category.city.*') ? 'active' : '' }}"> City</a></li>
+                </ul>
+            </li>
+                <li class="slide {{ request()->routeIs('admin.page-attribute.*') ? 'is-expanded' : '' }}">
+                    <a class="side-menu__item {{ request()->routeIs('admin.page-attribute.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#"><i class="side-menu__icon fe fe-book-open"></i><span class="side-menu__label">Page Attribute</span><i class="angle fe fe-chevron-right"></i></a>
+                    <ul class="slide-menu">
+                        <li><a href="{{ route('admin.page-attribute.en') }}" class="slide-item  {{ request()->routeIs('admin.page-attribute.en') ? 'active' : '' }}"> Catchaguide.com</a></li>
+                        <li><a href="{{ route('admin.page-attribute.de') }}" class="slide-item  {{ request()->routeIs('admin.page-attribute.de') ? 'active' : '' }}"> Catchaguide.de</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <div class="slide-right" id="slide-right"><svg xmlns="http://www.w3.org/2000/svg" fill="#7b8191" width="24" height="24" viewBox="0 0 24 24"><path d="M10.707 17.707 16.414 12l-5.707-5.707-1.414 1.414L13.586 12l-4.293 4.293z"/></svg></div>
+        </div>
+    </div>
+    <!--/APP-SIDEBAR-->
+</div>

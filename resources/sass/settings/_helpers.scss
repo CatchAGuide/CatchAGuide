@@ -1,0 +1,17 @@
+.column-reverse-row-normal {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column-reverse;
+  gap: 40px;
+
+  @include media(">=tablet") {
+    flex-direction: row;
+    gap: 0;
+  }
+}
+
+.sm-hidden {
+  @include media("<=tablet") {
+    display: none;
+  }
+}
