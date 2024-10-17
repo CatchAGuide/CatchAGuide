@@ -392,24 +392,32 @@
                 document.querySelector(`input[name="booking_window"][value="${booking_window}"]`).checked = true;
             }
 
-            const seasonal_trip = '{{ $formData['seasonal_trip'] ?? '' }}';
-            const months = {!! json_encode($formData['months'] ?? []) !!};
-            if (seasonal_trip) {
-                document.querySelector(`input[name="seasonal_trip"][value="${seasonal_trip}"]`).checked = true;
-                if (seasonal_trip === 'months' && months) {
-                    const months = JSON.parse(months);
-                    months.forEach(month => {
-                        document.querySelector(`input[name="months[]"][value="${month}"]`).checked = true;
-                    });
+            const seasonalTripData = '{{ $formData['seasonal_trip'] ?? '' }}';
+            const monthsData = {!! json_encode($formData['months'] ?? []) !!};
+            if (seasonalTripData) {
+                const seasonalTripRadio = document.querySelector(`input[name="seasonal_trip"][value="${seasonalTripData}"]`);
+                if (seasonalTripRadio) {
+                    seasonalTripRadio.checked = true;
+                    if (seasonalTripData === 'season_monthly') {
+                        document.getElementById('season_monthly').style.display = 'block';
+                        if (monthsData && monthsData.length > 0) {
+                            monthsData.forEach(month => {
+                                const monthCheckbox = document.querySelector(`input[name="months[]"][value="${month}"]`);
+                                if (monthCheckbox) {
+                                    monthCheckbox.checked = true;
+                                }
+                            });
+                        }
+                    } else {
+                        document.getElementById('season_monthly').style.display = 'none';
+                    }
                 }
             }
 
-            // Show/hide monthly selection based on seasonal_trip value
+            // Trigger change event on seasonal_trip radio buttons to ensure proper visibility
             const seasonalTripInputs = document.querySelectorAll('input[name="seasonal_trip"]');
             seasonalTripInputs.forEach(input => {
-            if (input.checked && input.value === 'season_monthly') {
-                document.getElementById('season_monthly').style.display = 'block';
-                }
+                input.dispatchEvent(new Event('change'));
             });
         }
     }
@@ -488,9 +496,9 @@
     // Seasonal trip selection
     $('input[name="seasonal_trip"]').change(function() {
         if ($(this).val() === 'season_monthly') {
-            $('#monthly_selection').show();
+            $('#season_monthly').show();
         } else {
-            $('#monthly_selection').hide();
+            $('#season_monthly').hide();
         }
     });
 
@@ -557,13 +565,10 @@
                 return;
             }
 
-            // Get cropped images from ImageManager
             const croppedImages = imageManager.getCroppedImages();
 
-            // Remove existing image files from formData
             formData.delete('title_image[]');
 
-            // Add cropped images to formData
             croppedImages.forEach((image, index) => {
                 if (image && image.dataUrl) {
                     const blob = dataURItoBlob(image.dataUrl);

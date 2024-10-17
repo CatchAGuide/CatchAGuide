@@ -9,6 +9,11 @@ class AddBlockTypeOnBlocker extends Migration
     public function up()
     {
         Schema::table('blocked_events', function (Blueprint $table) {
+            $table->dropColumn([
+                'source'
+            ]);
+        });
+        Schema::table('blocked_events', function (Blueprint $table) {
             $table->enum('source', ['personal', 'global'])->nullable()->before('user_id');
         });
     }
