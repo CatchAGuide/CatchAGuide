@@ -384,21 +384,19 @@
                                           </label>
                                         </div>
                                         <div>
-                                          @if(count($selectedExtras))
-                                            @if($guiding->is_newguiding)
-                                              @if($selectedExtras[$index])
-                                              <div class="d-flex align-items-center mb-2">
-                                                <label for="">Quantity:</label>
-                                                <input id="numericInput" class="w-25 form-control form-control-sm mx-2" type="number" min="0" step="1" name="quantity" value="2" max="{{$persons}}" wire:model="extraQuantities.{{ $index }}" wire:change="calculateTotalPrice" required>
-                                              </div>
-                                              @endif
-                                            @else
-                                              @if(in_array($extra->id, $selectedExtras))
-                                              <div class="d-flex align-items-center mb-2">
-                                                <label for="">Quantity:</label>
-                                                <input id="numericInput" class="w-25 form-control form-control-sm mx-2" type="number" min="0" step="1" name="quantity" value="2" max="{{$persons}}" wire:model="extraQuantities.{{ $extra->id }}" wire:change="calculateTotalPrice" required>
-                                              </div>
-                                              @endif
+                                          @if($guiding->is_newguiding)
+                                            @if(isset($selectedExtras[$index]) && $selectedExtras[$index])
+                                            <div class="d-flex align-items-center mb-2">
+                                              <label for="">Quantity:</label>
+                                              <input id="numericInput" class="w-25 form-control form-control-sm mx-2" type="number" min="1" step="1" name="quantity" value="1" max="{{$persons}}" wire:model="extraQuantities.{{ $index }}" wire:change="calculateTotalPrice" required>
+                                            </div>
+                                            @endif
+                                          @else
+                                            @if(in_array($extra->id, $selectedExtras))
+                                            <div class="d-flex align-items-center mb-2">
+                                              <label for="">Quantity:</label>
+                                              <input id="numericInput" class="w-25 form-control form-control-sm mx-2" type="number" min="1" step="1" name="quantity" value="1" max="{{$persons}}" wire:model="extraQuantities.{{ $extra->id }}" wire:change="calculateTotalPrice" required>
+                                            </div>
                                             @endif
                                           @endif
                                         </div>
@@ -482,7 +480,10 @@
       minDate: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
       lockDays: [
         @foreach($guiding->user->blocked_events as $blocked)
-          ["{{ substr($blocked->from,0,-9) }}", "{{ substr($blocked->from,0,-9) }}"],
+            @if($blocked->guiding_id == $guiding->id)
+            ["{{ substr($blocked->from,0,-9) }}", "{{ substr($blocked->due,0,-9) }}"],
+            @endif
+            ["{{ substr($blocked->from,0,-9) }}", "{{ substr($blocked->due,0,-9) }}"],
         @endforeach
         new Date(),
       ],

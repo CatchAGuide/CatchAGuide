@@ -426,64 +426,6 @@
             @if(!$agent->ismobile())
                 @include('pages.guidings.content.bookguiding')
             @endif
-            {{-- <div class="sticky-top" style="top: 20px;">
-                <!-- Guiding Booking -->
-                <div class="card mb-3">
-                    <div class="card-header">Guiding Buchen</div>
-                    <div class="card-body">
-                        <form>
-                            <div class="mb-3">
-                                <select class="form-select" aria-label="Personenanzahl">
-                                    <option selected>Bitte wähle die Personenanzahl</option>
-                                    @if($guiding->price_type == 'per_person')
-                                        @foreach(json_decode($guiding->prices) as $price)
-                                            <option value="{{ $price->person }}">{{ $price->person }} {{ $price->person == 1 ? 'Person' : 'Personen' }}</option>
-                                        @endforeach
-                                    @else
-                                        <option value="1">1 Person</option>
-                                        <option value="2">2 Personen</option>
-                                        <option value="3">3 Personen</option>
-                                        <option value="4">4 Personen</option>
-                                    @endif
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-danger w-100">VERFÜGBARKEIT PRÜFEN & BUCHEN</button>
-                        </form>
-                        <div class="mt-3">
-                            <h5>Preis</h5>
-                            @if($guiding->price_type == 'per_person')
-                                <ul class="list-unstyled">
-                                    @foreach(json_decode($guiding->prices) as $price)
-                                        <li class="d-flex justify-content-between align-items-center">
-                                            <span>{{ $price->person }} {{ $price->person == 1 ? 'Person' : 'Personen' }}</span>
-                                            <span class="text-right">
-                                                <span class="text-danger">{{ $price->person > 1 ? round($price->amount / $price->person) : $price->amount }}€</span>
-                                                @if($price->person > 1)
-                                                    <span class="text-black" style="font-size: 0.8em;"> p.P</span>
-                                                @endif
-                                            </span>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            @else
-                                <ul class="list-unstyled">
-                                    @foreach(json_decode($guiding->prices) as $price)
-                                        <li class="d-flex justify-content-between align-items-center">
-                                            <span>{{ $price->person }} {{ $price->person == 1 ? 'Person' : 'Personen' }}</span>
-                                            <span class="text-right">
-                                                <span class="text-danger">{{ round($price->amount / $price->person) }}€</span>
-                                                @if($price->person > 1)
-                                                    <span class="text-black" style="font-size: 0.8em;"> p.P</span>
-                                                @endif
-                                            </span>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div> --}}
         </div>
 
         <!-- Map Section -->
@@ -694,6 +636,9 @@
             minDate: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
             lockDays: [
                 @foreach($guiding->user->blocked_events as $blocked)
+                    @if($blocked->guiding_id == $guiding->id)
+                    ["{{ substr($blocked->from,0,-9) }}", "{{ substr($blocked->due,0,-9) }}"],
+                    @endif
                     ["{{ substr($blocked->from,0,-9) }}", "{{ substr($blocked->due,0,-9) }}"],
                 @endforeach
                 new Date(),
