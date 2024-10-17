@@ -341,9 +341,13 @@ class GuidingsController extends Controller
             $data = $request->validated();
             $isDraft = $data['is_draft'] ?? false;
 
-            $guiding = new Guiding();
+            if ($request->input('is_update') == '1') {
+                $guiding = Guiding::findOrFail($request->input('guiding_id'));
+            } else {
+                $guiding = new Guiding();
+                $guiding->user_id = auth()->id();
+            }
 
-            $guiding->user_id = auth()->id();
             $guiding->is_newguiding = 1;
             $guiding->slug = slugify($request->input('title') . "-" . $request->input('location') . "-" . auth()->id());
 
@@ -364,14 +368,6 @@ class GuidingsController extends Controller
                     }
                     $galeryImages[] = $webp_path;
                 }
-                // foreach($request->title_image as $index => $image){
-                //     $webp_path = media_upload($image, 'guidings-images', $guiding->slug. "-". $index);
-
-                //     if ($index == $request->input('primaryImage', 0)) {
-                //         $guiding->thumbnail_path = $webp_path;
-                //     }
-                //     $galeryImages[] = $webp_path;
-                // }
             }
             $guiding->galery_images = json_encode($galeryImages);
 
@@ -487,7 +483,12 @@ class GuidingsController extends Controller
                     $guiding->months = json_encode($selectedMonths);
                 }
 
-                $blockedPeriods = [];
+                if ($request->input('is_update') == '1') {
+                    BlockedEvent::where('guiding_id', $guiding->id)
+                                ->where('type', 'blockiert')
+                                ->delete();
+                }
+
                 foreach ($allMonths as $index => $month) {
                     if (!in_array($month, $selectedMonths)) {
                         $year = date('Y');
@@ -498,7 +499,7 @@ class GuidingsController extends Controller
                         BlockedEvent::create([
                             'user_id' => $guiding->user_id,
                             'type' => 'blockiert',
-                            'source' => 'personal',
+                            'guiding_id' => $guiding->id,
                             'from' => $blockedFrom,
                             'due' => $blockedTo,
                         ]);
@@ -510,15 +511,11 @@ class GuidingsController extends Controller
 
             DB::commit();
 
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => $isDraft ? 'Draft saved successfully!' : 'Guiding created successfully!',
-                    'redirect_url' => route('profile.myguidings'),
-                ]);
-            }
-            
-            return redirect()->route('profile.myguidings')->with('success', $isDraft ? 'Draft saved successfully!' : 'Guiding created successfully!');
+            return response()->json([
+                'success' => true,
+                'message' => $isDraft ? 'Draft saved successfully!' : 'Guiding created successfully!',
+                'redirect_url' => route('profile.myguidings'),
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error in guidingsStore: ' . $e->getMessage());
@@ -531,7 +528,6 @@ class GuidingsController extends Controller
     {
         $user = Auth::user();
         $data = $request->all();
-        Log::info($data);
         $currentStep = $request->input('current_step', 1);
 
         return response()->json(['success' => true, 'message' => 'Draft saved successfully']);
