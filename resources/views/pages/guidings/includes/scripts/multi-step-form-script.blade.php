@@ -12,6 +12,29 @@
     let city = '';
     let country = '';
     let postal_code = '';
+
+    const errorMapping = {
+        title: { field: 'Title', step: 1 },
+        title_image: { field: 'Galery Image', step: 1 },
+        primaryImage: { field: 'Primary Image', step: 1 },
+        location: { field: 'Location', step: 1 },
+        type_of_fishing: { field: 'Type of Fishing', step: 2 },
+        target_fish: { field: 'Target Fish', step: 3 },
+        methods: { field: 'Methods', step: 3 },
+        water_types: { field: 'Water Types', step: 3 },
+        style_of_fishing: { field: 'Style of Fishing', step: 4 },
+        desc_course_of_action: { field: 'Course of Action', step: 5 },
+        desc_meeting_point: { field: 'Meeting Point', step: 5 },
+        desc_tour_unique: { field: 'Tour Unique', step: 5 },
+        desc_starting_time: { field: 'Starting Time', step: 5 },
+        tour_type: { field: 'Tour Type', step: 7 },
+        duration: { field: 'Duration', step: 7 },
+        no_guest: { field: 'Number of Guests', step: 7 },
+        price_type: { field: 'Price Type', step: 7 },
+        allowed_booking_advance: { field: 'Allowed Booking Advance', step: 8 },
+        booking_window: { field: 'Booking Window', step: 8 },
+        seasonal_trip: { field: 'Seasonal Trip', step: 8 },
+    };
     
     function initAutocomplete() {
         autocomplete = new google.maps.places.Autocomplete(
@@ -68,7 +91,6 @@
     
     function initializeImageManager() {
         if (typeof ImageManager === 'undefined') {
-            console.error('ImageManager class not found');
             setTimeout(initializeImageManager, 100);
             return;
         }
@@ -490,11 +512,8 @@
     // Add this function to populate price fields when editing
     function populatePriceFields(priceType) {
         var prices = {!! json_encode($formData['prices'] ?? []) !!};
-        console.log(prices);
         if (priceType === 'per_person') {
             Object.entries(prices).forEach(([key, value]) => {
-                console.log(key);
-                console.log(value);
                 $(`input[name="price_per_person_${value.person}"]`).val(value.amount);
             });
         } else if (priceType === 'per_boat') {
@@ -560,6 +579,12 @@
             if (loadingScreen) {
                 loadingScreen.style.display = 'none';
             }
+            
+            // Scroll to error container if there are validation errors
+            const errorContainer = document.getElementById('error-container');
+            if (errorContainer && errorContainer.style.display === 'block') {
+                errorContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
     }
 
@@ -574,7 +599,6 @@
             }
 
             const croppedImages = imageManager.getCroppedImages();
-
             formData.delete('title_image[]');
 
             croppedImages.forEach((image, index) => {
@@ -607,11 +631,10 @@
                 return response.json();
             })
             .then(data => {
-                console.log('Form submitted successfully:', data);
                 if (data.redirect_url) {
                     window.location.href = data.redirect_url;
                 } else {
-                    alert('Form submitted successfully!');
+                    displayValidationErrors(data.errors);
                 }
             })
             .catch(error => {
@@ -644,15 +667,25 @@
 
     function displayValidationErrors(errors) {
         const errorContainer = document.getElementById('error-container');
-        errorContainer.innerHTML = '';
-        errorContainer.style.display = 'block';
+        errorContainer.innerHTML = ''; // Clear previous errors
+        errorContainer.style.display = 'block'; // Show the error container
+
+        const errorList = document.createElement('ul'); // Create a new list for errors
 
         for (const field in errors) {
-            const errorMessage = errors[field][0]; // Get the first error message for each field
-            const errorElement = document.createElement('p');
-            errorElement.textContent = `${field}: ${errorMessage}`;
-            errorContainer.appendChild(errorElement);
+            const errorMessage = errors[field][0]; 
+            const fieldInfo = errorMapping[field]; 
+            
+            const listItem = document.createElement('li');
+            if (fieldInfo) {
+                listItem.textContent = `${fieldInfo.field} (Step ${fieldInfo.step}): ${errorMessage}`;
+            } else {
+                listItem.textContent = errorMessage; 
+            }
+            errorList.appendChild(listItem);
         }
+
+        errorContainer.appendChild(errorList);
     }
 
     // Helper function to convert data URI to Blob
@@ -990,3 +1023,4 @@
 
 <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY') }}&libraries=places&callback=initAutocomplete" async defer></script>
 @endpush
+

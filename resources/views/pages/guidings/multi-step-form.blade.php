@@ -2,7 +2,6 @@
 <div class="card">
     <div class="card-body">
         
-        <div id="error-container" class="alert alert-danger" style="display: none;"></div>
         <div class="step-wrapper">
             <div class="step-buttons">
                 <div class="step-button active" data-step="1">
@@ -33,6 +32,7 @@
 
             <div class="step-line"></div>
         </div>
+        <div id="error-container" class="alert alert-danger" style="display: none;"></div>
 
         <form action="{{ route('profile.newguiding.store') }}" method="POST" id="newGuidingForm" enctype="multipart/form-data">
             @csrf
