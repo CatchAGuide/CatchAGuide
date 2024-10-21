@@ -165,9 +165,29 @@
 
             <!-- Description Section -->
             <div class="card mb-3">
-                <div class="card-header">Description</div>
+                <div class="card-header">Course of action</div>
                 <div class="card-body">
-                    <p>{!! $guiding->description !!}</p>
+                    <p>{!! $guiding->desc_course_of_action !!}</p>
+                </div>
+            </div>
+            <div class="card mb-3">
+                <div class="card-header">Starting time</div>
+                <div class="card-body">
+                    <p>{!! $guiding->desc_starting_time !!}</p>
+                </div>
+            </div>
+            
+            <div class="card mb-3">
+                <div class="card-header">Meeting point</div>
+                <div class="card-body">
+                    <p>{!! $guiding->desc_meeting_point !!}</p>
+                </div>
+            </div>
+            
+            <div class="card mb-3">
+                <div class="card-header">Tour highlights</div>
+                <div class="card-body">
+                    <p>{!! $guiding->desc_tour_unique !!}</p>
                 </div>
             </div>
 
