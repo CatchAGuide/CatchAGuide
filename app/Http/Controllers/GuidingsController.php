@@ -34,6 +34,7 @@ class GuidingsController extends Controller
         $locale = Config::get('app.locale');
 
         $title = '';
+        $filter_title = '';
         $randomSeed = Session::get('random_seed');
         if (!$randomSeed) {
             $randomSeed = rand();
@@ -53,6 +54,7 @@ class GuidingsController extends Controller
 
         if($request->has('num_guests') && !empty($request->get('num_guests'))){
             $title .= __('guidings.Guest') . ' ' . $request->num_guests . ' | ';
+            $filter_title .= __('guidings.Guest') . ' ' . $request->num_guests . ', ';
             $q = $query->where('max_guests','>=',$request->get('num_guests'));
         }
 
@@ -90,13 +92,17 @@ class GuidingsController extends Controller
 
             if(count($requestMethods)){
                 $title .= __('guidings.Method') . ' (';
+                $filter_title .= __('guidings.Method') . ' (';
                 $method_rows = Method::whereIn('id', $request->methods)->get();
                 $title_row = '';
                 foreach ($method_rows as $row) {
                     $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
                 }
                 $title .= substr($title_row, 0, -2);
-                $title .= ') | ';
+                $title .= '), ';
+                $filter_title .= substr($title_row, 0, -2);
+                $filter_title .= '), ';
+
                 $query->whereHas('guidingMethods', function ($query) use ($requestMethods) {
                     $query->whereIn('method_id', $requestMethods);
                 });
@@ -111,6 +117,7 @@ class GuidingsController extends Controller
             if($requestFishingTypes){
 
                 $title .= __('guidings.Fishing_Type') . 'Fishing Type (';
+                $filter_title .= __('guidings.Fishing_Type') . 'Fishing Type (';
                 $method_rows = FishType::whereIn('id', $request->fishing_type)->get();
                 $title_row = '';
                 foreach ($method_rows as $row) {
@@ -118,6 +125,8 @@ class GuidingsController extends Controller
                 }
                 $title .= substr($title_row, 0, -2);
                 $title .= ') | ';
+                $filter_title .= substr($title_row, 0, -2);
+                $filter_title .= '), ';
 
                 $query->whereHas('fishingTypes', function ($query) use ($requestFishingTypes) {
                     $query->where('id', $requestFishingTypes);
@@ -127,6 +136,7 @@ class GuidingsController extends Controller
 
         if($request->has('duration') && !empty($request->get('duration'))){
             $title .= __('guidings.Duration') . ' ' . $request->duration . ' | ';
+            $filter_title .= __('guidings.Duration') . ' ' . $request->duration . ', ';
 
             $q = $query->where('duration','>=',$request->get('duration'));
         }
@@ -150,6 +160,7 @@ class GuidingsController extends Controller
             if(count($requestWater)){
 
                 $title .= __('guidings.Water') . ' (';
+                $filter_title .= __('guidings.Water') . ' (';
                 $method_rows = Water::whereIn('id', $request->water)->get();
                 $title_row = '';
                 foreach ($method_rows as $row) {
@@ -157,6 +168,8 @@ class GuidingsController extends Controller
                 }
                 $title .= substr($title_row, 0, -2);
                 $title .= ') | ';
+                $filter_title .= substr($title_row, 0, -2);
+                $filter_title .= '), ';
 
                 $query->whereHas('guidingWaters', function ($query) use ($requestWater) {
                     $query->whereIn('water_id', $requestWater);
@@ -171,6 +184,7 @@ class GuidingsController extends Controller
             if(count($requestFish)){
 
                 $title .= __('guidings.Target_Fish') . ' (';
+                $filter_title .= __('guidings.Target_Fish') . ' (';
                 $method_rows = Target::whereIn('id', $request->target_fish)->get();
                 $title_row = '';
                 foreach ($method_rows as $row) {
@@ -178,6 +192,8 @@ class GuidingsController extends Controller
                 }
                 $title .= substr($title_row, 0, -2);
                 $title .= ') | ';
+                $filter_title .= substr($title_row, 0, -2);
+                $filter_title .= '), ';
 
                 $query->whereHas('guidingTargets', function ($query) use ($requestFish) {
                     $query->whereIn('target_id', $requestFish);
@@ -186,8 +202,38 @@ class GuidingsController extends Controller
 
         }
 
+        if($request->has('price_range')){
+            $price_range = $request->get('price_range');
+            $price = explode('-', $price_range);
+
+            $title .= 'Price ' . $request->price_range . ' | ';
+            $filter_title .= 'Price ab ' . $request->price_range . ' p.P., ';
+
+            $query->select(['*', DB::raw('(CASE WHEN price_five_persons IS NOT NULL THEN price_five_persons/5 WHEN price_four_persons IS NOT NULL THEN price_four_persons/4 WHEN price_three_persons IS NOT NULL THEN price_three_persons/3 WHEN price_two_persons IS NOT NULL THEN price_two_persons/2 ELSE price END) AS lowest_price')]);
+            if (count($price) > 1) {
+                $query->havingRaw('lowest_price >= ? AND lowest_price <= ?', $price);
+            } else {
+                $query->havingRaw('lowest_price >= ?', $price);
+
+            }
+
+        }
+
+        if($request->has('ratings')){
+            $ratings = $request->get('ratings');
+
+            $title .= 'Ratings ' . $request->ratings . ' | ';
+            $filter_title .= 'Ratings ' . $request->ratings . ' Star/s, ';
+
+            $query->whereIn('user_id', function ($query1) use ($ratings) {
+                $query1->select('guide_id')->from('ratings')->where('rating', $ratings);
+            });
+
+        }
+
         if($request->has('country')){
             $title .= __('guidings.Country') . ' ' . $request->country . ' | ';
+            $filter_title .= __('guidings.Country') . ' ' . $request->country . ', ';
             $query->where('country',$request->get('country'));
         }
 
@@ -195,6 +241,7 @@ class GuidingsController extends Controller
         if($request->has('radius')){
 
             $title .= __('guidings.Radius') . ' ' . $request->radius . 'km | ';
+            $filter_title .= __('guidings.Radius') . ' ' . $request->radius . 'km, ';
             $radius = $request->get('radius');
         }
 
@@ -202,7 +249,8 @@ class GuidingsController extends Controller
         $placeLng = $request->get('placeLng');
 
         if($request->has('place') && empty($request->get('place'))){
-            $title .= __('guidings.Place') . ' ' . $request->place . ' | ';
+            $title .= __('guidings.Place') . ' ' . $request->place . ', ';
+            $filter_title .= __('guidings.Place') . ' ' . $request->place . ' | ';
             return redirect()->route('guidings.index', $request->except([
                 'placeLng',
                 'placeLat'
@@ -212,6 +260,7 @@ class GuidingsController extends Controller
         if(!empty($placeLat) && !empty($placeLng) && !empty($request->get('place'))){
 
             $title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
+            $filter_title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ', ';
             $query->select(['guidings.*'])
             ->selectRaw("(6371 * acos(cos(radians($placeLat)) * cos(radians(lat)) * cos(radians(lng) - radians($placeLng)) + sin(radians($placeLat)) * sin(radians(lat)))) AS distance")
             ->where('status', 1)
@@ -240,14 +289,15 @@ class GuidingsController extends Controller
             }
         }
 
-       
         $guidings = $query->paginate(20);
 
+        $filter_title = substr($filter_title, 0, -2);
 
         $guidings->appends(request()->except('page'));
 
         return view('pages.guidings.index', [
             'title' => $title,
+            'filter_title' => $filter_title,
             'guidings' => $guidings,
             'radius' => $radius,
             'allGuidings' => $allGuidings,
