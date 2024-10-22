@@ -1,13 +1,14 @@
 <nav class="navbar-custom mb-5">
     <div class="container">
         <div class="row align-items-center">
-            <div class="col-lg-4">
+            <div class="col-4 col-lg-4">
                 <div class="logo">
                     <a href="{{ route('welcome') }}"><img src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}" alt="Logo"></a>
                 </div>
             </div>
-            <div class="col-lg-8">
-                <div class="nav-links text-right d-flex justify-content-end align-items-center">
+            <div class="col-8 col-lg-8 d-none d-lg-block">
+                <div class="nav-links text-right d-flex justify-content-end align-items-end">
+                <!-- <div class="nav-links text-right d-flex justify-content-end align-items-center"> -->
                     @if(Auth::check())
                         <a href="{{ route('profile.bookings') }}" class="me-3" style="color: #787780;">Bookings</a>
                         {{-- <a href="#" class="me-3" style="color: #787780;">Inbox</a> --}}
@@ -30,6 +31,8 @@
             </div>
         </div>
 
+        <!-- <form class="search-form-short row gx-2 pe-0 d-none d-sm-none d-md-none" id="global-search" action="{{route('guidings.index')}}" method="get"> -->
+        @if(request()->segment(1) != 'guidings')
         <form class="search-form-short row gx-2 pe-0" id="global-search" action="{{route('guidings.index')}}" method="get">
             <div class="row global-search-row">
                 <div class="col-lg-4 col-sm-12 column-input mx-0 pt-1 px-0">
@@ -63,5 +66,6 @@
                 </div>
             </div>
         </form>
+        @endif
     </div>
 </nav>
