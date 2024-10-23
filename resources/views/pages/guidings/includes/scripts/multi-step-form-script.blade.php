@@ -776,22 +776,12 @@
                     errors.push('Water types are required.');
                     isValid = false;
                 }
-                break;
-            case 4:
-                // if (!document.querySelector('input[name="experience_level[]"]:checked')) {
-                //     errors.push('Please select at least one experience level.');
-                //     isValid = false;
-                // }
-                if (!document.getElementById('inclussions').value.trim()) {
-                    errors.push('Inclusions are required.');
-                    isValid = false;
-                }
                 if (!document.querySelector('input[name="style_of_fishing"]:checked')) {
                     errors.push('Please select a style of fishing.');
                     isValid = false;
                 }
                 break;
-            case 5:
+            case 4:
                 if (!document.getElementById('is_update').value.trim() || document.getElementById('is_update').value.trim() === '0') {
                     if (!document.getElementById('desc_course_of_action').value.trim()) {
                         errors.push('Course of action description is required.');
@@ -816,10 +806,10 @@
                     }
                 }
                 break;
-            case 6:
+            case 5:
                 // No specific validation for this step
                 break;
-            case 7:
+            case 6:
                 if (!document.querySelector('input[name="tour_type"]:checked')) {
                     errors.push('Please select a tour type.');
                     isValid = false;
@@ -838,7 +828,7 @@
                 }
                 // Add more price validation based on the selected price type
                 break;
-            case 8:
+            case 7:
                 if (!document.querySelector('input[name="allowed_booking_advance"]:checked')) {
                     errors.push('Please select an allowed booking advance.');
                     isValid = false;
@@ -853,6 +843,10 @@
                 }
                 if (document.querySelector('input[name="seasonal_trip"]:checked').value === 'season_monthly' && !document.querySelector('input[name="months[]"]:checked')) {
                     errors.push('Please select at least one month for seasonal trips.');
+                    isValid = false;
+                }
+                if (!document.getElementById('inclussions').value.trim()) {
+                    errors.push('Included in the price are required.');
                     isValid = false;
                 }
                 break;
