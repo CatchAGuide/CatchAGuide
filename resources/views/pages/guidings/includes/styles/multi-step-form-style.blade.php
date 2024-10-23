@@ -110,6 +110,7 @@
         .image-card img {
             width: 100%;
             height: auto;
+            aspect-ratio: 6 / 4;
             object-fit: contain;
             border-radius: 10px 10px 0 0;
         }
@@ -202,8 +203,11 @@
         }
         
         .btn-group-toggle .btn-checkbox {
-            border: 2px solid #e8604c;
-            color: #e8604c;
+            
+            border: 2px solid #ddd; /* Inactive border */
+            color: black; /* Inactive text color */
+            /* border: 2px solid #e8604c;
+            color: #e8604c; */
             background-color: transparent;
             border-radius: 10px;
             padding: 10px 20px;
@@ -215,26 +219,13 @@
             cursor: pointer;    
         }
 
-        .btn-group-toggle input[type="radio"]:checked + .btn-checkbox,
-        .btn-group-toggle input[type="checkbox"]:checked + .btn-checkbox {
-            background-color: #fef5f3;
-            color: #e8604c;
-            border-color: #e8604c;
-        }
-        
-        .btn-group-toggle .btn-checkbox:hover {
-            background-color: #fef5f3;
-            color: #e8604c;
-            border-color: #e8604c;
-        }
-
         .btn-group-toggle .btn-checkbox {
             color: #787780;
         }
 
         .btn-group-toggle .btn-checkbox.active {
-            color: #e8604c;
-            background-color: #fef5f3;
+            background-color: #fef5f3; /* Active background */
+            color: #e8604c; /* Active text color */
             border-color: #e8604c;
         }
         
@@ -380,8 +371,6 @@
             margin-top: 25px;
         }
 
-        .btn-group-toggle input[type="radio"]:checked + .btn-checkbox,
-        .btn-group-toggle input[type="checkbox"]:checked + .btn-checkbox,
         .step-buttons .step-button.active {
             background-color: #f2856d;
             color: white;
@@ -433,23 +422,23 @@
             background-color: #313041;
         }
 
-        .btn-group-toggle .btn-checkbox {
-            background-color: #313041;
-            color: white;
-            border-color: #313041;
-        }
-
         .btn-group-toggle .btn-checkbox:hover {
-            background-color: #fef5f3;
+            /* background-color: #fef5f3;
             color: #f2856d;
-            border-color: #f2856d;
+            border-color: #f2856d; */
+            background-color: transparent; /* Hover background */
+            color: #313041; /* Hover text color */
+            border-color: #313041;
         }
 
         .btn-group-toggle input[type="radio"]:checked + .btn-checkbox,
         .btn-group-toggle input[type="checkbox"]:checked + .btn-checkbox {
-            background-color: #f2856d;
+            background-color: #fef5f3; /* Active background */
+            color: #e8604c; /* Active text color */
+            border-color: #e8604c;
+            /* background-color: #f2856d;
             color: white;
-            border-color: #f2856d;
+            border-color: #f2856d; */
         }
 
         .card-body {
@@ -473,7 +462,7 @@
 
         .image-preview-wrapper {
             width: 300px;
-            height: 240px;
+            height: 200px;
             margin: 10px;
             position: relative;
             overflow: hidden;

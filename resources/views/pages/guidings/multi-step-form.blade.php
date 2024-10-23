@@ -8,24 +8,24 @@
                     <i class="fas fa-ship"></i>
                 </div>
                 <div class="step-button" data-step="2">
-                    <i class="fas fa-info-circle"></i>
+                    <i class="fas fa-water"></i>
                 </div>
                 <div class="step-button" data-step="3">
-                    <i class="fas fa-fish"></i>
+                    <i class="fas fa-anchor"></i>
                 </div>
-                <div class="step-button" data-step="4">
+                {{-- <div class="step-button" data-step="4">
                     <i class="fas fa-chart-line"></i>
-                </div>
-                <div class="step-button" data-step="5">
+                </div> --}}
+                <div class="step-button" data-step="4">
                     <i class="fas fa-file-alt"></i>
                 </div>
-                <div class="step-button" data-step="6">
+                <div class="step-button" data-step="5">
                     <i class="fas fa-info-circle"></i>
                 </div>
-                <div class="step-button" data-step="7">
+                <div class="step-button" data-step="6">
                     <i class="fas fa-dollar-sign"></i>
                 </div>
-                <div class="step-button" data-step="8">
+                <div class="step-button" data-step="7">
                     <i class="fas fa-calendar-alt"></i>
                 </div>
             </div>
@@ -59,7 +59,7 @@
 
                 <label for="title_image" class="form-label fw-bold fs-5">
                     Gallery Image
-                    <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Move an uploaded image to center what you like to show. Zoom or turn the image if required and chose your favorite as a title image."></i>
+                    <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title='Choose a title which describes your tour best. Include for example the location, the target fish, the water name, etc. Example: "Fishing tour in Amsterdam for Perch & Zander".'></i>
                 </label>
                 <div class="card mb-4">
                     <div class="card-body">
@@ -112,7 +112,7 @@
 
             <!-- Step 2 -->
             <div class="step" id="step2">
-                <h5>Provide details about your guiding service</h5>
+                <h5>Type of fishing and boat description</h5>
 
                 <div class="form-group">
                     <label for="type_of_fishing" class="form-label fw-bold fs-5">
@@ -129,7 +129,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="option-card" id="shoreOption" onclick="selectOption('shore')">
-                                <i class="fas fa-water option-icon"></i>
+                                <i class="fas fa-umbrella-beach option-icon"></i>
                                 <p class="option-label">Shore</p>
                                 <input type="radio" name="type_of_fishing_radio" value="shore" class="d-none">
                             </div>
@@ -174,8 +174,8 @@
 
                     <div class="form-group">
                         <label for="descriptions" class="form-label fw-bold fs-5">
-                            Description
-                            <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title='"Change title to "Boat information" Tell your guests more about your boat by adding detailed information for each aspect. "''></i>
+                            Boat description
+                            <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title='Tell your guests more about your boat by adding detailed information for each aspect.'></i>
                         </label>
                         <div class="btn-group-toggle">
                             <div class="btn-checkbox-container">
@@ -232,7 +232,7 @@
 
                     <div class="form-group">
                         <label for="extras" class="form-label fw-bold fs-5">
-                            Extras
+                            Extras and boat equipment
                             <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Here you can add extra equipment which the guests can find on your boat."></i>
                         </label>
                         <input  class="form-control" name="extras" id="extras" placeholder="Add extras..." data-bs-toggle="tooltip" title="Here you can add extra equipment which the guests can find on your boat.">
@@ -253,7 +253,7 @@
 
             <!-- Step 3 -->
             <div class="step" id="step3">
-                <h5>Specify fish species and fishing details</h5>
+                <h5>Specify target fish and fishing method</h5>
                 
                 <div class="form-group">
                     <label for="target_fish" class="form-label fw-bold fs-5">
@@ -272,59 +272,7 @@
                     </label>
                     <input type="text" class="form-control" name="methods" id="methods" data-role="tagsinput" placeholder="Select Methods...">
                 </div>
-
-                <hr>
                 
-                <div class="form-group">
-                    <label for="water_types" class="form-label fw-bold fs-5">
-                        Water Types
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Chose the water type on which your fishing tour takes place most of the time. "></i>
-                    </label>
-                    <input type="text" class="form-control" name="water_types" id="water_types" data-role="tagsinput" placeholder="Select Water Tyles...">
-                </div>
-
-                <hr>
-
-                <div class="button-group">
-                    <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn">Leave & Save to Draft</button>
-                    </div>
-                    <div class="right-buttons">
-                        <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
-                        <button type="button" class="btn btn-primary" id="nextBtn" onclick="validateStep(currentStep)">Next</button>
-                        <button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">Submit</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 4 -->
-            <div class="step" id="step4">
-                <h5>Describe your expertise and experience</h5>
-
-                <div class="form-group">
-                    <label for="experience_level" class="form-label fw-bold fs-5">
-                        Experience Level
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="What experience level is your guiding designed for? Your fishing trip can also be designed for beginners and advanced anglers together. "></i>
-                    </label>
-                    <div class="d-flex flex-wrap btn-group-toggle">
-                        <input type="checkbox" name="experience_level[]" value="beginner" id="beginner">
-                        <label for="beginner" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Beginner</label>
-                        
-                        <input type="checkbox" name="experience_level[]" value="advance" id="advance">
-                        <label for="advance" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Advance</label>
-                    </div>
-                </div>
-
-                <hr>
-                
-                <div class="form-group">
-                    <label for="inclussions" class="form-label fw-bold fs-5">
-                        Inclusions
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Chose all extras which are included in your fishing tour without additional price charges."></i>
-                    </label>
-                    <input type="text" class="form-control" name="inclussions" id="inclussions" data-role="tagsinput" placeholder="Select inclussions...">
-                </div>
-
                 <hr>
                 
                 <div class="form-group">
@@ -344,6 +292,18 @@
                     </div>
                 </div>
 
+                <hr>
+                
+                <div class="form-group">
+                    <label for="water_types" class="form-label fw-bold fs-5">
+                        Water Types
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Choose the water type on which your fishing tour takes place most of the time."></i>
+                    </label>
+                    <input type="text" class="form-control" name="water_types" id="water_types" data-role="tagsinput" placeholder="Select Water Tyles...">
+                </div>
+
+                <hr>
+
                 <div class="button-group">
                     <div class="left-buttons">
                         <button type="button" class="btn btn-secondary" id="saveDraftBtn">Leave & Save to Draft</button>
@@ -356,18 +316,68 @@
                 </div>
             </div>
 
-            <!-- Step 5 -->
-            <div class="step" id="step5">
-                <h5>Write a detailed description of your service</h5>
-                
-                @if(isset($formData) && $formData['is_update'] == 1)
-                    <div class="form-group">
-                        <label for="long_description">Overall summary of the service and what it offers</label>
-                        <textarea name="long_description" id="long_description" class="form-control" placeholder="course of action. . . .">{{ $formData['long_description'] ?? '' }}</textarea>
-                    </div>
+            <!-- Step 4 -->
+            {{-- <div class="step" id="step4"> --}}
+                {{-- <h5>Describe your expertise and experience</h5> --}}
 
-                    <hr>
-                @endif
+                {{-- <div class="form-group">
+                    <label for="experience_level" class="form-label fw-bold fs-5">
+                        Experience Level
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="What experience level is your guiding designed for? Your fishing trip can also be designed for beginners and advanced anglers together. "></i>
+                    </label>
+                    <div class="d-flex flex-wrap btn-group-toggle">
+                        <input type="checkbox" name="experience_level[]" value="beginner" id="beginner">
+                        <label for="beginner" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Beginner</label>
+                        
+                        <input type="checkbox" name="experience_level[]" value="advance" id="advance">
+                        <label for="advance" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Advance</label>
+                    </div>
+                </div> --}}
+
+                {{-- <hr>
+                
+                <div class="form-group">
+                    <label for="inclussions" class="form-label fw-bold fs-5">
+                        Inclusions
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Chose all extras which are included in your fishing tour without additional price charges."></i>
+                    </label>
+                    <input type="text" class="form-control" name="inclussions" id="inclussions" data-role="tagsinput" placeholder="Select inclussions...">
+                </div> --}}
+
+                {{-- <hr>
+                
+                <div class="form-group">
+                    <label for="style_of_fishing" class="form-label fw-bold fs-5">
+                        Style Of Fishing
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="What style of fishing is your guiding designed for? Your fishing trip can also be designed foractive and passive fishing together. "></i>
+                    </label>
+                    <div class="d-flex flex-wrap btn-group-toggle">
+                        <input type="radio" name="style_of_fishing" value="active" id="active">
+                        <label for="active" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Active</label>
+                        
+                        <input type="radio" name="style_of_fishing" value="passive" id="passive">
+                        <label for="passive" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Passive</label>
+                        
+                        <input type="radio" name="style_of_fishing" value="active_passive" id="active_passive">
+                        <label for="active_passive" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Active / Passive</label>
+                    </div>
+                </div> --}}
+
+                {{-- <div class="button-group">
+                    <div class="left-buttons">
+                        <button type="button" class="btn btn-secondary" id="saveDraftBtn">Leave & Save to Draft</button>
+                    </div>
+                    <div class="right-buttons">
+                        <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
+                        <button type="button" class="btn btn-primary" id="nextBtn" onclick="validateStep(currentStep)">Next</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">Submit</button>
+                    </div>
+                </div>
+            </div> --}}
+
+            <!-- Step 5 -->
+            <div class="step" id="step4">
+                <h5>Write a detailed description of your service</h5>
                 
                 <div class="form-group">
                     <label for="desc_course_of_action" class="form-label fw-bold fs-5">
@@ -406,6 +416,15 @@
                     </label>
                     <textarea name="desc_tour_unique" id="desc_tour_unique" class="form-control" placeholder="Tell your guests about special highlights they can experience on a fishing tour with you.">{{ $formData['desc_tour_unique'] ?? '' }}</textarea>
                 </div>
+                
+                @if(isset($formData) && $formData['is_update'] == 1)
+                    <div class="form-group">
+                        <label for="long_description">Overall summary of the service and what it offers</label>
+                        <textarea name="long_description" id="long_description" class="form-control" placeholder="course of action. . . ." readonly style="width: 100%; height: auto; min-height: 100px;" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'">{{ $formData['long_description'] ?? '' }}</textarea>
+                    </div>
+
+                    <hr>
+                @endif
 
                 <div class="button-group">
                     <div class="left-buttons">
@@ -420,7 +439,7 @@
             </div>
 
             <!-- Step 6 -->
-            <div class="step" id="step6">
+            <div class="step" id="step5">
                 <h5>Add any additional information</h5>
 
                 <div class="form-group">
@@ -536,7 +555,7 @@
                 <div class="form-group">
                     <label for="recommended_preparation" class="form-label fw-bold fs-5">
                         Recommended preparation
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="How can your guests prepare themselves for a fishing tour with you? Chose all things your guests should keep in mind when planning the tour."></i>
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="How can your guests prepare themselves for a fishing tour with you? Choose all things your guests should keep in mind when planning the tour."></i>
                     </label>
                     <div class="btn-group-toggle">
                         <div class="btn-checkbox-container">
@@ -584,7 +603,7 @@
             </div>
 
             <!-- Step 7 -->
-            <div class="step" id="step7">
+            <div class="step" id="step6">
                 <h5>Set your pricing structure</h5>
                 <div class="form-group">
                     <label for="tour_type" class="form-label fw-bold fs-5">
@@ -633,7 +652,7 @@
                 
                 <div class="form-group">
                     <label for="no_guest" class="form-label fw-bold fs-5">
-                        Number of guest
+                        Max number of guests
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="How many guests can take part on your fishing tour max? "></i>
                     </label>
                     <input type="number" class="form-control" id="no_guest" name="no_guest" value="{{ $formData['no_guest'] ?? '' }}" placeholder="0">
@@ -644,7 +663,7 @@
                 <div class="form-group">
                     <label for="price" class="form-label fw-bold fs-5">
                         Pricing
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Do you have one fixed price for a tour no matter how many guests take part or will the price depend on how many guests take part?"></i>
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Do you have fixed price per tour or will the price depend on how many guests will join? Enter the gross price which will be charged to your guests."></i>
                     </label>
                     <div class="d-flex flex-wrap btn-group-toggle">
                         <input type="radio" name="price_type" value="per_person" id="per_person_checkbox">
@@ -657,10 +676,20 @@
                     <div class="form-group" id="dynamic-price-fields-container"></div>
                 </div>
 
+                
+                <hr>
+                <div class="form-group">
+                    <label for="inclussions" class="form-label fw-bold fs-5">
+                        Included in the price
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Chose all extras which are included in your fishing tour without additional price charges."></i>
+                    </label>
+                    <input type="text" class="form-control" name="inclussions" id="inclussions" data-role="tagsinput" placeholder="Select inclussions...">
+                </div>
+
                 <hr>
                 <div class="form-group">
                     <label for="extra_pricing" class="form-label fw-bold fs-5">
-                        Extras
+                        Extras which can be booked additionally
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Here you can add extras which can be booked with an additional surecharge. Enter the name and the price per person and add extras by clicking the plus symbol below. Example: Lunch for 15€ per person. These extras can actively be chosen by your guests during a reservation request. "></i>
                         <button type="button" id="add-extra" class="btn btn-sm btn-secondary ms-2"><i class="fas fa-plus"></i></button>
                     </label>
@@ -680,11 +709,11 @@
             </div>
 
             <!-- Step 8 -->
-            <div class="step" id="step8">
+            <div class="step" id="step7">
                 <h5>Define your availability and booking options</h5>
                 <div class="form-group">
                     <label for="allowed_booking_advance" class="form-label fw-bold fs-5">
-                        Allowance of min. booking days in advance
+                        How last minute can a guest book a tour with you?
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="How many days in advance do you allow a booking of your fishing trip? "></i>
                     </label>
                     <div class="d-flex flex-wrap btn-group-toggle">
@@ -706,7 +735,7 @@
 
                 <div class="form-group">
                     <label for="booking_window" class="form-label fw-bold fs-5">
-                        Booking window for how long in advance you allow bookings
+                        How far into the future can a guest book a tour with you?
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="How many months into the future do you allow the booking of your fishing tour?"></i>
                     </label>
                     <div class="d-flex flex-wrap btn-group-toggle">
