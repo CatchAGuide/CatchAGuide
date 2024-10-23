@@ -69,7 +69,7 @@
             <div class="row">
                 <div class="col-md-4 my-1">
                     <div class="trending-card">
-                        <a href="/guidings?country=Germany"> 
+                        <a href="{{ route('destination.country', ['country' => 'deutschland']) }}"> 
                             <div class="trending-card-wrapper">
                                 <img alt="Deutschland" class="trending-card-background" src="{{asset('assets/2024/germany/deutschland4.webp')}}">
                                 <div class="trending-card-wrapper-content">
@@ -90,7 +90,7 @@
                 </div>
                 <div class="col-md-4 my-1">
                     <div class="trending-card">
-                        <a href="/guidings?country=Netherlands">
+                        <a href="{{ route('destination.country', ['country' => 'niederlande']) }}">
                             <div class="trending-card-wrapper">
                                 <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/netherlands/holland1.webp')}}">
                                 <div class="trending-card-wrapper-content">
@@ -111,7 +111,7 @@
                 </div>
                 <div class="col-md-4 my-1">
                     <div class="trending-card">
-                        <a href="/guidings?country=Denmark">
+                        <a href="{{ route('destination.country', ['country' => 'danemark']) }}">
                             <div class="trending-card-wrapper">
                                 <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/denmark/denmark.webp')}}">
                                 <div class="trending-card-wrapper-content">
@@ -132,7 +132,7 @@
                 </div>
                 <div class="col-md-4 my-1">
                     <div class="trending-card">
-                        <a href="/guidings?country=Sweden"> 
+                        <a href="{{ route('destination.country', ['country' => 'schweden']) }}"> 
                             <div class="trending-card-wrapper">
                                 <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/sweden/schweden5.webp')}}">
                                 <div class="trending-card-wrapper-content">
@@ -153,7 +153,7 @@
                 </div>
                 <div class="col-md-4 my-1">
                     <div class="trending-card">
-                        <a href="/guidings?country=Spain">
+                        <a href="{{ route('destination.country', ['country' => 'spanien']) }}">
                             <div class="trending-card-wrapper">
                                 <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/spain/spain.webp')}}">
                                 <div class="trending-card-wrapper-content">
@@ -174,7 +174,7 @@
                 </div>
                 <div class="col-md-4 my-1">
                     <div class="trending-card">
-                        <a href="/guidings?country=Portugal">
+                        <a href="{{ route('destination.country', ['country' => 'portugal']) }}">
                             <div class="trending-card-wrapper">
                                 <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/portugal/portugal.webp')}}">
                                 <div class="trending-card-wrapper-content">
@@ -195,7 +195,7 @@
                 </div>
                 <div class="col-md-4 my-1">
                     <div class="trending-card">
-                        <a href="/guidings?country=Croatia">
+                        <a href="{{ route('destination.country', ['country' => 'kroatien']) }}">
                             <div class="trending-card-wrapper">
                                 <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/croatia/croatia.webp')}}">
                                 <div class="trending-card-wrapper-content">
