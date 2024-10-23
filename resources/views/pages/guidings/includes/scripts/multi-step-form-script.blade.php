@@ -222,18 +222,42 @@
                 }
             });
 
-            const extrasInputData = document.querySelector('input[name="extras"]');
-            if (extrasInputData) {
-                const extrasTagify = new Tagify(extrasInputData);
+            const extrasTagify = initTagify('input[name="extras"]', {
+                whitelist: [
+                    'GPS', 'Echolot', 'Live Scope', 'Radar', 'Funk', 'Flybridge', 'WC', 
+                    'Roofing', 'Dusche', 'Küche', 'Bett', 'Wifi', 'Ice box/ Kühlschrank', 
+                    'Air conditioning', 'Fighting chair', 'E-Motor', 'Felitiertisch'
+                ].sort(),
+                dropdown: {
+                    maxItems: Infinity,
+                    classname: "tagify__dropdown",
+                    enabled: 0,
+                    closeOnSelect: false
+                }
+            });
+
+            if (document.getElementById('is_update').value === '1') {
                 const extrasData = {!! json_encode($formData['boat_extras'] ?? []) !!};
-                extrasTagify.addTags(extrasData);
+                if (extrasTagify && extrasData) {
+                    extrasTagify.addTags(extrasData);
+                }
             }
 
-            const targetFishInputData = document.querySelector('input[name="target_fish"]');
-            if (targetFishInputData) {
-                const targetFishTagify = new Tagify(targetFishInputData);
+            const targetFishTagify = initTagify('input[name="target_fish"]', {
+                whitelist: {!! json_encode($targets->toArray()) !!}.sort(),
+                dropdown: {
+                    maxItems: Infinity,
+                    classname: "tagify__dropdown",
+                    enabled: 0,
+                    closeOnSelect: false
+                }
+            });
+
+            if (document.getElementById('is_update').value === '1') {
                 const targetFishData = {!! json_encode($formData['target_fish'] ?? []) !!};
-                targetFishTagify.addTags(targetFishData);
+                if (targetFishTagify && targetFishData) {
+                    targetFishTagify.addTags(targetFishData);
+                }
             }
 
             const methodsInputData = document.querySelector('input[name="methods"]');
@@ -488,9 +512,9 @@
             var guestCount = parseInt($('#no_guest').val()) || 1;
             for (var i = 1; i <= guestCount; i++) {
                 container.append(`<div class="input-group mt-2">
-                    <span class="input-group-text">Price for ${i} person(s)</span>
-                    <input type="number" class="form-control" name="price_per_person_${i}" placeholder="Price for ${i} person(s)">
-                    <span class="input-group-text">€ per Person</span>
+                    <span class="input-group-text">Total price for ${i} ${i === 1 ? 'guest &nbsp;' : 'guests'}</span>
+                    <input type="number" class="form-control" name="price_per_person_${i}" placeholder="Price for ${i} ${i === 1 ? 'person' : 'persons'}">
+                    <span class="input-group-text">€</span>
                 </div>`);
             }
         } else if (priceType === 'per_boat') {
@@ -540,7 +564,7 @@
                     <span class="input-group-text">Additional Offer</span>
                     <input type="text" class="form-control mr-2" name="extra_name_${extraCount}" placeholder="Extra name">
                     <span class="input-group-text">Price</span>
-                    <input type="number" class="form-control mr-2" name="extra_price_${extraCount}" placeholder="100.00">
+                    <input type="number" class="form-control mr-2" name="extra_price_${extraCount}" placeholder="Enter price per person">
                     <span class="input-group-text">€ per Person</span>
                 </div>
                 <button type="button" class="btn btn-danger btn-sm remove-extra"><i class="fas fa-trash"></i></button>
@@ -704,7 +728,6 @@
         const errorContainer = document.getElementById('error-container');
         errorContainer.style.display = 'none';
         errorContainer.innerHTML = '';
-        return true;
 
         let isValid = true;
         let errors = [];
@@ -718,8 +741,8 @@
         switch(step) {
             case 1:
                 if (!document.getElementById('title_image').files.length) {
-                    errors.push('Please upload at least one image.');
-                    isValid = false;
+                    // errors.push('Please upload at least one image.');
+                    // isValid = false;
                 }
                 if (!document.getElementById('location').value.trim()) {
                     errors.push('Location is required.');
@@ -755,10 +778,10 @@
                 }
                 break;
             case 4:
-                if (!document.querySelector('input[name="experience_level[]"]:checked')) {
-                    errors.push('Please select at least one experience level.');
-                    isValid = false;
-                }
+                // if (!document.querySelector('input[name="experience_level[]"]:checked')) {
+                //     errors.push('Please select at least one experience level.');
+                //     isValid = false;
+                // }
                 if (!document.getElementById('inclussions').value.trim()) {
                     errors.push('Inclusions are required.');
                     isValid = false;
@@ -878,8 +901,11 @@
     function initTagify(selector, options = {}) {
         const element = document.querySelector(selector);
         if (element && !element.tagify) {
-            new Tagify(element, options);
+            const tagify = new Tagify(element, options);
+            element.tagify = tagify;
+            return tagify;
         }
+        return element.tagify;
     }
 
     // Then, in your DOMContentLoaded event listener, replace the existing Tagify initializations with:
