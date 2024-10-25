@@ -162,7 +162,7 @@
                 @foreach($guidings as $guiding)
                                    <div class="row m-0 mb-2">
                                         <div class="col-sm-6 col-md-12">
-                                            <div class="row border shadow-sm bg-white">
+                                            <div class="row border shadow-sm bg-white xszzs">
                                                 <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-1">
                                                     <div id="carouselExampleControls-{{$guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
                                                         <div class="carousel-inner">

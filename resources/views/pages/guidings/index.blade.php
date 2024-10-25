@@ -41,7 +41,7 @@
     }
 
     .carousel .carousel-control-next {
-        right: 28px;
+        right: 0px;
     }
 
     .carousel .carousel-control-prev {
@@ -363,7 +363,7 @@
                                           </div>
                                     </div>
                                     <div class="col-sm-12 col-lg-12 ps-md-0">
-                                        <button class="btn btn-sm theme-primary btn-theme-new w-100 h-100" style="font-size:0.75rem">@lang('message.Search')</button>    
+                                        <button class="btn btn-sm theme-primary btn-theme-new w-100 h-100" >@lang('message.Search')</button>    
                                     </div>
                                 </div>
                             </form>
@@ -380,8 +380,7 @@
                             <div class="tours-list__right">
                                 <div class="tours-list__inner">
                                     @foreach($guidings as $guiding)
-                                
-                                    <div class="row m-0 mb-2">
+                                    <div class="row m-0 mb-2 guiding-list-item">
                                         <div class="col-md-12">
                                             <div class="row p-2 border shadow-sm bg-white rounded">
                                                 <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1">
@@ -410,169 +409,121 @@
                                             
                                                 </div>
                                                 <div class="col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 mt-1">
-                                                    <h5 class="fw-bolder text-truncate"><a class="text-dark" href="{{ $guiding->is_newguiding ? route('guidings.newShow', [$guiding->id, $guiding->slug]) : route('guidings.show', [$guiding->id, $guiding->slug]) }}">{{translate($guiding->title)}}</a></h5>
-                                                    <span class="text-center" style="font-size:1rem;color:rgb(28, 28, 28)"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($guiding->location) }}</span>                                      
-                                                    <div class="row mt-2">
-                                                        <div class="col-6 col-sm-6 col-md-6">
-                                                            <div class="d-flex align-items-center">
-                                                                <div>
-                                                                    <img src="{{asset('assets/images/icons/clock.svg')}}" height="20" width="20" alt="" />
+                                                    <a href="{{ $guiding->is_newguiding ? route('guidings.newShow', [$guiding->id, $guiding->slug]) : route('guidings.show', [$guiding->id, $guiding->slug]) }}">
+                                                        <div>
+                                                            <div class="guidings-item">
+                                                                <div class="guidings-item-title">
+                                                                    <h5 class="fw-bolder text-truncate">{{translate($guiding->title)}}</h5>
+                                                                    <span class="text-center" style="font-size:1rem;color:rgb(28, 28, 28)"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($guiding->location) }}</span>                                      
                                                                 </div>
-                                                                <div class="mx-2" style="font-size:0.75rem">
-                                                                    {{ $guiding->duration }} @if($guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-6 col-sm-6 col-md-6">
-                                                            <div class="d-flex align-items-center mt-2">
-                                                                <div class="icon-small">
-                                                                    <span class="icon-user"></span>
-                                                                </div>
-                                                                <div class="mx-2" style="font-size:0.75rem">
-                                                                {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
+                                                                <div class="guidings-item-ratings">
+                                                                <div class="ratings-score">
+                                                                        <i data-lucide="star" size="32"></i>
+                                                                        <span>{{$guiding->user->average_rating()}} </span>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="col-6 col-sm-6 col-md-6">
-                                                            <div class="d-flex align-items-center">
-                                                                <div>
-                                                                    <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
+                                                            <div class="row mt-2">
+                                                                <div class="col-6 col-sm-6 col-md-6 guidings-icon-container"> 
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div>
+                                                                            <img src="{{asset('assets/images/icons/clock.svg')}}" height="20" width="20" alt="" />
+                                                                        </div>
+                                                                        <div class="mx-2" >
+                                                                            {{ $guiding->duration }} @if($guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
-                                                                <div class="mx-2">
-                                                                    <div class="tours-list__content__trait__text" style="font-size:0.75rem">
-                                                                        @php
-                                                                        $guidingTargets = $guiding->guidingTargets->pluck('name')->toArray();
-                                                                        if(app()->getLocale() == 'en'){
-                                                                            $guidingTargets =  $guiding->guidingTargets->pluck('name_en')->toArray();
-                                                                        }
-                                                                        @endphp
+                                                                <div class="col-6 col-sm-6 col-md-6 guidings-icon-container"> 
+                                                                    <div class="d-flex align-items-center mt-2">
+                                                                        <div class="icon-small">
+                                                                            <span class="icon-user"></span>
+                                                                        </div>
+                                                                        <div class="mx-2" >
+                                                                        {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-6 col-sm-6 col-md-6 guidings-icon-container"> 
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div>
+                                                                            <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
+                                                                        </div>
+                                                                        <div class="mx-2">
+                                                                            <div class="tours-list__content__trait__text" >
+                                                                                @php
+                                                                                $guidingTargets = $guiding->guidingTargets->pluck('name')->toArray();
+                                                                                if(app()->getLocale() == 'en'){
+                                                                                    $guidingTargets =  $guiding->guidingTargets->pluck('name_en')->toArray();
+                                                                                }
+                                                                                @endphp
+                                                                                
+                                                                                @if(!empty($guidingTargets))
+                                                                                    {{ implode(', ', $guidingTargets) }}
+                                                                                @else
+                                                                                {{ translate($guiding->threeTargets()) }}
+                                                                                {{$guiding->target_fish_sonstiges ? " & " . translate($guiding->target_fish_sonstiges) : ""}}
+                                                                                @endif
+                                                                            </div>
                                                                         
-                                                                        @if(!empty($guidingTargets))
-                                                                            {{ implode(', ', $guidingTargets) }}
-                                                                        @else
-                                                                        {{ translate($guiding->threeTargets()) }}
-                                                                        {{$guiding->target_fish_sonstiges ? " & " . translate($guiding->target_fish_sonstiges) : ""}}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-6 col-sm-6 col-md-6 guidings-icon-container"> 
+                                                                    <div class="d-flex align-items-center">                                              
+                                                                        <div>
+                                                                            <img src="{{asset('assets/images/icons/fishing-tool.png')}}" height="20" width="20" alt="" />
+                                                                        </div>
+                                                                        <div class="mx-2">
+                                                                            <div class="tours-list__content__trait__text" >
+                                                                            {{$guiding->is_boat ? $guiding->boat_type : 'Shore'}}   
+                                                                            </div>
+                                                                        
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row mt-5">
+                                                                    <div class="col-12 col-lg-9">
+                                                                        @if(!empty($guiding->inclusions))
+                                                                        <div class="guidings-included">
+                                                                            <strong>What's Included</strong>
+                                                                            <div class="inclusions-list">
+                                                                                @php
+                                                                                    $inclusions = json_decode($guiding->inclusions, true);
+                                                                                    $maxToShow = 3; // Maximum number of inclusions to display
+                                                                                @endphp
+    
+                                                                                @foreach ($inclusions as $index => $inclusion)
+                                                                                    @if ($index < $maxToShow)
+                                                                                        <span class="inclusion-item">●{{ $inclusion['value'] }}</span>
+                                                                                    @endif
+                                                                                @endforeach
+    
+                                                                                @if (count($inclusions) > $maxToShow)
+                                                                                    <span class="inclusion-item">+{{ count($inclusions) - $maxToShow }} more</span>
+                                                                                @endif
+                                                                            </div>
+                                                                        </div>
                                                                         @endif
                                                                     </div>
-                                                                
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-6 col-sm-6 col-md-6">
-                                                            <div class="d-flex align-items-center">
-                                                                <div>
-                                                                    <img src="{{asset('assets/images/icons/fishing-tool.png')}}" height="20" width="20" alt="" />
-                                                                </div>
-                                                                <div class="mx-2">
-                                                                    <div class="tours-list__content__trait__text" style="font-size:0.75rem">
-                                                                        @php
-                                                                        $whereFishing = null;
-                                                                        if($guiding->fishingFrom){
-                                                                            if(app()->getLocale() == 'en'){
-                                                                                $whereFishing = $guiding->fishingFrom->name_en;
-                                                                            }else{
-                                                                               $whereFishing =  $guiding->fishingFrom->name;
-                                                                            }
-                                                                        }
-                                                                    
-                                                                        @endphp
-                                                                        @if($whereFishing) {{$whereFishing}} @else {{$guiding->fishing_from}} @endif    
+                                                                    <div class="col-12 col-lg-3">
+                                                                        <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$guiding->getLowestPrice()}}€ p.P.</span></h5>
+                                                                        <div class="d-none d-flex flex-column mt-4">
+                                                                            <!-- <a class="btn theme-primary btn-theme-new btn-sm" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">Details</a>
+                                                                            <a class="btn btn-sm mt-2   {{ (auth()->check() ? (auth()->user()->isWishItem($guiding->id) ? 'btn-danger' : 'btn-outline-theme ') : 'btn-outline-theme') }}" href="{{ route('wishlist.add-or-remove', $guiding->id) }}">
+                                                                                {{ (auth()->check() ? (auth()->user()->isWishItem($guiding->id) ? 'Added to Favorites' : 'Add to Favorites') : 'Add to Favorites') }}
+                                                                            </a> -->
+                                                                        </div>
                                                                     </div>
-                                                                
-                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="row mt-5">
-                                                        <div class="col-12 col-lg-6">
-                                                            <div class="ratings mr-2 color-primary my-1" style="font-size:0.80rem">
-                                                                @if(count($guiding->user->received_ratings) > 0)
-                                                                @switch(two($guiding->user->average_rating()))
-                                                                    @case(two($guiding->user->average_rating()) >= 5)
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star"></i>
-                                                                        {{one($guiding->user->average_rating())}}/ 5
-                                                                        @break
-                                                                    @case(two($guiding->user->average_rating()) >= 4.5)
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star-half"></i>
-                                                                        {{one($guiding->user->average_rating())}}/ 5
-                                                                        @break
-                                                                    @case(two($guiding->user->average_rating()) >= 4)
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star"></i>
-                                                                        {{one($guiding->user->average_rating())}}/ 5
-                                                                        @break
-                                                                    @case(two($guiding->user->average_rating()) >= 3.5)
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star-half"></i>
-                                                                        {{one($guiding->user->average_rating())}}/ 5
-                                                                        @break
-                                                                    @case(two($guiding->user->average_rating()) >= 3)
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star"></i>
-                                                                        {{one($guiding->user->average_rating())}}/ 5
-                                                                        @break
-                                                                    @case(two($guiding->user->average_rating()) >= 2.5)
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star-half"></i>
-                                                                        {{one($guiding->user->average_rating())}}/ 5
-                                                                        @break
-                                                                    @case(two($guiding->user->average_rating()) >= 2)
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star"></i>
-                                                                        {{one($guiding->user->average_rating())}}/ 5
-                                                                        @break
-                                                                    @case(two($guiding->user->average_rating()) >= 1.5)
-                                                                        <i class="fa fa-star"></i>
-                                                                        <i class="fa fa-star-half"></i>
-                                                                        {{one($guiding->user->average_rating())}}/ 5
-                                                                        @break
-                                                                    @case(two($guiding->user->average_rating()) >= 1)
-                                                                        <i class="fa fa-star"></i>
-                                                                        {{one($guiding->user->average_rating())}}/ 5
-                                                                        @break
-                                                                    @default
-                                                                        <i class="fa fa-star"></i>
-                                                                        {{one($guiding->user->average_rating())}}
-                                                                @endswitch
-
-                                                                @if(count($guiding->user->received_ratings) >= 2) 
-                                                                    ({{count($guiding->user->received_ratings)}} Bewertungen)
-                                                                @else 
-                                                                    ({{count($guiding->user->received_ratings)}} Bewertung)
-                                                                @endif
-
-                                                            @endif     
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-12 col-lg-6">
-                                                            <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$guiding->getLowestPrice()}}€ p.P.</span></h5>
-                                                            <div class="d-none d-flex flex-column mt-4">
-                                                                <a class="btn theme-primary btn-theme-new btn-sm" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">Details</a>
-                                                                <a class="btn btn-sm mt-2   {{ (auth()->check() ? (auth()->user()->isWishItem($guiding->id) ? 'btn-danger' : 'btn-outline-theme ') : 'btn-outline-theme') }}" href="{{ route('wishlist.add-or-remove', $guiding->id) }}">
-                                                                    {{ (auth()->check() ? (auth()->user()->isWishItem($guiding->id) ? 'Added to Favorites' : 'Add to Favorites') : 'Add to Favorites') }}
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                                        
+                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                  
                                     @endforeach
                                     {!! $guidings->links('vendor.pagination.default') !!}
 

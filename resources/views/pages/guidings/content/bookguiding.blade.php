@@ -30,11 +30,13 @@
                             <ul class="list-unstyled">
                                 @foreach(json_decode($guiding->prices) as $price)
                                     <li class="d-flex justify-content-between align-items-center">
-                                        <span>{{ $price->person }} {{ $price->person == 1 ? 'Person' : 'Personen' }}</span>
+                                        <span class="">{{ $price->person }} {{ $price->person == 1 ? 'Person' : 'Personen' }}</span>
                                         <span class="text-right">
-                                            <span class="text-danger">{{ $price->person > 1 ? round($price->amount / $price->person) : $price->amount }}€</span>
                                             @if($price->person > 1)
+                                                <span class="text-danger">{{ $price->person > 1 ? round($price->amount / $price->person) : $price->amount }}€</span>
                                                 <span class="text-black" style="font-size: 0.8em;"> p.P</span>
+                                                @else
+                                                <span class="text-danger me-3 pe-1">{{ $price->person > 1 ? round($price->amount / $price->person) : $price->amount }}€</span>
                                             @endif
                                         </span>
                                     </li>
