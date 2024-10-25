@@ -66,7 +66,7 @@ class Destination extends Model
     public function getThumbnailPath()
     {
         if (empty($this->thumbnail_path)) {
-            return 'https://place-hold.it/300x300';
+            return asset('assets/images/300x300.png');
         }
 
         $thumbnail_path = \Str::replace('public', 'storage', $this->thumbnail_path);
