@@ -63,8 +63,11 @@
 <div class="container">
     <section class="toptargetfish">
         <div class="container my-4">
-            <div class="section-title my-2">
-                <p>@lang('destination.introduction')</p>
+            <div id="page-main-intro" class="section-title my-2">
+                <div class="page-main-intro-text">
+                    @lang('destination.introduction')
+                </div>
+                <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm">Read More</a></p>
             </div>
             <div class="row">
                 <div class="col-md-4 my-1">
@@ -218,4 +221,48 @@
         </div>
     </section>
 </div>
+@endsection
+@section('js_after')
+<script>
+    
+    $(function(){
+
+        var word_char_count_allowed = 200;
+        var page_main_intro = $('.page-main-intro-text');
+        console.log(page_main_intro);
+        var page_main_intro_text = page_main_intro.html();
+        var page_main_intro_count = page_main_intro.text().length;
+        var ellipsis = "..."; 
+        var moreText = '<a href="#" class="btn btn-primary btn-sm">Read More</a>';
+        var lessText = '<a href="#" class="btn btn-primary btn-sm">Read Less</a>';
+
+        var visible_text = page_main_intro_text.substring(0, word_char_count_allowed);
+        var hidden_text  = page_main_intro_text.substring(word_char_count_allowed);
+
+        if (page_main_intro_count >= word_char_count_allowed) {
+            $('.page-main-intro-text').html(visible_text + '<span class="more-ellipsis">' + ellipsis + '</span><span class="more-text" style="display:none;">' + hidden_text + '</span>');
+            //$('.more-text').show();
+            $('.see-more').click(function(e) {
+                e.preventDefault();
+                var textContainer = $(this).prev('.page-main-intro-text'); // Get the content element
+
+                if ($(this).hasClass('less')) {
+                    $(this).removeClass('less');
+                    $(this).html(moreText);
+                    textContainer.find('.more-text').hide();
+                    textContainer.find('.more-ellipsis').show();
+                } else {
+                    $(this).addClass('less');
+                    $(this).html(lessText);
+                    textContainer.find('.more-text').show();
+                    textContainer.find('.more-ellipsis').hide();
+                }
+            });
+        } else {
+            $('.see-more').hide();
+        }
+
+    });
+
+</script>
 @endsection
