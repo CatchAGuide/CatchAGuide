@@ -227,9 +227,8 @@
     
     $(function(){
 
-        var word_char_count_allowed = 200;
+        var word_char_count_allowed = 520;
         var page_main_intro = $('.page-main-intro-text');
-        console.log(page_main_intro);
         var page_main_intro_text = page_main_intro.html();
         var page_main_intro_count = page_main_intro.text().length;
         var ellipsis = "..."; 
@@ -240,6 +239,7 @@
         var hidden_text  = page_main_intro_text.substring(word_char_count_allowed);
 
         if (page_main_intro_count >= word_char_count_allowed) {
+            console.log(1);
             $('.page-main-intro-text').html(visible_text + '<span class="more-ellipsis">' + ellipsis + '</span><span class="more-text" style="display:none;">' + hidden_text + '</span>');
             //$('.more-text').show();
             $('.see-more').click(function(e) {
@@ -259,6 +259,7 @@
                 }
             });
         } else {
+            console.log(2);
             $('.see-more').hide();
         }
 
