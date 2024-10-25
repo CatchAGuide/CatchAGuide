@@ -1,6 +1,6 @@
 .about-one__img img {
   max-width: 100%;
-  height: 300px;
+  height: 250px;
   object-fit: cover;
   object-position: center;
 }
@@ -40,7 +40,286 @@
 .tour-details-two__related-tours .tour-details-two__title {
   margin-bottom: 29px;
 }
+#guidings-page{
+  .tour-details-two__book-tours{
 
+  }
+  #guiding-tab{
+    .nav-link{
+      font-size: 16px;
+      padding: 10px 12px;
+      &.active, &:hover{
+        color: #e8604c;
+      }
+    }
+  }
+  #nav-tabContent {
+    min-height: 350px;
+    padding: 16px;
+    font-size: 16px;
+    .table th {
+      text-align: left; 
+      width: 30%;
+      font-size: 16px;
+  }
+  
+  .table td {
+      width: 70%; 
+      font-size: 16px;
+  }
+}
+.important-info{
+  padding: 16px;
+  margin-bottom: 16px;
+  i{
+    color: #e8604c;
+  }
+}
+.description-container{
+  .description-item{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    .header-container{
+      
+    }
+    span{
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 500;
+    }
+    svg{
+      width: 16px;
+      height: 16px;
+      color: #e8604c;
+
+    }
+    p{
+      padding: 0 16px;
+    }
+  }
+}
+.title-right-container{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+}
+.title-right-buttons{
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+}
+.guidings-rating{
+  .ratings-head{
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .ratings-score-ave{
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    span{
+      font-size: 32px;
+      font-weight: 700;
+    }
+    svg{
+      width: 16px;
+      height: 16px;
+      fill: #ffcc00;
+      color: #ffcc00;
+    }
+    .ratings-card{
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+  }
+}
+.ratings-item{
+  .ratings-comment-top{
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    p{
+      margin-bottom: 0;
+      line-height: 1;
+      color: #adaaaa;
+      &.user{
+        font-weight: 600;
+        color: var(--thm-black);
+      }
+      &.date{
+        font-size: 14px;
+        color: #adaaaa;
+      }
+    }
+  }
+  .user-info{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .ratings-comment {
+    padding: 16px;
+    border: 1px solid #ece8e0;
+    svg{
+      width: 14px;
+      height: 14px;
+      fill: #ffcc00;
+      color: #ffcc00;
+    }
+}
+.comment-content{
+  margin-top: 16px;
+  p{
+    font-size: 16px;
+  }
+}
+}
+}
+.guidings-gallery{
+  min-height: 400px;
+  gap: 16px;
+  .row{
+    gap: 16px;
+  }
+  .left-image{
+    width: 600px;
+    padding: 0 !important;
+    height: 400px;
+    img{
+      width: 100%;
+      object-fit: cover;
+      max-height: 400px;
+      height: 100%;
+    }
+  }
+  .right-images{
+    width: calc(100% - 616px);
+    padding: 0 !important;
+    img{
+      width: 100%;
+      object-fit: cover;
+      height: 100%;
+      max-height: 165px;
+      aspect-ratio: 6/4;
+      min-height: 100%;
+    }
+  }
+  .col-7,.col-5{
+    flex: 1;
+  }
+  
+  .gallery{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    height: 100%;
+  }
+  .gallery-item{
+    width: calc((100% - 50%) - 8px);
+    padding: 0;
+    flex-shrink: 1;
+    position: relative;
+    cursor: pointer;
+    &:hover{
+      filter: contrast(0.5);
+    }
+    span{
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #00000082;
+      color: #fff;
+      cursor: pointer;
+  }
+  }
+}
+div#masonry-grid{
+  .col-12{
+    text-align: center;
+  }
+  img{
+    width: 600px;
+    height: 400px;
+  }
+}
+.guidings-description-container{
+  display: flex;
+  gap: 16px;
+  .guidings-descriptions{
+    width: calc(65% - 8px);
+  }
+  .guidings-book{
+    width: calc(35% - 8px);
+    .card-body{
+      padding-top: 0;
+    }
+  }
+}
+.guidings-icon-container{
+  font-size: 18px;
+  span{
+    font-size: 24px;
+
+  }
+  img{
+    width: 24px;
+    height: 24px;
+  }
+}
+.tours-list__right{
+  .carousel-item{
+    img{
+      width: 100% !important;
+    }
+  }
+  .guiding-list-item{
+    &:hover{
+      box-shadow: 0 0 4px 0px #00000073;
+    }
+  }
+  .guidings-item{
+    display: flex;
+    align-items: flex-start;
+  }
+  .guidings-item-title {
+    width: calc(100% - 200px);
+}
+  .guidings-item-ratings{
+      width: 200px;
+      display: flex;
+      justify-content: end;
+      .ratings-score{
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        svg{
+          width: 18px;
+          height: 18px;
+          fill: #ffcc00;
+          color: #ffcc00;
+        }
+      }
+  }
+.guidings-included{
+  .inclusions-list{
+
+    display: flex;
+    gap: 8px;
+  }
+}
+a:has(.guidings-item){
+  &:hover{
+    color: inherit;
+  }
+}
+}
 @media screen and (min-width: 768px) {
   .tour-details-two__sticky {
     top: 117px;
