@@ -222,18 +222,10 @@
                                 <a href="{{ route('destination.country', ['country' => $region->country_slug, 'region' => $region->slug]) }}">
                                     <div class="card">
                                         <div class="card-img">
-                                            <img src="{{ $region->getThumbnailPath() }}" class="dimg-fluid" width="300px" alt="...">
+                                            <img src="{{ $region->getThumbnailPath() }}" class="dimg-fluid" style="width: 300px; height:300px;" alt="Image Not Available">
                                         </div>
                                         <div class="card-img-overlay">
-                                            <h5>{{ $region->name }}
-                                                @if($region->language == 'de')
-                                                <label><i class="fi fi-de"></i></label> 
-                                                @elseif($region->language == 'en')
-                                                <label><i class="fi fi-gb"></i></label>
-                                                @else
-                                                <label><i class="fi fi-de"></i></label>
-                                                @endif
-                                            </h5>
+                                            <h5>{{ $region->name }}</h5>
                                         </div>
                                     </div>
                                 </a>
@@ -266,18 +258,10 @@
                                 <a href="{{ route('destination.country', ['country' => $city->country_slug, 'region' => $city->region_slug, 'city' => $city->slug]) }}">
                                     <div class="card">
                                         <div class="card-img">
-                                            <img src="{{ $city->getThumbnailPath() }}" class="dimg-fluid" width="300px" alt="...">
+                                            <img src="{{ $city->getThumbnailPath() }}" class="dimg-fluid" style="width: 300px; height:300px;" alt="Image Not Available">
                                         </div>
                                         <div class="card-img-overlay">
-                                            <h5>{{ $city->name }}
-                                                @if($region->language == 'de')
-                                                <label><i class="fi fi-de"></i></label> 
-                                                @elseif($region->language == 'en')
-                                                <label><i class="fi fi-gb"></i></label>
-                                                @else
-                                                <label><i class="fi fi-de"></i></label>
-                                                @endif
-                                            </h5>
+                                            <h5>{{ $city->name }}</h5>
                                         </div>
                                     </div>
                                 </a>
