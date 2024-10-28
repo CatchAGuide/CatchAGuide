@@ -702,15 +702,6 @@
 <script async src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY') }}&callback=initMap"></script>
 
 <script>
-//    const masonryModal = document.getElementById('galleryModal');
-//     masonryModal.addEventListener('shown.bs.modal', function () {
-//       // Initialize Masonry when modal opens
-//       var msnry = new Masonry('#masonry-grid', {
-//         itemSelector: '.col-6',
-//         columnWidth: '.col-6',
-//         percentPosition: true
-//       });
-//     });
     function initMap() {
         var location = { lat: 41.40338, lng: 2.17403 }; // Example coordinates
         var map = new google.maps.Map(document.getElementById('map'), {
@@ -728,6 +719,23 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        const blockedEvents = JSON.parse('{!! json_encode($blocked_events) !!}');
+
+        let lockDays = [];
+        if (blockedEvents && typeof blockedEvents === 'object') {
+            lockDays = Object.values(blockedEvents).flatMap(event => {
+                const fromDate = new Date(event.from);
+                const dueDate = new Date(event.due);
+
+                // Create an array of all dates in the range
+                const dates = [];
+                for (let d = fromDate; d <= dueDate; d.setDate(d.getDate() + 1)) {
+                    dates.push(new Date(d));
+                }
+                return dates;
+            });
+        }
+
         const picker = new Litepicker({
             element: document.getElementById('lite-datepicker'),
             inlineMode: true,
@@ -735,18 +743,9 @@
             numberOfColumns: initCheckNumberOfColumns(),
             numberOfMonths: initCheckNumberOfColumns(),
             minDate: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
-            lockDays: [
-                @foreach($guiding->user->blocked_events as $blocked)
-                    @if($blocked->guiding_id == $guiding->id)
-                    ["{{ substr($blocked->from,0,-9) }}", "{{ substr($blocked->due,0,-9) }}"],
-                    @endif
-                    ["{{ substr($blocked->from,0,-9) }}", "{{ substr($blocked->due,0,-9) }}"],
-                @endforeach
-                new Date(),
-            ],
+            lockDays: lockDays,
             lang: '{{app()->getLocale()}}',
             setup: (picker) => {
-                // Change picker columns on resize
                 window.addEventListener('resize', () => {
                     picker.setOptions({
                         numberOfColumns: initCheckNumberOfColumns(),
@@ -792,3 +791,4 @@
     });
 </script>
 @endsection
+

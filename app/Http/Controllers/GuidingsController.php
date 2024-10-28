@@ -364,6 +364,7 @@ class GuidingsController extends Controller
             'ratings' => $ratings,
             'other_guidings' => $otherGuidings,
             'average_rating' => $averageRating,
+            'blocked_events' => $guiding->getBlockedEvents(),
         ]);
     }
 

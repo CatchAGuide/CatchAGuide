@@ -440,4 +440,55 @@ class Guiding extends Model
         }
     }
 
+    public function getBlockedEvents()
+    {
+        $blocked_events = collect($this->user->blocked_events)
+            ->where('guiding_id', $this->id)
+            ->map(function($blocked) {
+                return [
+                    "from" => date('Y-m-d', strtotime($blocked->from)), 
+                    "due" => date('Y-m-d', strtotime($blocked->due))
+                ];
+            })->toArray();
+
+        $today = now();
+
+        // Add booking window restrictions
+        if ($this->booking_window !== 'no_limitation') {
+            $bookingWindowMonths = [
+                'six_months' => 6,
+                'nine_months' => 9,
+                'twelve_months' => 12
+            ];
+
+            if (isset($bookingWindowMonths[$this->booking_window])) {
+                $blockFrom = $today->copy()->addMonths($bookingWindowMonths[$this->booking_window])->addDay();
+                
+                $blocked_events[] = [
+                    "from" => $blockFrom->format('Y-m-d'),
+                    "due" => $blockFrom->copy()->addYears(10)->format('Y-m-d')
+                ];
+            }
+        }
+
+        // Add advance booking restrictions
+        $advanceBookingPeriods = [
+            'same_day' => fn($date) => $date->endOfDay(),
+            'three_days' => fn($date) => $date->addDays(3), 
+            'one_week' => fn($date) => $date->addWeek(),
+            'one_month' => fn($date) => $date->addMonth()
+        ];
+
+        if (isset($advanceBookingPeriods[$this->allowed_booking_advance])) {
+            $blockUntil = $advanceBookingPeriods[$this->allowed_booking_advance]($today->copy());
+            
+            $blocked_events[] = [
+                "from" => $today->format('Y-m-d'),
+                "due" => $blockUntil->format('Y-m-d')
+            ];
+        }
+
+        return $blocked_events;
+    }
+
 }
