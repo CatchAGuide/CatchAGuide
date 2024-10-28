@@ -26,6 +26,7 @@ use App\Mail\GuidingRequestMail;
 use App\Mail\SearchRequestUserMail;
 use Illuminate\Support\Facades\Log;
 use App\Models\BlockedEvent;
+use App\Models\ExtrasPrice;
 
 class GuidingsController extends Controller
 {
@@ -427,7 +428,7 @@ class GuidingsController extends Controller
             if ($guiding->is_boat) {
                 $guiding->boat_type = $request->has('type_of_boat') ? $request->input('type_of_boat') : '';
                 $guiding->boat_information = $this->saveDescriptions($request);
-                $guiding->boat_extras = $request->has('extras') ? $request->input('extras') : '';
+                $guiding->boat_extras = $request->has('boat_extras') ? $request->input('boat_extras') : '';
             }
 
             //step 3
@@ -854,6 +855,8 @@ class GuidingsController extends Controller
         $waters = Water::all();
         $methods = Method::all();
         $inclussions = Inclussion::all();
+        $extras_prices = ExtrasPrice::all();
+        $pageTitle = __('profile.editguiding');
 
         $locale = Config::get('app.locale');
         if($locale == 'en') {
@@ -869,6 +872,9 @@ class GuidingsController extends Controller
             $inclussions = $inclussions->map(function ($item) {
                 return ['value' => $item->name_en, 'id' => $item->id];
             });
+            $extras_prices = $extras_prices->map(function ($item) {
+                return ['value' => $item->name_en, 'id' => $item->id];
+            });
         } else {
             $targets = $targets->map(function ($item) {
                 return ['value' => $item->name, 'id' => $item->id];
@@ -882,9 +888,12 @@ class GuidingsController extends Controller
             $inclussions = $inclussions->map(function ($item) {
                 return ['value' => $item->name, 'id' => $item->id];
             });
+            $extras_prices = $extras_prices->map(function ($item) {
+                return ['value' => $item->name, 'id' => $item->id];
+            });
         }
 
-        return view('pages.profile.newguiding', compact('formData', 'waters', 'methods', 'targets', 'inclussions'));
+        return view('pages.profile.newguiding', compact('formData', 'waters', 'methods', 'targets', 'inclussions', 'extras_prices', 'pageTitle'));
     }
 
     public function update(StoreGuidingRequest $request, Guiding $guiding)

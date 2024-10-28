@@ -36,7 +36,7 @@ class StoreNewGuidingRequest extends FormRequest
             'price_type' => 'required|in:per_person,per_boat',
             'price_per_person_*' => 'required_if:price_type,per_person|numeric|min:0',
             'price_per_boat' => 'required_if:price_type,per_boat|numeric|min:0',
-            'extras' => 'nullable|string',
+            'boat_extras' => 'nullable|string',
             'allowed_booking_advance' => 'required|string',
             'booking_window' => 'required|string',
             'seasonal_trip' => 'required|string',

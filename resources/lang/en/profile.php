@@ -16,6 +16,7 @@ return [
 
     'myGuides' => 'My guidings',
     'creategiud' => 'New guidings',
+    'editguiding' => 'Edit guiding',
     'bookedWithMe' => 'Booked with me',
     'calendar' => 'Availability',
     'guidebookings' => 'Book with me',

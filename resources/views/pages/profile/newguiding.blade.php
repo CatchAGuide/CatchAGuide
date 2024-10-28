@@ -1,5 +1,5 @@
 @extends('pages.profile.layouts.profile')
-@section('title', __('profile.creategiud'))
+@section('title', isset($pageTitle) ? $pageTitle : __('profile.creategiud'))
 @section('custom_style')
 
 <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />

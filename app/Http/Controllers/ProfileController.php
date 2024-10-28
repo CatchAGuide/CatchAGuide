@@ -22,6 +22,7 @@ use Mail;
 
 use App\Events\BookingStatusChanged;
 use App\Models\Inclussion;
+use App\Models\ExtrasPrice;
 
 class ProfileController extends Controller
 {
@@ -146,10 +147,12 @@ class ProfileController extends Controller
     //step 1
     public function newguiding()
     {
+        $pageTitle = __('profile.creategiud');
         $targets = Target::all();
         $methods = Method::all();
         $waters = Water::all();
         $inclussions = Inclussion::all();
+        $extras_prices = ExtrasPrice::all();
 
         $locale = Config::get('app.locale');
         if($locale == 'en') {
@@ -165,6 +168,9 @@ class ProfileController extends Controller
             $inclussions = $inclussions->map(function ($item) {
                 return ['value' => $item->name_en, 'id' => $item->id];
             });
+            $extras_prices = $extras_prices->map(function ($item) {
+                return ['value' => $item->name_en, 'id' => $item->id];
+            });
         } else {
             $targets = $targets->map(function ($item) {
                 return ['value' => $item->name, 'id' => $item->id];
@@ -178,8 +184,11 @@ class ProfileController extends Controller
             $inclussions = $inclussions->map(function ($item) {
                 return ['value' => $item->name, 'id' => $item->id];
             });
+            $extras_prices = $extras_prices->map(function ($item) {
+                return ['value' => $item->name, 'id' => $item->id];
+            });
         }
-        return view('pages.profile.newguiding', compact('waters', 'methods', 'targets', 'inclussions'));
+        return view('pages.profile.newguiding', compact('waters', 'methods', 'targets', 'inclussions', 'extras_prices', 'pageTitle'));
     }
     
     public function postGuidingStepOne(Request $request){

@@ -19,7 +19,7 @@
               <h2><strong>Checkout</strong></h2>
             </div>
             <div>
-              <p><span class="btn theme-primary text-white">Catchaguide.com</span></p>
+              {{-- <p><span class="btn theme-primary text-white">Catchaguide.com</span></p> --}}
             </div>
           </div>
 

@@ -7,7 +7,7 @@
 <script>
     let imageManager;
     let currentStep = 1;
-    const totalSteps = 8; 
+    const totalSteps = 7; 
     let autocomplete;
     let city = '';
     let country = '';
@@ -119,7 +119,7 @@
         });
     }
 
-    $(document).on('click', '#saveDraftBtn', function(e) {
+    $(document).on('click', '[id^="saveDraftBtn"]', function(e) {
         e.preventDefault();
         saveDraft();
     });
@@ -184,6 +184,7 @@
 
     function setFormDataIfEdit() {
         if (document.getElementById('is_update').value === '1') {
+
             const typeOfFishingData = '{{ $formData['type_of_fishing'] ?? '' }}';
             if (typeOfFishingData) {
                 const radioButton = document.querySelector(`input[name="type_of_fishing_radio"][value="${typeOfFishingData}"]`);
@@ -222,7 +223,7 @@
                 }
             });
 
-            const extrasTagify = initTagify('input[name="extras"]', {
+            const extrasTagify = initTagify('input[name="boat_extras"]', {
                 whitelist: [
                     'GPS', 'Echolot', 'Live Scope', 'Radar', 'Funk', 'Flybridge', 'WC', 
                     'Roofing', 'Dusche', 'Küche', 'Bett', 'Wifi', 'Ice box/ Kühlschrank', 
@@ -236,13 +237,12 @@
                 }
             });
 
-            if (document.getElementById('is_update').value === '1') {
-                const extrasData = {!! json_encode($formData['boat_extras'] ?? []) !!};
-                if (extrasTagify && extrasData) {
-                    extrasTagify.addTags(extrasData);
-                }
+            const extrasData = {!! json_encode($formData['boat_extras'] ?? []) !!};
+            if (extrasTagify && extrasData) {
+                extrasTagify.addTags(extrasData);
             }
 
+            //target fish
             const targetFishTagify = initTagify('input[name="target_fish"]', {
                 whitelist: {!! json_encode($targets->toArray()) !!}.sort(),
                 dropdown: {
@@ -253,33 +253,53 @@
                 }
             });
 
-            if (document.getElementById('is_update').value === '1') {
-                const targetFishData = {!! json_encode($formData['target_fish'] ?? []) !!};
-                if (targetFishTagify && targetFishData) {
-                    targetFishTagify.addTags(targetFishData);
-                }
+            const targetFishData = {!! json_encode($formData['target_fish'] ?? []) !!};
+            if (targetFishTagify && targetFishData) {
+                targetFishTagify.addTags(targetFishData);
             }
+            
+            //methods
+            const methodsTagify = initTagify('input[name="methods"]', {
+                whitelist: {!! json_encode($methods->toArray()) !!}.sort(),
+                dropdown: {
+                    maxItems: Infinity,
+                    classname: "tagify__dropdown",
+                    enabled: 0,
+                    closeOnSelect: false
+                }
+            });
 
-            const methodsInputData = document.querySelector('input[name="methods"]');
-            if (methodsInputData) {
-                const methodsTagify = new Tagify(methodsInputData);
-                const methodsData = {!! json_encode($formData['methods'] ?? []) !!};
+            const methodsData = {!! json_encode($formData['methods'] ?? []) !!};
+            if (methodsTagify && methodsData) {
                 methodsTagify.addTags(methodsData);
             }
 
-            const waterTypesInputData = document.querySelector('input[name="water_types"]');
-            if (waterTypesInputData) {
-                const waterTypesTagify = new Tagify(waterTypesInputData);
-                const waterTypesData = {!! json_encode($formData['water_types'] ?? []) !!};
+            //water types
+            const waterTypesTagify = initTagify('input[name="water_types"]', {
+                whitelist: {!! json_encode($waters->toArray()) !!}.sort(),
+                dropdown: {
+                    maxItems: Infinity,
+                    classname: "tagify__dropdown",
+                    enabled: 0,
+                    closeOnSelect: false
+                }
+            });
+
+            const waterTypesData = {!! json_encode($formData['water_types'] ?? []) !!};
+            if (waterTypesTagify && waterTypesData) {
                 waterTypesTagify.addTags(waterTypesData);
             }
 
-            const inclussionsInputData = document.querySelector('input[name="inclussions"]');
-            if (inclussionsInputData) {
-                const inclussionsTagify = new Tagify(inclussionsInputData);
-                const inclussionsData = {!! json_encode($formData['inclussions'] ?? []) !!};
-                inclussionsTagify.addTags(inclussionsData);
-            }
+            //inclussions
+            const inclussionsTagify = initTagify('input[name="water_types"]', {
+                whitelist: {!! json_encode($inclussions->toArray()) !!}.sort(),
+                dropdown: {
+                    maxItems: Infinity,
+                    classname: "tagify__dropdown",
+                    enabled: 0,
+                    closeOnSelect: false
+                }
+            });
             
             const experinceLevelData = {!! json_encode($formData['experience_level'] ?? []) !!};
             Object.entries(experinceLevelData).forEach(([key, value]) => {
@@ -555,6 +575,7 @@
     });
 
     // Add extra pricing
+    
     let extraCount = 0;
     $('#add-extra').click(function() {
         extraCount++;
@@ -562,7 +583,10 @@
             <div class="extra-row d-flex mb-2">
                 <div class="input-group mt-2">
                     <span class="input-group-text">Additional Offer</span>
-                    <input type="text" class="form-control mr-2" name="extra_name_${extraCount}" placeholder="Extra name">
+                    <div class="dropdown">
+                        <input type="text" id="customInput_${extraCount}" class="form-control dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" placeholder="Select or add a value">
+                        <div class="dropdown-menu w-100" id="suggestionsList_${extraCount}"></div>
+                    </div>
                     <span class="input-group-text">Price</span>
                     <input type="number" class="form-control mr-2" name="extra_price_${extraCount}" placeholder="Enter price per person">
                     <span class="input-group-text">€ per Person</span>
@@ -571,7 +595,48 @@
             </div>
         `;
         $('#extras-container').append(newRow);
+
+        // Initialize dropdown logic for the new input
+        initializeDropdown(`customInput_${extraCount}`, `suggestionsList_${extraCount}`);
     });
+
+    function initializeDropdown(inputId, suggestionsListId) {
+        const input = document.getElementById(inputId);
+        const suggestionsList = document.getElementById(suggestionsListId);
+
+        const suggestions = {!! json_encode($extras_prices->toArray()) !!}.sort()
+
+        function showSuggestions() {
+            const value = input.value.toLowerCase();
+            suggestionsList.innerHTML = "";
+
+            suggestions
+                .filter(suggestion => suggestion.value.toLowerCase().includes(value))
+                .forEach(suggestion => {
+                    const option = document.createElement("a");
+                    option.className = "dropdown-item";
+                    option.href = "#";
+                    option.textContent = suggestion.value;
+                    option.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        input.value = suggestion.value; 
+                        suggestionsList.classList.remove("show"); 
+                    });
+                    suggestionsList.appendChild(option);
+                });
+            suggestionsList.classList.add("show");
+        }
+
+        input.addEventListener("focus", showSuggestions);
+
+        input.addEventListener("input", showSuggestions);
+
+        document.addEventListener("click", function (e) {
+            if (!input.contains(e.target)) {
+                suggestionsList.classList.remove("show");
+            }
+        });
+    }
 
     $(document).on('click', '.remove-extra', function() {
         $(this).closest('.extra-row').remove();
@@ -728,6 +793,7 @@
         const errorContainer = document.getElementById('error-container');
         errorContainer.style.display = 'none';
         errorContainer.innerHTML = '';
+        return true;
 
         let isValid = true;
         let errors = [];
@@ -864,6 +930,7 @@
     // Step navigation
     function showStep(stepNumber) {
         if (stepNumber > currentStep && !validateStep(currentStep)) {
+            console.log('Validation failed for current step');
             return;
         }
 
@@ -875,14 +942,17 @@
 
         scrollToFormCenter();
 
-        // Update button visibility
-        $('#prevBtn').toggle(currentStep > 1);
-        $('#nextBtn').toggle(currentStep < totalSteps);
-        $('#submitBtn').toggle(currentStep === totalSteps);
-        
-        // Hide nextBtn on last step
+        const isUpdate = document.getElementById('is_update').value === '1';
+
+        // Use dynamic IDs based on the current step
+        $(`#saveDraftBtn${stepNumber}`).toggle(!isUpdate);
+        $(`#submitBtn${stepNumber}`).toggle(isUpdate || currentStep === totalSteps);
+
+        $(`#prevBtn${stepNumber}`).toggle(currentStep > 1);
+        $(`#nextBtn${stepNumber}`).toggle(currentStep < totalSteps);
+
         if (currentStep === totalSteps) {
-            $('#nextBtn').hide();
+            $(`#nextBtn${stepNumber}`).hide();
         }
     }
 
@@ -904,10 +974,11 @@
 
     // Then, in your DOMContentLoaded event listener, replace the existing Tagify initializations with:
     document.addEventListener('DOMContentLoaded', function() {
+        showStep(currentStep); // Ensure buttons are correctly initialized on load
         initializeImageManager();
 
-        // Extras
-        initTagify('input[name="extras"]', {
+        // Boat Extras
+        initTagify('input[name="boat_extras"]', {
             whitelist: [
                 'GPS', 'Echolot', 'Live Scope', 'Radar', 'Funk', 'Flybridge', 'WC', 
                 'Roofing', 'Dusche', 'Küche', 'Bett', 'Wifi', 'Ice box/ Kühlschrank', 
@@ -1005,14 +1076,14 @@
         });
 
         // Next button functionality
-        $(document).on('click', '#nextBtn', function() {
+        $(document).on('click', '[id^="nextBtn"]', function() {
             if (validateStep(currentStep)) {
                 showStep(currentStep + 1);
             }
         });
 
         // Previous button functionality
-        $(document).on('click', '#prevBtn', function() {
+        $(document).on('click', '[id^="prevBtn"]', function() {
             showStep(currentStep - 1);
         });
 

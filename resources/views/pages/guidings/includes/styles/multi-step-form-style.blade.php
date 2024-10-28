@@ -250,7 +250,7 @@
             color: #787780;
         }
         
-        #submitBtn {
+        [id^="submitBtn"] {
             background-color: #1f8017;
             color: white;
             border-color: #1f8017;
@@ -259,17 +259,12 @@
             order: 2;
         }
         
-        #submitBtn:hover {
+        [id^="submitBtn"]:hover {
             background-color: #1f8017;
             border-color: #1f8017;
         }
         
-        #saveDraftBtn {
-            /* margin-left: auto;
-            background-color: #f2856d;
-            color: white;
-            border-color: #f2856d;
-            order: 3; */
+        [id^="saveDraftBtn"] {
             background-color: #787780;
             color: white;
             border-color: #787780;
@@ -277,23 +272,23 @@
             margin-left: auto;
         }
 
-        #saveDraftBtn:hover {
+        [id^="saveDraftBtn"]:hover {
             background-color: #e8604c;
             border-color: #e8604c;
         }
-        #prevBtn, #nextBtn, #submitBtn {
+        [id^="prevBtn"], [id^="nextBtn"], [id^="submitBtn"] {
             background-color: #262e35;
             color: white;
             border-color: #262e35;
             margin-top: 15px;
         }
         
-        #nextBtn:hover, #submitBtn:hover {
+        [id^="nextBtn"]:hover, [id^="submitBtn"]:hover {
             background-color: #1f8017;
             border-color: #1f8017;
         }
 
-        #prevBtn:hover {
+        [id^="prevBtn"]:hover {
             background-color: #d4c614;
             border-color: #d4c614;
         }
@@ -642,7 +637,7 @@
                 gap: 10px;
             }
 
-            #saveDraftBtn {
+            [id^="saveDraftBtn"] {
                 order: 1;
             }
 

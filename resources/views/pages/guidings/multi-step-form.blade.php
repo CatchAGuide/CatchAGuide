@@ -58,7 +58,7 @@
                 <h5>Upload images and set basic information</h5>
 
                 <label for="title_image" class="form-label fw-bold fs-5">
-                    Gallery Image
+                    Upload Image
                     <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title='Choose a title which describes your tour best. Include for example the location, the target fish, the water name, etc. Example: "Fishing tour in Amsterdam for Perch & Zander".'></i>
                 </label>
                 <div class="card mb-4">
@@ -82,7 +82,7 @@
                         Location
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter a city or a region which is close to the place where your fishing tour takes place."></i>
                     </label>
-                    <input type="search" class="form-control" id="location" name="location" value="{{ $formData['location'] ?? '' }}" placeholder="Enter a city or any other location close to the area your fishing tour takes place">
+                    <input type="search" class="form-control" id="location" name="location" value="{{ $formData['location'] ?? '' }}" placeholder='Choose a title which describes your tour best. Include for example the location, the target fish, the water name, etc. Example: "Fishing tour in Amsterdam for Perch & Zander".''>
                     <input type="hidden" name="latitude" id="latitude" value="{{ $formData['latitude'] ?? '' }}">
                     <input type="hidden" name="longitude" id="longitude" value="{{ $formData['longitude'] ?? '' }}">
                     <input type="hidden" name="country" id="country" value="{{ $formData['country'] ?? '' }}">
@@ -101,11 +101,11 @@
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn">Leave & Save to Draft</button>
+                        <button type="button" class="btn btn-secondary" id="saveDraftBtn1">Leave & Save to Draft</button>
                     </div>
                     <div class="right-buttons">
-                        <button type="button" class="btn btn-primary" id="nextBtn" onclick="validateStep(currentStep)">Next</button>
-                        <button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">Submit</button>
+                        <button type="button" class="btn btn-primary" id="nextBtn1" onclick="validateStep(currentStep)">Next</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn1" style="display: none;">Submit & Publish</button>
                     </div>
                 </div>
             </div>
@@ -231,22 +231,22 @@
                     <hr>
 
                     <div class="form-group">
-                        <label for="extras" class="form-label fw-bold fs-5">
+                        <label for="boat_extras" class="form-label fw-bold fs-5">
                             Extras and boat equipment
                             <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Here you can add extra equipment which the guests can find on your boat."></i>
                         </label>
-                        <input  class="form-control" name="extras" id="extras" placeholder="Add extras..." data-bs-toggle="tooltip" title="Here you can add extra equipment which the guests can find on your boat.">
+                        <input  class="form-control" name="boat_extras" id="boat_extras" placeholder="Add extras..." data-bs-toggle="tooltip" title="Here you can add extra equipment which the guests can find on your boat.">
                     </div>
                 </div>
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn">Leave & Save to Draft</button>
+                        <button type="button" class="btn btn-secondary" id="saveDraftBtn2">Leave & Save to Draft</button>
                     </div>
                     <div class="right-buttons">
-                        <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
-                        <button type="button" class="btn btn-primary" id="nextBtn" onclick="validateStep(currentStep)">Next</button>
-                        <button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">Submit</button>
+                        <button type="button" class="btn btn-primary" id="prevBtn2">Previous</button>
+                        <button type="button" class="btn btn-primary" id="nextBtn2" onclick="validateStep(currentStep)">Next</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn2" style="display: none;">Submit & Publish</button>
                     </div>
                 </div>
             </div>
@@ -306,76 +306,17 @@
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn">Leave & Save to Draft</button>
+                        <button type="button" class="btn btn-secondary" id="saveDraftBtn3">Leave & Save to Draft</button>
                     </div>
                     <div class="right-buttons">
-                        <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
-                        <button type="button" class="btn btn-primary" id="nextBtn" onclick="validateStep(currentStep)">Next</button>
-                        <button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">Submit</button>
+                        <button type="button" class="btn btn-primary" id="prevBtn3">Previous</button>
+                        <button type="button" class="btn btn-primary" id="nextBtn3" onclick="validateStep(currentStep)">Next</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn3" style="display: none;">Submit & Publish</button>
                     </div>
                 </div>
             </div>
 
             <!-- Step 4 -->
-            {{-- <div class="step" id="step4"> --}}
-                {{-- <h5>Describe your expertise and experience</h5> --}}
-
-                {{-- <div class="form-group">
-                    <label for="experience_level" class="form-label fw-bold fs-5">
-                        Experience Level
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="What experience level is your guiding designed for? Your fishing trip can also be designed for beginners and advanced anglers together. "></i>
-                    </label>
-                    <div class="d-flex flex-wrap btn-group-toggle">
-                        <input type="checkbox" name="experience_level[]" value="beginner" id="beginner">
-                        <label for="beginner" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Beginner</label>
-                        
-                        <input type="checkbox" name="experience_level[]" value="advance" id="advance">
-                        <label for="advance" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Advance</label>
-                    </div>
-                </div> --}}
-
-                {{-- <hr>
-                
-                <div class="form-group">
-                    <label for="inclussions" class="form-label fw-bold fs-5">
-                        Inclusions
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="Chose all extras which are included in your fishing tour without additional price charges."></i>
-                    </label>
-                    <input type="text" class="form-control" name="inclussions" id="inclussions" data-role="tagsinput" placeholder="Select inclussions...">
-                </div> --}}
-
-                {{-- <hr>
-                
-                <div class="form-group">
-                    <label for="style_of_fishing" class="form-label fw-bold fs-5">
-                        Style Of Fishing
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="What style of fishing is your guiding designed for? Your fishing trip can also be designed foractive and passive fishing together. "></i>
-                    </label>
-                    <div class="d-flex flex-wrap btn-group-toggle">
-                        <input type="radio" name="style_of_fishing" value="active" id="active">
-                        <label for="active" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Active</label>
-                        
-                        <input type="radio" name="style_of_fishing" value="passive" id="passive">
-                        <label for="passive" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Passive</label>
-                        
-                        <input type="radio" name="style_of_fishing" value="active_passive" id="active_passive">
-                        <label for="active_passive" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">Active / Passive</label>
-                    </div>
-                </div> --}}
-
-                {{-- <div class="button-group">
-                    <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn">Leave & Save to Draft</button>
-                    </div>
-                    <div class="right-buttons">
-                        <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
-                        <button type="button" class="btn btn-primary" id="nextBtn" onclick="validateStep(currentStep)">Next</button>
-                        <button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">Submit</button>
-                    </div>
-                </div>
-            </div> --}}
-
-            <!-- Step 5 -->
             <div class="step" id="step4">
                 <h5>Write a detailed description of your service</h5>
                 
@@ -428,17 +369,17 @@
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn">Leave & Save to Draft</button>
+                        <button type="button" class="btn btn-secondary" id="saveDraftBtn4">Leave & Save to Draft</button>
                     </div>
                     <div class="right-buttons">
-                        <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
-                        <button type="button" class="btn btn-primary" id="nextBtn" onclick="validateStep(currentStep)">Next</button>
-                        <button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">Submit</button>
+                        <button type="button" class="btn btn-primary" id="prevBtn4">Previous</button>
+                        <button type="button" class="btn btn-primary" id="nextBtn4" onclick="validateStep(currentStep)">Next</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn4" style="display: none;">Submit & Publish</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Step 6 -->
+            <!-- Step 5 -->
             <div class="step" id="step5">
                 <h5>Add any additional information</h5>
 
@@ -592,17 +533,17 @@
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn">Leave & Save to Draft</button>
+                        <button type="button" class="btn btn-secondary" id="saveDraftBtn5">Leave & Save to Draft</button>
                     </div>
                     <div class="right-buttons">
-                        <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
-                        <button type="button" class="btn btn-primary" id="nextBtn" onclick="validateStep(currentStep)">Next</button>
-                        <button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">Submit</button>
+                        <button type="button" class="btn btn-primary" id="prevBtn5">Previous</button>
+                        <button type="button" class="btn btn-primary" id="nextBtn5" onclick="validateStep(currentStep)">Next</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn5" style="display: none;">Submit & Publish</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Step 7 -->
+            <!-- Step 6 -->
             <div class="step" id="step6">
                 <h5>Set your pricing structure</h5>
                 <div class="form-group">
@@ -698,17 +639,17 @@
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn">Leave & Save to Draft</button>
+                        <button type="button" class="btn btn-secondary" id="saveDraftBtn6">Leave & Save to Draft</button>
                     </div>
                     <div class="right-buttons">
-                        <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
-                        <button type="button" class="btn btn-primary" id="nextBtn" onclick="validateStep(currentStep)">Next</button>
-                        <button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">Submit</button>
+                        <button type="button" class="btn btn-primary" id="prevBtn6">Previous</button>
+                        <button type="button" class="btn btn-primary" id="nextBtn6" onclick="validateStep(currentStep)">Next</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn6" style="display: none;">Submit & Publish</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Step 8 -->
+            <!-- Step 7 -->
             <div class="step" id="step7">
                 <h5>Define your availability and booking options</h5>
                 <div class="form-group">
@@ -783,11 +724,10 @@
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn">Leave & Save to Draft</button>
                     </div>
                     <div class="right-buttons">
-                        <button type="button" class="btn btn-primary" id="prevBtn">Previous</button>
-                        <button type="submit" class="btn btn-primary" id="submitBtn">Submit & Publish</button>
+                        <button type="button" class="btn btn-primary" id="prevBtn7">Previous</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn7">Submit & Publish</button>
                     </div>
                 </div>
             </div>
