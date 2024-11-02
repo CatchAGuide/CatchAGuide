@@ -1,3 +1,6 @@
+.small-text{
+  font-size:12px;
+}
 .about-one__img img {
   max-width: 100%;
   height: 250px;
@@ -176,6 +179,34 @@
   margin-top: 16px;
   p{
     font-size: 16px;
+  }
+}
+}
+div#lite-datepicker{
+  width: 100%;
+  .litepicker, .litepicker .container__days, .litepicker .container__months {
+          width: 100%;
+      }
+  .container__months.columns-2 {
+    width: 100% !important;
+    .month-item {
+      width: 48% !important;
+      .container__days{
+        .day-item, div {
+          width: calc(100% / 7) !important;
+          height: 44px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          &:hover{
+            border-radius: 50px;
+            border: 1px solid #e8604c;
+          }
+      }
+      }
+      .month-item-weekdays-row {
+        width: 100%;
+    }
   }
 }
 }
