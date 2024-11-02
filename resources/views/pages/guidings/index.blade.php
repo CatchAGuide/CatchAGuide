@@ -383,7 +383,7 @@
                                     <div class="row m-0 mb-2 guiding-list-item">
                                         <div class="col-md-12">
                                             <div class="row p-2 border shadow-sm bg-white rounded">
-                                                <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1">
+                                                <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-0">
                                                     <div id="carouselExampleControls-{{$guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
                                                         <div class="carousel-inner">
                                                             @if(count(get_galleries_image_link($guiding)))
