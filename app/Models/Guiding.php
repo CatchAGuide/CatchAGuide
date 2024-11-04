@@ -491,4 +491,45 @@ class Guiding extends Model
         return $blocked_events;
     }
 
+    public function nearestGuides($latitude, $longitude, $country)
+    {
+        $latitude = $latitude;
+        $longitude = $longitude;
+        $country = $country;
+
+        $distances = [50, 100, 200];
+        $level = 1;
+    
+        foreach ($distances as $distance) {
+            $guides = $this->select('*')
+                ->where('country', $country)
+                ->whereRaw("ST_Distance_Sphere(point(longitude, latitude), point(?, ?)) <= ?", [$longitude, $latitude, $distance * 1000])
+                ->get();
+            
+            if ($guides->isNotEmpty()) {
+                // Add level identifier to the results
+                return response()->json([
+                    'note' => "Reached Level {$level} - {$distance} km",
+                    'level' => $level,
+                    'distance' => $distance,
+                    'guides' => $guides
+                ]);
+            }
+    
+            $level++; // Increment level if no results found within the current radius
+        }
+        
+        // Global nearest guide if none found within specified distances
+        $nearestGuide = $this->select('*')
+            ->orderByRaw("ST_Distance_Sphere(point(longitude, latitude), point(?, ?))", [$longitude, $latitude])
+            ->first();
+    
+        return response()->json([
+            'note' => 'Reached Global Level - No match within country boundaries',
+            'level' => 4,
+            'distance' => 0,
+            'guides' => $nearestGuide ? [$nearestGuide] : []
+        ]);
+    }
+
 }
