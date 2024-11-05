@@ -532,4 +532,86 @@ class Guiding extends Model
         ]);
     }
 
+    public static function nearestGuideIds($latitude, $longitude, $country)
+    {
+        $latitude = $latitude;
+        $longitude = $longitude;
+        $country = $country;
+
+        $distances = [100, 200, 300];
+        $level = 1;
+    
+        foreach ($distances as $distance) {
+            $ids = [];
+            $guides = self::select('*')
+                ->where('status', 1)
+                ->whereRaw("ST_Distance_Sphere(point(lng, lat), point(?, ?)) <= ?", [$longitude, $latitude, $distance * 1000])
+                ->get();
+
+            foreach ($guides as $guide) {
+                $ids[] = $guide->id;
+            }
+
+            if (count($ids) > 0) {
+                return $ids;
+            }
+
+            $level++; // Increment level if no results found within the current radius
+        }
+        
+        // Global nearest guide if none found within specified distances
+        $nearestGuide = self::select('*')
+            ->where('status', 1)
+            ->orderByRaw("ST_Distance_Sphere(point(lng, lat), point(?, ?))", [$longitude, $latitude])
+            ->first();
+    
+        return $nearestGuide ? [$nearestGuide->id] : null;
+    }
+
+    public static function nearestGuideList($latitude, $longitude, $customRadius = null)
+    {
+        // If custom radius provided, try that first
+        if ($customRadius) {
+            $guides = self::select('id')
+                ->whereRaw("ST_Distance_Sphere(point(lng, lat), point(?, ?)) <= ?", [
+                    $longitude, 
+                    $latitude, 
+                    $customRadius * 1000
+                ])
+                ->where('status', 1)
+                ->get();
+
+            if ($guides->isNotEmpty()) {
+                return $guides;
+            }
+        }
+
+        $distances = [50, 100, 200];
+
+        foreach ($distances as $distance) {
+            $distance = $customRadius ? $customRadius + $distance : $distance;
+            $guides = self::select('id')
+                ->whereRaw("ST_Distance_Sphere(point(lng, lat), point(?, ?)) <= ?", [
+                    $longitude, 
+                    $latitude, 
+                    $distance * 1000
+                ])
+                ->where('status', 1)
+                ->get();
+
+            if ($guides->isNotEmpty()) {
+                return $guides;
+            }
+        }
+
+        // Level 4: Find nearest guide globally
+        return self::select('id')
+            ->where('status', 1)
+            ->orderByRaw("ST_Distance_Sphere(point(lng, lat), point(?, ?))", [$longitude, $latitude])
+            ->limit(1)
+            ->get();
+    }
+
+
+
 }

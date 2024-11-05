@@ -42,7 +42,8 @@ class GuidingsController extends Controller
             Session::put('random_seed', $randomSeed);
         }
 
-        $query = Guiding::query()->where('status',1)->whereNotNull('lat')->whereNotNull('lng');
+        //$query = Guiding::query()->where('status',1)->whereNotNull('lat')->whereNotNull('lng');
+        $query = Guiding::query()->where('status',1);
 
         if (empty($request->all())) {
             $query->orderByRaw("RAND($randomSeed)");
@@ -232,13 +233,13 @@ class GuidingsController extends Controller
 
         }
 
-        if($request->has('country')){
+        /*if($request->has('country')){
             $title .= __('guidings.Country') . ' ' . $request->country . ' | ';
             $filter_title .= __('guidings.Country') . ' ' . $request->country . ', ';
             $query->where('country',$request->get('country'));
-        }
+        }*/
 
-        $radius = null; // Radius in miles
+        $radius = 50; // Radius in miles
         if($request->has('radius')){
 
             $title .= __('guidings.Radius') . ' ' . $request->radius . 'km | ';
@@ -249,29 +250,33 @@ class GuidingsController extends Controller
         $placeLat = $request->get('placeLat');
         $placeLng = $request->get('placeLng');
 
-        if($request->has('place') && empty($request->get('place'))){
+
+        /*if($request->has('place') && empty($request->get('place'))){
             $title .= __('guidings.Place') . ' ' . $request->place . ', ';
             $filter_title .= __('guidings.Place') . ' ' . $request->place . ' | ';
             return redirect()->route('guidings.index', $request->except([
                 'placeLng',
                 'placeLat'
             ]));
-        }
+        }*/
 
         if(!empty($placeLat) && !empty($placeLng) && !empty($request->get('place'))){
 
             $title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
             $filter_title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ', ';
-            $query->select(['guidings.*'])
+            /*$query->select(['guidings.*'])
             ->selectRaw("(6371 * acos(cos(radians($placeLat)) * cos(radians(lat)) * cos(radians(lng) - radians($placeLng)) + sin(radians($placeLat)) * sin(radians(lat)))) AS distance")
             ->where('status', 1)
             ->orderBy('distance') // Sort the results by distance in ascending order
-            ->get();
+            ->get();*/
 
+            //$guiding_ids = Guiding::nearestGuideIds($placeLat, $placeLng, $request->country);
+            $guiding_ids = Guiding::nearestGuideList($placeLat, $placeLng, $radius);
+            //dump($guiding_ids);
+            $query->whereIn('id', $guiding_ids);
         }
 
         $allGuidings = $query->get();
-
 
         $otherguidings = array();
 

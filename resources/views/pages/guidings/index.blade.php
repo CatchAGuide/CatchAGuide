@@ -194,6 +194,9 @@
     #offcanvasBottomSearch {
         height: 90%!important;
     }
+    .pac-container {
+        z-index: 2000;
+    }
 </style>
 
 @endsection
@@ -228,18 +231,20 @@
 
         <div class="container-fluid">
             <div class="row">
+                <!-- 
                 <div class="col-6 col-sm-4 col-md-12 d-flex align-items-center my-2">
                     <div class="d-flex justify-content-start">
                         <button  id="toggleFilterBtn" class="btn outline-none"><span class="fw-bold text-decoration-underline">Filters</span><i class="fa fa-filter color-primary" aria-hidden="true"></i></button>
                     </div>
-                </div>
+                </div> 
+                -->
                 <div id="filterCard" class="col-sm-12 col-lg-3">
                     <div class="card mb-2">
                         <div id="map-placeholder">
                             <button class="btn btn-primary" data-bs-target="#mapModal" data-bs-toggle="modal">Show on map</button>
                         </div>
                     </div>
-                    <div class="card d-block">
+                    <div class="card d-block d-none d-sm-block">
                         <div class="card-header">
                             Filter By:
                         </div>
@@ -254,8 +259,8 @@
                                                 </div>
                                                 <input  id="searchPlace" name="place" type="text" value="{{ request()->get('place') ? request()->get('place') : null }} @if(empty(request()->get('place')) && !empty(request()->get('country'))) {{request()->get('country')}} @endif" class="form-control border-0 border-bottom rounded-0" placeholder="@lang('message.enter-location')"  autocomplete="on">
                                             </div>
-                                          <input type="hidden" id="placeLat" value="{{ request()->get('placeLat') ? request()->get('placeLat') : null }}" name="placeLat"/>
-                                          <input type="hidden" id="placeLng" value="{{ request()->get('placeLng') ? request()->get('placeLng') : null }}" name="placeLng"/>
+                                          <input type="hidden" id="LocationLat" value="{{ request()->get('placeLat') ? request()->get('placeLat') : null }}" name="placeLat"/>
+                                          <input type="hidden" id="LocationLng" value="{{ request()->get('placeLng') ? request()->get('placeLng') : null }}" name="placeLng"/>
                                         </div>
                                     </div>
                                     <div class="col-12">
@@ -267,12 +272,14 @@
                                             </div>
                                             <select id="radius" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="radius">
                                                 <option selected disabled hidden>Radius</option>
-                                                <option value="" >@lang('message.choose')...</option>
-                                                <option value="50" {{ request()->get('radius') ? request()->get('radius') == 50 ? 'selected' : null : null }}>50 km</option>
+                                                @foreach([50, 100, 150, 250, 500] as $key => $value)
+                                                    <option value="{{ $value }}" {{ (request()->has('radius')? ((request()->get('radius') == $value)? 'selected' : '' ) : (($value == 50)? 'selected' : '')) }}>{{ $value }} km</option>
+                                                @endforeach
+                                                <!-- <option value="50" {{ request()->has('radius') ? request()->get('radius') == 50 ? 'selected' : null : null }}>50 km</option>
                                                 <option value="100" {{ request()->get('radius') ? request()->get('radius') == 100 ? 'selected' : null : null }}>100 km</option>
                                                 <option value="150" {{ request()->get('radius') ? request()->get('radius') == 150 ? 'selected' : null : null }}>150 km</option>
                                                 <option value="250" {{ request()->get('radius') ? request()->get('radius') == 250 ? 'selected' : null : null }}>250 km</option>
-                                                <option value="500" {{ request()->get('radius') ? request()->get('radius') == 500 ? 'selected' : null : null }}>500 km</option>
+                                                <option value="500" {{ request()->get('radius') ? request()->get('radius') == 500 ? 'selected' : null : null }}>500 km</option> -->
                                             </select>
                                           </div>
                                     </div>
@@ -570,20 +577,141 @@
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body small">
-        ...
+            <form id="filterContainerOffCanvass" action="{{route('guidings.index')}}" method="get" class="px-4 py-2">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group my-1">
+                            <div class="input-group">
+                                <div class="input-group-prepend border-0 border-bottom ">
+                                    <span class=" d-flex align-items-center px-2 h-100"><i class="fas fa-map-marker-alt"></i></span>
+                                </div>
+                                <input id="searchPlace2" name="place" type="text" value="{{ request()->get('place') ? request()->get('place') : null }} @if(empty(request()->get('place')) && !empty(request()->get('country'))) {{request()->get('country')}} @endif" class="form-control border-0 border-bottom rounded-0" placeholder="@lang('message.enter-location')"  autocomplete="on">
+                            </div>
+                          <input type="hidden" id="LocationLat2" value="{{ request()->get('placeLat') ? request()->get('placeLat') : null }}" name="placeLat"/>
+                          <input type="hidden" id="LocationLng2" value="{{ request()->get('placeLng') ? request()->get('placeLng') : null }}" name="placeLng"/>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="input-group my-1">
+                            <div class="input-group-prepend border-0 border-bottom ">
+                                <span class="d-flex align-items-center px-2 h-100">
+                                    <i class="fa fa-compass"></i>
+                                </span>
+                            </div>
+                            <select id="radiusOffCanvass" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="radius">
+                                <option selected disabled hidden>Radius</option>
+                                <option value="" >@lang('message.choose')...</option>
+                                <option value="50" {{ request()->get('radius') ? request()->get('radius') == 50 ? 'selected' : null : null }}>50 km</option>
+                                <option value="100" {{ request()->get('radius') ? request()->get('radius') == 100 ? 'selected' : null : null }}>100 km</option>
+                                <option value="150" {{ request()->get('radius') ? request()->get('radius') == 150 ? 'selected' : null : null }}>150 km</option>
+                                <option value="250" {{ request()->get('radius') ? request()->get('radius') == 250 ? 'selected' : null : null }}>250 km</option>
+                                <option value="500" {{ request()->get('radius') ? request()->get('radius') == 500 ? 'selected' : null : null }}>500 km</option>
+                            </select>
+                          </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="input-group my-1">
+                            <div class="input-group-prepend border-0 border-bottom ">
+                                <span class="d-flex align-items-center px-2 h-100">
+                                    <i class="fas fa-user"></i>
+                                </span>
+                            </div>
+                            <select id="num-guestsOffCanvass" class="form-control form-select  border-0 border-bottom rounded-0 custom-select" name="num_guests">
+                                <option value="" disabled selected hidden>@lang('message.number-of-guests')</option>
+                                <option value="">@lang('message.choose')...</option>
+                                <option value="1" {{ request()->get('num_guests') ? request()->get('num_guests') == 1 ? 'selected' : null : null }}>1</option>
+                                <option value="2" {{ request()->get('num_guests') ? request()->get('num_guests') == 2 ? 'selected' : null : null }}>2</option>
+                                <option value="3" {{ request()->get('num_guests') ? request()->get('num_guests') == 3 ? 'selected' : null : null }}>3</option>
+                                <option value="4" {{ request()->get('num_guests') ? request()->get('num_guests') == 4 ? 'selected' : null : null }}>4</option>
+                                <option value="5" {{ request()->get('num_guests') ? request()->get('num_guests') == 5 ? 'selected' : null : null }}>5</option>
+                            </select>
+                        </div>
+                    </div>
+                 
+                    <div class="col-12">
+                        <div class="form-group my-1 d-flex align-items-center border-bottom">
+                            <div class="px-2 select2-icon">
+                                <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
+                            </div>
+                           
+                            <select class="form-control form-select border-0 rounded-0" id="target_fishOffCanvass" name="target_fish[]" style="width:100%">
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <div class="form-group my-1 d-flex align-items-center border-bottom">
+                            <div class="px-2 select2-icon">
+                                <img src="{{asset('assets/images/icons/water-waves.png')}}" height="20" width="20" alt="" />
+                            </div>
+                            <select class="form-control form-select border-0  rounded-0" id="waterOffCanvass" name="water[]" style="width:100%">
+                    
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group my-1 d-flex align-items-center border-bottom ">
+                            <div class="px-2 select2-icon">
+                                <img src="{{asset('assets/images/icons/fishing.png')}}" height="20" width="20" alt="" />
+                            </div>
+                            <select class="form-control form-select border-0 rounded-0" id="methodsOffCanvass" name="methods[]" style="width:100%">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="input-group my-1">
+                            <div class="input-group-prepend border-0 border-bottom ">
+                                <span class="d-flex align-items-center px-2 h-100">
+                                    <i class="fa fa-euro-sign"></i>
+                                </span>
+                            </div>
+                            <select id="price_rangeOffCanvass" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="price_range">
+                                <option selected disabled hidden>Price per Person</option>
+                                <option value="" >@lang('message.choose')...</option>
+                                <option value="1-50" {{ request()->get('price_range') ? request()->get('price_range') == '1-200' ? 'selected' : null : null }}>1 - 50 p.P.</option>
+                                <option value="51-100" {{ request()->get('price_range') ? request()->get('price_range') == '201-400' ? 'selected' : null : null }}>51 - 100 p.P.</option>
+                                <option value="101-150" {{ request()->get('price_range') ? request()->get('price_range') == '401-600' ? 'selected' : null : null }}>101 - 150 p.P.</option>
+                                <option value="151-200" {{ request()->get('price_range') ? request()->get('price_range') == '601-800' ? 'selected' : null : null }}>151 - 200 p.P.</option>
+                                <option value="201-250" {{ request()->get('price_range') ? request()->get('price_range') == '801-1000' ? 'selected' : null : null }}>201 - 250 p.P.</option>
+                                <option value="350" {{ request()->get('price_range') ? request()->get('price_range') == '1001' ? 'selected' : null : null }}>350 and more</option>
+                            </select>
+                          </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="input-group my-1">
+                            <div class="input-group-prepend border-0 border-bottom ">
+                                <span class="d-flex align-items-center px-2 h-100">
+                                    <i class="fa fa-star"></i>
+                                </span>
+                            </div>
+                            <select id="ratingsOffCanvass" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="ratings">
+                                <option selected disabled hidden>Ratings</option>
+                                <option value="" >@lang('message.choose')...</option>
+                                <option value="1" {{ request()->get('ratings') ? request()->get('ratings') == 1 ? 'selected' : null : null }}>1 Star</option>
+                                <option value="2" {{ request()->get('ratings') ? request()->get('ratings') == 2 ? 'selected' : null : null }}>2 Stars</option>
+                                <option value="3" {{ request()->get('ratings') ? request()->get('ratings') == 3 ? 'selected' : null : null }}>3 Stars</option>
+                                <option value="4" {{ request()->get('ratings') ? request()->get('ratings') == 4 ? 'selected' : null : null }}>4 Stars</option>
+                                <option value="5" {{ request()->get('ratings') ? request()->get('ratings') == 5 ? 'selected' : null : null }}>5 Stars</option>
+                            </select>
+                          </div>
+                    </div>
+                    <div class="col-sm-12 col-lg-12 ps-md-0">
+                        <button class="btn btn-sm theme-primary btn-theme-new w-100 h-100" >@lang('message.Search')</button>    
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 @endsection
 
 @section('js_after')
 
-
-<!-- <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q&libraries=places,geocoder"></script>
-<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script> -->
+<!-- 
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q&libraries=places,geocoder"></script>
 <script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
     ({key: "AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q", v: "weekly"});
-</script>
+</script> 
+-->
 <script>
     $('#sortby').on('change',function(){
         $('#form-sortby').submit();
@@ -601,9 +729,7 @@ toggleBtn.addEventListener('click', function() {
 });
 $(function(){
     $('#toggleFilterBtn').click(function(){
-        console.log(12);
         $('#filterCard').toggle();
-        console.log(34);
     });
 });
 </script>
@@ -613,11 +739,11 @@ $(function(){
 
 function initializeSelect2() {
 
-    var selectTarget = $('#target_fish');
-    var selectWater = $('#water');
-    var selectMethod = $('#methods');
+    var selectTarget = $('#target_fish, #target_fishOffCanvass');
+    var selectWater = $('#water, #waterOffCanvass');
+    var selectMethod = $('#methods, #methodsOffCanvass');
 
-    $("#target_fish").select2({
+    $("#target_fish, #target_fishOffCanvass").select2({
         multiple: true,
         placeholder: '@lang('message.target-fish')',
         width: 'resolve', // need to override the changed default
@@ -647,7 +773,7 @@ function initializeSelect2() {
     selectTarget.trigger('change');
 
 
-    $("#water").select2({
+    $("#water, #waterOffCanvass").select2({
         multiple: true,
         placeholder: '@lang('message.body-type')',
         width: 'resolve' // need to override the changed default
@@ -677,7 +803,7 @@ function initializeSelect2() {
 
 
 
-    $("#methods").select2({
+    $("#methods, #methodsOffCanvass").select2({
         multiple: true,
         placeholder: '@lang('message.fishing-technique')',
         width: 'resolve' // need to override the changed default
@@ -703,11 +829,11 @@ function initializeSelect2() {
     @endforeach
   
     @if(request()->get('price_range'))
-        $('#price_range').val('{{ request()->get('price_range') }}');
+        $('#price_range, #price_rangeOffCanvass').val('{{ request()->get('price_range') }}');
     @endif
   
     @if(request()->get('ratings'))
-        $('#ratings').val('{{ request()->get('ratings') }}');
+        $('#ratings, #ratingsOffCanvass').val('{{ request()->get('ratings') }}');
     @endif
     // Trigger change event to update Select2 display
     selectMethod.trigger('change');
@@ -851,17 +977,30 @@ function initializeSelect2() {
 
 
 
-function initialize() {
+/*function initialize() {
     var input = document.getElementById('searchPlace');
     var autocomplete = new google.maps.places.Autocomplete(input);
     google.maps.event.addListener(autocomplete, 'place_changed', function () {
+        //alert(2221);
         var place = autocomplete.getPlace();
-        document.getElementById('placeLat').value = place.geometry.location.lat();
-        document.getElementById('placeLng').value = place.geometry.location.lng();
+        document.getElementById('LocationLat').value = place.geometry.location.lat();
+        document.getElementById('LocationLng').value = place.geometry.location.lng();
     });
-}
+}*/
 
-window.addEventListener('load', initialize);
+/*function initialize2() {
+
+    var input = document.getElementById('searchPlaceOffCanvass');
+    var autocomplete = new google.maps.places.Autocomplete(input);
+    google.maps.event.addListener(autocomplete, 'place_changed', function () {
+        var place = autocomplete.getPlace();
+        document.getElementById('placeLatOffCanvass').value = place.geometry.location.lat();
+        document.getElementById('placeLngOffCanvass').value = place.geometry.location.lng();
+    });
+}*/
+
+//window.addEventListener('load', initialize);
+//window.addEventListener('load', initialize2);
 
 window.addEventListener('load', function() {
     var placeLatitude = '{{ request()->get('placeLat') }}'; // Replace with the actual value from the request
@@ -900,7 +1039,8 @@ function codeLatLng(lat, lng) {
     geocoder.geocode({'latLng': latlng}, function (results, status) {
         if (status === google.maps.GeocoderStatus.OK) {
             if (results[0]) {
-                document.getElementById('searchPlace').value = results[0].formatted_address;
+                document.getElementById('searchPlace2').value = results[0].formatted_address;
+                //document.getElementById('searchPlaceOffCanvass').value = results[0].formatted_address;
             } else {
                 console.log('No results found');
                 return null;
