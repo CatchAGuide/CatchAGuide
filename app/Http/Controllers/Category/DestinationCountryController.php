@@ -222,11 +222,7 @@ class DestinationCountryController extends Controller
                     $query->whereIn('target_id', $requestFish);
                 });
             }
-
         }
-
-        $title .= __('guidings.Country') . ' ' . $country . ' | ';
-        $query->where('country',$country);
 
         $radius = null; // Radius in miles
         if($request->has('radius')){
@@ -239,15 +235,10 @@ class DestinationCountryController extends Controller
         $placeLat = $geocode['lat'];
         $placeLng = $geocode['lng'];
 
-        /*if($request->has('place') && empty($request->get('place'))){
-            $title .= __('guidings.Place') . ' ' . $request->place . ' | ';
-            return redirect()->route('guidings.index', $request->except([
-                'placeLng',
-                'placeLat'
-            ]));
-        }*/
+        $title .= __('guidings.Country') . ' ' . $country . ' | ';
+        //$query->where('country',$country);
 
-        if(!empty($placeLat) && !empty($placeLng) && !empty($request->get('place'))){
+        if(!empty($placeLat) && !empty($placeLng)){
 
             $title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
             $query->select(['guidings.*'])
@@ -259,7 +250,6 @@ class DestinationCountryController extends Controller
         }
 
         $allGuidings = $query->get();
-
 
         $otherguidings = array();
 
