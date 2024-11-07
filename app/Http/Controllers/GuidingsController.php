@@ -239,7 +239,7 @@ class GuidingsController extends Controller
             $query->where('country',$request->get('country'));
         }*/
 
-        $radius = 50; // Radius in miles
+        $radius = null; // Radius in miles
         if($request->has('radius')){
 
             $title .= __('guidings.Radius') . ' ' . $request->radius . 'km | ';

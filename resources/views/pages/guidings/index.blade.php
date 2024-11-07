@@ -272,14 +272,11 @@
                                             </div>
                                             <select id="radius" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="radius">
                                                 <option selected disabled hidden>Radius</option>
-                                                @foreach([50, 100, 150, 250, 500] as $key => $value)
-                                                    <option value="{{ $value }}" {{ (request()->has('radius')? ((request()->get('radius') == $value)? 'selected' : '' ) : (($value == 50)? 'selected' : '')) }}>{{ $value }} km</option>
-                                                @endforeach
-                                                <!-- <option value="50" {{ request()->has('radius') ? request()->get('radius') == 50 ? 'selected' : null : null }}>50 km</option>
+                                                <option value="50" {{ request()->has('radius') ? request()->get('radius') == 50 ? 'selected' : null : null }}>50 km</option>
                                                 <option value="100" {{ request()->get('radius') ? request()->get('radius') == 100 ? 'selected' : null : null }}>100 km</option>
                                                 <option value="150" {{ request()->get('radius') ? request()->get('radius') == 150 ? 'selected' : null : null }}>150 km</option>
                                                 <option value="250" {{ request()->get('radius') ? request()->get('radius') == 250 ? 'selected' : null : null }}>250 km</option>
-                                                <option value="500" {{ request()->get('radius') ? request()->get('radius') == 500 ? 'selected' : null : null }}>500 km</option> -->
+                                                <option value="500" {{ request()->get('radius') ? request()->get('radius') == 500 ? 'selected' : null : null }}>500 km</option>
                                             </select>
                                           </div>
                                     </div>
