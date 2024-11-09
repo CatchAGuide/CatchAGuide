@@ -34,6 +34,7 @@ class GuidingsController extends Controller
     {
         $locale = Config::get('app.locale');
 
+        $searchMessage = "";
         $title = '';
         $filter_title = '';
         $randomSeed = Session::get('random_seed');
@@ -271,9 +272,10 @@ class GuidingsController extends Controller
             ->get();*/
 
             //$guiding_ids = Guiding::nearestGuideIds($placeLat, $placeLng, $request->country);
-            $guiding_ids = Guiding::nearestGuideList($placeLat, $placeLng, $radius);
-            //dump($guiding_ids);
-            $query->whereIn('id', $guiding_ids);
+            // $guiding_ids = Guiding::nearestGuideList($placeLat, $placeLng, $radius);
+            $guidingFilter = Guiding::locationFilter($request->get('place'), $radius);
+            $searchMessage = $guidingFilter['message'];
+            $query->whereIn('id', $guidingFilter['ids']);
         }
 
         $allGuidings = $query->get();
@@ -307,6 +309,7 @@ class GuidingsController extends Controller
             'guidings' => $guidings,
             'radius' => $radius,
             'allGuidings' => $allGuidings,
+            'searchMessage' => $searchMessage,
             'otherguidings' => $otherguidings,
         ]);
         
@@ -414,6 +417,7 @@ class GuidingsController extends Controller
             $guiding->lat = $request->has('latitude') ? $request->input('latitude') : '';
             $guiding->lng = $request->has('longitude') ? $request->input('longitude') : '';
             $guiding->country = $request->has('country') ? $request->input('country') : '';
+            $guiding->city = $request->has('city') ? $request->input('city') : '';
             
             $galeryImages = [];
             if ($request->has('title_image')) {
@@ -809,6 +813,7 @@ class GuidingsController extends Controller
             'latitude' => $guiding->lat,
             'longitude' => $guiding->lng,
             'country' => $guiding->country,
+            'city' => $guiding->city,
             'galery_images' => $guiding->galery_images,
             'thumbnail_path' => $guiding->thumbnail_path,
 
