@@ -610,7 +610,7 @@ class Guiding extends Model
      */
     private static function getCoordinatesFromLocation(string $location): ?array
     {
-        $geocodeResult = self::geocodeLocation($location);
+        $geocodeResult = self::geocodeLocation($location, true);
         if (!$geocodeResult) {
             return null;
         }
@@ -625,7 +625,7 @@ class Guiding extends Model
     /**
      * Make request to Google Geocoding API and parse response
      */
-    private static function geocodeLocation(string $location): ?array 
+    private static function geocodeLocation(string $location, bool $cityCheck = false): ?array 
     {
         try {
             $client = new \GuzzleHttp\Client();
@@ -654,8 +654,28 @@ class Guiding extends Model
                     if (in_array('locality', $component['types'])) {
                         $parsedResult['city'] = $component['long_name'];
                     }
+                    if (in_array('administrative_area_level_1', $component['types'])) {
+                        // Use state/province capital if city not found
+                        if (!$parsedResult['city']) {
+                            $parsedResult['city'] = $component['long_name'];
+                        }
+                    }
                     if (in_array('country', $component['types'])) {
                         $parsedResult['country'] = $component['long_name'];
+                        // If no city foun
+                        if (!$parsedResult['city'] && $cityCheck) {
+                            $capitalResponse = $client->get('https://maps.googleapis.com/maps/api/place/textsearch/json', [
+                                'query' => [
+                                    'query' => "{$component['long_name']} capital city",
+                                    'key' => env('GOOGLE_MAP_API_KEY')
+                                ]
+                            ]);
+                            $capitalData = json_decode($capitalResponse->getBody(), true);
+                            if ($capitalData['status'] === 'OK' && !empty($capitalData['results'])) {
+                                $parsedResult['city'] = $capitalData['results'][0]['name'];
+                                return self::geocodeLocation("{$parsedResult['city']}, {$component['long_name']}");
+                            }
+                        }
                     }
                     $parsedResult['types'][] = $component['types'][0];
                 }
