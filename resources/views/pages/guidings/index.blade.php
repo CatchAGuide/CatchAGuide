@@ -272,6 +272,7 @@
                                             </div>
                                             <select id="radius" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="radius">
                                                 <option selected disabled hidden>Radius</option>
+                                                <option value="" >@lang('message.choose')...</option>
                                                 <option value="50" {{ request()->has('radius') ? request()->get('radius') == 50 ? 'selected' : null : null }}>50 km</option>
                                                 <option value="100" {{ request()->get('radius') ? request()->get('radius') == 100 ? 'selected' : null : null }}>100 km</option>
                                                 <option value="150" {{ request()->get('radius') ? request()->get('radius') == 150 ? 'selected' : null : null }}>150 km</option>
@@ -376,6 +377,13 @@
                 </div>
 
                 <div class="col-sm-12 col-lg-9">
+                    <!-- Add search message display -->
+                    @if(!empty($searchMessage))
+                        <div class="alert alert-info mb-3" role="alert">
+                            {{ $searchMessage }}
+                        </div>
+                    @endif
+
                     <!-- column-reverse-row-normal -->
                     <div class="row">
                   
@@ -597,7 +605,7 @@
                             </div>
                             <select id="radiusOffCanvass" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="radius">
                                 <option selected disabled hidden>Radius</option>
-                                <option value="" >@lang('message.choose')...</option>
+                                <option>@lang('message.choose')...</option>
                                 <option value="50" {{ request()->get('radius') ? request()->get('radius') == 50 ? 'selected' : null : null }}>50 km</option>
                                 <option value="100" {{ request()->get('radius') ? request()->get('radius') == 100 ? 'selected' : null : null }}>100 km</option>
                                 <option value="150" {{ request()->get('radius') ? request()->get('radius') == 150 ? 'selected' : null : null }}>150 km</option>

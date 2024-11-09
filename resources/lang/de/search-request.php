@@ -20,5 +20,6 @@ return [
     'phone' => 'Telefonnummer',
     'mail_address' => 'Mailadresse',
     'comments' => 'Kommentare',
-
+    "searchLevel1" => "Keine Ergebnisse: Leider bieten wir derzeit keine Angeltouren in #Ort# an. Jedoch gibt es andere Optionen im Umkreis von 200km zu deinem bevorzugten Ort",
+    "searchLevel2" => "Keine Ergebnisse: Leider bieten wir derzeit keine Angeltouren in #Ort# an. Hier sind verfügbare Optionen, die am nächsten zu deinem bevorzugten Ort liegen",
 ];

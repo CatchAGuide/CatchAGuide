@@ -20,6 +20,7 @@ use App\Models\FishingType;
 use App\Models\EquipmentStatus;
 use App\Models\FishingEquipment;
 use App\Models\Rating;
+use App\Models\LocationBoundary;
 
 class Guiding extends Model
 {
@@ -92,6 +93,7 @@ class Guiding extends Model
         'allowed_booking_advance',
         'booking_window',
         'galery_images',
+        'city'
     ];
 
     public const LATITUDE  = 'lat';
@@ -491,127 +493,179 @@ class Guiding extends Model
         return $blocked_events;
     }
 
-    public function nearestGuides($latitude, $longitude, $country)
+    /**
+     * Filter guidings based on location and radius
+     * 
+     * @param string $location City or country name
+     * @param int|null $radius Search radius in kilometers
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public static function locationFilter(string $location, ?int $radius = null)
     {
-        $latitude = $latitude;
-        $longitude = $longitude;
-        $country = $country;
-
-        $distances = [50, 100, 200];
-        $level = 1;
-    
-        foreach ($distances as $distance) {
-            $guides = $this->select('*')
-                ->where('country', $country)
-                ->whereRaw("ST_Distance_Sphere(point(longitude, latitude), point(?, ?)) <= ?", [$longitude, $latitude, $distance * 1000])
-                ->get();
-            
-            if ($guides->isNotEmpty()) {
-                // Add level identifier to the results
-                return response()->json([
-                    'note' => "Reached Level {$level} - {$distance} km",
-                    'level' => $level,
-                    'distance' => $distance,
-                    'guides' => $guides
-                ]);
-            }
-    
-            $level++; // Increment level if no results found within the current radius
-        }
+        // Parse location into components
+        $locationParts = self::parseLocation($location);
+        $returnData = [
+            'message' => '',
+            'ids' => []
+        ];
         
-        // Global nearest guide if none found within specified distances
-        $nearestGuide = $this->select('*')
-            ->orderByRaw("ST_Distance_Sphere(point(longitude, latitude), point(?, ?))", [$longitude, $latitude])
-            ->first();
-    
-        return response()->json([
-            'note' => 'Reached Global Level - No match within country boundaries',
-            'level' => 4,
-            'distance' => 0,
-            'guides' => $nearestGuide ? [$nearestGuide] : []
-        ]);
-    }
+        // First try direct database match based on parsed location
+        $guidings = self::select('id')
+            ->where(function($query) use ($locationParts) {
+                if ($locationParts['city']) {
+                    $query->where('city', $locationParts['city']);
+                } else if ($locationParts['country']) {
+                    $query->where('country', $locationParts['country']); 
+                }
+            })
+            ->where('status', 1)
+            ->pluck('id');
 
-    public static function nearestGuideIds($latitude, $longitude, $country)
-    {
-        $latitude = $latitude;
-        $longitude = $longitude;
-        $country = $country;
-
-        $distances = [100, 200, 300];
-        $level = 1;
-    
-        foreach ($distances as $distance) {
-            $ids = [];
-            $guides = self::select('*')
-                ->where('status', 1)
-                ->whereRaw("ST_Distance_Sphere(point(lng, lat), point(?, ?)) <= ?", [$longitude, $latitude, $distance * 1000])
-                ->get();
-
-            foreach ($guides as $guide) {
-                $ids[] = $guide->id;
-            }
-
-            if (count($ids) > 0) {
-                return $ids;
-            }
-
-            $level++; // Increment level if no results found within the current radius
+        if ($guidings->isNotEmpty()) {
+            $returnData['ids'] = $guidings;
+            $returnData['message'] = 'Direct match';
+            return $returnData;
         }
+
+        // If no direct matches, use geocoding
+        $coordinates = self::getCoordinatesFromLocation($locationParts['original']);
         
-        // Global nearest guide if none found within specified distances
-        $nearestGuide = self::select('*')
-            ->where('status', 1)
-            ->orderByRaw("ST_Distance_Sphere(point(lng, lat), point(?, ?))", [$longitude, $latitude])
-            ->first();
-    
-        return $nearestGuide ? [$nearestGuide->id] : null;
-    }
-
-    public static function nearestGuideList($latitude, $longitude, $customRadius = null)
-    {
-        // If custom radius provided, try that first
-        if ($customRadius) {
-            $guides = self::select('id')
-                ->whereRaw("ST_Distance_Sphere(point(lng, lat), point(?, ?)) <= ?", [
-                    $longitude, 
-                    $latitude, 
-                    $customRadius * 1000
-                ])
-                ->where('status', 1)
-                ->get();
-
-            if ($guides->isNotEmpty()) {
-                return $guides;
-            }
+        if (!$coordinates) {
+            return collect();
         }
 
-        $distances = [50, 100, 200];
+        // Try radius search
+        $searchRadius = $radius ?? 200;
+        
+        $guidings = self::select('id')
+            ->whereRaw("ST_Distance_Sphere(
+                point(lng, lat),
+                point(?, ?)
+            ) <= ?", [
+                $coordinates['lng'],
+                $coordinates['lat'],
+                $searchRadius * 1000
+            ])
+            ->where('status', 1)
+            ->pluck('id');
 
-        foreach ($distances as $distance) {
-            $distance = $customRadius ? $customRadius + $distance : $distance;
-            $guides = self::select('id')
-                ->whereRaw("ST_Distance_Sphere(point(lng, lat), point(?, ?)) <= ?", [
-                    $longitude, 
-                    $latitude, 
-                    $distance * 1000
-                ])
-                ->where('status', 1)
-                ->get();
-
-            if ($guides->isNotEmpty()) {
-                return $guides;
-            }
+        if ($guidings->isNotEmpty()) {
+            $returnData['ids'] = $guidings;
+            $returnData['message'] = __('search-request.searchLevel1');
+            return $returnData;
         }
 
-        // Level 4: Find nearest guide globally
-        return self::select('id')
+        // If still no results, find nearest guiding
+        $returnData['ids'] = self::select('id')
             ->where('status', 1)
-            ->orderByRaw("ST_Distance_Sphere(point(lng, lat), point(?, ?))", [$longitude, $latitude])
+            ->orderByRaw("ST_Distance_Sphere(
+                point(lng, lat),
+                point(?, ?)
+            )", [
+                $coordinates['lng'],
+                $coordinates['lat']
+            ])
             ->limit(1)
-            ->get();
+            ->pluck('id');
+        $returnData['message'] = __('search-request.searchLevel2');
+        return $returnData;
     }
 
+    /**
+     * Parse location string into components
+     * 
+     * @param string $location
+     * @return array
+     */
+    private static function parseLocation(string $location): array
+    {
+        // Initialize return array
+        $result = [
+            'original' => $location,
+            'city' => null,
+            'country' => null
+        ];
 
+        // Remove any extra whitespace and split by comma
+        $parts = array_map('trim', explode(',', $location));
 
+        if (count($parts) === 1) {
+            // Single location provided - need to determine if it's a city or country
+            $geocodeResult = self::geocodeLocation($location);
+            if ($geocodeResult) {
+                $result['city'] = $geocodeResult['city'];
+                $result['country'] = $geocodeResult['country'];
+            }
+        } else {
+            // City and country provided
+            $result['city'] = $parts[0];
+            $result['country'] = $parts[1];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get coordinates from location using Google Geocoding API
+     */
+    private static function getCoordinatesFromLocation(string $location): ?array
+    {
+        $geocodeResult = self::geocodeLocation($location);
+        if (!$geocodeResult) {
+            return null;
+        }
+
+        return [
+            'lat' => $geocodeResult['lat'],
+            'lng' => $geocodeResult['lng'],
+            'type' => $geocodeResult['types']
+        ];
+    }
+
+    /**
+     * Make request to Google Geocoding API and parse response
+     */
+    private static function geocodeLocation(string $location): ?array 
+    {
+        try {
+            $client = new \GuzzleHttp\Client();
+            $response = $client->get('https://maps.googleapis.com/maps/api/geocode/json', [
+                'query' => [
+                    'address' => $location,
+                    'key' => env('GOOGLE_MAP_API_KEY')
+                ]
+            ]);
+
+            $data = json_decode($response->getBody(), true);
+
+            if ($data['status'] === 'OK') {
+                $result = $data['results'][0];
+                $location = $result['geometry']['location'];
+                
+                $parsedResult = [
+                    'lat' => $location['lat'],
+                    'lng' => $location['lng'],
+                    'city' => null,
+                    'country' => null,
+                    'types' => []
+                ];
+
+                foreach ($result['address_components'] as $component) {
+                    if (in_array('locality', $component['types'])) {
+                        $parsedResult['city'] = $component['long_name'];
+                    }
+                    if (in_array('country', $component['types'])) {
+                        $parsedResult['country'] = $component['long_name'];
+                    }
+                    $parsedResult['types'][] = $component['types'][0];
+                }
+
+                return $parsedResult;
+            }
+        } catch (\Exception $e) {
+            \Log::error('Google Maps API error: ' . $e->getMessage());
+        }
+
+        return null;
+    }
 }
