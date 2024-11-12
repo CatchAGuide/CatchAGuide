@@ -22,7 +22,7 @@
                             </select>
                         </div>
                         <input type="hidden" name="guiding_id" value="{{ $guiding->id }}">
-                        <button type="submit" class="btn btn-danger w-100">VERFÜGBARKEIT PRÜFEN & BUCHEN</button>
+                        <button type="submit" class="btn btn-orange w-100">VERFÜGBARKEIT PRÜFEN & BUCHEN</button>
                     </form>
                     <div class="mt-3">
                         <h5>Preis</h5>
@@ -33,10 +33,10 @@
                                         <span class="">{{ $price->person }} {{ $price->person == 1 ? 'Person' : 'Personen' }}</span>
                                         <span class="text-right">
                                             @if($price->person > 1)
-                                                <span class="text-danger">{{ $price->person > 1 ? round($price->amount / $price->person) : $price->amount }}€</span>
+                                                <span class="text-orange">{{ $price->person > 1 ? round($price->amount / $price->person) : $price->amount }}€</span>
                                                 <span class="text-black" style="font-size: 0.8em;"> p.P</span>
                                                 @else
-                                                <span class="text-danger me-3 pe-1">{{ $price->person > 1 ? round($price->amount / $price->person) : $price->amount }}€</span>
+                                                <span class="text-orange me-3 pe-1">{{ $price->person > 1 ? round($price->amount / $price->person) : $price->amount }}€</span>
                                             @endif
                                         </span>
                                     </li>

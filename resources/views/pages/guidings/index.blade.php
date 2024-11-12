@@ -439,7 +439,7 @@
                                                                 <div class="col-6 col-sm-6 col-md-6 guidings-icon-container"> 
                                                                     <div class="d-flex align-items-center">
                                                                         <div>
-                                                                            <img src="{{asset('assets/images/icons/clock.svg')}}" height="20" width="20" alt="" />
+                                                                            <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
                                                                         </div>
                                                                         <div class="mx-2" >
                                                                             {{ $guiding->duration }} @if($guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
@@ -448,8 +448,8 @@
                                                                 </div>
                                                                 <div class="col-6 col-sm-6 col-md-6 guidings-icon-container"> 
                                                                     <div class="d-flex align-items-center mt-2">
-                                                                        <div class="icon-small">
-                                                                            <span class="icon-user"></span>
+                                                                        <div class="">
+                                                                        <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" />
                                                                         </div>
                                                                         <div class="mx-2" >
                                                                         {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
@@ -459,7 +459,7 @@
                                                                 <div class="col-6 col-sm-6 col-md-6 guidings-icon-container"> 
                                                                     <div class="d-flex align-items-center">
                                                                         <div>
-                                                                            <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
+                                                                            <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
                                                                         </div>
                                                                         <div class="mx-2">
                                                                             <div class="tours-list__content__trait__text" >
@@ -484,7 +484,7 @@
                                                                 <div class="col-6 col-sm-6 col-md-6 guidings-icon-container"> 
                                                                     <div class="d-flex align-items-center">                                              
                                                                         <div>
-                                                                            <img src="{{asset('assets/images/icons/fishing-tool.png')}}" height="20" width="20" alt="" />
+                                                                            <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
                                                                         </div>
                                                                         <div class="mx-2">
                                                                             <div class="tours-list__content__trait__text" >
