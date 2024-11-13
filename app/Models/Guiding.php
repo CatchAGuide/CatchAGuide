@@ -523,7 +523,7 @@ class Guiding extends Model
 
         if ($guidings->isNotEmpty()) {
             $returnData['ids'] = $guidings;
-            $returnData['message'] = 'Direct match';
+            $returnData['message'] = str_replace('#location#', $location, __('search-request.searchLevel1'));;
             return $returnData;
         }
 
@@ -551,23 +551,23 @@ class Guiding extends Model
 
         if ($guidings->isNotEmpty()) {
             $returnData['ids'] = $guidings;
-            $returnData['message'] = __('search-request.searchLevel1');
+            $returnData['message'] = str_replace('#location#', $location, __('search-request.searchLevel2'));
             return $returnData;
         }
 
         // If still no results, find nearest guiding
         $returnData['ids'] = self::select('id')
             ->where('status', 1)
-            ->orderByRaw("ST_Distance_Sphere(
-                point(lng, lat),
+            ->selectRaw("ST_Distance_Sphere(
+                point(lng, lat), 
                 point(?, ?)
-            )", [
+            ) as distance", [
                 $coordinates['lng'],
                 $coordinates['lat']
             ])
-            ->limit(1)
+            ->orderBy('distance')
             ->pluck('id');
-        $returnData['message'] = __('search-request.searchLevel2');
+        $returnData['message'] = str_replace('#location#', $location, __('search-request.searchLevel3'));
         return $returnData;
     }
 

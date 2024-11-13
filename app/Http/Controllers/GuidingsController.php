@@ -27,6 +27,7 @@ use App\Mail\SearchRequestUserMail;
 use Illuminate\Support\Facades\Log;
 use App\Models\BlockedEvent;
 use App\Models\ExtrasPrice;
+use App\Models\FishingType;
 
 class GuidingsController extends Controller
 {
@@ -121,7 +122,7 @@ class GuidingsController extends Controller
 
                 $title .= __('guidings.Fishing_Type') . 'Fishing Type (';
                 $filter_title .= __('guidings.Fishing_Type') . 'Fishing Type (';
-                $method_rows = FishType::whereIn('id', $request->fishing_type)->get();
+                $method_rows = FishingType::whereIn('id', $request->fishing_type)->get();
                 $title_row = '';
                 foreach ($method_rows as $row) {
                     $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';

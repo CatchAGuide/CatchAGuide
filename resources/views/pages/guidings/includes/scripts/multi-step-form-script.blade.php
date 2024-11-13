@@ -5,15 +5,14 @@
 <script src="{{ asset('assets/js/ImageManager.js') }}"></script>
 
 <script>
-    let imageManager;
-    let currentStep = 1;
-    const totalSteps = 7; 
-    let autocomplete;
-    let city = '';
-    let country = '';
-    let postal_code = '';
-
-    const errorMapping = {
+    window.imageManagerLoaded = window.imageManagerLoaded || null;
+    window.currentStep = window.currentStep || 1;
+    window.totalSteps = window.totalSteps || 7;
+    window.autocomplete = window.autocomplete || null;
+    window.city = window.city || null;
+    window.country = window.country || null;
+    window.postal_code = window.postal_code || null;
+    window.errorMapping = window.errorMapping || {
         title: { field: 'Title', step: 1 },
         title_image: { field: 'Galery Image', step: 1 },
         primaryImage: { field: 'Primary Image', step: 1 },
@@ -53,6 +52,7 @@
                 $('#longitude').val(place.geometry.location.lng());
 
                 if (types.includes('locality')) {
+                    $('#city').val(component.long_name);
                     city = component.long_name;
                 } else if (types.includes('country')) {
                     country = component.long_name;
@@ -90,19 +90,19 @@
     }
     
     function initializeImageManager() {
-        if (typeof ImageManager === 'undefined') {
+        if (typeof imageManagerLoaded === 'undefined') {
             setTimeout(initializeImageManager, 100);
             return;
         }
 
-        imageManager = new ImageManager('#croppedImagesContainer', '#title_image');
+        imageManagerLoaded = new ImageManager('#croppedImagesContainer', '#title_image');
         
         if (document.getElementById('is_update').value === '1') {
             const existingImagesInput = document.getElementById('existing_images');
             const thumbnailPath = document.getElementById('thumbnail_path').value;
             
             if (existingImagesInput && existingImagesInput.value) {
-                imageManager.loadExistingImages(existingImagesInput.value, thumbnailPath);
+                imageManagerLoaded.loadExistingImages(existingImagesInput.value, thumbnailPath);
             }
         }
 
@@ -115,7 +115,7 @@
         });
 
         $('#title_image').on('change', function(event) {
-            imageManager.handleFileSelect(event.target.files);
+            imageManagerLoaded.handleFileSelect(event.target.files);
         });
     }
 
@@ -450,7 +450,7 @@
                 if (seasonalTripRadio) {
                     seasonalTripRadio.checked = true;
                     if (seasonalTripData === 'season_monthly') {
-                        document.getElementById('season_monthly').style.display = 'block';
+                        // document.getElementById('season_monthly').style.display = 'block';
                         if (monthsData && monthsData.length > 0) {
                             monthsData.forEach(month => {
                                 const monthCheckbox = document.querySelector(`input[name="months[]"][value="${month}"]`);
@@ -501,9 +501,12 @@
         if (this.checked) {
             $label.addClass('active');
             $textarea.show();
+            $textarea.prop('required', true);
         } else {
             $label.removeClass('active');
             $textarea.hide();
+            $textarea.prop('required', false);
+            $textarea.val('');
         }
     });
 
@@ -576,7 +579,7 @@
 
     // Add extra pricing
     
-    let extraCount = 0;
+    window.extraCount = window.extraCount || 0;
     $('#add-extra').click(function() {
         extraCount++;
         const newRow = `
@@ -682,12 +685,12 @@
         const formData = new FormData(form);
 
         try {
-            if (!imageManager) {
+            if (!imageManagerLoaded) {
                 console.error('ImageManager not initialized');
                 return;
             }
 
-            const croppedImages = imageManager.getCroppedImages();
+            const croppedImages = imageManagerLoaded.getCroppedImages();
             formData.delete('title_image[]');
 
             croppedImages.forEach((image, index) => {
@@ -697,7 +700,7 @@
                 }
             });
 
-            const primaryImageIndex = imageManager.getPrimaryImageIndex();
+            const primaryImageIndex = imageManagerLoaded.getPrimaryImageIndex();
 
             fetch(form.action, {
                 method: 'POST',
@@ -801,15 +804,34 @@
         // Check if it's a draft submission
         const isDraft = document.querySelector('input[name="is_draft"]');
         if (isDraft && isDraft.value === '1') {
-            return true; // Skip validation for drafts
+            return true;
+        }
+
+        // Helper function to validate checkbox groups with textareas
+        function validateCheckboxGroup(checkboxName, groupLabel) {
+            const checkedBoxes = document.querySelectorAll(`input[name="${checkboxName}"]:checked`);
+            checkedBoxes.forEach(checkbox => {
+                const container = checkbox.closest('.btn-checkbox-container');
+                const textarea = container.querySelector('textarea');
+                if (textarea && !textarea.value.trim()) {
+                    const checkboxLabel = container.querySelector('label').textContent.trim();
+                    errors.push(`Please provide details for the selected "${checkboxLabel}" under ${groupLabel}`);
+                    isValid = false;
+                }
+            });
         }
 
         switch(step) {
             case 1:
-                if (!document.getElementById('title_image').files.length) {
-                    // errors.push('Please upload at least one image.');
-                    // isValid = false;
+                // Check for actual file input and visible previews
+                const fileInput = document.getElementById('title_image');
+                const previewWrappers = document.querySelectorAll('.image-preview-wrapper');
+                
+                if (!fileInput.files.length && !previewWrappers.length) {
+                    errors.push('Please upload at least one image.');
+                    isValid = false;
                 }
+                
                 if (!document.getElementById('location').value.trim()) {
                     errors.push('Location is required.');
                     isValid = false;
@@ -820,13 +842,12 @@
                 }
                 break;
             case 2:
-                if (!document.querySelector('input[name="type_of_fishing_radio"]:checked')) {
-                    errors.push('Please select a type of fishing.');
-                    // isValid = false;
-                } 
-                if (document.getElementById('type_of_fishing').value === 'boat' && !document.querySelector('input[name="type_of_boat"]:checked')) {
+                if (document.getElementById('type_of_fishing').value && !document.querySelector('input[name="type_of_boat"]:checked')) {
                     errors.push('Please select a type of boat.');
                     isValid = false;
+                }
+                if (document.getElementById('type_of_fishing').value === 'boat' ) {
+                    validateCheckboxGroup('descriptions[]', 'Boat Information');
                 }
                 break;
             case 3:
@@ -873,7 +894,9 @@
                 }
                 break;
             case 5:
-                // No specific validation for this step
+                validateCheckboxGroup('other_information[]', 'Other Information');
+                validateCheckboxGroup('requiements_taking_part[]', 'Requirements');
+                validateCheckboxGroup('recommended_preparation[]', 'Recommendations');
                 break;
             case 6:
                 if (!document.querySelector('input[name="tour_type"]:checked')) {
@@ -883,6 +906,19 @@
                 if (!document.querySelector('input[name="duration"]:checked')) {
                     errors.push('Please select a duration.');
                     isValid = false;
+
+                    const selectedDuration = document.querySelector('input[name="duration"]:checked').value;
+                    if (selectedDuration === 'multi_day') {
+                        if (!document.getElementById('duration_days').value.trim()) {
+                            errors.push('Number of days is required.');
+                            isValid = false;
+                        }
+                    } else {
+                        if (!document.getElementById('duration_hours').value.trim()) {
+                            errors.push('Number of hours is required.');
+                            isValid = false;
+                        }
+                    }
                 }
                 if (!document.getElementById('no_guest').value.trim()) {
                     errors.push('Number of guests is required.');
@@ -940,11 +976,11 @@
         $(`.step-button[data-step="${stepNumber}"]`).addClass('active');
         currentStep = stepNumber;
 
+        console.log(currentStep);
         scrollToFormCenter();
 
         const isUpdate = document.getElementById('is_update').value === '1';
 
-        // Use dynamic IDs based on the current step
         $(`#saveDraftBtn${stepNumber}`).toggle(!isUpdate);
         $(`#submitBtn${stepNumber}`).toggle(isUpdate || currentStep === totalSteps);
 
@@ -959,7 +995,6 @@
     $('.step-button').click(function() {
         showStep($(this).data('step'));
     });
-    
 
     // Add this function at the beginning of your script
     function initTagify(selector, options = {}) {
@@ -974,7 +1009,7 @@
 
     // Then, in your DOMContentLoaded event listener, replace the existing Tagify initializations with:
     document.addEventListener('DOMContentLoaded', function() {
-        showStep(currentStep); // Ensure buttons are correctly initialized on load
+        showStep(currentStep);
         initializeImageManager();
 
         // Boat Extras
@@ -1078,6 +1113,8 @@
         // Next button functionality
         $(document).on('click', '[id^="nextBtn"]', function() {
             if (validateStep(currentStep)) {
+                console.log('nextBtn clicked');
+                console.log(currentStep);
                 showStep(currentStep + 1);
             }
         });
@@ -1093,9 +1130,9 @@
         const imageUploadInput = document.getElementById('title_image');
         if (imageUploadInput) {
             imageUploadInput.addEventListener('change', function(event) {
-                if (imageManager) {
+                if (imageManagerLoaded) {
                     try {
-                        imageManager.handleFileSelect(event.target.files);
+                        imageManagerLoaded.handleFileSelect(event.target.files);
                     } catch (error) {
                         console.error('Error in handleFileSelect:', error);
                     }
@@ -1112,6 +1149,6 @@
     document.getElementById('newGuidingForm').addEventListener('submit', handleSubmit);
 </script>
 
-<script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY') }}&libraries=places&callback=initAutocomplete" async defer></script>
+{{-- <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY') }}&libraries=places&callback=initAutocomplete" async defer></script> --}}
 @endpush
 
