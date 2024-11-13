@@ -20,7 +20,7 @@ class LoginAuthController extends Controller
     public function login(Request $request)
     {
         if(Auth::attempt($request->only(['email', 'password']))) {
-            return redirect()->intended(route('welcome'));
+            return redirect()->intended(route('profile.index'));
         }
 
         return $this->loginFailed()->withError('Invalid Username and Password');
