@@ -17,13 +17,20 @@ class GuidingsSettingsSeeder extends Seeder
         DB::table('waters')->truncate();
         $waters = [
             ['name' => 'Fluss', 'name_en' => 'River'],
-            ['name' => 'See', 'name_en' => 'Lake'], 
-            ['name' => 'Meer', 'name_en' => 'Sea'],
+            ['name' => 'See', 'name_en' => 'Lake'],
+            ['name' => 'Meer', 'name_en' => 'Sea/ ocean'],
             ['name' => 'Küste', 'name_en' => 'Coast'],
             ['name' => 'Kanal', 'name_en' => 'Canal'],
             ['name' => 'Stausee', 'name_en' => 'Reservoir'],
             ['name' => 'Hochsee', 'name_en' => 'Off shore'],
-            ['name' => 'Bach', 'name_en' => 'Stream']
+            ['name' => 'Bach', 'name_en' => 'Stream'],
+            ['name' => 'Hafen', 'name_en' => 'Port/ Harbour'],
+            ['name' => 'Angelkurs auf dem Trockenen', 'name_en' => 'Fishing course on land'],
+            ['name' => 'Fjord', 'name_en' => 'Fjord'],
+            ['name' => 'Brackwasser', 'name_en' => 'Brackish water'],
+            ['name' => 'Polder', 'name_en' => 'Polder'],
+            ['name' => 'Altarm', 'name_en' => 'Oxbow lake'],
+            ['name' => 'Teich', 'name_en' => 'Pond']
         ];
         foreach($waters as $water) {
             DB::table('waters')->insert($water);
@@ -46,25 +53,21 @@ class GuidingsSettingsSeeder extends Seeder
             ['name' => 'Regenbogenforelle', 'name_en' => 'Rainbow Trout'],
             ['name' => 'Schleie', 'name_en' => 'Tench'],
             ['name' => 'Zander', 'name_en' => 'Zander'],
-            ['name' => 'Atlantischer Bonito', 'name_en' => 'Atlantic Bonito'],
-            ['name' => 'Kabeljau', 'name_en' => 'Atlantic Cod'],
-            ['name' => 'Atlantische Makrele', 'name_en' => 'Atlantic Mackerel'],
+            ['name' => 'Bonito', 'name_en' => 'Bonito'],
+            ['name' => 'Dorsch', 'name_en' => 'Cod'],
+            ['name' => 'Makrele', 'name_en' => 'Mackerel'],
             ['name' => 'Atlantischer Lachs', 'name_en' => 'Atlantic Salmon'],
-            ['name' => 'Blauflossen-Thunfisch', 'name_en' => 'Atlantic Bluefin Tuna'],
-            ['name' => 'Atlantischer Hering', 'name_en' => 'Atlantic Herring'],
-            ['name' => 'Atlantischer Heilbutt', 'name_en' => 'Atlantic Halibut'],
+            ['name' => 'Hering', 'name_en' => 'Herring'],
+            ['name' => 'Heilbutt', 'name_en' => 'Halibut'],
             ['name' => 'Barrakuda', 'name_en' => 'Barracuda'],
-            ['name' => 'Blauflossiger Stachelmakrele', 'name_en' => 'Bluefish'],
-            ['name' => 'Seezunge', 'name_en' => 'Common Sole'],
+            ['name' => 'Bluefish', 'name_en' => 'Bluefish'],
             ['name' => 'Meeraal', 'name_en' => 'Conger Eel'],
             ['name' => 'Kliesche', 'name_en' => 'Dab'],
-            ['name' => 'Europäischer Wolfsbarsch', 'name_en' => 'European Sea Bass'],
             ['name' => 'Flunder', 'name_en' => 'Flounder'],
             ['name' => 'Goldbrasse', 'name_en' => 'Gilthead Seabream'],
-            ['name' => 'Großer Bernsteinfisch', 'name_en' => 'Greater Amberjack'],
+            ['name' => 'Amberjack', 'name_en' => 'Amberjack'],
             ['name' => 'Knurrhahn', 'name_en' => 'Gurnard'],
             ['name' => 'Schellfisch', 'name_en' => 'Haddock'],
-            ['name' => 'Petersfisch', 'name_en' => 'John Dory'],
             ['name' => 'Leng', 'name_en' => 'Ling'],
             ['name' => 'Goldmakrele', 'name_en' => 'Mahi Mahi'],
             ['name' => 'Pollack', 'name_en' => 'Pollack'],
@@ -72,12 +75,11 @@ class GuidingsSettingsSeeder extends Seeder
             ['name' => 'Rotbarsch', 'name_en' => 'Redfish'],
             ['name' => 'Meerbrasse', 'name_en' => 'Sea Bream'],
             ['name' => 'Meerforelle', 'name_en' => 'Seatrout'],
+            ['name' => 'Seezunge', 'name_en' => 'Sole'],
             ['name' => 'Tintenfisch', 'name_en' => 'Squid'],
-            ['name' => 'Wittling', 'name_en' => 'Whiting'],
-            ['name' => 'Katfisch', 'name_en' => 'Wolffish'],
-            ['name' => 'Gelbschwanz', 'name_en' => 'Yellowtail Amberjack'],
+            ['name' => 'Seewolf', 'name_en' => 'Wolffish'],
+            ['name' => 'Blauflossen-Thunfisch', 'name_en' => 'Bluefin Tuna'],
             ['name' => 'Schwertfisch', 'name_en' => 'Swordfish'],
-            ['name' => 'Atlantischer Blauer Marlin', 'name_en' => 'Atlantic Blue Marlin'],
             ['name' => 'Weißer Marlin', 'name_en' => 'White Marlin'],
             ['name' => 'Blauhai', 'name_en' => 'Blue Shark'],
             ['name' => 'Heringshai', 'name_en' => 'Porbeagle Shark'],
@@ -86,11 +88,40 @@ class GuidingsSettingsSeeder extends Seeder
             ['name' => 'Großer Hammerhai', 'name_en' => 'Great Hammerhead Shark'],
             ['name' => 'Dornhai', 'name_en' => 'Spiny Dogfish'],
             ['name' => 'Hundshai', 'name_en' => 'Smoothhound'],
+            ['name' => 'Hundshai', 'name_en' => 'Tope Shark'],
+            ['name' => 'Blauer Marlin', 'name_en' => 'Blue Marlin'],
             ['name' => 'Speerfisch', 'name_en' => 'Spearfish'],
             ['name' => 'Dentex', 'name_en' => 'Dentex'],
+            ['name' => 'Petersfisch', 'name_en' => 'John Dory'],
             ['name' => 'Meeräsche', 'name_en' => 'Mullet'],
             ['name' => 'Rochen', 'name_en' => 'Ray'],
-            ['name' => 'Drachenkopf', 'name_en' => 'Scorpionfish']
+            ['name' => 'Drachenkopf', 'name_en' => 'Scorpionfish'],
+            ['name' => 'Europäischer Wolfsbarsch', 'name_en' => 'Seabass (European)'],
+            ['name' => 'Wittling', 'name_en' => 'Whiting'],
+            ['name' => 'Barbe', 'name_en' => 'Barbel'],
+            ['name' => 'Giebel', 'name_en' => 'Prussian Carp'],
+            ['name' => 'Hornhecht', 'name_en' => 'Garfish'],
+            ['name' => 'Quappe', 'name_en' => 'Burbot'],
+            ['name' => 'Scholle', 'name_en' => 'Plaice'],
+            ['name' => 'Seelachs', 'name_en' => 'Coalfish'],
+            ['name' => 'Steinbutt', 'name_en' => 'Turbot'],
+            ['name' => 'Aal', 'name_en' => 'Eel'],
+            ['name' => 'Schwarzbarsch', 'name_en' => 'Black Bass'],
+            ['name' => 'Dorade', 'name_en' => 'Gilthead'],
+            ['name' => 'Snapper', 'name_en' => 'Snapper'],
+            ['name' => 'Döbel', 'name_en' => 'Chub'],
+            ['name' => 'Albacore', 'name_en' => 'Albacore'],
+            ['name' => 'Schwarzer Bonito', 'name_en' => 'Black Skipjack'],
+            ['name' => 'False Albacore', 'name_en' => 'False Albacore'],
+            ['name' => 'Zackenbarsch', 'name_en' => 'Grouper'],
+            ['name' => 'Bigeye Tuna', 'name_en' => 'Bigeye Tuna'],
+            ['name' => 'Blackfin Tuna', 'name_en' => 'Blackfin Tuna'],
+            ['name' => 'Dogtooth Tuna', 'name_en' => 'Dogtooth Tuna'],
+            ['name' => 'Angelkurs auf dem Trockenen', 'name_en' => 'Fishing Course on land'],
+            ['name' => 'Kleiner Thunfisch', 'name_en' => 'Little Thunny'],
+            ['name' => 'Rotbrasse', 'name_en' => 'Red Porgy'],
+            ['name' => 'Drückerfisch', 'name_en' => 'Triggerfish'],
+            ['name' => 'Sechskiemenhai', 'name_en' => 'Sixgill Shark']
         ];
         foreach($targets as $target) {
             DB::table('targets')->insert($target);
@@ -112,7 +143,15 @@ class GuidingsSettingsSeeder extends Seeder
             ['name' => 'Eisangeln', 'name_en' => 'Ice fishing'],
             ['name' => 'Jiggen', 'name_en' => 'Jigging'],
             ['name' => 'Hardbait', 'name_en' => 'Hardbait fishing'],
-            ['name' => 'Köderfischangeln', 'name_en' => 'Deadbait fishing']
+            ['name' => 'Köderfischangeln', 'name_en' => 'Deadbait fishing'],
+            ['name' => 'Angelkurs auf dem Trockenen', 'name_en' => 'Fishing course on land'],
+            ['name' => 'Bootsangeln', 'name_en' => 'Boat fishing'],
+            ['name' => 'Grundangeln', 'name_en' => 'Bottom fishing'],
+            ['name' => 'LIvescope', 'name_en' => 'Livescope'],
+            ['name' => 'Vertikalangeln', 'name_en' => 'Vertical fishing'],
+            ['name' => 'Watangeln', 'name_en' => 'Wading'],
+            ['name' => 'Klopfen', 'name_en' => 'Klopfen'],
+            ['name' => 'Pelagisch angeln', 'name_en' => 'Pelagic fishing']
         ];
         foreach($methods as $method) {
             DB::table('methods')->insert($method);
@@ -137,7 +176,7 @@ class GuidingsSettingsSeeder extends Seeder
             ['name' => 'Drill Stuhl', 'name_en' => 'Fighting chair'],
             ['name' => 'E-Motor', 'name_en' => 'Electric motor'],
             ['name' => 'Felitiertisch', 'name_en' => 'Feliting table'],
-            ['name' => 'Sonstiges', 'name_en' => 'Others']
+            ['name' => 'Sontiges', 'name_en' => 'Others']
         ];
         foreach($boat_extras as $extra) {
             DB::table('boat_extras')->insert($extra);
@@ -163,7 +202,8 @@ class GuidingsSettingsSeeder extends Seeder
             ['name' => 'Unterkunft', 'name_en' => 'Accommodation'],
             ['name' => 'Vollverpflegung', 'name_en' => 'Complete meals'],
             ['name' => 'Bilder & Videos vom Trip', 'name_en' => 'Pictures & videos from the trip'],
-            ['name' => 'Sontiges', 'name_en' => 'Others']
+            ['name' => 'Sontiges', 'name_en' => 'Others'],
+            ['name' => 'Kaffee', 'name_en' => 'Coffee']
         ];
         foreach($inclusions as $inclusion) {
             DB::table('inclussions')->insert($inclusion);
@@ -188,6 +228,39 @@ class GuidingsSettingsSeeder extends Seeder
             DB::table('extras_prices')->insert($extra_price);
         }
 
+        # Boat Types
+        DB::table('guiding_boat_types')->truncate();
+        $boat_types = [
+            ['name' => 'Kajak', 'name_en' => 'Kayak'],
+            ['name' => 'Belly Boot', 'name_en' => 'Belly Boat'], 
+            ['name' => 'Ruderboot', 'name_en' => 'Rowing Boat'],
+            ['name' => 'Drift Boot', 'name_en' => 'Drift Boat'],
+            ['name' => 'Sportangelboot', 'name_en' => 'Sport Fishing Boat'],
+            ['name' => 'Yacht', 'name_en' => 'Yacht'],
+            ['name' => 'Segelboot', 'name_en' => 'Sailing Boat'],
+            ['name' => 'Schlauchboot', 'name_en' => 'Inflatable Boat'],
+            ['name' => 'Aluboot', 'name_en' => 'Aluminum Boat']
+        ];
+        foreach($boat_types as $boat_type) {
+            DB::table('guiding_boat_types')->insert($boat_type);
+        }
+
+        # Boat Descriptions
+        DB::table('guiding_boat_descriptions')->truncate();
+        $boat_descriptions = [
+            ['name' => 'Anzahl der Sitzplätze', 'name_en' => 'Number of seats'],
+            ['name' => 'Länge', 'name_en' => 'Length'],
+            ['name' => 'Breite', 'name_en' => 'Width'],
+            ['name' => 'Baujahr', 'name_en' => 'Year built'],
+            ['name' => 'Motorenhersteller', 'name_en' => 'Engine manufacturer'],
+            ['name' => 'Motorleistung', 'name_en' => 'Engine power'],
+            ['name' => 'Höchstgeschwindigkeit', 'name_en' => 'Max speed'],
+            ['name' => 'Hersteller', 'name_en' => 'Manufacturer'],
+            ['name' => 'Beschreibung', 'name_en' => 'Description']
+        ];
+        foreach($boat_descriptions as $boat_description) {
+            DB::table('guiding_boat_descriptions')->insert($boat_description);
+        }
 
     }
 }
