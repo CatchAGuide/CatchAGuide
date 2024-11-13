@@ -105,14 +105,14 @@
                     </button>
                 </a>
             </div>
-            <div class="col-md-3">
+            {{-- <div class="col-md-3">
                 <a href="{{ route('chat') }}">
                     <button style="width: 100%; text-align: justify;" class="btn btn-outline-danger btn-block">
                         <i class="fa fa-2x fa-paper-plane"></i>
                         <span class="box-title">@lang('profile.mess') ({{Auth::user()->countunreadmessages()}})</span>
                     </button>
                 </a>
-            </div>
+            </div> --}}
             @if(Auth::user()->is_guide)
                 <div class="col-md-3">
                     <a href="{{ route('profile.newguiding') }}">
