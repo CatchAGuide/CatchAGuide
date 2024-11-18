@@ -420,48 +420,38 @@
                                                     </div>
                                             
                                                 </div>
-                                                <div class="col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 mt-1">
+                                                <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 p-md-3 mt-md-1">
                                                     <a href="{{ $guiding->is_newguiding ? route('guidings.newShow', [$guiding->id, $guiding->slug]) : route('guidings.show', [$guiding->id, $guiding->slug]) }}">
-                                                        <div>
                                                             <div class="guidings-item">
                                                                 <div class="guidings-item-title">
                                                                     <h5 class="fw-bolder text-truncate">{{translate($guiding->title)}}</h5>
-                                                                    <span class="text-center" style="font-size:1rem;color:rgb(28, 28, 28)"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($guiding->location) }}</span>                                      
+                                                                    <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($guiding->location) }}</span>                                      
                                                                 </div>
+                                                                @if ($guiding->user->average_rating())
                                                                 <div class="guidings-item-ratings">
                                                                 <div class="ratings-score">
                                                                         <i data-lucide="star" size="32"></i>
                                                                         <span>{{$guiding->user->average_rating()}} </span>
                                                                     </div>
                                                                 </div>
+                                                                @endif
                                                             </div>
-                                                            <div class="row mt-2">
-                                                                <div class="col-6 col-sm-6 col-md-6 guidings-icon-container"> 
-                                                                    <div class="d-flex align-items-center">
-                                                                        <div>
+                                                            <div class="guidings-item-icon">
+                                                                <div class="guidings-icon-container"> 
                                                                             <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
-                                                                        </div>
-                                                                        <div class="mx-2" >
+                                                                        <div class="">
                                                                             {{ $guiding->duration }} @if($guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
                                                                         </div>
-                                                                    </div>
                                                                 </div>
-                                                                <div class="col-6 col-sm-6 col-md-6 guidings-icon-container"> 
-                                                                    <div class="d-flex align-items-center mt-2">
-                                                                        <div class="">
+                                                                <div class="guidings-icon-container"> 
                                                                         <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" />
-                                                                        </div>
-                                                                        <div class="mx-2" >
+                                                                        <div class="">
                                                                         {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
                                                                         </div>
-                                                                    </div>
                                                                 </div>
-                                                                <div class="col-6 col-sm-6 col-md-6 guidings-icon-container"> 
-                                                                    <div class="d-flex align-items-center">
-                                                                        <div>
+                                                                <div class="guidings-icon-container"> 
                                                                             <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
-                                                                        </div>
-                                                                        <div class="mx-2">
+                                                                        <div class="">
                                                                             <div class="tours-list__content__trait__text" >
                                                                                 @php
                                                                                 $guidingTargets = $guiding->guidingTargets->pluck('name')->toArray();
@@ -479,24 +469,19 @@
                                                                             </div>
                                                                         
                                                                         </div>
-                                                                    </div>
                                                                 </div>
-                                                                <div class="col-6 col-sm-6 col-md-6 guidings-icon-container"> 
-                                                                    <div class="d-flex align-items-center">                                              
-                                                                        <div>
+                                                                <div class="guidings-icon-container">
                                                                             <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
-                                                                        </div>
-                                                                        <div class="mx-2">
+                                                                        <div class="">
                                                                             <div class="tours-list__content__trait__text" >
                                                                             {{$guiding->is_boat ? $guiding->boat_type : 'Shore'}}   
                                                                             </div>
                                                                         
                                                                         </div>
-                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                            <div class="row mt-5">
-                                                                    <div class="col-12 col-lg-9">
+                                                            <div class="inclusions-price">
+                                                                    <div class="guidings-inclusions-container">
                                                                         @if(!empty($guiding->inclusions))
                                                                         <div class="guidings-included">
                                                                             <strong>What's Included</strong>
@@ -508,7 +493,7 @@
     
                                                                                 @foreach ($inclusions as $index => $inclusion)
                                                                                     @if ($index < $maxToShow)
-                                                                                        <span class="inclusion-item">●{{ $inclusion['value'] }}</span>
+                                                                                        <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclusion['value'] }}</span>
                                                                                     @endif
                                                                                 @endforeach
     
@@ -519,7 +504,7 @@
                                                                         </div>
                                                                         @endif
                                                                     </div>
-                                                                    <div class="col-12 col-lg-3">
+                                                                    <div class="guiding-item-price">
                                                                         <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$guiding->getLowestPrice()}}€ p.P.</span></h5>
                                                                         <div class="d-none d-flex flex-column mt-4">
                                                                             <!-- <a class="btn theme-primary btn-theme-new btn-sm" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">Details</a>
@@ -528,9 +513,7 @@
                                                                             </a> -->
                                                                         </div>
                                                                     </div>
-                                                            </div>
-                                                        </div>
-                                                                        
+                                                            </div>    
                                                     </a>
                                                 </div>
                                             </div>

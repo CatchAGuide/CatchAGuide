@@ -6,26 +6,29 @@
                 <div class="card-body">
                     <form action="{{ route('checkout') }}" method="POST">
                         @csrf
-                        <div class="mb-3">
-                            <select class="form-select" aria-label="Personenanzahl" name="person" required>
-                                <option selected disabled>Bitte wähle die Personenanzahl</option>
-                                @if($guiding->price_type == 'per_person')
-                                    @foreach(json_decode($guiding->prices) as $price)
-                                        <option value="{{ $price->person }}">{{ $price->person }} {{ $price->person == 1 ? 'Person' : 'Personen' }}</option>
-                                    @endforeach
-                                @else
-                                    <option value="1">1 Person</option>
-                                    <option value="2">2 Personen</option>
-                                    <option value="3">3 Personen</option>
-                                    <option value="4">4 Personen</option>
-                                @endif
-                            </select>
+                        <div class="booking-form-container">
+                            <div class="booking-select mb-md-3">
+                                <select class="form-select" aria-label="Personenanzahl" name="person" required>
+                                    <option selected disabled>{{ translate('Please select number of people') }}</option>
+                                    @if($guiding->price_type == 'per_person')
+                                        @foreach(json_decode($guiding->prices) as $price)
+                                            <option value="{{ $price->person }}">{{ $price->person }} {{ $price->person == 1 ? 'Person' : 'Personen' }}</option>
+                                        @endforeach
+                                    @else
+                                        <option selected value="1">1 Person {{ $guiding->prices }}</option>
+                                        <option value="2">2 Personen</option>
+                                        <option value="3">3 Personen</option>
+                                        <option value="4">4 Personen</option>
+                                    @endif
+                                </select>
+                            </div>
+                            <input type="hidden" name="guiding_id" value="{{ $guiding->id }}">
+                            <button type="submit" class="btn btn-orange w-100">{{ translate('Book now') }}</button>
+
                         </div>
-                        <input type="hidden" name="guiding_id" value="{{ $guiding->id }}">
-                        <button type="submit" class="btn btn-orange w-100">VERFÜGBARKEIT PRÜFEN & BUCHEN</button>
                     </form>
                     <div class="mt-3">
-                        <h5>Preis</h5>
+                        <h5>{{ translate('Price') }}</h5>
                         @if($guiding->price_type == 'per_person')
                             <ul class="list-unstyled">
                                 @foreach(json_decode($guiding->prices) as $price)
