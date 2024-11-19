@@ -1,18 +1,26 @@
-<nav class="navbar-custom container" style="background-color:#fff;">
+<nav class="navbar-custom container sticky-top" style="background-color:#fff;">
     <div class="logo">
         <a href="{{ route('welcome') }}"><img src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}" alt="Logo"></a>
     </div>
     <div class="nav-links d-none d-sm-flex align-items-center" style="color: #ccc;">
+        <a href="#" class="me-3" style="color: #787780;">Destination</a>
+        <a href="{{ route('guidings.index') }}" class="me-3" style="color: #787780;">Fishing Near Me</a>   
+        <a href="{{ route('blog.index') }}" class="me-3" style="color: #787780;">Magazine</a>
         @if(Auth::check())
             <a href="{{ route('profile.bookings') }}" class="button new-filter-btn me-3" style="color: #787780;">Bookings</a>
             <a href="#" class="me-3" style="color: #787780;">Get Help</a>   
             <div class="dropdown d-inline-block">
                 <a class="dropdown-toggle" href="#" role="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="color: #787780;">
-                    {{ Auth::user()->firstname }} {{ Auth::user()->lastname }}
+                    {{ Auth::user()->firstname }}
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="userDropdown">
                     <li><a class="dropdown-item" href="{{ route('profile.index') }}" style="color: #787780;">Profile</a></li>
-                    <li><a class="dropdown-item" href="{{ route('admin.auth.logout') }}" style="color: #787780;">Logout</a></li>
+                    <li>
+                        <form action="{{ route('admin.auth.logout') }}" method="POST" class="d-inline">
+                            @csrf
+                            <button type="submit" class="dropdown-item" style="color: #787780;">Logout</button>
+                        </form>
+                    </li>
                 </ul>
             </div>
             <div class="language-wrapper d-inline-block ms-3">
