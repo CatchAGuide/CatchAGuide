@@ -57,6 +57,11 @@
         padding: 0;
         opacity: .6;
     }
+    .read-more-btn {
+        background-color: #E8604C !important;
+        color: #fff !important;
+        border: 2px solid #E8604C !important;
+    }
     </style>
 @endsection
 @section('content')
@@ -67,7 +72,7 @@
                 <div class="page-main-intro-text">
                     @lang('destination.introduction')
                 </div>
-                <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm">Read More</a></p>
+                <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a></p>
             </div>
             <div class="row">
                 <div class="col-md-4 my-1">
@@ -232,12 +237,12 @@
         var page_main_intro_text = page_main_intro.html();
         var page_main_intro_count = page_main_intro.text().length;
         var ellipsis = "..."; 
-        var moreText = '<a href="#" class="btn btn-primary btn-sm">Read More</a>';
-        var lessText = '<a href="#" class="btn btn-primary btn-sm">Read Less</a>';
+        var moreText = '<a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a>';
+        var lessText = '<a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_less')</a>';
 
         var visible_text = page_main_intro_text.substring(0, word_char_count_allowed);
         var hidden_text  = page_main_intro_text.substring(word_char_count_allowed);
-
+        console.log(visible_text);
         if (page_main_intro_count >= word_char_count_allowed) {
             console.log(1);
             $('.page-main-intro-text').html(visible_text + '<span class="more-ellipsis">' + ellipsis + '</span><span class="more-text" style="display:none;">' + hidden_text + '</span>');

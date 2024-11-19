@@ -192,6 +192,11 @@
         left: 20px;
         color: #fff;
     }
+    .read-more-btn {
+        background-color: #E8604C !important;
+        color: #fff !important;
+        border: 2px solid #E8604C !important;
+    }
 
 </style>
 @endsection
@@ -203,7 +208,7 @@
             <div class="col-12">
                 <div id="page-main-intro" class="mb-3">
                     <div class="page-main-intro-text mb-1">{!! nl2br($row_data->introduction) !!}</div>
-                    <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm">Read More</a></p>
+                    <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a></p>
                 </div>
                 @php
                 $region_count = $regions->count();
@@ -213,7 +218,7 @@
                 @endphp
 
                 @if($region_count > 0)
-                <h5 class="mb-2">All Region</h5>
+                <h5 class="mb-2">@lang('destination.all_region')</h5>
                 <div id="carousel-regions" class="carousel slide mb-4" data-bs-ride="carousel" {!! ($region_count <= 4) ? 'data-bs-interval="false"' : '' !!}>
                     <div class="carousel-inner" role="listbox">
                         @foreach($regions as $region)
@@ -249,7 +254,7 @@
                 </div>
                 @endif
                 @if($city_count > 0)
-                <h5 class="mb-2">All Cities</h5>
+                <h5 class="mb-2">@lang('destination.all_cities')</h5>
                 <div id="carousel-cities" class="carousel slide mb-4" data-bs-ride="carousel" {!! ($city_count <= 4) ? 'data-bs-interval="false"' : '' !!}>
                     <div class="carousel-inner" role="listbox">
                         @foreach($cities as $city)
@@ -284,17 +289,17 @@
                     @endif
                 </div>
                 @endif
-                <h5 class="mb-2">Listing </h5>
+                <h5 class="mb-2">@lang('destination.listing')</h5>
                 <div class="row mb-2">
                     <div class="col-sm-12 col-lg-3">
                         <div class="card mb-2">
                             <div id="map-placeholder">
-                                <button class="btn btn-primary" data-bs-target="#mapModal" data-bs-toggle="modal">Show on map</button>
+                                <button class="btn btn-primary read-more-btn" data-bs-target="#mapModal" data-bs-toggle="modal">@lang('destination.show_on_map')</button>
                             </div>
                         </div>
                         <div class="card">
                             <div class="card-header">
-                                Filter By:
+                                @lang('destination.filter_by'):
                             </div>
                             <div class="card-body border-bottom">
                                 <form method="get" action="{{ url()->current() }}">
@@ -306,7 +311,7 @@
                                             </span>
                                         </div>
                                         <select class="form-control form-select  border-0 rounded-0 custom-select" id="num_guests" name="num_guests">
-                                            <option disabled selected hidden>-- Select --</option>
+                                            <option disabled selected hidden>-- @lang('destination.select') --</option>
                                             <option value="">@lang('message.choose')...</option>
                                             <option value="1" {{ request()->get('num_guests') ? request()->get('num_guests') == 1 ? 'selected' : null : null }}>1</option>
                                             <option value="2" {{ request()->get('num_guests') ? request()->get('num_guests') == 2 ? 'selected' : null : null }}>2</option>
@@ -337,7 +342,7 @@
                                         </div>
                                         <select class="form-select" id="methods" name="methods[]"></select>
                                     </div>
-                                    <button class="btn btn-sm theme-primary btn-theme-new w-100" type="submit">Search</button>   
+                                    <button class="btn btn-sm theme-primary btn-theme-new w-100" type="submit">@lang('destination.search')</button>
                                 </form> 
                             </div>
                         </div>
@@ -362,11 +367,11 @@
                                             @if(count(get_galleries_image_link($guiding)) > 1)
                                                 <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls-{{$guiding->id}}" data-bs-slide="prev">
                                                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                                    <span class="visually-hidden">Previous</span>
+                                                    <span class="visually-hidden">@lang('destination.previous')</span>
                                                 </button>
                                                 <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls-{{$guiding->id}}" data-bs-slide="next">
                                                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                                    <span class="visually-hidden">Next</span>
+                                                    <span class="visually-hidden">@lang('destination.next')</span>
                                                 </button>
                                             @endif
                                         </div>
@@ -614,9 +619,9 @@
                                             <h5 class="mr-1 color-primary fw-bold text-center">@lang('message.from') {{ $guiding->getLowestPrice() }}€ p.p.</h4>
                                         </div>
                                         <div class="d-flex flex-column mt-4">
-                                            <a class="btn theme-primary btn-theme-new btn-sm" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">Details</a>
+                                            <a class="btn theme-primary btn-theme-new btn-sm" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">@lang('destination.details')</a>
                                             <a class="btn btn-sm mt-2   {{ (auth()->check() ? (auth()->user()->isWishItem($guiding->id) ? 'btn-danger' : 'btn-outline-theme ') : 'btn-outline-theme') }}" href="{{ route('wishlist.add-or-remove', $guiding->id) }}">
-                                                {{ (auth()->check() ? (auth()->user()->isWishItem($guiding->id) ? 'Added to Favorites' : 'Add to Favorites') : 'Add to Favorites') }}
+                                                {{ (auth()->check() ? (auth()->user()->isWishItem($guiding->id) ? __('destination.add_to_favorites') : __('destination.add_to_favorites')) : __('destination.add_to_favorites')) }}
                                             </a>
                                         </div>
                                     </div>
@@ -638,7 +643,7 @@
                         <table class="table table-bordered " id="fish_chart_table">
                             <thead>
                                 <tr>
-                                    <th width="28%">Fish</th>
+                                    <th width="28%">@lang('destination.fish')</th>
                                     <th width="6%" class="text-center">Jan</th>
                                     <th width="6%" class="text-center">Feb</th>
                                     <th width="6%" class="text-center">Mar</th>
@@ -686,7 +691,7 @@
                         <table class="table table-bordered table-striped" id="fish_size_limit_table">
                             <thead>
                                 <tr>
-                                    <th width="20%">Fish</th>
+                                    <th width="20%">@lang('destination.fish')</th>
                                     <th width="80%"></th>
                                 </tr>
                             </thead>
@@ -712,7 +717,7 @@
                         <table class="table table-bordered table-striped" id="fish_time_limit_table">
                             <thead>
                                 <tr>
-                                    <th width="20%">Fish</th>
+                                    <th width="20%">@lang('destination.fish')</th>
                                     <th width="80%"></th>
                                 </tr>
                             </thead>
@@ -752,13 +757,9 @@
     <!--News One End-->
 
     <div class="modal show" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="mapModalLabel">Map</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div id="map" class="modal-body" style="height:500px;"></div>
+        <div class="modal-dialog modal-xl" style="width:90%!important; max-width: 100%; height:90%;">
+            <div class="modal-content" style="height:100%;">
+                <div id="map" class="modal-body"></div>
             </div>
         </div>
     </div>
@@ -828,8 +829,8 @@
         var page_main_intro_text = page_main_intro.html();
         var page_main_intro_count = page_main_intro.text().length;
         var ellipsis = "..."; 
-        var moreText = '<a href="#" class="btn btn-primary btn-sm">Read More</a>';
-        var lessText = '<a href="#" class="btn btn-primary btn-sm">Read Less</a>';
+        var moreText = '<a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a>';
+        var lessText = '<a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_less')</a>';
 
         var visible_text = page_main_intro_text.substring(0, word_char_count_allowed);
         var hidden_text  = page_main_intro_text.substring(word_char_count_allowed);
