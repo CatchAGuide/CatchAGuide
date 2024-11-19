@@ -796,8 +796,6 @@
         const errorContainer = document.getElementById('error-container');
         errorContainer.style.display = 'none';
         errorContainer.innerHTML = '';
-        return true;
-
         let isValid = true;
         let errors = [];
 
@@ -823,7 +821,6 @@
 
         switch(step) {
             case 1:
-                // Check for actual file input and visible previews
                 const fileInput = document.getElementById('title_image');
                 const previewWrappers = document.querySelectorAll('.image-preview-wrapper');
                 
@@ -831,7 +828,13 @@
                     errors.push('Please upload at least one image.');
                     isValid = false;
                 }
-                
+
+                console.log(previewWrappers.length);
+                if (!previewWrappers || previewWrappers.length < 5) {
+                    errors.push('Please upload at least 5 images.');
+                    isValid = false;
+                }
+
                 if (!document.getElementById('location').value.trim()) {
                     errors.push('Location is required.');
                     isValid = false;
@@ -965,36 +968,57 @@
 
     // Step navigation
     function showStep(stepNumber) {
-        if (stepNumber > currentStep && !validateStep(currentStep)) {
-            console.log('Validation failed for current step');
+        // Prevent invalid step numbers
+        if (stepNumber < 1 || stepNumber > totalSteps) {
+            console.error('Invalid step number:', stepNumber);
             return;
         }
 
+        // Only validate when moving forward
+        if (stepNumber > currentStep && !validateStep(currentStep)) {
+            console.error('Validation failed for current step');
+            return;
+        }
+
+        // Update step visibility
         $('.step').removeClass('active');
         $(`#step${stepNumber}`).addClass('active');
+        
+        // Update step button states
         $('.step-button').removeClass('active');
         $(`.step-button[data-step="${stepNumber}"]`).addClass('active');
+        
+        // Update current step
         currentStep = stepNumber;
 
-        console.log(currentStep);
+        // Scroll form into view
         scrollToFormCenter();
 
+        // Update button visibility
         const isUpdate = document.getElementById('is_update').value === '1';
-
         $(`#saveDraftBtn${stepNumber}`).toggle(!isUpdate);
         $(`#submitBtn${stepNumber}`).toggle(isUpdate || currentStep === totalSteps);
-
         $(`#prevBtn${stepNumber}`).toggle(currentStep > 1);
         $(`#nextBtn${stepNumber}`).toggle(currentStep < totalSteps);
-
-        if (currentStep === totalSteps) {
-            $(`#nextBtn${stepNumber}`).hide();
-        }
     }
 
-    $('.step-button').click(function() {
-        showStep($(this).data('step'));
+    // Update the next button click handlers
+    $(document).on('click', '[id^="nextBtn"]', function(e) {
+        e.preventDefault(); // Prevent any default behavior
+        e.stopPropagation(); // Prevent event bubbling
+        
+        console.log('Current step before next:', currentStep);
+        if (validateStep(currentStep)) {
+            showStep(currentStep + 1);
+        }
+        console.log('Current step after next:', currentStep);
     });
+
+    // Remove the onclick attribute from the next buttons in the HTML
+    // Change from:
+    // <button type="button" class="btn btn-primary" id="nextBtn1" onclick="validateStep(currentStep)">
+    // To:
+    // <button type="button" class="btn btn-primary" id="nextBtn1">
 
     // Add this function at the beginning of your script
     function initTagify(selector, options = {}) {

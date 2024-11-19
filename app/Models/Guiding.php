@@ -423,11 +423,19 @@ class Guiding extends Model
         if ($this->is_newguiding) {
             if ($this->price_type == 'per_person') {
                 $prices = json_decode($this->prices, true);
-                return $prices ? min(array_map(function($price) {
+                if (!$prices) {
+                    return 0;
+                }
+                
+                $singlePrice = collect($prices)->where('person', 1)->first();
+                $singlePrice = $singlePrice ? $singlePrice['amount'] : PHP_FLOAT_MAX;
+                
+                $minPrice = min(array_map(function($price) {
                     return $price['person'] > 1 ? round($price['amount'] / $price['person']) : $price['amount'];
-                }, $prices)) : 0;
+                }, $prices));
+                
+                return min($singlePrice, $minPrice);
             }
-            // Add handling for other price types if needed
             return 0;
         } else {
             $validPrices = array_filter([
@@ -438,7 +446,14 @@ class Guiding extends Model
                 $this->max_guests >= 5 ? $this->price_five_persons / 5 : null
             ], function($value) { return $value > 0; });
 
-            return !empty($validPrices) ? min(array_map('round', $validPrices)) : 0;
+            if (empty($validPrices)) {
+                return 0;
+            }
+
+            $singlePrice = $this->price;
+            $minPrice = min(array_map('round', $validPrices));
+            
+            return $singlePrice > 0 ? min($singlePrice, $minPrice) : $minPrice;
         }
     }
 

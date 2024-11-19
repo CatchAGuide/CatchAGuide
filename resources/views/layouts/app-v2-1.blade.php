@@ -167,8 +167,8 @@
             background-color:#313041;
         }*/
         .navbar-custom {
-            padding-bottom: 40px!important; 
-            border-bottom: 70px solid var(--thm-black)!important;
+            /* padding-bottom: 40px!important;  */
+            /* border-bottom: 70px solid var(--thm-black)!important; */
         }
         .header-login-link,
         .header-signup-link {
