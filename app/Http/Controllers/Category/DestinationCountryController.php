@@ -23,6 +23,7 @@ class DestinationCountryController extends Controller
 
     public function country(Request $request, $country, $region=null, $city=null)
     {
+        $place_location = $country;
         $query = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit']);
 
         $country_row = Destination::whereSlug($country)->whereType('country')->first();
@@ -38,6 +39,7 @@ class DestinationCountryController extends Controller
             } elseif (is_null($country_row)) {
                 abort(404);
             }
+            $place_location = $city;
             $query = $query->whereType('city')->whereCountryId($country_row->id)->whereRegionId($region_row->id)->whereId($city_row->id);
         } elseif (!is_null($region)) {
             if (is_null($region_row)) {
@@ -45,6 +47,7 @@ class DestinationCountryController extends Controller
             } elseif (is_null($country_row)) {
                 abort(404);
             }
+            $place_location = $region;
             $query = $query->whereType('region')->whereCountryId($country_row->id)->whereId($region_row->id);
         } else {
             if (is_null($country_row)) {
@@ -241,11 +244,14 @@ class DestinationCountryController extends Controller
         if(!empty($placeLat) && !empty($placeLng)){
 
             $title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
-            $query->select(['guidings.*'])
+            /*$query->select(['guidings.*'])
             ->selectRaw("(6371 * acos(cos(radians($placeLat)) * cos(radians(lat)) * cos(radians(lng) - radians($placeLng)) + sin(radians($placeLat)) * sin(radians(lat)))) AS distance")
             ->where('status', 1)
             ->orderBy('distance') // Sort the results by distance in ascending order
-            ->get();
+            ->get();*/
+            $guidingFilter = Guiding::locationFilter($place_location, $radius);
+            $searchMessage = $guidingFilter['message'];
+            $query->whereIn('id', $guidingFilter['ids']);
 
         }
 

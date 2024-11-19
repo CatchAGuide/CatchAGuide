@@ -630,53 +630,55 @@
 
                 <div class="mb-3">{!! $row_data->content !!}</div>
 
-                <h4 class="mb-2">{{ $row_data->fish_avail_title }}</h4>
-                <p>{!! $row_data->fish_avail_intro !!}</p>
-                @if($fish_chart->count() > 0)
-                <div class="table-responsive">
-                    <table class="table table-bordered " id="fish_chart_table">
-                        <thead>
-                            <tr>
-                                <th width="28%">Fish</th>
-                                <th width="6%" class="text-center">Jan</th>
-                                <th width="6%" class="text-center">Feb</th>
-                                <th width="6%" class="text-center">Mar</th>
-                                <th width="6%" class="text-center">Apr</th>
-                                <th width="6%" class="text-center">May</th>
-                                <th width="6%" class="text-center">Jun</th>
-                                <th width="6%" class="text-center">Jul</th>
-                                <th width="6%" class="text-center">Aug</th>
-                                <th width="6%" class="text-center">Sep</th>
-                                <th width="6%" class="text-center">Oct</th>
-                                <th width="6%" class="text-center">Nov</th>
-                                <th width="6%" class="text-center">Dec</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($fish_chart as $row)
-                            <tr>
-                                <td>{{ $row->fish }}</td>
-                                <td class="text-center" style="background-color: {{ $row->bg_color($row->jan) }}"></td>
-                                <td class="text-center" style="background-color: {{ $row->bg_color($row->feb) }}"></td>
-                                <td class="text-center" style="background-color: {{ $row->bg_color($row->mar) }}"></td>
-                                <td class="text-center" style="background-color: {{ $row->bg_color($row->apr) }}"></td>
-                                <td class="text-center" style="background-color: {{ $row->bg_color($row->may) }}"></td>
-                                <td class="text-center" style="background-color: {{ $row->bg_color($row->jun) }}"></td>
-                                <td class="text-center" style="background-color: {{ $row->bg_color($row->jul) }}"></td>
-                                <td class="text-center" style="background-color: {{ $row->bg_color($row->aug) }}"></td>
-                                <td class="text-center" style="background-color: {{ $row->bg_color($row->sep) }}"></td>
-                                <td class="text-center" style="background-color: {{ $row->bg_color($row->oct) }}"></td>
-                                <td class="text-center" style="background-color: {{ $row->bg_color($row->nov) }}"></td>
-                                <td class="text-center" style="background-color: {{ $row->bg_color($row->dec) }}"></td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                @if($row_data->fish_avail_title != '' && $row_data->fish_avail_intro != '')
+                    <h4 class="mb-2">{{ $row_data->fish_avail_title }}</h4>
+                    <p>{!! $row_data->fish_avail_intro !!}</p>
+                    @if($fish_chart->count() > 0)
+                    <div class="table-responsive">
+                        <table class="table table-bordered " id="fish_chart_table">
+                            <thead>
+                                <tr>
+                                    <th width="28%">Fish</th>
+                                    <th width="6%" class="text-center">Jan</th>
+                                    <th width="6%" class="text-center">Feb</th>
+                                    <th width="6%" class="text-center">Mar</th>
+                                    <th width="6%" class="text-center">Apr</th>
+                                    <th width="6%" class="text-center">May</th>
+                                    <th width="6%" class="text-center">Jun</th>
+                                    <th width="6%" class="text-center">Jul</th>
+                                    <th width="6%" class="text-center">Aug</th>
+                                    <th width="6%" class="text-center">Sep</th>
+                                    <th width="6%" class="text-center">Oct</th>
+                                    <th width="6%" class="text-center">Nov</th>
+                                    <th width="6%" class="text-center">Dec</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($fish_chart as $row)
+                                <tr>
+                                    <td>{{ $row->fish }}</td>
+                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->jan) }}"></td>
+                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->feb) }}"></td>
+                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->mar) }}"></td>
+                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->apr) }}"></td>
+                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->may) }}"></td>
+                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->jun) }}"></td>
+                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->jul) }}"></td>
+                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->aug) }}"></td>
+                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->sep) }}"></td>
+                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->oct) }}"></td>
+                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->nov) }}"></td>
+                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->dec) }}"></td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    @endif
                 @endif
 
                 <div class="row">
-                    @if($row_data->size_limit_title != '' || $row_data->size_limit_intro != '')
+                    @if($row_data->size_limit_title != '' && $row_data->size_limit_intro != '')
                     <div class="col-sm-12 col-md-12 col-lg-12">
                         <h4>{{ $row_data->size_limit_title }}</h4>
                         <p>{!! $row_data->size_limit_intro !!}</p>
@@ -702,7 +704,7 @@
                         @endif
                     </div>
                     @endif
-                    @if($row_data->time_limit_title != '' || $row_data->time_limit_intro != '')
+                    @if($row_data->time_limit_title != '' && $row_data->time_limit_intro != '')
                     <div class="col-sm-12 col-md-12 col-lg-12">
                         <h4>{{ $row_data->time_limit_title }}</h4>
                         <p>{!! $row_data->time_limit_intro !!}</p>
@@ -729,9 +731,8 @@
                     </div>
                     @endif
                 </div>
-                @if($row_data->faq_title != '')
+                @if($row_data->faq_title != '' && $faq->count() > 0)
                 <h4 class="mb-2">{{ $row_data->faq_title }}</h4>
-                    @if($faq->count() > 0)
                     <div class="accordion mb-5" id="faq">
                         @foreach($faq as $row)
                             <div class="accordion-item">
@@ -744,7 +745,6 @@
                             </div>
                         @endforeach
                     </div>
-                    @endif
                 @endif
             </div>
         </div>
@@ -872,7 +872,7 @@ toggleBtn.addEventListener('click', function() {
 </script>
 
 <script>
-/*    initializeSelect2();
+    initializeSelect2();
 
 function initializeSelect2() {
 
@@ -968,10 +968,7 @@ function initializeSelect2() {
     // Trigger change event to update Select2 display
     selectMethod.trigger('change');
 
-
-
-
-}*/
+}
 
 
 
