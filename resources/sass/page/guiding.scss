@@ -92,8 +92,18 @@
   }
 }
 .important-info{
-  padding: 16px 16px 0px 16px;
+  padding: 16px;
   margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid rgba(0,0,0,.125);
+  border-radius: .25rem;
+  .info-item{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: auto;
+  }
   i{
     color: $primary-color;
     fill: $primary-color;
@@ -408,6 +418,22 @@ div#masonry-grid{
   }
   .guidings-item-title {
     width: calc(100% - 200px);
+    color: $font-color;
+    h5{
+      color: $font-color;
+    }
+}
+  // .guidings-item-icon{
+  //   display: flex;
+  //   gap: 8px;
+  //   align-items: center;
+  // }
+  .guiding-item-desc {
+    a{
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
 }
   .guidings-item-ratings{
       width: 200px;
@@ -441,7 +467,32 @@ div#masonry-grid{
         display: none; /* Initially hidden */
     }
   }
+  .guidings-item-icon{
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .guidings-icon-container {
+    font-size: 18px;
+    display: flex;
+    gap: 4px;
+    width: calc(50% - 4px);
+    color: $font-color;
+}
+  .inclusions-price {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    justify-content: space-between;
+    min-height: 54px;
+    .guiding-item-price{
+      span{
+        color: $primary-color;
+      }
+    }
+}
 .guidings-included{
+  color: $font-color;
   .inclusions-list{
 
     display: flex;
@@ -454,11 +505,20 @@ a:has(.guidings-item){
   }
 }
 }
-@media screen and (max-width: 980px) {
+.guidings-book-mobile {
+  display: none;
+}
+@media screen and (max-width: 1200px) {
   #guidings-page{
     .important-info{
-      padding: 0 16px;
-    }
+      justify-content: space-evenly;
+      flex-wrap: wrap;
+      gap: 8px;
+  }
+  }
+}
+@media screen and (max-width: 980px) {
+  #guidings-page{
     .title-right-buttons{
       display: none;
     }
@@ -515,16 +575,24 @@ a:has(.guidings-item){
       .accordion-button{
         font-size: 19px;
         font-weight: bold;
-        color: #787780;
+        color: $font-color;
         &:not(.collapsed){
             background-color: #e8e8e8;
-            color: #787780;
+            color: $font-color;
         }
         &:focus{
           box-shadow: none;
         }
       }
-      
+      .table{
+        color: #787780;
+        th{
+          font-weight: 500;
+        }
+        td{
+          
+        }
+      } 
     }
     .gallery-mobile{
       display: flex;
@@ -694,6 +762,104 @@ a:has(.guidings-item){
         object-fit: cover;
       }
     }
+  }
+  .guidings-book-mobile {
+    position: fixed;
+    bottom: 0;
+    z-index: 2;
+    width: 100%;
+    display: block;
+    .tour-details-two__book-tours{
+      padding: 0;
+    }
+    .booking-form-container{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      .booking-select{
+        // width: 200px;
+      }
+      .booking-price{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        font-weight: 600;
+        font-size: 18px;
+        margin-bottom: 8px;
+        #priceDisplay{
+          text-decoration: underline 2px $primary-color !important;
+        }
+      }
+    }
+    .booking-price-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      
+  }
+  }
+}
+@media screen and (max-width: 768px) {
+  .tours-list__right{
+    .guidings-item{
+      flex-direction: column;
+      gap: 8px;
+      .guidings-item-ratings{
+        width: auto;
+      }
+    }
+    .guidings-item-title {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      h5{
+        overflow: unset;
+        text-overflow: unset;
+        word-wrap: break-word;
+        white-space:unset
+      }
+  }
+  .guidings-item-icon{
+    margin-top: 0 !important;
+    gap: 4px; 
+  }
+  .guidings-icon-container {
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: calc(50% - 4px);
+    img{
+      width: 20px;
+      height: 20px;
+    }
+}
+.guidings-included {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.inclusions-list{
+  flex-wrap: wrap;
+  .inclusion-item{
+    display: flex;
+    gap: 4px;
+    width: calc((100% - 50%) - 4px);
+    align-items: center;
+    color: $font-color;
+    i.fa.fa-check{
+      font-size: 12px;
+    }
+  }
+}
+.inclusions-price {
+  flex-direction: column;
+  align-items: normal;
+}
   }
 }
 @media screen and (min-width: 768px) {
