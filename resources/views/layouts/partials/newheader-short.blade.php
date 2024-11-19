@@ -1,4 +1,4 @@
-<nav class="navbar-custom">
+<nav class="navbar-custom short-header">
     <div class="container">
         <!-- Top Row -->
         <div class="row align-items-center">
@@ -90,24 +90,24 @@
 </nav>
 
 <style>
-.navbar-custom {
+.short-header.navbar-custom {
     background-color: #313041;
     padding-top: 16px;
     padding-bottom: 35px;
     position: relative;
 }
 
-.btn-outline-secondary {
+.short-header .btn-outline-secondary {
     border: 1px solid rgba(255,255,255,0.3);
     background: transparent;
 }
 
-.btn-outline-secondary:hover {
+.short-header .btn-outline-secondary:hover {
     background-color: rgba(255,255,255,0.1);
     border-color: white;
 }
 
-.floating-search-container {
+.short-header .floating-search-container {
     position: absolute;
     left: 0;
     right: 0;
@@ -116,19 +116,19 @@
     z-index: 1000;
 }
 
-.search-box {
+.short-header .search-box {
     background: white;
     padding: 12px;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.search-input {
+.short-header .search-input {
     position: relative;
     margin-right: 12px;
 }
 
-.input-icon {
+.short-header .input-icon {
     position: absolute;
     left: 12px;
     top: 50%;
@@ -137,21 +137,21 @@
     z-index: 1;
 }
 
-.form-control,
-.form-select {
+.short-header .form-control,
+.short-header .form-select {
     height: 48px;
     padding-left: 40px;
     border: 1px solid #E85B40;
     border-radius: 4px;
 }
 
-.form-control:focus,
-.form-select:focus {
+.short-header .form-control:focus,
+.short-header .form-select:focus {
     box-shadow: none;
     border-color: #E85B40;
 }
 
-.search-button {
+.short-header .search-button {
     background-color: #E85B40;
     color: white;
     border: none;
@@ -171,17 +171,17 @@ input[type=number] {
     -moz-appearance: textfield;
 }
 
-.gap-4 {
+.short-header .gap-4 {
     gap: 1rem !important;
 }
 
-.row.mb-5,
-.row.mb-4,
-.row.mb-3 {
+.short-header .row.mb-5,
+.short-header .row.mb-4,
+.short-header .row.mb-3 {
     margin-bottom: 0 !important;
 }
 
-.categories-row {
+.short-header .categories-row {
     margin-top: 1.5rem;
     margin-bottom: 1.5rem;
 }
