@@ -44,12 +44,10 @@ class GuidingsController extends Controller
             Session::put('random_seed', $randomSeed);
         }
 
-        //$query = Guiding::query()->where('status',1)->whereNotNull('lat')->whereNotNull('lng');
-        $query = Guiding::query()->where('status',1);
+        $query = Guiding::select(['*', DB::raw('(CASE WHEN price_five_persons IS NOT NULL THEN price_five_persons/5 WHEN price_four_persons IS NOT NULL THEN price_four_persons/4 WHEN price_three_persons IS NOT NULL THEN price_three_persons/3 WHEN price_two_persons IS NOT NULL THEN price_two_persons/2 ELSE price END) AS lowest_price')])->where('status',1);
 
         if (empty($request->all())) {
             $query->orderByRaw("RAND($randomSeed)");
-            // Request has at least one parameter (input data)
         } 
           
         if($request->has('page')){
@@ -69,11 +67,11 @@ class GuidingsController extends Controller
                   break;
 
                 case 'price-asc':
-                    $query->orderBy('price','asc');
+                    $query->orderBy('lowest_price','asc');
                   break;
 
                 case 'price-desc':
-                    $query->orderBy('price','desc');
+                    $query->orderBy('lowest_price','desc');
                   break;
 
                 case 'long-duration':
@@ -213,7 +211,7 @@ class GuidingsController extends Controller
             $title .= 'Price ' . $request->price_range . ' | ';
             $filter_title .= 'Price ab ' . $request->price_range . ' p.P., ';
 
-            $query->select(['*', DB::raw('(CASE WHEN price_five_persons IS NOT NULL THEN price_five_persons/5 WHEN price_four_persons IS NOT NULL THEN price_four_persons/4 WHEN price_three_persons IS NOT NULL THEN price_three_persons/3 WHEN price_two_persons IS NOT NULL THEN price_two_persons/2 ELSE price END) AS lowest_price')]);
+            //$query->select(['*', DB::raw('(CASE WHEN price_five_persons IS NOT NULL THEN price_five_persons/5 WHEN price_four_persons IS NOT NULL THEN price_four_persons/4 WHEN price_three_persons IS NOT NULL THEN price_three_persons/3 WHEN price_two_persons IS NOT NULL THEN price_two_persons/2 ELSE price END) AS lowest_price')]);
             if (count($price) > 1) {
                 $query->havingRaw('lowest_price >= ? AND lowest_price <= ?', $price);
             } else {
@@ -235,12 +233,6 @@ class GuidingsController extends Controller
 
         }
 
-        /*if($request->has('country')){
-            $title .= __('guidings.Country') . ' ' . $request->country . ' | ';
-            $filter_title .= __('guidings.Country') . ' ' . $request->country . ', ';
-            $query->where('country',$request->get('country'));
-        }*/
-
         $radius = null; // Radius in miles
         if($request->has('radius')){
 
@@ -253,27 +245,10 @@ class GuidingsController extends Controller
         $placeLng = $request->get('placeLng');
 
 
-        /*if($request->has('place') && empty($request->get('place'))){
-            $title .= __('guidings.Place') . ' ' . $request->place . ', ';
-            $filter_title .= __('guidings.Place') . ' ' . $request->place . ' | ';
-            return redirect()->route('guidings.index', $request->except([
-                'placeLng',
-                'placeLat'
-            ]));
-        }*/
-
         if(!empty($placeLat) && !empty($placeLng) && !empty($request->get('place'))){
 
             $title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
             $filter_title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ', ';
-            /*$query->select(['guidings.*'])
-            ->selectRaw("(6371 * acos(cos(radians($placeLat)) * cos(radians(lat)) * cos(radians(lng) - radians($placeLng)) + sin(radians($placeLat)) * sin(radians(lat)))) AS distance")
-            ->where('status', 1)
-            ->orderBy('distance') // Sort the results by distance in ascending order
-            ->get();*/
-
-            //$guiding_ids = Guiding::nearestGuideIds($placeLat, $placeLng, $request->country);
-            // $guiding_ids = Guiding::nearestGuideList($placeLat, $placeLng, $radius);
             $guidingFilter = Guiding::locationFilter($request->get('place'), $radius);
             $searchMessage = $guidingFilter['message'];
             $query->whereIn('id', $guidingFilter['ids']);
