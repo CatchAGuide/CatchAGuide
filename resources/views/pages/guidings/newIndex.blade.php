@@ -111,48 +111,53 @@
                 <img data-bs-toggle="modal" data-bs-target="#galleryModal" src="{{asset($guiding->thumbnail_path)}}" class="img-fluid" alt="Main Image">
             </div>
             <div class="right-images">
+                @php
+                    $galleryImages = json_decode($guiding->galery_images);
+                    $thumbnailPath = asset($guiding->thumbnail_path);
+                    $filteredImages = array_filter($galleryImages, function($image) use ($thumbnailPath) {
+                        return asset($image) !== $thumbnailPath; // Exclude thumbnail from gallery
+                    });
+                    $hiddenCount = count($galleryImages) > 4 ? count($galleryImages) - 4 : 0;
+                @endphp
                 <div class="gallery">
-                    @php
-                        $galleryImages = json_decode($guiding->galery_images);
-                        $thumbnailPath = asset($guiding->thumbnail_path);
-                        $filteredImages = array_filter($galleryImages, function($image) use ($thumbnailPath) {
-                            return asset($image) !== $thumbnailPath; // Exclude thumbnail from gallery
-                        });
-                        $hiddenCount = count($galleryImages) > 4 ? count($galleryImages) - 4 : 0;
-                    @endphp
                     @foreach ($filteredImages as $index => $image)
-                        @if ($index < 4)
-                            <div class="gallery-item">
+                    
+                     <div class="gallery-item">
+                        @if (  count($galleryImages) == 1 )
+                            @for ($i = 0; $i < 5; $i++)
+                                <img src="{{asset($image)}}" class="img-fluid" alt="Gallery Image {{ $i + 1 }}" data-bs-toggle="modal" data-bs-target="#galleryModal" data-image="{{ asset($image) }}">
+                            @endfor
+                        @else
+                            @if ($index < 4)
                                 <img src="{{asset($image)}}" class="img-fluid" alt="Gallery Image {{ $index + 1 }}" data-bs-toggle="modal" data-bs-target="#galleryModal" data-image="{{ asset($image) }}">
-                            </div>
-                        @elseif ($index == 4)
-                            <div class="gallery-item">
+                            @elseif ($index == 4)
                                 <img src="{{asset($image)}}" class="img-fluid" alt="Gallery Image {{ $index + 1 }} (and {{ $hiddenCount }} more)"  data-image="{{ asset($image) }}">
                                 <span data-bs-toggle="modal" data-bs-target="#galleryModal" class="position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">+{{ $hiddenCount }} more</span>
-                            </div>
+                            @endif
                         @endif
+                    </div>
                     @endforeach
                 </div>
                 <div class="gallery-mobile">
                     @php
-                        $galleryImages = json_decode($guiding->galery_images);
-                        $thumbnailPath = asset($guiding->thumbnail_path);
-                        $filteredImages = array_filter($galleryImages, function($image) use ($thumbnailPath) {
-                            return asset($image) !== $thumbnailPath; // Exclude thumbnail from gallery
-                        });
                         $hiddenCount = count($galleryImages) > 2 ? count($galleryImages) - 2 : 0;
                     @endphp
                     @foreach ($filteredImages as $index => $image)
-                        @if ($index < 2)
-                            <div class="gallery-item">
-                                <img src="{{ asset($image) }}" class="img-fluid" alt="Gallery Image {{ $index + 1 }}" data-bs-toggle="modal" data-bs-target="#galleryModal" data-image="{{ asset($image) }}">
-                            </div>
-                        @elseif ($index == 2)
-                            <div class="gallery-item">
-                                <img src="{{ asset($image) }}" class="img-fluid" alt="Gallery Image {{ $index + 1 }} (and {{ $hiddenCount }} more)" data-image="{{ asset($image) }}">
-                                <span data-bs-toggle="modal" data-bs-target="#galleryModal" class="position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">+{{ $hiddenCount }} more</span>
-                            </div>
-                        @endif
+                    
+                        <div class="gallery-item">
+                            @if (  count($galleryImages) == 1 )
+                            @for ($i = 0; $i < 5; $i++)
+                                <img src="{{asset($image)}}" class="img-fluid" alt="Gallery Image {{ $i + 1 }}" data-bs-toggle="modal" data-bs-target="#galleryModal" data-image="{{ asset($image) }}">
+                            @endfor
+                            @else
+                                @if ($index < 2)
+                                        <img src="{{ asset($image) }}" class="img-fluid" alt="Gallery Image {{ $index + 1 }}" data-bs-toggle="modal" data-bs-target="#galleryModal" data-image="{{ asset($image) }}">
+                                @elseif ($index == 2)
+                                        <img src="{{ asset($image) }}" class="img-fluid" alt="Gallery Image {{ $index + 1 }} (and {{ $hiddenCount }} more)" data-image="{{ asset($image) }}">
+                                        <span data-bs-toggle="modal" data-bs-target="#galleryModal" class="position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">+{{ $hiddenCount }} more</span>
+                                @endif
+                            @endif
+                        </div>
                     @endforeach
                 </div>
             </div>

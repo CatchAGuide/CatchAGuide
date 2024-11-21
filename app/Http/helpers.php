@@ -90,6 +90,20 @@ if (!function_exists('media_upload')) {
             throw new \InvalidArgumentException('Invalid input: must be a URL or an uploaded file');
         }
         
+        // Check file size and resize if needed
+        $fileSize = strlen($image->encode('webp', $quality)->encoded);
+        if ($fileSize > 2048 * 1024) { // If larger than 2048KB
+            $width = $image->width();
+            $height = $image->height();
+            
+            // Calculate new dimensions while maintaining aspect ratio
+            $ratio = sqrt(2048 * 1024 / $fileSize);
+            $newWidth = round($width * $ratio);
+            $newHeight = round($height * $ratio);
+            
+            $image->resize($newWidth, $newHeight);
+        }
+        
         $webpImageName = pathinfo($filename, PATHINFO_FILENAME) . '.webp';
         $webpImage = $image->encode('webp', $quality);
         

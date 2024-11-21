@@ -113,3 +113,10 @@ if (! function_exists('get_faqs_by_page')) {
         return $frequentlyAskedQuestions;
     }
 }
+
+if (!function_exists('targets')) {
+    function targets()
+    {
+        return new \App\Helpers\TargetHelper();
+    }
+}
