@@ -125,7 +125,7 @@
     }
 
     @media only screen and (max-width: 450px) {
-        #map-placeholder button {
+        #map-placeholder a.btn {
             top: 35%;
             left: 30%;
         }
@@ -135,13 +135,13 @@
         #toggleFilterBtn{
             display:block;
         }
-        #map-placeholder button {
+        #map-placeholder a.btn {
             top: 40%;
             left: 35%;
         }
     }
     @media only screen and (max-width: 991px) {
-        #map-placeholder button {
+        #map-placeholder a.btn {
             top: 45%;
             left: 45%;
         }
@@ -178,7 +178,7 @@
         height: 200px;
         background-image: url({{ url('') }}/assets/images/map-bg.png);
     }
-    #map-placeholder button {
+    #map-placeholder a.btn {
         position: absolute;
         top: 44%;
         left: 37%;
@@ -207,7 +207,6 @@
     <div id="guidings-menu-search" class="container d-block d-lg-none d-xl-none d-xxl-none">
         <div class="input-group mb-3">
             <p class="input-group-text form-control form-control rounded-pill" style="font-size: 12px; overflow-x: scroll; height:37px; padding:0; padding-left:10px;">{{ $filter_title }}</p>
-            <button class="btn btn-outline-secondary rounded-circle ms-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottomSearch" aria-controls="offcanvasBottomSearch" style="height:37px;"><i class="fa fa-bars"></i></button>
         </div>
     </div>
     <section class="page-header">
@@ -231,17 +230,76 @@
 
         <div class="container-fluid">
             <div class="row">
-                <!-- 
-                <div class="col-6 col-sm-4 col-md-12 d-flex align-items-center my-2">
-                    <div class="d-flex justify-content-start">
-                        <button  id="toggleFilterBtn" class="btn outline-none"><span class="fw-bold text-decoration-underline">Filters</span><i class="fa fa-filter color-primary" aria-hidden="true"></i></button>
+                <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none">
+                    <div class="row">
+                        <div class="col-5" style="font-size: 13px;">
+                            <form id="form-sortby" action="{{route('guidings.index')}}" method="get">
+                                <div class="row-sort">
+                                    <div class="d-flex flex-sm-row flex-column align-items-sm-center align-items-stretch my-2">
+                                        <div class="d-flex align-items-center">
+                                            <select class="form-select form-select-sm" name="sortby" id="sortby">
+                                                <option value="" disabled selected>@lang('message.choose')...</option>
+                                                <option value="newest" {{request()->get('sortby') ? request()->get('sortby') == 'newest' ? 'selected' : '' : '' }}>@lang('message.newest')</option>
+                                                <option value="price-asc" {{request()->get('sortby') ? request()->get('sortby') == 'price-asc' ? 'selected' : '' : '' }}>@lang('message.lowprice')</option>
+                                                <option value="short-duration" {{request()->get('sortby') ? request()->get('sortby') == 'short-duration' ? 'selected' : '' : '' }}>@lang('message.shortduration')</option>
+                                                <option value="long-duration" {{request()->get('sortby') ? request()->get('sortby') == 'long-duration' ? 'selected' : '' : '' }}>@lang('message.longduration')</option>
+                                            </select>
+                                            <label class="fs-sm me-2 pe-1 text-nowrap" for="sortby"><i class="fi-arrows-sort text-muted mt-n1 me-2"></i>@lang('message.sortby')</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @foreach(request()->except('sortby') as $key => $value)
+                                    @if(is_array($value))
+                                        @foreach($value as $arrayValue)
+                                            <input type="hidden" name="{{ $key }}[]" value="{{ $arrayValue }}">
+                                        @endforeach
+                                    @else
+                                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                    @endif
+                                @endforeach
+                            </form>
+                        </div>
+                        <div class="col-3" style="font-size: 13px; margin-top: 15px;">
+                            <a class="me-3" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottomSearch" aria-controls="offcanvasBottomSearch" href="javascript:void(0)"><i class="fa fa-filter me-1"></i>Filter</a>
+                        </div>
+                        <div class="col-4" style="font-size: 13px; margin-top: 15px;">
+                            <a class="me-2 text-decoration-none" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)"><i class="fa fa-map-marker-alt me-2"></i>Show on Map</a>
+                        </div>
                     </div>
-                </div> 
-                -->
+                    <!-- <div class="d-flex align-items-center">
+                    </div> -->
+                </div>
                 <div id="filterCard" class="col-sm-12 col-lg-3">
-                    <div class="card mb-2">
+                    <div class="card mb-2 d-none d-sm-block">
                         <div id="map-placeholder">
-                            <button class="btn btn-primary" data-bs-target="#mapModal" data-bs-toggle="modal">Show on map</button>
+                            <a class="btn btn-primary" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)">Show on map</a>
+                        </div>
+                    </div>
+                    <div class="card d-block d-none d-sm-block mb-1">
+                        <div class="card-header">
+                            Sort By:
+                        </div>
+                        <div class="card-body border-bottom">
+                            <form id="form-sortby-2" action="{{route('guidings.index')}}" method="get">
+                                <select class="form-select form-select-sm" name="sortby" id="sortby-2">
+                                    <option value="" disabled selected>@lang('message.choose')...</option>
+                                    <option value="newest" {{request()->get('sortby') ? request()->get('sortby') == 'newest' ? 'selected' : '' : '' }}>@lang('message.newest')</option>
+                                    <option value="price-asc" {{request()->get('sortby') ? request()->get('sortby') == 'price-asc' ? 'selected' : '' : '' }}>@lang('message.lowprice')</option>
+                                    <option value="short-duration" {{request()->get('sortby') ? request()->get('sortby') == 'short-duration' ? 'selected' : '' : '' }}>@lang('message.shortduration')</option>
+                                    <option value="long-duration" {{request()->get('sortby') ? request()->get('sortby') == 'long-duration' ? 'selected' : '' : '' }}>@lang('message.longduration')</option>
+                                </select>
+
+                                @foreach(request()->except('sortby') as $key => $value)
+                                    @if(is_array($value))
+                                        @foreach($value as $arrayValue)
+                                            <input type="hidden" name="{{ $key }}[]" value="{{ $arrayValue }}">
+                                        @endforeach
+                                    @else
+                                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                    @endif
+                                @endforeach
+                            </form>
                         </div>
                     </div>
                     <div class="card d-block d-none d-sm-block">
@@ -545,13 +603,13 @@
 
 
     <div class="modal show" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
+        <div class="modal-dialog modal-xl" style="max-width: 100%; width: 96%; height:100%;">
+            <div class="modal-content" style="height:90%;">
+                <!-- <div class="modal-header">
                     <h1 class="modal-title fs-5" id="mapModalLabel">Map</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div id="map" class="modal-body" style="height:500px;"></div>
+                </div> -->
+                <div id="map" class="modal-body"></div>
             </div>
         </div>
     </div>
@@ -703,6 +761,9 @@
 <script>
     $('#sortby').on('change',function(){
         $('#form-sortby').submit();
+    });
+    $('#sortby-2').on('change',function(){
+        $('#form-sortby-2').submit();
     });
 </script>
 <script>
