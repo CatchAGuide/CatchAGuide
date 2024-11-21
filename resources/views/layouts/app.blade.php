@@ -155,7 +155,7 @@
 
         <div class="logo-box">
             <a href="{{ route('welcome') }}" aria-label="logo image"><img
-                    src="{{asset('assets/images/logo/400PngdpiLogo-2.png')}}" width="155"
+                    src="{{asset('assets/images/logo/CatchAGuide2_Logo_PNG.png')}}" width="155"
                     alt=""/></a>
         </div>
         <!-- /.logo-box -->

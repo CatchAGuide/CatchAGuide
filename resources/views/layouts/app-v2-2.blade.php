@@ -227,7 +227,7 @@
         <span class="mobile-nav__close mobile-nav__toggler"><i class="fa fa-times"></i></span>
 
         <div class="logo-box">
-            <a href="{{ route('welcome') }}" aria-label="logo image"><img src="{{ asset('assets/images/logo/CatchAGuide_Logo_PNG.png') }}" width="155" alt=""/></a>
+            <a href="{{ route('welcome') }}" aria-label="logo image"><img src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}" width="155" alt=""/></a>
         </div>
         <!-- /.logo-box -->
         <div class="mobile-nav__container"></div>
