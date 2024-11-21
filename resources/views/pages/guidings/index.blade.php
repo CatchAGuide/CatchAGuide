@@ -7,15 +7,65 @@
 @section('header_sub_title', '')
 
 @section('css_after')
-{{-- <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" /> --}}
-
 <style>
-    .fixedmap {
-        position: fixed;
-        right: 0px;
-        bottom: 10%;
-        height: 70%;
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 15px;
     }
+
+    .page-header {
+        margin-top: -60px;
+        padding-top: 80px;
+        background: #f8f9fa;
+    }
+
+    .page-header-bg-overly,
+    .pager-header-bg {
+        display: none;
+    }
+
+    .floating-search-container {
+        position: relative;
+        margin-top: -30px;
+        margin-bottom: 30px;
+        z-index: 100;
+    }
+
+    #filterCard {
+        position: sticky;
+        top: 20px;
+    }
+
+    .carousel .carousel-control-next, 
+    .carousel .carousel-control-prev {
+        background: rgba(0,0,0,0.5);
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .carousel.slide img {
+        height: 300px;
+        object-fit: cover;
+        width: 100%;
+    }
+
+    .form-custom-input {
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 8px 12px;
+        width: 100%;
+    }
+
+    .form-custom-input:focus {
+        border-color: #e8604c;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(232,96,76,0.25);
+    }
+
     a:hover {
         color: black;
     }
@@ -204,11 +254,6 @@
 @include('layouts.schema.listings')
 @endsection
 @section('content')
-    <div id="guidings-menu-search" class="container d-block d-lg-none d-xl-none d-xxl-none">
-        <div class="input-group mb-3">
-            <p class="input-group-text form-control form-control rounded-pill" style="font-size: 12px; overflow-x: scroll; height:37px; padding:0; padding-left:10px;">{{ $filter_title }}</p>
-        </div>
-    </div>
     <section class="page-header">
         <div class="page-header__bottom">
             <div class="container">

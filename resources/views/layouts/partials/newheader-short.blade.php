@@ -109,7 +109,16 @@
             <div class="col-12 d-md-none mt-3">
                 <div class="search-summary" role="button" id="headerSearchTrigger">
                     <i class="fas fa-search me-2"></i>
-                    <span>Where are you going?</span>
+                    @if(request()->has('place'))
+                        <span>{{ request()->place }} · 
+                            {{ request()->num_guests ?? '0' }} guests
+                            @if(request()->has('target_fish'))
+                                · {{ count((array)request()->target_fish) }} fish
+                            @endif
+                        </span>
+                    @else
+                        <span>Where are you going?</span>
+                    @endif
                 </div>
             </div>
         </div>
@@ -141,20 +150,29 @@
                     <div class="d-flex">
                         <div class="search-input flex-grow-1">
                             <i class="fa fa-search input-icon"></i>
-                            <input type="text" class="form-control" name="place" placeholder="@lang('homepage.searchbar-destination')">
-                            <input type="hidden" id="placeLat" name="placeLat"/>
-                            <input type="hidden" id="placeLng" name="placeLng"/>
+                            <input type="text" 
+                                   class="form-control" 
+                                   name="place" 
+                                   placeholder="@lang('homepage.searchbar-destination')"
+                                   value="{{ request()->place }}">
+                            <input type="hidden" id="placeLat" name="placeLat" value="{{ request()->placeLat }}"/>
+                            <input type="hidden" id="placeLng" name="placeLng" value="{{ request()->placeLng }}"/>
                         </div>
                         <div class="search-input" style="width: 200px;">
                             <i class="fa fa-user input-icon"></i>
-                            <input type="number" class="form-control" name="num_guests" placeholder="@lang('homepage.searchbar-person')">
+                            <input type="number" 
+                                   class="form-control" 
+                                   name="num_guests" 
+                                   placeholder="@lang('homepage.searchbar-person')"
+                                   value="{{ request()->num_guests }}">
                         </div>
                         <div class="search-input" style="width: 300px;">
                             <i class="fa fa-fish input-icon"></i>
-                            <select class="form-select" name="target_fish[]" id="target_fish_search" >
+                            <select class="form-select" name="target_fish[]" id="target_fish_search">
                                 <option value="">Select fish...</option>
                                 @foreach(targets()::getAllTargets() as $target)
-                                    <option value="{{$target['id']}}">
+                                    <option value="{{$target['id']}}" 
+                                        {{ in_array($target['id'], (array)request()->target_fish) ? 'selected' : '' }}>
                                         {{$target['name']}}
                                     </option>
                                 @endforeach
@@ -683,9 +701,10 @@ input[type=number] {
                             <input type="text" 
                                    class="form-control ps-5" 
                                    name="place" 
-                                   placeholder="@lang('homepage.searchbar-destination')">
-                            <input type="hidden" name="placeLat"/>
-                            <input type="hidden" name="placeLng"/>
+                                   placeholder="@lang('homepage.searchbar-destination')"
+                                   value="{{ request()->place }}">
+                            <input type="hidden" name="placeLat" value="{{ request()->placeLat }}"/>
+                            <input type="hidden" name="placeLng" value="{{ request()->placeLng }}"/>
                         </div>
                     </div>
 
@@ -696,7 +715,8 @@ input[type=number] {
                             <input type="number" 
                                    class="form-control ps-5" 
                                    name="num_guests" 
-                                   placeholder="@lang('homepage.searchbar-person')">
+                                   placeholder="@lang('homepage.searchbar-person')"
+                                   value="{{ request()->num_guests }}">
                         </div>
                     </div>
 
@@ -707,7 +727,10 @@ input[type=number] {
                             <select class="form-select ps-5" name="target_fish[]">
                                 <option value="">Select fish...</option>
                                 @foreach(targets()::getAllTargets() as $target)
-                                    <option value="{{$target['id']}}">{{$target['name']}}</option>
+                                    <option value="{{$target['id']}}"
+                                        {{ in_array($target['id'], (array)request()->target_fish) ? 'selected' : '' }}>
+                                        {{$target['name']}}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
