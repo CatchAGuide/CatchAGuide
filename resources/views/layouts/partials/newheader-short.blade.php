@@ -2,45 +2,91 @@
     <div class="container">
         <!-- Top Row -->
         <div class="row align-items-center">
-            <!-- Logo and Mobile Profile -->
+            <!-- Logo and Navigation -->
             <div class="col-12 d-flex justify-content-between align-items-center">
                 <div class="logo">
                     <a href="{{ route('welcome') }}">
                         <img src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}" alt="Logo" style="height: 45px;">
                     </a>
                 </div>
-                <!-- Mobile Icons -->
-                <div class="d-flex align-items-center d-md-none">
-                    <a href="#" class="text-white me-3"><i class="fas fa-bell"></i></a>
-                    <div class="dropdown mobile-profile-dropdown">
-                        <img src="{{ Auth::user()->avatar ?? asset('assets/images/default-avatar.png') }}" 
-                             class="rounded-circle" 
-                             style="width: 32px; height: 32px;" 
-                             data-bs-toggle="dropdown"
-                             alt="Profile">
-                        <div class="dropdown-menu dropdown-menu-end mobile-profile-menu">
-                            <div class="px-3 py-2">
-                                <img src="{{ Auth::user()->avatar ?? asset('assets/images/default-avatar.png') }}" 
-                                     class="rounded-circle me-2" 
-                                     style="width: 40px; height: 40px;">
-                                <span>{{ Auth::user()->firstname }}</span>
-                            </div>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="{{ route('profile.index') }}">
-                                <i class="fas fa-user me-2"></i> Manage account
-                            </a>
-                            <a class="dropdown-item" href="#">
-                                <i class="fas fa-globe me-2"></i> Language: EN
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <form method="POST" action="{{ route('admin.auth.logout') }}">
-                                @csrf
-                                <button type="submit" class="dropdown-item">
-                                    <i class="fas fa-sign-out-alt me-2"></i> Sign out
-                                </button>
-                            </form>
-                        </div>
+                
+                <!-- Desktop Menu -->
+                <div class="d-none d-md-flex align-items-center top-nav-items">
+                    <a href="{{ route('additional.contact') }}" class="nav-link">
+                        <i class="fas fa-question-circle"></i>
+                    </a>
+                    <div class="nav-link language-selector">
+                        <i class="fas fa-globe"></i>
+                        <span>EN</span>
                     </div>
+                    <a href="#" class="nav-link become-guide-link">
+                        Become a guide
+                    </a>
+                    @auth
+                        <div class="header-desktop-profile dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                                <img src="{{ asset('images/'. Auth::user()->profil_image) ?? asset('images/placeholder_guide.jpg') }}" 
+                                     class="rounded-circle me-2" 
+                                     alt="Profile">
+                                <span>{{ Auth::user()->firstname }} {{ Auth::user()->lastname }}</span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end">
+                                <a class="dropdown-item" href="{{ route('profile.index') }}">
+                                    <i class="fas fa-user me-2"></i> Profile
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <form method="POST" action="{{ route('admin.auth.logout') }}">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="fas fa-sign-out-alt me-2"></i> Logout
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @else
+                        <a href="{{ route('login') }}" class="nav-link login-link">Log in</a>
+                        <a href="{{ route('register') }}" class="btn btn-outline-light signup-btn">Sign up</a>
+                    @endauth
+                </div>
+
+                <!-- Mobile Icons -->
+                <div class="d-flex d-md-none">
+                    @auth
+                        <a href="#" class="text-white me-3"><i class="fas fa-bell"></i></a>
+                        <div class="dropdown mobile-profile-dropdown me-3">
+                            <img src="{{ asset('images/'. Auth::user()->profil_image) ?? asset('images/placeholder_guide.jpg') }}" 
+                                 class="rounded-circle" 
+                                 style="width: 32px; height: 32px;" 
+                                 data-bs-toggle="dropdown"
+                                 alt="Profile">
+                            <div class="dropdown-menu dropdown-menu-end mobile-profile-menu">
+                                <div class="px-3 py-2">
+                                    <img src="{{ asset('images/'. Auth::user()->profil_image) ?? asset('images/placeholder_guide.jpg') }}" 
+                                         class="rounded-circle me-2" 
+                                         style="width: 40px; height: 40px;">
+                                    <span>{{ Auth::user()->firstname . ' ' . Auth::user()->lastname }}</span>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{{ route('profile.index') }}">
+                                    <i class="fas fa-user me-2"></i> Manage account
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <form method="POST" action="{{ route('admin.auth.logout') }}">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="fas fa-sign-out-alt me-2"></i> Sign out
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @else
+                        <a href="{{ route('login') }}" class="text-white me-3">
+                            <i class="far fa-user-circle" style="font-size: 24px;"></i>
+                        </a>
+                    @endauth
+                    <a href="#" class="mobile-nav__toggler text-white">
+                        <i class="fas fa-bars" style="font-size: 20px;"></i>
+                    </a>
                 </div>
             </div>
 
@@ -63,44 +109,16 @@
             <div class="col-12 d-md-none mt-3">
                 <div class="search-summary" role="button" id="headerSearchTrigger">
                     <i class="fas fa-search me-2"></i>
-                    <span>Where are you going?</span>
-                </div>
-            </div>
-
-            <!-- Desktop Menu -->
-            <div class="col-8 d-none d-md-block">
-                <div class="nav-links d-flex justify-content-end align-items-center">
-                    <div class="d-flex align-items-center gap-4">
-                        <div class="dropdown">
-                            <a href="#" class="text-white d-flex align-items-center" data-bs-toggle="dropdown">
-                                <img src="{{ asset('assets/images/flags/en.png') }}" class="me-1" style="width: 20px; height: 15px;" alt="EN">
-                                EN
-                            </a>
-                            <div class="dropdown-menu">
-                                <!-- Add language options here -->
-                            </div>
-                        </div>
-                        <a href="{{ route('additional.contact') }}" class="text-white"><i class="fas fa-question-circle"></i></a>
-                        @if(Auth::check())
-                            <div class="dropdown">
-                                <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
-                                    <img src="{{ Auth::user()->avatar ?? asset('assets/images/default-avatar.png') }}" 
-                                         class="rounded-circle me-2" 
-                                         style="width: 32px; height: 32px;" 
-                                         alt="Profile">
-                                    <span>{{ Auth::user()->firstname }}</span>
-                                </a>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="{{ route('profile.index') }}">Profile</a>
-                                    <div class="dropdown-divider"></div>
-                                    <form method="POST" action="{{ route('admin.auth.logout') }}">
-                                        @csrf
-                                        <button type="submit" class="dropdown-item">Logout</button>
-                                    </form>
-                                </div>
-                            </div>
-                        @endif
-                    </div>
+                    @if(request()->has('place'))
+                        <span>{{ request()->place }} · 
+                            {{ request()->num_guests ?? '0' }} guests
+                            @if(request()->has('target_fish'))
+                                · {{ count((array)request()->target_fish) }} fish
+                            @endif
+                        </span>
+                    @else
+                        <span>Where are you going?</span>
+                    @endif
                 </div>
             </div>
         </div>
@@ -132,20 +150,29 @@
                     <div class="d-flex">
                         <div class="search-input flex-grow-1">
                             <i class="fa fa-search input-icon"></i>
-                            <input type="text" class="form-control" name="place" placeholder="@lang('homepage.searchbar-destination')">
-                            <input type="hidden" id="placeLat" name="placeLat"/>
-                            <input type="hidden" id="placeLng" name="placeLng"/>
+                            <input type="text" 
+                                   class="form-control" 
+                                   name="place" 
+                                   placeholder="@lang('homepage.searchbar-destination')"
+                                   value="{{ request()->place }}">
+                            <input type="hidden" id="placeLat" name="placeLat" value="{{ request()->placeLat }}"/>
+                            <input type="hidden" id="placeLng" name="placeLng" value="{{ request()->placeLng }}"/>
                         </div>
                         <div class="search-input" style="width: 200px;">
                             <i class="fa fa-user input-icon"></i>
-                            <input type="number" class="form-control" name="num_guests" placeholder="@lang('homepage.searchbar-person')">
+                            <input type="number" 
+                                   class="form-control" 
+                                   name="num_guests" 
+                                   placeholder="@lang('homepage.searchbar-person')"
+                                   value="{{ request()->num_guests }}">
                         </div>
                         <div class="search-input" style="width: 300px;">
                             <i class="fa fa-fish input-icon"></i>
-                            <select class="form-select" name="target_fish[]" id="target_fish_search" >
+                            <select class="form-select" name="target_fish[]" id="target_fish_search">
                                 <option value="">Select fish...</option>
                                 @foreach(targets()::getAllTargets() as $target)
-                                    <option value="{{$target['id']}}">
+                                    <option value="{{$target['id']}}" 
+                                        {{ in_array($target['id'], (array)request()->target_fish) ? 'selected' : '' }}>
                                         {{$target['name']}}
                                     </option>
                                 @endforeach
@@ -391,6 +418,265 @@ input[type=number] {
         display: none !important;
     }
 }
+
+/* Mobile Menu Styles */
+.mobile-nav__toggler {
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mobile-nav__toggler:hover {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Ensure proper spacing between elements */
+.mobile-profile-dropdown {
+    margin-right: 12px;
+}
+
+/* Desktop-specific header styles */
+.header-desktop-profile.dropdown {
+    position: relative;
+}
+
+.header-desktop-profile .dropdown-toggle {
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.header-desktop-profile .dropdown-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.header-desktop-profile .dropdown-toggle::after {
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.header-desktop-profile .header-profile-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+}
+
+.header-desktop-profile .dropdown-menu {
+    min-width: 200px;
+    margin-top: 8px;
+    padding: 8px 0;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 4px;
+}
+
+.header-desktop-profile .dropdown-item {
+    padding: 8px 16px;
+    font-size: 14px;
+    color: #333;
+}
+
+.header-desktop-profile .dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.header-desktop-profile .dropdown-divider {
+    margin: 4px 0;
+}
+
+.header-login-link {
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.header-login-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white !important;
+    text-decoration: none !important;
+}
+
+/* Ensure these styles only apply to desktop */
+@media (min-width: 768px) {
+    .header-desktop-profile .dropdown-toggle {
+        display: flex;
+        align-items: center;
+    }
+    
+    .header-desktop-profile img {
+        width: 32px;
+        height: 32px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+}
+
+/* Preserve mobile styles */
+@media (max-width: 767px) {
+    .header-desktop-profile {
+        display: none;
+    }
+}
+
+/* Desktop Header Specific Styles */
+@media (min-width: 768px) {
+    .short-header .nav-links {
+        height: 45px;
+    }
+    
+    .short-header .nav-links a {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
+    
+    .short-header .nav-links a:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        text-decoration: none;
+    }
+    
+    .short-header .btn-outline-light {
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        padding: 8px 16px;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+    
+    .short-header .btn-outline-light:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: white;
+    }
+    
+    /* Adjust spacing between nav items */
+    .short-header .nav-links .gap-4 > * {
+        margin-left: 1rem;
+    }
+    
+    /* Language selector style */
+    .short-header .nav-links .fa-globe {
+        margin-right: 4px;
+    }
+}
+
+/* Desktop Header Styles */
+@media (min-width: 768px) {
+    .short-header .top-nav-items {
+        gap: 32px;
+        height: 45px;
+    }
+
+    .short-header .top-nav-items .nav-link {
+        color: white;
+        text-decoration: none;
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 16px;
+        font-weight: 500;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
+
+    .short-header .top-nav-items .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        text-decoration: none;
+    }
+
+    /* Icons sizing */
+    .short-header .top-nav-items .nav-link i {
+        font-size: 18px;
+    }
+
+    /* Language selector specific styling */
+    .short-header .language-selector {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+    }
+
+    /* Become a guide link */
+    .short-header .become-guide-link {
+        font-weight: 500;
+    }
+
+    /* Profile section */
+    .short-header .header-desktop-profile {
+        display: flex;
+        align-items: center;
+    }
+
+    .short-header .header-desktop-profile img {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .short-header .header-desktop-profile .dropdown-toggle {
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+    /* Sign up button */
+    .short-header .signup-btn {
+        border: 1.5px solid rgba(255, 255, 255, 0.5);
+        padding: 10px 20px;
+        font-size: 16px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .short-header .signup-btn:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: white;
+    }
+
+    /* Login link */
+    .short-header .login-link {
+        font-weight: 500;
+    }
+
+    /* Ensure proper vertical alignment */
+    .short-header .logo,
+    .short-header .top-nav-items,
+    .short-header .top-nav-items > * {
+        display: flex;
+        align-items: center;
+    }
+
+    /* Profile dropdown */
+    .short-header .header-desktop-profile .dropdown-toggle::after {
+        margin-left: 8px;
+        border-top-width: 6px;
+    }
+
+    .short-header .header-desktop-profile .dropdown-menu {
+        margin-top: 8px;
+        right: 0;
+        left: auto;
+        min-width: 200px;
+        padding: 8px 0;
+        font-size: 15px;
+    }
+
+    .short-header .header-desktop-profile .dropdown-item {
+        padding: 8px 16px;
+    }
+}
+
+/* Preserve mobile responsiveness */
+@media (max-width: 767px) {
+    .short-header .top-nav-items {
+        display: none;
+    }
+}
 </style>
 
 <script>
@@ -415,9 +701,10 @@ input[type=number] {
                             <input type="text" 
                                    class="form-control ps-5" 
                                    name="place" 
-                                   placeholder="@lang('homepage.searchbar-destination')">
-                            <input type="hidden" name="placeLat"/>
-                            <input type="hidden" name="placeLng"/>
+                                   placeholder="@lang('homepage.searchbar-destination')"
+                                   value="{{ request()->place }}">
+                            <input type="hidden" name="placeLat" value="{{ request()->placeLat }}"/>
+                            <input type="hidden" name="placeLng" value="{{ request()->placeLng }}"/>
                         </div>
                     </div>
 
@@ -428,7 +715,8 @@ input[type=number] {
                             <input type="number" 
                                    class="form-control ps-5" 
                                    name="num_guests" 
-                                   placeholder="@lang('homepage.searchbar-person')">
+                                   placeholder="@lang('homepage.searchbar-person')"
+                                   value="{{ request()->num_guests }}">
                         </div>
                     </div>
 
@@ -439,7 +727,10 @@ input[type=number] {
                             <select class="form-select ps-5" name="target_fish[]">
                                 <option value="">Select fish...</option>
                                 @foreach(targets()::getAllTargets() as $target)
-                                    <option value="{{$target['id']}}">{{$target['name']}}</option>
+                                    <option value="{{$target['id']}}"
+                                        {{ in_array($target['id'], (array)request()->target_fish) ? 'selected' : '' }}>
+                                        {{$target['name']}}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
