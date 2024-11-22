@@ -1,34 +1,31 @@
 <div class="col-md-12 tour-details-two__sticky sticky-lg-top {{$agent->ismobile() ? 'text-center' : ''}}">
     <div class="tour-details-two__sidebar">
         <div class="tour-details-two__book-tours">
-            <!-- <h3 class="tour-details-two__sidebar-title d-none d-md-block">@lang('message.bookaguide')</h3> -->
             @if($guiding->is_newguiding)
                 <div class="card-body">
                 <form action="{{ route('checkout') }}" method="POST">
                     @csrf
                     <div class="booking-form-container">
-                        <div class="booking-select">
-                        <div class="booking-price">
-                                <span>{{ translate('Price:') }}</span>
-                                <span id="priceDisplay" class="text-orange">{{ $guiding->getLowestPrice() }}€ p.P.</span>
-                            </div>
-                            <select class="form-select" id="personSelect" aria-label="Personenanzahl" name="person" required>
-                                <option selected disabled>Bitte wählen</option>
-                                @if($guiding->price_type == 'per_person')
+                        <div class="booking-select position-relative">
+                            <div style="display: flex;">
+                                <select class="form-select" id="personSelect" aria-label="Personenanzahl" name="person" required>
+                                    <option selected disabled>Bitte wählen</option>
                                     @foreach(json_decode($guiding->prices) as $price)
                                         <option value="{{ $price->person }}" data-price="{{ round($price->amount / $price->person) }}">
                                             {{ $price->person }} {{ $price->person == 1 ? 'Person' : 'Personen' }}
                                         </option>
                                     @endforeach
-                                @else
-                                    @foreach(json_decode($guiding->prices) as $price)
-                                        <option value="{{ $price->person }}" data-price="{{ $price->amount }}">
-                                            {{ $price->person }} {{ $price->person == 1 ? 'Person' : 'Personen' }}
-                                        </option>
-                                    @endforeach
-                                @endif
-                            </select>
-                           
+                                </select>
+                                <button type="button" id="clearSelect" class="btn btn-link text-danger" style="display: none;">
+                                    <i class="fa fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="booking-price">
+                                <span id="priceLabel" data-from-text="{{ translate('From:') }}" data-price-text="{{ translate('Price:') }}">
+                                    {{ translate('From:') }}
+                                </span>
+                                <span id="priceDisplay" class="text-orange">{{ $guiding->getLowestPrice() }}€ p.P.</span>
+                            </div>
                         </div>
                         <div class="booking-price-container">
                             <button type="submit" class="btn btn-orange w-100">{{ translate('Book now') }}</button>
@@ -78,25 +75,41 @@
         </div>
     </div>
 </div>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const personSelect = document.getElementById('personSelect');
-        const priceDisplay = document.getElementById('priceDisplay');
+  document.addEventListener('DOMContentLoaded', function () {
+    const personSelect = document.getElementById('personSelect');
+    const priceLabel = document.getElementById('priceLabel');
+    const priceDisplay = document.getElementById('priceDisplay');
+    const clearSelect = document.getElementById('clearSelect');
 
-        // Update price when a new option is selected
-        personSelect.addEventListener('change', function () {
-            const selectedOption = this.options[this.selectedIndex];
-            const personCount = selectedOption.value; // Get the value of the selected option (number of people)
-            const price = selectedOption.getAttribute('data-price');
+    const fromText = priceLabel.getAttribute('data-from-text');
+    const priceText = priceLabel.getAttribute('data-price-text');
 
-            if (price) {
-                // Check if the selected option is for 1 person
-                if (personCount === '1') {
-                    priceDisplay.textContent = `${price}€`; // No "p.P." for 1 person
-                } else {
-                    priceDisplay.textContent = `${price}€ p.P.`; // Add "p.P." for more than 1 person
-                }
+    // Update price and label when a new option is selected
+    personSelect.addEventListener('change', function () {
+        const selectedOption = this.options[this.selectedIndex];
+        const personCount = selectedOption.value;
+        const price = selectedOption.getAttribute('data-price');
+
+        if (price) {
+            priceLabel.textContent = priceText;
+            if (personCount === '1') {
+                priceDisplay.textContent = `${price}€`;
+            } else {
+                priceDisplay.textContent = `${price}€ p.P.`;
             }
-        });
+            clearSelect.style.display = "block"; // Show the clear button
+        }
     });
+
+    // Clear selection and reset to default
+    clearSelect.addEventListener('click', function () {
+        personSelect.selectedIndex = 0;
+        priceLabel.textContent = fromText;
+        priceDisplay.textContent = "{{ $guiding->getLowestPrice() }}€ p.P.";
+        clearSelect.style.display = "none"; // Hide the clear button
+    });
+});
+
 </script>

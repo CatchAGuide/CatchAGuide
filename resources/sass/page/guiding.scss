@@ -47,6 +47,7 @@
 #guidings-page{
   .title-container{
     display: flex;
+    margin-bottom: 16px;
     .title-wrapper{
       display: flex;
       justify-content: space-between;
@@ -70,11 +71,17 @@
     .nav-link{
       font-size: 18px;
       padding: 10px 12px;
+      flex-grow: 1;
       &.active, &:hover{
         color: $primary-color;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
       }
     }
   }
+  .tabs-container {
+    border: 1px solid #dee2e6;
+}
   #guidings-tabs, #guidings-accordion {
     min-height: 300px;
     padding: 16px;
@@ -83,12 +90,14 @@
       text-align: left; 
       width: 30%;
       font-size: 16px;
-      color: #787878;
+      color: #787780;
+      font-weight: 400;
   }
   
   .table td {
       width: 70%; 
       font-size: 16px;
+      color: #787780;
   }
 }
 .important-info{
@@ -114,6 +123,7 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    margin-bottom: 8px;
     .header-container{
       
     }
@@ -296,14 +306,17 @@ div#lite-datepicker{
     }
   }
 }
+.popular-tours__carousel {
+  .owl-dots.disabled{
+    display: none !important;
+  }
+}
 }
 
 .guidings-gallery{
   min-height: 400px;
   gap: 16px;
-  .row{
-    gap: 16px;
-  }
+  margin-bottom: 16px !important;
   .left-image{
     width: 600px;
     padding: 0 !important;
@@ -423,11 +436,6 @@ div#masonry-grid{
       color: $font-color;
     }
 }
-  // .guidings-item-icon{
-  //   display: flex;
-  //   gap: 8px;
-  //   align-items: center;
-  // }
   .guiding-item-desc {
     a{
       display: flex;
@@ -438,7 +446,7 @@ div#masonry-grid{
   .guidings-item-ratings{
       width: 200px;
       display: flex;
-      justify-content: end;
+      justify-content: flex-end;
       .ratings-score{
         display: flex;
         align-items: center;
@@ -776,8 +784,13 @@ a:has(.guidings-item){
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-direction: column;
+      gap: 16px;
       .booking-select{
-        // width: 200px;
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        align-items: center;
       }
       .booking-price{
         display: flex;
@@ -786,7 +799,7 @@ a:has(.guidings-item){
         gap: 4px;
         font-weight: 600;
         font-size: 18px;
-        margin-bottom: 8px;
+        min-width: 150px;
         #priceDisplay{
           text-decoration: underline 2px $primary-color !important;
         }
@@ -797,7 +810,7 @@ a:has(.guidings-item){
       align-items: center;
       justify-content: center;
       gap: 8px;
-      
+      width: 100%;
   }
   }
 }
