@@ -15,8 +15,7 @@
     }
 
     .page-header {
-        margin-top: -60px;
-        padding-top: 80px;
+        /*margin-top: -60px;*/
         background: #f8f9fa;
     }
 
@@ -179,9 +178,13 @@
             top: 35%;
             left: 30%;
         }
+
+        .page-header {
+            margin-top: 0px!important;
+        }
     }
 
-    @media only screen and (max-width: 600px) {
+    @media only screen and (max-width: 451px) and (max-width: 766px) {
         #toggleFilterBtn{
             display:block;
         }
@@ -189,11 +192,24 @@
             top: 40%;
             left: 35%;
         }
+
+        .page-header {
+            margin-top: 0px!important;
+        }
     }
-    @media only screen and (max-width: 991px) {
+    @media only screen and (min-width: 767px) and (max-width: 991px) {
         #map-placeholder a.btn {
             top: 45%;
             left: 45%;
+        }
+
+        .page-header {
+            margin-top: -60px!important;
+        }
+    }
+    @media only screen and (min-width: 992px) {
+        .page-header {
+            margin-top: -60px!important;
         }
     }
     #radius{
@@ -247,6 +263,16 @@
     .pac-container {
         z-index: 2000;
     }
+    .cag-btn {
+        background-color: #E8604C !important;
+        color: #fff !important;
+        border: 2px solid #E8604C !important;
+    }
+    .mobile-selection-sfm {
+        position: sticky;
+        z-index: 10;
+        top: 10px;
+    }
 </style>
 
 @endsection
@@ -275,24 +301,17 @@
 
         <div class="container-fluid">
             <div class="row">
-                <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none">
-                    <div class="row">
-                        <div class="col-5" style="font-size: 13px;">
-                            <form id="form-sortby" action="{{route('guidings.index')}}" method="get">
-                                <div class="row-sort">
-                                    <div class="d-flex flex-sm-row flex-column align-items-sm-center align-items-stretch my-2">
-                                        <div class="d-flex align-items-center">
-                                            <select class="form-select form-select-sm" name="sortby" id="sortby">
-                                                <option value="" disabled selected>@lang('message.choose')...</option>
-                                                <option value="newest" {{request()->get('sortby') ? request()->get('sortby') == 'newest' ? 'selected' : '' : '' }}>@lang('message.newest')</option>
-                                                <option value="price-asc" {{request()->get('sortby') ? request()->get('sortby') == 'price-asc' ? 'selected' : '' : '' }}>@lang('message.lowprice')</option>
-                                                <option value="short-duration" {{request()->get('sortby') ? request()->get('sortby') == 'short-duration' ? 'selected' : '' : '' }}>@lang('message.shortduration')</option>
-                                                <option value="long-duration" {{request()->get('sortby') ? request()->get('sortby') == 'long-duration' ? 'selected' : '' : '' }}>@lang('message.longduration')</option>
-                                            </select>
-                                            <label class="fs-sm me-2 pe-1 text-nowrap" for="sortby"><i class="fi-arrows-sort text-muted mt-n1 me-2"></i>@lang('message.sortby')</label>
-                                        </div>
-                                    </div>
-                                </div>
+                <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
+                    <div class="d-grid gap-2 w-100">
+                        <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+                            <div class="btn-group border rounded-start w-25 cag-btn" role="group">
+                                <button type="button" class="btn dropdown-toggle text-white" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-arrow-down-arrow-up me-1"></i>@lang('message.choose')...</button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=newest">@lang('message.newest')</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=price-asc">@lang('message.lowprice')</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=short-duration">@lang('message.shortduration')</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=long-duration">@lang('message.longduration')</a></li>
+                                </ul>
 
                                 @foreach(request()->except('sortby') as $key => $value)
                                     @if(is_array($value))
@@ -303,17 +322,15 @@
                                         <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                                     @endif
                                 @endforeach
-                            </form>
-                        </div>
-                        <div class="col-3" style="font-size: 13px; margin-top: 15px;">
-                            <a class="me-3" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottomSearch" aria-controls="offcanvasBottomSearch" href="javascript:void(0)"><i class="fa fa-filter me-1"></i>Filter</a>
-                        </div>
-                        <div class="col-4" style="font-size: 13px; margin-top: 15px;">
-                            <a class="me-2 text-decoration-none" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)"><i class="fa fa-map-marker-alt me-2"></i>Show on Map</a>
+                            </div>
+                            <a class="btn w-25 border-start cag-btn" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottomSearch" aria-controls="offcanvasBottomSearch" href="javascript:void(0)" style="border-left: 1px solid #ccc!important; z-index: 2;">
+                                <i class="fa fa-filter me-1"></i>Filter
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="guiding-filter-counter"> 1</span>
+                            </a>
+                            <a class="btn border w-50 cag-btn" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)" style=" border-left: 2px solid #ccc!important;"><i class="fa fa-map-marker-alt me-2"></i>Show on Map</a>
+
                         </div>
                     </div>
-                    <!-- <div class="d-flex align-items-center">
-                    </div> -->
                 </div>
                 <div id="filterCard" class="col-sm-12 col-lg-3">
                     <div class="card mb-2 d-none d-sm-block">
@@ -650,10 +667,10 @@
     <div class="modal show" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl" style="max-width: 100%; width: 96%; height:100%;">
             <div class="modal-content" style="height:90%;">
-                <!-- <div class="modal-header">
+                <div class="modal-header">
                     <h1 class="modal-title fs-5" id="mapModalLabel">Map</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div> -->
+                </div>
                 <div id="map" class="modal-body"></div>
             </div>
         </div>
@@ -804,6 +821,7 @@
 </script> 
 -->
 <script>
+    $('#guiding-filter-counter').html('{{ $guidings->count() }}');
     $('#sortby').on('change',function(){
         $('#form-sortby').submit();
     });
