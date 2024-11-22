@@ -268,6 +268,11 @@
         color: #fff !important;
         border: 2px solid #E8604C !important;
     }
+    .cag-btn-inverted {
+        background-color: #313041 !important;
+        color: #fff !important;
+        border: 2px solid #313041 !important;
+    }
     .mobile-selection-sfm {
         position: sticky;
         z-index: 10;
@@ -304,8 +309,8 @@
                 <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
                     <div class="d-grid gap-2 w-100">
                         <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-                            <div class="btn-group border rounded-start w-25 cag-btn" role="group">
-                                <button type="button" class="btn dropdown-toggle text-white" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-arrow-down-arrow-up me-1"></i>@lang('message.choose')...</button>
+                            <div class="btn-group border rounded-start cag-btn-inverted" role="group" style=" width:30%;">
+                                <button type="button" class="btn dropdown-toggle text-white" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-arrow-down-arrow-up me-1"></i>@lang('message.sortby')</button>
                                 <ul class="dropdown-menu">
                                     <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=newest">@lang('message.newest')</a></li>
                                     <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=price-asc">@lang('message.lowprice')</a></li>
@@ -323,11 +328,13 @@
                                     @endif
                                 @endforeach
                             </div>
-                            <a class="btn w-25 border-start cag-btn" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottomSearch" aria-controls="offcanvasBottomSearch" href="javascript:void(0)" style="border-left: 1px solid #ccc!important; z-index: 2;">
+                            <a class="btn border-start cag-btn-inverted" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottomSearch" aria-controls="offcanvasBottomSearch" href="javascript:void(0)" style="border-left: 1px solid #ccc!important; z-index: 2; width:30%;">
                                 <i class="fa fa-filter me-1"></i>Filter
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="guiding-filter-counter"> 1</span>
+                                @if($guidings->count() > 0)
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="guiding-filter-counter">{{ $guidings->count() }}</span>
+                                @endif
                             </a>
-                            <a class="btn border w-50 cag-btn" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)" style=" border-left: 2px solid #ccc!important;"><i class="fa fa-map-marker-alt me-2"></i>Show on Map</a>
+                            <a class="btn border cag-btn-inverted" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)" style=" border-left: 2px solid #ccc!important; width:40%;"><i class="fa fa-map-marker-alt me-2"></i>Show on Map</a>
 
                         </div>
                     </div>
@@ -506,7 +513,6 @@
 
                     <!-- column-reverse-row-normal -->
                     <div class="row">
-                  
                     @if(count($guidings))
                         <div class="col-lg-12 col-sm-12">
                             <div class="tours-list__right">
@@ -821,7 +827,6 @@
 </script> 
 -->
 <script>
-    $('#guiding-filter-counter').html('{{ $guidings->count() }}');
     $('#sortby').on('change',function(){
         $('#form-sortby').submit();
     });
