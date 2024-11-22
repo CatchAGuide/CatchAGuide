@@ -83,6 +83,9 @@
                 <a href="#" class="fs-6 text-decoration-none text-muted">
                         <i class="bi bi-geo-alt"></i> Fishing trip in <strong>{{$guiding->location}}</strong>
                     </a>
+                    <a href="#map" class="fs-6 text-decoration-none text-muted">
+                        <span class="text-primary">Show on map</span>
+                    </a>
                 </div>
                 <div class="col-auto pe-0 me-1">
                   
@@ -91,15 +94,12 @@
                     </p>
                 </div>
                 <div class="col-auto p-0">
-                <a href="#map" class="fs-6 text-decoration-none text-muted">
-                        <span class="text-primary">Show on map</span>
-                    </a>
                 </div>
             </div>
             <div class="col-12 col-lg-6 title-right-container">
                 <div class="title-right-buttons">
                     <a class="btn" href="#" role="button"><i data-lucide="share-2"></i></a>
-                    <button type="button" class="btn btn-outline-primary">Book now</button>
+                    <a href="#book-now" class="btn btn-orange">Book now</a>
                 </div>
                 <span>Best price guarantee</span>
                 </div>
@@ -111,53 +111,121 @@
                 <img data-bs-toggle="modal" data-bs-target="#galleryModal" src="{{asset($guiding->thumbnail_path)}}" class="img-fluid" alt="Main Image">
             </div>
             <div class="right-images">
+                <div class="gallery">
                 @php
                     $galleryImages = json_decode($guiding->galery_images);
                     $thumbnailPath = asset($guiding->thumbnail_path);
-                    $filteredImages = array_filter($galleryImages, function($image) use ($thumbnailPath) {
-                        return asset($image) !== $thumbnailPath; // Exclude thumbnail from gallery
-                    });
+                    $finalImages = [];
                     $hiddenCount = count($galleryImages) > 4 ? count($galleryImages) - 4 : 0;
+                    if (!$galleryImages || count($galleryImages) === 0) {
+                        // No gallery images, duplicate thumbnailPath 4 times
+                        $finalImages = array_fill(0, 4, $thumbnailPath);
+                    } elseif (count($galleryImages) > 5) {
+                        // More than 5 gallery images, exclude the thumbnailPath and take the first 4 gallery images
+                        $finalImages = array_slice(array_filter($galleryImages, function($image) use ($thumbnailPath) {
+                            return asset($image) !== $thumbnailPath;
+                        }), 0, 4);
+                    } else {
+                        // Less than or equal to 5 gallery images
+                        $filteredGallery = array_filter($galleryImages, function($image) use ($thumbnailPath) {
+                            return asset($image) !== $thumbnailPath;
+                        });
+                        
+                        if (count($filteredGallery) < 4) {
+                            $finalImages = $filteredGallery;
+
+                            if (count($finalImages) == 2) {
+                                // Add the thumbnailPath and the first gallery image to complete 4 items
+                                $finalImages[] = $thumbnailPath;
+                                $finalImages[] = $filteredGallery[0];
+                            } elseif (count($finalImages) == 1) {
+                                // Add thumbnailPath and repeat the 1 gallery image and thumbnail to make 4 items
+                                $finalImages[] = $thumbnailPath;
+                                $finalImages[] = $filteredGallery[0];
+                                $finalImages[] = $thumbnailPath;
+                            } else {
+                                // Add thumbnailPath until the list reaches 4 items
+                                while (count($finalImages) < 4) {
+                                    $finalImages[] = $thumbnailPath;
+                                }
+                            }
+                        } else {
+                            $finalImages = $filteredGallery;
+                        }
+                    }
                 @endphp
-                <div class="gallery">
-                    @foreach ($filteredImages as $index => $image)
-                    
-                     <div class="gallery-item">
-                        @if (  count($galleryImages) == 1 )
-                            @for ($i = 0; $i < 5; $i++)
-                                <img src="{{asset($image)}}" class="img-fluid" alt="Gallery Image {{ $i + 1 }}" data-bs-toggle="modal" data-bs-target="#galleryModal" data-image="{{ asset($image) }}">
-                            @endfor
-                        @else
-                            @if ($index < 4)
+
+                    @foreach ($finalImages as $index => $image)
+                        @if ($index < 3)
+                            <div class="gallery-item">
                                 <img src="{{asset($image)}}" class="img-fluid" alt="Gallery Image {{ $index + 1 }}" data-bs-toggle="modal" data-bs-target="#galleryModal" data-image="{{ asset($image) }}">
-                            @elseif ($index == 4)
+                            </div>
+                        @elseif ($index == 3 && $hiddenCount !== 0)
+                            <div class="gallery-item">
                                 <img src="{{asset($image)}}" class="img-fluid" alt="Gallery Image {{ $index + 1 }} (and {{ $hiddenCount }} more)"  data-image="{{ asset($image) }}">
                                 <span data-bs-toggle="modal" data-bs-target="#galleryModal" class="position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">+{{ $hiddenCount }} more</span>
-                            @endif
+                            </div>
+                        @elseif ($index == 3)
+                            <div class="gallery-item">
+                                <img src="{{asset($image)}}" class="img-fluid" alt="Gallery Image {{ $index + 1 }} (and {{ $hiddenCount }} more)"  data-image="{{ asset($image) }}">
+                            </div>
                         @endif
-                    </div>
                     @endforeach
                 </div>
                 <div class="gallery-mobile">
                     @php
-                        $hiddenCount = count($galleryImages) > 2 ? count($galleryImages) - 2 : 0;
-                    @endphp
-                    @foreach ($filteredImages as $index => $image)
-                    
-                        <div class="gallery-item">
-                            @if (  count($galleryImages) == 1 )
-                            @for ($i = 0; $i < 5; $i++)
-                                <img src="{{asset($image)}}" class="img-fluid" alt="Gallery Image {{ $i + 1 }}" data-bs-toggle="modal" data-bs-target="#galleryModal" data-image="{{ asset($image) }}">
-                            @endfor
-                            @else
-                                @if ($index < 2)
-                                        <img src="{{ asset($image) }}" class="img-fluid" alt="Gallery Image {{ $index + 1 }}" data-bs-toggle="modal" data-bs-target="#galleryModal" data-image="{{ asset($image) }}">
-                                @elseif ($index == 2)
-                                        <img src="{{ asset($image) }}" class="img-fluid" alt="Gallery Image {{ $index + 1 }} (and {{ $hiddenCount }} more)" data-image="{{ asset($image) }}">
-                                        <span data-bs-toggle="modal" data-bs-target="#galleryModal" class="position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">+{{ $hiddenCount }} more</span>
-                                @endif
-                            @endif
-                        </div>
+                    $galleryImages = json_decode($guiding->galery_images);
+                    $thumbnailPath = asset($guiding->thumbnail_path);
+                    $finalImages = [];
+                    $hiddenCount = count($galleryImages) > 2 ? count($galleryImages) - 2 : 0;
+                    if (!$galleryImages || count($galleryImages) === 0) {
+                        // No gallery images, duplicate thumbnailPath 4 times
+                        $finalImages = array_fill(0, 2, $thumbnailPath);
+                    } elseif (count($galleryImages) > 3) {
+                        // More than 5 gallery images, exclude the thumbnailPath and take the first 4 gallery images
+                        $finalImages = array_slice(array_filter($galleryImages, function($image) use ($thumbnailPath) {
+                            return asset($image) !== $thumbnailPath;
+                        }), 0, 2);
+                    } else {
+                        // Less than or equal to 5 gallery images
+                        $filteredGallery = array_filter($galleryImages, function($image) use ($thumbnailPath) {
+                            return asset($image) !== $thumbnailPath;
+                        });
+                        
+                        if (count($filteredGallery) < 3) {
+                            $finalImages = $filteredGallery;
+
+                            if (count($finalImages) == 2) {
+                                // Add the thumbnailPath and the first gallery image to complete 4 items
+                                $finalImages[] = $thumbnailPath;
+                                $finalImages[] = $filteredGallery[0];
+                            } elseif (count($finalImages) == 1) {
+                                // Add thumbnailPath and repeat the 1 gallery image and thumbnail to make 4 items
+                                $finalImages[] = $thumbnailPath;
+                                $finalImages[] = $filteredGallery[0];
+                                $finalImages[] = $thumbnailPath;
+                            } else {
+                                // Add thumbnailPath until the list reaches 4 items
+                                while (count($finalImages) < 3) {
+                                    $finalImages[] = $thumbnailPath;
+                                }
+                            }
+                        } else {
+                            $finalImages = $filteredGallery;
+                        }
+                    }
+                @endphp
+                    @foreach ($finalImages as $index => $image)
+                        @if ($index < 1)
+                            <div class="gallery-item">
+                                <img src="{{ asset($image) }}" class="img-fluid" alt="Gallery Image {{ $index + 1 }}" data-bs-toggle="modal" data-bs-target="#galleryModal" data-image="{{ asset($image) }}">
+                            </div>
+                        @elseif ($index == 1)
+                            <div class="gallery-item">
+                                <img src="{{ asset($image) }}" class="img-fluid" alt="Gallery Image {{ $index + 1 }} (and {{ $hiddenCount }} more)" data-image="{{ asset($image) }}">
+                                <span data-bs-toggle="modal" data-bs-target="#galleryModal" class="position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">+{{ $hiddenCount }} more</span>
+                            </div>
+                        @endif
                     @endforeach
                 </div>
             </div>
@@ -256,305 +324,304 @@
                     </div>
                 </div>
             </div>
-
-            <div class="nav nav-tabs" id="guiding-tab" role="tablist">
-                <button class="nav-link active" id="nav-fishing-tab" data-bs-toggle="tab" data-bs-target="#fishing" type="button" role="tab" aria-controls="nav-fishing" aria-selected="true">Fishing Experience</button>
-                <button class="nav-link" id="nav-include-tab" data-bs-toggle="tab" data-bs-target="#include" type="button" role="tab" aria-controls="nav-include" aria-selected="false">Inclusions</button>
-                <!-- <button class="nav-link" id="nav-costs-tab" data-bs-toggle="tab" data-bs-target="#costs" type="button" role="tab" aria-controls="nav-costs" aria-selected="false">Additional Extras</button> -->
-                <button class="nav-link" id="nav-boat-tab" data-bs-toggle="tab" data-bs-target="#boat" type="button" role="tab" aria-controls="nav-boat" aria-selected="false">Boat Details</button>
-                <button class="nav-link" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab" aria-controls="nav-info" aria-selected="false">Important Information</button>
-            </div>
-
-<div class="tab-content mb-5" id="guidings-tabs">
-
-    <!-- What's Included Tab -->
-    <div class="tab-pane fade" id="include" role="tabpanel" aria-labelledby="nav-include-tab">
-        <div class="row">
-            <div class="col-6">
-                @if(!empty($guiding->inclusions))
-                    <div class="row">
-                        <strong class="mb-2 subtitle-text">Inclusions</strong>
-                        @foreach (json_decode($guiding->inclusions) as $index => $inclusion)
-                            <div class="col-12 mb-2 text-start">
-                            <i data-lucide="wrench"></i> {{$inclusion->value}}
-                            </div>
-                        @endforeach
-                    </div>
-                @else
-                    <p>No inclusions specified</p>
-                @endif
-            </div>
-            <div class="col-6">
-            @if(!empty(json_decode($guiding->pricing_extra)))
-                    <div class="row">
-                        <strong class="mb-2 subtitle-text">Additional Extras</strong>
-                        @foreach (json_decode($guiding->pricing_extra) as $pricing_extras)
-                            <div class="mb-2">
-                                <strong>{{$pricing_extras->name}}</strong> 
-                                <span>{{$pricing_extras->price}}€ p.P</span>
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
-            </div>
-        </div>
-    </div>
-
-    <!-- Fishing Experience Tab -->
-    <div class="tab-pane fade show active" id="fishing" role="tabpanel" aria-labelledby="nav-fishing-tab">
-    <div class="row">
-        
-        @if(!empty($guiding->target_fish))
-            <div class="tab-category mb-4 col-12 col-lg-4">
-                <strong class="subtitle-text">Target Fish</strong>
-                <div class="row">
-                    @foreach (json_decode($guiding->target_fish) as $index => $target_fish)
-                        <div class="col-12 text-start">
-                            {{$target_fish->value}}
-                        </div>
-                        @if(($index + 1) % 2 == 0)
-                            </div><div class="row">
-                        @endif
-                    @endforeach
+            <div class="tabs-container">
+                <div class="nav nav-tabs" id="guiding-tab" role="tablist">
+                    <button class="nav-link active" id="nav-fishing-tab" data-bs-toggle="tab" data-bs-target="#fishing" type="button" role="tab" aria-controls="nav-fishing" aria-selected="true">Fishing Experience</button>
+                    <button class="nav-link" id="nav-include-tab" data-bs-toggle="tab" data-bs-target="#include" type="button" role="tab" aria-controls="nav-include" aria-selected="false">Inclusions</button>
+                    <button class="nav-link" id="nav-boat-tab" data-bs-toggle="tab" data-bs-target="#boat" type="button" role="tab" aria-controls="nav-boat" aria-selected="false">Boat Details</button>
+                    <button class="nav-link" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab" aria-controls="nav-info" aria-selected="false">Important Information</button>
                 </div>
-            </div>
-        @else
-        <!-- Fish Section -->
-            <p class="mb-4">No fish specified</p>
-        @endif
-        <!-- Methods Section -->
-        @if(!empty($guiding->fishing_methods))
-            <div class="tab-category mb-4 col-12 col-lg-4">
-                <strong class="subtitle-text">Fishing Methods</strong>
-                <div class="row">
-                    @foreach (json_decode($guiding->fishing_methods) as $index => $fishing_method)
-                        <div class="col-12 text-start">
-                            {{$fishing_method->value}}
-                        </div>
-                        @if(($index + 1) % 2 == 0)
-                            </div><div class="row">
-                        @endif
-                    @endforeach
-                </div>
-            </div>
-        @else
-            <p class="mb-4">No methods specified</p>
-        @endif
     
-        <!-- Water Types Section -->
-        @if(!empty($guiding->water_types))
-            <div class="tab-category mb-4 col-12 col-lg-4">
-                <strong class="subtitle-text">Water Types</strong>
-                <div class="row">
-                    @foreach (json_decode($guiding->water_types) as $index => $water_type)
-                        <div class="col-12 text-start">
-                            {{$water_type->value}}
-                        </div>
-                        @if(($index + 1) % 2 == 0)
-                            </div><div class="row">
-                        @endif
-                    @endforeach
-                </div>
-            </div>
-        @else
-            <p class="mb-4">No water types specified</p>
-        @endif
-    </div>
-
-</div>
-
-
-    <!-- Additional Costs Tab -->
-    <!-- <div class="tab-pane fade" id="costs" role="tabpanel" aria-labelledby="nav-costs-tab">
-            @if(!empty($guiding->pricing_extra))
-                @foreach (json_decode($guiding->pricing_extra) as $pricing_extras)
+                <div class="tab-content mb-5" id="guidings-tabs">
+    
+                    <!-- What's Included Tab -->
+                    <div class="tab-pane fade" id="include" role="tabpanel" aria-labelledby="nav-include-tab">
                         <div class="row">
-                            <div class="col-md-6 mb-2">
-                                <strong>{{$pricing_extras->name}}</strong> 
-                                <span>{{$pricing_extras->price}}€ p.P</span>
+                            <div class="col-6">
+                                @if(!empty($guiding->inclusions))
+                                    <div class="row">
+                                        <strong class="mb-2 subtitle-text">Inclusions</strong>
+                                        @foreach (json_decode($guiding->inclusions) as $index => $inclusion)
+                                            <div class="col-12 mb-2 text-start">
+                                            <i data-lucide="wrench"></i> {{$inclusion->value}}
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <p>No inclusions specified</p>
+                                @endif
+                            </div>
+                            <div class="col-6">
+                            @if(!empty(json_decode($guiding->pricing_extra)))
+                                    <div class="row">
+                                        <strong class="mb-2 subtitle-text">Additional Extras</strong>
+                                        @foreach (json_decode($guiding->pricing_extra) as $pricing_extras)
+                                            <div class="mb-2">
+                                                <strong>{{$pricing_extras->name}}</strong> 
+                                                <span>{{$pricing_extras->price}}€ p.P</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
                         </div>
-                        </div>
-                @endforeach
-            @else
-                <span>No extra prices specified</span>
-            @endif
-    </div> -->
-    @php
-        $boatInformation = json_decode($guiding->boat_information, true);
-    @endphp
-    <div class="tab-pane fade" id="boat" role="tabpanel" aria-labelledby="nav-boat-tab">
-    <div class="row">
-    <div class="col-md-12">
-    @if(!empty($guiding->boat_information))
-        <strong class="subtitle-text">Boat Information:</strong>
-        <!-- Boat Information as a Table -->
-        <table class="table ">
-    <tbody>
-        <tr>
-            <th>Seats</th>
-            <td colspan="1">{{ $boatInformation['seats'] ?? '' }}</td>
-        </tr>
-        <tr>
-            <th>Length</th>
-            <td>{{ $boatInformation['length'] ?? '' }}</td>
-        </tr>
-        <tr>
-            <th>Width</th>
-            <td>{{ $boatInformation['width'] ?? '' }}</td>
-        </tr>
-        <tr>
-            <th>Year Built</th>
-            <td>{{ $boatInformation['year_built'] ?? '' }}</td>
-        </tr>
-        <tr>
-            <th>Engine Manufacturer</th>
-            <td>{{ $boatInformation['engine_manufacturer'] ?? '' }}</td>
-        </tr>
-        <tr>
-            <th>Engine Power (hp)</th>
-            <td>{{ $boatInformation['engine_power'] ?? '' }}</td>
-        </tr>
-        <tr>
-            <th>Max Speed</th>
-            <td>{{ $boatInformation['max_speed'] ?? '' }}</td>
-        </tr>
-        <tr>
-            <th>Manufacturer</th>
-            <td>{{ $boatInformation['manufacturer'] ?? '' }}</td>
-        </tr>
-    </tbody>
-</table>
-
-    @endif
-</div>
-
-
-        <div class="col-md-6">
-            @if(!empty($guiding->boat_extras))
-                <strong class="subtitle-text">Boat Extras:</strong>
-                <!-- Boat Extras as a List -->
-                <ul>
-                    @foreach(json_decode($guiding->boat_extras) as $extra)
-                        <li>{{ $extra->value }}</li>
-                    @endforeach
-                </ul>
-            @endif
-        </div>
-    </div>
-
-    @if(empty($guiding->boat_type) && empty($guiding->boat_information) && empty($guiding->boat_extras))
-        <p>No boat information specified</p>
-    @endif
-</div>
-
-
-    <!-- Important Information Tab -->
-    <div class="tab-pane fade" id="info" role="tabpanel" aria-labelledby="nav-info-tab">
-
-    <!-- Requirements Section -->
-    @if(!empty($guiding->requirements))
-        <div class="tab-category mb-4">
-            <strong class="subtitle-text">Requirements</strong>
-            <div class="row">
-                @foreach (json_decode($guiding->requirements) as $reqIndex => $requirements)
-                    <div class="col-12 text-start">
-                        <ul>
-                            <li>
-                                <strong>{{ ucfirst(str_replace('_', ' ', $reqIndex)) }}:</strong> {{ $requirements }}
-                            </li>
-                        </ul>
                     </div>
-                    @if(($loop->index + 1) % 2 == 0)
-                        </div><div class="row">
-                    @endif
-                @endforeach
-            </div>
-        </div>
-    @else
-        <p class="mb-4">No requirements specified</p>
-    @endif
-<hr/>
-    <!-- Other Information Section -->
-    @if(!empty($guiding->other_information))
-        <div class="tab-category mb-4">
-            <strong class="subtitle-text">Other Information</strong>
-            <div class="row">
-                @foreach (json_decode($guiding->other_information) as $otherIndex => $other)
-                    <div class="col-12 text-start">
-                    <ul>
-                    <li>
-                        <strong>{{ ucfirst(str_replace('_', ' ', $otherIndex)) }}:</strong> {{ $other }}
-                    </li>
-                    </ul>
+    
+                    <!-- Fishing Experience Tab -->
+                    <div class="tab-pane fade show active" id="fishing" role="tabpanel" aria-labelledby="nav-fishing-tab">
+                    <div class="row">
+                        
+                        @if(!empty($guiding->target_fish))
+                            <div class="tab-category mb-4 col-12 col-lg-4">
+                                <strong class="subtitle-text">Target Fish</strong>
+                                <div class="row">
+                                    @foreach (json_decode($guiding->target_fish) as $index => $target_fish)
+                                        <div class="col-12 text-start">
+                                            {{$target_fish->value}}
+                                        </div>
+                                        @if(($index + 1) % 2 == 0)
+                                            </div><div class="row">
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                        <!-- Fish Section -->
+                            <p class="mb-4">No fish specified</p>
+                        @endif
+                        <!-- Methods Section -->
+                        @if(!empty($guiding->fishing_methods))
+                            <div class="tab-category mb-4 col-12 col-lg-4">
+                                <strong class="subtitle-text">Fishing Methods</strong>
+                                <div class="row">
+                                    @foreach (json_decode($guiding->fishing_methods) as $index => $fishing_method)
+                                        <div class="col-12 text-start">
+                                            {{$fishing_method->value}}
+                                        </div>
+                                        @if(($index + 1) % 2 == 0)
+                                            </div><div class="row">
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <p class="mb-4">No methods specified</p>
+                        @endif
+                    
+                        <!-- Water Types Section -->
+                        @if(!empty($guiding->water_types))
+                            <div class="tab-category mb-4 col-12 col-lg-4">
+                                <strong class="subtitle-text">Water Types</strong>
+                                <div class="row">
+                                    @foreach (json_decode($guiding->water_types) as $index => $water_type)
+                                        <div class="col-12 text-start">
+                                            {{$water_type->value}}
+                                        </div>
+                                        @if(($index + 1) % 2 == 0)
+                                            </div><div class="row">
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <p class="mb-4">No water types specified</p>
+                        @endif
                     </div>
-                    @if(($loop->index + 1) % 2 == 0)
-                        </div><div class="row">
-                    @endif
-                @endforeach
-            </div>
-        </div>
-    @else
-        <p class="mb-4">No other information specified</p>
-    @endif
-    <hr/>
-    <!-- Recommended Preparation Section -->
-    @if(!empty($guiding->recommendations))
-        <div class="tab-category mb-4">
-            <strong class="subtitle-text">Recommended Preparation</strong>
-            <div class="row">
-                @foreach (json_decode($guiding->recommendations) as $recIndex => $recommendations)
-                    <div class="col-12 text-start">
-                    <ul>
-                    <li>
-                        <strong>{{ ucfirst(str_replace('_', ' ', $recIndex)) }}:</strong> {{ $recommendations }}
-                    </li>
-                    </ul>
-                    </div>
-                    @if(($loop->index + 1) % 2 == 0)
-                        </div><div class="row">
-                    @endif
-                @endforeach
-            </div>
-        </div>
-    @else
-        <p class="mb-4">No recommendations specified</p>
-    @endif
-    <hr/>
-    <!-- Essential Details Section -->
-    <div class="row mb-4">
-        <!-- <div class="col-md-6">
-            @if(!empty($guiding->experience_level))
-                <h6>Experience Level:</h6>
-                <ul>
-                    @foreach(json_decode($guiding->experience_level) as $value)
-                        <li>{{ $value }}</li>
-                    @endforeach
-                </ul>
-            @endif
-        </div> -->
-
-        <div class="col-md-6">
-            @if(!empty($guiding->style_of_fishing))
-                    <strong class="subtitle-text">Style of Fishing:</strong> 
-                    <span class="">{{ $guiding->style_of_fishing }}</span>
-            @endif
-        </div>
-        <div class="col-md-6">
-            @if(!empty($guiding->tour_type))
-                <div>
-                    <strong class="subtitle-text">Tour Type:</strong> 
-                    <span class="">{{ $guiding->tour_type }}</span>
+    
                 </div>
-            @endif
-        </div>
-    </div>
-
-    @if(empty($guiding->experience_level) && empty($guiding->tour_type) && empty($guiding->style_of_fishing))
-        <p>No information specified</p>
-    @endif
-</div>
-
-</div>
+    
+    
+                    <!-- Additional Costs Tab -->
+                    <!-- <div class="tab-pane fade" id="costs" role="tabpanel" aria-labelledby="nav-costs-tab">
+                            @if(!empty($guiding->pricing_extra))
+                                @foreach (json_decode($guiding->pricing_extra) as $pricing_extras)
+                                        <div class="row">
+                                            <div class="col-md-6 mb-2">
+                                                <strong>{{$pricing_extras->name}}</strong> 
+                                                <span>{{$pricing_extras->price}}€ p.P</span>
+                                        </div>
+                                        </div>
+                                @endforeach
+                            @else
+                                <span>No extra prices specified</span>
+                            @endif
+                    </div> -->
+                    @php
+                        $boatInformation = json_decode($guiding->boat_information, true);
+                    @endphp
+                    <div class="tab-pane fade" id="boat" role="tabpanel" aria-labelledby="nav-boat-tab">
+                    <div class="row">
+                    <div class="col-md-12">
+                    @if(!empty($guiding->boat_information))
+                        <strong class="subtitle-text">Boat Information:</strong>
+                        <!-- Boat Information as a Table -->
+                        <table class="table ">
+                    <tbody>
+                        <tr>
+                            <th>Seats</th>
+                            <td colspan="1">{{ $boatInformation['seats'] ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Length</th>
+                            <td>{{ $boatInformation['length'] ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Width</th>
+                            <td>{{ $boatInformation['width'] ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Year Built</th>
+                            <td>{{ $boatInformation['year_built'] ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Engine Manufacturer</th>
+                            <td>{{ $boatInformation['engine_manufacturer'] ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Engine Power (hp)</th>
+                            <td>{{ $boatInformation['engine_power'] ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Max Speed</th>
+                            <td>{{ $boatInformation['max_speed'] ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Manufacturer</th>
+                            <td>{{ $boatInformation['manufacturer'] ?? '' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+    
+                    @endif
+                </div>
+    
+    
+                        <div class="col-md-6">
+                            @if(!empty($guiding->boat_extras))
+                                <strong class="subtitle-text">Boat Extras:</strong>
+                                <!-- Boat Extras as a List -->
+                                <ul>
+                                    @foreach(json_decode($guiding->boat_extras) as $extra)
+                                        <li>{{ $extra->value }}</li>
+                                    @endforeach
+                                </ul>
+                            @endif
+                        </div>
+                    </div>
+    
+                    @if(empty($guiding->boat_type) && empty($guiding->boat_information) && empty($guiding->boat_extras))
+                        <p>No boat information specified</p>
+                    @endif
+                </div>
+    
+    
+                    <!-- Important Information Tab -->
+                    <div class="tab-pane fade" id="info" role="tabpanel" aria-labelledby="nav-info-tab">
+    
+                    <!-- Requirements Section -->
+                    @if(!empty($guiding->requirements))
+                        <div class="tab-category mb-4">
+                            <strong class="subtitle-text">Requirements</strong>
+                            <div class="row">
+                                @foreach (json_decode($guiding->requirements) as $reqIndex => $requirements)
+                                    <div class="col-12 text-start">
+                                        <ul>
+                                            <li>
+                                                <strong>{{ ucfirst(str_replace('_', ' ', $reqIndex)) }}:</strong> {{ $requirements }}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    @if(($loop->index + 1) % 2 == 0)
+                                        </div><div class="row">
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    @else
+                        <p class="mb-4">No requirements specified</p>
+                    @endif
+                <hr/>
+                    <!-- Other Information Section -->
+                    @if(!empty($guiding->other_information))
+                        <div class="tab-category mb-4">
+                            <strong class="subtitle-text">Other Information</strong>
+                            <div class="row">
+                                @foreach (json_decode($guiding->other_information) as $otherIndex => $other)
+                                    <div class="col-12 text-start">
+                                    <ul>
+                                    <li>
+                                        <strong>{{ ucfirst(str_replace('_', ' ', $otherIndex)) }}:</strong> {{ $other }}
+                                    </li>
+                                    </ul>
+                                    </div>
+                                    @if(($loop->index + 1) % 2 == 0)
+                                        </div><div class="row">
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    @else
+                        <p class="mb-4">No other information specified</p>
+                    @endif
+                    <hr/>
+                    <!-- Recommended Preparation Section -->
+                    @if(!empty($guiding->recommendations))
+                        <div class="tab-category mb-4">
+                            <strong class="subtitle-text">Recommended Preparation</strong>
+                            <div class="row">
+                                @foreach (json_decode($guiding->recommendations) as $recIndex => $recommendations)
+                                    <div class="col-12 text-start">
+                                    <ul>
+                                    <li>
+                                        <strong>{{ ucfirst(str_replace('_', ' ', $recIndex)) }}:</strong> {{ $recommendations }}
+                                    </li>
+                                    </ul>
+                                    </div>
+                                    @if(($loop->index + 1) % 2 == 0)
+                                        </div><div class="row">
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    @else
+                        <p class="mb-4">No recommendations specified</p>
+                    @endif
+                    <hr/>
+                    <!-- Essential Details Section -->
+                    <div class="row mb-4">
+                        <!-- <div class="col-md-6">
+                            @if(!empty($guiding->experience_level))
+                                <h6>Experience Level:</h6>
+                                <ul>
+                                    @foreach(json_decode($guiding->experience_level) as $value)
+                                        <li>{{ $value }}</li>
+                                    @endforeach
+                                </ul>
+                            @endif
+                        </div> -->
+    
+                        <div class="col-md-6">
+                            @if(!empty($guiding->style_of_fishing))
+                                    <strong class="subtitle-text">Style of Fishing:</strong> 
+                                    <span class="">{{ $guiding->style_of_fishing }}</span>
+                            @endif
+                        </div>
+                        <div class="col-md-6">
+                            @if(!empty($guiding->tour_type))
+                                <div>
+                                    <strong class="subtitle-text">Tour Type:</strong> 
+                                    <span class="">{{ $guiding->tour_type }}</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+    
+                    @if(empty($guiding->experience_level) && empty($guiding->tour_type) && empty($guiding->style_of_fishing))
+                        <p>No information specified</p>
+                    @endif
+                </div>
+                </div>
+            </div>
 <!-- Accordion mobile ver -->
 <div class="accordion mb-5" id="guidings-accordion">
 
@@ -789,7 +856,7 @@
         </div>
     
         <!-- Right Column -->
-        <div class="guidings-book">
+        <div id="book-now" class="guidings-book">
             @if(!$agent->ismobile())
                 @include('pages.guidings.content.bookguiding')
             @endif
@@ -1075,11 +1142,11 @@
                                             <img src="{{ app('guiding')->getImagesUrl($other_guiding)['image_0'] }}" alt="{{ $other_guiding->title }}"/>
                                         @endif
                                     @endif
-                                    <div class="popular-tours__icon">
+                                    <!-- <div class="popular-tours__icon">
                                         <a href="{{ route('wishlist.add-or-remove', $other_guiding->id) }}">
                                             <i class="fa fa-heart {{ (auth()->check() ? (auth()->user()->isWishItem($other_guiding->id) ? 'text-danger' : '') : '') }}"></i>
                                         </a>
-                                    </div>
+                                    </div> -->
                                 </figure>
                             </a>
 
