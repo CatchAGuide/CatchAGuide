@@ -1,17 +1,17 @@
-<nav class="navbar-custom short-header {{ request()->is('/') ? 'with-bg' : '' }} {{ request()->is('guidings*') ? 'no-search' : '' }}">
+<nav class="cag-header-navbar {{ request()->is('/') ? 'cag-header-with-bg' : '' }} {{ request()->is('guidings*') ? 'cag-header-no-search' : '' }}">
     <div class="container">
         <!-- Top Row -->
         <div class="row align-items-center">
             <!-- Logo and Navigation -->
             <div class="col-12 d-flex justify-content-between align-items-center">
-                <div class="logo">
+                <div class="cag-header-logo">
                     <a href="{{ route('welcome') }}">
                         <img src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}" alt="Logo" style="height: 45px;">
                     </a>
                 </div>
                 
                 <!-- Desktop Menu -->
-                <div class="d-none d-md-flex align-items-center top-nav-items">
+                <div class="d-none d-md-flex align-items-center cag-header-nav-items">
                     <a href="{{ route('additional.contact') }}" class="nav-link">
                         <i class="fas fa-question-circle"></i>
                     </a>
@@ -52,7 +52,7 @@
                 <!-- Mobile Icons -->
                 <div class="d-flex d-md-none">
                     @auth
-                        <a href="#" class="text-white me-3"><i class="fas fa-bell"></i></a>
+                        {{-- <a href="#" class="text-white me-3"><i class="fas fa-bell"></i></a> --}} 
                         <div class="dropdown mobile-profile-dropdown me-3">
                             <img src="{{ asset('images/'. Auth::user()->profil_image) ?? asset('images/placeholder_guide.jpg') }}" 
                                  class="rounded-circle" 
@@ -190,7 +190,7 @@
 </nav>
 
 <style>
-.short-header.navbar-custom {
+.cag-header-navbar {
     background-color: #313041;
     padding-top: 16px;
     padding-bottom: 35px;
@@ -198,17 +198,17 @@
     margin-bottom: 60px;
 }
 
-.short-header .btn-outline-secondary {
+.cag-header-navbar .btn-outline-secondary {
     border: 1px solid rgba(255,255,255,0.3);
     background: transparent;
 }
 
-.short-header .btn-outline-secondary:hover {
+.cag-header-navbar .btn-outline-secondary:hover {
     background-color: rgba(255,255,255,0.1);
     border-color: white;
 }
 
-.short-header .floating-search-container {
+.cag-header-navbar .floating-search-container {
     position: absolute;
     left: 0;
     right: 0;
@@ -217,19 +217,19 @@
     z-index: 1000;
 }
 
-.short-header .search-box {
+.cag-header-navbar .search-box {
     background: white;
     padding: 12px;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.short-header .search-input {
+.cag-header-navbar .search-input {
     position: relative;
     margin-right: 12px;
 }
 
-.short-header .input-icon {
+.cag-header-navbar .input-icon {
     position: absolute;
     left: 12px;
     top: 50%;
@@ -238,21 +238,21 @@
     z-index: 1;
 }
 
-.short-header .form-control,
-.short-header .form-select {
+.cag-header-navbar .form-control,
+.cag-header-navbar .form-select {
     height: 48px;
     padding-left: 40px;
     border: 1px solid #E85B40;
     border-radius: 4px;
 }
 
-.short-header .form-control:focus,
-.short-header .form-select:focus {
+.cag-header-navbar .form-control:focus,
+.cag-header-navbar .form-select:focus {
     box-shadow: none;
     border-color: #E85B40;
 }
 
-.short-header .search-button {
+.cag-header-navbar .search-button {
     background-color: #E85B40;
     color: white;
     border: none;
@@ -272,28 +272,28 @@ input[type=number] {
     -moz-appearance: textfield;
 }
 
-.short-header .gap-4 {
+.cag-header-navbar .gap-4 {
     gap: 1rem !important;
 }
 
-.short-header .row.mb-5,
-.short-header .row.mb-4,
-.short-header .row.mb-3 {
+.cag-header-navbar .row.mb-5,
+.cag-header-navbar .row.mb-4,
+.cag-header-navbar .row.mb-3 {
     margin-bottom: 0 !important;
 }
 
-.short-header .categories-row {
+.cag-header-navbar .categories-row {
     margin-top: 1.5rem;
     margin-bottom: 1.5rem;
 }
 
 /* Form controls alignment */
-.short-header .search-box .d-flex {
+.cag-header-navbar .search-box .d-flex {
     align-items: center;
     gap: 12px;
 }
 
-.short-header .search-input {
+.cag-header-navbar .search-input {
     position: relative;
     min-height: 48px;
     display: flex;
@@ -301,9 +301,9 @@ input[type=number] {
 }
 
 /* Consistent sizing for all form elements */
-.short-header .form-control,
-.short-header .form-select,
-.short-header select {
+.cag-header-navbar .form-control,
+.cag-header-navbar .form-select,
+.cag-header-navbar select {
     height: 48px !important;
     line-height: 48px;
     padding: 0 40px;
@@ -313,35 +313,35 @@ input[type=number] {
 }
 
 /* Fix for select2 if you're using it */
-.short-header .select2-container {
+.cag-header-navbar .select2-container {
     height: 48px !important;
 }
 
-.short-header .select2-container .select2-selection--single {
+.cag-header-navbar .select2-container .select2-selection--single {
     height: 48px !important;
     line-height: 48px;
     border: 1px solid #E85B40;
     border-radius: 4px;
 }
 
-.short-header .select2-container--default .select2-selection--single .select2-selection__rendered {
+.cag-header-navbar .select2-container--default .select2-selection--single .select2-selection__rendered {
     line-height: 48px;
     padding-left: 40px;
 }
 
-.short-header .select2-container--default .select2-selection--single .select2-selection__arrow {
+.cag-header-navbar .select2-container--default .select2-selection--single .select2-selection__arrow {
     height: 46px;
 }
 
 /* Search button alignment */
-.short-header .search-button {
+.cag-header-navbar .search-button {
     height: 48px;
     min-width: 120px;
     white-space: nowrap;
 }
 
 /* Input icons alignment */
-.short-header .input-icon {
+.cag-header-navbar .input-icon {
     position: absolute;
     left: 12px;
     top: 50%;
@@ -352,13 +352,13 @@ input[type=number] {
 }
 
 /* Fix for fish icon in select */
-.short-header .fa-fish.input-icon {
+.cag-header-navbar .fa-fish.input-icon {
     z-index: 2;
 }
 
 /* Mobile Styles */
 @media (max-width: 767px) {
-    .short-header.navbar-custom {
+    .cag-header-navbar {
         padding-bottom: 16px;
         margin-bottom: 0;
     }
@@ -522,53 +522,53 @@ input[type=number] {
 
 /* Desktop Header Specific Styles */
 @media (min-width: 768px) {
-    .short-header .nav-links {
+    .cag-header-navbar .nav-links {
         height: 45px;
     }
     
-    .short-header .nav-links a {
+    .cag-header-navbar .nav-links a {
         font-size: 14px;
         padding: 8px 12px;
         border-radius: 4px;
         transition: background-color 0.2s;
     }
     
-    .short-header .nav-links a:hover {
+    .cag-header-navbar .nav-links a:hover {
         background-color: rgba(255, 255, 255, 0.1);
         text-decoration: none;
     }
     
-    .short-header .btn-outline-light {
+    .cag-header-navbar .btn-outline-light {
         border: 1px solid rgba(255, 255, 255, 0.5);
         padding: 8px 16px;
         font-size: 14px;
         transition: all 0.2s;
     }
     
-    .short-header .btn-outline-light:hover {
+    .cag-header-navbar .btn-outline-light:hover {
         background-color: rgba(255, 255, 255, 0.1);
         border-color: white;
     }
     
     /* Adjust spacing between nav items */
-    .short-header .nav-links .gap-4 > * {
+    .cag-header-navbar .nav-links .gap-4 > * {
         margin-left: 1rem;
     }
     
     /* Language selector style */
-    .short-header .nav-links .fa-globe {
+    .cag-header-navbar .nav-links .fa-globe {
         margin-right: 4px;
     }
 }
 
 /* Desktop Header Styles */
 @media (min-width: 768px) {
-    .short-header .top-nav-items {
+    .cag-header-navbar .top-nav-items {
         gap: 32px;
         height: 45px;
     }
 
-    .short-header .top-nav-items .nav-link {
+    .cag-header-navbar .top-nav-items .nav-link {
         color: white;
         text-decoration: none;
         padding: 10px 16px;
@@ -581,19 +581,19 @@ input[type=number] {
         transition: background-color 0.2s;
     }
 
-    .short-header .top-nav-items .nav-link:hover {
+    .cag-header-navbar .top-nav-items .nav-link:hover {
         background-color: rgba(255, 255, 255, 0.1);
         color: white;
         text-decoration: none;
     }
 
     /* Icons sizing */
-    .short-header .top-nav-items .nav-link i {
+    .cag-header-navbar .top-nav-items .nav-link i {
         font-size: 18px;
     }
 
     /* Language selector specific styling */
-    .short-header .language-selector {
+    .cag-header-navbar .language-selector {
         display: flex;
         align-items: center;
         gap: 8px;
@@ -601,17 +601,17 @@ input[type=number] {
     }
 
     /* Become a guide link */
-    .short-header .become-guide-link {
+    .cag-header-navbar .become-guide-link {
         font-weight: 500;
     }
 
     /* Profile section */
-    .short-header .header-desktop-profile {
+    .cag-header-navbar .header-desktop-profile {
         display: flex;
         align-items: center;
     }
 
-    .short-header .header-desktop-profile img {
+    .cag-header-navbar .header-desktop-profile img {
         width: 36px;
         height: 36px;
         border-radius: 50%;
@@ -619,13 +619,13 @@ input[type=number] {
         border: 2px solid rgba(255, 255, 255, 0.2);
     }
 
-    .short-header .header-desktop-profile .dropdown-toggle {
+    .cag-header-navbar .header-desktop-profile .dropdown-toggle {
         font-size: 16px;
         font-weight: 500;
     }
 
     /* Sign up button */
-    .short-header .signup-btn {
+    .cag-header-navbar .signup-btn {
         border: 1.5px solid rgba(255, 255, 255, 0.5);
         padding: 10px 20px;
         font-size: 16px;
@@ -633,31 +633,31 @@ input[type=number] {
         transition: all 0.2s;
     }
 
-    .short-header .signup-btn:hover {
+    .cag-header-navbar .signup-btn:hover {
         background-color: rgba(255, 255, 255, 0.1);
         border-color: white;
     }
 
     /* Login link */
-    .short-header .login-link {
+    .cag-header-navbar .login-link {
         font-weight: 500;
     }
 
     /* Ensure proper vertical alignment */
-    .short-header .logo,
-    .short-header .top-nav-items,
-    .short-header .top-nav-items > * {
+    .cag-header-navbar .logo,
+    .cag-header-navbar .top-nav-items,
+    .cag-header-navbar .top-nav-items > * {
         display: flex;
         align-items: center;
     }
 
     /* Profile dropdown */
-    .short-header .header-desktop-profile .dropdown-toggle::after {
+    .cag-header-navbar .header-desktop-profile .dropdown-toggle::after {
         margin-left: 8px;
         border-top-width: 6px;
     }
 
-    .short-header .header-desktop-profile .dropdown-menu {
+    .cag-header-navbar .header-desktop-profile .dropdown-menu {
         margin-top: 8px;
         right: 0;
         left: auto;
@@ -666,23 +666,94 @@ input[type=number] {
         font-size: 15px;
     }
 
-    .short-header .header-desktop-profile .dropdown-item {
+    .cag-header-navbar .header-desktop-profile .dropdown-item {
         padding: 8px 16px;
     }
 }
 
 /* Preserve mobile responsiveness */
 @media (max-width: 767px) {
-    .short-header .top-nav-items {
+    .cag-header-navbar .top-nav-items {
         display: none;
     }
 }
-</style>
 
-<script>
-    var selectTarget = $('#home_target_fish');
+/* Categories styling for both headers */
+.categories-row a,
+.categories-mobile a {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 8px 16px;
+    border-radius: 50px;
+    transition: background-color 0.2s;
+    margin-right: 16px; /* Increased spacing between categories */
+}
+
+.categories-row a:hover,
+.categories-mobile a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Mobile adjustments */
+@media (max-width: 767px) {
+    /* Logo sizing */
+    .cag-header-navbar .logo img {
+        height: 35px; /* Reduced height */
+        width: auto; /* Maintain aspect ratio */
+        object-fit: contain;
+    }
     
-</script>
+    /* Header text adjustments */
+    .header-contents {
+        padding: 8px 0; /* Reduced padding */
+    }
+    
+    .header-contents h1 {
+        font-size: 22px;
+        margin-top: 8px !important;
+        margin-bottom: 4px;
+    }
+    
+    .header-contents p {
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+    
+    /* Categories mobile spacing */
+    .categories-mobile {
+        margin: 8px 0; /* Reduced margin */
+        padding: 0;
+    }
+    
+    .categories-mobile a {
+        margin-right: 8px; /* Reduced spacing between mobile categories */
+        font-size: 14px;
+        padding: 6px 12px; /* Slightly smaller padding for mobile */
+    }
+    
+    /* Reduce bottom padding */
+    .cag-header-navbar {
+        padding-bottom: 12px;
+    }
+}
+
+/* Desktop adjustments */
+@media (min-width: 768px) {
+    /* Increase space between categories and search */
+    .categories-row {
+        margin-top: 16px !important;
+        margin-bottom: 32px !important; /* Increased space above search bar */
+    }
+    
+    .categories-row a {
+        margin-right: 24px; /* More space between desktop categories */
+    }
+    
+    /* Adjust floating search container position */
+    .floating-search-container {
+        bottom: -35px; /* Slightly lower position */
+    }
+}
+</style>
 
 <!-- Search Modal for Mobile -->
 <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
