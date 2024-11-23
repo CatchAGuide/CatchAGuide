@@ -1,86 +1,499 @@
-<nav class="navbar-custom container sticky-top" style="background-color:#fff;">
-    <div class="logo">
-        <a href="{{ route('welcome') }}"><img src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}" alt="Logo"></a>
-    </div>
-    <div class="nav-links d-none d-sm-flex align-items-center" style="color: #ccc;">
-        <a href="#" class="me-3" style="color: #787780;">Destination</a>
-        <a href="{{ route('guidings.index') }}" class="me-3" style="color: #787780;">Fishing Near Me</a>   
-        <a href="{{ route('blog.index') }}" class="me-3" style="color: #787780;">Magazine</a>
-        @if(Auth::check())
-            <a href="{{ route('profile.bookings') }}" class="button new-filter-btn me-3" style="color: #787780;">Bookings</a>
-            <a href="#" class="me-3" style="color: #787780;">Get Help</a>   
-            <div class="dropdown d-inline-block">
-                <a class="dropdown-toggle" href="#" role="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="color: #787780;">
-                    {{ Auth::user()->firstname }}
-                </a>
-                <ul class="dropdown-menu" aria-labelledby="userDropdown">
-                    <li><a class="dropdown-item" href="{{ route('profile.index') }}" style="color: #787780;">Profile</a></li>
-                    <li>
-                        <form action="{{ route('admin.auth.logout') }}" method="POST" class="d-inline">
-                            @csrf
-                            <button type="submit" class="dropdown-item" style="color: #787780;">Logout</button>
-                        </form>
-                    </li>
-                </ul>
-            </div>
-            <div class="language-wrapper d-inline-block ms-3">
-                <form action="{{ route('language.switch') }}" method="POST">
-                    @csrf
-                    <select name="language" class="selectpicker" data-width="fit" onchange="this.form.submit()">
-                        @foreach (config('app.locales') as $key => $locale)
-                        <option  value="{{ $locale }}" data-content='<span class="fi fi-{{$key}}"></span>' {{ app()->getLocale() == $locale ? 'selected' : '' }}></option>
-                        @endforeach
-                    </select>        
-                </form>
-            </div>
-        @else
-            <a href="#" class="button new-filter-btn me-3" style="color: #787780;">Become a guide</a>
-            <a class="header-login-link me-3" href="{{ route('login') }}" style="color: #787780;">Log in</a>
-            <a class="header-signup-link" href="{{ route('login') }}" style="color: #787780;">Sign up</a>
-        @endif
-    </div>
-    <div class="d-flex justify-content-between align-items-center d-block d-sm-none">
-        <a href="#" class="mobile-nav__toggler" style="padding-top: 15px; padding-bottom: 15px;"><i class="fa fa-bars"></i></a>
-    </div>
-</nav>
-<header class="header" style="background-image: url('{{ asset('assets/images/allguidings.jpg') }}'); background-size: cover; background-position: center; z-index: 0;">
-    <div class="overlay"></div>
-    <div class="header-content container">
-        <h1 class="h2 mt-5">@yield('header_title')</h1>
-        <p>@yield('header_sub_title')</p>
-    </div>
-        
-    <form class="search-form row gx-2 pe-0" id="global-search" action="{{route('guidings.index')}}" method="get">
-        <div class="row" style="padding-right: 0;">
-            <div class="col-lg-4 column-input mx-0 pt-1 px-1">
-                <div class="form-group">
-                    <div class="d-flex align-items-center small">
-                        <i class="fa fa-search fa-fw text-muted position-absolute px-2"></i>
-                        <input  id="searchPlace" name="place" type="text" class="form-control rounded-0 ps-4" placeholder="@lang('homepage.searchbar-destination')"  autocomplete="on">
-                        <input type="hidden" id="placeLat" name="placeLat"/>
-                        <input type="hidden" id="placeLng" name="placeLng"/>
+<nav class="navbar-custom short-header {{ request()->is('/') ? 'with-bg' : '' }} {{ request()->is('guidings*') ? 'no-search' : '' }}">
+    <div class="container">
+        <!-- Top Row -->
+        <div class="row align-items-center">
+            <!-- Logo and Navigation -->
+            <div class="col-12 d-flex justify-content-between align-items-center">
+                <div class="logo">
+                    <a href="{{ route('welcome') }}">
+                        <img src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}" alt="Logo" style="height: 45px;">
+                    </a>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="d-none d-md-flex align-items-center top-nav-items">
+                    <a href="{{ route('additional.contact') }}" class="nav-link">
+                        <i class="fas fa-question-circle"></i>
+                    </a>
+                    <div class="nav-link language-selector">
+                        <i class="fas fa-globe"></i>
+                        <span>EN</span>
                     </div>
+                    <a href="#" class="nav-link become-guide-link">
+                        Become a guide
+                    </a>
+                    @auth
+                        <div class="header-desktop-profile dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                                <img src="{{ asset('images/'. Auth::user()->profil_image) ?? asset('images/placeholder_guide.jpg') }}" 
+                                     class="rounded-circle me-2" 
+                                     alt="Profile">
+                                <span>{{ Auth::user()->firstname }} {{ Auth::user()->lastname }}</span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end">
+                                <a class="dropdown-item" href="{{ route('profile.index') }}">
+                                    <i class="fas fa-user me-2"></i> Profile
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <form method="POST" action="{{ route('admin.auth.logout') }}">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="fas fa-sign-out-alt me-2"></i> Logout
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @else
+                        <a href="{{ route('login') }}" class="nav-link login-link">Log in</a>
+                        <a href="{{ route('register') }}" class="btn btn-outline-light signup-btn">Sign up</a>
+                    @endauth
+                </div>
+
+                <!-- Mobile Icons -->
+                <div class="d-flex d-md-none">
+                    @auth
+                        <div class="dropdown mobile-profile-dropdown me-3">
+                            <img src="{{ asset('images/'. Auth::user()->profil_image) ?? asset('images/placeholder_guide.jpg') }}" 
+                                 class="rounded-circle" 
+                                 style="width: 32px; height: 32px;" 
+                                 data-bs-toggle="dropdown"
+                                 alt="Profile">
+                            <div class="dropdown-menu dropdown-menu-end mobile-profile-menu">
+                                <div class="px-3 py-2">
+                                    <img src="{{ asset('images/'. Auth::user()->profil_image) ?? asset('images/placeholder_guide.jpg') }}" 
+                                         class="rounded-circle me-2" 
+                                         style="width: 40px; height: 40px;">
+                                    <span>{{ Auth::user()->firstname . ' ' . Auth::user()->lastname }}</span>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{{ route('profile.index') }}">
+                                    <i class="fas fa-user me-2"></i> Manage account
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <form method="POST" action="{{ route('admin.auth.logout') }}">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="fas fa-sign-out-alt me-2"></i> Sign out
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @else
+                        <a href="{{ route('login') }}" class="text-white me-3">
+                            <i class="far fa-user-circle" style="font-size: 24px;"></i>
+                        </a>
+                    @endauth
+                    <a href="#" class="mobile-nav__toggler text-white">
+                        <i class="fas fa-bars" style="font-size: 20px;"></i>
+                    </a>
                 </div>
             </div>
-            <div class="col-lg-2 column-input my-1 px-1">
-                <div class="form-group">
-                    <div class="d-flex align-items-center small">
-                        <i class="fa fa-user fa-fw text-muted position-absolute px-2"></i>
-                        <input type="number" min="1" max="5" class="form-control rounded-0 ps-4" name="num_guests" placeholder="@lang('homepage.searchbar-person')" />
-                    </div>
+            
+            <div class="header-contents container">
+                <h1 class="h2 mt-5">@yield('header_title')</h1>
+                <p>@yield('header_sub_title')</p>
+            </div>
+            
+            <!-- Categories Row - Mobile -->
+            <div class="col-12 d-md-none mt-3">
+                <div class="d-flex categories-mobile">
+                    <a href="#" class="me-4 text-white text-decoration-none">
+                        <i class="fas fa-map-marker-alt me-2"></i>Destination
+                    </a>
+                    <a href="{{ route('guidings.index') }}" class="me-4 text-white text-decoration-none">
+                        <i class="fas fa-fish me-2"></i>Fishing Near Me
+                    </a>
+                    <a href="{{ route('blog.index') }}" class="text-white text-decoration-none">
+                        <i class="fas fa-book-open me-2"></i>Magazine
+                    </a>
                 </div>
             </div>
-            <div class="col-lg-4 column-input my-1 px-1">
-                <div class="d-flex align-items-center small myselect2 p-0">
-                    <i class="fa fa-fish fa-fw text-muted position-absolute px-2"></i>
-                    <select class="form-control form-select rounded-0 ps-4" id="home_target_fish" name="target_fish[]" style="width:100%">
-                        
-                    </select>
+
+            <!-- Mobile Search Summary -->
+            <div class="col-12 d-md-none mt-3">
+                <div class="search-summary" role="button" id="headerSearchTrigger">
+                    <i class="fas fa-search me-2"></i>
+                    @if(request()->has('place'))
+                        <span>{{ request()->place }} · 
+                            {{ request()->num_guests ?? '0' }} guests
+                            @if(request()->has('target_fish'))
+                                · {{ count((array)request()->target_fish) }} fish
+                            @endif
+                        </span>
+                    @else
+                        <span>Where are you going?</span>
+                    @endif
                 </div>
-            </div>
-            <div class="col-lg-2 my-1 px-1">
-                <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
             </div>
         </div>
-    </form>
-</header>
+
+        <!-- Categories Row - Desktop -->
+        <div class="row categories-row d-none d-md-block">
+            <div class="col-12">
+                <div class="d-flex">
+                    <a href="#" class="me-4 text-white text-decoration-none">
+                        <i class="fas fa-map-marker-alt me-2"></i>Destination
+                    </a>
+                    <a href="{{ route('guidings.index') }}" class="me-4 text-white text-decoration-none">
+                        <i class="fas fa-fish me-2"></i>Fishing Near Me
+                    </a>
+                    <a href="{{ route('blog.index') }}" class="me-4 text-white text-decoration-none">
+                        <i class="fas fa-book-open me-2"></i>Magazine
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Row - Floating (Desktop Only) -->
+    @if(request()->segment(1) != 'guidings')
+    <div class="floating-search-container d-none d-md-block">
+        <div class="container">
+            <form id="global-search" action="{{route('guidings.index')}}" method="get">
+                <div class="search-box">
+                    <div class="d-flex">
+                        <div class="search-input flex-grow-1">
+                            <i class="fa fa-search input-icon"></i>
+                            <input type="text" 
+                                   class="form-control" 
+                                   name="place" 
+                                   placeholder="@lang('homepage.searchbar-destination')"
+                                   value="{{ request()->place }}">
+                            <input type="hidden" id="placeLat" name="placeLat" value="{{ request()->placeLat }}"/>
+                            <input type="hidden" id="placeLng" name="placeLng" value="{{ request()->placeLng }}"/>
+                        </div>
+                        <div class="search-input" style="width: 200px;">
+                            <i class="fa fa-user input-icon"></i>
+                            <input type="number" 
+                                   class="form-control" 
+                                   name="num_guests" 
+                                   placeholder="@lang('homepage.searchbar-person')"
+                                   value="{{ request()->num_guests }}">
+                        </div>
+                        <div class="search-input" style="width: 300px;">
+                            <i class="fa fa-fish input-icon"></i>
+                            <select class="form-select" name="target_fish[]" id="target_fish_search">
+                                <option value="">Select fish...</option>
+                                @foreach(targets()::getAllTargets() as $target)
+                                    <option value="{{$target['id']}}" 
+                                        {{ in_array($target['id'], (array)request()->target_fish) ? 'selected' : '' }}>
+                                        {{$target['name']}}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-lg-2 my-1 px-0">
+                            <button type="submit" class="search-button">@lang('homepage.searchbar-search')</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    @endif
+</nav>
+
+<style>
+.short-header.navbar-custom {
+    background-color: #313041;
+    padding: 16px 0 35px;
+    position: relative;
+    margin-bottom: 60px;
+}
+
+.short-header .floating-search-container {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -30px;
+    z-index: 1000;
+}
+
+.short-header .search-box {
+    background: white;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.short-header .search-input {
+    position: relative;
+    margin-right: 12px;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+}
+
+.short-header .input-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.short-header .form-control,
+.short-header .form-select {
+    height: 48px;
+    padding-left: 40px;
+    border: 1px solid #E85B40;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.short-header .form-control:focus,
+.short-header .form-select:focus {
+    box-shadow: none;
+    border-color: #E85B40;
+}
+
+.short-header .search-button {
+    background-color: #E85B40;
+    color: white;
+    border: none;
+    height: 48px;
+    padding: 0 24px;
+    border-radius: 4px;
+    min-width: 120px;
+    white-space: nowrap;
+}
+
+/* Remove number input arrows */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+/* Mobile Styles */
+@media (max-width: 767px) {
+    .short-header.navbar-custom {
+        padding-bottom: 16px;
+        margin-bottom: 0;
+    }
+    
+    .mobile-profile-dropdown {
+        position: relative;
+        margin-right: 12px;
+    }
+    
+    .mobile-profile-dropdown .dropdown-menu {
+        position: absolute;
+        right: 0;
+        left: auto;
+        top: 100%;
+        margin-top: 0.5rem;
+        z-index: 1050;
+    }
+    
+    .search-summary {
+        background: white;
+        padding: 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-bottom: 10px;
+    }
+    
+    .categories-mobile {
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        margin: 12px 0;
+        padding: 4px 0;
+    }
+    
+    .categories-mobile::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .mobile-profile-menu {
+        width: 250px;
+        max-width: calc(100vw - 2rem);
+    }
+
+    .floating-search-container {
+        display: none !important;
+    }
+
+    .header-contents {
+        padding: 12px 0;
+    }
+    
+    .header-contents h1 {
+        font-size: 24px;
+        margin-top: 12px !important;
+    }
+}
+
+/* Desktop Header Styles */
+@media (min-width: 768px) {
+    .short-header .top-nav-items {
+        gap: 32px;
+        height: 45px;
+    }
+
+    .short-header .top-nav-items .nav-link {
+        color: white;
+        text-decoration: none;
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 16px;
+        font-weight: 500;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
+
+    .short-header .top-nav-items .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+
+    .short-header .signup-btn {
+        border: 1.5px solid rgba(255, 255, 255, 0.5);
+        padding: 10px 20px;
+        font-size: 16px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .short-header .signup-btn:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: white;
+    }
+
+    .header-desktop-profile .dropdown-menu {
+        margin-top: 8px;
+        right: 0;
+        left: auto;
+        min-width: 200px;
+        padding: 8px 0;
+        font-size: 15px;
+    }
+
+    .header-desktop-profile .dropdown-item {
+        padding: 8px 16px;
+    }
+}
+
+/* Categories styling */
+.categories-row a,
+.categories-mobile a {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 8px 16px;
+    border-radius: 50px;
+    transition: background-color 0.2s;
+    margin-right: 16px;
+}
+
+.categories-row a:hover,
+.categories-mobile a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.categories-row {
+    margin-top: 16px !important;
+    margin-bottom: 32px !important;
+    position: relative;
+    z-index: 1;
+}
+
+.header-contents {
+    padding: 16px 0;
+}
+
+.header-contents h1 {
+    margin-top: 16px !important;
+    margin-bottom: 8px;
+    font-size: 28px;
+    color: white;
+}
+
+.header-contents p {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 16px;
+}
+</style>
+
+<!-- Search Modal for Mobile -->
+<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="searchModalLabel">Search</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="mobile-search" action="{{route('guidings.index')}}" method="get">
+                    <div class="mb-3">
+                        <label class="form-label">Location</label>
+                        <div class="position-relative">
+                            <i class="fas fa-search position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
+                            <input type="text" 
+                                   class="form-control ps-5" 
+                                   name="place" 
+                                   placeholder="@lang('homepage.searchbar-destination')"
+                                   value="{{ request()->place }}">
+                            <input type="hidden" name="placeLat" value="{{ request()->placeLat }}"/>
+                            <input type="hidden" name="placeLng" value="{{ request()->placeLng }}"/>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Number of Persons</label>
+                        <div class="position-relative">
+                            <i class="fas fa-user position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
+                            <input type="number" 
+                                   class="form-control ps-5" 
+                                   name="num_guests" 
+                                   placeholder="@lang('homepage.searchbar-person')"
+                                   value="{{ request()->num_guests }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Target Fish</label>
+                        <div class="position-relative">
+                            <i class="fas fa-fish position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
+                            <select class="form-select ps-5" name="target_fish[]">
+                                <option value="">Select fish...</option>
+                                @foreach(targets()::getAllTargets() as $target)
+                                    <option value="{{$target['id']}}"
+                                        {{ in_array($target['id'], (array)request()->target_fish) ? 'selected' : '' }}>
+                                        {{$target['name']}}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchTrigger = document.getElementById('headerSearchTrigger');
+    const searchModal = document.getElementById('searchModal');
+    
+    if (searchTrigger && searchModal) {
+        const headerSearchModal = new bootstrap.Modal(searchModal);
+        
+        searchTrigger.addEventListener('click', function() {
+            headerSearchModal.show();
+        });
+    }
+});
+</script>

@@ -42,13 +42,47 @@
         <p>@yield('header_sub_title')</p>
     </div>
         
+    @if($agent->ismobile())
+    <form class="search-form row gx-2 pe-0" id="global-search" action="{{route('guidings.index')}}" method="get">
+        <div class="row px-3">
+            <div class="col-12 column-input my-2">
+                <div class="form-group">
+                    <div class="d-flex align-items-center small">
+                        <i class="fa fa-search fa-fw text-muted position-absolute px-2"></i>
+                        <input id="searchPlace" name="place" type="text" class="form-control rounded-0 ps-4" placeholder="@lang('homepage.searchbar-destination')" autocomplete="on">
+                        <input type="hidden" id="placeLat" name="placeLat"/>
+                        <input type="hidden" id="placeLng" name="placeLng"/>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 column-input my-2">
+                <div class="form-group">
+                    <div class="d-flex align-items-center small">
+                        <i class="fa fa-user fa-fw text-muted position-absolute px-2"></i>
+                        <input type="number" min="1" max="5" class="form-control rounded-0 ps-4" name="num_guests" placeholder="@lang('homepage.searchbar-person')" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 column-input my-2">
+                <div class="d-flex align-items-center small myselect2 p-0">
+                    <i class="fa fa-fish fa-fw text-muted position-absolute px-2"></i>
+                    <select class="form-control form-select rounded-0 ps-4" id="home_target_fish" name="target_fish[]" style="width:100%">
+                    </select>
+                </div>
+            </div>
+            <div class="col-12 my-2">
+                <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
+            </div>
+        </div>
+    </form>
+    @else
     <form class="search-form row gx-2 pe-0" id="global-search" action="{{route('guidings.index')}}" method="get">
         <div class="row" style="padding-right: 0;">
             <div class="col-lg-4 column-input mx-0 pt-1 px-1">
                 <div class="form-group">
                     <div class="d-flex align-items-center small">
                         <i class="fa fa-search fa-fw text-muted position-absolute px-2"></i>
-                        <input  id="searchPlace" name="place" type="text" class="form-control rounded-0 ps-4" placeholder="@lang('homepage.searchbar-destination')"  autocomplete="on">
+                        <input id="searchPlace" name="place" type="text" class="form-control rounded-0 ps-4" placeholder="@lang('homepage.searchbar-destination')" autocomplete="on">
                         <input type="hidden" id="placeLat" name="placeLat"/>
                         <input type="hidden" id="placeLng" name="placeLng"/>
                     </div>
@@ -66,7 +100,6 @@
                 <div class="d-flex align-items-center small myselect2 p-0">
                     <i class="fa fa-fish fa-fw text-muted position-absolute px-2"></i>
                     <select class="form-control form-select rounded-0 ps-4" id="home_target_fish" name="target_fish[]" style="width:100%">
-                        
                     </select>
                 </div>
             </div>
@@ -75,4 +108,5 @@
             </div>
         </div>
     </form>
+    @endif
 </header>
