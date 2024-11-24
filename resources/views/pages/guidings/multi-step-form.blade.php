@@ -109,7 +109,7 @@
                         </button>
                     </div>
                     <div class="right-buttons">
-                        <button type="button" class="btn btn-primary" id="nextBtn1" onclick="validateStep(currentStep)">
+                        <button type="button" class="btn btn-primary" id="nextBtn1">
                             {{ __('newguidings.next') }}
                         </button>
                         <button type="submit" class="btn btn-primary" id="submitBtn1" style="display: none;">
@@ -268,7 +268,7 @@
                         <button type="button" class="btn btn-primary" id="prevBtn2">
                             {{ __('newguidings.previous') }}
                         </button>
-                        <button type="button" class="btn btn-primary" id="nextBtn2" onclick="validateStep(currentStep)">
+                        <button type="button" class="btn btn-primary" id="nextBtn2">
                             {{ __('newguidings.next') }}
                         </button>
                         <button type="submit" class="btn btn-primary" id="submitBtn2" style="display: none;">
@@ -351,7 +351,7 @@
                         <button type="button" class="btn btn-primary" id="prevBtn3">
                             {{ __('newguidings.previous') }}
                         </button>
-                        <button type="button" class="btn btn-primary" id="nextBtn3" onclick="validateStep(currentStep)">
+                        <button type="button" class="btn btn-primary" id="nextBtn3">
                             {{ __('newguidings.next') }}
                         </button>
                         <button type="submit" class="btn btn-primary" id="submitBtn3" style="display: none;">
@@ -426,7 +426,7 @@
                         <button type="button" class="btn btn-primary" id="prevBtn4">
                             {{ __('newguidings.previous') }}
                         </button>
-                        <button type="button" class="btn btn-primary" id="nextBtn4" onclick="validateStep(currentStep)">
+                        <button type="button" class="btn btn-primary" id="nextBtn4">
                             {{ __('newguidings.next') }}
                         </button>
                         <button type="submit" class="btn btn-primary" id="submitBtn4" style="display: none;">
@@ -641,7 +641,7 @@
                         <button type="button" class="btn btn-primary" id="prevBtn5">
                             {{ __('newguidings.previous') }}
                         </button>
-                        <button type="button" class="btn btn-primary" id="nextBtn5" onclick="validateStep(currentStep)">
+                        <button type="button" class="btn btn-primary" id="nextBtn5">
                             {{ __('newguidings.next') }}
                         </button>
                         <button type="submit" class="btn btn-primary" id="submitBtn5" style="display: none;">
@@ -775,7 +775,7 @@
                         <button type="button" class="btn btn-primary" id="prevBtn6">
                             {{ __('newguidings.previous') }}
                         </button>
-                        <button type="button" class="btn btn-primary" id="nextBtn6" onclick="validateStep(currentStep)">
+                        <button type="button" class="btn btn-primary" id="nextBtn6">
                             {{ __('newguidings.next') }}
                         </button>
                         <button type="submit" class="btn btn-primary" id="submitBtn6" style="display: none;">

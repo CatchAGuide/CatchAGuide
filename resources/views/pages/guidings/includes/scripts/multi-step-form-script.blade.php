@@ -1003,22 +1003,22 @@
     }
 
     // Update the next button click handlers
-    $(document).on('click', '[id^="nextBtn"]', function(e) {
+    $(document).off('click', '[id^="nextBtn"]').on('click', '[id^="nextBtn"]', function(e) {
         e.preventDefault(); // Prevent any default behavior
         e.stopPropagation(); // Prevent event bubbling
         
-        console.log('Current step before next:', currentStep);
         if (validateStep(currentStep)) {
-            showStep(currentStep + 1);
+            const nextStep = currentStep + 1;
+            showStep(nextStep);
         }
-        console.log('Current step after next:', currentStep);
     });
 
-    // Remove the onclick attribute from the next buttons in the HTML
-    // Change from:
-    // <button type="button" class="btn btn-primary" id="nextBtn1" onclick="validateStep(currentStep)">
-    // To:
-    // <button type="button" class="btn btn-primary" id="nextBtn1">
+    // Update the previous button click handlers similarly
+    $(document).off('click', '[id^="prevBtn"]').on('click', '[id^="prevBtn"]', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        showStep(currentStep - 1);
+    });
 
     // Add this function at the beginning of your script
     function initTagify(selector, options = {}) {
@@ -1134,20 +1134,6 @@
             }
         });
 
-        // Next button functionality
-        $(document).on('click', '[id^="nextBtn"]', function() {
-            if (validateStep(currentStep)) {
-                console.log('nextBtn clicked');
-                console.log(currentStep);
-                showStep(currentStep + 1);
-            }
-        });
-
-        // Previous button functionality
-        $(document).on('click', '[id^="prevBtn"]', function() {
-            showStep(currentStep - 1);
-        });
-
         //If edit is requested, set the form data
         setFormDataIfEdit();
         
@@ -1167,6 +1153,23 @@
         } else {
             console.error('File input element not found');
         }
+
+        // Add click handlers for step buttons
+        document.querySelectorAll('.step-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const targetStep = parseInt(this.dataset.step);
+                const currentStepElement = document.querySelector('.step.active');
+                const currentStepNumber = parseInt(currentStepElement.id.replace('step', ''));
+
+                // Only allow moving to previous steps or the next immediate step
+                if (targetStep < currentStepNumber || targetStep === currentStepNumber + 1) {
+                    if (targetStep > currentStepNumber && !validateStep(currentStepNumber)) {
+                        return;
+                    }
+                    showStep(targetStep);
+                }
+            });
+        });
     });
 
     // Update the form's submit event listener
