@@ -20,7 +20,7 @@
                         <span>EN</span>
                     </div>
                     <a href="#" class="nav-link become-guide-link">
-                        Become a guide
+                        @lang('homepage.header-become-guide')
                     </a>
                     @auth
                         <div class="header-desktop-profile dropdown">
@@ -32,53 +32,36 @@
                             </a>
                             <div class="dropdown-menu dropdown-menu-end">
                                 <a class="dropdown-item" href="{{ route('profile.index') }}">
-                                    <i class="fas fa-user me-2"></i> Profile
+                                    <i class="fas fa-user me-2"></i> @lang('homepage.header-profile')
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <form method="POST" action="{{ route('admin.auth.logout') }}">
                                     @csrf
                                     <button type="submit" class="dropdown-item">
-                                        <i class="fas fa-sign-out-alt me-2"></i> Logout
+                                        <i class="fas fa-sign-out-alt me-2"></i> @lang('homepage.header-logout')
                                     </button>
                                 </form>
                             </div>
                         </div>
                     @else
-                        <a href="{{ route('login') }}" class="nav-link login-link">Log in</a>
-                        <a href="{{ route('register') }}" class="btn btn-outline-light signup-btn">Sign up</a>
+                        <a href="{{ route('login') }}" class="nav-link login-link">
+                            @lang('homepage.header-login')
+                        </a>
+                            <a href="{{ route('register') }}" class="btn btn-outline-light signup-btn">
+                            @lang('homepage.header-signup')
+                        </a>
                     @endauth
                 </div>
 
                 <!-- Mobile Icons -->
                 <div class="d-flex d-md-none">
                     @auth
-                        {{-- <a href="#" class="text-white me-3"><i class="fas fa-bell"></i></a> --}} 
-                        <div class="dropdown mobile-profile-dropdown me-3">
+                        <a href="{{ route('profile.index') }}" class="me-3">
                             <img src="{{ asset('images/'. Auth::user()->profil_image) ?? asset('images/placeholder_guide.jpg') }}" 
                                  class="rounded-circle" 
                                  style="width: 32px; height: 32px;" 
-                                 data-bs-toggle="dropdown"
                                  alt="Profile">
-                            <div class="dropdown-menu dropdown-menu-end mobile-profile-menu">
-                                <div class="px-3 py-2">
-                                    <img src="{{ asset('images/'. Auth::user()->profil_image) ?? asset('images/placeholder_guide.jpg') }}" 
-                                         class="rounded-circle me-2" 
-                                         style="width: 40px; height: 40px;">
-                                    <span>{{ Auth::user()->firstname . ' ' . Auth::user()->lastname }}</span>
-                                </div>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{{ route('profile.index') }}">
-                                    <i class="fas fa-user me-2"></i> Manage account
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <form method="POST" action="{{ route('admin.auth.logout') }}">
-                                    @csrf
-                                    <button type="submit" class="dropdown-item">
-                                        <i class="fas fa-sign-out-alt me-2"></i> Sign out
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
+                        </a>
                     @else
                         <a href="{{ route('login') }}" class="text-white me-3">
                             <i class="far fa-user-circle" style="font-size: 24px;"></i>
@@ -93,14 +76,14 @@
             <!-- Categories Row - Mobile -->
             <div class="col-12 d-md-none mt-3">
                 <div class="d-flex categories-mobile">
-                    <a href="#" class="me-4 text-white text-decoration-none">
-                        <i class="fas fa-map-marker-alt me-2"></i>Destination
+                    <a href="{{ route('destination') }}" class="me-4 text-white text-decoration-none">
+                        <i class="fas fa-map-marker-alt me-2"></i>@lang('homepage.filter-destination')
                     </a>
                     <a href="{{ route('guidings.index') }}" class="me-4 text-white text-decoration-none">
-                        <i class="fas fa-fish me-2"></i>Fishing Near Me
+                        <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
                     <a href="{{ route('blog.index') }}" class="text-white text-decoration-none">
-                        <i class="fas fa-book-open me-2"></i>Magazine
+                        <i class="fas fa-book-open me-2"></i>@lang('homepage.filter-magazine')
                     </a>
                 </div>
             </div>
@@ -117,7 +100,7 @@
                             @endif
                         </span>
                     @else
-                        <span>Where are you going?</span>
+                        <span>@lang('homepage.searchbar-search-placeholder')</span>
                     @endif
                 </div>
             </div>
@@ -127,14 +110,14 @@
         <div class="row categories-row d-none d-md-block">
             <div class="col-12">
                 <div class="d-flex">
-                    <a href="#" class="me-4 text-white text-decoration-none">
-                        <i class="fas fa-map-marker-alt me-2"></i>Destination
+                    <a href="{{ route('destination') }}" class="me-4 text-white text-decoration-none">
+                        <i class="fas fa-map-marker-alt me-2"></i>@lang('homepage.filter-destination')
                     </a>
                     <a href="{{ route('guidings.index') }}" class="me-4 text-white text-decoration-none">
-                        <i class="fas fa-fish me-2"></i>Fishing Near Me
+                        <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
                     <a href="{{ route('blog.index') }}" class="me-4 text-white text-decoration-none">
-                        <i class="fas fa-book-open me-2"></i>Magazine
+                        <i class="fas fa-book-open me-2"></i>@lang('homepage.filter-magazine')
                     </a>
                 </div>
             </div>
@@ -169,7 +152,7 @@
                         <div class="search-input" style="width: 300px;">
                             <i class="fa fa-fish input-icon"></i>
                             <select class="form-select" name="target_fish[]" id="target_fish_search">
-                                <option value="">Select fish...</option>
+                                <option value="">@lang('homepage.searchbar-targetfish')...</option>
                                 @foreach(targets()::getAllTargets() as $target)
                                     <option value="{{$target['id']}}" 
                                         {{ in_array($target['id'], (array)request()->target_fish) ? 'selected' : '' }}>
@@ -753,6 +736,31 @@ input[type=number] {
         bottom: -35px; /* Slightly lower position */
     }
 }
+
+/* Mobile Profile Styles - Scoped to short header */
+.short-header.navbar-custom .d-flex.d-md-none a {
+    display: flex;
+    align-items: center;
+}
+
+.short-header.navbar-custom .d-flex.d-md-none img {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+}
+
+.short-header.navbar-custom .d-flex.d-md-none .mobile-nav__toggler {
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.short-header.navbar-custom .d-flex.d-md-none .mobile-nav__toggler:hover {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
 </style>
 
 <!-- Search Modal for Mobile -->
@@ -760,13 +768,13 @@ input[type=number] {
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="searchModalLabel">Search</h5>
+                <h5 class="modal-title" id="searchModalLabel">@lang('homepage.searchbar-search')</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="mobile-search" action="{{route('guidings.index')}}" method="get">
                     <div class="mb-3">
-                        <label class="form-label">Location</label>
+                        <label class="form-label">@lang('homepage.searchbar-destination')</label>
                         <div class="position-relative">
                             <i class="fas fa-search position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
                             <input type="text" 
@@ -780,7 +788,7 @@ input[type=number] {
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Number of Persons</label>
+                        <label class="form-label">@lang('homepage.searchbar-person')</label>
                         <div class="position-relative">
                             <i class="fas fa-user position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
                             <input type="number" 
@@ -792,11 +800,11 @@ input[type=number] {
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Target Fish</label>
+                        <label class="form-label">@lang('homepage.searchbar-targetfish')</label>
                         <div class="position-relative">
                             <i class="fas fa-fish position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
                             <select class="form-select ps-5" name="target_fish[]">
-                                <option value="">Select fish...</option>
+                                <option value="">@lang('homepage.searchbar-targetfish')...</option>
                                 @foreach(targets()::getAllTargets() as $target)
                                     <option value="{{$target['id']}}"
                                         {{ in_array($target['id'], (array)request()->target_fish) ? 'selected' : '' }}>
@@ -807,7 +815,7 @@ input[type=number] {
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                    <button type="submit" class="btn btn-primary w-100">@lang('homepage.searchbar-search')</button>
                 </form>
             </div>
         </div>

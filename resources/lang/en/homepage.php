@@ -2,11 +2,20 @@
 return [
     'header-title' => 'Find your next guided fishing tour!',
     'header-message' => 'Search deals on fishing trips, vacations and much more',
+    'header-become-guide' => 'Become a guide',
+    'header-login' => 'Log in',
+    'header-signup' => 'Sign up',
+    'header-profile' => 'Profile',
+    'header-logout' => 'Logout',
 
     'searchbar-destination' => 'Destination',
     'searchbar-person' => 'Guests',
     'searchbar-targetfish' => 'Target fish',
     'searchbar-search' => 'Search',
+    'searchbar-search-placeholder' => 'Discover your dream fishing destination...',
+
+    'filter-fishing-near-me' => 'Fishing near me',
+    'filter-magazine' => 'Magazine',
 
     'usps-first' => 'Easy & direct online booking',
     'usps-second' => 'Best customer service on the market',

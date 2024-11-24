@@ -19,65 +19,50 @@
                         <i class="fas fa-globe"></i>
                         <span>EN</span>
                     </div>
+                    
                     <a href="#" class="nav-link become-guide-link">
-                        Become a guide
+                        @lang('homepage.header-become-guide')
                     </a>
                     @auth
                         <div class="header-desktop-profile dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
                                 <img src="{{ asset('images/'. Auth::user()->profil_image) ?? asset('images/placeholder_guide.jpg') }}" 
-                                     class="rounded-circle me-2" 
+                                     class="rounded-circle profile-image" 
                                      alt="Profile">
                                 <span>{{ Auth::user()->firstname }} {{ Auth::user()->lastname }}</span>
                             </a>
                             <div class="dropdown-menu dropdown-menu-end">
                                 <a class="dropdown-item" href="{{ route('profile.index') }}">
-                                    <i class="fas fa-user me-2"></i> Profile
+                                    <i class="fas fa-user me-2"></i> @lang('homepage.header-profile')
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <form method="POST" action="{{ route('admin.auth.logout') }}">
                                     @csrf
                                     <button type="submit" class="dropdown-item">
-                                        <i class="fas fa-sign-out-alt me-2"></i> Logout
+                                        <i class="fas fa-sign-out-alt me-2"></i> @lang('homepage.header-logout')
                                     </button>
                                 </form>
                             </div>
                         </div>
                     @else
-                        <a href="{{ route('login') }}" class="nav-link login-link">Log in</a>
-                        <a href="{{ route('register') }}" class="btn btn-outline-light signup-btn">Sign up</a>
+                        <a href="{{ route('login') }}" class="nav-link login-link">
+                            @lang('homepage.header-login')
+                        </a>
+                        <a href="{{ route('register') }}" class="btn btn-outline-light signup-btn">
+                            @lang('homepage.header-signup')
+                        </a>
                     @endauth
                 </div>
 
                 <!-- Mobile Icons -->
                 <div class="d-flex d-md-none">
                     @auth
-                        <div class="dropdown mobile-profile-dropdown me-3">
+                        <a href="{{ route('profile.index') }}" class="me-3">
                             <img src="{{ asset('images/'. Auth::user()->profil_image) ?? asset('images/placeholder_guide.jpg') }}" 
                                  class="rounded-circle" 
                                  style="width: 32px; height: 32px;" 
-                                 data-bs-toggle="dropdown"
                                  alt="Profile">
-                            <div class="dropdown-menu dropdown-menu-end mobile-profile-menu">
-                                <div class="px-3 py-2">
-                                    <img src="{{ asset('images/'. Auth::user()->profil_image) ?? asset('images/placeholder_guide.jpg') }}" 
-                                         class="rounded-circle me-2" 
-                                         style="width: 40px; height: 40px;">
-                                    <span>{{ Auth::user()->firstname . ' ' . Auth::user()->lastname }}</span>
-                                </div>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{{ route('profile.index') }}">
-                                    <i class="fas fa-user me-2"></i> Manage account
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <form method="POST" action="{{ route('admin.auth.logout') }}">
-                                    @csrf
-                                    <button type="submit" class="dropdown-item">
-                                        <i class="fas fa-sign-out-alt me-2"></i> Sign out
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
+                        </a>
                     @else
                         <a href="{{ route('login') }}" class="text-white me-3">
                             <i class="far fa-user-circle" style="font-size: 24px;"></i>
@@ -97,14 +82,14 @@
             <!-- Categories Row - Mobile -->
             <div class="col-12 d-md-none mt-3">
                 <div class="d-flex categories-mobile">
-                    <a href="#" class="me-4 text-white text-decoration-none">
-                        <i class="fas fa-map-marker-alt me-2"></i>Destination
+                    <a href="{{ route('destination') }}" class="me-4 text-white text-decoration-none">
+                        <i class="fas fa-map-marker-alt me-2"></i>@lang('homepage.searchbar-destination')
                     </a>
                     <a href="{{ route('guidings.index') }}" class="me-4 text-white text-decoration-none">
-                        <i class="fas fa-fish me-2"></i>Fishing Near Me
+                        <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
                     <a href="{{ route('blog.index') }}" class="text-white text-decoration-none">
-                        <i class="fas fa-book-open me-2"></i>Magazine
+                        <i class="fas fa-book-open me-2"></i>@lang('homepage.filter-magazine')
                     </a>
                 </div>
             </div>
@@ -121,7 +106,7 @@
                             @endif
                         </span>
                     @else
-                        <span>Where are you going?</span>
+                        <span>@lang('homepage.searchbar-search-placeholder')</span>
                     @endif
                 </div>
             </div>
@@ -131,14 +116,14 @@
         <div class="row categories-row d-none d-md-block">
             <div class="col-12">
                 <div class="d-flex">
-                    <a href="#" class="me-4 text-white text-decoration-none">
-                        <i class="fas fa-map-marker-alt me-2"></i>Destination
+                    <a href="{{ route('destination') }}" class="me-4 text-white text-decoration-none">
+                        <i class="fas fa-map-marker-alt me-2"></i>@lang('homepage.searchbar-destination')
                     </a>
                     <a href="{{ route('guidings.index') }}" class="me-4 text-white text-decoration-none">
-                        <i class="fas fa-fish me-2"></i>Fishing Near Me
+                        <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
                     <a href="{{ route('blog.index') }}" class="me-4 text-white text-decoration-none">
-                        <i class="fas fa-book-open me-2"></i>Magazine
+                        <i class="fas fa-book-open me-2"></i>@lang('homepage.filter-magazine')
                     </a>
                 </div>
             </div>
@@ -173,7 +158,7 @@
                         <div class="search-input" style="width: 300px;">
                             <i class="fa fa-fish input-icon"></i>
                             <select class="form-select" name="target_fish[]" id="target_fish_search">
-                                <option value="">Select fish...</option>
+                                <option value="">@lang('homepage.searchbar-targetfish')...</option>
                                 @foreach(targets()::getAllTargets() as $target)
                                     <option value="{{$target['id']}}" 
                                         {{ in_array($target['id'], (array)request()->target_fish) ? 'selected' : '' }}>
@@ -451,6 +436,31 @@ input[type=number] {
 .header-contents p {
     color: rgba(255, 255, 255, 0.9);
     margin-bottom: 16px;
+}
+
+/* Profile Image Styles - Scoped to navbar-custom header only */
+.navbar-custom .header-desktop-profile .profile-image {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.navbar-custom .header-desktop-profile .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.navbar-custom .header-desktop-profile .nav-link span {
+    color: white;
+    font-weight: 500;
+}
+
+/* Ensure dropdown toggle arrow is properly aligned */
+.navbar-custom .header-desktop-profile .dropdown-toggle::after {
+    margin-left: 8px;
+    vertical-align: middle;
 }
 </style>
 
