@@ -16,75 +16,70 @@
                         <i class="fas fa-question-circle"></i>
                     </a>
                     <div class="nav-link language-selector">
-                        <i class="fas fa-globe"></i>
-                        <span>EN</span>
+                        <form action="{{ route('language.switch') }}" method="POST" class="d-flex align-items-center">
+                            @csrf
+                            <i class="fas fa-globe me-2"></i>
+                            <select name="language" class="selectpicker header-language-select" data-width="fit" onchange="this.form.submit()">
+                                @foreach (config('app.locales') as $key => $locale)
+                                    <option value="{{ $locale }}" 
+                                            data-content='<span class="fi fi-{{$key}}"></span>' 
+                                            {{ app()->getLocale() == $locale ? 'selected' : '' }}>
+                                    </option>
+                                @endforeach
+                            </select>
+                        </form>
                     </div>
+                    
                     <a href="#" class="nav-link become-guide-link">
-                        Become a guide
+                        @lang('homepage.header-become-guide')
                     </a>
                     @auth
                         <div class="header-desktop-profile dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
                                 <img src="{{ asset('images/'. Auth::user()->profil_image) ?? asset('images/placeholder_guide.jpg') }}" 
-                                     class="rounded-circle me-2" 
+                                     class="rounded-circle profile-image" 
                                      alt="Profile">
                                 <span>{{ Auth::user()->firstname }} {{ Auth::user()->lastname }}</span>
                             </a>
                             <div class="dropdown-menu dropdown-menu-end">
                                 <a class="dropdown-item" href="{{ route('profile.index') }}">
-                                    <i class="fas fa-user me-2"></i> Profile
+                                    <i class="fas fa-user me-2"></i> @lang('homepage.header-profile')
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <form method="POST" action="{{ route('admin.auth.logout') }}">
                                     @csrf
                                     <button type="submit" class="dropdown-item">
-                                        <i class="fas fa-sign-out-alt me-2"></i> Logout
+                                        <i class="fas fa-sign-out-alt me-2"></i> @lang('homepage.header-logout')
                                     </button>
                                 </form>
                             </div>
                         </div>
                     @else
-                        <a href="{{ route('login') }}" class="nav-link login-link">Log in</a>
-                        <a href="{{ route('register') }}" class="btn btn-outline-light signup-btn">Sign up</a>
+                        <a href="{{ route('login') }}" class="nav-link login-link">
+                            @lang('homepage.header-login')
+                        </a>
+                        <a href="{{ route('register') }}" class="btn btn-outline-light signup-btn">
+                            @lang('homepage.header-signup')
+                        </a>
                     @endauth
                 </div>
 
-                <!-- Mobile Icons -->
-                <div class="d-flex d-md-none">
+                <!-- Mobile Icons - Update alignment -->
+                <div class="d-flex d-md-none align-items-center">
                     @auth
-                        <div class="dropdown mobile-profile-dropdown me-3">
+                        <a href="{{ route('profile.index') }}" class="me-3">
                             <img src="{{ asset('images/'. Auth::user()->profil_image) ?? asset('images/placeholder_guide.jpg') }}" 
                                  class="rounded-circle" 
                                  style="width: 32px; height: 32px;" 
-                                 data-bs-toggle="dropdown"
                                  alt="Profile">
-                            <div class="dropdown-menu dropdown-menu-end mobile-profile-menu">
-                                <div class="px-3 py-2">
-                                    <img src="{{ asset('images/'. Auth::user()->profil_image) ?? asset('images/placeholder_guide.jpg') }}" 
-                                         class="rounded-circle me-2" 
-                                         style="width: 40px; height: 40px;">
-                                    <span>{{ Auth::user()->firstname . ' ' . Auth::user()->lastname }}</span>
-                                </div>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{{ route('profile.index') }}">
-                                    <i class="fas fa-user me-2"></i> Manage account
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <form method="POST" action="{{ route('admin.auth.logout') }}">
-                                    @csrf
-                                    <button type="submit" class="dropdown-item">
-                                        <i class="fas fa-sign-out-alt me-2"></i> Sign out
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
+                        </a>
                     @else
                         <a href="{{ route('login') }}" class="text-white me-3">
                             <i class="far fa-user-circle" style="font-size: 24px;"></i>
                         </a>
                     @endauth
-                    <a href="#" class="mobile-nav__toggler text-white">
-                        <i class="fas fa-bars" style="font-size: 20px;"></i>
+                    <a href="#" class="text-white" data-bs-toggle="modal" data-bs-target="#mobileMenuModal">
+                        <i class="fas fa-bars" style="font-size: 24px;"></i>
                     </a>
                 </div>
             </div>
@@ -97,14 +92,14 @@
             <!-- Categories Row - Mobile -->
             <div class="col-12 d-md-none mt-3">
                 <div class="d-flex categories-mobile">
-                    <a href="#" class="me-4 text-white text-decoration-none">
-                        <i class="fas fa-map-marker-alt me-2"></i>Destination
+                    <a href="{{ route('destination') }}" class="me-4 text-white text-decoration-none">
+                        <i class="fas fa-map-marker-alt me-2"></i>@lang('homepage.searchbar-destination')
                     </a>
                     <a href="{{ route('guidings.index') }}" class="me-4 text-white text-decoration-none">
-                        <i class="fas fa-fish me-2"></i>Fishing Near Me
+                        <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
                     <a href="{{ route('blog.index') }}" class="text-white text-decoration-none">
-                        <i class="fas fa-book-open me-2"></i>Magazine
+                        <i class="fas fa-book-open me-2"></i>@lang('homepage.filter-magazine')
                     </a>
                 </div>
             </div>
@@ -121,7 +116,7 @@
                             @endif
                         </span>
                     @else
-                        <span>Where are you going?</span>
+                        <span>@lang('homepage.searchbar-search-placeholder')</span>
                     @endif
                 </div>
             </div>
@@ -131,14 +126,14 @@
         <div class="row categories-row d-none d-md-block">
             <div class="col-12">
                 <div class="d-flex">
-                    <a href="#" class="me-4 text-white text-decoration-none">
-                        <i class="fas fa-map-marker-alt me-2"></i>Destination
+                    <a href="{{ route('destination') }}" class="me-4 text-white text-decoration-none">
+                        <i class="fas fa-map-marker-alt me-2"></i>@lang('homepage.searchbar-destination')
                     </a>
                     <a href="{{ route('guidings.index') }}" class="me-4 text-white text-decoration-none">
-                        <i class="fas fa-fish me-2"></i>Fishing Near Me
+                        <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
                     <a href="{{ route('blog.index') }}" class="me-4 text-white text-decoration-none">
-                        <i class="fas fa-book-open me-2"></i>Magazine
+                        <i class="fas fa-book-open me-2"></i>@lang('homepage.filter-magazine')
                     </a>
                 </div>
             </div>
@@ -173,7 +168,7 @@
                         <div class="search-input" style="width: 300px;">
                             <i class="fa fa-fish input-icon"></i>
                             <select class="form-select" name="target_fish[]" id="target_fish_search">
-                                <option value="">Select fish...</option>
+                                <option value="">@lang('homepage.searchbar-targetfish')...</option>
                                 @foreach(targets()::getAllTargets() as $target)
                                     <option value="{{$target['id']}}" 
                                         {{ in_array($target['id'], (array)request()->target_fish) ? 'selected' : '' }}>
@@ -341,7 +336,7 @@ input[type=number] {
     }
 
     .short-header .top-nav-items {
-        gap: 24px;
+        gap: 8px;
         height: 45px;
     }
 
@@ -373,10 +368,10 @@ input[type=number] {
     .short-header .top-nav-items .nav-link {
         color: white;
         text-decoration: none;
-        padding: 10px 16px;
+        padding: 8px 12px;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
         font-size: 16px;
         font-weight: 500;
         border-radius: 4px;
@@ -390,7 +385,7 @@ input[type=number] {
 
     .short-header .signup-btn {
         border: 1.5px solid rgba(255, 255, 255, 0.5);
-        padding: 10px 20px;
+        padding: 8px 16px;
         font-size: 16px;
         font-weight: 500;
         transition: all 0.2s;
@@ -451,6 +446,261 @@ input[type=number] {
 .header-contents p {
     color: rgba(255, 255, 255, 0.9);
     margin-bottom: 16px;
+}
+
+/* Profile Image Styles - Scoped to navbar-custom header only */
+.navbar-custom .header-desktop-profile .profile-image {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.navbar-custom .header-desktop-profile .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.navbar-custom .header-desktop-profile .nav-link span {
+    color: white;
+    font-weight: 500;
+}
+
+/* Ensure dropdown toggle arrow is properly aligned */
+.navbar-custom .header-desktop-profile .dropdown-toggle::after {
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+/* Add these styles */
+.mobile-menu-items {
+    padding: 20px;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    color: #333;
+    text-decoration: none;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+}
+
+.menu-item i {
+    width: 24px;
+    margin-right: 15px;
+}
+
+.menu-divider {
+    height: 1px;
+    background-color: #eee;
+    margin: 10px 0;
+}
+
+.social-icons {
+    display: flex;
+    gap: 20px;
+    padding: 15px;
+}
+
+.social-icon {
+    color: #333;
+    font-size: 20px;
+}
+
+/* Ensure the burger menu is vertically centered */
+.mobile-nav__toggler {
+    display: flex;
+    align-items: center;
+    height: 32px;
+}
+
+/* Add these new styles */
+.mobile-menu-header {
+    background-color: #313041;
+    padding: 1rem;
+}
+
+.mobile-menu-profile-image {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    margin-right: 12px;
+}
+
+.mobile-menu-username {
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.mobile-menu-logo {
+    height: 40px;
+}
+
+/* Style for the close button */
+.mobile-menu-header .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Scoped styles for mobile menu */
+#mobileMenuModal .mobile-menu-header {
+    background-color: #313041;
+    padding: 0.75rem 1rem;
+    border-bottom: none;
+}
+
+#mobileMenuModal .mobile-menu-profile-image {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-right: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+#mobileMenuModal .mobile-menu-username {
+    color: white;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+#mobileMenuModal .mobile-menu-logo {
+    height: 45px;
+}
+
+#mobileMenuModal .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+    opacity: 0.8;
+}
+
+#mobileMenuModal .mobile-menu-items {
+    padding: 0.5rem 1rem;
+}
+
+#mobileMenuModal .menu-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    color: #333;
+    text-decoration: none;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 16px;
+}
+
+#mobileMenuModal .menu-item i {
+    width: 24px;
+    margin-right: 12px;
+    font-size: 18px;
+}
+
+#mobileMenuModal .menu-divider {
+    height: 1px;
+    background-color: #eee;
+    margin: 8px 0;
+}
+
+#mobileMenuModal .social-icons {
+    display: flex;
+    gap: 20px;
+    padding: 12px 0;
+}
+
+#mobileMenuModal .social-icon {
+    color: #333;
+    font-size: 20px;
+    text-decoration: none;
+}
+
+#mobileMenuModal .social-icon:hover {
+    color: #E85B40;
+}
+
+/* Ensure the burger menu is vertically centered in header */
+.navbar-custom .mobile-nav__toggler {
+    display: flex;
+    align-items: center;
+    height: 32px;
+}
+
+/* Remove default modal padding */
+#mobileMenuModal .modal-body {
+    padding: 0;
+}
+
+/* Hover effects */
+#mobileMenuModal .menu-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+#mobileMenuModal .menu-item.text-danger:hover {
+    color: #dc3545 !important;
+}
+
+/* Desktop Language Selector */
+.navbar-custom .header-language-select {
+    background: transparent;
+    border: none;
+    color: white;
+    padding-right: 15px;
+}
+
+.navbar-custom .header-language-select option {
+    background-color: white;
+    color: #333;
+}
+
+/* Override bootstrap-select styles for header */
+.navbar-custom .selectpicker {
+    background: transparent !important;
+    border: none !important;
+}
+
+.navbar-custom .selectpicker .filter-option {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-custom .selectpicker .filter-option .fi {
+    font-size: 1.2em;
+}
+
+/* Language Modal Styles */
+#languageModal .modal-content {
+    border-radius: 8px;
+}
+
+#languageModal .list-group-item {
+    border: none;
+    padding: 12px 16px;
+}
+
+#languageModal .list-group-item.active {
+    background-color: #E85B40;
+    border-color: #E85B40;
+}
+
+#languageModal .fi {
+    font-size: 1.2em;
+}
+
+/* Hide default select arrow in modern browsers */
+.header-language-select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* Hide default select arrow in IE */
+.header-language-select::-ms-expand {
+    display: none;
 }
 </style>
 
@@ -513,6 +763,123 @@ input[type=number] {
     </div>
 </div>
 
+<!-- Update the Mobile Menu Modal header -->
+<div class="modal fade" id="mobileMenuModal" tabindex="-1">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <!-- Updated header section -->
+            <div class="modal-header mobile-menu-header">
+                <div class="d-flex align-items-center">
+                    @auth
+                        <img src="{{ asset('images/'. Auth::user()->profil_image) ?? asset('images/placeholder_guide.jpg') }}" 
+                             class="rounded-circle mobile-menu-profile-image" 
+                             alt="Profile">
+                        <span class="mobile-menu-username">{{ Auth::user()->firstname }} {{ Auth::user()->lastname }}</span>
+                    @else
+                        <img src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}" 
+                             alt="Logo" 
+                             class="mobile-menu-logo">
+                    @endauth
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <!-- Rest of the modal content remains the same -->
+            <div class="modal-body p-0">
+                <div class="mobile-menu-items">
+                    <a href="{{ route('destination') }}" class="menu-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>@lang('homepage.searchbar-destination')</span>
+                    </a>
+                    <a href="{{ route('guidings.index') }}" class="menu-item">
+                        <i class="fas fa-fish"></i>
+                        <span>@lang('homepage.filter-fishing-near-me')</span>
+                    </a>
+                    <a href="{{ route('blog.index') }}" class="menu-item">
+                        <i class="fas fa-book-open"></i>
+                        <span>@lang('homepage.filter-magazine')</span>
+                    </a>
+                    
+                    <div class="menu-divider"></div>
+                    
+                    @auth
+                        <a href="{{ route('profile.index') }}" class="menu-item">
+                            <i class="fas fa-user"></i>
+                            <span>@lang('homepage.header-profile')</span>
+                        </a>
+                        <a href="{{ route('profile.bookings') }}" class="menu-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>@lang('profile.bookings')</span>
+                        </a>
+                        
+                        <div class="menu-divider"></div>
+                    @endauth
+                    
+                    <div class="menu-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>info.catchaguide@gmail.com</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-phone"></i>
+                        <span>+49 (0) 15155495574</span>
+                    </div>
+                    
+                    <div class="social-icons">
+                        <a href="https://www.facebook.com/CatchAGuide" class="fab fa-facebook-square"></a>
+                        <a href="https://wa.me/+49{{env('CONTACT_NUM')}}" class="fab fa-whatsapp"></a>
+                        <a href="https://www.instagram.com/catchaguide_official/" class="fab fa-instagram"></a>
+                    </div>
+                    
+                    <div class="menu-divider"></div>
+                    
+                    <a href="#" class="menu-item" data-bs-toggle="modal" data-bs-target="#languageModal">
+                        <i class="fas fa-globe"></i>
+                        <span>Language <span class="fi fi-{{ array_search(app()->getLocale(), config('app.locales')) }}"></span></span>
+                    </a>
+                    
+                    @auth
+                        <div class="menu-divider"></div>
+                        <form method="POST" action="{{ route('admin.auth.logout') }}">
+                            @csrf
+                            <button type="submit" class="menu-item text-danger">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>@lang('homepage.header-logout')</span>
+                            </button>
+                        </form>
+                    @endauth
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add this new modal for mobile language selection -->
+<div class="modal fade" id="languageModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Select Language</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ route('language.switch') }}" method="POST">
+                    @csrf
+                    <div class="list-group">
+                        @foreach (config('app.locales') as $key => $locale)
+                            <button type="submit" 
+                                    name="language" 
+                                    value="{{ $locale }}" 
+                                    class="list-group-item list-group-item-action d-flex align-items-center {{ app()->getLocale() == $locale ? 'active' : '' }}">
+                                <span class="fi fi-{{$key}} me-2"></span>
+                                {{ strtoupper($locale) }}
+                            </button>
+                        @endforeach
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const searchTrigger = document.getElementById('headerSearchTrigger');
@@ -525,5 +892,11 @@ document.addEventListener('DOMContentLoaded', function() {
             headerSearchModal.show();
         });
     }
+
+    // Initialize bootstrap-select
+    $('.selectpicker').selectpicker({
+        style: 'btn-link',
+        size: 4
+    });
 });
 </script>
