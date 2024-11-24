@@ -54,7 +54,7 @@
                 </div>
 
                 <!-- Mobile Icons -->
-                <div class="d-flex d-md-none">
+                <div class="d-flex d-md-none align-items-center">
                     @auth
                         <a href="{{ route('profile.index') }}" class="me-3">
                             <img src="{{ asset('images/'. Auth::user()->profil_image) ?? asset('images/placeholder_guide.jpg') }}" 
@@ -67,8 +67,8 @@
                             <i class="far fa-user-circle" style="font-size: 24px;"></i>
                         </a>
                     @endauth
-                    <a href="#" class="mobile-nav__toggler text-white">
-                        <i class="fas fa-bars" style="font-size: 20px;"></i>
+                    <a href="#" class="text-white" data-bs-toggle="modal" data-bs-target="#mobileMenuModal">
+                        <i class="fas fa-bars" style="font-size: 24px;"></i>
                     </a>
                 </div>
             </div>
@@ -761,7 +761,216 @@ input[type=number] {
 .short-header.navbar-custom .d-flex.d-md-none .mobile-nav__toggler:hover {
     color: rgba(255, 255, 255, 0.8) !important;
 }
+
+/* Mobile Menu Styles */
+#mobileMenuModal .mobile-menu-header {
+    background-color: #313041;
+    padding: 1rem;
+    border-bottom: none;
+}
+
+#mobileMenuModal .mobile-menu-profile-image {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-right: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+#mobileMenuModal .mobile-menu-username {
+    color: white;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+#mobileMenuModal .mobile-menu-logo {
+    height: 45px;
+}
+
+#mobileMenuModal .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+    opacity: 0.8;
+}
+
+#mobileMenuModal .mobile-menu-items {
+    padding: 0.5rem 1rem;
+}
+
+#mobileMenuModal .menu-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    color: #333;
+    text-decoration: none;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 16px;
+}
+
+#mobileMenuModal .menu-item i {
+    width: 24px;
+    margin-right: 12px;
+    font-size: 18px;
+}
+
+#mobileMenuModal .menu-divider {
+    height: 1px;
+    background-color: #eee;
+    margin: 8px 0;
+}
+
+#mobileMenuModal .social-icons {
+    display: flex;
+    gap: 20px;
+    padding: 12px 0;
+}
+
+#mobileMenuModal .social-icon {
+    color: #333;
+    font-size: 20px;
+    text-decoration: none;
+}
+
+#mobileMenuModal .social-icon:hover {
+    color: #E85B40;
+}
+
+/* Language Modal Styles */
+#languageModal .modal-content {
+    border-radius: 8px;
+}
+
+#languageModal .list-group-item {
+    border: none;
+    padding: 12px 16px;
+}
+
+#languageModal .list-group-item.active {
+    background-color: #E85B40;
+    border-color: #E85B40;
+}
+
+#languageModal .fi {
+    font-size: 1.2em;
+}
 </style>
+
+<div class="modal fade" id="mobileMenuModal" tabindex="-1">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header mobile-menu-header">
+                <div class="d-flex align-items-center">
+                    @auth
+                        <img src="{{ asset('images/'. Auth::user()->profil_image) ?? asset('images/placeholder_guide.jpg') }}" 
+                             class="rounded-circle mobile-menu-profile-image" 
+                             alt="Profile">
+                        <span class="mobile-menu-username">{{ Auth::user()->firstname }} {{ Auth::user()->lastname }}</span>
+                    @else
+                        <img src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}" 
+                             alt="Logo" 
+                             class="mobile-menu-logo">
+                    @endauth
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="mobile-menu-items">
+                    <a href="{{ route('destination') }}" class="menu-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>@lang('homepage.searchbar-destination')</span>
+                    </a>
+                    <a href="{{ route('guidings.index') }}" class="menu-item">
+                        <i class="fas fa-fish"></i>
+                        <span>@lang('homepage.filter-fishing-near-me')</span>
+                    </a>
+                    <a href="{{ route('blog.index') }}" class="menu-item">
+                        <i class="fas fa-book-open"></i>
+                        <span>@lang('homepage.filter-magazine')</span>
+                    </a>
+                    
+                    <div class="menu-divider"></div>
+                    
+                    @auth
+                        <a href="{{ route('profile.index') }}" class="menu-item">
+                            <i class="fas fa-user"></i>
+                            <span>@lang('homepage.header-profile')</span>
+                        </a>
+                        <a href="{{ route('profile.bookings') }}" class="menu-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>@lang('profile.bookings')</span>
+                        </a>
+                        
+                        <div class="menu-divider"></div>
+                    @endauth
+                    
+                    <div class="menu-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>info.catchaguide@gmail.com</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-phone"></i>
+                        <span>+49 (0) 15155495574</span>
+                    </div>
+                    
+                    <div class="social-icons">
+                        <a href="https://www.facebook.com/CatchAGuide" class="social-icon"><i class="fab fa-facebook"></i></a>
+                        <a href="https://wa.me/+49{{env('CONTACT_NUM')}}" class="social-icon"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://www.instagram.com/catchaguide_official/" class="social-icon"><i class="fab fa-instagram"></i></a>
+                    </div>
+                    
+                    <div class="menu-divider"></div>
+                    
+                    <a href="#" class="menu-item" data-bs-toggle="modal" data-bs-target="#languageModal">
+                        <i class="fas fa-globe"></i>
+                        <span>Language <span class="fi fi-{{ array_search(app()->getLocale(), config('app.locales')) }}"></span></span>
+                    </a>
+                    
+                    @auth
+                        <div class="menu-divider"></div>
+                        <form method="POST" action="{{ route('admin.auth.logout') }}">
+                            @csrf
+                            <button type="submit" class="menu-item text-danger">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>@lang('homepage.header-logout')</span>
+                            </button>
+                        </form>
+                    @endauth
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Language Modal -->
+<div class="modal fade" id="languageModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Select Language</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ route('language.switch') }}" method="POST">
+                    @csrf
+                    <div class="list-group">
+                        @foreach (config('app.locales') as $key => $locale)
+                            <button type="submit" 
+                                    name="language" 
+                                    value="{{ $locale }}" 
+                                    class="list-group-item list-group-item-action d-flex align-items-center {{ app()->getLocale() == $locale ? 'active' : '' }}">
+                                <span class="fi fi-{{$key}} me-2"></span>
+                                {{ strtoupper($locale) }}
+                            </button>
+                        @endforeach
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Search Modal for Mobile -->
 <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
@@ -824,7 +1033,6 @@ input[type=number] {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Get the specific elements
     const searchTrigger = document.getElementById('headerSearchTrigger');
     const searchModal = document.getElementById('searchModal');
     
@@ -835,5 +1043,11 @@ document.addEventListener('DOMContentLoaded', function() {
             headerSearchModal.show();
         });
     }
+
+    // Initialize bootstrap-select if you're using it
+    $('.selectpicker').selectpicker({
+        style: 'btn-link',
+        size: 4
+    });
 });
 </script>
