@@ -271,73 +271,103 @@ input[type=number] {
     -moz-appearance: textfield;
 }
 
-/* Mobile Styles */
+/* Mobile Styles - with specific selectors */
 @media (max-width: 767px) {
-    .short-header.navbar-custom {
-        padding-bottom: 16px;
-        margin-bottom: 0;
+    .short-header.navbar-custom .header-contents {
+        padding: 12px 20px !important;
+        margin: 0 !important;
     }
     
-    .mobile-profile-dropdown {
-        position: relative;
-        margin-right: 12px;
-    }
-    
-    .mobile-profile-dropdown .dropdown-menu {
-        position: absolute;
-        right: 0;
-        left: auto;
-        top: 100%;
-        margin-top: 0.5rem;
-        z-index: 1050;
-    }
-    
-    .search-summary {
-        background: white;
-        padding: 12px;
-        border-radius: 8px;
-        cursor: pointer;
-        margin-bottom: 10px;
-    }
-    
-    .categories-mobile {
-        overflow-x: auto;
-        white-space: nowrap;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-        margin: 12px 0;
-        padding: 4px 0;
-    }
-    
-    .categories-mobile::-webkit-scrollbar {
-        display: none;
-    }
-    
-    .mobile-profile-menu {
-        width: 250px;
-        max-width: calc(100vw - 2rem);
+    .short-header.navbar-custom .header-contents h1 {
+        font-size: 24px !important;
+        margin-top: 8px !important;
+        margin-bottom: 4px !important;
     }
 
-    .floating-search-container {
+    .short-header.navbar-custom .header-contents p {
+        margin-bottom: 8px !important;
+    }
+
+    /* Categories container with hidden scrollbar */
+    .short-header.navbar-custom .categories-mobile {
+        margin: 8px 20px !important;
+        padding: 0 !important;
+        display: flex !important;
+        gap: 8px !important;
+        overflow-x: auto !important;
+        -ms-overflow-style: none !important;  /* IE and Edge */
+        scrollbar-width: none !important;  /* Firefox */
+    }
+    
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .short-header.navbar-custom .categories-mobile::-webkit-scrollbar {
         display: none !important;
     }
 
-    .header-contents {
-        padding: 12px 0;
+    /* Individual category items */
+    .short-header.navbar-custom .categories-mobile a {
+        padding: 6px 12px !important;
+        margin-right: 8px !important;
+        white-space: nowrap !important;
+        font-size: 14px !important;
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        border-radius: 50px !important;
     }
-    
-    .header-contents h1 {
-        font-size: 24px;
-        margin-top: 12px !important;
+
+    .short-header.navbar-custom .categories-mobile a:last-child {
+        margin-right: 0 !important;
+    }
+
+    /* Search bar fixes */
+    .short-header.navbar-custom .search-summary {
+        margin: 0 20px !important;
+        padding: 12px !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        border-radius: 8px !important;
+        color: white !important;
+        cursor: pointer !important;
+    }
+
+    .short-header.navbar-custom .search-summary i {
+        margin-right: 8px !important;
     }
 }
 
 /* Desktop Header Styles */
 @media (min-width: 768px) {
+    .short-header .container {
+        max-width: 1200px;
+        padding: 0 15px;
+    }
+
     .short-header .top-nav-items {
-        gap: 32px;
+        gap: 24px;
         height: 45px;
+    }
+
+    .short-header .logo img {
+        height: 40px;
+        margin-top: 4px;
+    }
+
+    .short-header .floating-search-container .container {
+        max-width: 1200px;
+        padding: 0 15px;
+    }
+
+    .short-header .search-box {
+        margin: 0;
+        width: 100%;
+    }
+
+    .categories-row {
+        margin-left: 0;
+        margin-right: 0;
+        padding: 0 15px;
+    }
+
+    .categories-row .col-12 {
+        padding: 0;
     }
 
     .short-header .top-nav-items .nav-link {
