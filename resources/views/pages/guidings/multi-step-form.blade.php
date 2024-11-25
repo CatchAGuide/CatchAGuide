@@ -1,5 +1,5 @@
 @include('pages.guidings.includes.styles.multi-step-form-style')
-<div class="card">
+<div id="guidings-form"  class="card">
     <div class="card-body">
         
         <div class="step-wrapper">
@@ -130,14 +130,14 @@
                            title="{{ __('newguidings.tooltip_type_of_fishing') }}"></i>
                     </label>
                     <div class="row justify-content-center">
-                        <div class="col-md-6">
+                        <div class="col-6">
                             <div class="option-card" id="boatOption" onclick="selectOption('boat')">
                                 <i class="fas fa-ship option-icon"></i>
                                 <p class="option-label">{{ __('newguidings.boat') }}</p>
                                 <input type="radio" name="type_of_fishing_radio" value="boat" class="d-none">
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-6">
                             <div class="option-card" id="shoreOption" onclick="selectOption('shore')">
                                 <i class="fas fa-umbrella-beach option-icon"></i>
                                 <p class="option-label">{{ __('newguidings.shore') }}</p>
@@ -152,7 +152,7 @@
                     <div class="form-group">
                         
                         <label for="type_of_boat" class="form-label fw-bold fs-5">
-                            {{ __('newguidings.type_of_boat') }}
+                            <span class="text-capitalize">{{ __('newguidings.type_of_boat') }}</span>
                             <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                                title="{{ __('newguidings.tooltip_type_of_boat') }}"></i>
                         </label>
@@ -573,7 +573,7 @@
                 <hr>
                 <div class="form-group">
                     <label for="extra_pricing" class="form-label fw-bold fs-5">
-                        {{ __('newguidings.extra_pricing') }}
+                        <span>{{ __('newguidings.extra_pricing') }}</span>
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="{{ __('newguidings.tooltip_extras_booked_additionally') }}"></i>
                         <button type="button" id="add-extra" class="btn btn-sm btn-secondary ms-2"><i class="fas fa-plus"></i></button>

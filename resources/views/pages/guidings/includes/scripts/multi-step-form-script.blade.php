@@ -585,14 +585,16 @@
         const newRow = `
             <div class="extra-row d-flex mb-2">
                 <div class="input-group mt-2">
-                    <span class="input-group-text">{{__('newguidings.additional_offer')}}</span>
-                    <div class="dropdown">
-                        <input type="text" id="customInput_${extraCount}" class="form-control dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" placeholder="{{__('newguidings.select_or_add_value')}}">
+                <div class="dropdown extras-dropdown">
+                        <span class="input-group-text d-none d-md-block">{{__('newguidings.additional_offer')}}</span>
+                        <input type="text" id="customInput_${extraCount}" class="form-control dropdown-toggle extras" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" placeholder="{{__('newguidings.select_or_add_value')}}">
                         <div class="dropdown-menu w-100" id="suggestionsList_${extraCount}"></div>
                     </div>
-                    <span class="input-group-text">{{__('newguidings.price')}}</span>
+                    <div class="price">
+                    <span class="input-group-text d-none d-md-block">{{__('newguidings.price')}}</span>
                     <input type="number" class="form-control mr-2" name="extra_price_${extraCount}" placeholder="{{__('newguidings.enter_price_per_person')}}">
                     <span class="input-group-text">€ {{ __('newguidings.per_person') }}</span>
+                    </div>
                 </div>
                 <button type="button" class="btn btn-danger btn-sm remove-extra"><i class="fas fa-trash"></i></button>
             </div>
