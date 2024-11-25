@@ -14,6 +14,11 @@ use App\Models\Payment;
 use App\Models\Target;
 use App\Models\User;
 use App\Models\Water;
+use App\Models\GuidingBoatType;
+use App\Models\GuidingBoatDescription;
+use App\Models\GuidingAdditionalInformation;
+use App\Models\GuidingRequirements;
+use App\Models\GuidingRecommendations;
 use Auth;
 use Hash;
 use Config;
@@ -148,86 +153,33 @@ class ProfileController extends Controller
     public function newguiding()
     {
         $pageTitle = __('profile.creategiud');
-        $targets = Target::all();
-        $methods = Method::all();
-        $waters = Water::all();
-        $inclussions = Inclussion::all();
-        $extras_prices = ExtrasPrice::all();
-
         $locale = Config::get('app.locale');
-        if($locale == 'en') {
-            $targets = $targets->map(function ($item) {
-                return ['value' => $item->name_en, 'id' => $item->id];
-            });
-            $methods = $methods->map(function ($item) {
-                return ['value' => $item->name_en, 'id' => $item->id];
-            });
-            $waters = $waters->map(function ($item) {
-                return ['value' => $item->name_en, 'id' => $item->id];
-            });
-            $inclussions = $inclussions->map(function ($item) {
-                return ['value' => $item->name_en, 'id' => $item->id];
-            });
-            $extras_prices = $extras_prices->map(function ($item) {
-                return ['value' => $item->name_en, 'id' => $item->id];
-            });
-        } else {
-            $targets = $targets->map(function ($item) {
-                return ['value' => $item->name, 'id' => $item->id];
-            });
-            $methods = $methods->map(function ($item) {
-                return ['value' => $item->name, 'id' => $item->id];
-            });
-            $waters = $waters->map(function ($item) {
-                return ['value' => $item->name, 'id' => $item->id];
-            });
-            $inclussions = $inclussions->map(function ($item) {
-                return ['value' => $item->name, 'id' => $item->id];
-            });
-            $extras_prices = $extras_prices->map(function ($item) {
-                return ['value' => $item->name, 'id' => $item->id];
+        $nameField = $locale == 'en' ? 'name_en' : 'name';
+
+        $modelClasses = [
+            'targets' => Target::class,
+            'methods' => Method::class,
+            'waters' => Water::class, 
+            'inclussions' => Inclussion::class,
+            'extras_prices' => ExtrasPrice::class,
+            'guiding_boat_types' => GuidingBoatType::class,
+            'guiding_boat_descriptions' => GuidingBoatDescription::class,
+            'guiding_additional_infos' => GuidingAdditionalInformation::class,
+            'guiding_requirements' => GuidingRequirements::class,
+            'guiding_recommendations' => GuidingRecommendations::class
+        ];
+
+        $collections = [];
+        foreach ($modelClasses as $key => $modelClass) {
+            $collections[$key] = $modelClass::all()->map(function($item) use ($nameField) {
+                return [
+                    'value' => $item->$nameField,
+                    'id' => $item->id
+                ];
             });
         }
-        return view('pages.profile.newguiding', compact('waters', 'methods', 'targets', 'inclussions', 'extras_prices', 'pageTitle'));
-    }
-    
-    public function postGuidingStepOne(Request $request){
 
-    }
-    //step 2
-    public function newguidingStepTwo(Request $request){
-
-    }
-
-    public function postGuidingStepTwo(Request $request){
-
-    }
-
-    //step 3 
-    public function newguidingStepThree(Request $request){
-
-    }
-
-    public function postGuidingStepThree(Request $request){
-
-    }
-    
-    //step 4 
-    public function newguidingStepFour(Request $request){
-
-    }
-
-    public function postGuidingStepFour(Request $request){
-
-    }
-
-    //step 55
-    public function newguidingStepFive(Request $request){
-
-    }
-
-    public function postGuidingStepFive(Request $request){
-
+        return view('pages.profile.newguiding', array_merge($collections, ['pageTitle' => $pageTitle]));
     }
 
     public function bookings()

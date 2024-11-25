@@ -15,6 +15,11 @@ use App\Models\Inclussion;
 use App\Models\GuidingExtra;
 use App\Models\GuidingPrice;
 use App\Models\GuidingTargetFish;
+use App\Models\GuidingBoatType;
+use App\Models\GuidingBoatDescription;
+use App\Models\GuidingAdditionalInformation;
+use App\Models\GuidingRequirements;
+use App\Models\GuidingRecommendations;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -838,49 +843,38 @@ class GuidingsController extends Controller
         ];
 
         // Get necessary data for dropdowns
-        $targets = Target::all();
-        $waters = Water::all();
-        $methods = Method::all();
-        $inclussions = Inclussion::all();
-        $extras_prices = ExtrasPrice::all();
-        $pageTitle = __('profile.editguiding');
-
         $locale = Config::get('app.locale');
-        if($locale == 'en') {
-            $targets = $targets->map(function ($item) {
-                return ['value' => $item->name_en, 'id' => $item->id];
-            });
-            $methods = $methods->map(function ($item) {
-                return ['value' => $item->name_en, 'id' => $item->id];
-            });
-            $waters = $waters->map(function ($item) {
-                return ['value' => $item->name_en, 'id' => $item->id];
-            });
-            $inclussions = $inclussions->map(function ($item) {
-                return ['value' => $item->name_en, 'id' => $item->id];
-            });
-            $extras_prices = $extras_prices->map(function ($item) {
-                return ['value' => $item->name_en, 'id' => $item->id];
-            });
-        } else {
-            $targets = $targets->map(function ($item) {
-                return ['value' => $item->name, 'id' => $item->id];
-            });
-            $methods = $methods->map(function ($item) {
-                return ['value' => $item->name, 'id' => $item->id];
-            });
-            $waters = $waters->map(function ($item) {
-                return ['value' => $item->name, 'id' => $item->id];
-            });
-            $inclussions = $inclussions->map(function ($item) {
-                return ['value' => $item->name, 'id' => $item->id];
-            });
-            $extras_prices = $extras_prices->map(function ($item) {
-                return ['value' => $item->name, 'id' => $item->id];
+        $nameField = $locale == 'en' ? 'name_en' : 'name';
+
+        $modelClasses = [
+            'targets' => Target::class,
+            'methods' => Method::class,
+            'waters' => Water::class,
+            'inclussions' => Inclussion::class,
+            'extras_prices' => ExtrasPrice::class,
+            'guiding_boat_types' => GuidingBoatType::class,
+            'guiding_boat_descriptions' => GuidingBoatDescription::class,
+            'guiding_additional_infos' => GuidingAdditionalInformation::class,
+            'guiding_requirements' => GuidingRequirements::class,
+            'guiding_recommendations' => GuidingRecommendations::class
+        ];
+
+        $collections = [];
+        foreach ($modelClasses as $key => $modelClass) {
+            $collections[$key] = $modelClass::all()->map(function($item) use ($nameField, $key) {
+                return [
+                    'value' => $item->$nameField,
+                    'id' => $item->id
+                ];
             });
         }
 
-        return view('pages.profile.newguiding', compact('formData', 'waters', 'methods', 'targets', 'inclussions', 'extras_prices', 'pageTitle'));
+        $pageTitle = __('profile.editguiding');
+
+        return view('pages.profile.newguiding', array_merge(
+            ['formData' => $formData, 'pageTitle' => $pageTitle],
+            $collections
+        ));
     }
 
     public function update(StoreGuidingRequest $request, Guiding $guiding)

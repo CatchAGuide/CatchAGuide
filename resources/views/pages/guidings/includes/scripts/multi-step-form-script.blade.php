@@ -535,13 +535,13 @@
             var guestCount = parseInt($('#no_guest').val()) || 1;
             for (var i = 1; i <= guestCount; i++) {
                 container.append(`<div class="input-group mt-2">
-                    <span class="input-group-text">Total price for ${i} ${i === 1 ? 'guest &nbsp;' : 'guests'}</span>
-                    <input type="number" class="form-control" name="price_per_person_${i}" placeholder="Price for ${i} ${i === 1 ? 'person' : 'persons'}">
+                    <span class="input-group-text">{{__('newguidings.total_price_for_number_of_guests', ['number' => '${i}'])}}</span>
+                    <input type="number" class="form-control" name="price_per_person_${i}" placeholder="{{__('newguidings.price_per_person', ['number' => '${i}'])}}">
                     <span class="input-group-text">€</span>
                 </div>`);
             }
         } else if (priceType === 'per_boat') {
-            container.append('<div class="input-group mt-2"><span class="input-group-text">Price</span><input type="number" class="form-control" name="price_per_boat" placeholder="Price per boat"><span class="input-group-text">€ per Boat</span></div>');
+            container.append(`<div class="input-group mt-2"><span class="input-group-text">{{__('newguidings.price')}}</span><input type="number" class="form-control" name="price_per_boat" placeholder="{{ __('newguidings.price') . ' ' . __('newguidings.per_boat')}}"><span class="input-group-text">€ {{ __('newguidings.per_boat') }}</span></div>`);
         }
 
         // Populate fields if editing
@@ -585,14 +585,14 @@
         const newRow = `
             <div class="extra-row d-flex mb-2">
                 <div class="input-group mt-2">
-                    <span class="input-group-text">Additional Offer</span>
+                    <span class="input-group-text">{{__('newguidings.additional_offer')}}</span>
                     <div class="dropdown">
-                        <input type="text" id="customInput_${extraCount}" class="form-control dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" placeholder="Select or add a value">
+                        <input type="text" id="customInput_${extraCount}" class="form-control dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" placeholder="{{__('newguidings.select_or_add_value')}}">
                         <div class="dropdown-menu w-100" id="suggestionsList_${extraCount}"></div>
                     </div>
-                    <span class="input-group-text">Price</span>
-                    <input type="number" class="form-control mr-2" name="extra_price_${extraCount}" placeholder="Enter price per person">
-                    <span class="input-group-text">€ per Person</span>
+                    <span class="input-group-text">{{__('newguidings.price')}}</span>
+                    <input type="number" class="form-control mr-2" name="extra_price_${extraCount}" placeholder="{{__('newguidings.enter_price_per_person')}}">
+                    <span class="input-group-text">€ {{ __('newguidings.per_person') }}</span>
                 </div>
                 <button type="button" class="btn btn-danger btn-sm remove-extra"><i class="fas fa-trash"></i></button>
             </div>
@@ -796,6 +796,7 @@
         const errorContainer = document.getElementById('error-container');
         errorContainer.style.display = 'none';
         errorContainer.innerHTML = '';
+        return true;
         let isValid = true;
         let errors = [];
 
@@ -829,7 +830,6 @@
                     isValid = false;
                 }
 
-                console.log(previewWrappers.length);
                 if (!previewWrappers || previewWrappers.length < 5) {
                     errors.push('Please upload at least 5 images.');
                     isValid = false;

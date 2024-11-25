@@ -21,4 +21,5 @@ return [
     'Content' => 'Content',
     'Add' => 'Add',
     'Location' => 'Location',
+    'Enter_value_for' => 'Enter value for',
 ];  

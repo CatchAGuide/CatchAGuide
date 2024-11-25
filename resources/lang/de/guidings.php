@@ -21,4 +21,5 @@ return [
     'Content' => 'Inhalt',
     'Add' => 'Hinzufügen',
     'Location' => 'Standort',
+    'Enter_value_for' => 'Wert eingeben für',
 ];  
