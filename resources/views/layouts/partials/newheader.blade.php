@@ -30,7 +30,7 @@
                         </form>
                     </div>
                     
-                    <a href="#" class="nav-link become-guide-link">
+                    <a href="{{ route('login') }}" class="nav-link become-guide-link">
                         @lang('homepage.header-become-guide')
                     </a>
                     @auth
@@ -98,7 +98,7 @@
                     <a href="{{ route('guidings.index') }}" class="me-4 text-white text-decoration-none">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
-                    <a href="{{ route('blog.index') }}" class="text-white text-decoration-none">
+                    <a href="{{ route($blogPrefix.'.index') }}" class="text-white text-decoration-none">
                         <i class="fas fa-book-open me-2"></i>@lang('homepage.filter-magazine')
                     </a>
                 </div>
@@ -132,7 +132,7 @@
                     <a href="{{ route('guidings.index') }}" class="me-4 text-white text-decoration-none">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
-                    <a href="{{ route('blog.index') }}" class="me-4 text-white text-decoration-none">
+                    <a href="{{ route($blogPrefix.'.index') }}" class="me-4 text-white text-decoration-none">
                         <i class="fas fa-book-open me-2"></i>@lang('homepage.filter-magazine')
                     </a>
                 </div>
@@ -341,7 +341,7 @@ input[type=number] {
     }
 
     .short-header .logo img {
-        height: 40px;
+        height: 45px;
         margin-top: 4px;
     }
 
@@ -394,6 +394,7 @@ input[type=number] {
     .short-header .signup-btn:hover {
         background-color: rgba(255, 255, 255, 0.1);
         border-color: white;
+        color: white;
     }
 
     .header-desktop-profile .dropdown-menu {
@@ -661,6 +662,16 @@ input[type=number] {
 .navbar-custom .selectpicker {
     background: transparent !important;
     border: none !important;
+    box-shadow: none !important;
+}
+
+.navbar-custom .bootstrap-select .dropdown-toggle:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.navbar-custom .bootstrap-select > .dropdown-toggle {
+    border: none !important;
 }
 
 .navbar-custom .selectpicker .filter-option {
@@ -794,7 +805,7 @@ input[type=number] {
                         <i class="fas fa-fish"></i>
                         <span>@lang('homepage.filter-fishing-near-me')</span>
                     </a>
-                    <a href="{{ route('blog.index') }}" class="menu-item">
+                    <a href="{{ route($blogPrefix.'.index') }}" class="menu-item">
                         <i class="fas fa-book-open"></i>
                         <span>@lang('homepage.filter-magazine')</span>
                     </a>

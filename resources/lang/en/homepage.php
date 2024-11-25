@@ -2,7 +2,7 @@
 return [
     'header-title' => 'Find your next guided fishing tour!',
     'header-message' => 'Search deals on fishing trips, vacations and much more',
-    'header-become-guide' => 'Become a guide',
+    'header-become-guide' => 'List fishing tour',
     'header-login' => 'Log in',
     'header-signup' => 'Sign up',
     'header-profile' => 'Profile',
@@ -15,7 +15,7 @@ return [
     'searchbar-search-placeholder' => 'Discover your dream fishing destination...',
 
     'filter-fishing-near-me' => 'Fishing near me',
-    'filter-magazine' => 'Magazine',
+    'filter-magazine' => 'Fishing Magazine',
 
     'usps-first' => 'Easy & direct online booking',
     'usps-second' => 'Best customer service on the market',
