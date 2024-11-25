@@ -550,8 +550,8 @@
                                                     <a href="{{ $guiding->is_newguiding ? route('guidings.newShow', [$guiding->id, $guiding->slug]) : route('guidings.show', [$guiding->id, $guiding->slug]) }}">
                                                             <div class="guidings-item">
                                                                 <div class="guidings-item-title">
-                                                                    <h5 class="fw-bolder text-truncate">{{translate($guiding->title)}}</h5>
-                                                                    <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($guiding->location) }}</span>                                      
+                                                                <h5 class="fw-bolder text-truncate">{{ Str::limit(translate($guiding->title), 70) }}</h5>
+                                                                <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($guiding->location) }}</span>                                      
                                                                 </div>
                                                                 @if ($guiding->user->average_rating())
                                                                 <div class="guidings-item-ratings">

@@ -73,7 +73,7 @@
 @endsection
 
 @section('profile-content')
-<div class="container shadow-lg p-4">
+<div class="container shadow-lg p-4 ">
 @livewire('edit-guiding',['guiding' => $guiding])
 </div>
 @endsection
