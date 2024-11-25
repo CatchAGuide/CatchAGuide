@@ -34,6 +34,7 @@ return [
     'boat_description' => 'Bootsbeschreibung',
     'boat_extras' => 'Extras und Bootsausrüstung',
     'boat_extras_placeholder' => 'Extras hinzufügen...',
+    'other_boat_info' => 'Weitere Bootsinformationen',
 
     // Step 3
     'target_fish' => 'Zielfische',
@@ -110,6 +111,7 @@ return [
     'tooltip_type_of_boat' => 'Auf welcher Art von Boot oder Wasserfahrzeug findet deine Angeltour statt?',
     'tooltip_boat_description' => 'Erzähle deinen Gästen mehr über dein Boot, indem du detaillierte Informationen zu jedem Aspekt hinzufügst.',
     'tooltip_boat_extras' => 'Hier kannst du zusätzliche Ausrüstung hinzufügen, die die Gäste auf deinem Boot finden.',
+    'tooltip_other_boat_info' => 'Hier kannst du weitere Informationen zu deinem Boot hinzufügen, die deinen Gästen mitteilen möchtest.',
     'tooltip_target_fish' => 'Füge alle Zielfische hinzu, die ein Gast während deiner Angeltour wahrscheinlich fangen wird.',
     'tooltip_fishing_methods' => 'Mit welchen Methoden können Gäste während einer Angeltour mit dir rechnen? Füge alle zutreffenden Angelmethoden hinzu.',
     'tooltip_style_of_fishing' => 'Für welchen Angelstil ist dein Guiding ausgelegt? Deine Angeltour kann auch für aktives und passives Angeln zusammen ausgelegt sein.',
@@ -256,4 +258,12 @@ return [
 
     'per_boat' => 'Pro Boot',
     'per_person' => 'Pro Person',
+    'number_of_hours' => 'Anzahl der Stunden',
+    'number_of_days' => 'Anzahl der Tage',
+    'total_price_for_number_of_guests' => 'Gesamtpreis für :number Gäste',
+    'price_per_person' => 'Preis pro :number Person',
+    'price' => 'Preis',
+    'additional_offer' => 'Zusätzliche Angebote',
+    'enter_price_per_person' => 'Preis pro Person eingeben',
+    'select_or_add_value' => 'Wert auswählen oder hinzufügen',
 ];

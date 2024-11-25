@@ -77,7 +77,7 @@
             <div class="col-12 d-md-none mt-3">
                 <div class="d-flex categories-mobile">
                     <a href="{{ route('destination') }}" class="me-4 text-white text-decoration-none">
-                        <i class="fas fa-map-marker-alt me-2"></i>@lang('homepage.filter-destination')
+                        <i class="fas fa-map-marker-alt me-2"></i>@lang('homepage.searchbar-destination')
                     </a>
                     <a href="{{ route('guidings.index') }}" class="me-4 text-white text-decoration-none">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
@@ -111,7 +111,7 @@
             <div class="col-12">
                 <div class="d-flex">
                     <a href="{{ route('destination') }}" class="me-4 text-white text-decoration-none">
-                        <i class="fas fa-map-marker-alt me-2"></i>@lang('homepage.filter-destination')
+                        <i class="fas fa-map-marker-alt me-2"></i>@lang('homepage.searchbar-destination')
                     </a>
                     <a href="{{ route('guidings.index') }}" class="me-4 text-white text-decoration-none">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')

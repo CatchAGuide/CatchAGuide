@@ -34,6 +34,7 @@ return [
     'boat_description' => 'Boat description',
     'boat_extras' => 'Extras and boat equipment',
     'boat_extras_placeholder' => 'Add extras...',
+    'other_boat_info' => 'Other Boat Information',
 
     // Step 3
     'target_fish' => 'Target Fish',
@@ -110,6 +111,7 @@ return [
     'tooltip_type_of_boat' => 'On what kind of boat or watercraft does your fishing tour take place?',
     'tooltip_boat_description' => 'Tell your guests more about your boat by adding detailed information for each aspect.',
     'tooltip_boat_extras' => 'Here you can add extra equipment which the guests can find on your boat.',
+    'tooltip_other_boat_info' => 'Here you can add other information about your boat which you like to tell your guests about.',
     'tooltip_target_fish' => 'Add all target fish which a guest will likely to catch during your fishing tour.',
     'tooltip_fishing_methods' => 'Fishing with which methods can guests expect during a fishing tour with you? Add all fishing methods which apply.',
     'tooltip_style_of_fishing' => 'What style of fishing is your guiding designed for? Your fishing trip can also be designed for active and passive fishing together.',
@@ -267,4 +269,12 @@ return [
 
     'per_boat' => 'Per Boat',
     'per_person' => 'Per Person',
+    'number_of_hours' => 'Number of hours',
+    'number_of_days' => 'Number of days',
+    'total_price_for_number_of_guests' => 'Total price for :number guest/\'s',
+    'price_per_person' => 'Price per :number person',
+    'price' => 'Price',
+    'additional_offer' => 'Additional Offer',
+    'enter_price_per_person' => 'Enter price per person',
+    'select_or_add_value' => 'Select or add value',
 ];

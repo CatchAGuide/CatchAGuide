@@ -157,10 +157,10 @@
                                title="{{ __('newguidings.tooltip_type_of_boat') }}"></i>
                         </label>
                         <div class="d-flex flex-wrap btn-group-toggle">
-                            @foreach(__('newguidings.boat_types') as $value => $label)
-                                <input type="radio" name="type_of_boat" value="{{ $value }}" id="{{ $value }}">
-                                <label for="{{ $value }}" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" 
-                                       style="flex-basis: calc(33.33% - 20px);">{{ $label }}</label>
+                            @foreach($guiding_boat_types as $guiding_boat_type)
+                                <input type="radio" name="type_of_boat" value="boat_type_{{ $guiding_boat_type['id'] }}" id="boat_type_{{ $guiding_boat_type['id'] }}">
+                                <label for="boat_type_{{ $guiding_boat_type['id'] }}" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" 
+                                       style="flex-basis: calc(33.33% - 20px);">{{ $guiding_boat_type['value'] }}</label>
                             @endforeach
                         </div>
                     </div>
@@ -175,75 +175,21 @@
                         </label>
                         <div class="form-group mb-3">
                             <label for="other_boat_info" class="form-label">
-                                Other Boat Information
+                                {{ __('newguidings.other_boat_info') }}
                             </label>
                             <textarea class="form-control" id="other_boat_info" name="other_boat_info" rows="3"></textarea>
                         </div>
                         <div class="btn-group-toggle">
-                            <div class="btn-checkbox-container">
-                                <input type="checkbox" name="descriptions[]" value="seats" id="seats_checkbox">
-                                <label for="seats_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                    {{ __('newguidings.number_of_seats') }}
-                                </label>
-                                <textarea class="form-control extra-input" name="seats" placeholder="{{ __('newguidings.enter_number_of_seats') }}"></textarea>
-                            </div>
-                    
-                            <div class="btn-checkbox-container">
-                                <input type="checkbox" name="descriptions[]" value="length" id="length_checkbox">
-                                <label for="length_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                    {{ __('newguidings.length') }}
-                                </label>
-                                <textarea class="form-control extra-input" name="length" placeholder="{{ __('newguidings.enter_length') }}"></textarea>
-                            </div>
-                    
-                            <div class="btn-checkbox-container">
-                                <input type="checkbox" name="descriptions[]" value="width" id="width_checkbox">
-                                <label for="width_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                    {{ __('newguidings.width') }}
-                                </label>
-                                <textarea class="form-control extra-input" name="width" placeholder="{{ __('newguidings.enter_width') }}"></textarea>
-                            </div>
-                    
-                            <div class="btn-checkbox-container">
-                                <input type="checkbox" name="descriptions[]" value="year_built" id="year_built_checkbox">
-                                <label for="year_built_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                    {{ __('newguidings.year_built') }}
-                                </label>
-                                <textarea class="form-control extra-input" name="year_built" placeholder="{{ __('newguidings.enter_year_built') }}"></textarea>
-                            </div>
-                    
-                            <div class="btn-checkbox-container">
-                                <input type="checkbox" name="descriptions[]" value="engine_manufacturer" id="engine_manufacturer_checkbox">
-                                <label for="engine_manufacturer_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                    {{ __('newguidings.engine_manufacturer') }}
-                                </label>
-                                <textarea class="form-control extra-input" name="engine_manufacturer" placeholder="{{ __('newguidings.enter_engine_manufacturer') }}"></textarea>
-                            </div>
-                    
-                            <div class="btn-checkbox-container">
-                                <input type="checkbox" name="descriptions[]" value="engine_power" id="engine_power_checkbox">
-                                <label for="engine_power_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                    {{ __('newguidings.engine_power') }}
-                                </label>
-                                <textarea class="form-control extra-input" name="engine_power" placeholder="{{ __('newguidings.enter_engine_power') }}"></textarea>
-                            </div>
-                    
-                            <div class="btn-checkbox-container">
-                                <input type="checkbox" name="descriptions[]" value="max_speed" id="max_speed_checkbox">
-                                <label for="max_speed_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                    {{ __('newguidings.max_speed') }}
-                                </label>
-                                <textarea class="form-control extra-input" name="max_speed" placeholder="{{ __('newguidings.enter_max_speed') }}"></textarea>
-                            </div>
-                    
-                            <div class="btn-checkbox-container">
-                                <input type="checkbox" name="descriptions[]" value="manufacturer" id="manufacturer_checkbox">
-                                <label for="manufacturer_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                    {{ __('newguidings.manufacturer') }}
-                                </label>
-                                <textarea class="form-control extra-input" name="manufacturer" placeholder="{{ __('newguidings.enter_manufacturer') }}"></textarea>
-                            </div>
-                        </div>
+                            @foreach($guiding_boat_descriptions as $guiding_boat_description)
+                                <div class="btn-checkbox-container">
+                                    <input type="checkbox" name="descriptions[]" value="boat_description_{{ $guiding_boat_description['value'] }}" id="boat_description_{{ $guiding_boat_description['value'] }}">
+                                    <label for="boat_description_{{ $guiding_boat_description['value'] }}" class="btn btn-outline-primary m-2 btn-checkbox">
+                                        {{ $guiding_boat_description['value'] }}
+                                    </label>
+                                    <textarea class="form-control extra-input" name="{{ $guiding_boat_description['value'] }}" placeholder="{{ __('guidings.Enter_value_for') . ' ' . $guiding_boat_description['value'] }}"></textarea>
+                                </div>
+                            @endforeach
+                        </div> 
                     </div>
 
                     <hr>
@@ -252,7 +198,7 @@
                         <label for="boat_extras" class="form-label fw-bold fs-5">
                             {{ __('newguidings.extras_boat_equipment') }}
                             <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                               title="{{ __('newguidings.tooltip_extras_boat_equipment') }}"></i>
+                               title="{{ __('newguidings.tooltip_boat_extras') }}"></i>
                         </label>
                         <input  class="form-control" name="boat_extras" id="boat_extras" placeholder="{{ __('newguidings.add_extras') }}" data-bs-toggle="tooltip" title="{{ __('newguidings.tooltip_add_extras') }}">
                     </div>
@@ -447,93 +393,15 @@
                            title="{{ __('newguidings.tooltip_other_information') }}"></i>
                     </label>
                     <div class="btn-group-toggle">
-                        <div class="btn-checkbox-container">
-                            <input type="checkbox" name="other_information[]" value="child_friendly" id="child_friendly_checkbox">
-                            <label for="child_friendly_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                {{ __('newguidings.child_friendly') }}
-                            </label>
-                            <textarea class="form-control extra-input" name="child_friendly" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
-                        </div>
-                        
-                        <div class="btn-checkbox-container">
-                            <input type="checkbox" name="other_information[]" value="disability_friendly" id="disability_friendly_checkbox">
-                            <label for="disability_friendly_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                {{ __('newguidings.disability_friendly') }}
-                            </label>
-                            <textarea class="form-control extra-input" name="disability_friendly" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
-                        </div>
-                        
-                        <div class="btn-checkbox-container">
-                            <input type="checkbox" name="other_information[]" value="no_smoking" id="no_smoking_checkbox">
-                            <label for="no_smoking_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                {{ __('newguidings.no_smoking') }}
-                            </label>
-                            <textarea class="form-control extra-input" name="no_smoking" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
-                        </div>
-                        
-                        <div class="btn-checkbox-container">
-                            <input type="checkbox" name="other_information[]" value="no_alcohol" id="no_alcohol_checkbox">
-                            <label for="no_alcohol_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                {{ __('newguidings.no_alcohol') }}
-                            </label>
-                            <textarea class="form-control extra-input" name="no_alcohol" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
-                        </div>
-                        
-                        <div class="btn-checkbox-container">
-                            <input type="checkbox" name="other_information[]" value="keep_catch" id="keep_catch_checkbox">
-                            <label for="keep_catch_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                {{ __('newguidings.keep_catch') }}
-                            </label>
-                            <textarea class="form-control extra-input" name="keep_catch" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
-                        </div>
-                        
-                        <div class="btn-checkbox-container">
-                            <input type="checkbox" name="other_information[]" value="catch_release_allowed" id="catch_release_allowed_checkbox">
-                            <label for="catch_release_allowed_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                {{ __('newguidings.catch_release_allowed') }}
-                            </label>
-                            <textarea class="form-control extra-input" name="catch_release_allowed" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
-                        </div>
-                        
-                        <div class="btn-checkbox-container">
-                            <input type="checkbox" name="other_information[]" value="catch_release_only" id="catch_release_only_checkbox">
-                            <label for="catch_release_only_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                {{ __('newguidings.catch_release_only') }}
-                            </label>
-                            <textarea class="form-control extra-input" name="catch_release_only" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
-                        </div>
-                        
-                        <div class="btn-checkbox-container">
-                            <input type="checkbox" name="other_information[]" value="accomodation" id="accomodation_checkbox">
-                            <label for="accomodation_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                {{ __('newguidings.accomodation') }}
-                            </label>
-                            <textarea class="form-control extra-input" name="accomodation" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
-                        </div>
-                        
-                        <div class="btn-checkbox-container">
-                            <input type="checkbox" name="other_information[]" value="campsite" id="campsite_checkbox">
-                            <label for="campsite_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                {{ __('newguidings.campsite') }}
-                            </label>
-                            <textarea class="form-control extra-input" name="campsite" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
-                        </div>
-                        
-                        <div class="btn-checkbox-container">
-                            <input type="checkbox" name="other_information[]" value="pick_up_service" id="pick_up_service_checkbox">
-                            <label for="pick_up_service_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                {{ __('newguidings.pick_up_service') }}
-                            </label>
-                            <textarea class="form-control extra-input" name="pick_up_service" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
-                        </div>
-                        
-                        <div class="btn-checkbox-container">
-                            <input type="checkbox" name="other_information[]" value="recommended_others" id="others_information_checkbox">
-                            <label for="others_information_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                {{ __('newguidings.others') }}
-                            </label>
-                            <textarea class="form-control extra-input" name="recommended_others" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
-                        </div>
+                        @foreach($guiding_additional_infos as $guiding_additional_info)
+                            <div class="btn-checkbox-container">
+                                <input type="checkbox" name="other_information[]" value="additional_info_{{ $guiding_additional_info['id'] }}" id="additional_info_{{ $guiding_additional_info['id'] }}">
+                                <label for="additional_info_{{ $guiding_additional_info['id'] }}" class="btn btn-outline-primary m-2 btn-checkbox">
+                                    {{ $guiding_additional_info['value'] }}
+                                </label>
+                                <textarea class="form-control extra-input" name="{{ $guiding_additional_info['id'] }}" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
 
@@ -543,40 +411,18 @@
                     <label for="requiements_taking_part" class="form-label fw-bold fs-5">
                         {{ __('newguidings.requirements_taking_part') }}
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                           title="{{ __('newguidings.tooltip_requirements_taking_part') }}"></i>
+                           title="{{ __('newguidings.tooltip_requirements') }}"></i>
                     </label>
                     <div class="btn-group-toggle">
-                        <div class="btn-checkbox-container">
-                            <input type="checkbox" name="requiements_taking_part[]" value="license_required" id="license_required_checkbox">
-                            <label for="license_required_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                {{ __('newguidings.license_or_permit_required') }}
-                            </label>
-                            <textarea class="form-control extra-input" name="license_required" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
-                        </div>
-                        
-                        <div class="btn-checkbox-container">
-                            <input type="checkbox" name="requiements_taking_part[]" value="specific_clothing" id="specific_clothing_checkbox">
-                            <label for="specific_clothing_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                {{ __('newguidings.specific_clothing_required') }}
-                            </label>
-                            <textarea class="form-control extra-input" name="specific_clothing" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
-                        </div>
-                        
-                        <div class="btn-checkbox-container">
-                            <input type="checkbox" name="requiements_taking_part[]" value="certain_experience" id="certain_experience_checkbox">
-                            <label for="certain_experience_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                {{ __('newguidings.certain_experience_required') }}
-                            </label>
-                            <textarea class="form-control extra-input" name="certain_experience" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
-                        </div>
-                        
-                        <div class="btn-checkbox-container">
-                            <input type="checkbox" name="requiements_taking_part[]" value="manufacturer_requirements" id="manufacturer_requirements_checkbox">
-                            <label for="manufacturer_requirements_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                {{ __('newguidings.others') }}
-                            </label>
-                            <textarea class="form-control extra-input" name="manufacturer_requirements" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
-                        </div>
+                        @foreach($guiding_requirements as $guiding_requirement)
+                            <div class="btn-checkbox-container">
+                                <input type="checkbox" name="requiements_taking_part[]" value="requiements_taking_part_{{ $guiding_requirement['id'] }}" id="requiements_taking_part_{{ $guiding_requirement['id'] }}">
+                                <label for="requiements_taking_part_{{ $guiding_requirement['id'] }}" class="btn btn-outline-primary m-2 btn-checkbox">
+                                    {{ $guiding_requirement['value'] }}
+                                </label>
+                                <textarea class="form-control extra-input" name="{{ $guiding_requirement['id'] }}" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
 
@@ -589,45 +435,15 @@
                            title="{{ __('newguidings.tooltip_recommended_preparation') }}"></i>
                     </label>
                     <div class="btn-group-toggle">
-                        <div class="btn-checkbox-container">
-                            <input type="checkbox" name="recommended_preparation[]" value="sun_protection" id="sun_protection_checkbox">
-                            <label for="sun_protection_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                {{ __('newguidings.sun_protection') }}
-                            </label>
-                            <textarea class="form-control extra-input" name="sun_protection" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
-                        </div>
-                        
-                        <div class="btn-checkbox-container">
-                            <input type="checkbox" name="recommended_preparation[]" value="food_drinks" id="food_drinks_checkbox">
-                            <label for="food_drinks_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                {{ __('newguidings.food_drinks') }}
-                            </label>
-                            <textarea class="form-control extra-input" name="food_drinks" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
-                        </div>
-                        
-                        <div class="btn-checkbox-container">
-                            <input type="checkbox" name="recommended_preparation[]" value="own_equipment" id="own_equipment_checkbox">
-                            <label for="own_equipment_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                {{ __('newguidings.own_equipment') }}
-                            </label>
-                            <textarea class="form-control extra-input" name="own_equipment" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
-                        </div>
-                        
-                        <div class="btn-checkbox-container">
-                            <input type="checkbox" name="recommended_preparation[]" value="specific_clothing_recommended" id="specific_clothing_recommended_checkbox">
-                            <label for="specific_clothing_recommended_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                {{ __('newguidings.specific_clothing') }}
-                            </label>
-                            <textarea class="form-control extra-input" name="specific_clothing_recommended" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
-                        </div>
-                        
-                        <div class="btn-checkbox-container">
-                            <input type="checkbox" name="recommended_preparation[]" value="others_recommended" id="others_recommended_checkbox">
-                            <label for="others_recommended_checkbox" class="btn btn-outline-primary m-2 btn-checkbox">
-                                {{ __('newguidings.others') }}
-                            </label>
-                            <textarea class="form-control extra-input" name="others_recommended" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
-                        </div>
+                        @foreach($guiding_recommendations as $guiding_recommendation)
+                            <div class="btn-checkbox-container">
+                                <input type="checkbox" name="recommended_preparation[]" value="recommended_preparation_{{ $guiding_recommendation['id'] }}" id="recommended_preparation_{{ $guiding_recommendation['id'] }}">
+                                <label for="recommended_preparation_{{ $guiding_recommendation['id'] }}" class="btn btn-outline-primary m-2 btn-checkbox">
+                                    {{ $guiding_recommendation['value'] }}
+                                </label>
+                                <textarea class="form-control extra-input" name="{{ $guiding_recommendation['id'] }}" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
 
@@ -699,11 +515,11 @@
                     </div>
                     <div id="duration_details" class="mt-3" style="display: none;">
                         <div id="hours_input" class="input-group mt-2">
-                            <span class="input-group-text">Number of hours:</span>
+                            <span class="input-group-text">{{ __('newguidings.number_of_hours') }}:</span>
                             <input type="number" id="duration_hours" name="duration_hours" class="form-control" value="{{ $formData['duration_hours'] ?? '' }}" min="1" max="24">
                         </div>
                         <div id="days_input" class="input-group mt-2" style="display: none;">
-                            <span class="input-group-text">Number of days:</span>
+                            <span class="input-group-text">{{ __('newguidings.number_of_days') }}:</span>
                             <input type="number" id="duration_days" name="duration_days" class="form-control" value="{{ $formData['duration_days'] ?? '' }}" min="2">
                         </div>
                     </div>
@@ -751,7 +567,7 @@
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="{{ __('newguidings.tooltip_included_in_price') }}"></i>
                     </label>
-                    <input type="text" class="form-control" name="inclussions" id="inclussions" data-role="tagsinput" placeholder="{{ __('newguidings.select_inclussions') }}">
+                    <input type="text" class="form-control" name="inclussions" id="inclussions" data-role="tagsinput" placeholder="{{ __('newguidings.inclusions_placeholder') }}">
                 </div>
 
                 <hr>
