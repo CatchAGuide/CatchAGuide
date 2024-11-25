@@ -2,20 +2,20 @@
 return [
     'header-title' => 'Finde deine nächste Angeltour!',
     'header-message' => 'Suche Angebote für Angelausflüge, Angelurlaube und vieles mehr',
-    'header-become-guide' => 'Angeltour anbieten',
-    'header-login' => 'Log in',
+    'header-become-guide' => 'Angeltouren anbieten',
+    'header-login' => 'Einloggen',
     'header-signup' => 'Registrieren',
     'header-profile' => 'Profil',
     'header-logout' => 'Logout',
 
     'searchbar-destination' => 'Ort',
     'searchbar-person' => 'Personen',
-    'searchbar-targetfish' => 'Zielfisch',
+    'searchbar-targetfish' => 'Zielfische',
     'searchbar-search' => 'Suchen',
     'searchbar-search-placeholder' => 'Entdecken Sie Ihr Traumangelziel...',
 
-    'filter-fishing-near-me' => 'Angeln in der Nähe',
-    'filter-magazine' => 'Magazin',
+    'filter-fishing-near-me' => 'In meiner Nähe',
+    'filter-magazine' => 'Angelmagazin',
 
     'usps-first' => 'Einfache und direkte Online-Buchung',
     'usps-second' => 'Bester Kundenservice auf dem Markt',
