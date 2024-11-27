@@ -56,6 +56,9 @@ return [
 
 
     // filter
+    'show_on_map' => 'Show on map',
+    'filter' => 'Filter',
+    'filter_by' => 'Filter by',
     'location' => 'Location',
     'enter-location' => 'Enter Location',
     'radius' => 'Radius',

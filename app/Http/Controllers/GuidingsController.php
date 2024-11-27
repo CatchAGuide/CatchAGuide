@@ -226,18 +226,6 @@ class GuidingsController extends Controller
 
         }
 
-        if($request->has('ratings')){
-            $ratings = $request->get('ratings');
-
-            $title .= 'Ratings ' . $request->ratings . ' | ';
-            $filter_title .= 'Ratings ' . $request->ratings . ' Star/s, ';
-
-            $query->whereIn('user_id', function ($query1) use ($ratings) {
-                $query1->select('guide_id')->from('ratings')->where('rating', $ratings);
-            });
-
-        }
-
         $radius = null; // Radius in miles
         if($request->has('radius')){
 

@@ -180,11 +180,11 @@
         }
 
         .page-header {
-            margin-top: 0px!important;
+            margin-top: -60px!important;
         }
     }
 
-    @media only screen and (max-width: 451px) and (max-width: 766px) {
+    @media only screen and (min-width: 451px) and (max-width: 766px) {
         #toggleFilterBtn{
             display:block;
         }
@@ -194,7 +194,7 @@
         }
 
         .page-header {
-            margin-top: 0px!important;
+            margin-top: -60px!important;
         }
     }
     @media only screen and (min-width: 767px) and (max-width: 991px) {
@@ -276,7 +276,11 @@
     .mobile-selection-sfm {
         position: sticky;
         z-index: 10;
-        top: 10px;
+        top: 0;
+        background-color: #fff;
+        padding-top: 15px;
+        padding-left: 15px;
+        padding-right: 15px;
     }
 </style>
 
@@ -329,12 +333,14 @@
                                 @endforeach
                             </div>
                             <a class="btn border-start cag-btn-inverted" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottomSearch" aria-controls="offcanvasBottomSearch" href="javascript:void(0)" style="border-left: 1px solid #ccc!important; z-index: 2; width:30%;">
-                                <i class="fa fa-filter me-1"></i>Filter
+                                <i class="fa fa-filter me-1"></i>@lang('message.filter') 
                                 @if($guidings->count() > 0)
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="guiding-filter-counter">{{ $guidings->count() }}</span>
+                                    @if(request()->has('radius') || request()->has('num_guests') || request()->has('target_fish') || request()->has('water') || request()->has('fishing_type') || request()->has('price_range'))
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="guiding-filter-counter">{{ $guidings->count() }}</span>
+                                    @endif
                                 @endif
                             </a>
-                            <a class="btn border cag-btn-inverted" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)" style=" border-left: 2px solid #ccc!important; width:40%;"><i class="fa fa-map-marker-alt me-2"></i>Show on Map</a>
+                            <a class="btn border cag-btn-inverted" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)" style=" border-left: 2px solid #ccc!important; width:40%;"><i class="fa fa-map-marker-alt me-2"></i>@lang('destination.show_on_map')</a>
 
                         </div>
                     </div>
@@ -342,12 +348,12 @@
                 <div id="filterCard" class="col-sm-12 col-lg-3">
                     <div class="card mb-2 d-none d-sm-block">
                         <div id="map-placeholder">
-                            <a class="btn btn-primary" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)">Show on map</a>
+                            <a class="btn btn-primary" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)">@lang('destination.show_on_map')</a>
                         </div>
                     </div>
                     <div class="card d-block d-none d-sm-block mb-1">
                         <div class="card-header">
-                            Sort By:
+                            @lang('message.sortby'):
                         </div>
                         <div class="card-body border-bottom">
                             <form id="form-sortby-2" action="{{route('guidings.index')}}" method="get">
@@ -373,7 +379,7 @@
                     </div>
                     <div class="card d-block d-none d-sm-block">
                         <div class="card-header">
-                            Filter By:
+                            @lang('destination.filter_by'):
                         </div>
                         <div class="card-body border-bottom">
                             <form id="filterContainer" action="{{route('guidings.index')}}" method="get" class="shadow-sm px-4 py-2">
@@ -457,7 +463,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-12">
+                                    <div class="col-12 mb-2">
                                         <div class="input-group my-1">
                                             <div class="input-group-prepend border-0 border-bottom ">
                                                 <span class="d-flex align-items-center px-2 h-100">
@@ -473,24 +479,6 @@
                                                 <option value="151-200" {{ request()->get('price_range') ? request()->get('price_range') == '601-800' ? 'selected' : null : null }}>151 - 200 p.P.</option>
                                                 <option value="201-250" {{ request()->get('price_range') ? request()->get('price_range') == '801-1000' ? 'selected' : null : null }}>201 - 250 p.P.</option>
                                                 <option value="350" {{ request()->get('price_range') ? request()->get('price_range') == '1001' ? 'selected' : null : null }}>350 and more</option>
-                                            </select>
-                                          </div>
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="input-group my-1">
-                                            <div class="input-group-prepend border-0 border-bottom ">
-                                                <span class="d-flex align-items-center px-2 h-100">
-                                                    <i class="fa fa-star"></i>
-                                                </span>
-                                            </div>
-                                            <select id="ratings" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="ratings">
-                                                <option selected disabled hidden>Ratings</option>
-                                                <option value="" >@lang('message.choose')...</option>
-                                                <option value="1" {{ request()->get('ratings') ? request()->get('ratings') == 1 ? 'selected' : null : null }}>1 Star</option>
-                                                <option value="2" {{ request()->get('ratings') ? request()->get('ratings') == 2 ? 'selected' : null : null }}>2 Stars</option>
-                                                <option value="3" {{ request()->get('ratings') ? request()->get('ratings') == 3 ? 'selected' : null : null }}>3 Stars</option>
-                                                <option value="4" {{ request()->get('ratings') ? request()->get('ratings') == 4 ? 'selected' : null : null }}>4 Stars</option>
-                                                <option value="5" {{ request()->get('ratings') ? request()->get('ratings') == 5 ? 'selected' : null : null }}>5 Stars</option>
                                             </select>
                                           </div>
                                     </div>
@@ -772,7 +760,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-12">
+                    <div class="col-12 mb-2">
                         <div class="input-group my-1">
                             <div class="input-group-prepend border-0 border-bottom ">
                                 <span class="d-flex align-items-center px-2 h-100">
@@ -788,24 +776,6 @@
                                 <option value="151-200" {{ request()->get('price_range') ? request()->get('price_range') == '601-800' ? 'selected' : null : null }}>151 - 200 p.P.</option>
                                 <option value="201-250" {{ request()->get('price_range') ? request()->get('price_range') == '801-1000' ? 'selected' : null : null }}>201 - 250 p.P.</option>
                                 <option value="350" {{ request()->get('price_range') ? request()->get('price_range') == '1001' ? 'selected' : null : null }}>350 and more</option>
-                            </select>
-                          </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="input-group my-1">
-                            <div class="input-group-prepend border-0 border-bottom ">
-                                <span class="d-flex align-items-center px-2 h-100">
-                                    <i class="fa fa-star"></i>
-                                </span>
-                            </div>
-                            <select id="ratingsOffCanvass" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="ratings">
-                                <option selected disabled hidden>Ratings</option>
-                                <option value="" >@lang('message.choose')...</option>
-                                <option value="1" {{ request()->get('ratings') ? request()->get('ratings') == 1 ? 'selected' : null : null }}>1 Star</option>
-                                <option value="2" {{ request()->get('ratings') ? request()->get('ratings') == 2 ? 'selected' : null : null }}>2 Stars</option>
-                                <option value="3" {{ request()->get('ratings') ? request()->get('ratings') == 3 ? 'selected' : null : null }}>3 Stars</option>
-                                <option value="4" {{ request()->get('ratings') ? request()->get('ratings') == 4 ? 'selected' : null : null }}>4 Stars</option>
-                                <option value="5" {{ request()->get('ratings') ? request()->get('ratings') == 5 ? 'selected' : null : null }}>5 Stars</option>
                             </select>
                           </div>
                     </div>
@@ -1045,6 +1015,8 @@ function initializeSelect2() {
         center: position,
         styles: mapStyle,
         mapId: "DEMO_MAP_ID",
+        mapTypeControl: false,
+        streetViewControl: false,
     });
 
     // The marker, positioned at Uluru
