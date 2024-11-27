@@ -127,7 +127,12 @@
     function scrollToFormCenter() {
         const form = document.getElementById('newGuidingForm');
         if (form) {
-            form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const formTop = form.getBoundingClientRect().top + window.pageYOffset; // Get the element's position relative to the document
+        window.scrollTo({ 
+            top: formTop - 250, // Adjust for 150px offset
+            behavior: 'smooth'  // Smooth scrolling
+        });
         }
     }
 
