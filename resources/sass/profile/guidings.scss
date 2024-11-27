@@ -1,3 +1,4 @@
+@import "../settings/variables";
 #guidings-form{
     .step {
         display: none;
@@ -275,27 +276,39 @@
         background-color: #e8604c;
         border-color: #e8604c;
     }
-    
-    [id^="prevBtn"],
-    [id^="nextBtn"],
-    [id^="submitBtn"] {
-        background-color: #262e35;
-        color: white;
-        border-color: #262e35;
+    button{
         margin-top: 15px;
+        &[id^="nextBtn"]{
+            background-color: #262e35;
+            color: white;
+            border-color: #262e35;
+            &:hover{
+                background-color: $primary-color;
+                border-color: $primary-color;
+            }
+        }
+        &[id^="prevBtn"]{
+            background-color: #fff;
+            color: #262e35;
+            border-color: #262e35;
+            &:hover{
+                background-color: #262e35;
+                color: white;
+            }
+        }
+        &[id^="submitBtn"]{
+            background-color: $primary-color;
+            color: white;
+            border-color: $primary-color;
+            &:hover{
+                background-color: $primary-color;
+                border-color: $primary-color;
+            }
+        }
     }
-    
-    [id^="nextBtn"]:hover,
-    [id^="submitBtn"]:hover {
-        background-color: #1f8017;
-        border-color: #1f8017;
-    }
-    
-    [id^="prevBtn"]:hover {
-        background-color: #d4c614;
-        border-color: #d4c614;
-    }
-    
+    label.form-label {
+    text-transform: capitalize;
+}
     .step-form-container {
         flex-grow: 1;
         width: 100%;
@@ -642,6 +655,15 @@
             flex: 1;
             gap: 4px;
         }
+    }
+    input#season_monthly {
+        display: none !important;
+    }
+    .row-button{
+        display: flex;
+    }
+    label.form-label {
+        text-transform: capitalize;
     }
 }
 // Media Queries

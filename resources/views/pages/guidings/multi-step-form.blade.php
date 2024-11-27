@@ -109,9 +109,14 @@
                         </button>
                     </div>
                     <div class="right-buttons">
-                        <button type="button" class="btn btn-primary" id="nextBtn1">
-                            {{ __('newguidings.next') }}
-                        </button>
+                        <div class="row-button">
+                            <div>
+
+                            </div>
+                            <button type="button" class="btn btn-primary" id="nextBtn1">
+                                {{ __('newguidings.next') }}
+                            </button>
+                        </div>
                         <button type="submit" class="btn btn-primary" id="submitBtn1" style="display: none;">
                             {{ __('newguidings.submit_publish') }}
                         </button>
@@ -211,12 +216,14 @@
                         </button>
                     </div>
                     <div class="right-buttons">
-                        <button type="button" class="btn btn-primary" id="prevBtn2">
-                            {{ __('newguidings.previous') }}
-                        </button>
-                        <button type="button" class="btn btn-primary" id="nextBtn2">
-                            {{ __('newguidings.next') }}
-                        </button>
+                        <div class="row-button">
+                            <button type="button" class="btn btn-info" id="prevBtn2">
+                                {{ __('newguidings.previous') }}
+                            </button>
+                            <button type="button" class="btn btn-primary" id="nextBtn2">
+                                {{ __('newguidings.next') }}
+                            </button>
+                        </div>
                         <button type="submit" class="btn btn-primary" id="submitBtn2" style="display: none;">
                             {{ __('newguidings.submit_publish') }}
                         </button>
@@ -294,12 +301,14 @@
                         </button>
                     </div>
                     <div class="right-buttons">
+                    <div class="row-button">
                         <button type="button" class="btn btn-primary" id="prevBtn3">
                             {{ __('newguidings.previous') }}
                         </button>
                         <button type="button" class="btn btn-primary" id="nextBtn3">
                             {{ __('newguidings.next') }}
                         </button>
+                    </div>
                         <button type="submit" class="btn btn-primary" id="submitBtn3" style="display: none;">
                             {{ __('newguidings.submit_publish') }}
                         </button>
@@ -369,12 +378,14 @@
                         </button>
                     </div>
                     <div class="right-buttons">
+                    <div class="row-button">
                         <button type="button" class="btn btn-primary" id="prevBtn4">
                             {{ __('newguidings.previous') }}
                         </button>
                         <button type="button" class="btn btn-primary" id="nextBtn4">
                             {{ __('newguidings.next') }}
                         </button>
+                    </div>
                         <button type="submit" class="btn btn-primary" id="submitBtn4" style="display: none;">
                             {{ __('newguidings.submit_publish') }}
                         </button>
@@ -454,12 +465,14 @@
                         </button>
                     </div>
                     <div class="right-buttons">
+                    <div class="row-button">
                         <button type="button" class="btn btn-primary" id="prevBtn5">
                             {{ __('newguidings.previous') }}
                         </button>
                         <button type="button" class="btn btn-primary" id="nextBtn5">
                             {{ __('newguidings.next') }}
                         </button>
+                    </div>
                         <button type="submit" class="btn btn-primary" id="submitBtn5" style="display: none;">
                             {{ __('newguidings.submit_publish') }}
                         </button>
@@ -588,12 +601,14 @@
                         </button>
                     </div>
                     <div class="right-buttons">
-                        <button type="button" class="btn btn-primary" id="prevBtn6">
-                            {{ __('newguidings.previous') }}
-                        </button>
-                        <button type="button" class="btn btn-primary" id="nextBtn6">
-                            {{ __('newguidings.next') }}
-                        </button>
+                        <div class="row-button">
+                            <button type="button" class="btn btn-primary" id="prevBtn6">
+                                {{ __('newguidings.previous') }}
+                            </button>
+                            <button type="button" class="btn btn-primary" id="nextBtn6">
+                                {{ __('newguidings.next') }}
+                            </button>
+                        </div>
                         <button type="submit" class="btn btn-primary" id="submitBtn6" style="display: none;">
                             {{ __('newguidings.submit_publish') }}
                         </button>
@@ -683,8 +698,8 @@
                             {{ __('newguidings.available_on_certain_months_only') }}
                         </label>
                     </div>
-                    
                     <div id="monthly_selection" style="display: none;">
+                        <p class="mb-0" style="text-align:center;">Please select available months</p>
                         <div class="d-flex flex-wrap btn-group-toggle">
                             @foreach(__('newguidings.months') as $month)
                                 <div class="btn-checkbox-container" style="flex: 0 0 20%; max-width: 20%; padding: 5px;">
@@ -701,9 +716,14 @@
                     <div class="left-buttons">
                     </div>
                     <div class="right-buttons">
-                        <button type="button" class="btn btn-primary" id="prevBtn7">
-                            {{ __('newguidings.previous') }}
-                        </button>
+                        <div class="row-button">
+                            <button type="button" class="btn btn-info" id="prevBtn7">
+                                {{ __('newguidings.previous') }}
+                            </button>
+                            <div>
+
+                            </div>
+                        </div>
                         <button type="submit" class="btn btn-primary" id="submitBtn7">
                             {{ __('newguidings.submit_publish') }}
                         </button>
