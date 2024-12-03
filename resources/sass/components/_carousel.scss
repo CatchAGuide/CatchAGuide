@@ -63,19 +63,53 @@
       }
     }
   }
-  button:has(.carousel-control-next,.carousel-control-prev){
-    background-color: #e8e8e8;
-    font-size: 16px;
+
+  .carousel-control-prev {
+    left: 5px;
+
+    @include media(">=tablet") {
+      left: 5px;
+    }
+
+    &-icon {
+      width: 1.2rem;
+      height: 1.2rem;
+    }
+  }
+
+  .carousel-control-next {
+    right: 5px;
+
+    @include media(">=tablet") {
+      right: 5px;
+    }
+
+    &-icon {
+      width: 1.2rem;
+      height: 1.2rem;
+    }
   }
 
   .carousel-control-next,
   .carousel-control-prev {
-    width: initial;
-    top: calc(50% - 15px);
+    width: 28px;
+    height: 28px;
+    top: 50%;
+    opacity: 1;
+    transition: opacity 0.25s ease-in-out;
     background: map-get($colors, "light");
-    height: max-content;
+    transform: translateY(-50%);
     border-radius: 50%;
     padding: 10px;
-    opacity: 1;
+
+    &:is(:hover, :focus) {
+      opacity: 1;
+    }
+
+    @include media(">=L-phone") {
+      top: 50%;
+      width: 32px;
+      height: 32px;
+    }
   }
 }

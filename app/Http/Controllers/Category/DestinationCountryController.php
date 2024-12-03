@@ -9,6 +9,7 @@ use App\Models\Method;
 use App\Models\Target;
 use App\Models\Water;
 use Config;
+use DB;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -82,7 +83,7 @@ class DestinationCountryController extends Controller
             Session::put('random_seed', $randomSeed);
         }
 
-        $query = Guiding::query()->where('status',1)->whereNotNull('lat')->whereNotNull('lng');
+        $query = Guiding::select(['*', DB::raw('(CASE WHEN price_five_persons IS NOT NULL THEN price_five_persons/5 WHEN price_four_persons IS NOT NULL THEN price_four_persons/4 WHEN price_three_persons IS NOT NULL THEN price_three_persons/3 WHEN price_two_persons IS NOT NULL THEN price_two_persons/2 ELSE price END) AS lowest_price')])->where('status',1)->whereNotNull('lat')->whereNotNull('lng');
 
         if (empty($request->all())) {
             $query->orderByRaw("RAND($randomSeed)");
@@ -255,6 +256,23 @@ class DestinationCountryController extends Controller
 
         }
 
+        if($request->has('price_range')){
+            $price_range = $request->get('price_range');
+            $price = explode('-', $price_range);
+
+            $title .= 'Price ' . $request->price_range . ' | ';
+
+            //$query->select(['*', DB::raw('(CASE WHEN price_five_persons IS NOT NULL THEN price_five_persons/5 WHEN price_four_persons IS NOT NULL THEN price_four_persons/4 WHEN price_three_persons IS NOT NULL THEN price_three_persons/3 WHEN price_two_persons IS NOT NULL THEN price_two_persons/2 ELSE price END) AS lowest_price')]);
+            if (count($price) > 1) {
+                $query->havingRaw('lowest_price >= ? AND lowest_price <= ?', $price);
+            } else {
+                $query->havingRaw('lowest_price >= ?', $price);
+
+            }
+
+        }
+        
+        $guidings_total = $query->count();
         $allGuidings = $query->get();
 
         $otherguidings = array();
@@ -276,11 +294,9 @@ class DestinationCountryController extends Controller
 
        
         $guidings = $query->paginate(6);
-
-
         $guidings->appends(request()->except('page'));
 
-        $data = compact('row_data', 'regions', 'cities', 'faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit', 'guidings', 'radius', 'allGuidings', 'otherguidings', 'title');
+        $data = compact('row_data', 'regions', 'cities', 'faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit', 'guidings', 'radius', 'allGuidings', 'otherguidings', 'title', 'guidings_total');
 
         return view('pages.category.country', $data);
     }

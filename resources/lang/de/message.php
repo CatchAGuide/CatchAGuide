@@ -62,6 +62,9 @@ return [
     
     
     // filter
+    'show_on_map' => 'Auf Karte anzeigen',
+    'filter' => 'Filtern',
+    'filter_by' => 'Filtern nach',
     'location' => 'Ort',
     'enter-location' => 'Ort eingeben',
     'radius' => 'Radius',

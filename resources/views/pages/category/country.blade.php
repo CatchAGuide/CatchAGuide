@@ -7,7 +7,12 @@
 
 @section('custom_style')
 <style>
-
+    #destination{
+        max-width: 1600px;
+    }
+    .guiding-item-desc a:hover {
+        color: #000!important;
+    }
     #page-main-intro {
         /*white-space: nowrap;*/
         /*overflow: hidden;
@@ -30,11 +35,11 @@
     #carousel-cities .dimg-fluid {
         min-height: 301.6px;
     }
-    #destination,
+    /* #destination,
     #destination a
      {
         font-size: 14px;
-    }
+    } */
     .country-listing-item p {
         font-size: 12px;
     }
@@ -52,6 +57,9 @@
         }
         #carousel-regions .carousel-inner .carousel-item > div:first-child {
             display: block;
+        }
+        .dimg-fluid {
+            width: 100%!important;
         }
     }
 
@@ -100,12 +108,17 @@
         text-align: center;
         padding-top: 40%;
     }
+    #map-placeholder button {
+        position: absolute;
+        top: 44%;
+        left: 37%;
+    }
 
     /*.country-listing-item .carousel-inner {
         height: 256px;
     }*/
 
-    .country-listing-item .carousel-control-prev,
+    /* .country-listing-item .carousel-control-prev,
     .country-listing-item .carousel-control-next {
         width: 30px!important;
         height: 30px!important;
@@ -116,7 +129,7 @@
         width: 256px!important;
         height: 300px!important;
         object-fit: cover;
-    }
+    } */
 
     .btn-outline-theme {
         color: #E8604C!important;
@@ -197,7 +210,29 @@
         color: #fff !important;
         border: 2px solid #E8604C !important;
     }
-
+    .cag-btn {
+        background-color: #E8604C !important;
+        color: #fff !important;
+        border: 2px solid #E8604C !important;
+    }
+    .cag-btn-inverted {
+        background-color: #313041 !important;
+        color: #fff !important;
+        border: 2px solid #313041 !important;
+    }
+    .mobile-selection-sfm {
+        position: sticky;
+        z-index: 10;
+        top: 0;
+        background-color: #fff;
+        padding-top: 15px;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    .dimg-fluid {
+        width: 300px;
+        height:300px;
+    }
 </style>
 @endsection
 
@@ -219,15 +254,34 @@
 
                 @if($region_count > 0)
                 <h5 class="mb-2">@lang('destination.all_region')</h5>
-                <div id="carousel-regions" class="carousel slide mb-4" data-bs-ride="carousel" {!! ($region_count <= 4) ? 'data-bs-interval="false"' : '' !!}>
-                    <div class="carousel-inner" role="listbox">
-                        @foreach($regions as $region)
-                        <div class="carousel-item {{ (($region_counter == 0)? 'active' : '') }}">
-                            <div class="col-md-3">
+                <div id="carousel-regions" class="owl-carousel owl-theme mb-4">
+                    @foreach($regions as $region)
+                        <div class="item">
+                            <div class="col-sm-12">
                                 <a href="{{ route('destination.country', ['country' => $region->country_slug, 'region' => $region->slug]) }}">
                                     <div class="card">
                                         <div class="card-img">
-                                            <img src="{{ $region->getThumbnailPath() }}" class="dimg-fluid" style="width: 300px; height:300px;" alt="Image Not Available">
+                                            <img src="{{ $region->getThumbnailPath() }}" class="dimg-fluid" alt="Image Not Available">
+                                        </div>
+                                        <div class="card-img-overlay">
+                                            <h5>{{ $region->name }}</h5>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <!-- <div id="carousel-regions" class="carousel slide mb-4" data-bs-ride="carousel" {!! ($region_count <= 4) ? 'data-bs-interval="false"' : '' !!}>
+                    <div class="carousel-inner" role="listbox">
+                        @foreach($regions as $region)
+                        <div class="carousel-item {{ (($region_counter == 0)? 'active' : '') }}">
+                            <div class="col-sm-12 col-lg-3">
+                                <a href="{{ route('destination.country', ['country' => $region->country_slug, 'region' => $region->slug]) }}">
+                                    <div class="card">
+                                        <div class="card-img">
+                                            <img src="{{ $region->getThumbnailPath() }}" class="dimg-fluid" alt="Image Not Available">
                                         </div>
                                         <div class="card-img-overlay">
                                             <h5>{{ $region->name }}</h5>
@@ -251,19 +305,18 @@
                         <span class="visually-hidden">Next</span>
                     </button>
                     @endif
-                </div>
+                </div> -->
                 @endif
                 @if($city_count > 0)
                 <h5 class="mb-2">@lang('destination.all_cities')</h5>
-                <div id="carousel-cities" class="carousel slide mb-4" data-bs-ride="carousel" {!! ($city_count <= 4) ? 'data-bs-interval="false"' : '' !!}>
-                    <div class="carousel-inner" role="listbox">
-                        @foreach($cities as $city)
-                        <div class="carousel-item {{ (($city_counter == 0)? 'active' : '') }}">
-                            <div class="col-md-3">
+                <div id="carousel-cities" class="owl-carousel owl-theme mb-4">
+                    @foreach($cities as $city)
+                        <div class="item">
+                            <div class="col-sm-12 col-lgs-3">
                                 <a href="{{ route('destination.country', ['country' => $city->country_slug, 'region' => $city->region_slug, 'city' => $city->slug]) }}">
                                     <div class="card">
                                         <div class="card-img">
-                                            <img src="{{ $city->getThumbnailPath() }}" class="dimg-fluid" style="width: 300px; height:300px;" alt="Image Not Available">
+                                            <img src="{{ $city->getThumbnailPath() }}" class="dimg-fluid" alt="Image Not Available">
                                         </div>
                                         <div class="card-img-overlay">
                                             <h5>{{ $city->name }}</h5>
@@ -272,32 +325,79 @@
                                 </a>
                             </div>
                         </div>
-                            @php
-                                $city_counter++;
-                            @endphp
-                        @endforeach
-                    </div>
-                    @if($city_count > 4)
-                    <button class="carousel-control-prev" type="button" data-bs-target="#carousel-cities" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#carousel-cities" data-bs-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
-                    </button>
-                    @endif
+                    @endforeach
                 </div>
                 @endif
-                <h5 class="mb-2">@lang('destination.listing')</h5>
-                <div class="row mb-2">
+                <h5 class="mb-2 text-capitalize">@lang('destination.listing')</h5>
+                <div class="row mb-5">
+                    <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
+                        <div class="d-grid gap-2 w-100">
+                            <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+                                <div class="btn-group border rounded-start cag-btn-inverted" role="group" style=" width:30%;">
+                                    <button type="button" class="btn dropdown-toggle text-white" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-arrow-down-arrow-up me-1"></i>@lang('message.sortby')</button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=newest">@lang('message.newest')</a></li>
+                                        <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=price-asc">@lang('message.lowprice')</a></li>
+                                        <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=short-duration">@lang('message.shortduration')</a></li>
+                                        <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=long-duration">@lang('message.longduration')</a></li>
+                                    </ul>
+
+                                    @foreach(request()->except('sortby') as $key => $value)
+                                        @if(is_array($value))
+                                            @foreach($value as $arrayValue)
+                                                <input type="hidden" name="{{ $key }}[]" value="{{ $arrayValue }}">
+                                            @endforeach
+                                        @else
+                                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                        @endif
+                                    @endforeach
+                                </div>
+                                <a class="btn border-start cag-btn-inverted" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottomSearch" aria-controls="offcanvasBottomSearch" href="javascript:void(0)" style="border-left: 1px solid #ccc!important; z-index: 2; width:30%;">
+                                    <i class="fa fa-filter me-1"></i>@lang('message.filter') 
+                                    @if($guidings_total > 0)
+                                        @if(request()->has('radius') || request()->has('num_guests') || request()->has('target_fish') || request()->has('water') || request()->has('fishing_type') || request()->has('price_range'))
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="guiding-filter-counter">{{ $guidings->count() }}</span>
+                                        @endif
+                                    @endif
+                                </a>
+                                <a class="btn border cag-btn-inverted" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)" style=" border-left: 2px solid #ccc!important; width:40%;"><i class="fa fa-map-marker-alt me-2"></i>@lang('destination.show_on_map')</a>
+
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-sm-12 col-lg-3">
-                        <div class="card mb-2">
+                        <div class="card mb-2 d-none d-sm-block">
                             <div id="map-placeholder">
                                 <button class="btn btn-primary read-more-btn" data-bs-target="#mapModal" data-bs-toggle="modal">@lang('destination.show_on_map')</button>
                             </div>
                         </div>
-                        <div class="card">
+                        <div class="card d-block d-none d-sm-block mb-1">
+                            <div class="card-header">
+                                @lang('message.sortby'):
+                            </div>
+                            <div class="card-body border-bottom">
+                                <form id="form-sortby-2" action="{{route('guidings.index')}}" method="get">
+                                    <select class="form-select form-select-sm" name="sortby" id="sortby-2">
+                                        <option value="" disabled selected>@lang('message.choose')...</option>
+                                        <option value="newest" {{request()->get('sortby') ? request()->get('sortby') == 'newest' ? 'selected' : '' : '' }}>@lang('message.newest')</option>
+                                        <option value="price-asc" {{request()->get('sortby') ? request()->get('sortby') == 'price-asc' ? 'selected' : '' : '' }}>@lang('message.lowprice')</option>
+                                        <option value="short-duration" {{request()->get('sortby') ? request()->get('sortby') == 'short-duration' ? 'selected' : '' : '' }}>@lang('message.shortduration')</option>
+                                        <option value="long-duration" {{request()->get('sortby') ? request()->get('sortby') == 'long-duration' ? 'selected' : '' : '' }}>@lang('message.longduration')</option>
+                                    </select>
+
+                                    @foreach(request()->except('sortby') as $key => $value)
+                                        @if(is_array($value))
+                                            @foreach($value as $arrayValue)
+                                                <input type="hidden" name="{{ $key }}[]" value="{{ $arrayValue }}">
+                                            @endforeach
+                                        @else
+                                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                        @endif
+                                    @endforeach
+                                </form>
+                            </div>
+                        </div>
+                        <div class="card d-block d-none d-sm-block">
                             <div class="card-header">
                                 @lang('destination.filter_by'):
                             </div>
@@ -342,6 +442,25 @@
                                         </div>
                                         <select class="form-select" id="methods" name="methods[]"></select>
                                     </div>
+                                    <div class="col-12 mb-2">
+                                        <div class="input-group my-1">
+                                            <div class="input-group-prepend border-0 border-bottom ">
+                                                <span class="d-flex align-items-center px-2 h-100">
+                                                    <i class="fa fa-euro-sign"></i>
+                                                </span>
+                                            </div>
+                                            <select id="price_range" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="price_range">
+                                                <option selected disabled hidden>Price per Person</option>
+                                                <option value="" >@lang('message.choose')...</option>
+                                                <option value="1-50" {{ request()->get('price_range') ? request()->get('price_range') == '1-200' ? 'selected' : null : null }}>1 - 50 p.P.</option>
+                                                <option value="51-100" {{ request()->get('price_range') ? request()->get('price_range') == '201-400' ? 'selected' : null : null }}>51 - 100 p.P.</option>
+                                                <option value="101-150" {{ request()->get('price_range') ? request()->get('price_range') == '401-600' ? 'selected' : null : null }}>101 - 150 p.P.</option>
+                                                <option value="151-200" {{ request()->get('price_range') ? request()->get('price_range') == '601-800' ? 'selected' : null : null }}>151 - 200 p.P.</option>
+                                                <option value="201-250" {{ request()->get('price_range') ? request()->get('price_range') == '801-1000' ? 'selected' : null : null }}>201 - 250 p.P.</option>
+                                                <option value="350" {{ request()->get('price_range') ? request()->get('price_range') == '1001' ? 'selected' : null : null }}>350 and more</option>
+                                            </select>
+                                          </div>
+                                    </div>
                                     <button class="btn btn-sm theme-primary btn-theme-new w-100" type="submit">@lang('destination.search')</button>
                                 </form> 
                             </div>
@@ -349,16 +468,16 @@
                     </div>
                     <div class="col-sm-12 col-lg-9 country-listing-item">
                         @foreach($guidings as $guiding)
-                        <div class="row m-0 mb-2">
-                            <div class="col-md-12">
+                        <div class="row m-0 mb-2 guiding-list-item">
+                            <div class="tours-list__right col-md-12">
                                 <div class="row p-2 border shadow-sm bg-white rounded">
-                                    <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1">
+                                    <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-0">
                                         <div id="carouselExampleControls-{{$guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
                                             <div class="carousel-inner">
                                                 @if(count(get_galleries_image_link($guiding)))
                                                     @foreach(get_galleries_image_link($guiding) as $index => $gallery_image_link)
-                                                        <div class="object-fit-cover carousel-item @if($index == 0) active @endif">
-                                                            <img class="d-block object-fit-cover w-100" src="{{ asset($gallery_image_link) }}">
+                                                        <div class="carousel-item @if($index == 0) active @endif">
+                                                            <img  class="carousel-image" src="{{$gallery_image_link}}">
                                                         </div>
                                                     @endforeach
                                                 @endif
@@ -367,264 +486,111 @@
                                             @if(count(get_galleries_image_link($guiding)) > 1)
                                                 <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls-{{$guiding->id}}" data-bs-slide="prev">
                                                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                                    <span class="visually-hidden">@lang('destination.previous')</span>
+                                                    <span class="visually-hidden">Previous</span>
                                                 </button>
                                                 <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls-{{$guiding->id}}" data-bs-slide="next">
                                                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                                    <span class="visually-hidden">@lang('destination.next')</span>
+                                                    <span class="visually-hidden">Next</span>
                                                 </button>
                                             @endif
                                         </div>
-                                
                                     </div>
-                                    <div class="col-11 col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 mt-1">
-                                        <h5 class="fw-bolder text-truncate"><a class="text-dark" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">{{translate($guiding->title)}}</a></h5>
-                                        <div class="ratings mr-2 color-primary my-1" style="font-size:0.80rem">
-                                            @if(count($guiding->user->received_ratings) > 0)
-                                            @switch(two($guiding->user->average_rating()))
-                                                @case(two($guiding->user->average_rating()) >= 5)
-                                                    - {{one($guiding->user->average_rating())}}
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star"></i>
-                                                    @break
-                                                @case(two($guiding->user->average_rating()) >= 4.5)
-                                                    - {{one($guiding->user->average_rating())}}
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star-half"></i>
-                                                    @break
-                                                @case(two($guiding->user->average_rating()) >= 4)
-                                                    - {{one($guiding->user->average_rating())}}
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star"></i>
-                                                    @break
-                                                @case(two($guiding->user->average_rating()) >= 3.5)
-                                                    - {{one($guiding->user->average_rating())}}
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star-half"></i>
-                                                    @break
-                                                @case(two($guiding->user->average_rating()) >= 3)
-                                                    - {{one($guiding->user->average_rating())}}
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star"></i>
-                                                    @break
-                                                @case(two($guiding->user->average_rating()) >= 2.5)
-                                                    - {{one($guiding->user->average_rating())}}
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star-half"></i>
-                                                    @break
-                                                @case(two($guiding->user->average_rating()) >= 2)
-                                                    - {{one($guiding->user->average_rating())}}
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star"></i>
-                                                    @break
-                                                @case(two($guiding->user->average_rating()) >= 1.5)
-                                                    - {{one($guiding->user->average_rating())}}
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star-half"></i>
-                                                    @break
-                                                @case(two($guiding->user->average_rating()) >= 1)
-                                                    - {{one($guiding->user->average_rating())}}
-                                                    <i class="fa fa-star"></i>
-                                                    @break
-                                                @default
-                                                    - {{one($guiding->user->average_rating())}}
-                                                    <i class="fa fa-star"></i>
-                                            @endswitch
-
-                                            @if(count($guiding->user->received_ratings) >= 2) 
-                                                ({{count($guiding->user->received_ratings)}} Bewertungen)
-                                            @else 
-                                                ({{count($guiding->user->received_ratings)}} Bewertung)
-                                            @endif
-
-                                        @endif     
-                                        </div>
-                                        <span class="text-center" style="font-size:1rem;color:rgb(28, 28, 28)"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($guiding->location) }}</span>                                      
-                                        <div class="row mt-2">
-                                            <div class="col-6 col-sm-6 col-md-6">
-                                                <div class="d-flex align-items-center">
-                                                    <div>
-                                                        <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
-                                                    </div>
-                                                    <div class="mx-2">
-                                                        <div class="tours-list__content__trait__text" style="font-size:0.75rem">
-                                                            @php
-                                                            $guidingTargets = $guiding->guidingTargets->pluck('name')->toArray();
-                                                            if(app()->getLocale() == 'en'){
-                                                                $guidingTargets =  $guiding->guidingTargets->pluck('name_en')->toArray();
-                                                            }
-                                                            @endphp
-                                                            
-                                                            @if(!empty($guidingTargets))
-                                                                {{ implode(', ', $guidingTargets) }}
-                                                            @else
-                                                            {{ translate($guiding->threeTargets()) }}
-                                                            {{$guiding->target_fish_sonstiges ? " & " . translate($guiding->target_fish_sonstiges) : ""}}
-                                                            @endif
-                                                        </div>
-                                                    
+                                    <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 p-md-3 mt-md-1">
+                                    <a href="{{ $guiding->is_newguiding ? route('guidings.newShow', [$guiding->id, $guiding->slug]) : route('guidings.show', [$guiding->id, $guiding->slug]) }}">
+                                            <div class="guidings-item">
+                                                <div class="guidings-item-title">
+                                                    <h5 class="fw-bolder text-truncate">{{translate($guiding->title)}}</h5>
+                                                    <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($guiding->location) }}</span>                                      
+                                                </div>
+                                                @if ($guiding->user->average_rating())
+                                                <div class="guidings-item-ratings">
+                                                <div class="ratings-score">
+                                                        <span class="text-warning">★</span>
+                                                        <span>{{$guiding->user->average_rating()}} </span>
                                                     </div>
                                                 </div>
+                                                @endif
                                             </div>
-                                            <div class="col-6 col-sm-6 col-md-6">
-                                                <div class="d-flex align-items-center">
-                                                    <div>
-                                                        <img src="{{asset('assets/images/icons/water-waves.png')}}" height="20" width="20" alt="" />
-                                                    </div>
-                                                    <div class="mx-2">
-                                                        <div class="tours-list__content__trait__text" style="font-size:0.75rem">
-                                                            @php
-                                                            $guidingWaters = $guiding->guidingWaters->pluck('name')->toArray();
-                                                            if(app()->getLocale() == 'en'){
-                                                                $guidingWaters =  $guiding->guidingWaters->pluck('name_en')->toArray();
-                                                            }
-                                                            @endphp
-                                                            
-                                                            @if(!empty($guidingWaters))
-                                                                {{ implode(', ', $guidingWaters) }}
-                                                            @else
-                                                            {{ translate($guiding->threeWaters()) }}
-                                                            {{$guiding->water_sonstiges ? " & " . translate($guiding->water_sonstiges) : ""}}
-                                                            @endif
+                                            <div class="guidings-item-icon">
+                                                <div class="guidings-icon-container"> 
+                                                            <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
+                                                        <div class="">
+                                                            {{ $guiding->duration }} @if($guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
                                                         </div>
-                                                    
-                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="col-6 col-sm-6 col-md-6">
-                                                <div class="d-flex align-items-center">
-                                                    <div>
-                                                        <img src="{{asset('assets/images/icons/fishing-tool.png')}}" height="20" width="20" alt="" />
-                                                    </div>
-                                                    <div class="mx-2">
-                                                        <div class="tours-list__content__trait__text" style="font-size:0.75rem">
-                                                            @php
-                                                            $fishingtype = null;
-                                                            if($guiding->fishingTypes){
+                                                <div class="guidings-icon-container"> 
+                                                        <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" />
+                                                        <div class="">
+                                                        {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
+                                                        </div>
+                                                </div>
+                                                <div class="guidings-icon-container"> 
+                                                            <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
+                                                        <div class="">
+                                                            <div class="tours-list__content__trait__text" >
+                                                                @php
+                                                                $guidingTargets = $guiding->guidingTargets->pluck('name')->toArray();
                                                                 if(app()->getLocale() == 'en'){
-                                                                    $fishingtype = $guiding->fishingTypes->name_en;
-                                                                }else{
-                                                                   $fishingtype =  $guiding->fishingTypes->name;
+                                                                    $guidingTargets =  $guiding->guidingTargets->pluck('name_en')->toArray();
                                                                 }
-                                                            }
+                                                                @endphp
+                                                                
+                                                                @if(!empty($guidingTargets))
+                                                                    {{ implode(', ', $guidingTargets) }}
+                                                                @else
+                                                                {{ translate($guiding->threeTargets()) }}
+                                                                {{$guiding->target_fish_sonstiges ? " & " . translate($guiding->target_fish_sonstiges) : ""}}
+                                                                @endif
+                                                            </div>
                                                         
-                                                            @endphp
-                
-                                                            @if($fishingtype) {{$fishingtype}}  @else {{$guiding->fishing_type}}@endif
                                                         </div>
-                                                    
-                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="col-6 col-sm-6 col-md-6">
-                                                <div class="d-flex align-items-center">
-                                                    <div>
-                                                        <img src="{{asset('assets/images/icons/fishing.png')}}" height="20" width="20" alt="" />
-                                                    </div>
-                                                    <div class="mx-2">
-                                                        <div class="tours-list__content__trait__text" style="font-size:0.75rem">
-                                                            @php
-                                                            $guidingMethods = $guiding->guidingMethods->pluck('name')->toArray();
-                                                            if(app()->getLocale() == 'en'){
-                                                                $guidingMethods =  $guiding->guidingMethods->pluck('name_en')->toArray();
-                                                            }
-                                                            @endphp
-                                                            
-                                                            @if(!empty($guidingMethods))
-                                                                {{ implode(', ', $guidingMethods) }}
-                                                            @else
-                                                            {{ $guiding->threeMethods() }}
-                                                            {{$guiding->methods_sonstiges && $guiding->threeMethods() > 0 ? " & " . translate($guiding->methods_sonstiges) : null}}
-                                                            @endif
-                                                        </div>
-                                                    
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-6 col-sm-6 col-md-6">
-                                                <div class="d-flex align-items-center">
-                                                    <div>
-                                                        <img src="{{asset('assets/images/icons/fishing-man.png')}}" height="20" width="20" alt="" />
-                                                    </div>
-                                                    <div class="mx-2">
-                                                        <div class="tours-list__content__trait__text" style="font-size:0.75rem">
-                                                            @php
-                                                            $whereFishing = null;
-                                                            if($guiding->fishingFrom){
-                                                                if(app()->getLocale() == 'en'){
-                                                                    $whereFishing = $guiding->fishingFrom->name_en;
-                                                                }else{
-                                                                   $whereFishing =  $guiding->fishingFrom->name;
-                                                                }
-                                                            }
+                                                <div class="guidings-icon-container">
+                                                            <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
+                                                        <div class="">
+                                                            <div class="tours-list__content__trait__text" >
+                                                            {{$guiding->is_boat ? $guiding->boat_type : 'Shore'}}   
+                                                            </div>
                                                         
-                                                            @endphp
-                                                            @if($whereFishing) {{$whereFishing}} @else {{$guiding->fishing_from}} @endif    
                                                         </div>
-                                                    
-                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="col-6 col-sm-6 col-md-6">
-                                                <div class="d-flex align-items-center mt-2">
-                                                    <div class="icon-small">
-                                                        <span class="icon-user"></span>
+                                            <div class="inclusions-price">
+                                                    <div class="guidings-inclusions-container">
+                                                        @if(!empty($guiding->inclusions))
+                                                        <div class="guidings-included">
+                                                            <strong>What's Included</strong>
+                                                            <div class="inclusions-list">
+                                                                @php
+                                                                    $inclusions = json_decode($guiding->inclusions, true);
+                                                                    $maxToShow = 3; // Maximum number of inclusions to display
+                                                                @endphp
+
+                                                                @foreach ($inclusions as $index => $inclusion)
+                                                                    @if ($index < $maxToShow)
+                                                                        <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclusion['value'] }}</span>
+                                                                    @endif
+                                                                @endforeach
+
+                                                                @if (count($inclusions) > $maxToShow)
+                                                                    <span class="inclusion-item">+{{ count($inclusions) - $maxToShow }} more</span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                        @endif
                                                     </div>
-                                                    <div class="mx-2" style="font-size:0.75rem">
-                                                    {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
+                                                    <div class="guiding-item-price">
+                                                        <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$guiding->getLowestPrice()}}€ p.P.</span></h5>
+                                                        <div class="d-none d-flex flex-column mt-4">
+                                                            <!-- <a class="btn theme-primary btn-theme-new btn-sm" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">Details</a>
+                                                            <a class="btn btn-sm mt-2   {{ (auth()->check() ? (auth()->user()->isWishItem($guiding->id) ? 'btn-danger' : 'btn-outline-theme ') : 'btn-outline-theme') }}" href="{{ route('wishlist.add-or-remove', $guiding->id) }}">
+                                                                {{ (auth()->check() ? (auth()->user()->isWishItem($guiding->id) ? 'Added to Favorites' : 'Add to Favorites') : 'Add to Favorites') }}
+                                                            </a> -->
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-6 col-sm-6 col-md-6">
-                                                <div class="d-flex align-items-center">
-                                                    <div>
-                                                        <img src="{{asset('assets/images/icons/clock.svg')}}" height="20" width="20" alt="" />
-                                                    </div>
-                                                    <div class="mx-2" style="font-size:0.75rem">
-                                                        {{ $guiding->duration }} @if($guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-12">
-                                                <div class="mt-3">
-                                                    @if($guiding->user->profil_image)
-                                                    <img class="center-block rounded-circle"
-                                                    src="{{asset('images/'. $guiding->user->profil_image)}}" alt="" width="20"
-                                                    height="20">
-                                                    @else
-                                                        <img class="center-block rounded-circle"
-                                                            src="{{asset('images/placeholder_guide.jpg')}}" alt="" width="20"
-                                                            height="20">
-                                                    @endif
-                                                    <span class="color-primary" style="font-size:1rem">{{$guiding->user->firstname}}</span>
-                                                </div>
-                                            </div>
-     
-                                        </div>
-                                    </div>
-                                    <div class="col-12 col-sm-12 col-md-2 col-lg-3 col-xl-2 col-xxl-2  mt-3">
-                                        <div class="text-center">
-                                            <h5 class="mr-1 color-primary fw-bold text-center">@lang('message.from') {{ $guiding->getLowestPrice() }}€ p.p.</h4>
-                                        </div>
-                                        <div class="d-flex flex-column mt-4">
-                                            <a class="btn theme-primary btn-theme-new btn-sm" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">@lang('destination.details')</a>
-                                            <a class="btn btn-sm mt-2   {{ (auth()->check() ? (auth()->user()->isWishItem($guiding->id) ? 'btn-danger' : 'btn-outline-theme ') : 'btn-outline-theme') }}" href="{{ route('wishlist.add-or-remove', $guiding->id) }}">
-                                                {{ (auth()->check() ? (auth()->user()->isWishItem($guiding->id) ? __('destination.add_to_favorites') : __('destination.add_to_favorites')) : __('destination.add_to_favorites')) }}
-                                            </a>
-                                        </div>
-                                    </div>
+                                            </div>    
+                                    </a>
+                                </div>
                                 </div>
                             </div>
                         </div>
@@ -636,7 +602,7 @@
                 <div class="mb-3">{!! $row_data->content !!}</div>
 
                 @if($row_data->fish_avail_title != '' && $row_data->fish_avail_intro != '')
-                    <h4 class="mb-2">{{ $row_data->fish_avail_title }}</h4>
+                    <h2 class="mb-2 mt-3">{{ $row_data->fish_avail_title }}</h2>
                     <p>{!! $row_data->fish_avail_intro !!}</p>
                     @if($fish_chart->count() > 0)
                     <div class="table-responsive">
@@ -684,8 +650,8 @@
 
                 <div class="row">
                     @if($row_data->size_limit_title != '' && $row_data->size_limit_intro != '')
-                    <div class="col-sm-12 col-md-12 col-lg-12">
-                        <h4>{{ $row_data->size_limit_title }}</h4>
+                    <div class="col-sm-12 col-md-12 col-lg-12 mt-3">
+                        <h2>{{ $row_data->size_limit_title }}</h2>
                         <p>{!! $row_data->size_limit_intro !!}</p>
                         @if(!empty($fish_size_limit))
                         <table class="table table-bordered table-striped" id="fish_size_limit_table">
@@ -710,8 +676,8 @@
                     </div>
                     @endif
                     @if($row_data->time_limit_title != '' && $row_data->time_limit_intro != '')
-                    <div class="col-sm-12 col-md-12 col-lg-12">
-                        <h4>{{ $row_data->time_limit_title }}</h4>
+                    <div class="col-sm-12 col-md-12 col-lg-12 mt-3">
+                        <h2>{{ $row_data->time_limit_title }}</h2>
                         <p>{!! $row_data->time_limit_intro !!}</p>
                         @if(!empty($fish_time_limit))
                         <table class="table table-bordered table-striped" id="fish_time_limit_table">
@@ -737,7 +703,7 @@
                     @endif
                 </div>
                 @if($row_data->faq_title != '' && $faq->count() > 0)
-                <h4 class="mb-2">{{ $row_data->faq_title }}</h4>
+                <h2 class="mb-2 mt-3">{{ $row_data->faq_title }}</h2>
                     <div class="accordion mb-5" id="faq">
                         @foreach($faq as $row)
                             <div class="accordion-item">
@@ -794,19 +760,73 @@
             next = next.nextElementSibling
         }
     });*/
-    let itemsCollapseRegions = document.querySelectorAll('#carousel-regions .carousel-item');
-    itemsCollapseRegions.forEach((el) => {
-        const minPerSlide = (itemsCollapseRegions.length >= 4) ? 4 : itemsCollapseRegions.length;
-        let next = el.nextElementSibling
-        for (var i=1; i<minPerSlide; i++) {
-            if (!next) {
-                next = itemsCollapseRegions[0]
+    /*window.addEventListener('resize', function() {
+        var innerWidth = window.innerWidth;
+        var innerHeight = window.innerHeight;
+
+        if (innerWidth < 767) {
+
+        } else {
+
+        }
+
+    });*/
+    // let itemsCollapseRegions = document.querySelectorAll('#carousel-regions .carousel-item');
+    // itemsCollapseRegions.forEach((el) => {
+    //     const minPerSlide = (itemsCollapseRegions.length >= 4) ? 4 : itemsCollapseRegions.length;
+    //     let next = el.nextElementSibling;
+    //     for (var i=1; i<minPerSlide; i++) {
+    //         if (!next) {
+    //             next = itemsCollapseRegions[0]
+    //         }
+    //         let cloneChild = next.cloneNode(true)
+    //         el.appendChild(cloneChild.children[0])
+    //         next = next.nextElementSibling
+    //     }
+    // });
+    $(document).ready(function(){
+    $('#carousel-regions').owlCarousel({
+        loop: false,
+        margin: 10,
+        nav: true,
+        navText: ['<', '>'],
+        autoplay: true,
+        responsive: {
+            0: {
+                items: 1
+            },
+            600: {
+                items: 2
+            },
+            1000: {
+                items: 4
             }
-            let cloneChild = next.cloneNode(true)
-            el.appendChild(cloneChild.children[0])
-            next = next.nextElementSibling
         }
     });
+
+    $('#carousel-cities').owlCarousel({
+        loop: false,            // Infinite looping
+        margin: 10,            // Space between items
+        nav: true,             // Show next/prev buttons
+        dots: true,            // Show pagination dots
+        autoplay: true,        // Enable auto-play
+        navText: ['<', '>'],
+        responsive: {
+            0: {
+                items: 1   // Show 1 item on small screens
+            },
+            600: {
+                items: 2   // Show 2 items on medium screens
+            },
+            1000: {
+                items: 4   // Show 4 items on large screens
+            }
+        }
+    });
+});
+
+
+
 
     let itemsCollapseCities = document.querySelectorAll('#carousel-cities .carousel-item');
     itemsCollapseCities.forEach((el) => {
@@ -822,9 +842,8 @@
         }
     });
     
-    $(function(){
-
-        var word_char_count_allowed = 1200;
+    $(function() {
+        var word_char_count_allowed = $(window).width() <= 768 ? 300 : 1200;  // Adjust character count based on screen size
         var page_main_intro = $('.page-main-intro-text');
         var page_main_intro_text = page_main_intro.html();
         var page_main_intro_count = page_main_intro.text().length;
@@ -833,7 +852,7 @@
         var lessText = '<a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_less')</a>';
 
         var visible_text = page_main_intro_text.substring(0, word_char_count_allowed);
-        var hidden_text  = page_main_intro_text.substring(word_char_count_allowed);
+        var hidden_text = page_main_intro_text.substring(word_char_count_allowed);
 
         if (page_main_intro_count >= word_char_count_allowed) {
             $('.page-main-intro-text').html(visible_text + '<span class="more-ellipsis">' + ellipsis + '</span><span class="more-text" style="display:none;">' + hidden_text + '</span>');
@@ -858,7 +877,18 @@
             $('.see-more').hide();
         }
 
+        // Re-adjust the text length if window is resized
+        $(window).resize(function() {
+            word_char_count_allowed = $(window).width() <= 768 ? 300 : 1200;
+            visible_text = page_main_intro_text.substring(0, word_char_count_allowed);
+            hidden_text = page_main_intro_text.substring(word_char_count_allowed);
+
+            if (page_main_intro_count >= word_char_count_allowed) {
+                $('.page-main-intro-text').html(visible_text + '<span class="more-ellipsis">' + ellipsis + '</span><span class="more-text" style="display:none;">' + hidden_text + '</span>');
+            }
+        });
     });
+
 </script>
 <script>
 // Get the toggle button and filter container elements
@@ -886,6 +916,10 @@ function initializeSelect2() {
         placeholder: '@lang('message.target-fish')',
         width: 'resolve', // need to override the changed default
     });
+  
+    @if(request()->get('price_range'))
+        $('#price_range, #price_rangeOffCanvass').val('{{ request()->get('price_range') }}');
+    @endif
 
     @foreach($alltargets as $target)
     var targetname = '{{$target->name}}';
