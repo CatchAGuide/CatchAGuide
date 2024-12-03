@@ -1,5 +1,5 @@
 @include('pages.guidings.includes.styles.multi-step-form-style')
-<div class="card">
+<div id="guidings-form"  class="card">
     <div class="card-body">
         
         <div class="step-wrapper">
@@ -109,9 +109,14 @@
                         </button>
                     </div>
                     <div class="right-buttons">
-                        <button type="button" class="btn btn-primary" id="nextBtn1">
-                            {{ __('newguidings.next') }}
-                        </button>
+                        <div class="row-button">
+                            <div>
+
+                            </div>
+                            <button type="button" class="btn btn-primary" id="nextBtn1">
+                                {{ __('newguidings.next') }}
+                            </button>
+                        </div>
                         <button type="submit" class="btn btn-primary" id="submitBtn1" style="display: none;">
                             {{ __('newguidings.submit_publish') }}
                         </button>
@@ -130,14 +135,14 @@
                            title="{{ __('newguidings.tooltip_type_of_fishing') }}"></i>
                     </label>
                     <div class="row justify-content-center">
-                        <div class="col-md-6">
+                        <div class="col-6">
                             <div class="option-card" id="boatOption" onclick="selectOption('boat')">
                                 <i class="fas fa-ship option-icon"></i>
                                 <p class="option-label">{{ __('newguidings.boat') }}</p>
                                 <input type="radio" name="type_of_fishing_radio" value="boat" class="d-none">
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-6">
                             <div class="option-card" id="shoreOption" onclick="selectOption('shore')">
                                 <i class="fas fa-umbrella-beach option-icon"></i>
                                 <p class="option-label">{{ __('newguidings.shore') }}</p>
@@ -152,7 +157,7 @@
                     <div class="form-group">
                         
                         <label for="type_of_boat" class="form-label fw-bold fs-5">
-                            {{ __('newguidings.type_of_boat') }}
+                            <span class="text-capitalize">{{ __('newguidings.type_of_boat') }}</span>
                             <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                                title="{{ __('newguidings.tooltip_type_of_boat') }}"></i>
                         </label>
@@ -211,12 +216,14 @@
                         </button>
                     </div>
                     <div class="right-buttons">
-                        <button type="button" class="btn btn-primary" id="prevBtn2">
-                            {{ __('newguidings.previous') }}
-                        </button>
-                        <button type="button" class="btn btn-primary" id="nextBtn2">
-                            {{ __('newguidings.next') }}
-                        </button>
+                        <div class="row-button">
+                            <button type="button" class="btn btn-info" id="prevBtn2">
+                                {{ __('newguidings.previous') }}
+                            </button>
+                            <button type="button" class="btn btn-primary" id="nextBtn2">
+                                {{ __('newguidings.next') }}
+                            </button>
+                        </div>
                         <button type="submit" class="btn btn-primary" id="submitBtn2" style="display: none;">
                             {{ __('newguidings.submit_publish') }}
                         </button>
@@ -294,12 +301,14 @@
                         </button>
                     </div>
                     <div class="right-buttons">
+                    <div class="row-button">
                         <button type="button" class="btn btn-primary" id="prevBtn3">
                             {{ __('newguidings.previous') }}
                         </button>
                         <button type="button" class="btn btn-primary" id="nextBtn3">
                             {{ __('newguidings.next') }}
                         </button>
+                    </div>
                         <button type="submit" class="btn btn-primary" id="submitBtn3" style="display: none;">
                             {{ __('newguidings.submit_publish') }}
                         </button>
@@ -369,12 +378,14 @@
                         </button>
                     </div>
                     <div class="right-buttons">
+                    <div class="row-button">
                         <button type="button" class="btn btn-primary" id="prevBtn4">
                             {{ __('newguidings.previous') }}
                         </button>
                         <button type="button" class="btn btn-primary" id="nextBtn4">
                             {{ __('newguidings.next') }}
                         </button>
+                    </div>
                         <button type="submit" class="btn btn-primary" id="submitBtn4" style="display: none;">
                             {{ __('newguidings.submit_publish') }}
                         </button>
@@ -454,12 +465,14 @@
                         </button>
                     </div>
                     <div class="right-buttons">
+                    <div class="row-button">
                         <button type="button" class="btn btn-primary" id="prevBtn5">
                             {{ __('newguidings.previous') }}
                         </button>
                         <button type="button" class="btn btn-primary" id="nextBtn5">
                             {{ __('newguidings.next') }}
                         </button>
+                    </div>
                         <button type="submit" class="btn btn-primary" id="submitBtn5" style="display: none;">
                             {{ __('newguidings.submit_publish') }}
                         </button>
@@ -573,7 +586,7 @@
                 <hr>
                 <div class="form-group">
                     <label for="extra_pricing" class="form-label fw-bold fs-5">
-                        {{ __('newguidings.extra_pricing') }}
+                        <span>{{ __('newguidings.extra_pricing') }}</span>
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="{{ __('newguidings.tooltip_extras_booked_additionally') }}"></i>
                         <button type="button" id="add-extra" class="btn btn-sm btn-secondary ms-2"><i class="fas fa-plus"></i></button>
@@ -588,12 +601,14 @@
                         </button>
                     </div>
                     <div class="right-buttons">
-                        <button type="button" class="btn btn-primary" id="prevBtn6">
-                            {{ __('newguidings.previous') }}
-                        </button>
-                        <button type="button" class="btn btn-primary" id="nextBtn6">
-                            {{ __('newguidings.next') }}
-                        </button>
+                        <div class="row-button">
+                            <button type="button" class="btn btn-primary" id="prevBtn6">
+                                {{ __('newguidings.previous') }}
+                            </button>
+                            <button type="button" class="btn btn-primary" id="nextBtn6">
+                                {{ __('newguidings.next') }}
+                            </button>
+                        </div>
                         <button type="submit" class="btn btn-primary" id="submitBtn6" style="display: none;">
                             {{ __('newguidings.submit_publish') }}
                         </button>
@@ -683,8 +698,8 @@
                             {{ __('newguidings.available_on_certain_months_only') }}
                         </label>
                     </div>
-                    
                     <div id="monthly_selection" style="display: none;">
+                        <p class="mb-0" style="text-align:center;">Please select available months</p>
                         <div class="d-flex flex-wrap btn-group-toggle">
                             @foreach(__('newguidings.months') as $month)
                                 <div class="btn-checkbox-container" style="flex: 0 0 20%; max-width: 20%; padding: 5px;">
@@ -701,9 +716,14 @@
                     <div class="left-buttons">
                     </div>
                     <div class="right-buttons">
-                        <button type="button" class="btn btn-primary" id="prevBtn7">
-                            {{ __('newguidings.previous') }}
-                        </button>
+                        <div class="row-button">
+                            <button type="button" class="btn btn-info" id="prevBtn7">
+                                {{ __('newguidings.previous') }}
+                            </button>
+                            <div>
+
+                            </div>
+                        </div>
                         <button type="submit" class="btn btn-primary" id="submitBtn7">
                             {{ __('newguidings.submit_publish') }}
                         </button>
