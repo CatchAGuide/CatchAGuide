@@ -1021,7 +1021,7 @@
                                                 @if ($guiding->user->average_rating())
                                                 <div class="guidings-item-ratings">
                                                 <div class="ratings-score">
-                                                        <i data-lucide="star" size="32"></i>
+                                                <span class="text-warning">★</span>
                                                         <span>{{$guiding->user->average_rating()}} </span>
                                                     </div>
                                                 </div>

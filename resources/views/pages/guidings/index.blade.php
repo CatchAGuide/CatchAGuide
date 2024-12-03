@@ -36,7 +36,7 @@
         top: 20px;
     }
 
-    .carousel .carousel-control-next, 
+    /*.carousel .carousel-control-next, 
     .carousel .carousel-control-prev {
         background: rgba(0,0,0,0.5);
         border-radius: 50%;
@@ -44,7 +44,7 @@
         height: 30px;
         top: 50%;
         transform: translateY(-50%);
-    }
+    }*/
 
     .carousel.slide img {
         height: 300px;
@@ -75,10 +75,10 @@
         filter: none !important;
     }
 
-    .carousel .carousel-control-next, .carousel .carousel-control-prev {
+    /* .carousel .carousel-control-next, .carousel .carousel-control-prev {
         top: 50%;
         transform: translateY(-50%);
-    }
+    } */
 
     .carousel.slide img {
         /* max-height: 265px; */
@@ -89,27 +89,27 @@
         /* height:228px; */
     }
 
-    .carousel .carousel-control-next {
+    /* .carousel .carousel-control-next {
         right: 0px;
     }
 
     .carousel .carousel-control-prev {
         left: 0;
-    }
+    } */
 
     .carousel-item {
         min-height: 50px;
     }
-    .carousel .carousel-control-next, .carousel .carousel-control-prev {
+    /* .carousel .carousel-control-next, .carousel .carousel-control-prev {
         padding: 3px;
         width: 24px;
-    }
+    } */
 
     .carousel-item-next, .carousel-item-prev, .carousel-item.active {
         display: flex;
     }
 
-    .carousel-control-prev-icon,
+    /* .carousel-control-prev-icon,
     .carousel-control-next-icon {
         width: 10px;
         height: 10px;
@@ -118,7 +118,7 @@
     .carousel .carousel-control-next, .carousel .carousel-control-prev {
         padding: 3px;
         width: 24px;
-    }
+    } */
     .form-custom-input{
     /* border: solid #e8604c 1px; */
     border: 1px solid #d4d5d6;
@@ -544,7 +544,7 @@
                                                                 @if ($guiding->user->average_rating())
                                                                 <div class="guidings-item-ratings">
                                                                 <div class="ratings-score">
-                                                                        <i data-lucide="star" size="32"></i>
+                                                                        <span class="text-warning">★</span>
                                                                         <span>{{$guiding->user->average_rating()}} </span>
                                                                     </div>
                                                                 </div>
