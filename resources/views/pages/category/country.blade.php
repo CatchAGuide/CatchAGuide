@@ -328,7 +328,7 @@
                     @endforeach
                 </div>
                 @endif
-                <h5 class="mb-2 text-capitalize">@lang('destination.listing')</h5>
+                <h5 class="mb-2">{{ translate('Fishing tours in') }} {{ $row_data-> name }}</h5>
                 <div class="row mb-5">
                     <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
                         <div class="d-grid gap-2 w-100">
@@ -499,8 +499,13 @@
                                     <a href="{{ $guiding->is_newguiding ? route('guidings.newShow', [$guiding->id, $guiding->slug]) : route('guidings.show', [$guiding->id, $guiding->slug]) }}">
                                             <div class="guidings-item">
                                                 <div class="guidings-item-title">
-                                                    <h5 class="fw-bolder text-truncate">{{translate($guiding->title)}}</h5>
-                                                    <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($guiding->location) }}</span>                                      
+                                                @if(!$agent->ismobile())
+                                                <h5 class="fw-bolder text-truncate">{{translate($guiding->title)}}</h5>
+                                                @endif
+                                                @if($agent->ismobile())
+                                                    <h5 class="fw-bolder text-truncate">{{ \Str::limit(translate($guiding->title), 45) }}</h5>
+                                                @endif
+                                                    <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($guiding->location) }} </span>                                      
                                                 </div>
                                                 @if ($guiding->user->average_rating())
                                                 <div class="guidings-item-ratings">
@@ -602,7 +607,7 @@
                 <div class="mb-3">{!! $row_data->content !!}</div>
 
                 @if($row_data->fish_avail_title != '' && $row_data->fish_avail_intro != '')
-                    <h2 class="mb-2 mt-3">{{ $row_data->fish_avail_title }}</h2>
+                    <h2 class="mb-2 mt-5">{{ $row_data->fish_avail_title }}</h2>
                     <p>{!! $row_data->fish_avail_intro !!}</p>
                     @if($fish_chart->count() > 0)
                     <div class="table-responsive">
@@ -650,7 +655,7 @@
 
                 <div class="row">
                     @if($row_data->size_limit_title != '' && $row_data->size_limit_intro != '')
-                    <div class="col-sm-12 col-md-12 col-lg-12 mt-3">
+                    <div class="col-sm-12 col-md-12 col-lg-12 mt-5">
                         <h2>{{ $row_data->size_limit_title }}</h2>
                         <p>{!! $row_data->size_limit_intro !!}</p>
                         @if(!empty($fish_size_limit))
@@ -658,7 +663,7 @@
                             <thead>
                                 <tr>
                                     <th width="20%">@lang('destination.fish')</th>
-                                    <th width="80%"></th>
+                                    <th width="80%">{{ translate('Size Limit') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -676,7 +681,7 @@
                     </div>
                     @endif
                     @if($row_data->time_limit_title != '' && $row_data->time_limit_intro != '')
-                    <div class="col-sm-12 col-md-12 col-lg-12 mt-3">
+                    <div class="col-sm-12 col-md-12 col-lg-12 mt-5">
                         <h2>{{ $row_data->time_limit_title }}</h2>
                         <p>{!! $row_data->time_limit_intro !!}</p>
                         @if(!empty($fish_time_limit))
@@ -684,7 +689,7 @@
                             <thead>
                                 <tr>
                                     <th width="20%">@lang('destination.fish')</th>
-                                    <th width="80%"></th>
+                                    <th width="80%">{{ translate('Time Limit') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -703,15 +708,15 @@
                     @endif
                 </div>
                 @if($row_data->faq_title != '' && $faq->count() > 0)
-                <h2 class="mb-2 mt-3">{{ $row_data->faq_title }}</h2>
+                <h2 class="mb-3 mt-5">{{ $row_data->faq_title }}</h2>
                     <div class="accordion mb-5" id="faq">
                         @foreach($faq as $row)
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ $row->id }}" aria-expanded="true" aria-controls="faq{{ $row->id }}">{{ $row->question }}</button>
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ $row->id }}" aria-expanded="true" aria-controls="faq{{ $row->id }}">{{ $row->question }}</button>
                                 </h2>
                                 <div class="accordion-collapse collapse" id="faq{{ $row->id }}" data-bs-parent="#faq">
-                                    <div class="accordion-body p-2">{{ $row->answer }}</div>
+                                    <div class="accordion-body ">{{ $row->answer }}</div>
                                 </div>
                             </div>
                         @endforeach
