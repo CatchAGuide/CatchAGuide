@@ -45,6 +45,11 @@
   margin-bottom: 29px;
 }
 #destination{
+  .cag-btn-inverted {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
   .owl-nav {
     margin-top: 0;
     button{
@@ -117,6 +122,25 @@
       -o-object-fit: cover;
       object-fit: cover;
     }
+}
+div#faq{
+  .accordion-header{
+    button{
+      font-size: 18px;
+      &:not(.collapsed) {
+        color: $primary-color;
+        background-color: #e8e8e8;
+        box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .125);
+    }
+    &:focus{
+      border-color: unset;
+      box-shadow: none;
+    }
+    }
+  }
+  .accordion-body{
+    font-size: 16px;
+  }
 }
 }
 #guidings-page{
