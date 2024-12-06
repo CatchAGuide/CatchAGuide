@@ -6,7 +6,7 @@
             <div class="col-12 d-flex justify-content-between align-items-center">
                 <div class="logo">
                     <a href="{{ route('welcome') }}">
-                        <img src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}" alt="Logo" style="height: 45px;">
+                        <img src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}" alt="Logo" style="height: auto;">
                     </a>
                 </div>
                 
@@ -90,7 +90,7 @@
             </div>
             
             <!-- Categories Row - Mobile -->
-            <div class="col-12 d-md-none mt-3">
+            <div class="col-12 d-md-none mt-1">
                 <div class="d-flex categories-mobile">
                     <a href="{{ route('destination') }}" class="me-4 text-white text-decoration-none">
                         <i class="fas fa-map-marker-alt me-2"></i>@lang('homepage.searchbar-destination')
@@ -269,7 +269,7 @@ input[type=number] {
 /* Mobile Styles - with specific selectors */
 @media (max-width: 767px) {
     .short-header.navbar-custom .header-contents {
-        padding: 12px 20px !important;
+        padding: 12px  !important;
         margin: 0 !important;
     }
     
@@ -280,7 +280,7 @@ input[type=number] {
     }
 
     .short-header.navbar-custom .header-contents p {
-        margin-bottom: 8px !important;
+        margin-bottom: 0px !important;
     }
 
     /* Categories container with hidden scrollbar */
@@ -315,16 +315,19 @@ input[type=number] {
 
     /* Search bar fixes */
     .short-header.navbar-custom .search-summary {
-        margin: 0 20px !important;
+        margin: 0 !important;
         padding: 12px !important;
-        background: rgba(255, 255, 255, 0.1) !important;
+        background: #fff;
         border-radius: 8px !important;
-        color: white !important;
+        color: #313041 !important;
         cursor: pointer !important;
     }
 
     .short-header.navbar-custom .search-summary i {
         margin-right: 8px !important;
+    }
+    form#mobile-search .btn-primary{
+        background-color: #313041;
     }
 }
 
@@ -427,8 +430,8 @@ input[type=number] {
 }
 
 .categories-row {
-    margin-top: 16px !important;
-    margin-bottom: 32px !important;
+    /* margin-top: 16px !important; */
+    margin-bottom: 38px !important;
     position: relative;
     z-index: 1;
 }

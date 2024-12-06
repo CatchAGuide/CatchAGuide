@@ -6,7 +6,7 @@
             <div class="col-12 d-flex justify-content-between align-items-center">
                 <div class="logo">
                     <a href="{{ route('welcome') }}">
-                        <img src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}" alt="Logo" style="height: 45px;">
+                        <img src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}" alt="Logo" style="height: auto;">
                     </a>
                 </div>
                 
@@ -85,7 +85,7 @@
             </div>
             
             <!-- Categories Row - Mobile -->
-            <div class="col-12 d-md-none mt-3">
+            <div class="col-12 d-md-none mt-2">
                 <div class="d-flex categories-mobile">
                     <a href="{{ route('destination') }}" class="me-4 text-white text-decoration-none">
                         <i class="fas fa-map-marker-alt me-2"></i>@lang('homepage.searchbar-destination')
@@ -100,7 +100,7 @@
             </div>
 
             <!-- Mobile Search Summary -->
-            <div class="col-12 d-md-none mt-3">
+            <div class="col-12 d-md-none mt-2">
                 <div class="search-summary" role="button" id="headerSearchTrigger">
                     <i class="fas fa-search me-2"></i>
                     @if(request()->has('place'))
@@ -263,6 +263,9 @@ input[type=number] {
 
 /* Mobile Styles - with specific selectors */
 @media (max-width: 767px) {
+    .short-header.navbar-custom {
+        padding: 16px 0 ;
+    }
     /* Categories container with hidden scrollbar */
     .short-header.navbar-custom .categories-mobile {
         margin: 8px 20px !important;
@@ -295,16 +298,20 @@ input[type=number] {
 
     /* Search bar fixes */
     .short-header.navbar-custom .search-summary {
-        margin: 0 20px !important;
+        margin: 0 !important;
         padding: 12px !important;
-        background: rgba(255, 255, 255, 0.1) !important;
+        background: #fff;
         border-radius: 8px !important;
-        color: white !important;
+        color: #313041 !important;
         cursor: pointer !important;
     }
 
     .short-header.navbar-custom .search-summary i {
         margin-right: 8px !important;
+    }
+    form#mobile-search .btn-primary{
+        background-color: #313041;
+        border-color: #E8604C !important;
     }
 }
 

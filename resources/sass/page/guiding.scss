@@ -44,12 +44,13 @@
 .tour-details-two__related-tours .tour-details-two__title {
   margin-bottom: 29px;
 }
-#destination{
-  .cag-btn-inverted {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.cag-btn-inverted {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none !important;
 }
+#destination{
   .owl-nav {
     margin-top: 0;
     button{
