@@ -201,7 +201,8 @@ return [
     'booking-date' => 'Booking Date',
     'guiding-price' => 'Guiding Price',
     'total-extras' => 'Total Extras',
-
+    'guiding-information' => 'Guiding Information',
+    'reservation' => 'Reservation',
 
 
     /**

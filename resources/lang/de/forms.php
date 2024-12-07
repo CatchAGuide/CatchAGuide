@@ -44,8 +44,9 @@ return [
     'guests' => 'Gäste',
     'timeLeangth' => 'Dauer',
     'price' => 'Du zahlst',
-    'total' => 'Den Gesamtbetrag in Höhe von',
-    'total2' => 'zahlst du direkt an den Guide. Die Zahlungsoptionen des Guides erhältst du mit der Buchungsbestätigung per Mail.'
+    'total' => 'Du musst noch nicht zahlen. Der Preis pro Tour beinhaltet die MwSt. und sämtliche Leistungen, die inklusive sind. Den Gesamtbetrag in Höhe von',
+    'total2' => 'zahlst du direkt an den Guide. Es gelten die Stornierungsbedingungen des Guides. Nach der Bestätigung deiner Reservierungsanfrage durch den Guide, erhälst du die Zahlungsoptionen in der Buchungsbestätigung per Mail.',
+    'total3' => 'Du erhälst innerhalb der nächsten 3 Tage eine Zusage oder Absage.'
 
     
 ];
