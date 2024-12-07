@@ -158,6 +158,10 @@ div#faq{
         display: none;
       }
     }
+    .location-row{
+      display: flex;
+      gap: 8px;
+    }
   }
   .tour-details-two__book-tours{
     .btn.btn-danger{
@@ -975,6 +979,17 @@ a:has(.guidings-item){
 }
   }
 }
+@media screen and (max-width: 480px) {
+  #guidings-page{
+    .title-container{
+      .location-row{
+        flex-direction: column;
+        gap: 0px;
+      }
+    }
+  }
+}
+
 @media screen and (min-width: 768px) {
   .tour-details-two__sticky {
     top: 117px;
