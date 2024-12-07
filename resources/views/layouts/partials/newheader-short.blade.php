@@ -140,7 +140,7 @@
         <div class="container">
             <form id="global-search" action="{{route('guidings.index')}}" method="get">
                 <div class="search-box">
-                    <div class="d-flex">
+                    <div class="search-row">
                         <div class="search-input flex-grow-1">
                             <i class="fa fa-search input-icon"></i>
                             <input type="text" 
@@ -171,7 +171,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-lg-2 my-1 px-0">
+                        <div class="my-1 px-0">
                             <button type="submit" class="search-button">@lang('homepage.searchbar-search')</button>
                         </div>
                     </div>
@@ -197,6 +197,11 @@
     z-index: 1000;
 }
 
+ .search-box .search-row{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
 .short-header .search-box {
     background: white;
     padding: 12px;
