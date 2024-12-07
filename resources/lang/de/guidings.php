@@ -22,4 +22,7 @@ return [
     'Add' => 'Hinzufügen',
     'Location' => 'Standort',
     'Enter_value_for' => 'Wert eingeben für',
+    'Fishing_Trip' => 'Angeltour in',
+    'Inclusions' => 'Inklusive',
+    
 ];  

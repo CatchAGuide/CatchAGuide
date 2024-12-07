@@ -25,7 +25,7 @@
 
           <ul id="progressbar">
             <li class="active" id="account"><strong>Information</strong></li>
-            <li class="{{ $this->page === 2 ? 'active' : '' }}" id="personal"><strong>Order Overview</strong></li>
+            <li class="{{ $this->page === 2 ? 'active' : '' }}" id="personal"><strong>{{ translate('Reservation') }}</strong></li>
           </ul>
         </div>
 
@@ -38,7 +38,7 @@
                     <div class="row">
                       <div class="col-md-6 my-3">
                         <div class="my-4">
-                          <span class="fw-bold">Select Date</span>
+                          <span class="fw-bold">{{ translate('Date Selection') }}</span>
                         </div>
                         <div class="col-md-12 d-flex justify-content-center">
                           <div id="lite-datepicker" wire:ignore></div>
@@ -46,7 +46,7 @@
                       </div>
                       <div class="col-md-6 my-3">
                         <div class="my-4">
-                          <span class="fw-bold">Personal Information</span>
+                          <span class="fw-bold">{{ translate('Personal Information') }}</span>
                         </div>
                         <div class="row">
                           <div class="col-sm-6">
@@ -163,19 +163,27 @@
                             </div>
                           </div>
                           <div class="col-md-12">
-                            @if($page === 1)
-                              <div class="pull-right">
-                                @if($selectedTime !== null)
-                                  <button class="thm-btn" type="button" wire:click="next">@lang('message.further') <i class="fa fa-chevron-right"></i></button>
-                                @else
-                                  <button class="thm-btn thm-btn-disabled" type="button" wire:click="next" disabled>@lang('message.further')<i class="fa fa-chevron-right"></i></button>
+                            <div class="row-buttons">
+                              <div class="button-container">  
+                                <!-- zurück -->
+                              <button class="thm-btn" type="button" onclick="window.history.back()"> <i class="fa fa-chevron-left"></i> @lang('message.return') </button>
+                              </div>
+                              <div class="button-container">
+                                @if($page === 1)
+                                  <div class="pull-right">
+                                    @if($selectedTime !== null)
+                                      <button class="thm-btn" type="button" wire:click="next">@lang('message.further') <i class="fa fa-chevron-right"></i></button>
+                                    @else
+                                      <button class="thm-btn thm-btn-disabled" type="button" wire:click="next" disabled>@lang('message.further')<i class="fa fa-chevron-right"></i></button>
+                                    @endif
+                                  </div>
+                                @elseif ($page !== 2)
+                                  <div class="pull-right">
+                                    <button class="thm-btn" wire:click="next">@lang('message.further') <i class="fa fa-chevron-right"></i></button>
+                                  </div>
                                 @endif
                               </div>
-                            @elseif ($page !== 2)
-                              <div class="pull-right">
-                                <button class="thm-btn" wire:click="next">@lang('message.further') <i class="fa fa-chevron-right"></i></button>
-                              </div>
-                            @endif
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -215,7 +223,7 @@
 
                         <div class="guide-info mt-3">
                           <div class="mb-2">
-                            <h5><span class="bordered-heading">Guiding Information</span></h5>
+                            <h5><span class="bordered-heading">@lang('message.guiding-information')</span></h5>
                           </div>
                           <div class="p-3 bg-light rounded">
                             @if($guiding->is_newguiding && $guiding->is_boat)
@@ -303,7 +311,7 @@
                             </div>
                             @endif
 
-                            @if($guiding->is_newguiding)
+                            @if($guiding->is_newguiding && $guiding->requirements)
                             <div class="flex-column">
                               <div class="my-2">
                                 <span class="text-dark fw-bold">{{ translate('Requirements for taking part')}}:</span>
@@ -429,11 +437,11 @@
                           <div class="alert alert-info note-box" role="alert">
                             @lang('forms.total')
                             {{$totalPrice}}€
-                            @lang('forms.total2')
+                            @lang('forms.total2') <strong>@lang('forms.total3')</strong>
                           </div>
-                          <button class="btn thm-btn rounded border mt-1 p-3" type="submit">@lang('message.complete-booking')</button>
-                          <button class="btn thm-btn rounded border mt-1 p-3" type="button" wire:click="prev" >@lang('message.return')</button>
-                          <a class="btn btn-primary rounded border mt-1 p-3" href="{{route('guidings.index')}}" >@lang('message.booking-cancel')</a>
+                          <button class="btn thm-btn rounded border mt-1 p-3" type="submit">@lang('message.reservation')</button>
+                          <button class="btn thm-btn btn-gray rounded border mt-1 p-3" type="button" wire:click="prev" >@lang('message.return')</button>
+                          <a class="btn thm-btn  btn-gray rounded border mt-1 p-3" href="{{route('guidings.index')}}" >@lang('message.booking-cancel')</a>
                         </div>
                       </div>
                     </div>
@@ -556,12 +564,34 @@ document.addEventListener('livewire:load', function () {
     });
   });
 });
+document.addEventListener('livewire:next', function () {
+  function scrollToFormCenter() {
+          const form = document.getElementById('all');
+          if (form) {
+              // form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              const formTop = form.getBoundingClientRect().top + window.pageYOffset; // Get the element's position relative to the document
+          window.scrollTo({ 
+              top: formTop - 50, // Adjust for 150px offset
+              console.log('test')
+              behavior: 'smooth'  // Smooth scrolling
+          });
+          }
+      }
+});
 </script>
 
 @endpush
 
 @section('css_after')
 <style>
+  .row-buttons{
+    display: flex;
+    justify-content: space-between;
+}
+button.btn-gray, a.btn-gray  {
+    background-color: #777;
+    color: #fff;
+}
   .litepicker .container__days .day-item.is-today.is-locked{
     color: #fff !important;
     background: green !important;

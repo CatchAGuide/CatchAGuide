@@ -22,4 +22,6 @@ return [
     'Add' => 'Add',
     'Location' => 'Location',
     'Enter_value_for' => 'Enter value for',
+    'Fishing_Trip' => 'Fishing trip in',
+    'Inclusions' => 'Inclusions',
 ];  

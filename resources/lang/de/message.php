@@ -193,6 +193,8 @@ return [
     'booking-date' => 'Buchungsdatum',
     'guiding-price' => 'Preis des Guidings',
     'total-extras' => 'Summe der Extras',
+    'guiding-information' => 'Guiding Informationen',
+    'reservation' => 'Reservieren',
 
     /**
      *

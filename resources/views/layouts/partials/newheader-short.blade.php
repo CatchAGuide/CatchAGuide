@@ -136,7 +136,6 @@
     </div>
 
     <!-- Search Row - Floating (Desktop Only) -->
-    @if(request()->segment(1) != 'guidings')
     <div class="floating-search-container d-none d-md-block">
         <div class="container">
             <form id="global-search" action="{{route('guidings.index')}}" method="get">
@@ -180,7 +179,6 @@
             </form>
         </div>
     </div>
-    @endif
 </nav>
 
 <style>

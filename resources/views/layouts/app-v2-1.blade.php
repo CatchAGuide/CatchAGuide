@@ -107,10 +107,6 @@
         .header {
             margin-bottom: 5rem;
         }
-        #global-search {
-            border: 1px solid #ccc;
-            bottom: -54px;
-        }
         #global-search .global-search-row {
             padding-right: 0 !important;
         }

@@ -27,13 +27,12 @@
     .floating-search-container {
         position: relative;
         margin-top: -30px;
-        margin-bottom: 30px;
         z-index: 100;
     }
 
     #filterCard {
-        position: sticky;
-        top: 20px;
+        /* position: sticky;
+        top: 20px; */
     }
 
     /*.carousel .carousel-control-next, 
@@ -204,12 +203,12 @@
         }
 
         .page-header {
-            margin-top: -60px!important;
+            margin-top: -30px!important;
         }
     }
     @media only screen and (min-width: 992px) {
         .page-header {
-            margin-top: -60px!important;
+            margin-top: -30px!important;
         }
     }
     #radius{
@@ -246,8 +245,8 @@
     }
     #map-placeholder a.btn {
         position: absolute;
-        top: 44%;
-        left: 37%;
+        top: calc(50% - 19px);
+        right: calc(50% - 81px);
     }
     #guidings-menu-search {
         position: absolute;
