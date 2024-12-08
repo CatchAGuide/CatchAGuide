@@ -9,15 +9,33 @@ class AddNewFieldsToGuidingsTable extends Migration
     public function up()
     {
         Schema::table('guidings', function (Blueprint $table) {
-            $table->string('style_of_fishing')->nullable();
-            $table->string('course_of_action')->nullable();
-            $table->string('special_about')->nullable();
-            $table->string('tour_unique')->nullable();
-            $table->string('starting_time')->nullable();
-            $table->string('private')->nullable();
-            $table->string('allowed_booking_advance')->nullable();
-            $table->string('booking_window')->nullable();
-            $table->string('seasonal_trip')->nullable();
+            if (!Schema::hasColumn('guidings', 'style_of_fishing')) {
+                $table->string('style_of_fishing')->nullable();
+            }
+            if (!Schema::hasColumn('guidings', 'course_of_action')) {
+                $table->string('course_of_action')->nullable();
+            }
+            if (!Schema::hasColumn('guidings', 'special_about')) {
+                $table->string('special_about')->nullable();
+            }
+            if (!Schema::hasColumn('guidings', 'tour_unique')) {
+                $table->string('tour_unique')->nullable();
+            }
+            if (!Schema::hasColumn('guidings', 'starting_time')) {
+                $table->string('starting_time')->nullable();
+            }
+            if (!Schema::hasColumn('guidings', 'private')) {
+                $table->string('private')->nullable();
+            }
+            if (!Schema::hasColumn('guidings', 'allowed_booking_advance')) {
+                $table->string('allowed_booking_advance')->nullable();
+            }
+            if (!Schema::hasColumn('guidings', 'booking_window')) {
+                $table->string('booking_window')->nullable();
+            }
+            if (!Schema::hasColumn('guidings', 'seasonal_trip')) {
+                $table->string('seasonal_trip')->nullable();
+            }
         });
     }
 

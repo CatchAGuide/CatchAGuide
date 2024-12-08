@@ -186,8 +186,8 @@ Route::middleware('auth:web')->group(function () {
 
 Route::get('guidings', [GuidingsController::class, 'index'])->name('guidings.index');
 Route::get('guidings/{slug?}', [GuidingsController::class, 'redirectToNewFormat']);
-Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'show'])->name('guidings.show');
-Route::get('newguidings/{id}/{slug}', [GuidingsController::class, 'newShow'])->name('guidings.newShow');
+// Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'show'])->name('guidings.show');
+Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'newShow'])->name('guidings.show');
 Route::post('newguidings', [GuidingsController::class, 'guidingsStore'])->name('guidings.store');
 
 Route::get('searchrequest', [GuidingsController::class, 'bookingrequest'])->name('guidings.request');

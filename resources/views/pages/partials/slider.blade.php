@@ -3,7 +3,7 @@
         <div class="new-custom-owl owl-carousel owl-theme">
             @foreach($models as $model)
                 <div class="item">
-                    <a href="{{ $model->is_newguiding ? route('guidings.newShow', [$model->id, $model->slug]) : route('guidings.show', [$model->id, $model->slug]) }}">
+                    <a href="{{ $model->is_newguiding ? route('guidings.show', [$model->id, $model->slug]) : route('guidings.show', [$model->id, $model->slug]) }}">
                         <div class="card" style="min-height:340px;">
                             @if(get_featured_image_link($model))
                                 <img src="{{get_featured_image_link($model)}}" class="card-img-top">
@@ -23,7 +23,7 @@
         @else
         @foreach($models as $model)
         <div class="col-6 col-xs-6 col-md-2 p-1">
-            <a href="{{ $model->is_newguiding ? route('guidings.newShow', [$model->id, $model->slug]) : route('guidings.show', [$model->id, $model->slug]) }}">
+            <a href="{{ $model->is_newguiding ? route('guidings.show', [$model->id, $model->slug]) : route('guidings.show', [$model->id, $model->slug]) }}">
                 <div class="card h-100 slider-dk">
                     @if(get_featured_image_link($model))
                     <img src="{{get_featured_image_link($model)}}" class="card-img-top">
