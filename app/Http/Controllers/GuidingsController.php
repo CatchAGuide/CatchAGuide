@@ -289,7 +289,8 @@ class GuidingsController extends Controller
         $locale = Config::get('app.locale');
 
         $guiding = Guiding::where('id',$id)->where('slug',$slug)->where('status',1)->first();
-        $targetFish = $guiding->is_newguiding ? json_decode($guiding->target_fish, true) : $guiding->guidingTargets->pluck('id')->toArray();
+        // $targetFish = $guiding->is_newguiding ? json_decode($guiding->target_fish, true) : $guiding->guidingTargets->pluck('id')->toArray();
+        $targetFish = json_decode($guiding->target_fish, true);
         $fishingFrom = $guiding->fishing_from_id;
         $fishingType = $guiding->fishing_type_id;
 
@@ -301,18 +302,17 @@ class GuidingsController extends Controller
             ->where('id', '!=', $guiding->id)
             ->where(function($query) use ($guiding, $targetFish, $fishingFrom, $fishingType) {
                 $query->where(function($q) use ($guiding, $targetFish) {
-                    if ($guiding->is_newguiding) {
-                        $q->where('is_newguiding', 1)
-                          ->where(function($subQ) use ($targetFish) {
+                    // if ($guiding->is_newguiding) {
+                        $q->where(function($subQ) use ($targetFish) {
                               foreach ($targetFish as $fish) {
                                   $subQ->orWhereJsonContains('target_fish', $fish);
                               }
                           });
-                    } else {
-                        $q->whereHas('guidingTargets', function($subQ) use ($targetFish) {
-                            $subQ->whereIn('target_id', $targetFish);
-                        });
-                    }
+                    // } else {
+                    //     $q->whereHas('guidingTargets', function($subQ) use ($targetFish) {
+                    //         $subQ->whereIn('target_id', $targetFish);
+                    //     });
+                    // }
                 })
                 ->where(function($q) use ($guiding, $fishingFrom) {
                     $q->where('fishing_from_id', $fishingFrom)
@@ -399,7 +399,7 @@ class GuidingsController extends Controller
                     $galeryImages[] = $webp_path;
                 }
             }
-            $guiding->galery_images = json_encode($galeryImages);
+            $guiding->gallery_images = json_encode($galeryImages);
 
             //step 2
             $guiding->is_boat = $request->has('type_of_fishing') ? ($request->input('type_of_fishing') == 'boat' ? 1 : 0) : 0;
@@ -416,10 +416,8 @@ class GuidingsController extends Controller
             $guiding->water_types = $request->has('water_types') ? $request->input('water_types') : '';
 
             //step 4
-            $guiding->experience_level = $request->has('experience_level') ? json_encode($request->input('experience_level')) : '';
             $guiding->inclusions = $request->has('inclussions') ? $request->input('inclussions') : '';
             if ($request->has('type_of_fishing')) {
-                $guiding->style_of_fishing = $request->input('style_of_fishing');
 
                 if ($request->input('type_of_fishing') == 'active') {
                     $guiding->fishing_type_id = 1;
@@ -783,7 +781,7 @@ class GuidingsController extends Controller
             'longitude' => $guiding->lng,
             'country' => $guiding->country,
             'city' => $guiding->city,
-            'galery_images' => $guiding->galery_images,
+            'gallery_images' => $guiding->gallery_images,
             'thumbnail_path' => $guiding->thumbnail_path,
 
             //step 2

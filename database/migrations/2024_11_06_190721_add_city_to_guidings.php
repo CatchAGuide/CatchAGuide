@@ -16,9 +16,6 @@ class AddCityToGuidings extends Migration
         Schema::table('guidings', function (Blueprint $table) {
             if (!Schema::hasColumn('guidings', 'city')) {
                 $table->string('city')->nullable()->after('location');
-            } else {
-                $table->dropColumn('city');
-                $table->string('city')->nullable()->after('location');
             }
         });
     }

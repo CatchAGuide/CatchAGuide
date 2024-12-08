@@ -496,7 +496,7 @@
                                         </div>
                                     </div>
                                     <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 p-md-3 mt-md-1">
-                                    <a href="{{ $guiding->is_newguiding ? route('guidings.newShow', [$guiding->id, $guiding->slug]) : route('guidings.show', [$guiding->id, $guiding->slug]) }}">
+                                    <a href="{{ route('guidings.show', [$guiding->id, $guiding->slug]) }}">
                                             <div class="guidings-item">
                                                 <div class="guidings-item-title">
                                                 @if(!$agent->ismobile())

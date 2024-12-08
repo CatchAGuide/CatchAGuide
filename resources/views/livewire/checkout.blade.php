@@ -226,7 +226,8 @@
                             <h5><span class="bordered-heading">@lang('message.guiding-information')</span></h5>
                           </div>
                           <div class="p-3 bg-light rounded">
-                            @if($guiding->is_newguiding && $guiding->is_boat)
+                            {{-- @if($guiding->is_newguiding && $guiding->is_boat) --}}
+                            @if($guiding->is_boat)
                               <div class="flex-column border-bottom">
                                 <div class="my-2">
                                   <span class="text-dark fw-bold">{{ translate('Fishing from ')}}:</span>
@@ -235,13 +236,13 @@
                                   {{$guiding->is_boat ? $guiding->boat_type : ''}}
                                 </div>
                               </div>
-                            @else
+                            {{-- @else
                               <div class="flex-column border-bottom">
                                 <div class="my-2">
                                   <span class="text-dark fw-bold">{{ translate('Shore') }}</span>
                                 </div>
                               </div>
-                            @endif
+                            @endif --}}
 
                             <div class="flex-column border-bottom">
                               <div class="my-2">
@@ -267,13 +268,13 @@
                               </div>
                               <div class="px-2 text-dark">
                                 @php
-                                if ($guiding->is_newguiding) {
+                                // if ($guiding->is_newguiding) {
                                   $guidingTargets = array_column($targets, 'value');
-                                } else {
-                                  $guidingTargets = app()->getLocale() == 'en'
-                                    ? $targets->pluck('name_en')->toArray()
-                                    : $targets->pluck('name')->toArray();
-                                }
+                                // } else {
+                                //   $guidingTargets = app()->getLocale() == 'en'
+                                //     ? $targets->pluck('name_en')->toArray()
+                                //     : $targets->pluck('name')->toArray();
+                                // }
                                 @endphp
                                 <p>
                                   {{implode(', ', $guidingTargets)}}
@@ -282,22 +283,22 @@
                             </div>
 
                             @php
-                            if ($guiding->is_newguiding) {
+                            // if ($guiding->is_newguiding) {
                               $guidingInclusions = json_decode($guiding->inclusions, true) ?? [];
                               $guidingInclusions = !empty($guidingInclusions) ? array_column($guidingInclusions, 'value') : [];
-                            } else {
-                              $guidingInclusions = app()->getLocale() == 'en'
-                                ? $guiding->inclussions->pluck('name_en')->toArray()
-                                : $guiding->inclussions->pluck('name')->toArray();
+                            // } else {
+                            //   $guidingInclusions = app()->getLocale() == 'en'
+                            //     ? $guiding->inclussions->pluck('name_en')->toArray()
+                            //     : $guiding->inclussions->pluck('name')->toArray();
 
-                              if (app()->getLocale() == 'en') {
-                                foreach ($guidingInclusions as $index => $name) {
-                                  if (empty($name)) {
-                                    $guidingInclusions[$index] = $guiding->inclussions[$index]->name;
-                                  }
-                                }
-                              }
-                            }
+                            //   if (app()->getLocale() == 'en') {
+                            //     foreach ($guidingInclusions as $index => $name) {
+                            //       if (empty($name)) {
+                            //         $guidingInclusions[$index] = $guiding->inclussions[$index]->name;
+                            //       }
+                            //     }
+                            //   }
+                            // }
                             @endphp
 
                             @if (!empty($guidingInclusions))
@@ -311,7 +312,8 @@
                             </div>
                             @endif
 
-                            @if($guiding->is_newguiding && $guiding->requirements)
+                            {{-- @if($guiding->is_newguiding && $guiding->requirements) --}}
+                            @if($guiding->requirements)
                             <div class="flex-column">
                               <div class="my-2">
                                 <span class="text-dark fw-bold">{{ translate('Requirements for taking part')}}:</span>
@@ -353,7 +355,7 @@
                                       <div class="d-flex flex-column">
                                         <div class="form-check p-0">
                                           <label class="form-check-label text-dark">
-                                            @if($guiding->is_newguiding)
+                                            {{-- @if($guiding->is_newguiding) --}}
                                               <input 
                                                 type="checkbox" 
                                                 class="form-check-input me-1" 
@@ -363,7 +365,7 @@
                                                 wire:change="$emit('extraChanged', '{{$index}}')"
                                               >
                                               {{$extra['name']}} - €{{$extra['price']}}
-                                            @else
+                                            {{-- @else
                                               <input 
                                                 type="checkbox" 
                                                 class="form-check-input me-1" 
@@ -373,10 +375,10 @@
                                                 wire:change="$emit('extraChanged', '{{$extra->id}}')"
                                               >
                                               {{$extra->name}} - €{{$extra->price}}
-                                            @endif
+                                            @endif --}}
                                           </label>
                                         </div>
-                                        @if($guiding->is_newguiding)
+                                        {{-- @if($guiding->is_newguiding) --}}
                                           <div class="quantity-container" style="display: none;">
                                             <div class="d-flex align-items-center mb-2">
                                               <label for="quantity_{{$index}}">Quantity:</label>
@@ -394,7 +396,7 @@
                                               >
                                             </div>
                                           </div>
-                                        @else
+                                        {{-- @else
                                           <div class="quantity-container" style="display: none;">
                                             <div class="d-flex align-items-center mb-2">
                                               <label for="quantity_{{$extra->id}}">Quantity:</label>
@@ -412,7 +414,7 @@
                                               >
                                             </div>
                                           </div>
-                                        @endif
+                                        @endif --}}
                                       </div>
                                     </div>
                                     @endforeach

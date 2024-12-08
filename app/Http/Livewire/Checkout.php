@@ -98,16 +98,16 @@ class Checkout extends Component
 
     public function mount()
     {
-        if ($this->guiding->is_newguiding) {
+        // if ($this->guiding->is_newguiding) {
             $this->extras = json_decode($this->guiding->pricing_extra, true) ?? [];
             $this->targets = json_decode($this->guiding->target_fish, true);
-        } else {
-            $this->extras = $this->guiding->extras;
-            $this->targets = $this->guiding->guidingTargets()->get();
-        }
+        // } else {
+        //     $this->extras = $this->guiding->extras;
+        //     $this->targets = $this->guiding->guidingTargets()->get();
+        // }
 
         foreach ($this->extras as $index => $extra) {
-            $extraId = $this->guiding->is_newguiding ? $index : $extra->id;
+            $extraId = $index;
             $this->selectedExtras[$extraId] = false;
             $this->extraQuantities[$extraId] = $this->persons;
         }
@@ -115,7 +115,7 @@ class Checkout extends Component
         $this->waters = $this->guiding->guidingWaters;
         $this->methods = $this->guiding->guidingMethods;
         
-        if ($this->guiding->is_newguiding) {
+        // if ($this->guiding->is_newguiding) {
             $prices = json_decode($this->guiding->prices, true);
             if ($this->guiding->price_type == 'per_person') {
                 $this->guidingprice = 0;
@@ -132,27 +132,27 @@ class Checkout extends Component
             } else {
                 $this->guidingprice = $prices[0]['amount'] ?? 0;
             }
-        } else {
-            switch ($this->persons) {
-                case '1':
-                    $this->guidingprice = $this->guiding->price;
-                    break;
-                case '2':
-                    $this->guidingprice = $this->guiding->price_two_persons;
-                    break;
-                case '3':
-                    $this->guidingprice = $this->guiding->price_three_persons;
-                    break;
-                case '4':
-                    $this->guidingprice = $this->guiding->price_four_persons;
-                    break;
-                case '5':
-                    $this->guidingprice = $this->guiding->price_five_persons;
-                    break;
-                default:
-                    $this->guidingprice = $this->guiding->price;
-            }
-        }
+        // } else {
+        //     switch ($this->persons) {
+        //         case '1':
+        //             $this->guidingprice = $this->guiding->price;
+        //             break;
+        //         case '2':
+        //             $this->guidingprice = $this->guiding->price_two_persons;
+        //             break;
+        //         case '3':
+        //             $this->guidingprice = $this->guiding->price_three_persons;
+        //             break;
+        //         case '4':
+        //             $this->guidingprice = $this->guiding->price_four_persons;
+        //             break;
+        //         case '5':
+        //             $this->guidingprice = $this->guiding->price_five_persons;
+        //             break;
+        //         default:
+        //             $this->guidingprice = $this->guiding->price;
+        //     }
+        // }
 
         $user = auth()->user();
 
@@ -201,7 +201,7 @@ class Checkout extends Component
         $totalExtraPrice = 0;
         $extraData = [];
     
-        if ($this->guiding->is_newguiding) {
+        // if ($this->guiding->is_newguiding) {
             foreach ($this->extras as $index => $extra) {
                 if ($this->selectedExtras[$index]) {
                     $quantity = $this->extraQuantities[$index] ?? 0;
@@ -215,20 +215,20 @@ class Checkout extends Component
                     ];
                 }
             }
-        } else {
-            $guidingExtras = $this->guiding->extras()->whereIn('id', array_keys(array_filter($this->selectedExtras)))->get();
-            foreach ($guidingExtras as $extra) {
-                $quantity = $this->extraQuantities[$extra->id] ?? 0;
-                $totalExtraPrice += $extra->price * $quantity;
-                $extraData[] = [
-                    'extra_id' => $extra->id,
-                    'extra_name' => $extra->name,
-                    'extra_price' => $extra->price,
-                    'extra_quantity' => $quantity,
-                    'extra_total_price' => $extra->price * $quantity,
-                ];
-            }
-        }
+        // } else {
+        //     $guidingExtras = $this->guiding->extras()->whereIn('id', array_keys(array_filter($this->selectedExtras)))->get();
+        //     foreach ($guidingExtras as $extra) {
+        //         $quantity = $this->extraQuantities[$extra->id] ?? 0;
+        //         $totalExtraPrice += $extra->price * $quantity;
+        //         $extraData[] = [
+        //             'extra_id' => $extra->id,
+        //             'extra_name' => $extra->name,
+        //             'extra_price' => $extra->price,
+        //             'extra_quantity' => $quantity,
+        //             'extra_total_price' => $extra->price * $quantity,
+        //         ];
+        //     }
+        // }
     
         $this->extraData = !empty($extraData) ? serialize($extraData) : null;
         $this->totalExtraPrice = $totalExtraPrice;

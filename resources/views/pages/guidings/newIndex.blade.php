@@ -11,7 +11,7 @@
 @section('share_tags')
     <meta property="og:title" content="{{translate($guiding->title)}}" />
     <meta property="og:description" content="{{translate($guiding->excerpt)}}" />
-    @if(count(app('guiding')->getImagesUrl($guiding)))
+    @if(!empty(app('guiding')->getImagesUrl($guiding)) && count(app('guiding')->getImagesUrl($guiding)))
     <meta property="og:image" content="{{app('guiding')->getImagesUrl($guiding)['image_0']}}"/>
     @endif
 
@@ -120,7 +120,7 @@
             <div class="right-images">
                 <div class="gallery">
                 @php
-                    $galleryImages = json_decode($guiding->galery_images);
+                    $galleryImages = json_decode($guiding->gallery_images,true);
                     $thumbnailPath = asset($guiding->thumbnail_path);
                     $finalImages = [];
                     $hiddenCount = count($galleryImages) > 4 ? count($galleryImages) - 4 : 0;
@@ -181,7 +181,7 @@
                 </div>
                 <div class="gallery-mobile">
                     @php
-                    $galleryImages = json_decode($guiding->galery_images);
+                    $galleryImages = json_decode($guiding->gallery_images ?? '[]');
                     $thumbnailPath = asset($guiding->thumbnail_path);
                     $finalImages = [];
                     $hiddenCount = count($galleryImages) > 2 ? count($galleryImages) - 2 : 0;
@@ -352,7 +352,7 @@
                                         <strong class="mb-2 subtitle-text">@lang('guidings.Inclusions')</strong>
                                         @foreach (json_decode($guiding->inclusions) as $index => $inclusion)
                                             <div class="col-12 mb-2 text-start">
-                                            <i data-lucide="wrench"></i> {{$inclusion->value}}
+                                            <i data-lucide="wrench"></i> {{$inclusion}}
                                             </div>
                                         @endforeach
                                     </div>
@@ -384,11 +384,11 @@
                             <div class="tab-category mb-4 col-12 col-lg-4">
                                 <strong class="subtitle-text">@lang('guidings.Target_Fish')</strong>
                                 <div class="row">
-                                    @foreach (json_decode($guiding->target_fish) as $index => $target_fish)
+                                    @foreach ($guiding->getTargetFishNames() as $fish)
                                         <div class="col-12 text-start">
-                                            {{$target_fish->value}}
+                                            {{$fish['name']}}
                                         </div>
-                                        @if(($index + 1) % 2 == 0)
+                                        @if(($loop->index + 1) % 2 == 0)
                                             </div><div class="row">
                                         @endif
                                     @endforeach
@@ -405,7 +405,7 @@
                                 <div class="row">
                                     @foreach (json_decode($guiding->fishing_methods) as $index => $fishing_method)
                                         <div class="col-12 text-start">
-                                            {{$fishing_method->value}}
+                                            {{$fishing_method}}
                                         </div>
                                         @if(($index + 1) % 2 == 0)
                                             </div><div class="row">
@@ -422,11 +422,11 @@
                             <div class="tab-category mb-4 col-12 col-lg-4">
                                 <strong class="subtitle-text">@lang('guidings.Water_Type')</strong>
                                 <div class="row">
-                                    @foreach (json_decode($guiding->water_types) as $index => $water_type)
+                                    @foreach ($guiding->getWaterNames() as $water)
                                         <div class="col-12 text-start">
-                                            {{$water_type->value}}
+                                            {{$water['name']}}
                                         </div>
-                                        @if(($index + 1) % 2 == 0)
+                                        @if(($loop->index + 1) % 2 == 0)
                                             </div><div class="row">
                                         @endif
                                     @endforeach
@@ -536,7 +536,7 @@
                                     <div class="col-12 text-start">
                                         <ul>
                                             <li>
-                                                <strong>{{ ucfirst(str_replace('_', ' ', $reqIndex)) }}:</strong> {{ $requirements }}
+                                                <strong>{{ ucfirst(str_replace('_', ' ', $reqIndex)) }}:</strong> {{ $requirements->value ?? '' }}
                                             </li>
                                         </ul>
                                     </div>
@@ -646,11 +646,15 @@
             <div class="row">
                 <div class="col-12 mb-4">
                     @if(!empty($guiding->inclusions))
+                        @php
+                            $inclusions = $guiding->getInclusionNames();
+                            $maxToShow = 3; // Maximum number of inclusions to display
+                        @endphp
                         <div class="row">
                             <strong class="mb-2 subtitle-text">@lang('guidings.Inclusions')</strong>
-                            @foreach (json_decode($guiding->inclusions) as $index => $inclusion)
+                            @foreach ($inclusions as $index => $inclusion)
                                 <div class="col-12 text-start">
-                                    <i data-lucide="wrench"></i> {{$inclusion->value}}
+                                    <i data-lucide="wrench"></i> {{$inclusion['name']}}
                                 </div>
                             @endforeach
                         </div>
@@ -692,7 +696,7 @@
                         <div class="row">
                             @foreach (json_decode($guiding->target_fish) as $index => $target_fish)
                                 <div class="col-12 text-start">
-                                    {{$target_fish->value}}
+                                    {{$target_fish}}
                                 </div>
                                 @if(($index + 1) % 2 == 0)
                                     </div><div class="row">
@@ -711,7 +715,7 @@
                         <div class="row">
                             @foreach (json_decode($guiding->fishing_methods) as $index => $fishing_method)
                                 <div class="col-12 text-start">
-                                    {{$fishing_method->value}}
+                                    {{$fishing_method}}
                                 </div>
                                 @if(($index + 1) % 2 == 0)
                                     </div><div class="row">
@@ -730,7 +734,7 @@
                         <div class="row">
                             @foreach (json_decode($guiding->water_types) as $index => $water_type)
                                 <div class="col-12 text-start">
-                                    {{$water_type->value}}
+                                    {{$water_type}}
                                 </div>
                                 @if(($index + 1) % 2 == 0)
                                     </div><div class="row">
@@ -801,7 +805,7 @@
                 <strong class="subtitle-text">@lang('guidings.Requirements')</strong>
                 <ul>
                     @foreach (json_decode($guiding->requirements) as $reqIndex => $requirements)
-                        <li><span>{{ ucfirst(str_replace('_', ' ', $reqIndex)) }}:</span> {{ $requirements }}</li>
+                        <li><span>{{ ucfirst(str_replace('_', ' ', $reqIndex)) }}:</span> {{ $requirements->value ?? '' }}</li>
                     @endforeach
                 </ul>
             @else
@@ -1021,7 +1025,7 @@
                                     </div>
                                 </div>
                                 <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 p-md-3 mt-md-1">
-                                    <a href="{{ $guiding->is_newguiding ? route('guidings.newShow', [$guiding->id, $guiding->slug]) : route('guidings.show', [$guiding->id, $guiding->slug]) }}">
+                                    <a href="{{ $guiding->is_newguiding ? route('guidings.show', [$guiding->id, $guiding->slug]) : route('guidings.show', [$guiding->id, $guiding->slug]) }}">
                                             <div class="guidings-item">
                                                 <div class="guidings-item-title">
                                                     <h5 class="fw-bolder text-truncate">{{translate($guiding->title)}}</h5>
@@ -1093,7 +1097,7 @@
 
                                                                 @foreach ($inclusions as $index => $inclusion)
                                                                     @if ($index < $maxToShow)
-                                                                        <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclusion['value'] }}</span>
+                                                                        <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclusion }}</span>
                                                                     @endif
                                                                 @endforeach
 
@@ -1142,15 +1146,15 @@
                         <div class="popular-tours__single">
                             <a class="popular-tours__img" href="{{ route('guidings.show',[$other_guiding->id,$other_guiding->slug]) }}" title="Guide aufmachen">
                                 <figure class="popular-tours__img__wrapper">
-                                    @if($other_guiding->is_newguiding)
+                                    {{-- @if($other_guiding->is_newguiding) --}}
                                         @if($other_guiding->thumbnail_path)
                                             <img src="{{ asset(!$other_guiding->is_newguiding ? "assets/guides/".$other_guiding->thumbnail_path : $other_guiding->thumbnail_path) }}" alt="{{ $other_guiding->title }}"/>
                                         @endif
-                                    @else
+                                    {{-- @else
                                         @if(isset(app('guiding')->getImagesUrl($other_guiding)['image_0']))
                                             <img src="{{ app('guiding')->getImagesUrl($other_guiding)['image_0'] }}" alt="{{ $other_guiding->title }}"/>
                                         @endif
-                                    @endif
+                                    @endif --}}
                                     <!-- <div class="popular-tours__icon">
                                         <a href="{{ route('wishlist.add-or-remove', $other_guiding->id) }}">
                                             <i class="fa fa-heart {{ (auth()->check() ? (auth()->user()->isWishItem($other_guiding->id) ? 'text-danger' : '') : '') }}"></i>

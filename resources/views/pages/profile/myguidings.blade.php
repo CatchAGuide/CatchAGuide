@@ -192,11 +192,11 @@
                     </div>
                   </div>
                   <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 mt-1 p-1">
-                    @if ($guiding->is_newguiding == 0)
+                    {{-- @if ($guiding->is_newguiding == 0)
                       <h5 class="fw-bolder text-truncate"><a class="text-dark" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">{{$guiding->title}}</a></h5>
-                    @else
-                      <h5 class="fw-bolder text-truncate"><a class="text-dark" href="{{ route('guidings.newShow',[$guiding->id,$guiding->slug]) }}">{{$guiding->title}}</a></h5>
-                    @endif
+                    @else --}}
+                      <h5 class="fw-bolder text-truncate"><a class="text-dark" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">{{$guiding->title}}</a></h5>
+                    {{-- @endif --}}
                     <div class="ratings mr-2 color-primary my-1" style="font-size:0.80rem">
                       @if(count($guiding->user->received_ratings) > 0)
                         @switch(two($guiding->user->average_rating()))
@@ -433,16 +433,16 @@
                   </div>
                   <div class="col-12 col-sm-12 col-md-2 col-lg-3 col-xl-2 col-xxl-2 position-relative">
                     <div class="d-flex flex-column my-5 py-2">
-                      @if($guiding->is_newguiding == 0)
+                      {{-- @if($guiding->is_newguiding == 0)
                         <a class="btn btn-outline-theme btn-sm my-1" href="{{route('guidings.show', [$guiding->id,$guiding->slug])}}">View</a>
-                      @else
-                        <a class="btn btn-outline-theme btn-sm my-1" href="{{route('guidings.newShow', [$guiding->id,$guiding->slug])}}">View</a>
-                      @endif
+                      @else --}}
+                        <a class="btn btn-outline-theme btn-sm my-1" href="{{route('guidings.show', [$guiding->id,$guiding->slug])}}">View</a>
+                      {{-- @endif
                       @if($guiding->is_newguiding == 0)
                         <a class="btn btn-outline-theme btn-sm my-1" href="{{route('guidings.edit', $guiding->id)}}">@lang('profile.edit')</a>
-                      @else
+                      @else --}}
                         <a class="btn btn-outline-theme btn-sm my-1" href="{{route('guidings.edit_newguiding', $guiding->id)}}">@lang('profile.edit')</a>
-                      @endif
+                      {{-- @endif --}}
                       @if($guiding->status == 1)
                         <a class="btn btn-outline-theme btn-sm my-1" href="{{route('profile.guiding.deactivate', $guiding)}}">@lang('profile.deactivateGuide')</a>
                       @else

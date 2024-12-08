@@ -51,7 +51,7 @@
             <input type="hidden" name="is_update" id="is_update" value="{{ $formData['is_update'] ?? 0 }}">
             <input type="hidden" name="guiding_id" id="guiding_id" value="{{ $formData['id'] ?? 0 }}">
             <input type="hidden" name="thumbnail_path" id="thumbnail_path" value="{{ $formData['thumbnail_path'] ?? '' }}">
-            <input type="hidden" name="existing_images" id="existing_images" value="{{ $formData['galery_images'] ?? "" }}">
+            <input type="hidden" name="existing_images" id="existing_images" value="{{ $formData['gallery_images'] ?? "" }}">
 
             <!-- Step 1 -->
             <div class="step active" id="step1">

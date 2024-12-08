@@ -262,5 +262,49 @@ class GuidingsSettingsSeeder extends Seeder
             DB::table('guiding_boat_descriptions')->insert($boat_description);
         }
 
+        # Additional Information
+        DB::table('guiding_additional_informations')->truncate();
+        $additional_information = [
+            ['name' => 'Kinderfreundlich', 'name_en' => 'Child-friendly'],
+            ['name' => 'Behindertenfreundlich', 'name_en' => 'Handicapped friendly'],
+            ['name' => 'Rauchen verboten', 'name_en' => 'No smoking'],
+            ['name' => 'Alkohol verboten', 'name_en' => 'No alcohol'],
+            ['name' => 'Fang wird behalten', 'name_en' => 'Keep the catch'],
+            ['name' => 'Catch & Release allowed', 'name_en' => 'Catch & Release allowed'],
+            ['name' => 'Catch & Release only', 'name_en' => 'Catch & Release only'],
+            ['name' => 'Stellplatz', 'name_en' => 'Parking space'],
+            ['name' => 'Sontiges', 'name_en' => 'Others']
+        ];
+        foreach($additional_information as $info) {
+            DB::table('guiding_additional_informations')->insert($info);
+        }
+
+        # Requirements
+        DB::table('guiding_requirements')->truncate();
+        $requirements = [
+            ['name' => 'Lizenzen / Erlaubnis', 'name_en' => 'Licenses / Permits'],
+            ['name' => 'Bekleidung', 'name_en' => 'Clothing'],
+            ['name' => 'Bestimmtes Erfahrungslevel', 'name_en' => 'Specific experience level'],
+            ['name' => 'Equipment', 'name_en' => 'Equipment'],
+            ['name' => 'Alter', 'name_en' => 'Age'],
+            ['name' => 'Sontiges', 'name_en' => 'Others']
+        ];
+        foreach($requirements as $requirement) {
+            DB::table('guiding_requirements')->insert($requirement);
+        }
+
+        # Recommendations
+        DB::table('guiding_recommendations')->truncate();
+        $recommendations = [
+            ['name' => 'Sonnenschutz', 'name_en' => 'Sun protection'],
+            ['name' => 'Verpflegung', 'name_en' => 'Food and drink'],
+            ['name' => 'Wahl des Equipments', 'name_en' => 'Choice of equipment'],
+            ['name' => 'Bestimmte Kleidung', 'name_en' => 'Specific clothing'],
+            ['name' => 'Sontiges', 'name_en' => 'Others']
+        ];
+        foreach($recommendations as $recommendation) {
+            DB::table('guiding_recommendations')->insert($recommendation);
+        }
+
     }
 }

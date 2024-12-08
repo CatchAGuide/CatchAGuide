@@ -92,8 +92,13 @@ class Guiding extends Model
         'seasonal_trip',
         'allowed_booking_advance',
         'booking_window',
-        'galery_images',
-        'city'
+        'gallery_images',
+        'city',
+        'desc_course_of_action',
+        'desc_meeting_point',
+        'desc_starting_time',
+        'desc_tour_unique',
+        'inclussions',
     ];
 
     public const LATITUDE  = 'lat';
@@ -420,7 +425,7 @@ class Guiding extends Model
 
     public function getLowestPrice()
     {
-        if ($this->is_newguiding) {
+        // if ($this->is_newguiding) {
             if ($this->price_type == 'per_person') {
                 $prices = json_decode($this->prices, true);
                 if (!$prices) {
@@ -437,24 +442,24 @@ class Guiding extends Model
                 return min($singlePrice, $minPrice);
             }
             return 0;
-        } else {
-            $validPrices = array_filter([
-                $this->price,
-                $this->max_guests >= 2 ? $this->price_two_persons / 2 : null,
-                $this->max_guests >= 3 ? $this->price_three_persons / 3 : null,
-                $this->max_guests >= 4 ? $this->price_four_persons / 4 : null,
-                $this->max_guests >= 5 ? $this->price_five_persons / 5 : null
-            ], function($value) { return $value > 0; });
+        // } else {
+        //     $validPrices = array_filter([
+        //         $this->price,
+        //         $this->max_guests >= 2 ? $this->price_two_persons / 2 : null,
+        //         $this->max_guests >= 3 ? $this->price_three_persons / 3 : null,
+        //         $this->max_guests >= 4 ? $this->price_four_persons / 4 : null,
+        //         $this->max_guests >= 5 ? $this->price_five_persons / 5 : null
+        //     ], function($value) { return $value > 0; });
 
-            if (empty($validPrices)) {
-                return 0;
-            }
+        //     if (empty($validPrices)) {
+        //         return 0;
+        //     }
 
-            $singlePrice = $this->price;
-            $minPrice = min(array_map('round', $validPrices));
+        //     $singlePrice = $this->price;
+        //     $minPrice = min(array_map('round', $validPrices));
             
-            return $singlePrice > 0 ? min($singlePrice, $minPrice) : $minPrice;
-        }
+        //     return $singlePrice > 0 ? min($singlePrice, $minPrice) : $minPrice;
+        // }
     }
 
     public function getBlockedEvents()
@@ -702,5 +707,135 @@ class Guiding extends Model
         }
 
         return null;
+    }
+
+    /**
+     * Get localized fishing method names
+     * @return array
+     */
+    public function getFishingMethodNames(): array
+    {
+        $methodIds = json_decode($this->fishing_methods) ?? [];
+        
+        if (empty($methodIds)) {
+            return [];
+        }
+
+        return Method::whereIn('id', $methodIds)
+            ->select('id', 'name', 'name_en')
+            ->get()
+            ->map(function($method) {
+                return [
+                    'id' => $method->id,
+                    'name' => app()->getLocale() == "en" && $method->name_en 
+                        ? $method->name_en 
+                        : $method->name
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Get localized water type names
+     * @return array
+     */
+    public function getWaterTypeNames(): array
+    {
+        $waterTypeIds = json_decode($this->water_types) ?? [];
+        
+        if (empty($waterTypeIds)) {
+            return [];
+        }
+
+        return Water::whereIn('id', $waterTypeIds)
+            ->select('id', 'name', 'name_en')
+            ->get()
+            ->map(function($water) {
+                return [
+                    'id' => $water->id,
+                    'name' => app()->getLocale() == "en" && $water->name_en 
+                        ? $water->name_en 
+                        : $water->name
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Get localized target fish names
+     * @return array
+     */
+    public function getTargetFishNames(): array
+    {
+        $targetIds = json_decode($this->target_fish) ?? [];
+        
+        if (empty($targetIds)) {
+            return [];
+        }
+
+        return Target::whereIn('id', $targetIds)
+            ->select('id', 'name', 'name_en')
+            ->get()
+            ->map(function($target) {
+                return [
+                    'id' => $target->id,
+                    'name' => app()->getLocale() == "en" && $target->name_en 
+                        ? $target->name_en 
+                        : $target->name
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Get localized inclusion names
+     * @return array
+     */
+    public function getInclusionNames(): array
+    {
+        $inclusionIds = json_decode($this->inclusions) ?? [];
+        
+        if (empty($inclusionIds)) {
+            return [];
+        }
+
+        return Inclussion::whereIn('id', $inclusionIds)
+            ->select('id', 'name', 'name_en')
+            ->get()
+            ->map(function($inclusion) {
+                return [
+                    'id' => $inclusion->id,
+                    'name' => app()->getLocale() == "en" && $inclusion->name_en 
+                        ? $inclusion->name_en 
+                        : $inclusion->name
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Get localized water names
+     * @return array
+     */
+    public function getWaterNames(): array
+    {
+        $waterIds = json_decode($this->water_types) ?? [];
+        
+        if (empty($waterIds)) {
+            return [];
+        }
+
+        return Water::whereIn('id', $waterIds)
+            ->select('id', 'name', 'name_en')
+            ->get()
+            ->map(function($water) {
+                return [
+                    'id' => $water->id,
+                    'name' => app()->getLocale() == "en" && $water->name_en 
+                        ? $water->name_en 
+                        : $water->name
+                ];
+            })
+            ->toArray();
     }
 }
