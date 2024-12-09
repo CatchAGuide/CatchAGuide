@@ -567,17 +567,11 @@
                                                                         <div class="">
                                                                             <div class="tours-list__content__trait__text" >
                                                                                 @php
-                                                                                $guidingTargets = $guiding->guidingTargets->pluck('name')->toArray();
-                                                                                if(app()->getLocale() == 'en'){
-                                                                                    $guidingTargets =  $guiding->guidingTargets->pluck('name_en')->toArray();
-                                                                                }
+                                                                                $guidingTargets = collect($guiding->getTargetFishNames())->pluck('name')->toArray();
                                                                                 @endphp
                                                                                 
                                                                                 @if(!empty($guidingTargets))
                                                                                     {{ implode(', ', $guidingTargets) }}
-                                                                                @else
-                                                                                {{ translate($guiding->threeTargets()) }}
-                                                                                {{$guiding->target_fish_sonstiges ? " & " . translate($guiding->target_fish_sonstiges) : ""}}
                                                                                 @endif
                                                                             </div>
                                                                         
@@ -595,23 +589,23 @@
                                                             </div>
                                                             <div class="inclusions-price">
                                                                     <div class="guidings-inclusions-container">
-                                                                        @if(!empty($guiding->inclusions))
+                                                                        @if(!empty($guiding->getInclusionNames()))
                                                                         <div class="guidings-included">
                                                                             <strong>What's Included</strong>
                                                                             <div class="inclusions-list">
                                                                                 @php
-                                                                                    $inclusions = json_decode($guiding->inclusions, true);
+                                                                                    $inclussions = $guiding->getInclusionNames();
                                                                                     $maxToShow = 3; // Maximum number of inclusions to display
                                                                                 @endphp
     
-                                                                                @foreach ($inclusions as $index => $inclusion)
+                                                                                @foreach ($inclussions as $index => $inclussion)
                                                                                     @if ($index < $maxToShow)
-                                                                                        <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclusion }}</span>
+                                                                                        <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclussion['name'] }}</span>
                                                                                     @endif
                                                                                 @endforeach
     
-                                                                                @if (count($inclusions) > $maxToShow)
-                                                                                    <span class="inclusion-item">+{{ count($inclusions) - $maxToShow }} more</span>
+                                                                                @if (count($inclussions) > $maxToShow)
+                                                                                    <span class="inclusion-item">+{{ count($inclussions) - $maxToShow }} more</span>
                                                                                 @endif
                                                                             </div>
                                                                         </div>
@@ -620,10 +614,6 @@
                                                                     <div class="guiding-item-price">
                                                                         <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$guiding->getLowestPrice()}}€ p.P.</span></h5>
                                                                         <div class="d-none d-flex flex-column mt-4">
-                                                                            <!-- <a class="btn theme-primary btn-theme-new btn-sm" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">Details</a>
-                                                                            <a class="btn btn-sm mt-2   {{ (auth()->check() ? (auth()->user()->isWishItem($guiding->id) ? 'btn-danger' : 'btn-outline-theme ') : 'btn-outline-theme') }}" href="{{ route('wishlist.add-or-remove', $guiding->id) }}">
-                                                                                {{ (auth()->check() ? (auth()->user()->isWishItem($guiding->id) ? 'Added to Favorites' : 'Add to Favorites') : 'Add to Favorites') }}
-                                                                            </a> -->
                                                                         </div>
                                                                     </div>
                                                             </div>    
@@ -789,12 +779,6 @@
 
 @section('js_after')
 
-<!-- 
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q&libraries=places,geocoding"></script>
-<script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
-    ({key: "AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q", v: "weekly"});
-</script> 
--->
 <script>
     $('#sortby').on('change',function(){
         $('#form-sortby').submit();
