@@ -163,18 +163,12 @@
                   <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-1">
                     <div id="carouselExampleControls-{{$guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
                       <div class="carousel-inner">
-                        @if($guiding->is_newguiding == 0)
-                          @if(count(get_galleries_image_link($guiding)))
-                            @foreach(get_galleries_image_link($guiding) as $index => $gallery_image_link)
-                              <div class="carousel-item @if($index == 0) active @endif">
-                                <img class="d-block w-100" src="{{$gallery_image_link}}">
-                              </div>
-                            @endforeach
-                          @endif
-                        @else
-                          <div class="carousel-item @if($index == 0) active @endif">
-                            <img class="d-block w-100" src="{{asset($guiding->thumbnail_path)}}">
-                          </div>
+                        @if(count(get_galleries_image_link($guiding)))
+                          @foreach(get_galleries_image_link($guiding) as $index => $gallery_image_link)
+                            <div class="carousel-item @if($index == 0) active @endif">
+                              <img class="d-block w-100" src="{{asset($gallery_image_link)}}">
+                            </div>
+                          @endforeach
                         @endif
                       </div>
 
@@ -279,21 +273,11 @@
                           <div class="mx-2">
                             <div class="tours-list__content__trait__text" style="font-size:0.75rem">
                               @php
-                                if($guiding->is_newguiding == 0) {
-                                  $guidingTargets = $guiding->guidingTargets->pluck('name')->toArray();
-                                  if(app()->getLocale() == 'en') {
-                                    $guidingTargets =  $guiding->guidingTargets->pluck('name_en')->toArray();
-                                  }
-                                } else {
-                                  $guidingTargets = array_column(json_decode($guiding->target_fish, true), 'value');
-                                }
+                                $guidingTargets = collect($guiding->getTargetFishNames())->pluck('name')->toArray();
                               @endphp
                               
                               @if(!empty($guidingTargets))
                                 {{ implode(', ', $guidingTargets) }}
-                              @else
-                                {{ translate($guiding->threeTargets()) }}
-                                {{$guiding->target_fish_sonstiges ? " & " . translate($guiding->target_fish_sonstiges) : ""}}
                               @endif
                             </div>
                           </div>
@@ -307,21 +291,11 @@
                           <div class="mx-2">
                             <div class="tours-list__content__trait__text" style="font-size:0.75rem">
                               @php
-                                if($guiding->is_newguiding == 0) {
-                                  $guidingWaters = $guiding->guidingWaters->pluck('name')->toArray();
-                                  if(app()->getLocale() == 'en') {
-                                    $guidingWaters =  $guiding->guidingWaters->pluck('name_en')->toArray();
-                                  }
-                                } else {
-                                  $guidingWaters = array_column(json_decode($guiding->water_types, true), 'value');
-                                }
+                                $guidingWaters = collect($guiding->getWaterNames())->pluck('name')->toArray();
                               @endphp
                               
                               @if(!empty($guidingWaters))
                                 {{ implode(', ', $guidingWaters) }}
-                              @else
-                                {{ translate($guiding->threeWaters()) }}
-                                {{$guiding->water_sonstiges ? " & " . translate($guiding->water_sonstiges) : ""}}
                               @endif
                             </div>
                           </div>
@@ -357,21 +331,11 @@
                           <div class="mx-2">
                             <div class="tours-list__content__trait__text" style="font-size:0.75rem">
                               @php
-                                if($guiding->is_newguiding == 0) {
-                                  $guidingMethods = $guiding->guidingMethods->pluck('name')->toArray();
-                                  if(app()->getLocale() == 'en'){
-                                    $guidingMethods =  $guiding->guidingMethods->pluck('name_en')->toArray();
-                                  }
-                                } else {
-                                  $guidingMethods = array_column(json_decode($guiding->fishing_methods, true), 'value');
-                                }
+                                $guidingMethods = collect($guiding->getFishingMethodNames())->pluck('name')->toArray();
                               @endphp
                               
                               @if(!empty($guidingMethods))
                                 {{ implode(', ', $guidingMethods) }}
-                              @else
-                                {{ $guiding->threeMethods() }}
-                                {{$guiding->methods_sonstiges && $guiding->threeMethods() > 0 ? " & " . translate($guiding->methods_sonstiges) : null}}
                               @endif
                             </div>
                           </div>
@@ -384,17 +348,7 @@
                           </div>
                           <div class="mx-2">
                             <div class="tours-list__content__trait__text" style="font-size:0.75rem">
-                              @php
-                                $whereFishing = null;
-                                if($guiding->fishingFrom){
-                                  if(app()->getLocale() == 'en'){
-                                    $whereFishing = $guiding->fishingFrom->name_en;
-                                  }else{
-                                    $whereFishing =  $guiding->fishingFrom->name;
-                                  }
-                                }
-                              @endphp
-                              @if($whereFishing) {{$whereFishing}} @else {{$guiding->fishing_from}} @endif    
+                              {{ translate('Fishing from ')}}: {{$guiding->is_boat ? $guiding->boat_type : translate('Shore')}}
                             </div>
                           </div>
                         </div>
@@ -433,16 +387,8 @@
                   </div>
                   <div class="col-12 col-sm-12 col-md-2 col-lg-3 col-xl-2 col-xxl-2 position-relative">
                     <div class="d-flex flex-column my-5 py-2">
-                      {{-- @if($guiding->is_newguiding == 0)
-                        <a class="btn btn-outline-theme btn-sm my-1" href="{{route('guidings.show', [$guiding->id,$guiding->slug])}}">View</a>
-                      @else --}}
-                        <a class="btn btn-outline-theme btn-sm my-1" href="{{route('guidings.show', [$guiding->id,$guiding->slug])}}">View</a>
-                      {{-- @endif
-                      @if($guiding->is_newguiding == 0)
-                        <a class="btn btn-outline-theme btn-sm my-1" href="{{route('guidings.edit', $guiding->id)}}">@lang('profile.edit')</a>
-                      @else --}}
-                        <a class="btn btn-outline-theme btn-sm my-1" href="{{route('guidings.edit_newguiding', $guiding->id)}}">@lang('profile.edit')</a>
-                      {{-- @endif --}}
+                      <a class="btn btn-outline-theme btn-sm my-1" href="{{route('guidings.show', [$guiding->id,$guiding->slug])}}">View</a>
+                      <a class="btn btn-outline-theme btn-sm my-1" href="{{route('guidings.edit_newguiding', $guiding->id)}}">@lang('profile.edit')</a>
                       @if($guiding->status == 1)
                         <a class="btn btn-outline-theme btn-sm my-1" href="{{route('profile.guiding.deactivate', $guiding)}}">@lang('profile.deactivateGuide')</a>
                       @else
