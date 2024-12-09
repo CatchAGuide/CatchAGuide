@@ -735,31 +735,6 @@ class Guiding extends Model
             ->toArray();
     }
 
-    /**
-     * Get localized water type names
-     * @return array
-     */
-    public function getWaterTypeNames(): array
-    {
-        $waterTypeIds = json_decode($this->water_types) ?? [];
-        
-        if (empty($waterTypeIds)) {
-            return [];
-        }
-
-        return Water::whereIn('id', $waterTypeIds)
-            ->select('id', 'name', 'name_en')
-            ->get()
-            ->map(function($water) {
-                return [
-                    'id' => $water->id,
-                    'name' => app()->getLocale() == "en" && $water->name_en 
-                        ? $water->name_en 
-                        : $water->name
-                ];
-            })
-            ->toArray();
-    }
 
     /**
      * Get localized target fish names
@@ -798,7 +773,7 @@ class Guiding extends Model
         if (empty($inclusionIds)) {
             return [];
         }
-
+        
         return Inclussion::whereIn('id', $inclusionIds)
             ->select('id', 'name', 'name_en')
             ->get()

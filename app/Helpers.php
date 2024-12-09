@@ -51,7 +51,7 @@ if (! function_exists('get_featured_image_link')) {
     {
         $link = null;
         if($model->thumbnail_path){
-            $link = '/assets/guides/'.$model->thumbnail_path;
+            $link = $model->thumbnail_path;
         }else{
             $link = 'images/placeholder_guide.jpg';
         }
@@ -63,19 +63,17 @@ if (! function_exists('get_featured_image_link')) {
 if (! function_exists('get_galleries_image_link')) {
     function get_galleries_image_link($model)
     {   
-
-        $imagepath = '/assets/guides/';
         $links = [];
 
         if($model->thumbnail_path){
-            $links[] = '/assets/guides/'.$model->thumbnail_path;
+            $links[] = $model->thumbnail_path;
         }
         $galleries = json_decode($model->galleries,true);
 
         if(is_array($galleries) && count($galleries)){
             foreach($galleries as $url){
                 if(!empty($url)){
-                    $links[] = '/assets/guides/'.$url;
+                    $links[] = $url;
                 }
             }
         

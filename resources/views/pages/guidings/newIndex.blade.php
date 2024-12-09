@@ -97,7 +97,7 @@
                 <div class="col-auto pe-0 me-1">
                   
                     <p class="mb-1">
-                        <span class="text-warning">★</span> {{$average_rating}}/5 (4 reviews)
+                        <span class="text-warning">★</span> {{$average_rating}}/{{$ratings->count()}} ({{$ratings->count()}} reviews)
                     </p>
                 </div>
                 <div class="col-auto p-0">
@@ -350,9 +350,9 @@
                                 @if(!empty($guiding->inclusions))
                                     <div class="row">
                                         <strong class="mb-2 subtitle-text">@lang('guidings.Inclusions')</strong>
-                                        @foreach (json_decode($guiding->inclusions) as $index => $inclusion)
+                                        @foreach ($guiding->getInclusionNames() as $index => $inclusion)
                                             <div class="col-12 mb-2 text-start">
-                                            <i data-lucide="wrench"></i> {{$inclusion}}
+                                            <i data-lucide="wrench"></i> {{$inclusion['name']}}
                                             </div>
                                         @endforeach
                                     </div>
@@ -403,9 +403,9 @@
                             <div class="tab-category mb-4 col-12 col-lg-4">
                                 <strong class="subtitle-text">@lang('guidings.Fishing_Method')</strong>
                                 <div class="row">
-                                    @foreach (json_decode($guiding->fishing_methods) as $index => $fishing_method)
+                                    @foreach ($guiding->getFishingMethodNames() as $index => $fishing_method)
                                         <div class="col-12 text-start">
-                                            {{$fishing_method}}
+                                            {{$fishing_method['name']}}
                                         </div>
                                         @if(($index + 1) % 2 == 0)
                                             </div><div class="row">
@@ -439,22 +439,6 @@
     
                 </div>
     
-    
-                    <!-- Additional Costs Tab -->
-                    <!-- <div class="tab-pane fade" id="costs" role="tabpanel" aria-labelledby="nav-costs-tab">
-                            @if(!empty($guiding->pricing_extra))
-                                @foreach (json_decode($guiding->pricing_extra) as $pricing_extras)
-                                        <div class="row">
-                                            <div class="col-md-6 mb-2">
-                                                <strong>{{$pricing_extras->name}}</strong> 
-                                                <span>{{$pricing_extras->price}}€ p.P</span>
-                                        </div>
-                                        </div>
-                                @endforeach
-                            @else
-                                <span>No extra prices specified</span>
-                            @endif
-                    </div> -->
                     @php
                         $boatInformation = json_decode($guiding->boat_information, true);
                     @endphp
@@ -598,16 +582,6 @@
                     <hr/>
                     <!-- Essential Details Section -->
                     <div class="row mb-4">
-                        <!-- <div class="col-md-6">
-                            @if(!empty($guiding->experience_level))
-                                <h6>Experience Level:</h6>
-                                <ul>
-                                    @foreach(json_decode($guiding->experience_level) as $value)
-                                        <li>{{ $value }}</li>
-                                    @endforeach
-                                </ul>
-                            @endif
-                        </div> -->
     
                         <div class="col-md-6">
                             @if(!empty($guiding->style_of_fishing))
@@ -647,14 +621,14 @@
                 <div class="col-12 mb-4">
                     @if(!empty($guiding->inclusions))
                         @php
-                            $inclusions = $guiding->getInclusionNames();
+                            $inclussions = $guiding->getInclusionNames();
                             $maxToShow = 3; // Maximum number of inclusions to display
                         @endphp
                         <div class="row">
                             <strong class="mb-2 subtitle-text">@lang('guidings.Inclusions')</strong>
-                            @foreach ($inclusions as $index => $inclusion)
+                            @foreach ($inclussions as $index => $inclussion)
                                 <div class="col-12 text-start">
-                                    <i data-lucide="wrench"></i> {{$inclusion['name']}}
+                                    <i data-lucide="wrench"></i> {{$inclussion['name']}}
                                 </div>
                             @endforeach
                         </div>
@@ -694,9 +668,9 @@
                     <div class="col-12 mb-4">
                         <strong class="subtitle-text"> @lang('guidings.Target_Fish')</strong>
                         <div class="row">
-                            @foreach (json_decode($guiding->target_fish) as $index => $target_fish)
+                            @foreach ($guiding->getTargetFishNames() as $index => $target_fish)
                                 <div class="col-12 text-start">
-                                    {{$target_fish}}
+                                    {{$target_fish['name']}}
                                 </div>
                                 @if(($index + 1) % 2 == 0)
                                     </div><div class="row">
@@ -713,9 +687,9 @@
                     <div class="col-12 mb-4">
                         <strong class="subtitle-text"> @lang('guidings.Fishing_Method')</strong>
                         <div class="row">
-                            @foreach (json_decode($guiding->fishing_methods) as $index => $fishing_method)
+                            @foreach ($guiding->getFishingMethodNames() as $index => $fishing_method)
                                 <div class="col-12 text-start">
-                                    {{$fishing_method}}
+                                    {{$fishing_method['name']}}
                                 </div>
                                 @if(($index + 1) % 2 == 0)
                                     </div><div class="row">
@@ -732,9 +706,9 @@
                     <div class="col-12 mb-3">
                         <strong class="subtitle-text"> @lang('guidings.Water_Type')</strong>
                         <div class="row">
-                            @foreach (json_decode($guiding->water_types) as $index => $water_type)
+                            @foreach ($guiding->getWaterNames() as $index => $water_type)
                                 <div class="col-12 text-start">
-                                    {{$water_type}}
+                                    {{$water_type['name']}}
                                 </div>
                                 @if(($index + 1) % 2 == 0)
                                     </div><div class="row">
@@ -1007,7 +981,7 @@
                                             @if(count(get_galleries_image_link($other_guiding)))
                                                 @foreach(get_galleries_image_link($other_guiding) as $index => $gallery_image_link)
                                                     <div class="carousel-item @if($index == 0) active @endif">
-                                                        <img class="d-block" src="{{$gallery_image_link}}" style="width:300px; height: 240px;">
+                                                        <img class="d-block" src="{{asset($gallery_image_link)}}" style="width:300px; height: 240px;">
                                                     </div>
                                                 @endforeach
                                             @endif
@@ -1025,7 +999,7 @@
                                     </div>
                                 </div>
                                 <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 p-md-3 mt-md-1">
-                                    <a href="{{ $guiding->is_newguiding ? route('guidings.show', [$guiding->id, $guiding->slug]) : route('guidings.show', [$guiding->id, $guiding->slug]) }}">
+                                    <a href="{{ route('guidings.show', [$guiding->id, $guiding->slug]) }}">
                                             <div class="guidings-item">
                                                 <div class="guidings-item-title">
                                                     <h5 class="fw-bolder text-truncate">{{translate($guiding->title)}}</h5>
@@ -1057,18 +1031,13 @@
                                                             <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
                                                         <div class="">
                                                             <div class="tours-list__content__trait__text" >
+
                                                                 @php
-                                                                $guidingTargets = $guiding->guidingTargets->pluck('name')->toArray();
-                                                                if(app()->getLocale() == 'en'){
-                                                                    $guidingTargets =  $guiding->guidingTargets->pluck('name_en')->toArray();
-                                                                }
+                                                                $guidingTargets = collect($guiding->getTargetFishNames())->pluck('name')->toArray();
                                                                 @endphp
                                                                 
                                                                 @if(!empty($guidingTargets))
                                                                     {{ implode(', ', $guidingTargets) }}
-                                                                @else
-                                                                {{ translate($guiding->threeTargets()) }}
-                                                                {{$guiding->target_fish_sonstiges ? " & " . translate($guiding->target_fish_sonstiges) : ""}}
                                                                 @endif
                                                             </div>
                                                         
@@ -1086,23 +1055,23 @@
                                             </div>
                                             <div class="inclusions-price">
                                                     <div class="guidings-inclusions-container">
-                                                        @if(!empty($guiding->inclusions))
+                                                        @if(!empty($guiding->getInclusionNames()))
                                                         <div class="guidings-included">
                                                             <strong>What's Included</strong>
                                                             <div class="inclusions-list">
                                                                 @php
-                                                                    $inclusions = json_decode($guiding->inclusions, true);
+                                                                    $inclussions = $guiding->getInclusionNames();
                                                                     $maxToShow = 3; // Maximum number of inclusions to display
                                                                 @endphp
 
-                                                                @foreach ($inclusions as $index => $inclusion)
+                                                                @foreach ($inclussions as $index => $inclussion)
                                                                     @if ($index < $maxToShow)
-                                                                        <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclusion }}</span>
+                                                                        <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclussion['name'] }}</span>
                                                                     @endif
                                                                 @endforeach
 
-                                                                @if (count($inclusions) > $maxToShow)
-                                                                    <span class="inclusion-item">+{{ count($inclusions) - $maxToShow }} more</span>
+                                                                @if (count($inclussions) > $maxToShow)
+                                                                    <span class="inclusion-item">+{{ count($inclussions) - $maxToShow }} more</span>
                                                                 @endif
                                                             </div>
                                                         </div>
@@ -1111,10 +1080,6 @@
                                                     <div class="guiding-item-price">
                                                         <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$guiding->getLowestPrice()}}€ p.P.</span></h5>
                                                         <div class="d-none d-flex flex-column mt-4">
-                                                            <!-- <a class="btn theme-primary btn-theme-new btn-sm" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">Details</a>
-                                                            <a class="btn btn-sm mt-2   {{ (auth()->check() ? (auth()->user()->isWishItem($guiding->id) ? 'btn-danger' : 'btn-outline-theme ') : 'btn-outline-theme') }}" href="{{ route('wishlist.add-or-remove', $guiding->id) }}">
-                                                                {{ (auth()->check() ? (auth()->user()->isWishItem($guiding->id) ? 'Added to Favorites' : 'Add to Favorites') : 'Add to Favorites') }}
-                                                            </a> -->
                                                         </div>
                                                     </div>
                                             </div>    
@@ -1146,20 +1111,9 @@
                         <div class="popular-tours__single">
                             <a class="popular-tours__img" href="{{ route('guidings.show',[$other_guiding->id,$other_guiding->slug]) }}" title="Guide aufmachen">
                                 <figure class="popular-tours__img__wrapper">
-                                    {{-- @if($other_guiding->is_newguiding) --}}
                                         @if($other_guiding->thumbnail_path)
-                                            <img src="{{ asset(!$other_guiding->is_newguiding ? "assets/guides/".$other_guiding->thumbnail_path : $other_guiding->thumbnail_path) }}" alt="{{ $other_guiding->title }}"/>
+                                            <img src="{{ asset($other_guiding->thumbnail_path) }}" alt="{{ $other_guiding->title }}"/>
                                         @endif
-                                    {{-- @else
-                                        @if(isset(app('guiding')->getImagesUrl($other_guiding)['image_0']))
-                                            <img src="{{ app('guiding')->getImagesUrl($other_guiding)['image_0'] }}" alt="{{ $other_guiding->title }}"/>
-                                        @endif
-                                    @endif --}}
-                                    <!-- <div class="popular-tours__icon">
-                                        <a href="{{ route('wishlist.add-or-remove', $other_guiding->id) }}">
-                                            <i class="fa fa-heart {{ (auth()->check() ? (auth()->user()->isWishItem($other_guiding->id) ? 'text-danger' : '') : '') }}"></i>
-                                        </a>
-                                    </div> -->
                                 </figure>
                             </a>
 
@@ -1168,9 +1122,8 @@
                                 </h5>
                                 <small class="crop-text-1 small-text text-muted">{{ $other_guiding->location ? translate($other_guiding->location) : $other_guiding->location }}</small>
                                 <p class="fw-bold text-muted">
-                                    <span>@lang('message.from') {{ two($other_guiding->price) }}€</span>
+                                    <span>@lang('message.from') {{ $other_guiding->getLowestPrice() }}€</span>
                                 </p>
-                                <!-- <span><i class="far fa-hourglass"></i>{{ translate('Dauer') }}: {{ two($other_guiding->duration) }} {{ translate('Stunden') }}</span> -->
                             </div>
                         </div>
                     @endforeach
@@ -1384,7 +1337,7 @@ document.addEventListener("DOMContentLoaded", function() {
             colDiv.className = 'col-md-6 mb-3';
             colDiv.innerHTML = `
                 <div class="card">
-                    <img src="${newGuiding.is_newguiding ? newGuiding.thumbnail_path : 'assets/guides/' + newGuiding.thumbnail_path}" class="card-img-top" alt="${newGuiding.title}">
+                    <img src="${newGuiding.thumbnail_path}" class="card-img-top" alt="${newGuiding.title}">
                     <div class="card-body">
                         <h5 class="card-title">${newGuiding.title}</h5>
                         <p class="card-text">${newGuiding.location}</p>
