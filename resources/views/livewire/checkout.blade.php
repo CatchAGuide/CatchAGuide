@@ -19,7 +19,6 @@
               <h2><strong>Checkout</strong></h2>
             </div>
             <div>
-              {{-- <p><span class="btn theme-primary text-white">Catchaguide.com</span></p> --}}
             </div>
           </div>
 
@@ -194,9 +193,6 @@
                     <div class="alert alert-info note-box" role="alert">
                       @lang('forms.guidTitleMsg')
                     </div>
-                    {{-- <div class="alert alert-success" role="alert">
-                      @lang('forms.guidTitleMsg')
-                    </div> --}}
                     <div class="row d-flex justify-content-center checkout-container">
                       <div class="col-lg-8 col-md-8 col-sm-5 my-2">
                         <div class="row">
@@ -226,7 +222,6 @@
                             <h5><span class="bordered-heading">@lang('message.guiding-information')</span></h5>
                           </div>
                           <div class="p-3 bg-light rounded">
-                            {{-- @if($guiding->is_newguiding && $guiding->is_boat) --}}
                             @if($guiding->is_boat)
                               <div class="flex-column border-bottom">
                                 <div class="my-2">
@@ -236,13 +231,13 @@
                                   {{$guiding->is_boat ? $guiding->boat_type : ''}}
                                 </div>
                               </div>
-                            {{-- @else
+                            @else
                               <div class="flex-column border-bottom">
                                 <div class="my-2">
                                   <span class="text-dark fw-bold">{{ translate('Shore') }}</span>
                                 </div>
                               </div>
-                            @endif --}}
+                            @endif
 
                             <div class="flex-column border-bottom">
                               <div class="my-2">
@@ -267,38 +262,15 @@
                                 <span class="text-dark fw-bold">@lang('profile.targetFish'):</span>
                               </div>
                               <div class="px-2 text-dark">
-                                @php
-                                // if ($guiding->is_newguiding) {
-                                  $guidingTargets = array_column($targets, 'value');
-                                // } else {
-                                //   $guidingTargets = app()->getLocale() == 'en'
-                                //     ? $targets->pluck('name_en')->toArray()
-                                //     : $targets->pluck('name')->toArray();
-                                // }
-                                @endphp
                                 <p>
-                                  {{implode(', ', $guidingTargets)}}
+                                  {{implode(', ', collect($guiding->getTargetFishNames())->pluck('name')->toArray())}}
                                 </p>
                               </div>
                             </div>
 
                             @php
-                            // if ($guiding->is_newguiding) {
-                              $guidingInclusions = json_decode($guiding->inclusions, true) ?? [];
-                              $guidingInclusions = !empty($guidingInclusions) ? array_column($guidingInclusions, 'value') : [];
-                            // } else {
-                            //   $guidingInclusions = app()->getLocale() == 'en'
-                            //     ? $guiding->inclussions->pluck('name_en')->toArray()
-                            //     : $guiding->inclussions->pluck('name')->toArray();
-
-                            //   if (app()->getLocale() == 'en') {
-                            //     foreach ($guidingInclusions as $index => $name) {
-                            //       if (empty($name)) {
-                            //         $guidingInclusions[$index] = $guiding->inclussions[$index]->name;
-                            //       }
-                            //     }
-                            //   }
-                            // }
+                              $guidingInclusions = $guiding->getInclusionNames();
+                              $guidingInclusions = !empty($guidingInclusions) ? array_column($guidingInclusions, 'name') : [];
                             @endphp
 
                             @if (!empty($guidingInclusions))
@@ -312,7 +284,6 @@
                             </div>
                             @endif
 
-                            {{-- @if($guiding->is_newguiding && $guiding->requirements) --}}
                             @if($guiding->requirements)
                             <div class="flex-column">
                               <div class="my-2">
@@ -355,7 +326,6 @@
                                       <div class="d-flex flex-column">
                                         <div class="form-check p-0">
                                           <label class="form-check-label text-dark">
-                                            {{-- @if($guiding->is_newguiding) --}}
                                               <input 
                                                 type="checkbox" 
                                                 class="form-check-input me-1" 
@@ -365,20 +335,8 @@
                                                 wire:change="$emit('extraChanged', '{{$index}}')"
                                               >
                                               {{$extra['name']}} - €{{$extra['price']}}
-                                            {{-- @else
-                                              <input 
-                                                type="checkbox" 
-                                                class="form-check-input me-1" 
-                                                name="extra" 
-                                                value="{{$extra->id}}" 
-                                                wire:model="selectedExtras.{{$extra->id}}"
-                                                wire:change="$emit('extraChanged', '{{$extra->id}}')"
-                                              >
-                                              {{$extra->name}} - €{{$extra->price}}
-                                            @endif --}}
                                           </label>
                                         </div>
-                                        {{-- @if($guiding->is_newguiding) --}}
                                           <div class="quantity-container" style="display: none;">
                                             <div class="d-flex align-items-center mb-2">
                                               <label for="quantity_{{$index}}">Quantity:</label>
@@ -396,25 +354,6 @@
                                               >
                                             </div>
                                           </div>
-                                        {{-- @else
-                                          <div class="quantity-container" style="display: none;">
-                                            <div class="d-flex align-items-center mb-2">
-                                              <label for="quantity_{{$extra->id}}">Quantity:</label>
-                                              <input 
-                                                id="quantity_{{$extra->id}}"
-                                                class="w-25 form-control form-control-sm mx-2 quantity-input" 
-                                                type="number"
-                                                min="1"
-                                                step="1"
-                                                name="quantity"
-                                                value="1"
-                                                max="{{$persons}}"
-                                                wire:model="extraQuantities.{{ $extra->id }}"
-                                                wire:change="calculateTotalPrice"
-                                              >
-                                            </div>
-                                          </div>
-                                        @endif --}}
                                       </div>
                                     </div>
                                     @endforeach

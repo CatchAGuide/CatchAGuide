@@ -98,13 +98,8 @@ class Checkout extends Component
 
     public function mount()
     {
-        // if ($this->guiding->is_newguiding) {
-            $this->extras = json_decode($this->guiding->pricing_extra, true) ?? [];
-            $this->targets = json_decode($this->guiding->target_fish, true);
-        // } else {
-        //     $this->extras = $this->guiding->extras;
-        //     $this->targets = $this->guiding->guidingTargets()->get();
-        // }
+        $this->extras = json_decode($this->guiding->pricing_extra, true) ?? [];
+        $this->targets = $this->guiding->getTargetFishNames();
 
         foreach ($this->extras as $index => $extra) {
             $extraId = $index;
@@ -112,47 +107,25 @@ class Checkout extends Component
             $this->extraQuantities[$extraId] = $this->persons;
         }
 
-        $this->waters = $this->guiding->guidingWaters;
-        $this->methods = $this->guiding->guidingMethods;
+        $this->waters = $this->guiding->getWaterNames();
+        $this->methods = $this->guiding->getFishingMethodNames();
         
-        // if ($this->guiding->is_newguiding) {
-            $prices = json_decode($this->guiding->prices, true);
-            if ($this->guiding->price_type == 'per_person') {
-                $this->guidingprice = 0;
-                foreach ($prices as $price) {
-                    if ($price['person'] == $this->persons) {
-                        $this->guidingprice = $price['amount'];
-                        break;
-                    }
+        $prices = json_decode($this->guiding->prices, true);
+        if ($this->guiding->price_type == 'per_person') {
+            $this->guidingprice = 0;
+            foreach ($prices as $price) {
+                if ($price['person'] == $this->persons) {
+                    $this->guidingprice = $price['amount'];
+                    break;
                 }
-                if ($this->guidingprice == 0 && !empty($prices)) {
-                    $lastPrice = end($prices);
-                    $this->guidingprice = $lastPrice['amount'] * $this->persons;
-                }
-            } else {
-                $this->guidingprice = $prices[0]['amount'] ?? 0;
             }
-        // } else {
-        //     switch ($this->persons) {
-        //         case '1':
-        //             $this->guidingprice = $this->guiding->price;
-        //             break;
-        //         case '2':
-        //             $this->guidingprice = $this->guiding->price_two_persons;
-        //             break;
-        //         case '3':
-        //             $this->guidingprice = $this->guiding->price_three_persons;
-        //             break;
-        //         case '4':
-        //             $this->guidingprice = $this->guiding->price_four_persons;
-        //             break;
-        //         case '5':
-        //             $this->guidingprice = $this->guiding->price_five_persons;
-        //             break;
-        //         default:
-        //             $this->guidingprice = $this->guiding->price;
-        //     }
-        // }
+            if ($this->guidingprice == 0 && !empty($prices)) {
+                $lastPrice = end($prices);
+                $this->guidingprice = $lastPrice['amount'] * $this->persons;
+            }
+        } else {
+            $this->guidingprice = $prices[0]['amount'] ?? 0;
+        }
 
         $user = auth()->user();
 
