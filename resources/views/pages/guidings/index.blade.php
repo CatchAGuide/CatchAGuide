@@ -581,7 +581,7 @@
                                                                             <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
                                                                         <div class="">
                                                                             <div class="tours-list__content__trait__text" >
-                                                                            {{$guiding->is_boat ? ($guiding->boat_type || $guiding->boat_type !== '' && $guiding->boatType['name'] !== null ? $guiding->boatType['name'] : 'Boat') : 'Shore'}}
+                                                                            {{$guiding->is_boat ? ($guiding->boat_type || $guiding->boat_type !== '' && $guiding->boatType['name'] !== null ? $guiding->boatType['name'] : @lang('guidings.boat')) : @lang('guidings.shore')}}
                                                                             </div>
                                                                         
                                                                         </div>

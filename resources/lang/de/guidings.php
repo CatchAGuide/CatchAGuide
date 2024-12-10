@@ -40,4 +40,12 @@ return [
     'Style_Fishing' => 'Angelart',
     'Tour_Type' => 'Art der Buchung',
     'Availability' => 'Verfügbarkeit der Angeltour',
+
+    'multi_day' => 'Mehrtägige',
+    'full_day' => 'Volltag',
+    'half_day' => 'Halbtag',
+    'boat' => 'Boot',
+    'shore' => 'Ufer',
+    'days' => 'Tag/e',
+    'hours' => 'Stunde/n',
 ];  
