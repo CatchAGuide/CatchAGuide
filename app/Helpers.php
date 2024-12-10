@@ -68,7 +68,7 @@ if (! function_exists('get_galleries_image_link')) {
         if($model->thumbnail_path){
             $links[] = $model->thumbnail_path;
         }
-        $galleries = json_decode($model->galleries,true);
+        $galleries = json_decode($model->gallery_images,true);
 
         if(is_array($galleries) && count($galleries)){
             foreach($galleries as $url){
