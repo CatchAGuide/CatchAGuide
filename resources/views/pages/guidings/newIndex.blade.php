@@ -486,7 +486,7 @@
                     <div class="tab-pane fade" id="info" role="tabpanel" aria-labelledby="nav-info-tab">
     
                     <!-- Requirements Section -->
-                    @if(!empty($guiding->requirements))
+                    @if(!empty($guiding->requirements) && $guiding->requirements !== null && $guiding->requirements->count() > 0)
                         <div class="tab-category mb-4">
                             <strong class="subtitle-text">@lang('guidings.Requirements')</strong>
                             <div class="row">
@@ -504,12 +504,10 @@
                                 @endforeach
                             </div>
                         </div>
-                    @else
-                        <p class="mb-4">No requirements specified</p>
+                        <hr/>
                     @endif
-                <hr/>
                     <!-- Other Information Section -->
-                    @if(!empty($guiding->other_information))
+                    @if(!empty($guiding->other_information) && $guiding->other_information !== null && $guiding->other_information->count() > 0)
                         <div class="tab-category mb-4">
                             <strong class="subtitle-text">@lang('guidings.Other_Info')</strong>
                             <div class="row">
@@ -527,12 +525,10 @@
                                 @endforeach
                             </div>
                         </div>
-                    @else
-                        <p class="mb-4">No other information specified</p>
+                        <hr/>
                     @endif
-                    <hr/>
                     <!-- Recommended Preparation Section -->
-                    @if(!empty($guiding->recommendations))
+                    @if(!empty($guiding->recommendations ) || $guiding->recommendations !== null && $guiding->recommendations->count() > 0)
                         <div class="tab-category mb-4">
                             <strong class="subtitle-text">@lang('guidings.Reco_Prep')</strong>
                             <div class="row">
@@ -550,10 +546,8 @@
                                 @endforeach
                             </div>
                         </div>
-                    @else
-                        <p class="mb-4">No recommendations specified</p>
+                        <hr/>
                     @endif
-                    <hr/>
                     <!-- Essential Details Section -->
                     <div class="row mb-4">
     
