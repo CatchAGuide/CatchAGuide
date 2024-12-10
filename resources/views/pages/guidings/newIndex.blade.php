@@ -11,7 +11,7 @@
 @section('share_tags')
     <meta property="og:title" content="{{translate($guiding->title)}}" />
     <meta property="og:description" content="{{translate($guiding->excerpt)}}" />
-    @if(!empty(app('guiding')->getImagesUrl($guiding)) && count(app('guiding')->getImagesUrl($guiding)))
+    @if(!empty(app('guiding')->getImagesUrl($guiding)) && is_array(app('guiding')->getImagesUrl($guiding)) && count(app('guiding')->getImagesUrl($guiding)))
     <meta property="og:image" content="{{app('guiding')->getImagesUrl($guiding)['image_0']}}"/>
     @endif
 
@@ -516,11 +516,11 @@
                         <div class="tab-category mb-4">
                             <strong class="subtitle-text">@lang('guidings.Requirements')</strong>
                             <div class="row">
-                                @foreach (json_decode($guiding->requirements) as $reqIndex => $requirements)
+                                @foreach ($guiding->getRequirementsAttribute() as $requirements)
                                     <div class="col-12 text-start">
                                         <ul>
                                             <li>
-                                                <strong>{{ ucfirst(str_replace('_', ' ', $reqIndex)) }}:</strong> {{ $requirements->value ?? '' }}
+                                                <strong>{{ $requirements['name'] }}:</strong> {{ $requirements['value'] ?? '' }}
                                             </li>
                                         </ul>
                                     </div>
@@ -539,11 +539,11 @@
                         <div class="tab-category mb-4">
                             <strong class="subtitle-text">@lang('guidings.Other_Info')</strong>
                             <div class="row">
-                                @foreach (json_decode($guiding->other_information) as $otherIndex => $other)
+                                @foreach ($guiding->getOtherInformationAttribute() as $otherIndex => $other)
                                     <div class="col-12 text-start">
                                     <ul>
                                     <li>
-                                        <strong>{{ ucfirst(str_replace('_', ' ', $otherIndex)) }}:</strong> {{ $other }}
+                                        <strong>{{ $other['name'] }}:</strong> {{ $other['value'] ?? '' }}
                                     </li>
                                     </ul>
                                     </div>
@@ -562,11 +562,11 @@
                         <div class="tab-category mb-4">
                             <strong class="subtitle-text">@lang('guidings.Reco_Prep')</strong>
                             <div class="row">
-                                @foreach (json_decode($guiding->recommendations) as $recIndex => $recommendations)
+                                @foreach ($guiding->getRecommendationsAttribute() as $recIndex => $recommendations)
                                     <div class="col-12 text-start">
                                     <ul>
                                     <li>
-                                        <strong>{{ ucfirst(str_replace('_', ' ', $recIndex)) }}:</strong> {{ $recommendations }}
+                                        <strong>{{ $recommendations['name'] }}:</strong> {{ $recommendations['value'] ?? '' }}
                                     </li>
                                     </ul>
                                     </div>
@@ -778,8 +778,8 @@
             @if(!empty($guiding->requirements))
                 <strong class="subtitle-text">@lang('guidings.Requirements')</strong>
                 <ul>
-                    @foreach (json_decode($guiding->requirements) as $reqIndex => $requirements)
-                        <li><span>{{ ucfirst(str_replace('_', ' ', $reqIndex)) }}:</span> {{ $requirements->value ?? '' }}</li>
+                    @foreach ($guiding->getRequirementsAttribute() as $requirements)
+                        <li><span>{{ $requirements['name'] }}:</span> {{ $requirements['value'] ?? '' }}</li>
                     @endforeach
                 </ul>
             @else
@@ -790,8 +790,8 @@
             @if(!empty($guiding->other_information))
                 <strong class="subtitle-text">@lang('guidings.Other_Info')</strong>
                 <ul>
-                    @foreach (json_decode($guiding->other_information) as $otherIndex => $other)
-                        <li><span>{{ ucfirst(str_replace('_', ' ', $otherIndex)) }}:</span> {{ $other }}</li>
+                    @foreach ($guiding->getOtherInformationAttribute() as $otherIndex => $other)
+                        <li><span>{{ $other['name'] }}:</span> {{ $other['value'] ?? '' }}</li>
                     @endforeach
                 </ul>
             @else
@@ -802,8 +802,8 @@
             @if(!empty($guiding->recommendations))
                 <strong class="subtitle-text">@lang('guidings.Reco_Prep')</strong>
                 <ul>
-                    @foreach (json_decode($guiding->recommendations) as $recIndex => $recommendations)
-                        <li><span>{{ ucfirst(str_replace('_', ' ', $recIndex)) }}:</span> {{ $recommendations }}</li>
+                    @foreach ($guiding->getRecommendationsAttribute() as $recIndex => $recommendations)
+                        <li><span>{{ $recommendations['name'] }}:</span> {{ $recommendations['value'] ?? '' }}</li>
                     @endforeach
                 </ul>
             @else
