@@ -14,7 +14,9 @@ class RenameGaleryImagesToGalleryImagesInGuidingsTable extends Migration
      */
     public function up()
     {
-        DB::statement('ALTER TABLE guidings RENAME COLUMN galery_images TO gallery_images');
+        if (Schema::hasColumn('guidings', 'galery_images')) {
+            DB::statement('ALTER TABLE guidings RENAME COLUMN galery_images TO gallery_images');
+        }
     }
 
     /**
