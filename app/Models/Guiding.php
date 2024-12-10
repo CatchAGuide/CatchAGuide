@@ -20,10 +20,12 @@ use App\Models\FishingType;
 use App\Models\EquipmentStatus;
 use App\Models\FishingEquipment;
 use App\Models\Rating;
-use App\Models\LocationBoundary;
 use App\Models\GuidingRequirements;
 use App\Models\GuidingAdditionalInformation;
 use App\Models\GuidingRecommendations;
+use App\Models\GuidingBoatType;
+use App\Models\GuidingBoatDescription;
+use App\Models\GuidingBoatExtras;
 
 class Guiding extends Model
 {
@@ -424,6 +426,17 @@ class Guiding extends Model
 
     public function ratings(){
         return $this->hasMany(Rating::class,'guide_id','id');
+    }
+
+    public function boatType(){
+        return $this->hasOne(GuidingBoatType::class,'id','boat_type')
+            ->withDefault(function ($boatType) {
+                return [
+                    'name' => app()->getLocale() == "en" && $boatType->name_en 
+                        ? $boatType->name_en 
+                        : $boatType->name
+                ];
+            });
     }
 
     public function getLowestPrice()
@@ -879,6 +892,25 @@ class Guiding extends Model
                     'id' => $recommendation->id,
                     'value' => $recommendationsData->firstWhere('id', $recommendation->id)['value'] ?? null,
                     'name' => $recommendation->name
+                ];
+            });
+    }
+
+    public function getBoatInformationAttribute()
+    {
+        if (!$this->attributes['boat_information']) {
+            return collect();
+        }
+
+        $boatInformationData = collect(json_decode($this->attributes['boat_information'], true));
+        
+        return GuidingBoatDescription::whereIn('id', $boatInformationData->pluck('id'))
+            ->get()
+            ->map(function ($boatInformation) use ($boatInformationData) {
+                return [
+                    'id' => $boatInformation->id,
+                    'value' => $boatInformationData->firstWhere('id', $boatInformation->id)['value'] ?? null,
+                    'name' => $boatInformation->name
                 ];
             });
     }

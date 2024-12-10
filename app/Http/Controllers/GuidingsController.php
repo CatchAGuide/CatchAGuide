@@ -247,7 +247,7 @@ class GuidingsController extends Controller
             $query->whereIn('id', $guidingFilter['ids']);
         }
 
-        $allGuidings = $query->get();
+        $allGuidings = $query->with('boatType')->get();
 
         $otherguidings = array();
 
@@ -266,7 +266,7 @@ class GuidingsController extends Controller
             }
         }
 
-        $guidings = $query->paginate(20);
+        $guidings = $query->with('boatType')->paginate(20);
 
         $filter_title = substr($filter_title, 0, -2);
 

@@ -267,7 +267,7 @@
             <div class="important-info">
                     <div class="info-item">
                         <i class="fas fa-ship"></i>
-                        <strong><p class="mb-0">{{$guiding->is_boat ? $guiding->boat_type : 'Shore'}}</p></strong>
+                        <strong><p class="mb-0">{{$guiding->is_boat ? ($guiding->boat_type || $guiding->boat_type !== '' && $guiding->boatType['name'] !== null ? $guiding->boatType['name'] : 'Boat') : 'Shore'}}</p></strong>
                     </div>
                     <div class="info-item">
                         <i>
@@ -440,54 +440,28 @@
                 </div>
     
                     @php
-                        $boatInformation = json_decode($guiding->boat_information, true);
+                        $boatInformation = $guiding->getBoatInformationAttribute();
                     @endphp
-                    <div class="tab-pane fade" id="boat" role="tabpanel" aria-labelledby="nav-boat-tab">
+                <div class="tab-pane fade" id="boat" role="tabpanel" aria-labelledby="nav-boat-tab">
                     <div class="row">
-                    <div class="col-md-12">
-                    @if(!empty($guiding->boat_information))
-                        <strong class="subtitle-text">{{translate('Boat')}}</strong>
-                        <!-- Boat Information as a Table -->
-                        <table class="table ">
-                    <tbody>
-                        <tr>
-                            <th>Seats</th>
-                            <td colspan="1">{{ $boatInformation['seats'] ?? '' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Length</th>
-                            <td>{{ $boatInformation['length'] ?? '' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Width</th>
-                            <td>{{ $boatInformation['width'] ?? '' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Year Built</th>
-                            <td>{{ $boatInformation['year_built'] ?? '' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Engine Manufacturer</th>
-                            <td>{{ $boatInformation['engine_manufacturer'] ?? '' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Engine Power (hp)</th>
-                            <td>{{ $boatInformation['engine_power'] ?? '' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Max Speed</th>
-                            <td>{{ $boatInformation['max_speed'] ?? '' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Manufacturer</th>
-                            <td>{{ $boatInformation['manufacturer'] ?? '' }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-    
-                    @endif
-                </div>
-    
+                        <div class="col-md-12">
+                            @if(!empty($boatInformation))
+                            <strong class="subtitle-text">{{translate('Boat')}}</strong>
+                            <!-- Boat Information as a Table -->
+                            <table class="table ">
+                                <tbody>
+                                    @foreach($boatInformation as $key => $value)
+                                    <tr>
+                                        <th>{{$value['name']}}</th>
+                                        <td colspan="1">{{ $value['value'] }}</td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                            @else
+                            <p>No boat information specified</p>
+                            @endif
+                        </div>
     
                         <div class="col-md-6">
                             @if(!empty($guiding->boat_extras))
@@ -1047,7 +1021,7 @@
                                                             <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
                                                         <div class="">
                                                             <div class="tours-list__content__trait__text" >
-                                                            {{$guiding->is_boat ? $guiding->boat_type : 'Shore'}}   
+                                                                {{$guiding->is_boat ? ($guiding->boat_type || $guiding->boat_type !== '' && $guiding->boatType['name'] !== null ? $guiding->boatType['name'] : 'Boat') : 'Shore'}}
                                                             </div>
                                                         
                                                         </div>
