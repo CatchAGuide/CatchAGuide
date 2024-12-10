@@ -7,25 +7,19 @@ use Illuminate\Support\Facades\DB;
 
 class RenameGaleryImagesToGalleryImagesInGuidingsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         if (Schema::hasColumn('guidings', 'galery_images')) {
-            DB::statement('ALTER TABLE guidings RENAME COLUMN galery_images TO gallery_images');
+            Schema::table('guidings', function (Blueprint $table) {
+                $table->renameColumn('galery_images', 'gallery_images');
+            });
         }
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
-        DB::statement('ALTER TABLE guidings RENAME COLUMN gallery_images TO galery_images');
+        Schema::table('guidings', function (Blueprint $table) {
+            $table->renameColumn('gallery_images', 'galery_images');
+        });
     }
 }
