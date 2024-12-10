@@ -273,7 +273,8 @@ return [
     'sunday' => 'Sonntag',
 
 
-
+    'Booking' => 'Jetzt reservieren',
+    'From' => 'Ab'
     
 
 ];

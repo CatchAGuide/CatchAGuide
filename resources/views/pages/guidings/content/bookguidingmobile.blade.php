@@ -20,8 +20,8 @@
                             </button>
                         </div>
                         <div class="booking-price">
-                            <span id="priceLabel" data-from-text="{{ translate('From:') }}" data-price-text="{{ translate('Price:') }}">
-                                {{ translate('From:') }}
+                            <span id="priceLabel" data-from-text="@lang('message.From')" data-price-text="{{ translate('Price:') }}">
+                            @lang('message.From')
                             </span>
                             <span id="priceDisplay" class="text-orange">{{ $guiding->getLowestPrice() }}€ p.P.</span>
                         </div>

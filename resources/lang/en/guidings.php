@@ -40,6 +40,7 @@ return [
     'Style_Fishing' => 'Style of Fishing',
     'Tour_Type' => 'Tour Type',
     'Availability' => 'Availability',
+    'Course_Action' => 'Description',
     
     'multi_day' => 'Multi Day',
     'full_day' => 'Full Day',
@@ -48,5 +49,6 @@ return [
     'shore' => 'Shore',
     'days' => 'day/s',
     'hours' => 'hour/s',
-
+    'More' => 'See more',
+    'Less' => 'See less',
 ];  
