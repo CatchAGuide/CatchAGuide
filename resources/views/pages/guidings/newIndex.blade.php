@@ -267,7 +267,7 @@
             <div class="important-info">
                     <div class="info-item">
                         <i class="fas fa-ship"></i>
-                        <strong><p class="mb-0">{{$guiding->is_boat ? ($guiding->boat_type || $guiding->boat_type !== '' && $guiding->boatType['name'] !== null ? $guiding->boatType['name'] : 'Boat') : 'Shore'}}</p></strong>
+                        <strong><p class="mb-0">{{$guiding->is_boat ? ($guiding->boat_type || $guiding->boat_type !== '' && $guiding->boatType['name'] !== null ? $guiding->boatType['name'] : __('guidings.boat')) : __('guidings.shore')}}</p></strong>
                     </div>
                     <div class="info-item">
                         <i>
@@ -280,7 +280,7 @@
                             </svg>
                         </i>
 
-                        <p class="mb-0">{{ ucfirst(str_replace('_', ' ', $guiding->duration_type)) }} : <strong>{{$guiding->duration}} {{ $guiding->duration_type == 'multi_day' ? 'day/s' : 'hour/s' }}</strong></p>
+                        <p class="mb-0">{{ __('guidings.'.$guiding->duration_type) }} : <strong>{{$guiding->duration}} {{ $guiding->duration_type == 'multi_day' ? __('guidings.days') : __('guidings.hours') }}</strong></p>
                     </div>
                     <div class="info-item">
                         <i class="fas fa-users"></i>
@@ -603,6 +603,21 @@
                             @foreach ($inclussions as $index => $inclussion)
                                 <div class="col-12 text-start">
                                     <i data-lucide="wrench"></i> {{$inclussion['name']}}
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p>No inclusions specified</p>
+                    @endif
+                </div>
+                <div class="col-12 mb-4">
+                    @if(!empty($guiding->pricing_extra))
+                        <div class="row">
+                            <strong class="mb-2 subtitle-text">@lang('guidings.Inclusions')</strong>
+                            @foreach (json_decode($guiding->pricing_extra) as $pricing_extras)
+                                <div class="col-12 text-start">
+                                    <i data-lucide="wrench"></i> {{$pricing_extras->name}}
+                                    <i data-lucide="wrench"></i> {{$pricing_extras->price}}€ p.P
                                 </div>
                             @endforeach
                         </div>
@@ -1021,7 +1036,7 @@
                                                             <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
                                                         <div class="">
                                                             <div class="tours-list__content__trait__text" >
-                                                                {{$guiding->is_boat ? ($guiding->boat_type || $guiding->boat_type !== '' && $guiding->boatType['name'] !== null ? $guiding->boatType['name'] : 'Boat') : 'Shore'}}
+                                                                {{$guiding->is_boat ? ($guiding->boat_type || $guiding->boat_type !== '' && $guiding->boatType['name'] !== null ? $guiding->boatType['name'] : __('guidings.boat')) : __('guidings.shore')}}
                                                             </div>
                                                         
                                                         </div>

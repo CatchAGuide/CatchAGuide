@@ -40,5 +40,13 @@ return [
     'Style_Fishing' => 'Style of Fishing',
     'Tour_Type' => 'Tour Type',
     'Availability' => 'Availability',
+    
+    'multi_day' => 'Multi Day',
+    'full_day' => 'Full Day',
+    'half_day' => 'Half Day',
+    'boat' => 'Boat',
+    'shore' => 'Shore',
+    'days' => 'day/s',
+    'hours' => 'hour/s',
 
 ];  
