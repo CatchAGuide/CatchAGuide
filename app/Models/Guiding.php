@@ -21,6 +21,9 @@ use App\Models\EquipmentStatus;
 use App\Models\FishingEquipment;
 use App\Models\Rating;
 use App\Models\LocationBoundary;
+use App\Models\GuidingRequirements;
+use App\Models\GuidingAdditionalInformation;
+use App\Models\GuidingRecommendations;
 
 class Guiding extends Model
 {
@@ -812,5 +815,71 @@ class Guiding extends Model
                 ];
             })
             ->toArray();
+    }
+
+    /**
+     * Get the requirements associated with the guiding.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getRequirementsAttribute()
+    {
+        if (!$this->attributes['requirements']) {
+            return collect();
+        }
+
+        $requirementsData = collect(json_decode($this->attributes['requirements'], true));
+        
+        return GuidingRequirements::whereIn('id', $requirementsData->pluck('id'))
+            ->get()
+            ->map(function ($requirement) use ($requirementsData) {
+                $originalData = $requirementsData->firstWhere('id', $requirement->id);
+                
+                return [
+                    'id' => $requirement->id,
+                    'value' => $originalData['value'] ?? null,
+                    'name' => app()->getLocale() == "en" && $requirement->name_en 
+                        ? $requirement->name_en 
+                        : $requirement->name
+                ];
+            });
+    }
+
+    public function getOtherInformationAttribute()
+    {
+        if (!$this->attributes['other_information']) {
+            return collect();
+        }
+
+        $otherInformationData = collect(json_decode($this->attributes['other_information'], true));
+        
+        return GuidingAdditionalInformation::whereIn('id', $otherInformationData->pluck('id'))
+            ->get()
+            ->map(function ($otherInformation) use ($otherInformationData) {
+                return [
+                    'id' => $otherInformation->id,
+                    'value' => $otherInformationData->firstWhere('id', $otherInformation->id)['value'] ?? null,
+                    'name' => $otherInformation->name
+                ];
+            });
+    }
+
+    public function getRecommendationsAttribute()
+    {
+        if (!$this->attributes['recommendations']) {
+            return collect();
+        }
+
+        $recommendationsData = collect(json_decode($this->attributes['recommendations'], true));
+
+        return GuidingRecommendations::whereIn('id', $recommendationsData->pluck('id'))
+            ->get()
+            ->map(function ($recommendation) use ($recommendationsData) {
+                return [
+                    'id' => $recommendation->id,
+                    'value' => $recommendationsData->firstWhere('id', $recommendation->id)['value'] ?? null,
+                    'name' => $recommendation->name
+                ];
+            });
     }
 }
