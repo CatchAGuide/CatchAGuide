@@ -787,17 +787,16 @@ class GuidingsController extends Controller
             //step 2
             'type_of_fishing' => $guiding->is_boat ? 'boat' : 'shore',
             'boat_type' => $guiding->boat_type,
-            'boat_information' => json_decode($guiding->boat_information, true),
+            'boat_information' => $guiding->getBoatInformationAttribute(),
             'boat_extras' => json_decode($guiding->boat_extras, true),
 
             //step 3
-            'target_fish' => json_decode($guiding->target_fish, true),
-            'methods' => json_decode($guiding->fishing_methods, true),
-            'water_types' => json_decode($guiding->water_types, true),
+            'target_fish' => $guiding->getTargetFishNames(),
+            'methods' => $guiding->getFishingMethodNames(),
+            'water_types' => $guiding->getWaterNames(),
 
             //step 4
-            'experience_level' => json_decode($guiding->experience_level, true),
-            'inclussions' => json_decode($guiding->inclusions, true),
+            'inclussions' => $guiding->getInclusionNames(),
             'style_of_fishing' => $guiding->style_of_fishing,
 
             //step 5
@@ -808,9 +807,9 @@ class GuidingsController extends Controller
             'desc_tour_unique' => $guiding->desc_tour_unique,
             
             //step 6
-            'requirements' => json_decode($guiding->requirements, true),
-            'recommendations' => json_decode($guiding->recommendations, true),
-            'other_information' => json_decode($guiding->other_information, true),
+            'requirements' => $guiding->getRequirementsAttribute(),
+            'recommendations' => $guiding->getRecommendationsAttribute(),
+            'other_information' => $guiding->getOtherInformationAttribute(),
 
             //step 7
             'tour_type' => $guiding->tour_type,

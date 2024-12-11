@@ -803,7 +803,6 @@
         const errorContainer = document.getElementById('error-container');
         errorContainer.style.display = 'none';
         errorContainer.innerHTML = '';
-        return true;
         let isValid = true;
         let errors = [];
 

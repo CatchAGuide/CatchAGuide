@@ -12,5 +12,10 @@ class GuidingRecommendations extends Model
     ];
 
     protected $table = 'guiding_recommendations';
+
+    public function getNameAttribute()
+    {        
+        return app()->getLocale() == 'en' ? $this->attributes['name_en'] : $this->attributes['name'];
+    }
 }
 

@@ -8,4 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class GuidingBoatType extends Model
 {
     use HasFactory;
+
+    public function getNameAttribute()
+    {        
+        return app()->getLocale() == 'en' ? $this->attributes['name_en'] : $this->attributes['name'];
+    }
 }
+
