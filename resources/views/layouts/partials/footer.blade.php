@@ -33,8 +33,8 @@
                     <div class="col-xl-4 col-lg-6 col-md-6">
                         <div class="footer-widget__column footer-widget__about {{$agent->ismobile() ? 'text-center' : ''}}">
                             <div class="footer-widget__about-logo {{$agent->ismobile() ? 'text-center' : ''}}">
-                                <a href="{{ route('welcome') }}"><img
-                                        src="{{ asset('assets/images/logo/400PngdpiLogo-2.png') }}"
+                                <a href="{{ route('welcome') }}"><img width="300"
+                                        src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}"
                                         alt="Logo"></a>
                             </div>
                             <p class="footer-widget__about-text">@lang('message.listHere')</p>

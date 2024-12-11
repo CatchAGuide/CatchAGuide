@@ -72,7 +72,7 @@
     <div class="title-container">
         <div class="title-wrapper">
             {{-- <h1>Fishing trip in {{$guiding->location}} - {{$guiding->title}}</h1> --}}
-            <div class="row px-2">
+            <div class="title-left-container">
                 <div class="col-24 col mb-1 guiding-title">
                     <h1>
                     {{ translate($guiding->title) }}
@@ -103,7 +103,7 @@
                 <div class="col-auto p-0">
                 </div>
             </div>
-            <div class="col-12 col-lg-6 title-right-container">
+            <div class="title-right-container">
                 <div class="title-right-buttons">
                     <a class="btn" href="#" role="button"><i data-lucide="share-2"></i></a>
                     <a href="#book-now" class="btn btn-orange">@lang('message.reservation')</a>
@@ -267,8 +267,7 @@
             <div class="important-info">
                     <div class="info-item">
                         <i class="fas fa-ship"></i>
-                        <strong><p class="mb-0">{{$guiding->is_boat ? ($guiding->boat_type || $guiding->boat_type !== '' && $guiding->boatType['name'] !== null ? $guiding->boatType['name'] : __('guidings.boat')) : __('guidings.shore')}}</p></strong>
-                    </div>
+                        <strong><p class="mb-0">{{$guiding->is_boat ? ($guiding->boat_type || $guiding->boat_type !== '' && $guiding->boatType['name'] !== null ? $guiding->boatType['name'] : __('guidings.boat')) : __('guidings.shore')}}</p></strong>                    </div>
                     <div class="info-item">
                         <i>
                             <svg class="time-icon" width="18px" height="18px" viewBox="0 0 347.442 347.442" xmlns="http://www.w3.org/2000/svg">
@@ -280,8 +279,7 @@
                             </svg>
                         </i>
 
-                        <p class="mb-0">{{ __('guidings.'.$guiding->duration_type) }} : <strong>{{$guiding->duration}} {{ $guiding->duration_type == 'multi_day' ? __('guidings.days') : __('guidings.hours') }}</strong></p>
-                    </div>
+                        <p class="mb-0">{{ __('guidings.'.$guiding->duration_type) }} : <strong>{{$guiding->duration}} {{ $guiding->duration_type == 'multi_day' ? __('guidings.days') : __('guidings.hours') }}</strong></p>                    </div>
                     <div class="info-item">
                         <i class="fas fa-users"></i>
                        <p class="mb-0">{{translate('Number of guests:')}} <strong>{{$guiding->max_guests}}</strong></p>
@@ -292,24 +290,27 @@
             <div class="description-container card p-3 mb-5">
                 <div class="description-list">
                     <!-- Course of Action -->
+                    @if ($guiding->desc_course_of_action)
                     <div class="description-item">
                         <div class="header-container">
-                            <span>{{translate('Course of action')}}</span>
+                            <span>@lang('guidings.Course_Action')</span>
                         </div>
                         <p class="text-wrapper">
                            {!! $guiding->desc_course_of_action !!}
                         </p>
                     </div>
+                    @endif
+                    @if ($guiding->desc_tour_unique)
                     <div class="description-item">
                         <div class="header-container">
-                            <span>Tour highlights</span>
+                            <span>Tour Highlights</span>
                         </div>
                         <p class="text-wrapper">
                         {!! $guiding->desc_tour_unique !!}
                         </p>
                     </div>
-                    
-                    <div class="row">
+                    @endif
+                    <div class="row description-item-row">
                         <!-- Starting Time -->
                         @if ($guiding->desc_starting_time)
                         <div class="description-item col-12 col-md-6">
@@ -528,7 +529,7 @@
                         <hr/>
                     @endif
                     <!-- Recommended Preparation Section -->
-                    @if(!empty($guiding->recommendations ) || $guiding->recommendations !== null && $guiding->recommendations->count() > 0)
+                    @if(!empty($guiding->recommendations ) && $guiding->recommendations !== null && $guiding->recommendations->count() > 0)
                         <div class="tab-category mb-4">
                             <strong class="subtitle-text">@lang('guidings.Reco_Prep')</strong>
                             <div class="row">
@@ -551,20 +552,20 @@
                     <!-- Essential Details Section -->
                     <div class="row mb-4">
     
+                        @if(!empty($guiding->style_of_fishing))
                         <div class="col-md-6">
-                            @if(!empty($guiding->style_of_fishing))
                                     <strong class="subtitle-text">@lang('guidings.Style_Fishing'):</strong> 
                                     <span class="">{{ $guiding->style_of_fishing }}</span>
-                            @endif
-                        </div>
+                                </div>
+                                @endif
+                                @if(!empty($guiding->tour_type))
                         <div class="col-md-6">
-                            @if(!empty($guiding->tour_type))
                                 <div>
                                     <strong class="subtitle-text">@lang('guidings.Tour_Type'):</strong> 
                                     <span class="">{{ $guiding->tour_type }}</span>
                                 </div>
+                            </div>
                             @endif
-                        </div>
                     </div>
     
                     @if(empty($guiding->experience_level) && empty($guiding->tour_type) && empty($guiding->style_of_fishing))
@@ -597,21 +598,6 @@
                             @foreach ($inclussions as $index => $inclussion)
                                 <div class="col-12 text-start">
                                     <i data-lucide="wrench"></i> {{$inclussion['name']}}
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <p>No inclusions specified</p>
-                    @endif
-                </div>
-                <div class="col-12 mb-4">
-                    @if(!empty($guiding->pricing_extra))
-                        <div class="row">
-                            <strong class="mb-2 subtitle-text">@lang('guidings.Inclusions')</strong>
-                            @foreach (json_decode($guiding->pricing_extra) as $pricing_extras)
-                                <div class="col-12 text-start">
-                                    <i data-lucide="wrench"></i> {{$pricing_extras->name}}
-                                    <i data-lucide="wrench"></i> {{$pricing_extras->price}}€ p.P
                                 </div>
                             @endforeach
                         </div>
@@ -765,43 +751,37 @@
                         <li><span>{{ $requirements['name'] }}:</span> {{ $requirements['value'] ?? '' }}</li>
                     @endforeach
                 </ul>
+                <hr/>
             @else
                 <p>No requirements specified</p>
+                <hr/>
             @endif
-            <hr/>
             <!-- Other Information Section -->
-            @if(!empty($guiding->other_information))
+            @if(!empty($guiding->other_information) && $guiding->other_information !== null && $guiding->other_information->count() > 0)
                 <strong class="subtitle-text">@lang('guidings.Other_Info')</strong>
                 <ul>
                     @foreach ($guiding->getOtherInformationAttribute() as $otherIndex => $other)
                         <li><span>{{ $other['name'] }}:</span> {{ $other['value'] ?? '' }}</li>
                     @endforeach
                 </ul>
-            @else
-                <p>No other information specified</p>
+                <hr/>
             @endif
-            <hr/>
             <!-- Recommended Preparation Section -->
-            @if(!empty($guiding->recommendations))
+            @if(!empty($guiding->recommendations ) && $guiding->recommendations !== null && $guiding->recommendations->count() > 0)
                 <strong class="subtitle-text">@lang('guidings.Reco_Prep')</strong>
                 <ul>
                     @foreach ($guiding->getRecommendationsAttribute() as $recIndex => $recommendations)
                         <li><span>{{ $recommendations['name'] }}:</span> {{ $recommendations['value'] ?? '' }}</li>
                     @endforeach
                 </ul>
-            @else
-                <p>No recommendations specified</p>
+                <hr/>
             @endif
-            <hr/>
             <div class="row p-0">
                 <div class="col-md-6">
                     @if(!empty($guiding->style_of_fishing))
                             <strong class="subtitle-text">@lang('guidings.Style_Fishing'):</strong> 
                             <span class="">{{ $guiding->style_of_fishing }}</span>
                     @endif
-                </div>
-                <div class="col-md-6">
-                    <hr/>
                 </div>
                 <div class="col-md-6">
                     @if(!empty($guiding->tour_type))
@@ -944,7 +924,7 @@
             </div>
         </div>
     </div>
-    @if($same_guiding)
+    @if($same_guiding && count($same_guiding ) > 0)
     <section class="tour-details-two mb-5 p-0">
         <div class="container">
     <div class="row">
@@ -1030,7 +1010,7 @@
                                                             <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
                                                         <div class="">
                                                             <div class="tours-list__content__trait__text" >
-                                                                {{$guiding->is_boat ? ($guiding->boat_type || $guiding->boat_type !== '' && $guiding->boatType['name'] !== null ? $guiding->boatType['name'] : __('guidings.boat')) : __('guidings.shore')}}
+                                                                {{$guiding->is_boat ? ($guiding->boat_type || $guiding->boat_type !== '' && $guiding->boatType['name'] !== null ? $guiding->boatType['name'] : 'Boat') : 'Shore'}}
                                                             </div>
                                                         
                                                         </div>
@@ -1083,6 +1063,7 @@
 </div>
     </section>
     @endif
+    @if ($other_guidings)
     <section class="tour-details-two mb-5 p-0">
         <div class="container">
 
@@ -1118,6 +1099,7 @@
             
         </div>
     </section>
+    @endif
 </div>
 <div class="guidings-book-mobile">
             @if($agent->ismobile())

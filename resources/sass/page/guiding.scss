@@ -176,6 +176,7 @@ div#faq{
       font-size: 18px;
       padding: 10px 12px;
       flex-grow: 1;
+      background-color: #faf5ee;
       &.active, &:hover{
         color: $primary-color;
         border-top-left-radius: 0;
@@ -223,6 +224,11 @@ div#faq{
   }
 }
 .description-container{
+  .description-item-row{
+    .description-item{
+      flex: 1;
+    }
+  }
   .description-item{
     display: flex;
     flex-direction: column;
@@ -689,7 +695,7 @@ a:has(.guidings-item){
         font-weight: bold;
         color: $font-color;
         &:not(.collapsed){
-            background-color: #e8e8e8;
+            background-color: #faf5ee;
             color: $font-color;
         }
         &:focus{

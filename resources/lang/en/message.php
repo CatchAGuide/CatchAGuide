@@ -278,6 +278,7 @@ return [
     'sunday' => 'Sunday',
 
 
-
+    'Booking' => 'Reserve now',
+    'From' => 'From'
 
 ];
