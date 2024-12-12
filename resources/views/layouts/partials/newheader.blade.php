@@ -106,39 +106,41 @@
 
             <!-- Mobile Search Summary -->
             <div id="filterContainer" class="col-12 d-md-none mt-3">
-            <div id="mobileherofilter" class="shadow-lg bg-white p-2 rounded">
-                            <div class="row">
-                                <div class="col-md-4 column-input my-2">
-                                    <div class="form-group">
-                                        <div class="d-flex align-items-center small">
-                                            <i class="fa fa-search fa-fw text-muted position-absolute ps-2"></i>
-                                            <input  id="searchPlace" name="place" type="text" class="form-control rounded-0" placeholder="@lang('homepage.searchbar-destination')"  autocomplete="on">
-                                            <input type="hidden" id="placeLat" name="placeLat"/>
-                                            <input type="hidden" id="placeLng" name="placeLng"/>
+            <form class="search-form row gx-2 pe-0" id="global-search1" action="{{route('guidings.index')}}" method="get">                
+                <div id="mobileherofilter" class="shadow-lg bg-white p-2 rounded">
+                                <div class="row">
+                                    <div class="col-md-4 column-input my-2">
+                                        <div class="form-group">
+                                            <div class="d-flex align-items-center small">
+                                                <i class="fa fa-search fa-fw text-muted position-absolute ps-2"></i>
+                                                <input  id="searchPlace" name="place" type="text" class="form-control rounded-0" placeholder="@lang('homepage.searchbar-destination')"  autocomplete="on">
+                                                <input type="hidden" id="placeLat" name="placeLat"/>
+                                                <input type="hidden" id="placeLng" name="placeLng"/>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-md-2 column-input my-2">
-                                    <div class="form-group">
-                                        <div class="d-flex align-items-center small">
-                                            <i class="fa fa-user fa-fw text-muted position-absolute ps-2"></i>
-                                            <input type="number" min="1" max="5" class="form-control rounded-0" name="num_guests" placeholder="@lang('homepage.searchbar-person')" />
+                                    <div class="col-md-2 column-input my-2">
+                                        <div class="form-group">
+                                            <div class="d-flex align-items-center small">
+                                                <i class="fa fa-user fa-fw text-muted position-absolute ps-2"></i>
+                                                <input type="number" min="1" max="5" class="form-control rounded-0" name="num_guests" placeholder="@lang('homepage.searchbar-person')" />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-md-4 column-input my-2">
-                                    <div class="d-flex align-items-center small myselect2">
-                                        <i class="fa fa-fish fa-fw text-muted position-absolute ps-1"></i>
-                                        <select class="form-control form-select" id="home_target_fish" name="target_fish[]" style="width:100%">
-                                            
-                                        </select>
+                                    <div class="col-md-4 column-input my-2">
+                                        <div class="d-flex align-items-center small myselect2">
+                                            <i class="fa fa-fish fa-fw text-muted position-absolute ps-1"></i>
+                                            <select class="form-control form-select" id="home_target_fish" name="target_fish[]" style="width:100%">
+                                                
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 column-input my-2">
+                                        <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
                                     </div>
                                 </div>
-                                <div class="col-md-2 column-input my-2">
-                                    <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
-                                </div>
-                            </div>
-                        </div> 
+                            </div> 
+            </form>
                 <!-- <div class="search-summary" role="button" id="headerSearchTrigger">
                     <i class="fas fa-search me-2"></i>
                     @if(request()->has('place'))
@@ -234,9 +236,10 @@
     margin: auto;
 }
      #mobileherofilter .column-input input{
+        border-top:none !important;
+        border-left:none !important;
+        border-right:none !important;
         border-bottom:1px solid #a7a7a7 !important;
-        /* border-bottom:2px solid #E8604C !important; */
-        border:none;
         outline:none !important;
     }
     #mobileherofilter .column-input i{
@@ -252,6 +255,9 @@
         outline:none !important;
     }
     #mobileherofilter .myselect2{
+        border-top:none !important;
+        border-left:none !important;
+        border-right:none !important;
         border-bottom:1px solid #a7a7a7 !important;
         /* border-bottom:2px solid #E8604C !important; */
         padding:2px 0px;
