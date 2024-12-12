@@ -213,7 +213,7 @@
 
             const boatInformationData = {!! json_encode($formData['boat_information'] ?? []) !!};
             Object.entries(boatInformationData).forEach(([key, value]) => {
-                const checkbox = document.querySelector(`input[name="descriptions[]"][value="${key}"]`);
+                const checkbox = document.querySelector(`input[name="descriptions[]"][value="boat_description_${value['id']}"]`);
                 if (checkbox) {
                     checkbox.checked = true;
                     const container = checkbox.closest('.btn-checkbox-container');
@@ -221,7 +221,7 @@
                         container.classList.add('active');
                         const textarea = container.querySelector('textarea');
                         if (textarea) {
-                            textarea.value = value;
+                            textarea.value = value['value'];
                             textarea.style.display = 'block';
                         }
                     }
@@ -229,11 +229,7 @@
             });
 
             const extrasTagify = initTagify('input[name="boat_extras"]', {
-                whitelist: [
-                    'GPS', 'Echolot', 'Live Scope', 'Radar', 'Funk', 'Flybridge', 'WC', 
-                    'Roofing', 'Dusche', 'Küche', 'Bett', 'Wifi', 'Ice box/ Kühlschrank', 
-                    'Air conditioning', 'Fighting chair', 'E-Motor', 'Felitiertisch'
-                ].sort(),
+                whitelist: {!! json_encode($boat_extras->toArray()) !!}.sort(),
                 dropdown: {
                     maxItems: Infinity,
                     classname: "tagify__dropdown",
@@ -1043,12 +1039,10 @@
         initializeImageManager();
 
         // Boat Extras
+        console.log('testss');
+        console.log({!! json_encode($boat_extras) !!});
         initTagify('input[name="boat_extras"]', {
-            whitelist: [
-                'GPS', 'Echolot', 'Live Scope', 'Radar', 'Funk', 'Flybridge', 'WC', 
-                'Roofing', 'Dusche', 'Küche', 'Bett', 'Wifi', 'Ice box/ Kühlschrank', 
-                'Air conditioning', 'Fighting chair', 'E-Motor', 'Felitiertisch'
-            ].sort(),
+            whitelist: {!! json_encode($boat_extras->toArray()) !!}.sort(),
             dropdown: {
                 maxItems: Infinity,
                 classname: "tagify__dropdown",

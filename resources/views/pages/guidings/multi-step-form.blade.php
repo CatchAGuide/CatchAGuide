@@ -187,8 +187,8 @@
                         <div class="btn-group-toggle">
                             @foreach($guiding_boat_descriptions as $guiding_boat_description)
                                 <div class="btn-checkbox-container">
-                                    <input type="checkbox" name="descriptions[]" value="boat_description_{{ $guiding_boat_description['value'] }}" id="boat_description_{{ $guiding_boat_description['value'] }}">
-                                    <label for="boat_description_{{ $guiding_boat_description['value'] }}" class="btn btn-outline-primary m-2 btn-checkbox">
+                                    <input type="checkbox" name="descriptions[]" value="boat_description_{{ $guiding_boat_description['id'] }}" id="boat_description_{{ $guiding_boat_description['id'] }}">
+                                    <label for="boat_description_{{ $guiding_boat_description['id'] }}" class="btn btn-outline-primary m-2 btn-checkbox">
                                         {{ $guiding_boat_description['value'] }}
                                     </label>
                                     <textarea class="form-control extra-input" name="{{ $guiding_boat_description['value'] }}" placeholder="{{ __('guidings.Enter_value_for') . ' ' . $guiding_boat_description['value'] }}"></textarea>

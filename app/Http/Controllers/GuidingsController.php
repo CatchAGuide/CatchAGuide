@@ -33,6 +33,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\BlockedEvent;
 use App\Models\ExtrasPrice;
 use App\Models\FishingType;
+use App\Models\BoatExtras;
 
 class GuidingsController extends Controller
 {
@@ -836,6 +837,7 @@ class GuidingsController extends Controller
             'methods' => Method::class,
             'waters' => Water::class,
             'inclussions' => Inclussion::class,
+            'boat_extras' => BoatExtras::class,
             'extras_prices' => ExtrasPrice::class,
             'guiding_boat_types' => GuidingBoatType::class,
             'guiding_boat_descriptions' => GuidingBoatDescription::class,
