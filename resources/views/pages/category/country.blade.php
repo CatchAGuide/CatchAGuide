@@ -562,18 +562,18 @@
                                             </div>
                                             <div class="inclusions-price">
                                                     <div class="guidings-inclusions-container">
-                                                        @if(!empty($guiding->inclusions))
+                                                        @if(!empty($guiding->getInclusionNames()))
                                                         <div class="guidings-included">
                                                             <strong>What's Included</strong>
                                                             <div class="inclusions-list">
                                                                 @php
-                                                                    $inclusions = json_decode($guiding->inclusions, true);
+                                                                    $inclusions = $guiding->getInclusionNames();
                                                                     $maxToShow = 3; // Maximum number of inclusions to display
                                                                 @endphp
 
                                                                 @foreach ($inclusions as $index => $inclusion)
                                                                     @if ($index < $maxToShow)
-                                                                        <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclusion['value'] }}</span>
+                                                                        <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclusion['name'] }}</span>
                                                                     @endif
                                                                 @endforeach
 
@@ -1095,6 +1095,8 @@ function initializeSelect2() {
         center: position,
         styles: mapStyle,
         mapId: "DEMO_MAP_ID",
+        mapTypeControl: false,
+        streetViewControl: false,
     });
 
     // The marker, positioned at Uluru
