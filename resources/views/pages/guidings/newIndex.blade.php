@@ -267,7 +267,8 @@
             <div class="important-info">
                     <div class="info-item">
                         <i class="fas fa-ship"></i>
-                        <strong><p class="mb-0">{{$guiding->is_boat ? ($guiding->boat_type || $guiding->boat_type !== '' && $guiding->boatType['name'] !== null ? $guiding->boatType['name'] : __('guidings.boat')) : __('guidings.shore')}}</p></strong>                    </div>
+                        <strong><p class="mb-0">{{$guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}</p></strong>
+                    </div>
                     <div class="info-item">
                         <i>
                             <svg class="time-icon" width="18px" height="18px" viewBox="0 0 347.442 347.442" xmlns="http://www.w3.org/2000/svg">
