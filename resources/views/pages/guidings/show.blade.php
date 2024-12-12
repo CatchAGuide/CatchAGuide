@@ -617,6 +617,8 @@ transform: translate3d(0,0,0); width: 100%;">
                     zoom: 10,
                     center: position,
                     mapId: "DEMO_MAP_ID",
+                    mapTypeControl: false,
+                    streetViewControl: false,
                 });
 
                 // The marker, positioned at Uluru

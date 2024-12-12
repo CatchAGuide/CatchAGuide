@@ -137,6 +137,7 @@
                         $filteredGallery = array_filter($galleryImages, function($image) use ($thumbnailPath) {
                             return asset($image) !== $thumbnailPath;
                         });
+                        $filteredGallery = array_values($filteredGallery);
                         
                         if (count($filteredGallery) < 4) {
                             $finalImages = $filteredGallery;
@@ -1236,10 +1237,13 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
     function initMap() {
-        var location = { lat: 41.40338, lng: 2.17403 }; // Example coordinates
+        //var location = { lat: 41.40338, lng: 2.17403 }; // Example coordinates
+        var location = { lat: {{ $guiding->lat }}, lng: {{ $guiding->lng }} }; // Example coordinates
         var map = new google.maps.Map(document.getElementById('map'), {
             zoom: 10,
-            center: location
+            center: location,
+            mapTypeControl: false,
+            streetViewControl: false,
         });
         var marker = new google.maps.Marker({
             position: location,
