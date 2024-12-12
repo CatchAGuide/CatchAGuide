@@ -429,53 +429,27 @@ class Guiding extends Model
     }
 
     public function boatType(){
-        return $this->hasOne(GuidingBoatType::class,'id','boat_type')
-            ->withDefault(function ($boatType) {
-                return [
-                    'name' => app()->getLocale() == "en" && $boatType->name_en 
-                        ? $boatType->name_en 
-                        : $boatType->name
-                ];
-            });
+        return $this->hasOne(GuidingBoatType::class,'id','boat_type');
     }
 
     public function getLowestPrice()
     {
-        // if ($this->is_newguiding) {
-            if ($this->price_type == 'per_person') {
-                $prices = json_decode($this->prices, true);
-                if (!$prices) {
-                    return 0;
-                }
-                
-                $singlePrice = collect($prices)->where('person', 1)->first();
-                $singlePrice = $singlePrice ? $singlePrice['amount'] : PHP_FLOAT_MAX;
-                
-                $minPrice = min(array_map(function($price) {
-                    return $price['person'] > 1 ? round($price['amount'] / $price['person']) : $price['amount'];
-                }, $prices));
-                
-                return min($singlePrice, $minPrice);
+        if ($this->price_type == 'per_person') {
+            $prices = json_decode($this->prices, true);
+            if (!$prices) {
+                return 0;
             }
-            return 0;
-        // } else {
-        //     $validPrices = array_filter([
-        //         $this->price,
-        //         $this->max_guests >= 2 ? $this->price_two_persons / 2 : null,
-        //         $this->max_guests >= 3 ? $this->price_three_persons / 3 : null,
-        //         $this->max_guests >= 4 ? $this->price_four_persons / 4 : null,
-        //         $this->max_guests >= 5 ? $this->price_five_persons / 5 : null
-        //     ], function($value) { return $value > 0; });
-
-        //     if (empty($validPrices)) {
-        //         return 0;
-        //     }
-
-        //     $singlePrice = $this->price;
-        //     $minPrice = min(array_map('round', $validPrices));
             
-        //     return $singlePrice > 0 ? min($singlePrice, $minPrice) : $minPrice;
-        // }
+            $singlePrice = collect($prices)->where('person', 1)->first();
+            $singlePrice = $singlePrice ? $singlePrice['amount'] : PHP_FLOAT_MAX;
+            
+            $minPrice = min(array_map(function($price) {
+                return $price['person'] > 1 ? round($price['amount'] / $price['person']) : $price['amount'];
+            }, $prices));
+            
+            return min($singlePrice, $minPrice);
+        }
+        return 0;
     }
 
     public function getBlockedEvents()
