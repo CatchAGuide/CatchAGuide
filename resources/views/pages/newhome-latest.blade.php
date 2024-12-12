@@ -433,7 +433,7 @@
     </div>
 </section>
 
-<section id="nearest-listing" class="py-1 my-5 offer d-none">
+<!-- <section id="nearest-listing" class="py-1 my-5 offer d-none">
 
     <div class="container my-4">
         <div class="my-2 section-title">
@@ -444,7 +444,7 @@
         
         </div>
     </div>
-</section>
+</section> -->
 
 
 <section class="py-1 my-5 trending">
@@ -458,9 +458,9 @@
                 @if(!$agent->ismobile())
                 <div>
                     @if(app()->getLocale() == 'de')
-                        <a href="{{route('allcountries')}}" class="color-primary fw-light">Alle Länder ansehen</a>
+                        <a href="{{route('destination')}}" class="color-primary fw-light">Alle Länder ansehen</a>
                     @else
-                        <a href="{{route('allcountries')}}" class="color-primary fw-light">Show all countries</a>
+                        <a href="{{route('destination')}}" class="color-primary fw-light">Show all countries</a>
                     @endif
                 </div>
                 @endif
