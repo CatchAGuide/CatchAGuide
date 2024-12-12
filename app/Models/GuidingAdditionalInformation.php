@@ -12,5 +12,10 @@ class GuidingAdditionalInformation extends Model
     ];
 
     protected $table = 'guiding_additional_informations';
+
+    public function getNameAttribute()
+    {        
+        return app()->getLocale() == 'en' ? $this->attributes['name_en'] : $this->attributes['name'];
+    }
 }
 

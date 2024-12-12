@@ -11,4 +11,9 @@ class ExtrasPrice extends Model
 
     protected $fillable = ['name', 'name_en'];
     protected $table = 'extras_prices';
+
+    public function getNameAttribute()
+    {
+        return app()->getLocale() == 'en' ? $this->attributes['name_en'] : $this->attributes['name'];
+    }   
 }

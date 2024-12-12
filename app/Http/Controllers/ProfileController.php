@@ -28,6 +28,7 @@ use Mail;
 use App\Events\BookingStatusChanged;
 use App\Models\Inclussion;
 use App\Models\ExtrasPrice;
+use App\Models\BoatExtras;
 
 class ProfileController extends Controller
 {
@@ -161,6 +162,7 @@ class ProfileController extends Controller
             'methods' => Method::class,
             'waters' => Water::class, 
             'inclussions' => Inclussion::class,
+            'boat_extras' => BoatExtras::class,
             'extras_prices' => ExtrasPrice::class,
             'guiding_boat_types' => GuidingBoatType::class,
             'guiding_boat_descriptions' => GuidingBoatDescription::class,

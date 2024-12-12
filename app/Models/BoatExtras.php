@@ -2,20 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class GuidingRequirements extends Model
+class BoatExtras extends Model
 {
-    protected $fillable = [
-        'name',
-        'name_en',
-    ];
-    
-    protected $table = 'guiding_requirements';
+    use HasFactory;
 
     public function getNameAttribute()
-    {        
+    {
         return app()->getLocale() == 'en' ? $this->attributes['name_en'] : $this->attributes['name'];
     }
 }
-
