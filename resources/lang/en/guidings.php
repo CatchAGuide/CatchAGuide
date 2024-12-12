@@ -41,6 +41,7 @@ return [
     'Tour_Type' => 'Tour Type',
     'Availability' => 'Availability',
     'Course_Action' => 'Description',
+    'Match_Guiding' => 'Match Guidings',
     
     'multi_day' => 'Multi Day',
     'full_day' => 'Full Day',

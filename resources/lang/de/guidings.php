@@ -41,6 +41,7 @@ return [
     'Tour_Type' => 'Art der Tour',
     'Availability' => 'Verfügbarkeit der Angeltour',
     'Course_Action' => 'Ablauf & Beschreibung',
+    'Match_Guiding' => 'Ähnliche Angelguidings',
 
     'multi_day' => 'Mehrtägig',
     'full_day' => 'Ganztags',

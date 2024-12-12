@@ -8,7 +8,7 @@ return [
     'header-profile' => 'Profil',
     'header-logout' => 'Logout',
 
-    'searchbar-destination' => 'Ort',
+    'searchbar-destination' => 'Länder',
     'searchbar-person' => 'Personen',
     'searchbar-targetfish' => 'Zielfische',
     'searchbar-search' => 'Suchen',

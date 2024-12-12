@@ -22,7 +22,7 @@
                 <th class="wd-15p border-bottom-0">@lang('profile.guidings')</th>
                 <th class="wd-15p border-bottom-0">@lang('profile.when')</th>
                 <th class="wd-15p border-bottom-0">@lang('profile.price')</th>
-                <th class="wd-15p border-bottom-0">@lang('profile.chat')</th>
+                <!-- <th class="wd-15p border-bottom-0">@lang('profile.chat')</th> -->
                 <th class="wd-15p border-bottom-0">@lang('profile.evaluation')</th>
                 <th class="wd-15p border-bottom-0">@lang('profile.details')</th>
                 <th class="wd-15p border-bottom-0">@lang('profile.contact')</th>
@@ -77,7 +77,7 @@
                 </td>
                 <td>{{ two($booking->price) }} €<br>
                 </td>
-                <td>
+                <!-- <td>
                     @switch($booking->status)
                     @case('accepted')
                         <a class="badge py-2 px-2 thm-btn"  href="{{ route('chat.create', $booking->guiding->user) }}">@lang('profile.chat')</a>
@@ -98,7 +98,7 @@
                     @default
                         <a class="badge py-2 px-2 thm-btn"  href="{{ route('chat.create', $booking->guiding->user) }}">@lang('profile.chat')</a>
                     @endswitch
-                </td>
+                </td> -->
                 <td>
                     @switch($booking->status)
                         @case('accepted')

@@ -1014,7 +1014,6 @@
                                                             <div class="tours-list__content__trait__text" >
                                                                 {{$guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
                                                             </div>
-                                                            </div>
                                                         
                                                         </div>
                                                 </div>
@@ -1071,7 +1070,7 @@
         <div class="container">
 
             <div class="tour-details-two__related-tours {{$agent->ismobile() ? 'text-center' : ''}}">
-                <h3 class="tour-details-two__title">{{ translate('Matching Guidings') }}</h3>
+                <h3 class="tour-details-two__title">@lang('guidings.Match_Guiding')</h3>
                 <div class="popular-tours__carousel owl-theme owl-carousel">
                     @foreach($other_guidings as $other_guiding)
                 
