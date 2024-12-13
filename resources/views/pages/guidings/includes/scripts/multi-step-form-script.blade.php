@@ -195,6 +195,7 @@
                 const radioButton = document.querySelector(`input[name="type_of_fishing_radio"][value="${typeOfFishingData}"]`);
                 if (radioButton) {
                     radioButton.checked = true;
+                    radioButton.dispatchEvent(new Event('change'));
                     selectOption(typeOfFishingData);
                 }
             }
@@ -204,6 +205,7 @@
                 const boatRadio = document.querySelector(`input[name="type_of_boat"][value="${boatTypeData}"]`);
                 if (boatRadio) {
                     boatRadio.checked = true;
+                    boatRadio.dispatchEvent(new Event('change'));
                     const label = boatRadio.closest('label');
                     if (label) {
                         label.classList.add('active');
@@ -216,6 +218,7 @@
                 const checkbox = document.querySelector(`input[name="descriptions[]"][value="boat_description_${value['id']}"]`);
                 if (checkbox) {
                     checkbox.checked = true;
+                    checkbox.dispatchEvent(new Event('change'));
                     const container = checkbox.closest('.btn-checkbox-container');
                     if (container) {
                         container.classList.add('active');
@@ -238,7 +241,7 @@
                 }
             });
 
-            const extrasData = {!! json_encode($formData['boat_extras'] ?? []) !!};
+            const extrasData = {!! json_encode(collect($formData['boat_extras'] ?? [])->pluck('name')->toArray()) !!};
             if (extrasTagify && extrasData) {
                 extrasTagify.addTags(extrasData);
             }
@@ -254,7 +257,7 @@
                 }
             });
 
-            const targetFishData = {!! json_encode($formData['target_fish'] ?? []) !!};
+            const targetFishData = {!! json_encode(collect($formData['target_fish'] ?? [])->pluck('name')->toArray()) !!};
             if (targetFishTagify && targetFishData) {
                 targetFishTagify.addTags(targetFishData);
             }
@@ -270,7 +273,7 @@
                 }
             });
 
-            const methodsData = {!! json_encode($formData['methods'] ?? []) !!};
+            const methodsData = {!! json_encode(collect($formData['methods'] ?? [])->pluck('name')->toArray()) !!};
             if (methodsTagify && methodsData) {
                 methodsTagify.addTags(methodsData);
             }
@@ -286,14 +289,14 @@
                 }
             });
 
-            const waterTypesData = {!! json_encode($formData['water_types'] ?? []) !!};
+            const waterTypesData = {!! json_encode(collect($formData['water_types'] ?? [])->pluck('name')->toArray()) !!};
             if (waterTypesTagify && waterTypesData) {
                 waterTypesTagify.addTags(waterTypesData);
             }
 
             //inclussions
-            const inclussionsTagify = initTagify('input[name="water_types"]', {
-                whitelist: {!! json_encode($inclussions->toArray()) !!}.sort(),
+            const inclusionsTagify = initTagify('input[name="inclusions"]', {
+                whitelist: {!! json_encode($inclusions->toArray()) !!}.sort(),
                 dropdown: {
                     maxItems: Infinity,
                     classname: "tagify__dropdown",
@@ -302,11 +305,17 @@
                 }
             });
             
+            const inclusionsData = {!! json_encode(collect($formData['inclusions'] ?? [])->pluck('name')->toArray()) !!};
+            if (inclusionsTagify && inclusionsData) {
+                inclusionsTagify.addTags(inclusionsData);
+            }
+            
             const experinceLevelData = {!! json_encode($formData['experience_level'] ?? []) !!};
             Object.entries(experinceLevelData).forEach(([key, value]) => {
                 const checkbox = document.querySelector(`input[name="experience_level[]"][value="${value}"]`);
                 if (checkbox) {
                     checkbox.checked = true;
+                    checkbox.dispatchEvent(new Event('change'));
                     const container = checkbox.closest('.btn-checkbox-container');
                     if (container) {
                         container.classList.add('active');
@@ -314,11 +323,12 @@
                 }
             });
 
-            const styleOfFishingData = '{{ $formData['style_of_fishing'] ?? '' }}';
+            const styleOfFishingData = '{{ $formData['fishing_type'] ?? '' }}';
             if (styleOfFishingData) {
                 const styleOfFishing = document.querySelector(`input[name="style_of_fishing"][value="${styleOfFishingData}"]`);
                 if (styleOfFishing) {
                     styleOfFishing.checked = true;
+                    styleOfFishing.dispatchEvent(new Event('change'));
                     const label = styleOfFishing.closest('label');
                     if (label) {
                         label.classList.add('active');
@@ -328,15 +338,16 @@
 
             const otherInformationData = {!! json_encode($formData['other_information'] ?? []) !!};
             Object.entries(otherInformationData).forEach(([key, value]) => {
-                const checkbox = document.querySelector(`input[name="other_information[]"][value="${key}"]`);
+                const checkbox = document.querySelector(`input[name="other_information[]"][value="${value['id']}"]`);
                 if (checkbox) {
                     checkbox.checked = true;
+                    checkbox.dispatchEvent(new Event('change'));
                     const container = checkbox.closest('.btn-checkbox-container');
                     if (container) {
                         container.classList.add('active');
                         const textarea = container.querySelector('textarea');
                         if (textarea) {
-                            textarea.value = value;
+                            textarea.value = value['value'];
                             textarea.style.display = 'block';
                         }
                     }
@@ -345,15 +356,16 @@
 
             const requirementsData = {!! json_encode($formData['requirements'] ?? []) !!};
             Object.entries(requirementsData).forEach(([key, value]) => {
-                const checkbox = document.querySelector(`input[name="requiements_taking_part[]"][value="${key}"]`);
+                const checkbox = document.querySelector(`input[name="requiements_taking_part[]"][value="${value['id']}"]`);
                 if (checkbox) {
                     checkbox.checked = true;
+                    checkbox.dispatchEvent(new Event('change'));
                     const container = checkbox.closest('.btn-checkbox-container');
                     if (container) {
                         container.classList.add('active');
                         const textarea = container.querySelector('textarea');
                         if (textarea) {
-                            textarea.value = value;
+                            textarea.value = value['value'];
                             textarea.style.display = 'block';
                         }
                     }
@@ -362,15 +374,16 @@
 
             const recommendationsData = {!! json_encode($formData['recommendations'] ?? []) !!};
             Object.entries(recommendationsData).forEach(([key, value]) => {
-                const checkbox = document.querySelector(`input[name="recommended_preparation[]"][value="${key}"]`);
+                const checkbox = document.querySelector(`input[name="recommended_preparation[]"][value="${value['id']}"]`);
                 if (checkbox) {
                     checkbox.checked = true;
+                    checkbox.dispatchEvent(new Event('change'));
                     const container = checkbox.closest('.btn-checkbox-container');
                     if (container) {
                         container.classList.add('active');
                         const textarea = container.querySelector('textarea');
                         if (textarea) {
-                            textarea.value = value;
+                            textarea.value = value['value'];
                             textarea.style.display = 'block';
                         }
                     }
@@ -382,6 +395,7 @@
                 const tourRadio = document.querySelector(`input[name="tour_type"][value="${tourTypeData}"]`);
                 if (tourRadio) {
                     tourRadio.checked = true;
+                    tourRadio.dispatchEvent(new Event('change'));
                     const label = tourRadio.closest('label');
                     if (label) {
                         label.classList.add('active');
@@ -446,17 +460,21 @@
 
             const seasonalTripData = '{{ $formData['seasonal_trip'] ?? '' }}';
             const monthsData = {!! json_encode($formData['months'] ?? []) !!};
+            
             if (seasonalTripData) {
                 const seasonalTripRadio = document.querySelector(`input[name="seasonal_trip"][value="${seasonalTripData}"]`);
                 if (seasonalTripRadio) {
                     seasonalTripRadio.checked = true;
+                    seasonalTripRadio.dispatchEvent(new Event('change'));
+
                     if (seasonalTripData === 'season_monthly') {
-                        // document.getElementById('season_monthly').style.display = 'block';
+                        document.getElementById('monthly_selection').style.display = 'block';
                         if (monthsData && monthsData.length > 0) {
                             monthsData.forEach(month => {
                                 const monthCheckbox = document.querySelector(`input[name="months[]"][value="${month}"]`);
                                 if (monthCheckbox) {
                                     monthCheckbox.checked = true;
+                                    monthCheckbox.dispatchEvent(new Event('change'));
                                 }
                             });
                         }
@@ -874,28 +892,21 @@
                 }
                 break;
             case 4:
-                if (!document.getElementById('is_update').value.trim() || document.getElementById('is_update').value.trim() === '0') {
-                    if (!document.getElementById('desc_course_of_action').value.trim()) {
-                        errors.push('Course of action description is required.');
-                        isValid = false;
-                    }
-                    if (!document.getElementById('desc_starting_time').value.trim()) {
-                        errors.push('Starting time description is required.');
-                        isValid = false;
-                    }
-                    if (!document.getElementById('desc_meeting_point').value.trim()) {
-                        errors.push('Meeting point description is required.');
-                        isValid = false;
-                    }
-                    if (!document.getElementById('desc_tour_unique').value.trim()) {
-                        errors.push('Tour uniqueness description is required.');
-                        isValid = false;
-                    }
-                } else {
-                    if (!document.getElementById('long_description').value.trim()) {
-                        errors.push('description is required.');
-                        isValid = false;
-                    }
+                if (!document.getElementById('desc_course_of_action').value.trim()) {
+                    errors.push('Course of action description is required.');
+                    isValid = false;
+                }
+                if (!document.getElementById('desc_starting_time').value.trim()) {
+                    errors.push('Starting time description is required.');
+                    isValid = false;
+                }
+                if (!document.getElementById('desc_meeting_point').value.trim()) {
+                    errors.push('Meeting point description is required.');
+                    isValid = false;
+                }
+                if (!document.getElementById('desc_tour_unique').value.trim()) {
+                    errors.push('Tour uniqueness description is required.');
+                    isValid = false;
                 }
                 break;
             case 5:
@@ -933,7 +944,11 @@
                     errors.push('Please select a price type.');
                     isValid = false;
                 }
-                // Add more price validation based on the selected price type
+                
+                if (!document.getElementById('inclusions').value.trim()) {
+                    errors.push('Included in the price are required.');
+                    isValid = false;
+                }
                 break;
             case 7:
                 if (!document.querySelector('input[name="allowed_booking_advance"]:checked')) {
@@ -944,18 +959,22 @@
                     errors.push('Please select a booking window.');
                     isValid = false;
                 }
-                if (!document.querySelector('input[name="seasonal_trip"]:checked')) {
-                    errors.push('Please select a seasonal trip option.');
-                    isValid = false;
-                }
-                if (document.querySelector('input[name="seasonal_trip"]:checked').value === 'season_monthly' && !document.querySelector('input[name="months[]"]:checked')) {
-                    errors.push('Please select at least one month for seasonal trips.');
-                    isValid = false;
-                }
-                if (!document.getElementById('inclussions').value.trim()) {
-                    errors.push('Included in the price are required.');
-                    isValid = false;
-                }
+                // if (!document.querySelector('input[name="seasonal_trip"]:checked')) {
+                //     errors.push('Please select a seasonal trip option.');
+                //     isValid = false;
+                // } else {
+                //     // Get the selected seasonal trip value
+                //     const seasonalTripValue = document.querySelector('input[name="seasonal_trip"]:checked').value;
+                    
+                //     // If seasonal_monthly is selected, check if at least one month is selected
+                //     if (seasonalTripValue === 'season_monthly') {
+                //         const selectedMonths = document.querySelectorAll('input[name="months[]"]:checked');
+                //         if (selectedMonths.length === 0) {
+                //             errors.push('Please select at least one month for seasonal trips.');
+                //             isValid = false;
+                //         }
+                //     }
+                // }
                 break;
         }
 
@@ -1039,8 +1058,6 @@
         initializeImageManager();
 
         // Boat Extras
-        console.log('testss');
-        console.log({!! json_encode($boat_extras) !!});
         initTagify('input[name="boat_extras"]', {
             whitelist: {!! json_encode($boat_extras->toArray()) !!}.sort(),
             dropdown: {
@@ -1087,8 +1104,8 @@
         });
 
         // Inclusions
-        initTagify('input[name="inclussions"]', {
-            whitelist: {!! json_encode($inclussions->toArray()) !!}.sort(),
+        initTagify('input[name="inclusions"]', {
+            whitelist: {!! json_encode($inclusions->toArray()) !!}.sort(),
             maxTags: 10,
             dropdown: {
                 maxItems: Infinity,
@@ -1133,9 +1150,6 @@
                 $('#duration_details').hide();
             }
         });
-
-        //If edit is requested, set the form data
-        setFormDataIfEdit();
         
         const imageUploadInput = document.getElementById('title_image');
         if (imageUploadInput) {

@@ -161,7 +161,7 @@ class ProfileController extends Controller
             'targets' => Target::class,
             'methods' => Method::class,
             'waters' => Water::class, 
-            'inclussions' => Inclussion::class,
+            'inclusions' => Inclussion::class,
             'boat_extras' => BoatExtras::class,
             'extras_prices' => ExtrasPrice::class,
             'guiding_boat_types' => GuidingBoatType::class,
