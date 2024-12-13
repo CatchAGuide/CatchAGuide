@@ -290,7 +290,7 @@
                                 <span class="text-dark fw-bold">{{ translate('Requirements for taking part')}}:</span>
                               </div>
                               <div class="px-2 text-dark">
-                                {{ implode(', ', array_filter(json_decode($guiding->requirements, true))) }}
+                                {{ implode(', ', array_filter(collect($guiding->requirements)->pluck('name')->toArray())) }}
                               </div>
                             </div>
                             @endif
