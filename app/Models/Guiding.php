@@ -26,6 +26,7 @@ use App\Models\GuidingRecommendations;
 use App\Models\GuidingBoatType;
 use App\Models\GuidingBoatDescription;
 use App\Models\GuidingBoatExtras;
+use App\Models\BoatExtras;
 
 class Guiding extends Model
 {
@@ -102,8 +103,7 @@ class Guiding extends Model
         'desc_course_of_action',
         'desc_meeting_point',
         'desc_starting_time',
-        'desc_tour_unique',
-        'inclussions',
+        'desc_tour_unique'
     ];
 
     public const LATITUDE  = 'lat';
@@ -799,6 +799,24 @@ class Guiding extends Model
                     'name' => app()->getLocale() == "en" && $water->name_en 
                         ? $water->name_en 
                         : $water->name
+                ];
+            })
+            ->toArray();
+    }
+
+    public function getBoatExtras(): array
+    {
+        $boatExtras = json_decode($this->boat_extras, true);
+        if (!$boatExtras) {
+            return [];
+        }
+
+        return BoatExtras::whereIn('id', $boatExtras)
+            ->get()
+            ->map(function($boatExtra) {
+                return [
+                    'id' => $boatExtra->id,
+                    'name' => $boatExtra->name
                 ];
             })
             ->toArray();

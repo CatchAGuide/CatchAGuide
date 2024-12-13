@@ -13,9 +13,6 @@
                 <div class="step-button" data-step="3">
                     <i class="fas fa-anchor"></i>
                 </div>
-                {{-- <div class="step-button" data-step="4">
-                    <i class="fas fa-chart-line"></i>
-                </div> --}}
                 <div class="step-button" data-step="4">
                     <i class="fas fa-file-alt"></i>
                 </div>
@@ -104,9 +101,9 @@
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn1">
+                        {{-- <button type="button" class="btn btn-secondary" id="saveDraftBtn1">
                             {{ __('newguidings.leave_save_draft') }}
-                        </button>
+                        </button> --}}
                     </div>
                     <div class="right-buttons">
                         <div class="row-button">
@@ -163,7 +160,7 @@
                         </label>
                         <div class="d-flex flex-wrap btn-group-toggle">
                             @foreach($guiding_boat_types as $guiding_boat_type)
-                                <input type="radio" name="type_of_boat" value="boat_type_{{ $guiding_boat_type['id'] }}" id="boat_type_{{ $guiding_boat_type['id'] }}">
+                                <input type="radio" name="type_of_boat" value="{{ $guiding_boat_type['id'] }}" id="boat_type_{{ $guiding_boat_type['id'] }}">
                                 <label for="boat_type_{{ $guiding_boat_type['id'] }}" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" 
                                        style="flex-basis: calc(33.33% - 20px);">{{ $guiding_boat_type['value'] }}</label>
                             @endforeach
@@ -187,11 +184,11 @@
                         <div class="btn-group-toggle">
                             @foreach($guiding_boat_descriptions as $guiding_boat_description)
                                 <div class="btn-checkbox-container">
-                                    <input type="checkbox" name="descriptions[]" value="boat_description_{{ $guiding_boat_description['id'] }}" id="boat_description_{{ $guiding_boat_description['id'] }}">
+                                    <input type="checkbox" name="descriptions[]" value="{{ $guiding_boat_description['id'] }}" id="boat_description_{{ $guiding_boat_description['id'] }}">
                                     <label for="boat_description_{{ $guiding_boat_description['id'] }}" class="btn btn-outline-primary m-2 btn-checkbox">
                                         {{ $guiding_boat_description['value'] }}
                                     </label>
-                                    <textarea class="form-control extra-input" name="{{ $guiding_boat_description['value'] }}" placeholder="{{ __('guidings.Enter_value_for') . ' ' . $guiding_boat_description['value'] }}"></textarea>
+                                    <textarea class="form-control extra-input" name="boat_description_{{ $guiding_boat_description['id'] }}" placeholder="{{ __('guidings.Enter_value_for') . ' ' . $guiding_boat_description['value'] }}"></textarea>
                                 </div>
                             @endforeach
                         </div> 
@@ -211,9 +208,9 @@
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn2">
+                        {{-- <button type="button" class="btn btn-secondary" id="saveDraftBtn2">
                             {{ __('newguidings.leave_save_draft') }}
-                        </button>
+                        </button> --}}
                     </div>
                     <div class="right-buttons">
                         <div class="row-button">
@@ -264,17 +261,17 @@
                            title="{{ __('newguidings.tooltip_style_of_fishing') }}"></i>
                     </label>
                     <div class="d-flex flex-wrap btn-group-toggle">
-                        <input type="radio" name="style_of_fishing" value="active" id="active">
+                        <input type="radio" name="style_of_fishing" value="1" id="active">
                         <label for="active" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">
                             {{ __('newguidings.active') }}
                         </label>
                         
-                        <input type="radio" name="style_of_fishing" value="passive" id="passive">
+                        <input type="radio" name="style_of_fishing" value="2" id="passive">
                         <label for="passive" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">
                             {{ __('newguidings.passive') }}
                         </label>
                         
-                        <input type="radio" name="style_of_fishing" value="active_passive" id="active_passive">
+                        <input type="radio" name="style_of_fishing" value="3" id="active_passive">
                         <label for="active_passive" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">
                             {{ __('newguidings.active_passive') }}
                         </label>
@@ -296,9 +293,9 @@
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn3">
+                        {{-- <button type="button" class="btn btn-secondary" id="saveDraftBtn3">
                             {{ __('newguidings.leave_save_draft') }}
-                        </button>
+                        </button> --}}
                     </div>
                     <div class="right-buttons">
                     <div class="row-button">
@@ -363,19 +360,19 @@
                 </div>
                 
                 @if(isset($formData) && $formData['is_update'] == 1)
-                    <div class="form-group">
+                    {{-- <div class="form-group">
                         <label for="long_description">Overall summary of the service and what it offers</label>
                         <textarea name="long_description" id="long_description" class="form-control" placeholder="course of action. . . ." readonly style="width: 100%; height: auto; min-height: 100px;" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'">{{ $formData['long_description'] ?? '' }}</textarea>
                     </div>
 
-                    <hr>
+                    <hr> --}}
                 @endif
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn4">
+                        {{-- <button type="button" class="btn btn-secondary" id="saveDraftBtn4">
                             {{ __('newguidings.leave_save_draft') }}
-                        </button>
+                        </button> --}}
                     </div>
                     <div class="right-buttons">
                     <div class="row-button">
@@ -406,11 +403,11 @@
                     <div class="btn-group-toggle">
                         @foreach($guiding_additional_infos as $guiding_additional_info)
                             <div class="btn-checkbox-container">
-                                <input type="checkbox" name="other_information[]" value="additional_info_{{ $guiding_additional_info['id'] }}" id="additional_info_{{ $guiding_additional_info['id'] }}">
+                                <input type="checkbox" name="other_information[]" value="{{ $guiding_additional_info['id'] }}" id="additional_info_{{ $guiding_additional_info['id'] }}">
                                 <label for="additional_info_{{ $guiding_additional_info['id'] }}" class="btn btn-outline-primary m-2 btn-checkbox">
                                     {{ $guiding_additional_info['value'] }}
                                 </label>
-                                <textarea class="form-control extra-input" name="{{ $guiding_additional_info['id'] }}" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
+                                <textarea class="form-control extra-input" name="other_information_{{ $guiding_additional_info['id'] }}" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
                             </div>
                         @endforeach
                     </div>
@@ -427,11 +424,11 @@
                     <div class="btn-group-toggle">
                         @foreach($guiding_requirements as $guiding_requirement)
                             <div class="btn-checkbox-container">
-                                <input type="checkbox" name="requiements_taking_part[]" value="requiements_taking_part_{{ $guiding_requirement['id'] }}" id="requiements_taking_part_{{ $guiding_requirement['id'] }}">
+                                <input type="checkbox" name="requiements_taking_part[]" value="{{ $guiding_requirement['id'] }}" id="requiements_taking_part_{{ $guiding_requirement['id'] }}">
                                 <label for="requiements_taking_part_{{ $guiding_requirement['id'] }}" class="btn btn-outline-primary m-2 btn-checkbox">
                                     {{ $guiding_requirement['value'] }}
                                 </label>
-                                <textarea class="form-control extra-input" name="{{ $guiding_requirement['id'] }}" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
+                                <textarea class="form-control extra-input" name="requiements_taking_part_{{ $guiding_requirement['id'] }}" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
                             </div>
                         @endforeach
                     </div>
@@ -448,11 +445,11 @@
                     <div class="btn-group-toggle">
                         @foreach($guiding_recommendations as $guiding_recommendation)
                             <div class="btn-checkbox-container">
-                                <input type="checkbox" name="recommended_preparation[]" value="recommended_preparation_{{ $guiding_recommendation['id'] }}" id="recommended_preparation_{{ $guiding_recommendation['id'] }}">
+                                <input type="checkbox" name="recommended_preparation[]" value="{{ $guiding_recommendation['id'] }}" id="recommended_preparation_{{ $guiding_recommendation['id'] }}">
                                 <label for="recommended_preparation_{{ $guiding_recommendation['id'] }}" class="btn btn-outline-primary m-2 btn-checkbox">
                                     {{ $guiding_recommendation['value'] }}
                                 </label>
-                                <textarea class="form-control extra-input" name="{{ $guiding_recommendation['id'] }}" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
+                                <textarea class="form-control extra-input" name="recommended_preparation_{{ $guiding_recommendation['id'] }}" placeholder="{{ __('newguidings.add_a_comment_or_additional_information') }}"></textarea>
                             </div>
                         @endforeach
                     </div>
@@ -460,9 +457,9 @@
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn5">
+                        {{-- <button type="button" class="btn btn-secondary" id="saveDraftBtn5">
                             {{ __('newguidings.leave_save_draft') }}
-                        </button>
+                        </button> --}}
                     </div>
                     <div class="right-buttons">
                     <div class="row-button">
@@ -575,12 +572,12 @@
                 
                 <hr>
                 <div class="form-group">
-                    <label for="inclussions" class="form-label fw-bold fs-5">
+                    <label for="inclusions" class="form-label fw-bold fs-5">
                         {{ __('newguidings.inclusions') }}
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="{{ __('newguidings.tooltip_included_in_price') }}"></i>
                     </label>
-                    <input type="text" class="form-control" name="inclussions" id="inclussions" data-role="tagsinput" placeholder="{{ __('newguidings.inclusions_placeholder') }}">
+                    <input type="text" class="form-control" name="inclusions" id="inclusions" data-role="tagsinput" placeholder="{{ __('newguidings.inclusions_placeholder') }}">
                 </div>
 
                 <hr>
@@ -596,9 +593,9 @@
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn6">
+                        {{-- <button type="button" class="btn btn-secondary" id="saveDraftBtn6">
                             {{ __('newguidings.leave_save_draft') }}
-                        </button>
+                        </button> --}}
                     </div>
                     <div class="right-buttons">
                         <div class="row-button">

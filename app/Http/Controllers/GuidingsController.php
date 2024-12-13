@@ -401,6 +401,8 @@ class GuidingsController extends Controller
                 }
             }
             $guiding->gallery_images = json_encode($galeryImages);
+            // Log::info($guiding);
+            // dd($request->all());
 
             //step 2
             $guiding->is_boat = $request->has('type_of_fishing') ? ($request->input('type_of_fishing') == 'boat' ? 1 : 0) : 0;
@@ -408,28 +410,24 @@ class GuidingsController extends Controller
             if ($guiding->is_boat) {
                 $guiding->boat_type = $request->has('type_of_boat') ? $request->input('type_of_boat') : '';
                 $guiding->boat_information = $this->saveDescriptions($request);
-                $guiding->boat_extras = $request->has('boat_extras') ? $request->input('boat_extras') : '';
+
+                $boatExtras = $request->has('boat_extras') ? collect(json_decode($request->input('boat_extras')))->pluck('id') : [];
+                $guiding->boat_extras = json_encode($boatExtras);
             }
 
             //step 3
-            $guiding->target_fish = $request->has('target_fish') ? $request->input('target_fish') : '';
-            $guiding->fishing_methods = $request->has('methods') ? $request->input('methods') : '';
-            $guiding->water_types = $request->has('water_types') ? $request->input('water_types') : '';
+            $targetFish = $request->has('target_fish') ? collect(json_decode($request->input('target_fish')))->pluck('id') : [];
+            $guiding->target_fish = json_encode($targetFish);
+            
+            $methods = $request->has('methods') ? collect(json_decode($request->input('methods')))->pluck('id') : [];
+            $guiding->fishing_methods = json_encode($methods);
+            
+            $guiding->fishing_type_id = $request->has('style_of_fishing') ? $request->input('style_of_fishing') : 3; 
+            
+            $waterTypes = $request->has('water_types') ? collect(json_decode($request->input('water_types')))->pluck('id') : [];
+            $guiding->water_types = json_encode($waterTypes);
 
             //step 4
-            $guiding->inclusions = $request->has('inclussions') ? $request->input('inclussions') : '';
-            if ($request->has('type_of_fishing')) {
-
-                if ($request->input('type_of_fishing') == 'active') {
-                    $guiding->fishing_type_id = 1;
-                } else if ($request->input('type_of_fishing') == 'passive') {
-                    $guiding->fishing_type_id = 2;
-                } else {
-                    $guiding->fishing_type_id = 3;
-                }
-            }
-
-            //step 5
             $guiding->desc_course_of_action = $request->has('desc_course_of_action') ? $request->input('desc_course_of_action') : '';
             $guiding->desc_meeting_point = $request->has('desc_meeting_point') ? $request->input('desc_meeting_point') : '';
             $guiding->meeting_point = $request->has('meeting_point') ? $request->input('desc_meeting_point') : '';
@@ -437,12 +435,12 @@ class GuidingsController extends Controller
             $guiding->desc_tour_unique = $request->has('desc_tour_unique') ? $request->input('desc_tour_unique') : '';
             $guiding->description = $this->generateLongDescription($request);
 
-            //step 6
+            //step 5
             $guiding->requirements = $this->saveRequirements($request);
             $guiding->recommendations = $this->saveRecommendations($request);   
             $guiding->other_information = $this->saveOtherInformation($request);  
 
-            //step 7
+            //step 6
             $guiding->tour_type = $request->has('tour_type') ? $request->input('tour_type') : '';
 
             $guiding->duration_type = $request->has('duration') ? $request->input('duration') : '';
@@ -475,6 +473,9 @@ class GuidingsController extends Controller
                 }
             }
             
+            $inclusions = $request->has('inclusions') ? collect(json_decode($request->input('inclusions')))->pluck('id') : [];
+            $guiding->inclusions = $inclusions;
+            
             $pricingExtras = [];
             $i = 1;
             while (true) {
@@ -496,7 +497,7 @@ class GuidingsController extends Controller
             }
             $guiding->pricing_extra = json_encode($pricingExtras);
 
-            //step 8    
+            //step 7   
             $guiding->allowed_booking_advance = $request->has('allowed_booking_advance') ? $request->input('allowed_booking_advance') : '';
             $guiding->booking_window = $request->has('booking_window') ? $request->input('booking_window') : '';
 
@@ -589,7 +590,7 @@ class GuidingsController extends Controller
         $descriptionData = [];
 
         foreach ($descriptions as $description) {
-            $descriptionData[$description] = $request->input($description);
+            $descriptionData[$description] = $request->input("boat_description_".$description);
         }
 
         return json_encode($descriptionData);
@@ -601,7 +602,7 @@ class GuidingsController extends Controller
         $otherInformationData = [];
 
         foreach ($otherInformations as $otherInformation) {
-            $otherInformationData[$otherInformation] = $request->input($otherInformation);
+            $otherInformationData[$otherInformation] = $request->input("other_information_".$otherInformation);
         }
 
         return json_encode($otherInformationData);
@@ -613,7 +614,7 @@ class GuidingsController extends Controller
         $requirementData = [];
 
         foreach ($requirements as $requirement) {
-            $requirementData[$requirement] = $request->input($requirement);
+            $requirementData[$requirement] = $request->input("requiements_taking_part_".$requirement);
         }
 
         return json_encode($requirementData);
@@ -625,7 +626,7 @@ class GuidingsController extends Controller
         $recommendationData = [];
 
         foreach ($recommendations as $recommendation) {
-            $recommendationData[$recommendation] = $request->input($recommendation);
+            $recommendationData[$recommendation] = $request->input("recommended_preparation_".$recommendation);
         }
 
         return json_encode($recommendationData);
@@ -789,7 +790,7 @@ class GuidingsController extends Controller
             'type_of_fishing' => $guiding->is_boat ? 'boat' : 'shore',
             'boat_type' => $guiding->boat_type,
             'boat_information' => $guiding->getBoatInformationAttribute(),
-            'boat_extras' => json_decode($guiding->boat_extras, true),
+            'boat_extras' => $guiding->getBoatExtras(),
 
             //step 3
             'target_fish' => $guiding->getTargetFishNames(),
@@ -797,8 +798,8 @@ class GuidingsController extends Controller
             'water_types' => $guiding->getWaterNames(),
 
             //step 4
-            'inclussions' => $guiding->getInclusionNames(),
-            'style_of_fishing' => $guiding->style_of_fishing,
+            'inclusions' => $guiding->getInclusionNames(),
+            'fishing_type' => $guiding->fishing_type_id,
 
             //step 5
             'long_description' => $guiding->description,
@@ -813,7 +814,7 @@ class GuidingsController extends Controller
             'other_information' => $guiding->getOtherInformationAttribute(),
 
             //step 7
-            'tour_type' => $guiding->tour_type,
+            'tour_type' => trim($guiding->tour_type),
             'duration' => $guiding->duration,
             'duration_type' => $guiding->duration_type,
             'no_guest' => $guiding->max_guests,
@@ -836,7 +837,7 @@ class GuidingsController extends Controller
             'targets' => Target::class,
             'methods' => Method::class,
             'waters' => Water::class,
-            'inclussions' => Inclussion::class,
+            'inclusions' => Inclussion::class,
             'boat_extras' => BoatExtras::class,
             'extras_prices' => ExtrasPrice::class,
             'guiding_boat_types' => GuidingBoatType::class,
