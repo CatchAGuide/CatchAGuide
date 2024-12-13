@@ -40,7 +40,7 @@ content: `
             <div class="d-flex align-items-center my-1">
             </div>
             <div class="text-center mt-2">
-                <a class="theme-primary text-center my-2" href="{{route('guidings.show',[$guiding->id,$guiding->slug])}}" style="padding:3px 7px;">@lang('message.from') {{ $guiding->getLowestPrice() }}€</a>
+                <a class="theme-primary text-center my-2" href="{{route('guidings.show',[$guiding->id,$guiding->slug])}}" style="padding:3px 7px;">@lang('message.from') {{ $guiding->getLowestPrice() }}€ p.P.</a>
             </div>
 
         </div>
