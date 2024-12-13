@@ -97,14 +97,14 @@
                     </button>
                 </a>
             </div>
-            <div class="col-md-3 profile-option-items">
+            <!-- <div class="col-md-3 profile-option-items">
                 <a href="{{ route('profile.favoriteguides') }}">
                     <button style="width: 100%; text-align: justify;" class="btn  btn-block">
                         <i class="fa fa-heart"></i>
                         <span class="box-title">@lang('profile.favorite')</span>
                     </button>
                 </a>
-            </div>
+            </div> -->
             {{-- <div class="col-md-3 profile-option-items">
                 <a href="{{ route('chat') }}">
                     <button style="width: 100%; text-align: justify;" class="btn  btn-block">

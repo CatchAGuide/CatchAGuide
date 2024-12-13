@@ -25,6 +25,8 @@ return [
     'Fishing_Trip' => 'Fishing trip in',
     'More_Fishing' => 'More fishing trips from',
     'Inclusions' => 'Inclusions',
+    'No_Inclusion' => 'No inclusion specified',
+    'Additional_Extra' => 'Additional Extras',
     'Starting_Time' => 'Starting time',
     'Meeting_Point' => 'Meeting Point',
     'Tour_Info' => 'Tour Information',
@@ -42,6 +44,7 @@ return [
     'Availability' => 'Availability',
     'Course_Action' => 'Description',
     'Match_Guiding' => 'Match Guidings',
+    'Whats_Included' => 'What\'s Included',
     
     'multi_day' => 'Multi Day',
     'full_day' => 'Full Day',

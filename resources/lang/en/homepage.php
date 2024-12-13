@@ -14,7 +14,7 @@ return [
     'searchbar-search' => 'Search',
     'searchbar-search-placeholder' => 'Discover your dream fishing destination...',
 
-    'filter-fishing-near-me' => 'Fishing near me',
+    'filter-fishing-near-me' => 'All Fishing Trips',
     'filter-magazine' => 'Fishing Magazine',
 
     'usps-first' => 'Easy & direct online booking',
