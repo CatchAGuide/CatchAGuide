@@ -335,7 +335,7 @@
                                 <i class="fa fa-filter me-1"></i>@lang('message.filter') 
                                 @if($guidings->count() > 0)
                                     @if(request()->has('radius') || request()->has('num_guests') || request()->has('target_fish') || request()->has('water') || request()->has('fishing_type') || request()->has('price_range'))
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="guiding-filter-counter">{{ $guidings->count() }}</span>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="guiding-filter-counter"></span>
                                     @endif
                                 @endif
                             </a>

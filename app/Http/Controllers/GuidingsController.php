@@ -289,7 +289,18 @@ class GuidingsController extends Controller
     {
         $locale = Config::get('app.locale');
 
-        $guiding = Guiding::where('id',$id)->where('slug',$slug)->where('status',1)->first();
+        //$guiding = Guiding::where('id',$id)->where('slug',$slug)->where('status',1)->first();
+        $query = Guiding::where('id',$id)->where('slug',$slug);
+
+        if (!Auth::check()) {
+            $query = $query->where('status',1);
+        }
+
+        $guiding = $query->first();
+
+        if (is_null($guiding)) {
+            abort(404);
+        }
         // $targetFish = $guiding->is_newguiding ? json_decode($guiding->target_fish, true) : $guiding->guidingTargets->pluck('id')->toArray();
         $targetFish = json_decode($guiding->target_fish, true);
         $fishingFrom = $guiding->fishing_from_id;
