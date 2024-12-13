@@ -564,7 +564,7 @@
                                                     <div class="guidings-inclusions-container">
                                                         @if(!empty($guiding->getInclusionNames()))
                                                         <div class="guidings-included">
-                                                            <strong>What's Included</strong>
+                                                            <strong>@lang('guidings.Whats_Included')</strong>
                                                             <div class="inclusions-list">
                                                                 @php
                                                                     $inclusions = $guiding->getInclusionNames();

@@ -13,7 +13,7 @@
                             <div class="card-body">
                             <h5 class="crop-text-2 card-title h6">{{$model->title}}</h5>
                             <small class="crop-text-1 small-text text-muted">{{translate($model->location)}}</small>
-                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{ $model->getLowestPrice() }}€</span></small>
+                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{ $model->getLowestPrice() }}€</span> p.P.</small>
                             </div>
                         </div>
                     </a>
@@ -33,7 +33,7 @@
                     <div class="card-body">
                     <h5 class="crop-text-2 card-title h6">{{translate($model->title)}}</h5>
                     <small class="crop-text-1 small-text text-muted">{{translate($model->location)}}</small>
-                    <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{$model->getLowestPrice()}}€</span></small>
+                    <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{$model->getLowestPrice()}}€</span> p.P.</small>
                     </div>
                 </div>
             </a>

@@ -25,6 +25,8 @@ return [
     'Fishing_Trip' => 'Angeltour in',
     'More_Fishing' => 'Weitere Angeltouren von',
     'Inclusions' => 'Inklusive',
+    'No_Inclusion' => 'Keine Inklusivleistungen angegeben',
+    'Additional_Extra' => 'Buchbare Extras',
     'Starting_Time' => 'Startzeit',
     'Meeting_Point' => 'Treffpunkt',
     'Tour_Info' => 'Tour Infos',
@@ -42,6 +44,7 @@ return [
     'Availability' => 'Verfügbarkeit der Angeltour',
     'Course_Action' => 'Ablauf & Beschreibung',
     'Match_Guiding' => 'Ähnliche Angelguidings',
+    'Whats_Included' => 'Im Preis inklusive',
 
     'multi_day' => 'Mehrtägig',
     'full_day' => 'Ganztags',

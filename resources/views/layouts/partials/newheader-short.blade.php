@@ -41,7 +41,7 @@
                                      alt="Profile">
                                 <span>{{ Auth::user()->firstname }} {{ Auth::user()->lastname }}</span>
                             </a>
-                            <div class="dropdown-menu dropdown-menu-end">
+                            <div class="dropdown-menu dropdown-menu-end z-index2">
                                 <a class="dropdown-item" href="{{ route('profile.index') }}">
                                     <i class="fas fa-user me-2"></i> @lang('homepage.header-profile')
                                 </a>
@@ -58,7 +58,7 @@
                         <a href="{{ route('login') }}" class="nav-link login-link">
                             @lang('homepage.header-login')
                         </a>
-                        <a href="{{ route('register') }}" class="btn btn-outline-light signup-btn">
+                        <a href="{{ route('login') }}" class="btn btn-outline-light signup-btn">
                             @lang('homepage.header-signup')
                         </a>
                     @endauth
@@ -163,10 +163,14 @@
                             <i class="fa fa-fish input-icon"></i>
                             <select class="form-select" name="target_fish[]" id="target_fish_search">
                                 <option value="">@lang('homepage.searchbar-targetfish')...</option>
-                                @foreach(targets()::getAllTargets() as $target)
-                                    <option value="{{$target['id']}}" 
-                                        {{ in_array($target['id'], (array)request()->target_fish) ? 'selected' : '' }}>
-                                        {{$target['name']}}
+                                @php
+                                    // Assuming targets()::getAllTargets() returns an array or collection of targets
+                                    $targets = collect(targets()::getAllTargets())->sortBy('name');
+                                @endphp
+                                @foreach($targets as $target)
+                                    <option value="{{ $target['id'] }}" 
+                                        {{ in_array($target['id'], (array) request()->target_fish) ? 'selected' : '' }}>
+                                        {{ $target['name'] }}
                                     </option>
                                 @endforeach
                             </select>
@@ -194,7 +198,7 @@
     left: 0;
     right: 0;
     bottom: -30px;
-    z-index: 1000;
+    z-index: 1;
 }
 
  .search-box .search-row{
@@ -731,10 +735,14 @@ input[type=number] {
                             <i class="fas fa-fish position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
                             <select class="form-select ps-5" name="target_fish[]">
                                 <option value="">Select fish...</option>
-                                @foreach(targets()::getAllTargets() as $target)
-                                    <option value="{{$target['id']}}"
-                                        {{ in_array($target['id'], (array)request()->target_fish) ? 'selected' : '' }}>
-                                        {{$target['name']}}
+                                @php
+                                    // Assuming targets()::getAllTargets() returns an array or collection of targets
+                                    $targets = collect(targets()::getAllTargets())->sortBy('name');
+                                @endphp
+                                @foreach($targets as $target)
+                                    <option value="{{ $target['id'] }}" 
+                                        {{ in_array($target['id'], (array) request()->target_fish) ? 'selected' : '' }}>
+                                        {{ $target['name'] }}
                                     </option>
                                 @endforeach
                             </select>
@@ -830,7 +838,19 @@ input[type=number] {
                                 <span>@lang('homepage.header-logout')</span>
                             </button>
                         </form>
-                    @endauth
+                        @else
+
+                        <div class="menu-divider"></div>
+                        <a href="{{ route('login') }}"  type="submit" class="menu-item">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>@lang('homepage.header-signup')</span>
+                        </a>
+                        <div class="menu-divider"></div>
+                            <a href="{{ route('login') }}" type="submit" class="menu-item">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>@lang('homepage.header-login')</span>
+                            </a>
+                        @endauth
                 </div>
             </div>
         </div>

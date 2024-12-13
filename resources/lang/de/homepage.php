@@ -14,7 +14,7 @@ return [
     'searchbar-search' => 'Suchen',
     'searchbar-search-placeholder' => 'Entdecken Sie Ihr Traumangelziel...',
 
-    'filter-fishing-near-me' => 'In meiner Nähe',
+    'filter-fishing-near-me' => 'Alle Angeltouren',
     'filter-magazine' => 'Angelmagazin',
 
     'usps-first' => 'Einfache und direkte Online-Buchung',

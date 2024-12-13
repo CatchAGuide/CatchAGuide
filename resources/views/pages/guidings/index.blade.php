@@ -514,7 +514,7 @@
                                                             @if(count(get_galleries_image_link($guiding)))
                                                                 @foreach(get_galleries_image_link($guiding) as $index => $gallery_image_link)
                                                                     <div class="carousel-item @if($index == 0) active @endif">
-                                                                        <img  class="d-block" src="{{$gallery_image_link}}" style="width:300px; height: 240px;">
+                                                                        <img  class="d-block" src="{{$gallery_image_link}}">
                                                                     </div>
                                                                 @endforeach
                                                             @endif
@@ -545,6 +545,7 @@
                                                                 <div class="ratings-score">
                                                                         <span class="text-warning">★</span>
                                                                         <span>{{$guiding->user->average_rating()}} </span>
+                                                                        /5 (No. reviews)
                                                                     </div>
                                                                 </div>
                                                                 @endif
@@ -591,7 +592,7 @@
                                                                     <div class="guidings-inclusions-container">
                                                                         @if(!empty($guiding->getInclusionNames()))
                                                                         <div class="guidings-included">
-                                                                            <strong>What's Included</strong>
+                                                                            <strong>@lang('guidings.Whats_Included')</strong>
                                                                             <div class="inclusions-list">
                                                                                 @php
                                                                                     $inclussions = $guiding->getInclusionNames();
