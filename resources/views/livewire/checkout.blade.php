@@ -290,7 +290,12 @@
                                 <span class="text-dark fw-bold">{{ translate('Requirements for taking part')}}:</span>
                               </div>
                               <div class="px-2 text-dark">
-                                {{ implode(', ', array_filter(collect($guiding->requirements)->pluck('name')->toArray()))  }}
+                                @if($guiding->requirements)
+                                @foreach($guiding->getRequirementsAttribute() as $requirement)
+                                  {!! $requirement['name'] !!}: {!! $requirement['value'] !!}
+                                  <br>
+                                @endforeach
+                                @endif
                               </div>
                             </div>
                             @endif
