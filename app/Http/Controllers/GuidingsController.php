@@ -54,8 +54,8 @@ class GuidingsController extends Controller
 
         if (empty($request->all())) {
             $query->orderByRaw("RAND($randomSeed)");
-        } 
-          
+        }
+
         if($request->has('page')){
             $title .= __('guidings.Page') . ' ' . $request->page . ' - ';
         }
@@ -67,79 +67,78 @@ class GuidingsController extends Controller
         }
 
         if($request->has('sortby') && !empty($request->get('sortby'))){
-            switch ($request->get('sortby')) {
-                case 'newest':
-                    $query->orderBy('created_at','desc');
-                  break;
+            // switch ($request->get('sortby')) {
+            //     case 'newest':
+            //         $query->orderBy('created_at','desc');
+            //       break;
 
-                case 'price-asc':
-                    $query->orderBy('lowest_price','asc');
-                  break;
+            //     case 'price-asc':
+            //         $query->orderBy('lowest_price','asc');
+            //       break;
 
-                case 'price-desc':
-                    $query->orderBy('lowest_price','desc');
-                  break;
+            //     case 'price-desc':
+            //         $query->orderBy('lowest_price','desc');
+            //       break;
 
-                case 'long-duration':
-                    $query->orderBy('duration','desc');
-                break;
+            //     case 'long-duration':
+            //         $query->orderBy('duration','desc');
+            //     break;
 
-                case 'short-duration':
-                    $query->orderBy('duration','asc');
-                break;
+            //     case 'short-duration':
+            //         $query->orderBy('duration','asc');
+            //     break;
 
-                default:
-                    $query;
-            }
+            //     default:
+            //         $query;
+            // }
         }
-
 
         if($request->has('methods') && !empty($request->get('methods'))){
    
-            $requestMethods = array_filter($request->get('methods'));
+            // $requestMethods = array_filter($request->get('methods'));
 
-            if(count($requestMethods)){
-                $title .= __('guidings.Method') . ' (';
-                $filter_title .= __('guidings.Method') . ' (';
-                $method_rows = Method::whereIn('id', $request->methods)->get();
-                $title_row = '';
-                foreach ($method_rows as $row) {
-                    $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
-                }
-                $title .= substr($title_row, 0, -2);
-                $title .= '), ';
-                $filter_title .= substr($title_row, 0, -2);
-                $filter_title .= '), ';
+            // if(count($requestMethods)){
+            //     $title .= __('guidings.Method') . ' (';
+            //     $filter_title .= __('guidings.Method') . ' (';
+            //     $method_rows = Method::whereIn('id', $request->methods)->get();
+            //     $title_row = '';
+            //     foreach ($method_rows as $row) {
+            //         $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
+            //     }
+            //     $title .= substr($title_row, 0, -2);
+            //     $title .= '), ';
+            //     $filter_title .= substr($title_row, 0, -2);
+            //     $filter_title .= '), ';
 
-                $query->whereHas('guidingMethods', function ($query) use ($requestMethods) {
-                    $query->whereIn('method_id', $requestMethods);
-                });
-            }
+            //     $query->whereHas('guidingMethods', function ($query) use ($requestMethods) {
+            //         $query->whereIn('method_id', $requestMethods);
+            //     });
+            // }
             
         }
 
         if($request->has('fishing_type') && !empty($request->get('fishing_type'))){
    
-            $requestFishingTypes = $request->get('fishing_type');
+            // $requestFishingTypes = $request->get('fishing_type');
 
-            if($requestFishingTypes){
+            // if($requestFishingTypes){
 
-                $title .= __('guidings.Fishing_Type') . 'Fishing Type (';
-                $filter_title .= __('guidings.Fishing_Type') . 'Fishing Type (';
-                $method_rows = FishingType::whereIn('id', $request->fishing_type)->get();
-                $title_row = '';
-                foreach ($method_rows as $row) {
-                    $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
-                }
-                $title .= substr($title_row, 0, -2);
-                $title .= ') | ';
-                $filter_title .= substr($title_row, 0, -2);
-                $filter_title .= '), ';
+            //     $title .= __('guidings.Fishing_Type') . 'Fishing Type (';
+            //     $filter_title .= __('guidings.Fishing_Type') . 'Fishing Type (';
+            //     $method_rows = FishingType::whereIn('id', $request->fishing_type)->get();
+            //     $title_row = '';
+            //     foreach ($method_rows as $row) {
+            //         $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
+            //     }
+            //     $title .= substr($title_row, 0, -2);
+            //     $title .= ') | ';
+            //     $filter_title .= substr($title_row, 0, -2);
+            //     $filter_title .= '), ';
 
-                $query->whereHas('fishingTypes', function ($query) use ($requestFishingTypes) {
-                    $query->where('id', $requestFishingTypes);
-                });
-            }
+            //     $query->whereHas('fishingTypes', function ($query) use ($requestFishingTypes) {
+            //         $query->where('id', $requestFishingTypes);
+            //     });
+            // }
         }
 
         if($request->has('duration') && !empty($request->get('duration'))){
@@ -151,62 +150,62 @@ class GuidingsController extends Controller
 
         if($request->has('fishingfrom') && !empty($request->get('fishingfrom'))){
    
-            $requestFishingFrom = array_filter($request->get('fishingfrom'));
+            // $requestFishingFrom = array_filter($request->get('fishingfrom'));
 
-            if(count($requestFishingFrom)){
-                $query->whereHas('fishingFrom', function ($query) use ($requestFishingFrom) {
-                    $query->whereIn('id', $requestFishingFrom);
-                });
-            }
+            // if(count($requestFishingFrom)){
+            //     $query->whereHas('fishingFrom', function ($query) use ($requestFishingFrom) {
+            //         $query->whereIn('id', $requestFishingFrom);
+            //     });
+            // }
             
         }
 
         if($request->has('water') && !empty($request->get('water'))){
 
-            $requestWater = array_filter($request->get('water'));
+            // $requestWater = array_filter($request->get('water'));
 
-            if(count($requestWater)){
+            // if(count($requestWater)){
 
-                $title .= __('guidings.Water') . ' (';
-                $filter_title .= __('guidings.Water') . ' (';
-                $method_rows = Water::whereIn('id', $request->water)->get();
-                $title_row = '';
-                foreach ($method_rows as $row) {
-                    $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
-                }
-                $title .= substr($title_row, 0, -2);
-                $title .= ') | ';
-                $filter_title .= substr($title_row, 0, -2);
-                $filter_title .= '), ';
+            //     $title .= __('guidings.Water') . ' (';
+            //     $filter_title .= __('guidings.Water') . ' (';
+            //     $method_rows = Water::whereIn('id', $request->water)->get();
+            //     $title_row = '';
+            //     foreach ($method_rows as $row) {
+            //         $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
+            //     }
+            //     $title .= substr($title_row, 0, -2);
+            //     $title .= ') | ';
+            //     $filter_title .= substr($title_row, 0, -2);
+            //     $filter_title .= '), ';
 
-                $query->whereHas('guidingWaters', function ($query) use ($requestWater) {
-                    $query->whereIn('water_id', $requestWater);
-                });
-            }
+            //     $query->whereHas('guidingWaters', function ($query) use ($requestWater) {
+            //         $query->whereIn('water_id', $requestWater);
+            //     });
+            // }
           
         }
 
         if($request->has('target_fish')){
-            $requestFish = array_filter($request->get('target_fish'));
+            // $requestFish = array_filter($request->get('target_fish'));
 
-            if(count($requestFish)){
+            // if(count($requestFish)){
 
-                $title .= __('guidings.Target_Fish') . ' (';
-                $filter_title .= __('guidings.Target_Fish') . ' (';
-                $method_rows = Target::whereIn('id', $request->target_fish)->get();
-                $title_row = '';
-                foreach ($method_rows as $row) {
-                    $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
-                }
-                $title .= substr($title_row, 0, -2);
-                $title .= ') | ';
-                $filter_title .= substr($title_row, 0, -2);
-                $filter_title .= '), ';
+            //     $title .= __('guidings.Target_Fish') . ' (';
+            //     $filter_title .= __('guidings.Target_Fish') . ' (';
+            //     $method_rows = Target::whereIn('id', $request->target_fish)->get();
+            //     $title_row = '';
+            //     foreach ($method_rows as $row) {
+            //         $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
+            //     }
+            //     $title .= substr($title_row, 0, -2);
+            //     $title .= ') | ';
+            //     $filter_title .= substr($title_row, 0, -2);
+            //     $filter_title .= '), ';
 
-                $query->whereHas('guidingTargets', function ($query) use ($requestFish) {
-                    $query->whereIn('target_id', $requestFish);
-                });
-            }
+            //     $query->whereHas('guidingTargets', function ($query) use ($requestFish) {
+            //         $query->whereIn('target_id', $requestFish);
+            //     });
+            // }
 
         }
 
@@ -222,9 +221,7 @@ class GuidingsController extends Controller
                 $query->havingRaw('lowest_price >= ? AND lowest_price <= ?', $price);
             } else {
                 $query->havingRaw('lowest_price >= ?', $price);
-
             }
-
         }
 
         $radius = null; // Radius in miles
@@ -237,7 +234,6 @@ class GuidingsController extends Controller
 
         $placeLat = $request->get('placeLat');
         $placeLng = $request->get('placeLng');
-
 
         if(!empty($placeLat) && !empty($placeLng) && !empty($request->get('place'))){
 
@@ -314,17 +310,11 @@ class GuidingsController extends Controller
             ->where('id', '!=', $guiding->id)
             ->where(function($query) use ($guiding, $targetFish, $fishingFrom, $fishingType) {
                 $query->where(function($q) use ($guiding, $targetFish) {
-                    // if ($guiding->is_newguiding) {
-                        $q->where(function($subQ) use ($targetFish) {
-                              foreach ($targetFish as $fish) {
-                                  $subQ->orWhereJsonContains('target_fish', $fish);
-                              }
-                          });
-                    // } else {
-                    //     $q->whereHas('guidingTargets', function($subQ) use ($targetFish) {
-                    //         $subQ->whereIn('target_id', $targetFish);
-                    //     });
-                    // }
+                    $q->where(function($subQ) use ($targetFish) {
+                        foreach ($targetFish as $fish) {
+                            $subQ->orWhereJsonContains('target_fish', $fish);
+                        }
+                    });
                 })
                 ->where(function($q) use ($guiding, $fishingFrom) {
                     $q->where('fishing_from_id', $fishingFrom)
@@ -708,12 +698,9 @@ class GuidingsController extends Controller
             abort(404);
         }
         
-
         $targetId = $guiding->guidingTargets->pluck('id')->toArray();
         $fishingfrom = $guiding->fishingFrom->id;
         $fishingtype = $guiding->fishingTypes->id;
-
-
 
         $ratings = $guiding->user->received_ratings;
         $ratingCount = $ratings->count();
@@ -734,8 +721,6 @@ class GuidingsController extends Controller
         //     ->limit(3)
         //     ->get();
 
-
-            
         return view('pages.guidings.show', [
             'guiding' => $guiding,
             'ratings' => $ratings,
