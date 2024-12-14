@@ -835,17 +835,15 @@ class Guiding extends Model
 
         $requirementsData = collect(json_decode($this->attributes['requirements'], true));
         
-        return GuidingRequirements::whereIn('id', $requirementsData->pluck('id'))
+        return GuidingRequirements::whereIn('id', array_keys($requirementsData->all()))
             ->get()
             ->map(function ($requirement) use ($requirementsData) {
-                $originalData = $requirementsData->firstWhere('id', $requirement->id);
+                $originalData = $requirementsData[$requirement->id];
                 
                 return [
                     'id' => $requirement->id,
-                    'value' => $originalData['value'] ?? null,
-                    'name' => app()->getLocale() == "en" && $requirement->name_en 
-                        ? $requirement->name_en 
-                        : $requirement->name
+                    'value' => $requirementsData[$requirement->id],
+                    'name' => $requirement->name
                 ];
             });
     }
@@ -858,12 +856,12 @@ class Guiding extends Model
 
         $otherInformationData = collect(json_decode($this->attributes['other_information'], true));
         
-        return GuidingAdditionalInformation::whereIn('id', $otherInformationData->pluck('id'))
+        return GuidingAdditionalInformation::whereIn('id', array_keys($otherInformationData->all()))
             ->get()
             ->map(function ($otherInformation) use ($otherInformationData) {
                 return [
                     'id' => $otherInformation->id,
-                    'value' => $otherInformationData->firstWhere('id', $otherInformation->id)['value'] ?? null,
+                    'value' => $otherInformationData[$otherInformation->id],
                     'name' => $otherInformation->name
                 ];
             });
@@ -877,12 +875,12 @@ class Guiding extends Model
 
         $recommendationsData = collect(json_decode($this->attributes['recommendations'], true));
 
-        return GuidingRecommendations::whereIn('id', $recommendationsData->pluck('id'))
+        return GuidingRecommendations::whereIn('id', array_keys($recommendationsData->all()))
             ->get()
             ->map(function ($recommendation) use ($recommendationsData) {
                 return [
                     'id' => $recommendation->id,
-                    'value' => $recommendationsData->firstWhere('id', $recommendation->id)['value'] ?? null,
+                    'value' => $recommendationsData[$recommendation->id],
                     'name' => $recommendation->name
                 ];
             });
@@ -893,17 +891,46 @@ class Guiding extends Model
         if (!$this->attributes['boat_information']) {
             return collect();
         }
-
+        
         $boatInformationData = collect(json_decode($this->attributes['boat_information'], true));
         
-        return GuidingBoatDescription::whereIn('id', $boatInformationData->pluck('id'))
+        return GuidingBoatDescription::whereIn('id', array_keys($boatInformationData->all()))
             ->get()
             ->map(function ($boatInformation) use ($boatInformationData) {
                 return [
                     'id' => $boatInformation->id,
-                    'value' => $boatInformationData->firstWhere('id', $boatInformation->id)['value'] ?? null,
+                    'value' => $boatInformationData[$boatInformation->id],
                     'name' => $boatInformation->name
                 ];
             });
+    }
+
+    public function getPricingExtraAttribute()
+    {
+        if (!$this->attributes['pricing_extra']) {
+            return collect();
+        }
+
+        return collect(json_decode($this->attributes['pricing_extra'], true))->map(function ($item) {
+            // Check if name is numeric (an ID)
+            if (is_numeric($item['name'])) {
+                // Try to find matching ExtrasPrice
+                $extraPrice = ExtrasPrice::find($item['name']);
+                if ($extraPrice) {
+                    return [
+                        'id' => $extraPrice->id,
+                        'name' => $extraPrice->name,
+                        'price' => $item['price']
+                    ];
+                }
+            }
+            
+            // If name is not numeric or ExtrasPrice not found, return direct values
+            return [
+                'id' => null,
+                'name' => $item['name'],
+                'price' => $item['price']
+            ];
+        });
     }
 }

@@ -63,6 +63,7 @@
                     <div class="card-body">
                         <div class="file-upload-wrapper">
                             <input id="title_image" name="title_image[]" type="file" multiple />
+                            <input id="cropped_image" name="cropped_image[]" type="file" multiple hidden/>
                             <label for="title_image" class="file-upload-btn">{{ __('newguidings.choose_files') }}</label>
                         </div>
                         <div id="croppedImagesContainer"></div>
@@ -721,7 +722,7 @@
 
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary" id="submitBtn7">
+                        <button type="submit" class="btn btn-primary" id="submitBtn7" onclick="console.log('Form submitted');">
                             {{ __('newguidings.submit_publish') }}
                         </button>
                     </div>

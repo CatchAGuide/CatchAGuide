@@ -402,8 +402,6 @@ class GuidingsController extends Controller
                 }
             }
             $guiding->gallery_images = json_encode($galeryImages);
-            // Log::info($guiding);
-            // dd($request->all());
 
             //step 2
             $guiding->is_boat = $request->has('type_of_fishing') ? ($request->input('type_of_fishing') == 'boat' ? 1 : 0) : 0;
@@ -483,14 +481,14 @@ class GuidingsController extends Controller
                 $nameKey = "extra_name_" . $i;
                 $priceKey = "extra_price_" . $i;
                 
+                $extraPrice = ExtrasPrice::where('name', $request->input($nameKey))
+                                       ->orWhere('name_en', $request->input($nameKey))
+                                       ->first();
                 if ($request->has($nameKey) && $request->has($priceKey)) {
                     $pricingExtras[] = [
-                        'name' => $request->input($nameKey),
+                        'name' => $extraPrice ? $extraPrice->id : $request->input($nameKey),
                         'price' => $request->input($priceKey)
                     ];
-                    if ($i == 1) {
-                        $guiding->price = $request->input($priceKey);
-                    }
                     $i++;
                 } else {
                     break;
@@ -635,7 +633,6 @@ class GuidingsController extends Controller
 
     public function store(StoreGuidingRequest $request)
     {
-        //dd($request->all());
         $data = $request->validated();
 
         $data['user_id'] = auth()->id();
@@ -816,7 +813,7 @@ class GuidingsController extends Controller
             'no_guest' => $guiding->max_guests,
             'price_type' => $guiding->price_type,
             'prices' => json_decode($guiding->prices, true),
-            'pricing_extra' => json_decode($guiding->pricing_extra, true),
+            'pricing_extra' => $guiding->getPricingExtraAttribute(),
 
             //step 8
             'allowed_booking_advance' => $guiding->allowed_booking_advance,

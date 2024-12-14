@@ -90,12 +90,7 @@
     }
     
     function initializeImageManager() {
-        if (typeof imageManagerLoaded === 'undefined') {
-            setTimeout(initializeImageManager, 100);
-            return;
-        }
-
-        imageManagerLoaded = new ImageManager('#croppedImagesContainer', '#title_image');
+        imageManagerLoaded = new ImageManager('#croppedImagesContainer', '#title_image', '#cropped_image');
         
         if (document.getElementById('is_update').value === '1') {
             const existingImagesInput = document.getElementById('existing_images');
@@ -114,9 +109,9 @@
             }
         });
 
-        $('#title_image').on('change', function(event) {
-            imageManagerLoaded.handleFileSelect(event.target.files);
-        });
+        // $('#title_image').on('change', function(event) {
+        //     imageManagerLoaded.handleFileSelect(event.target.files);
+        // });
     }
 
     $(document).on('click', '[id^="saveDraftBtn"]', function(e) {
@@ -184,7 +179,7 @@
             form.noValidate = true;
         }
 
-        form.submit();
+        // form.submit();
     }
 
     function setFormDataIfEdit() {
@@ -215,7 +210,7 @@
 
             const boatInformationData = {!! json_encode($formData['boat_information'] ?? []) !!};
             Object.entries(boatInformationData).forEach(([key, value]) => {
-                const checkbox = document.querySelector(`input[name="descriptions[]"][value="boat_description_${value['id']}"]`);
+                const checkbox = document.querySelector(`input[name="descriptions[]"][value="${value['id']}"]`);
                 if (checkbox) {
                     checkbox.checked = true;
                     checkbox.dispatchEvent(new Event('change'));
@@ -606,7 +601,7 @@
                 <div class="input-group mt-2">
                 <div class="dropdown extras-dropdown">
                         <span class="input-group-text d-none d-md-block">{{__('newguidings.additional_offer')}}</span>
-                        <input type="text" id="customInput_${extraCount}" class="form-control dropdown-toggle extras" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" placeholder="{{__('newguidings.select_or_add_value')}}">
+                        <input type="text" id="customInput_${extraCount}" name="extra_name_${extraCount}" class="form-control dropdown-toggle extras" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" placeholder="{{__('newguidings.select_or_add_value')}}">
                         <div class="dropdown-menu w-100" id="suggestionsList_${extraCount}"></div>
                     </div>
                     <div class="price">
@@ -711,6 +706,7 @@
                 return;
             }
 
+            console.log("image manager loaded", document.querySelector('#cropped_image').files);
             const croppedImages = imageManagerLoaded.getCroppedImages();
             formData.delete('title_image[]');
 

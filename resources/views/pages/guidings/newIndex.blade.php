@@ -464,12 +464,12 @@
                         </div>
     
                         <div class="col-md-6">
-                            @if(!empty($guiding->boat_extras))
+                            @if($guiding->boat_extras != null || $guiding->boat_extras != '' || $guiding->boat_extras != '[]')
                                 <strong class="subtitle-text">@lang('guidings.Boat_Extras'):</strong>
                                 <!-- Boat Extras as a List -->
                                 <ul>
-                                    @foreach(json_decode($guiding->boat_extras) as $extra)
-                                        <li>{{ $extra->value }}</li>
+                                    @foreach($guiding->getBoatExtras() as $extra)
+                                        <li>{{ $extra['name'] }}</li>
                                     @endforeach
                                 </ul>
                             @endif
@@ -726,11 +726,11 @@
         @endif
 
         <!-- Boat Extras Section -->
-            @if(!empty($guiding->boat_extras))
+            @if($guiding->boat_extras != null || $guiding->boat_extras != '' || $guiding->boat_extras != '[]')
                 <strong class="subtitle-text">@lang('guidings.Boat_Extras'):</strong>
                 <ul>
-                    @foreach(json_decode($guiding->boat_extras) as $extra)
-                        <li>{{ $extra->value }}</li>
+                    @foreach($guiding->getBoatExtras() as $extra)
+                        <li>{{ $extra['name'] }}</li>
                     @endforeach
                 </ul>
             @endif
