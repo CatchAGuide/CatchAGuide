@@ -13,13 +13,13 @@ class GuidingService{
 
                 $images[$key] = $imgUrl;
                 if(app()->getLocale() == 'en'){
-                    $url = str_replace('https://catchaguide.com//',env('EN_APP_URL'),$imgUrl);
-                    $images[$key] = $url;
+                    // $url = str_replace('https://catchaguide.com//',env('EN_APP_URL'),$imgUrl);
+                    // $images[$key] = $url;
                 }
 
                 if(app()->getLocale() == 'de'){
-                    $url = str_replace('https://catchaguide.com//',env('DE_APP_URL'),$imgUrl);
-                    $images[$key] = $url;
+                    // $url = str_replace('https://catchaguide.com//',env('DE_APP_URL'),$imgUrl);
+                    // $images[$key] = $url;
                 }
          
             }

@@ -14,18 +14,11 @@ class AddDescriptionQuestionsToGuidings extends Migration
     public function up()
     {
         Schema::table('guidings', function (Blueprint $table) {
-            if (!Schema::hasColumn('guidings', 'desc_course_of_action')) {
-                $table->text('desc_course_of_action')->nullable();
-            }
-            if (!Schema::hasColumn('guidings', 'desc_meeting_point')) {
-                $table->text('desc_meeting_point')->nullable();
-            }
-            if (!Schema::hasColumn('guidings', 'desc_starting_time')) {
-                $table->text('desc_starting_time')->nullable();
-            }
-            if (!Schema::hasColumn('guidings', 'desc_tour_unique')) {
-                $table->text('desc_tour_unique')->nullable();
-            }
+            //
+            $table->text('desc_course_of_action')->nullable();
+            $table->text('desc_meeting_point')->nullable();
+            $table->text('desc_starting_time')->nullable();
+            $table->text('desc_tour_unique')->nullable();
         });
     }
 
@@ -37,12 +30,11 @@ class AddDescriptionQuestionsToGuidings extends Migration
     public function down()
     {
         Schema::table('guidings', function (Blueprint $table) {
-            $table->dropColumn([
-                'desc_course_of_action',
-                'desc_meeting_point',
-                'desc_starting_time',
-                'desc_tour_unique'
-            ]);
+            //
+            $table->dropColumn('desc_course_of_action');
+            $table->dropColumn('desc_meeting_point');
+            $table->dropColumn('desc_starting_time');
+            $table->dropColumn('desc_tour_unique');
         });
     }
 }

@@ -73,7 +73,7 @@
 @endsection
 
 @section('profile-content')
-<div class="container shadow-lg p-4 ">
+<div class="container shadow-lg p-4">
 @livewire('edit-guiding',['guiding' => $guiding])
 </div>
 @endsection
@@ -526,7 +526,7 @@
         });
     </script>
 
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q&libraries=places,geocoding"></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q&libraries=places,geocoder"></script>
     <script>
         function initialize() {
             var input = document.getElementById('searchPlace');

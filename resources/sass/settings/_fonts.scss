@@ -1,4 +1,3 @@
-@import "../settings/variables";
 /* mulish-200 - latin */
 @font-face {
   font-family: 'Mulish';
@@ -376,9 +375,3 @@
   url('/assets/fonts/raleway-v28-latin-900.svg#Raleway') format('svg'); /* Legacy iOS */
 }
 
-.text-orange{
-  color: $primary-color;
-}
-.subtitle-text{
-  font-size: 18px;
-}

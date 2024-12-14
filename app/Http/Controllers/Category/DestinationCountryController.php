@@ -9,7 +9,6 @@ use App\Models\Method;
 use App\Models\Target;
 use App\Models\Water;
 use Config;
-use DB;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -24,7 +23,6 @@ class DestinationCountryController extends Controller
 
     public function country(Request $request, $country, $region=null, $city=null)
     {
-        $place_location = $country;
         $query = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit']);
 
         $country_row = Destination::whereSlug($country)->whereType('country')->first();
@@ -40,7 +38,6 @@ class DestinationCountryController extends Controller
             } elseif (is_null($country_row)) {
                 abort(404);
             }
-            $place_location = $city;
             $query = $query->whereType('city')->whereCountryId($country_row->id)->whereRegionId($region_row->id)->whereId($city_row->id);
         } elseif (!is_null($region)) {
             if (is_null($region_row)) {
@@ -48,7 +45,6 @@ class DestinationCountryController extends Controller
             } elseif (is_null($country_row)) {
                 abort(404);
             }
-            $place_location = $region;
             $query = $query->whereType('region')->whereCountryId($country_row->id)->whereId($region_row->id);
         } else {
             if (is_null($country_row)) {
@@ -83,7 +79,7 @@ class DestinationCountryController extends Controller
             Session::put('random_seed', $randomSeed);
         }
 
-        $query = Guiding::select(['*', DB::raw('(CASE WHEN price_five_persons IS NOT NULL THEN price_five_persons/5 WHEN price_four_persons IS NOT NULL THEN price_four_persons/4 WHEN price_three_persons IS NOT NULL THEN price_three_persons/3 WHEN price_two_persons IS NOT NULL THEN price_two_persons/2 ELSE price END) AS lowest_price')])->where('status',1)->whereNotNull('lat')->whereNotNull('lng');
+        $query = Guiding::query()->where('status',1)->whereNotNull('lat')->whereNotNull('lng');
 
         if (empty($request->all())) {
             $query->orderByRaw("RAND($randomSeed)");
@@ -226,7 +222,11 @@ class DestinationCountryController extends Controller
                     $query->whereIn('target_id', $requestFish);
                 });
             }
+
         }
+
+        $title .= __('guidings.Country') . ' ' . $country . ' | ';
+        $query->where('country',$country);
 
         $radius = null; // Radius in miles
         if($request->has('radius')){
@@ -239,41 +239,27 @@ class DestinationCountryController extends Controller
         $placeLat = $geocode['lat'];
         $placeLng = $geocode['lng'];
 
-        $title .= __('guidings.Country') . ' ' . $country . ' | ';
-        //$query->where('country',$country);
+        /*if($request->has('place') && empty($request->get('place'))){
+            $title .= __('guidings.Place') . ' ' . $request->place . ' | ';
+            return redirect()->route('guidings.index', $request->except([
+                'placeLng',
+                'placeLat'
+            ]));
+        }*/
 
-        if(!empty($placeLat) && !empty($placeLng)){
+        if(!empty($placeLat) && !empty($placeLng) && !empty($request->get('place'))){
 
             $title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
-            /*$query->select(['guidings.*'])
+            $query->select(['guidings.*'])
             ->selectRaw("(6371 * acos(cos(radians($placeLat)) * cos(radians(lat)) * cos(radians(lng) - radians($placeLng)) + sin(radians($placeLat)) * sin(radians(lat)))) AS distance")
             ->where('status', 1)
             ->orderBy('distance') // Sort the results by distance in ascending order
-            ->get();*/
-            $guidingFilter = Guiding::locationFilter($place_location, $radius);
-            $searchMessage = $guidingFilter['message'];
-            $query->whereIn('id', $guidingFilter['ids']);
+            ->get();
 
         }
 
-        if($request->has('price_range')){
-            $price_range = $request->get('price_range');
-            $price = explode('-', $price_range);
-
-            $title .= 'Price ' . $request->price_range . ' | ';
-
-            //$query->select(['*', DB::raw('(CASE WHEN price_five_persons IS NOT NULL THEN price_five_persons/5 WHEN price_four_persons IS NOT NULL THEN price_four_persons/4 WHEN price_three_persons IS NOT NULL THEN price_three_persons/3 WHEN price_two_persons IS NOT NULL THEN price_two_persons/2 ELSE price END) AS lowest_price')]);
-            if (count($price) > 1) {
-                $query->havingRaw('lowest_price >= ? AND lowest_price <= ?', $price);
-            } else {
-                $query->havingRaw('lowest_price >= ?', $price);
-
-            }
-
-        }
-        
-        $guidings_total = $query->count();
         $allGuidings = $query->get();
+
 
         $otherguidings = array();
 
@@ -294,9 +280,11 @@ class DestinationCountryController extends Controller
 
        
         $guidings = $query->paginate(6);
+
+
         $guidings->appends(request()->except('page'));
 
-        $data = compact('row_data', 'regions', 'cities', 'faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit', 'guidings', 'radius', 'allGuidings', 'otherguidings', 'title', 'guidings_total');
+        $data = compact('row_data', 'regions', 'cities', 'faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit', 'guidings', 'radius', 'allGuidings', 'otherguidings', 'title');
 
         return view('pages.category.country', $data);
     }
@@ -323,7 +311,7 @@ class DestinationCountryController extends Controller
         $client = new \GuzzleHttp\Client();
         $geocoder = new Geocoder($client);
 
-        $geocoder->setApiKey(env('GOOGLE_MAP_API_KEY'));
+        $geocoder->setApiKey('AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q');
 
         $geocoder->setCountry($country);
 

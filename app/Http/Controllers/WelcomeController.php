@@ -59,11 +59,7 @@ class WelcomeController extends Controller
 
         $nearestlistings = $nearestlistings->map(function ($listing) {
             $listing->title = translate($listing->title);
-            
-            // Check if 'image_0' exists before accessing it
-            $images = app('guiding')->getImagesUrl($listing);
-            $listing->image_url = isset($images['image_0']) ? $images['image_0'] : null; // Set to null or a default value if not set
-            
+            $listing->image_url = app('guiding')->getImagesUrl($listing)['image_0'];
             return $listing;
         });
 

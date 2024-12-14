@@ -98,41 +98,65 @@ class Checkout extends Component
 
     public function mount()
     {
-        // $this->extras = json_decode($this->guiding->pricing_extra, true) ?? [];
-        $this->extras = [];
-        $this->targets = $this->guiding->getTargetFishNames();
+        if ($this->guiding->is_newguiding) {
+            $this->extras = json_decode($this->guiding->pricing_extra, true) ?? [];
+            $this->targets = json_decode($this->guiding->target_fish, true);
+        } else {
+            $this->extras = $this->guiding->extras;
+            $this->targets = $this->guiding->guidingTargets()->get();
+        }
 
         foreach ($this->extras as $index => $extra) {
-            $extraId = $index;
+            $extraId = $this->guiding->is_newguiding ? $index : $extra->id;
             $this->selectedExtras[$extraId] = false;
             $this->extraQuantities[$extraId] = $this->persons;
         }
 
-        $this->waters = $this->guiding->getWaterNames();
-        $this->methods = $this->guiding->getFishingMethodNames();
+        $this->waters = $this->guiding->guidingWaters;
+        $this->methods = $this->guiding->guidingMethods;
         
-        $prices = json_decode($this->guiding->prices, true);
-        if ($this->guiding->price_type == 'per_person') {
-            $this->guidingprice = 0;
-            foreach ($prices as $price) {
-                if ($price['person'] == $this->persons) {
-                    $this->guidingprice = $price['amount'];
-                    break;
+        if ($this->guiding->is_newguiding) {
+            $prices = json_decode($this->guiding->prices, true);
+            if ($this->guiding->price_type == 'per_person') {
+                $this->guidingprice = 0;
+                foreach ($prices as $price) {
+                    if ($price['person'] == $this->persons) {
+                        $this->guidingprice = $price['amount'];
+                        break;
+                    }
                 }
-            }
-            if ($this->guidingprice == 0 && !empty($prices)) {
-                $lastPrice = end($prices);
-                $this->guidingprice = $lastPrice['amount'] * $this->persons;
+                if ($this->guidingprice == 0 && !empty($prices)) {
+                    $lastPrice = end($prices);
+                    $this->guidingprice = $lastPrice['amount'] * $this->persons;
+                }
+            } else {
+                $this->guidingprice = $prices[0]['amount'] ?? 0;
             }
         } else {
-            $this->guidingprice = $prices[0]['amount'] ?? 0;
+            switch ($this->persons) {
+                case '1':
+                    $this->guidingprice = $this->guiding->price;
+                    break;
+                case '2':
+                    $this->guidingprice = $this->guiding->price_two_persons;
+                    break;
+                case '3':
+                    $this->guidingprice = $this->guiding->price_three_persons;
+                    break;
+                case '4':
+                    $this->guidingprice = $this->guiding->price_four_persons;
+                    break;
+                case '5':
+                    $this->guidingprice = $this->guiding->price_five_persons;
+                    break;
+                default:
+                    $this->guidingprice = $this->guiding->price;
+            }
         }
 
         $user = auth()->user();
 
-        $guidingExtras = collect(json_decode($this->guiding->pricing_extra, true) ?? [])->filter(function($extra, $index) {
-            return isset($this->selectedExtras[$index]) && $this->selectedExtras[$index];
-        })->values();
+        $guidingExtras = $this->guiding->extras()->whereIn('id', $this->selectedExtras)->get();
 
         $totalExtraPrice = 0;
         
@@ -177,16 +201,31 @@ class Checkout extends Component
         $totalExtraPrice = 0;
         $extraData = [];
     
-        foreach ($this->extras as $index => $extra) {
-            if ($this->selectedExtras[$index]) {
-                $quantity = $this->extraQuantities[$index] ?? 0;
-                $totalExtraPrice += $extra['price'] * $quantity;
+        if ($this->guiding->is_newguiding) {
+            foreach ($this->extras as $index => $extra) {
+                if ($this->selectedExtras[$index]) {
+                    $quantity = $this->extraQuantities[$index] ?? 0;
+                    $totalExtraPrice += $extra['price'] * $quantity;
+                    $extraData[] = [
+                        'extra_id' => $index,
+                        'extra_name' => $extra['name'],
+                        'extra_price' => $extra['price'],
+                        'extra_quantity' => $quantity,
+                        'extra_total_price' => $extra['price'] * $quantity,
+                    ];
+                }
+            }
+        } else {
+            $guidingExtras = $this->guiding->extras()->whereIn('id', array_keys(array_filter($this->selectedExtras)))->get();
+            foreach ($guidingExtras as $extra) {
+                $quantity = $this->extraQuantities[$extra->id] ?? 0;
+                $totalExtraPrice += $extra->price * $quantity;
                 $extraData[] = [
-                    'extra_id' => $index,
-                    'extra_name' => $extra['name'],
-                    'extra_price' => $extra['price'],
+                    'extra_id' => $extra->id,
+                    'extra_name' => $extra->name,
+                    'extra_price' => $extra->price,
                     'extra_quantity' => $quantity,
-                    'extra_total_price' => $extra['price'] * $quantity,
+                    'extra_total_price' => $extra->price * $quantity,
                 ];
             }
         }
@@ -200,6 +239,12 @@ class Checkout extends Component
     {   
 
         $this->validateData();
+        // if ($this->page === 1) {
+        //     if (!$this->selectedDate || !$this->selectedTime) return;
+        // }
+        // if ($this->page === 2) {
+        //     if (!$this->userData['firstname'] || !$this->userData['lastname'] || !$this->userData['address'] || !$this->userData['postal'] || !$this->userData['city'] || !$this->userData['phone'] || !$this->userData['email']) return;
+        // }
 
         $this->page++;
     }
@@ -296,7 +341,7 @@ class Checkout extends Component
         $user->information->phone = $booking->phone;
         $user->information->save();
 
-        // SendCheckoutEmail::dispatch($booking,$user,$this->guiding,$this->guiding->user);
+        SendCheckoutEmail::dispatch($booking,$user,$this->guiding,$this->guiding->user);
         
         sleep(5);
 

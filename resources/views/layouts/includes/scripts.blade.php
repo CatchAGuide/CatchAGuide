@@ -45,8 +45,7 @@
 {{-- <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> --}}
 <script src="{{ asset('assets/js/select2.min.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous" async></script>
-<script src="/js/app.js"></script>
+
 @stack('js_push')
 
 <script>
@@ -113,14 +112,9 @@
 @livewireScripts
 @yield('js_after')
 @stack('js_push')
-<!-- 
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q&libraries=places,geocoding"></script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q&libraries=places,geocoder"></script>
 <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
- -->
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY') }}&libraries=places,geocoding"></script>
-<script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
-    ({key: "{{ env('GOOGLE_MAP_API_KEY') }}", v: "weekly"});
-</script>
+
 
 <script>
     // asdffff
@@ -162,46 +156,6 @@
             var place = autocomplete.getPlace();
             document.getElementById('LocationLat').value = place.geometry.location.lat();
             document.getElementById('LocationLng').value = place.geometry.location.lng();
-        });
-
-        var input2 = document.getElementById('searchPlace2');
-        var autocomplete2 = new google.maps.places.Autocomplete(input2);
-        google.maps.event.addListener(autocomplete2, 'place_changed', function () {
-            var place2 = autocomplete2.getPlace();
-            document.getElementById('LocationLat2').value = place2.geometry.location.lat();
-            document.getElementById('LocationLng2').value = place2.geometry.location.lng();
-        });
-        
-        var searchPlaceHeaderDesktop = document.getElementById('searchPlaceHeaderDesktop');
-        var autocompleteHeaderDesktop = new google.maps.places.Autocomplete(searchPlaceHeaderDesktop);
-        google.maps.event.addListener(autocompleteHeaderDesktop, 'place_changed', function () {
-            var placeHeaderDesktop = autocompleteHeaderDesktop.getPlace();
-            document.getElementById('LocationLatHeaderDesktop').value = placeHeaderDesktop.geometry.location.lat();
-            document.getElementById('LocationLngHeaderDesktop').value = placeHeaderDesktop.geometry.location.lng();
-        });
-        
-        var searchPlaceDesktop = document.getElementById('searchPlaceDesktop');
-        var autocompleteDesktop = new google.maps.places.Autocomplete(searchPlaceDesktop);
-        google.maps.event.addListener(autocompleteDesktop, 'place_changed', function () {
-            var placeDesktop = autocompleteDesktop.getPlace();
-            document.getElementById('LocationLatDesktop').value = placeDesktop.geometry.location.lat();
-            document.getElementById('LocationLngDesktop').value = placeDesktop.geometry.location.lng();
-        });
-
-        var searchPlaceMobile = document.getElementById('searchPlaceMobile');
-        var autocompleteMobile = new google.maps.places.Autocomplete(searchPlaceMobile);
-        google.maps.event.addListener(autocompleteMobile, 'place_changed', function () {
-            var placeMobile = autocompleteMobile.getPlace();
-            document.getElementById('LocationLatMobile').value = placeMobile.geometry.location.lat();
-            document.getElementById('LocationLngMobile').value = placeMobile.geometry.location.lng();
-        });
-
-        var searchPlaceShortDesktop = document.getElementById('searchPlaceShortDesktop');
-        var autocompleteShortDesktop = new google.maps.places.Autocomplete(searchPlaceShortDesktop);
-        google.maps.event.addListener(autocompleteShortDesktop, 'place_changed', function () {
-            var placeShortDesktop = autocompleteShortDesktop.getPlace();
-            document.getElementById('LocationLatShortDesktop').value = placeShortDesktop.geometry.location.lat();
-            document.getElementById('LocationLngShortDesktop').value = placeShortDesktop.geometry.location.lng();
         });
     }
 

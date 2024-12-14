@@ -13,9 +13,4 @@ class Inclussion extends Model
     {
         return $this->belongsToMany(Guiding::class, 'guiding_inclussions')->withTimestamps();;
     }
-
-    public function getNameAttribute()
-    {        
-        return app()->getLocale() == 'en' ? $this->attributes['name_en'] : $this->attributes['name'];
-    }
 }

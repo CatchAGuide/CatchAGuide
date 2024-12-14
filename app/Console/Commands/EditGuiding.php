@@ -25,7 +25,7 @@ use App\Models\EquipmentStatus;
 
 use Livewire\WithFileUploads;
 
-class EditGuidings extends Component
+class EditGuiding extends Component
 {
 
     use WithFileUploads;

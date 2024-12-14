@@ -1,4 +1,3 @@
-@import "../settings/variables";
 .thm-btn {
   &-disabled {
     pointer-events: none;
@@ -9,14 +8,5 @@
     &:focus {
       opacity: 0.5;
     }
-  }
-}
-.btn-orange{
-  background-color: $primary-color;
-  color: #fff;
-  &:hover{
-    color:$primary-color;
-    background-color: transparent;
-    border: 1px solid $primary-color;
   }
 }

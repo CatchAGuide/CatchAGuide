@@ -19,12 +19,13 @@
               <h2><strong>Checkout</strong></h2>
             </div>
             <div>
+              <p><span class="btn theme-primary text-white">Catchaguide.com</span></p>
             </div>
           </div>
 
           <ul id="progressbar">
             <li class="active" id="account"><strong>Information</strong></li>
-            <li class="{{ $this->page === 2 ? 'active' : '' }}" id="personal"><strong>{{ translate('Reservation') }}</strong></li>
+            <li class="{{ $this->page === 2 ? 'active' : '' }}" id="personal"><strong>Order Overview</strong></li>
           </ul>
         </div>
 
@@ -37,7 +38,7 @@
                     <div class="row">
                       <div class="col-md-6 my-3">
                         <div class="my-4">
-                          <span class="fw-bold">{{ translate('Date Selection') }}</span>
+                          <span class="fw-bold">Select Date</span>
                         </div>
                         <div class="col-md-12 d-flex justify-content-center">
                           <div id="lite-datepicker" wire:ignore></div>
@@ -45,7 +46,7 @@
                       </div>
                       <div class="col-md-6 my-3">
                         <div class="my-4">
-                          <span class="fw-bold">{{ translate('Personal Information') }}</span>
+                          <span class="fw-bold">Personal Information</span>
                         </div>
                         <div class="row">
                           <div class="col-sm-6">
@@ -162,27 +163,19 @@
                             </div>
                           </div>
                           <div class="col-md-12">
-                            <div class="row-buttons">
-                              <div class="button-container">  
-                                <!-- zurück -->
-                              <button class="thm-btn" type="button" onclick="window.history.back()"> <i class="fa fa-chevron-left"></i> @lang('message.return') </button>
-                              </div>
-                              <div class="button-container">
-                                @if($page === 1)
-                                  <div class="pull-right">
-                                    @if($selectedTime !== null)
-                                      <button class="thm-btn" type="button" wire:click="next">@lang('message.further') <i class="fa fa-chevron-right"></i></button>
-                                    @else
-                                      <button class="thm-btn thm-btn-disabled" type="button" wire:click="next" disabled>@lang('message.further')<i class="fa fa-chevron-right"></i></button>
-                                    @endif
-                                  </div>
-                                @elseif ($page !== 2)
-                                  <div class="pull-right">
-                                    <button class="thm-btn" wire:click="next">@lang('message.further') <i class="fa fa-chevron-right"></i></button>
-                                  </div>
+                            @if($page === 1)
+                              <div class="pull-right">
+                                @if($selectedTime !== null)
+                                  <button class="thm-btn" type="button" wire:click="next">@lang('message.further') <i class="fa fa-chevron-right"></i></button>
+                                @else
+                                  <button class="thm-btn thm-btn-disabled" type="button" wire:click="next" disabled>@lang('message.further')<i class="fa fa-chevron-right"></i></button>
                                 @endif
                               </div>
-                            </div>
+                            @elseif ($page !== 2)
+                              <div class="pull-right">
+                                <button class="thm-btn" wire:click="next">@lang('message.further') <i class="fa fa-chevron-right"></i></button>
+                              </div>
+                            @endif
                           </div>
                         </div>
                       </div>
@@ -190,7 +183,7 @@
                   </div>
 
                   <div class="tab-pane fade {{ $this->page === 2 ? 'show active' : '' }}" id="pills-orders" role="tabpanel" aria-labelledby="pills--tab">
-                    <div class="alert alert-info note-box" role="alert">
+                    <div class="alert alert-success" role="alert">
                       @lang('forms.guidTitleMsg')
                     </div>
                     <div class="row d-flex justify-content-center checkout-container">
@@ -219,13 +212,13 @@
 
                         <div class="guide-info mt-3">
                           <div class="mb-2">
-                            <h5><span class="bordered-heading">@lang('message.guiding-information')</span></h5>
+                            <h5><span class="bordered-heading">Guiding Information</span></h5>
                           </div>
                           <div class="p-3 bg-light rounded">
-                            @if($guiding->is_boat)
+                            @if($guiding->is_newguiding && $guiding->is_boat)
                               <div class="flex-column border-bottom">
                                 <div class="my-2">
-                                  <span class="text-dark fw-bold">{{ translate('Fishing from ')}}:</span>
+                                  <span class="text-dark fw-bold">{{ translate('Boat')}}:</span>
                                 </div>
                                 <div class="px-2 text-dark">
                                   {{$guiding->is_boat ? $guiding->boat_type : ''}}
@@ -253,7 +246,7 @@
                                 <span class="text-dark fw-bold">@lang('profile.duration'):</span>
                               </div>
                               <div class="px-2 text-dark">
-                                <p>{{$guiding->duration}} @if($guiding->duration_type == 'multi_day') days @else @lang('message.hours') @endif</p>
+                                <p>{{$guiding->duration}} @lang('message.hours')</p>
                               </div>
                             </div>
 
@@ -262,40 +255,90 @@
                                 <span class="text-dark fw-bold">@lang('profile.targetFish'):</span>
                               </div>
                               <div class="px-2 text-dark">
+                                @php
+                                if ($guiding->is_newguiding) {
+                                  $guidingTargets = array_column($targets, 'value');
+                                } else {
+                                  $guidingTargets = app()->getLocale() == 'en'
+                                    ? $targets->pluck('name_en')->toArray()
+                                    : $targets->pluck('name')->toArray();
+                                }
+                                @endphp
                                 <p>
-                                  {{implode(', ', collect($guiding->getTargetFishNames())->pluck('name')->toArray())}}
+                                  {{implode(', ', $guidingTargets)}}
                                 </p>
                               </div>
                             </div>
 
-                            @php
-                              $guidingInclusions = $guiding->getInclusionNames();
-                              $guidingInclusions = !empty($guidingInclusions) ? array_column($guidingInclusions, 'name') : [];
-                            @endphp
+                            <div class="flex-column border-bottom">
+                              <div class="my-2">
+                                <span class="text-dark fw-bold">@lang('profile.WhereFrom'):</span>
+                              </div>
+                              <div class="px-2 text-dark">
+                                @if(app()->getLocale() == 'en')
+                                {{$guiding->fishingFrom->name_en ? $guiding->fishingFrom->name_en : $guiding->fishingFrom->name}}
+                                @else
+                                {{$guiding->fishingFrom ? $guiding->fishingFrom->name : ''}}
+                                @endif
+                              </div>
+                            </div>
 
-                            @if (!empty($guidingInclusions))
                             <div class="flex-column border-bottom">
                               <div class="my-2">
                                 <span class="text-dark fw-bold">@lang('profile.inclussion'):</span>
                               </div>
                               <div class="px-2 text-dark">
+                                @php
+                                if ($guiding->is_newguiding) {
+                                  $guidingInclusions = json_decode($guiding->inclusions, true);
+                                  $guidingInclusions = array_column($guidingInclusions, 'value');
+                                } else {
+                                  $guidingInclusions = app()->getLocale() == 'en'
+                                    ? $guiding->inclussions->pluck('name_en')->toArray()
+                                    : $guiding->inclussions->pluck('name')->toArray();
+
+                                  // If name_en is empty, fallback to name
+                                  if (app()->getLocale() == 'en') {
+                                    foreach ($guidingInclusions as $index => $name) {
+                                      if (empty($name)) {
+                                        $guidingInclusions[$index] = $guiding->inclussions[$index]->name;
+                                      }
+                                    }
+                                  }
+                                }
+                                @endphp
+
+                                @if (!empty($guidingInclusions))
                                 {{ implode(', ', array_filter($guidingInclusions)) }}
+                                @endif
                               </div>
                             </div>
-                            @endif
 
-                            @if($guiding->requirements)
+                            <div class="flex-column border-bottom">
+                              <div class="my-2">
+                                <span class="text-dark fw-bold">@lang('profile.location'):</span>
+                              </div>
+                              <div class="px-2 text-dark">
+                                {{$guiding->location}}
+                              </div>
+                            </div>
+
+                            {{-- <div class="flex-column">
+                              <div class="my-2">
+                                <span class="text-dark fw-bold">@lang('profile.meetingPoint'):</span>
+                              </div>
+                              <div class="px-2 text-dark">
+                                {{$guiding->meeting_point ? $guiding->meeting_point : null }}
+                              </div>
+                            </div> --}}
+
+                            @if($guiding->is_newguiding)
                             <div class="flex-column">
                               <div class="my-2">
                                 <span class="text-dark fw-bold">{{ translate('Requirements for taking part')}}:</span>
                               </div>
                               <div class="px-2 text-dark">
-                                @if($guiding->requirements)
-                                @foreach($guiding->getRequirementsAttribute() as $requirement)
-                                  {!! $requirement['name'] !!}: {!! $requirement['value'] !!}
-                                  <br>
-                                @endforeach
-                                @endif
+                                {{ implode(', ', array_filter(json_decode($guiding->requirements, true))) }}
                               </div>
                             </div>
                             @endif
@@ -327,38 +370,38 @@
                                 <div class="row p-2">
                                   <div>
                                     @foreach($extras as $index => $extra)
-                                    <div class="col-md-12 extra-container"> <!-- Added extra-container class -->
+                                    <div class="col-md-12">
                                       <div class="d-flex flex-column">
                                         <div class="form-check p-0">
                                           <label class="form-check-label text-dark">
-                                              <input 
-                                                type="checkbox" 
-                                                class="form-check-input me-1" 
-                                                name="extra" 
-                                                value="{{$index}}" 
-                                                wire:model="selectedExtras.{{$index}}"
-                                                wire:change="$emit('extraChanged', '{{$index}}')"
-                                              >
+                                            @if($guiding->is_newguiding)
+                                              <input type="checkbox" class="form-check-input me-1" name="extra" value="{{$index}}" wire:model.lazy="selectedExtras.{{$index}}">
                                               {{$extra['name']}} - €{{$extra['price']}}
+                                            @else
+                                              <input type="checkbox" class="form-check-input me-1" name="extra" value="{{$extra->id}}" wire:model.lazy="selectedExtras.{{$extra->id}}">
+                                              {{$extra->name}} - €{{$extra->price}}
+                                            @endif
                                           </label>
                                         </div>
-                                          <div class="quantity-container" style="display: none;">
-                                            <div class="d-flex align-items-center mb-2">
-                                              <label for="quantity_{{$index}}">Quantity:</label>
-                                              <input 
-                                                id="quantity_{{$index}}"
-                                                class="w-25 form-control form-control-sm mx-2 quantity-input" 
-                                                type="number"
-                                                min="1"
-                                                step="1"
-                                                name="quantity"
-                                                value="1"
-                                                max="{{$persons}}"
-                                                wire:model="extraQuantities.{{ $index }}"
-                                                wire:change="calculateTotalPrice"
-                                              >
-                                            </div>
-                                          </div>
+                                        <div>
+                                          @if(count($selectedExtras))
+                                            @if($guiding->is_newguiding)
+                                              @if($selectedExtras[$index])
+                                              <div class="d-flex align-items-center mb-2">
+                                                <label for="">Quantity:</label>
+                                                <input id="numericInput" class="w-25 form-control form-control-sm mx-2" type="number" min="0" step="1" name="quantity" value="2" max="{{$persons}}" wire:model="extraQuantities.{{ $index }}" wire:change="calculateTotalPrice" required>
+                                              </div>
+                                              @endif
+                                            @else
+                                              @if(in_array($extra->id, $selectedExtras))
+                                              <div class="d-flex align-items-center mb-2">
+                                                <label for="">Quantity:</label>
+                                                <input id="numericInput" class="w-25 form-control form-control-sm mx-2" type="number" min="0" step="1" name="quantity" value="2" max="{{$persons}}" wire:model="extraQuantities.{{ $extra->id }}" wire:change="calculateTotalPrice" required>
+                                              </div>
+                                              @endif
+                                            @endif
+                                          @endif
+                                        </div>
                                       </div>
                                     </div>
                                     @endforeach
@@ -367,12 +410,10 @@
                               </div>
                               @endif
 
-                              @if($totalExtraPrice > 0)
                               <div class="px-2 py-1 d-flex">
                                 <div class="col-8">@lang('message.total-extras'):</span></div>
                                 <div class="ml-auto">€{{$totalExtraPrice}}</div>
                               </div>
-                              @endif
                               <div class="border-top px-4 mx-3"></div>
                               <div class="px-2 py-1 d-flex pt-3">
                                 <div class="col-8"><b>Total</b></div>
@@ -380,14 +421,14 @@
                               </div>
                             </div>
                           </div>
-                          <div class="alert alert-info note-box" role="alert">
+                          <div class="alert alert-success mt-3" role="alert">
                             @lang('forms.total')
                             {{$totalPrice}}€
-                            @lang('forms.total2') <strong>@lang('forms.total3')</strong>
+                            @lang('forms.total2')
                           </div>
-                          <button class="btn thm-btn rounded border mt-1 p-3" type="submit">@lang('message.reservation')</button>
-                          <button class="btn thm-btn btn-gray rounded border mt-1 p-3" type="button" wire:click="prev" >@lang('message.return')</button>
-                          <a class="btn thm-btn  btn-gray rounded border mt-1 p-3" href="{{route('guidings.index')}}" >@lang('message.booking-cancel')</a>
+                          <button class="btn thm-btn rounded border mt-1 p-3" type="submit">@lang('message.complete-booking')</button>
+                          <button class="btn thm-btn rounded border mt-1 p-3" type="button" wire:click="prev" >@lang('message.return')</button>
+                          <a class="btn btn-primary rounded border mt-1 p-3" href="{{route('guidings.index')}}" >@lang('message.booking-cancel')</a>
                         </div>
                       </div>
                     </div>
@@ -431,15 +472,7 @@
     }
   }
 
-  
   document.addEventListener('livewire:load', function () {
-    const blockedEvents = @json($guiding->getBlockedEvents());
-
-    let lockDays = [];
-    if (blockedEvents && typeof blockedEvents === 'object') {
-      lockDays = Object.values(blockedEvents).map(event => [event.from, event.due]);
-    }
-
     const picker = new Litepicker({
       element: document.getElementById('lite-datepicker'),
       inlineMode: true,
@@ -447,7 +480,12 @@
       numberOfColumns: initCheckNumberOfColumns(),
       numberOfMonths: initCheckNumberOfColumns(),
       minDate: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
-      lockDays: lockDays,
+      lockDays: [
+        @foreach($guiding->user->blocked_events as $blocked)
+          ["{{ substr($blocked->from,0,-9) }}", "{{ substr($blocked->from,0,-9) }}"],
+        @endforeach
+        new Date(),
+      ],
       lang: '{{app()->getLocale()}}',
       setup: (picker) => {
         picker.on('selected', (date1, date2) => {
@@ -477,67 +515,11 @@
     });
   });
 </script>
-<script>
-document.addEventListener('livewire:load', function () {
-  // Handle numeric input validation
-  document.addEventListener('input', function(e) {
-    if (e.target.classList.contains('quantity-input')) {
-      let value = e.target.value.replace(/[^0-9]/g, '');
-      if (value === '') value = '1';
-      if (parseInt(value) < 1) value = '1';
-      e.target.value = value;
-    }
-  });
-
-  // Handle checkbox changes
-  Livewire.on('extraChanged', (extraId) => {
-    const checkboxes = document.querySelectorAll('.form-check-input');
-    checkboxes.forEach(checkbox => {
-      if (checkbox.value === extraId.toString()) {
-        const container = checkbox.closest('.extra-container').querySelector('.quantity-container');
-        if (container) {
-          container.style.display = checkbox.checked ? 'block' : 'none';
-          
-          // Initialize quantity input when showing
-          if (checkbox.checked) {
-            const quantityInput = container.querySelector('.quantity-input');
-            if (quantityInput && !quantityInput.value) {
-              quantityInput.value = '1';
-            }
-          }
-        }
-      }
-    });
-  });
-});
-document.addEventListener('livewire:next', function () {
-  function scrollToFormCenter() {
-          const form = document.getElementById('all');
-          if (form) {
-              // form.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              const formTop = form.getBoundingClientRect().top + window.pageYOffset; // Get the element's position relative to the document
-          window.scrollTo({ 
-              top: formTop - 50, // Adjust for 150px offset
-              console.log('test')
-              behavior: 'smooth'  // Smooth scrolling
-          });
-          }
-      }
-});
-</script>
 
 @endpush
 
 @section('css_after')
 <style>
-  .row-buttons{
-    display: flex;
-    justify-content: space-between;
-}
-button.btn-gray, a.btn-gray  {
-    background-color: #777;
-    color: #fff;
-}
   .litepicker .container__days .day-item.is-today.is-locked{
     color: #fff !important;
     background: green !important;
@@ -592,18 +574,5 @@ button.btn-gray, a.btn-gray  {
     -webkit-box-shadow: inset 0 0 0 1px var(--thm-primary);
     box-shadow: inset 0 0 0 1px var(--thm-primary);
   }
-  .note-box {
-    background-color: #e9f7f9;
-    border-left: 5px solid #17a2b8;
-    border-radius: 0.25rem;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    font-size: 0.9rem;
-    color: #0c5460;
-  }
-  .note-box strong {
-    color: #0c5460;
-  }
 </style>
 @endsection
-

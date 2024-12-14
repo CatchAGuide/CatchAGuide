@@ -36,16 +36,3 @@ DB.sql
 logs/*
 php.ini
 public_html_original/*
-.gitignore
-_ide_helper_models.php
-_ide_helper.php
-storage/app/.gitignore
-storage/framework/*
-storage/logs/.gitignore
-
-app/Console/Commands/GenerateLocationDataFromGuidingsCommand.php
-app/Http/Controllers/GuidingController.php
-app/Http/Resources/GuidingResource.php
-app/Models/LocationBoundary.php
-database/migrations/2024_11_06_191646_add_spatial_index_to_guidings.php
-database/seeders/LocationBoundarySeeder.php

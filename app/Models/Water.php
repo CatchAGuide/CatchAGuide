@@ -14,8 +14,4 @@ class Water extends Model
         return $this->belongsToMany(Guiding::class, 'guiding_waters')->withTimestamps();;
     }
 
-    public function getNameAttribute()
-    {        
-        return app()->getLocale() == 'en' ? $this->attributes['name_en'] : $this->attributes['name'];
-    }
 }

@@ -16,7 +16,6 @@ class BlockedEvent extends Model
         'due',
         'type',
         'user_id',
-        'guiding_id',
     ];
 
     /**

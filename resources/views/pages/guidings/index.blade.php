@@ -7,63 +7,15 @@
 @section('header_sub_title', '')
 
 @section('css_after')
+{{-- <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" /> --}}
+
 <style>
-    .container {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 0 15px;
+    .fixedmap {
+        position: fixed;
+        right: 0px;
+        bottom: 10%;
+        height: 70%;
     }
-
-    .page-header {
-        /*margin-top: -60px;*/
-        background: #f8f9fa;
-    }
-
-    .page-header-bg-overly,
-    .pager-header-bg {
-        display: none;
-    }
-
-    .floating-search-container {
-        position: relative;
-        margin-top: -30px;
-        z-index: 100;
-    }
-
-    #filterCard {
-        /* position: sticky;
-        top: 20px; */
-    }
-
-    /*.carousel .carousel-control-next, 
-    .carousel .carousel-control-prev {
-        background: rgba(0,0,0,0.5);
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        top: 50%;
-        transform: translateY(-50%);
-    }*/
-
-    .carousel.slide img {
-        height: 300px;
-        object-fit: cover;
-        width: 100%;
-    }
-
-    .form-custom-input {
-        border: 1px solid #dee2e6;
-        border-radius: 4px;
-        padding: 8px 12px;
-        width: 100%;
-    }
-
-    .form-custom-input:focus {
-        border-color: #e8604c;
-        outline: none;
-        box-shadow: 0 0 0 2px rgba(232,96,76,0.25);
-    }
-
     a:hover {
         color: black;
     }
@@ -74,10 +26,10 @@
         filter: none !important;
     }
 
-    /* .carousel .carousel-control-next, .carousel .carousel-control-prev {
+    .carousel .carousel-control-next, .carousel .carousel-control-prev {
         top: 50%;
         transform: translateY(-50%);
-    } */
+    }
 
     .carousel.slide img {
         /* max-height: 265px; */
@@ -88,27 +40,27 @@
         /* height:228px; */
     }
 
-    /* .carousel .carousel-control-next {
-        right: 0px;
+    .carousel .carousel-control-next {
+        right: 0;
     }
 
     .carousel .carousel-control-prev {
         left: 0;
-    } */
+    }
 
     .carousel-item {
         min-height: 50px;
     }
-    /* .carousel .carousel-control-next, .carousel .carousel-control-prev {
+    .carousel .carousel-control-next, .carousel .carousel-control-prev {
         padding: 3px;
         width: 24px;
-    } */
+    }
 
     .carousel-item-next, .carousel-item-prev, .carousel-item.active {
         display: flex;
     }
 
-    /* .carousel-control-prev-icon,
+    .carousel-control-prev-icon,
     .carousel-control-next-icon {
         width: 10px;
         height: 10px;
@@ -117,7 +69,7 @@
     .carousel .carousel-control-next, .carousel .carousel-control-prev {
         padding: 3px;
         width: 24px;
-    } */
+    }
     .form-custom-input{
     /* border: solid #e8604c 1px; */
     border: 1px solid #d4d5d6;
@@ -172,44 +124,14 @@
         width: auto;
     }
 
-    @media only screen and (max-width: 450px) {
-        #map-placeholder a.btn {
-            top: 35%;
-            left: 30%;
-        }
-
-        .page-header {
-            margin-top: -60px!important;
-        }
-    }
-
-    @media only screen and (min-width: 451px) and (max-width: 766px) {
+    @media only screen and (max-width: 600px) {
         #toggleFilterBtn{
             display:block;
         }
-        #map-placeholder a.btn {
-            top: 40%;
-            left: 35%;
+        #filterContainer{
+            display:none;
         }
-
-        .page-header {
-            margin-top: -60px!important;
-        }
-    }
-    @media only screen and (min-width: 767px) and (max-width: 991px) {
-        #map-placeholder a.btn {
-            top: 45%;
-            left: 45%;
-        }
-
-        .page-header {
-            margin-top: -30px!important;
-        }
-    }
-    @media only screen and (min-width: 992px) {
-        .page-header {
-            margin-top: -30px!important;
-        }
+        
     }
     #radius{
         background: url("data:image/svg+xml,<svg height='10px' width='10px' viewBox='0 0 16 16' fill='%23808080' xmlns='http://www.w3.org/2000/svg'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>") no-repeat;
@@ -236,51 +158,6 @@
     .container {
         max-width:1600px;
     }
-
-    #map-placeholder {
-        position: relative;
-        width:100%;
-        height: 200px;
-        background-image: url({{ url('') }}/assets/images/map-bg.png);
-    }
-    #map-placeholder a.btn {
-        position: absolute;
-        top: calc(50% - 19px);
-        right: calc(50% - 81px);
-    }
-    #guidings-menu-search {
-        position: absolute;
-        top: 133px;
-        z-index: 3;
-    }
-    #guidings-result {
-        line-height: 14px;
-    }
-    #offcanvasBottomSearch {
-        height: 90%!important;
-    }
-    .pac-container {
-        z-index: 2000;
-    }
-    .cag-btn {
-        background-color: #E8604C !important;
-        color: #fff !important;
-        border: 2px solid #E8604C !important;
-    }
-    .cag-btn-inverted {
-        background-color: #313041 !important;
-        color: #fff !important;
-        border: 2px solid #313041 !important;
-    }
-    .mobile-selection-sfm {
-        position: sticky;
-        z-index: 10;
-        top: 0;
-        background-color: #fff;
-        padding-top: 15px;
-        padding-left: 15px;
-        padding-right: 15px;
-    }
 </style>
 
 @endsection
@@ -288,7 +165,19 @@
 @include('layouts.schema.listings')
 @endsection
 @section('content')
-    <section class="page-header">
+
+    <section class="page-header m-0">
+        <!-- <div class="page-header__top">
+            <div class="page-header-bg"
+                 style="background-image: url({{asset('assets/images/allguidings.jpg')}})">
+            </div>
+            <div class="page-header-bg-overly"></div>
+            <div class="container">
+                <div class="page-header__top-inner">
+                    <h1 class="h2">{{ucwords(isset($place) ? translate('Alle Guidings bei ') . $place : translate('Alle Guidings') )}}</h1>
+                </div>
+            </div>
+        </div> -->
         <div class="page-header__bottom">
             <div class="container">
                 <div class="page-header__bottom-inner">
@@ -308,213 +197,186 @@
     <section class="tours-list" style="padding-top: 20px;">
 
         <div class="container-fluid">
+
             <div class="row">
-                <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
-                    <div class="d-grid gap-2 w-100">
-                        <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-                            <div class="btn-group border rounded-start cag-btn-inverted" role="group" style=" width:30%;">
-                                <button type="button" class="btn dropdown-toggle text-white" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-arrow-down-arrow-up me-1"></i>@lang('message.sortby')</button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=newest">@lang('message.newest')</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=price-asc">@lang('message.lowprice')</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=short-duration">@lang('message.shortduration')</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=long-duration">@lang('message.longduration')</a></li>
-                                </ul>
-
-                                @foreach(request()->except('sortby') as $key => $value)
-                                    @if(is_array($value))
-                                        @foreach($value as $arrayValue)
-                                            <input type="hidden" name="{{ $key }}[]" value="{{ $arrayValue }}">
-                                        @endforeach
-                                    @else
-                                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                                    @endif
-                                @endforeach
-                            </div>
-                            <a class="btn border-start cag-btn-inverted" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottomSearch" aria-controls="offcanvasBottomSearch" href="javascript:void(0)" style="border-left: 1px solid #ccc!important; z-index: 2; width:30%;">
-                                <i class="fa fa-filter me-1"></i>@lang('message.filter') 
-                                @if($guidings->count() > 0)
-                                    @if(request()->has('radius') || request()->has('num_guests') || request()->has('target_fish') || request()->has('water') || request()->has('fishing_type') || request()->has('price_range'))
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="guiding-filter-counter"></span>
-                                    @endif
-                                @endif
-                            </a>
-                            <a class="btn border cag-btn-inverted" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)" style=" border-left: 2px solid #ccc!important; width:40%;"><i class="fa fa-map-marker-alt me-2"></i>@lang('destination.show_on_map')</a>
-
-                        </div>
+                
+                @if($agent->ismobile())
+                
+                <div class="col-12 map__wrap" id="wrap">
+                    <div>
+                        <a class="p-3 mb-2 btn new-bg btn-theme-new text-center w-100 my-3" href="{{ route('guidings.request') }}">@lang('request.btnsearch')</a>
+                    <div>
+                    <div id="map">
                     </div>
                 </div>
-                <div id="filterCard" class="col-sm-12 col-lg-3">
-                    <div class="card mb-2 d-none d-sm-block">
-                        <div id="map-placeholder">
-                            <a class="btn btn-primary" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)">@lang('destination.show_on_map')</a>
-                        </div>
-                    </div>
-                    <div class="card d-block d-none d-sm-block mb-1">
-                        <div class="card-header">
-                            @lang('message.sortby'):
-                        </div>
-                        <div class="card-body border-bottom">
-                            <form id="form-sortby-2" action="{{route('guidings.index')}}" method="get">
-                                <select class="form-select form-select-sm" name="sortby" id="sortby-2">
-                                    <option value="" disabled selected>@lang('message.choose')...</option>
-                                    <option value="newest" {{request()->get('sortby') ? request()->get('sortby') == 'newest' ? 'selected' : '' : '' }}>@lang('message.newest')</option>
-                                    <option value="price-asc" {{request()->get('sortby') ? request()->get('sortby') == 'price-asc' ? 'selected' : '' : '' }}>@lang('message.lowprice')</option>
-                                    <option value="short-duration" {{request()->get('sortby') ? request()->get('sortby') == 'short-duration' ? 'selected' : '' : '' }}>@lang('message.shortduration')</option>
-                                    <option value="long-duration" {{request()->get('sortby') ? request()->get('sortby') == 'long-duration' ? 'selected' : '' : '' }}>@lang('message.longduration')</option>
-                                </select>
-
-                                @foreach(request()->except('sortby') as $key => $value)
-                                    @if(is_array($value))
-                                        @foreach($value as $arrayValue)
-                                            <input type="hidden" name="{{ $key }}[]" value="{{ $arrayValue }}">
-                                        @endforeach
-                                    @else
-                                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                                    @endif
-                                @endforeach
-                            </form>
-                        </div>
-                    </div>
-                    <div class="card d-block d-none d-sm-block">
-                        <div class="card-header">
-                            @lang('destination.filter_by'):
-                        </div>
-                        <div class="card-body border-bottom">
-                            <form id="filterContainer" action="{{route('guidings.index')}}" method="get" class="shadow-sm px-4 py-2">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <div class="form-group my-1">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend border-0 border-bottom ">
-                                                    <span class=" d-flex align-items-center px-2 h-100"><i class="fas fa-map-marker-alt"></i></span>
-                                                </div>
-                                                <input  id="searchPlace" name="place" type="text" value="{{ request()->get('place') ? request()->get('place') : null }} @if(empty(request()->get('place')) && !empty(request()->get('country'))) {{request()->get('country')}} @endif" class="form-control border-0 border-bottom rounded-0" placeholder="@lang('message.enter-location')"  autocomplete="on">
-                                            </div>
-                                          <input type="hidden" id="LocationLat" value="{{ request()->get('placeLat') ? request()->get('placeLat') : null }}" name="placeLat"/>
-                                          <input type="hidden" id="LocationLng" value="{{ request()->get('placeLng') ? request()->get('placeLng') : null }}" name="placeLng"/>
+                @endif
+                
+                <div class="col-md-12">
+                    
+                    <form id="filterContainer" action="{{route('guidings.index')}}" method="get" class="shadow-sm px-4 py-2">
+                        <div class="row">
+                            <div class="col-6 col-sm-6 col-md-4">
+                                <div class="form-group my-1">
+                                    {{-- <label for="place">@lang('message.location')</label> --}}
+                                    <div class="input-group">
+                                        <div class="input-group-prepend border-0 border-bottom ">
+                                            <span class=" d-flex align-items-center px-2 h-100"><i class="fas fa-map-marker-alt"></i></span>
                                         </div>
+                                        <input  id="searchPlace" name="place" type="text" value="{{ request()->get('place') ? request()->get('place') : null }} @if(empty(request()->get('place')) && !empty(request()->get('country'))) {{request()->get('country')}} @endif" class="form-control border-0 border-bottom rounded-0" placeholder="@lang('message.enter-location')"  autocomplete="on">
                                     </div>
-                                    <div class="col-12">
-                                        <div class="input-group my-1">
-                                            <div class="input-group-prepend border-0 border-bottom ">
-                                                <span class="d-flex align-items-center px-2 h-100">
-                                                    <i class="fa fa-compass"></i>
-                                                </span>
-                                            </div>
-                                            <select id="radius" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="radius">
-                                                <option selected disabled hidden>Radius</option>
-                                                <option value="" >@lang('message.choose')...</option>
-                                                <option value="50" {{ request()->has('radius') ? request()->get('radius') == 50 ? 'selected' : null : null }}>50 km</option>
-                                                <option value="100" {{ request()->get('radius') ? request()->get('radius') == 100 ? 'selected' : null : null }}>100 km</option>
-                                                <option value="150" {{ request()->get('radius') ? request()->get('radius') == 150 ? 'selected' : null : null }}>150 km</option>
-                                                <option value="250" {{ request()->get('radius') ? request()->get('radius') == 250 ? 'selected' : null : null }}>250 km</option>
-                                                <option value="500" {{ request()->get('radius') ? request()->get('radius') == 500 ? 'selected' : null : null }}>500 km</option>
-                                            </select>
-                                          </div>
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="input-group my-1">
-                                            <div class="input-group-prepend border-0 border-bottom ">
-                                                <span class="d-flex align-items-center px-2 h-100">
-                                                    <i class="fas fa-user"></i>
-                                                </span>
-                                            </div>
-                                            <select id="num-guests" class="form-control form-select  border-0 border-bottom rounded-0 custom-select" name="num_guests">
-                                                <option value="" disabled selected hidden>@lang('message.number-of-guests')</option>
-                                                <option value="">@lang('message.choose')...</option>
-                                                <option value="1" {{ request()->get('num_guests') ? request()->get('num_guests') == 1 ? 'selected' : null : null }}>1</option>
-                                                <option value="2" {{ request()->get('num_guests') ? request()->get('num_guests') == 2 ? 'selected' : null : null }}>2</option>
-                                                <option value="3" {{ request()->get('num_guests') ? request()->get('num_guests') == 3 ? 'selected' : null : null }}>3</option>
-                                                <option value="4" {{ request()->get('num_guests') ? request()->get('num_guests') == 4 ? 'selected' : null : null }}>4</option>
-                                                <option value="5" {{ request()->get('num_guests') ? request()->get('num_guests') == 5 ? 'selected' : null : null }}>5</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                 
-                                    <div class="col-12">
-                                        <div class="form-group my-1 d-flex align-items-center border-bottom">
-                                            <div class="px-2 select2-icon">
-                                                <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
-                                            </div>
-                                           
-                                            <select class="form-control form-select border-0 rounded-0" id="target_fish" name="target_fish[]" style="width:100%">
-                                            </select>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="col-12">
-                                        <div class="form-group my-1 d-flex align-items-center border-bottom">
-                                            <div class="px-2 select2-icon">
-                                                <img src="{{asset('assets/images/icons/water-waves.png')}}" height="20" width="20" alt="" />
-                                            </div>
-                                            <select class="form-control form-select border-0  rounded-0" id="water" name="water[]" style="width:100%">
-                                    
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="form-group my-1 d-flex align-items-center border-bottom ">
-                                            <div class="px-2 select2-icon">
-                                                <img src="{{asset('assets/images/icons/fishing.png')}}" height="20" width="20" alt="" />
-                                            </div>
-                                            <select class="form-control form-select border-0 rounded-0" id="methods" name="methods[]" style="width:100%">
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-12 mb-2">
-                                        <div class="input-group my-1">
-                                            <div class="input-group-prepend border-0 border-bottom ">
-                                                <span class="d-flex align-items-center px-2 h-100">
-                                                    <i class="fa fa-euro-sign"></i>
-                                                </span>
-                                            </div>
-                                            <select id="price_range" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="price_range">
-                                                <option selected disabled hidden>Price per Person</option>
-                                                <option value="" >@lang('message.choose')...</option>
-                                                <option value="1-50" {{ request()->get('price_range') ? request()->get('price_range') == '1-200' ? 'selected' : null : null }}>1 - 50 p.P.</option>
-                                                <option value="51-100" {{ request()->get('price_range') ? request()->get('price_range') == '201-400' ? 'selected' : null : null }}>51 - 100 p.P.</option>
-                                                <option value="101-150" {{ request()->get('price_range') ? request()->get('price_range') == '401-600' ? 'selected' : null : null }}>101 - 150 p.P.</option>
-                                                <option value="151-200" {{ request()->get('price_range') ? request()->get('price_range') == '601-800' ? 'selected' : null : null }}>151 - 200 p.P.</option>
-                                                <option value="201-250" {{ request()->get('price_range') ? request()->get('price_range') == '801-1000' ? 'selected' : null : null }}>201 - 250 p.P.</option>
-                                                <option value="350" {{ request()->get('price_range') ? request()->get('price_range') == '1001' ? 'selected' : null : null }}>350 and more</option>
-                                            </select>
-                                          </div>
-                                    </div>
-                                    <div class="col-sm-12 col-lg-12 ps-md-0">
-                                        <button class="btn btn-sm theme-primary btn-theme-new w-100 h-100" >@lang('message.Search')</button>    
-                                    </div>
+                                  <input type="hidden" id="placeLat" value="{{ request()->get('placeLat') ? request()->get('placeLat') : null }}" name="placeLat"/>
+                                  <input type="hidden" id="placeLng" value="{{ request()->get('placeLng') ? request()->get('placeLng') : null }}" name="placeLng"/>
                                 </div>
-                            </form>
+                            </div>
+                            <div class="col-6 col-sm-6 col-md-4">
+                                <div class="input-group my-1">
+                                    {{-- <label for="radius">Radius</label> --}}
+                                    <div class="input-group-prepend border-0 border-bottom ">
+                                        <span class="d-flex align-items-center px-2 h-100">
+                                            <i class="fa fa-compass"></i>
+                                        </span>
+                                    </div>
+                                    <select id="radius" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="radius">
+                                        <option selected disabled hidden>Radius</option>
+                                        <option value="" >@lang('message.choose')...</option>
+                                        <option value="50" {{ request()->get('radius') ? request()->get('radius') == 50 ? 'selected' : null : null }}>50 km</option>
+                                        <option value="100" {{ request()->get('radius') ? request()->get('radius') == 100 ? 'selected' : null : null }}>100 km</option>
+                                        <option value="150" {{ request()->get('radius') ? request()->get('radius') == 150 ? 'selected' : null : null }}>150 km</option>
+                                        <option value="250" {{ request()->get('radius') ? request()->get('radius') == 250 ? 'selected' : null : null }}>250 km</option>
+                                        <option value="500" {{ request()->get('radius') ? request()->get('radius') == 500 ? 'selected' : null : null }}>500 km</option>
+                                    </select>
+                                  </div>
+                            </div>
+                            <div class="col-12 col-sm-12 col-md-4">
+                                <div class="input-group my-1">
+                                    {{-- <label for="radius">@lang('message.number-of-guests')</label> --}}
+                                    <div class="input-group-prepend border-0 border-bottom ">
+                                        <span class="d-flex align-items-center px-2 h-100">
+                                            <i class="fas fa-user"></i>
+                                        </span>
+                                    </div>
+                                    <select id="num-guests" class="form-control form-select  border-0 border-bottom rounded-0 custom-select" name="num_guests">
+                                        <option value="" disabled selected hidden>@lang('message.number-of-guests')</option>
+                                        <option value="">@lang('message.choose')...</option>
+                                        <option value="1" {{ request()->get('num_guests') ? request()->get('num_guests') == 1 ? 'selected' : null : null }}>1</option>
+                                        <option value="2" {{ request()->get('num_guests') ? request()->get('num_guests') == 2 ? 'selected' : null : null }}>2</option>
+                                        <option value="3" {{ request()->get('num_guests') ? request()->get('num_guests') == 3 ? 'selected' : null : null }}>3</option>
+                                        <option value="4" {{ request()->get('num_guests') ? request()->get('num_guests') == 4 ? 'selected' : null : null }}>4</option>
+                                        <option value="5" {{ request()->get('num_guests') ? request()->get('num_guests') == 5 ? 'selected' : null : null }}>5</option>
+                                    </select>
+                                </div>
+                            </div>
+                         
+                            <div class="col-md-3">
+                                <div class="form-group my-1 d-flex align-items-center border-bottom">
+                                    {{-- <label for="target_fish">@lang('message.target-fish')</label> --}}
+                                    <div class="px-2 select2-icon">
+                                        <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
+                                    </div>
+                                   
+                                    <select class="form-control form-select border-0 rounded-0" id="target_fish" name="target_fish[]" style="width:100%">
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="form-group my-1 d-flex align-items-center border-bottom">
+                                    {{-- <label for="water">@lang('message.body-type')</label> --}}
+                                    <div class="px-2 select2-icon">
+                                        <img src="{{asset('assets/images/icons/water-waves.png')}}" height="20" width="20" alt="" />
+                                    </div>
+                                    <select class="form-control form-select border-0  rounded-0" id="water" name="water[]" style="width:100%">
+                            
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group my-1 d-flex align-items-center border-bottom ">
+                                    {{-- <label for="methods">@lang('message.fishing-technique')</label> --}}
+                                    <div class="px-2 select2-icon">
+                                        <img src="{{asset('assets/images/icons/fishing.png')}}" height="20" width="20" alt="" />
+                                    </div>
+                                    <select class="form-control form-select border-0 rounded-0" id="methods" name="methods[]" style="width:100%">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-1 ps-md-0">
+                                <button class="btn btn-sm theme-primary btn-theme-new w-100 h-100" style="font-size:0.75rem">@lang('message.Search')</button>    
+                            </div>
+                            
                         </div>
-                    </div>
+        
+                    </form>
                 </div>
 
-                <div class="col-sm-12 col-lg-9">
-                    <!-- Add search message display -->
-                    @if(!empty($searchMessage))
-                        <div class="alert alert-info mb-3" role="alert">
-                            {{ $searchMessage }}
+                <div class="col-6 col-sm-4 col-md-12 d-flex align-items-center my-2">
+                    <div class="d-flex justify-content-start">
+                        <button  id="toggleFilterBtn" class="btn outline-none"><span class="fw-bold text-decoration-underline">Filters</span><i class="fa fa-filter color-primary" aria-hidden="true"></i></button>
+                    </div>
+                </div>
+                @if(count($guidings) > 0)
+                <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6 col-xxl-4 my-2 mt-md-5">
+                    <form id="form-sortby" action="{{route('guidings.index')}}" method="get">
+                        <div class="row-sort">
+                            <div class="d-flex flex-sm-row flex-column align-items-sm-center align-items-stretch my-2">
+                                <div class="d-flex align-items-center">
+                                    <label class="fs-sm me-2 pe-1 text-nowrap" for="sortby"><i class="fi-arrows-sort text-muted mt-n1 me-2"></i>@lang('message.sortby')</label>
+                                    <select class="form-select form-select-sm" name="sortby" id="sortby">
+                                        <option value="" disabled selected>@lang('message.choose')...</option>
+                                        <option value="newest" {{request()->get('sortby') ? request()->get('sortby') == 'newest' ? 'selected' : '' : '' }}>@lang('message.newest')</option>
+                                        <option value="price-asc" {{request()->get('sortby') ? request()->get('sortby') == 'price-asc' ? 'selected' : '' : '' }}>@lang('message.lowprice')</option>
+                                        <option value="short-duration" {{request()->get('sortby') ? request()->get('sortby') == 'short-duration' ? 'selected' : '' : '' }}>@lang('message.shortduration')</option>
+                                        <option value="long-duration" {{request()->get('sortby') ? request()->get('sortby') == 'long-duration' ? 'selected' : '' : '' }}>@lang('message.longduration')</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                    @endif
 
+                        @foreach(request()->except('sortby') as $key => $value)
+                            @if(is_array($value))
+                                @foreach($value as $arrayValue)
+                                    <input type="hidden" name="{{ $key }}[]" value="{{ $arrayValue }}">
+                                @endforeach
+                            @else
+                                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                            @endif
+                        @endforeach
+                    </form>
+                </div>
+                <div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-6 col-xxl-4 my-2 mt-md-5">
+                    <div class="d-flex justify-content-center justify-content-md-end ">
+                        {!! $guidings->links('vendor.pagination.default') !!}
+                    </div>  
+                  
+                </div>
+                <div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-6 col-xxl-4 align-self-end">
+                    <div class="d-flex justify-content-center justify-content-md-end ">
+                        <a class="p-3 mb-2 btn new-bg btn-theme-new text-center w-100 my-3" href="{{ route('guidings.request') }}">@lang('request.btnsearch')</a>
+                    </div>
+                </div>
+                @endif
+
+                <div class="col-12">
                     <!-- column-reverse-row-normal -->
-                    <div class="row">
-                    @if(count($guidings))
-                        <div class="col-lg-12 col-sm-12">
+                    <div class="row column-reverse-row-normal">
+                  
+                        @if(count($guidings))
+               
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-8">
                             <div class="tours-list__right">
                                 <div class="tours-list__inner">
                                     @foreach($guidings as $guiding)
-                                    <div class="row m-0 mb-2 guiding-list-item">
+                                
+                                    <div class="row m-0 mb-2">
                                         <div class="col-md-12">
                                             <div class="row p-2 border shadow-sm bg-white rounded">
-                                                <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-0">
+                                                <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1">
                                                     <div id="carouselExampleControls-{{$guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
                                                         <div class="carousel-inner">
                                                             @if(count(get_galleries_image_link($guiding)))
                                                                 @foreach(get_galleries_image_link($guiding) as $index => $gallery_image_link)
                                                                     <div class="carousel-item @if($index == 0) active @endif">
-                                                                        <img  class="d-block" src="{{$gallery_image_link}}">
+                                                                        <img  class="d-block w-100" src="{{$gallery_image_link}}">
                                                                     </div>
                                                                 @endforeach
                                                             @endif
@@ -533,102 +395,305 @@
                                                     </div>
                                             
                                                 </div>
-                                                <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 p-md-3 mt-md-1">
-                                                    <a href="{{ route('guidings.show', [$guiding->id, $guiding->slug])}}">
-                                                            <div class="guidings-item">
-                                                                <div class="guidings-item-title">
-                                                                <h5 class="fw-bolder text-truncate">{{ Str::limit(translate($guiding->title), 70) }}</h5>
-                                                                <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($guiding->location) }}</span>                                      
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 mt-1">
+                                                    <h5 class="fw-bolder text-truncate"><a class="text-dark" href="{{ $guiding->is_newguiding ? route('guidings.newShow', [$guiding->id, $guiding->slug]) : route('guidings.show', [$guiding->id, $guiding->slug]) }}">{{translate($guiding->title)}}</a></h5>
+                                                    <div class="ratings mr-2 color-primary my-1" style="font-size:0.80rem">
+                                                        @if(count($guiding->user->received_ratings) > 0)
+                                                        @switch(two($guiding->user->average_rating()))
+                                                            @case(two($guiding->user->average_rating()) >= 5)
+                                                                - {{one($guiding->user->average_rating())}}
+                                                                <i class="fa fa-star"></i>
+                                                                <i class="fa fa-star"></i>
+                                                                <i class="fa fa-star"></i>
+                                                                <i class="fa fa-star"></i>
+                                                                <i class="fa fa-star"></i>
+                                                                @break
+                                                            @case(two($guiding->user->average_rating()) >= 4.5)
+                                                                - {{one($guiding->user->average_rating())}}
+                                                                <i class="fa fa-star"></i>
+                                                                <i class="fa fa-star"></i>
+                                                                <i class="fa fa-star"></i>
+                                                                <i class="fa fa-star"></i>
+                                                                <i class="fa fa-star-half"></i>
+                                                                @break
+                                                            @case(two($guiding->user->average_rating()) >= 4)
+                                                                - {{one($guiding->user->average_rating())}}
+                                                                <i class="fa fa-star"></i>
+                                                                <i class="fa fa-star"></i>
+                                                                <i class="fa fa-star"></i>
+                                                                <i class="fa fa-star"></i>
+                                                                @break
+                                                            @case(two($guiding->user->average_rating()) >= 3.5)
+                                                                - {{one($guiding->user->average_rating())}}
+                                                                <i class="fa fa-star"></i>
+                                                                <i class="fa fa-star"></i>
+                                                                <i class="fa fa-star"></i>
+                                                                <i class="fa fa-star-half"></i>
+                                                                @break
+                                                            @case(two($guiding->user->average_rating()) >= 3)
+                                                                - {{one($guiding->user->average_rating())}}
+                                                                <i class="fa fa-star"></i>
+                                                                <i class="fa fa-star"></i>
+                                                                <i class="fa fa-star"></i>
+                                                                @break
+                                                            @case(two($guiding->user->average_rating()) >= 2.5)
+                                                                - {{one($guiding->user->average_rating())}}
+                                                                <i class="fa fa-star"></i>
+                                                                <i class="fa fa-star"></i>
+                                                                <i class="fa fa-star-half"></i>
+                                                                @break
+                                                            @case(two($guiding->user->average_rating()) >= 2)
+                                                                - {{one($guiding->user->average_rating())}}
+                                                                <i class="fa fa-star"></i>
+                                                                <i class="fa fa-star"></i>
+                                                                @break
+                                                            @case(two($guiding->user->average_rating()) >= 1.5)
+                                                                - {{one($guiding->user->average_rating())}}
+                                                                <i class="fa fa-star"></i>
+                                                                <i class="fa fa-star-half"></i>
+                                                                @break
+                                                            @case(two($guiding->user->average_rating()) >= 1)
+                                                                - {{one($guiding->user->average_rating())}}
+                                                                <i class="fa fa-star"></i>
+                                                                @break
+                                                            @default
+                                                                - {{one($guiding->user->average_rating())}}
+                                                                <i class="fa fa-star"></i>
+                                                        @endswitch
+
+                                                        @if(count($guiding->user->received_ratings) >= 2) 
+                                                            ({{count($guiding->user->received_ratings)}} Bewertungen)
+                                                        @else 
+                                                            ({{count($guiding->user->received_ratings)}} Bewertung)
+                                                        @endif
+
+                                                    @endif     
+                                                    </div>
+                                                    <span class="text-center" style="font-size:1rem;color:rgb(28, 28, 28)"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($guiding->location) }}</span>                                      
+                                                    <div class="row mt-2">
+                                                        <div class="col-6 col-sm-6 col-md-6">
+                                                            <div class="d-flex align-items-center">
+                                                                <div>
+                                                                    <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
                                                                 </div>
-                                                                @if ($guiding->user->average_rating())
-                                                                <div class="guidings-item-ratings">
-                                                                <div class="ratings-score">
-                                                                        <span class="text-warning">★</span>
-                                                                        <span>{{$guiding->user->average_rating()}} </span>
-                                                                        /5 ({{ $guiding->user->received_ratings->count() }} review/s)
-                                                                    </div>
-                                                                </div>
-                                                                @endif
-                                                            </div>
-                                                            <div class="guidings-item-icon">
-                                                                <div class="guidings-icon-container"> 
-                                                                            <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
-                                                                        <div class="">
-                                                                            {{ $guiding->duration }} @if($guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
-                                                                        </div>
-                                                                </div>
-                                                                <div class="guidings-icon-container"> 
-                                                                        <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" />
-                                                                        <div class="">
-                                                                        {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
-                                                                        </div>
-                                                                </div>
-                                                                <div class="guidings-icon-container"> 
-                                                                            <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
-                                                                        <div class="">
-                                                                            <div class="tours-list__content__trait__text" >
-                                                                                @php
-                                                                                $guidingTargets = collect($guiding->getTargetFishNames())->pluck('name')->toArray();
-                                                                                @endphp
-                                                                                
-                                                                                @if(!empty($guidingTargets))
-                                                                                    {{ implode(', ', $guidingTargets) }}
-                                                                                @endif
-                                                                            </div>
+                                                                <div class="mx-2">
+                                                                    <div class="tours-list__content__trait__text" style="font-size:0.75rem">
+                                                                        @php
+                                                                        $guidingTargets = $guiding->guidingTargets->pluck('name')->toArray();
+                                                                        if(app()->getLocale() == 'en'){
+                                                                            $guidingTargets =  $guiding->guidingTargets->pluck('name_en')->toArray();
+                                                                        }
+                                                                        @endphp
                                                                         
-                                                                        </div>
-                                                                </div>
-                                                                <div class="guidings-icon-container">
-                                                                            <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
-                                                                        <div class="">
-                                                                            <div class="tours-list__content__trait__text" >
-                                                                            {{$guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
-                                                                            </div>
-                                                                        
-                                                                        </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="inclusions-price">
-                                                                    <div class="guidings-inclusions-container">
-                                                                        @if(!empty($guiding->getInclusionNames()))
-                                                                        <div class="guidings-included">
-                                                                            <strong>@lang('guidings.Whats_Included')</strong>
-                                                                            <div class="inclusions-list">
-                                                                                @php
-                                                                                    $inclussions = $guiding->getInclusionNames();
-                                                                                    $maxToShow = 3; // Maximum number of inclusions to display
-                                                                                @endphp
-    
-                                                                                @foreach ($inclussions as $index => $inclussion)
-                                                                                    @if ($index < $maxToShow)
-                                                                                        <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclussion['name'] }}</span>
-                                                                                    @endif
-                                                                                @endforeach
-    
-                                                                                @if (count($inclussions) > $maxToShow)
-                                                                                    <span class="inclusion-item">+{{ count($inclussions) - $maxToShow }} more</span>
-                                                                                @endif
-                                                                            </div>
-                                                                        </div>
+                                                                        @if(!empty($guidingTargets))
+                                                                            {{ implode(', ', $guidingTargets) }}
+                                                                        @else
+                                                                        {{ translate($guiding->threeTargets()) }}
+                                                                        {{$guiding->target_fish_sonstiges ? " & " . translate($guiding->target_fish_sonstiges) : ""}}
                                                                         @endif
                                                                     </div>
-                                                                    <div class="guiding-item-price">
-                                                                        <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$guiding->getLowestPrice()}}€ p.P.</span></h5>
-                                                                        <div class="d-none d-flex flex-column mt-4">
-                                                                        </div>
+                                                                
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6 col-sm-6 col-md-6">
+                                                            <div class="d-flex align-items-center">
+                                                                <div>
+                                                                    <img src="{{asset('assets/images/icons/water-waves.png')}}" height="20" width="20" alt="" />
+                                                                </div>
+                                                                <div class="mx-2">
+                                                                    <div class="tours-list__content__trait__text" style="font-size:0.75rem">
+                                                                        @php
+                                                                        $guidingWaters = $guiding->guidingWaters->pluck('name')->toArray();
+                                                                        if(app()->getLocale() == 'en'){
+                                                                            $guidingWaters =  $guiding->guidingWaters->pluck('name_en')->toArray();
+                                                                        }
+                                                                        @endphp
+                                                                        
+                                                                        @if(!empty($guidingWaters))
+                                                                            {{ implode(', ', $guidingWaters) }}
+                                                                        @else
+                                                                        {{ translate($guiding->threeWaters()) }}
+                                                                        {{$guiding->water_sonstiges ? " & " . translate($guiding->water_sonstiges) : ""}}
+                                                                        @endif
                                                                     </div>
-                                                            </div>    
-                                                    </a>
+                                                                
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6 col-sm-6 col-md-6">
+                                                            <div class="d-flex align-items-center">
+                                                                <div>
+                                                                    <img src="{{asset('assets/images/icons/fishing-tool.png')}}" height="20" width="20" alt="" />
+                                                                </div>
+                                                                <div class="mx-2">
+                                                                    <div class="tours-list__content__trait__text" style="font-size:0.75rem">
+                                                                        @php
+                                                                        $fishingtype = null;
+                                                                        if($guiding->fishingTypes){
+                                                                            if(app()->getLocale() == 'en'){
+                                                                                $fishingtype = $guiding->fishingTypes->name_en;
+                                                                            }else{
+                                                                               $fishingtype =  $guiding->fishingTypes->name;
+                                                                            }
+                                                                        }
+                                                                    
+                                                                        @endphp
+                            
+                                                                        @if($fishingtype) {{$fishingtype}}  @else {{$guiding->fishing_type}}@endif
+                                                                    </div>
+                                                                
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6 col-sm-6 col-md-6">
+                                                            <div class="d-flex align-items-center">
+                                                                <div>
+                                                                    <img src="{{asset('assets/images/icons/fishing.png')}}" height="20" width="20" alt="" />
+                                                                </div>
+                                                                <div class="mx-2">
+                                                                    <div class="tours-list__content__trait__text" style="font-size:0.75rem">
+                                                                        @php
+                                                                        $guidingMethods = $guiding->guidingMethods->pluck('name')->toArray();
+                                                                        if(app()->getLocale() == 'en'){
+                                                                            $guidingMethods =  $guiding->guidingMethods->pluck('name_en')->toArray();
+                                                                        }
+                                                                        @endphp
+                                                                        
+                                                                        @if(!empty($guidingMethods))
+                                                                            {{ implode(', ', $guidingMethods) }}
+                                                                        @else
+                                                                        {{ $guiding->threeMethods() }}
+                                                                        {{$guiding->methods_sonstiges && $guiding->threeMethods() > 0 ? " & " . translate($guiding->methods_sonstiges) : null}}
+                                                                        @endif
+                                                                    </div>
+                                                                
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6 col-sm-6 col-md-6">
+                                                            <div class="d-flex align-items-center">
+                                                                <div>
+                                                                    <img src="{{asset('assets/images/icons/fishing-man.png')}}" height="20" width="20" alt="" />
+                                                                </div>
+                                                                <div class="mx-2">
+                                                                    <div class="tours-list__content__trait__text" style="font-size:0.75rem">
+                                                                        @php
+                                                                        $whereFishing = null;
+                                                                        if($guiding->fishingFrom){
+                                                                            if(app()->getLocale() == 'en'){
+                                                                                $whereFishing = $guiding->fishingFrom->name_en;
+                                                                            }else{
+                                                                               $whereFishing =  $guiding->fishingFrom->name;
+                                                                            }
+                                                                        }
+                                                                    
+                                                                        @endphp
+                                                                        @if($whereFishing) {{$whereFishing}} @else {{$guiding->fishing_from}} @endif    
+                                                                    </div>
+                                                                
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6 col-sm-6 col-md-6">
+                                                            <div class="d-flex align-items-center mt-2">
+                                                                <div class="icon-small">
+                                                                    <span class="icon-user"></span>
+                                                                </div>
+                                                                <div class="mx-2" style="font-size:0.75rem">
+                                                                {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6 col-sm-6 col-md-6">
+                                                            <div class="d-flex align-items-center">
+                                                                <div>
+                                                                    <img src="{{asset('assets/images/icons/clock.svg')}}" height="20" width="20" alt="" />
+                                                                </div>
+                                                                <div class="mx-2" style="font-size:0.75rem">
+                                                                    {{ $guiding->duration }} @if($guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <div class="mt-3">
+                                                                @if($guiding->user->profil_image)
+                                                                <img class="center-block rounded-circle"
+                                                                src="{{asset('images/'. $guiding->user->profil_image)}}" alt="" width="20"
+                                                                height="20">
+                                                                @else
+                                                                    <img class="center-block rounded-circle"
+                                                                        src="{{asset('images/placeholder_guide.jpg')}}" alt="" width="20"
+                                                                        height="20">
+                                                                @endif
+                                                                <span class="color-primary" style="font-size:1rem">{{$guiding->user->firstname}}</span>
+                                                            </div>
+                                                        </div>
+                 
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-sm-12 col-md-2 col-lg-3 col-xl-2 col-xxl-2  mt-3">
+                                                    <div class="text-center">
+                                                        <h5 class="mr-1 color-primary fw-bold text-center">@lang('message.from') {{$guiding->getLowestPrice()}}€</h5>
+                                                    </div>
+                                                    <div class="d-flex flex-column mt-4">
+                                                        <a class="btn theme-primary btn-theme-new btn-sm" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">Details</a>
+                                                        <a class="btn btn-sm mt-2   {{ (auth()->check() ? (auth()->user()->isWishItem($guiding->id) ? 'btn-danger' : 'btn-outline-theme ') : 'btn-outline-theme') }}" href="{{ route('wishlist.add-or-remove', $guiding->id) }}">
+                                                            {{ (auth()->check() ? (auth()->user()->isWishItem($guiding->id) ? 'Added to Favorites' : 'Add to Favorites') : 'Add to Favorites') }}
+                                                        </a>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
+                                  
                                     @endforeach
                                     {!! $guidings->links('vendor.pagination.default') !!}
 
                                 </div>
                             </div>
                         </div>
+                        
+                        @if(!$agent->ismobile())
+                            
+                            <div class="col-xxl-4 col-lg-12 map__wrap" id="wrap">
+                                <div id="map">
+                                </div>
+                            </div>
+                        @endif
+                      
+                    @else
+                    
+                    @if(!$agent->ismobile())
+                        <div class="col-12">
+                            <div class="alert alert-danger" role="alert">
+                                <b>{{ translate( 'Es scheint so, als gäbe es noch keine Guidings nach deinen Suchkriterien' ) }}</b>
+                            </div>
+                            <div class="my-2">
+                                <h4>@lang('message.find-otherguide')</h4>
+                            </div>
+                        </div>
+                    @endif
+     
+                        @include('pages.guidings.partials.list',['guidings' => $otherguidings])
+
+                        @if($agent->ismobile())
+                        <div class="col-12">
+                            <div class="alert alert-danger" role="alert">
+                                <b>{{ translate( 'Es scheint so, als gäbe es noch keine Guidings nach deinen Suchkriterien' ) }}</b>
+                            </div>
+                            <div class="my-2">
+                                <h4>@lang('message.find-otherguide')</h4>
+                            </div>
+                        </div>
+                        @endif
+                        @if(!$agent->ismobile())
+                            <div class="col-xxl-4 col-lg-6 map__wrap" id="wrap">
+                                <div id="map">
+                                </div>
+                            </div>
+                        @endif
+
                     @endif
     
                     </div>
@@ -648,144 +713,23 @@
     @endforeach
 
 
-    <div class="modal show" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl" style="max-width: 100%; width: 96%; height:100%;">
-            <div class="modal-content" style="height:90%;">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="mapModalLabel">Map</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div id="map" class="modal-body"></div>
-            </div>
-        </div>
-    </div>
     <!-- Endmodal -->
 
     <br>
-
-    <div class="offcanvas offcanvas-bottom" tabindex="-1" id="offcanvasBottomSearch" aria-labelledby="offcanvasBottomLabel">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasBottomLabel">Filter</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body small">
-            <form id="filterContainerOffCanvass" action="{{route('guidings.index')}}" method="get" class="px-4 py-2">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="form-group my-1">
-                            <div class="input-group">
-                                <div class="input-group-prepend border-0 border-bottom ">
-                                    <span class=" d-flex align-items-center px-2 h-100"><i class="fas fa-map-marker-alt"></i></span>
-                                </div>
-                                <input id="searchPlace2" name="place" type="text" value="{{ request()->get('place') ? request()->get('place') : null }} @if(empty(request()->get('place')) && !empty(request()->get('country'))) {{request()->get('country')}} @endif" class="form-control border-0 border-bottom rounded-0" placeholder="@lang('message.enter-location')"  autocomplete="on">
-                            </div>
-                          <input type="hidden" id="LocationLat2" value="{{ request()->get('placeLat') ? request()->get('placeLat') : null }}" name="placeLat"/>
-                          <input type="hidden" id="LocationLng2" value="{{ request()->get('placeLng') ? request()->get('placeLng') : null }}" name="placeLng"/>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="input-group my-1">
-                            <div class="input-group-prepend border-0 border-bottom ">
-                                <span class="d-flex align-items-center px-2 h-100">
-                                    <i class="fa fa-compass"></i>
-                                </span>
-                            </div>
-                            <select id="radiusOffCanvass" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="radius">
-                                <option selected disabled hidden>Radius</option>
-                                <option>@lang('message.choose')...</option>
-                                <option value="50" {{ request()->get('radius') ? request()->get('radius') == 50 ? 'selected' : null : null }}>50 km</option>
-                                <option value="100" {{ request()->get('radius') ? request()->get('radius') == 100 ? 'selected' : null : null }}>100 km</option>
-                                <option value="150" {{ request()->get('radius') ? request()->get('radius') == 150 ? 'selected' : null : null }}>150 km</option>
-                                <option value="250" {{ request()->get('radius') ? request()->get('radius') == 250 ? 'selected' : null : null }}>250 km</option>
-                                <option value="500" {{ request()->get('radius') ? request()->get('radius') == 500 ? 'selected' : null : null }}>500 km</option>
-                            </select>
-                          </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="input-group my-1">
-                            <div class="input-group-prepend border-0 border-bottom ">
-                                <span class="d-flex align-items-center px-2 h-100">
-                                    <i class="fas fa-user"></i>
-                                </span>
-                            </div>
-                            <select id="num-guestsOffCanvass" class="form-control form-select  border-0 border-bottom rounded-0 custom-select" name="num_guests">
-                                <option value="" disabled selected hidden>@lang('message.number-of-guests')</option>
-                                <option value="">@lang('message.choose')...</option>
-                                <option value="1" {{ request()->get('num_guests') ? request()->get('num_guests') == 1 ? 'selected' : null : null }}>1</option>
-                                <option value="2" {{ request()->get('num_guests') ? request()->get('num_guests') == 2 ? 'selected' : null : null }}>2</option>
-                                <option value="3" {{ request()->get('num_guests') ? request()->get('num_guests') == 3 ? 'selected' : null : null }}>3</option>
-                                <option value="4" {{ request()->get('num_guests') ? request()->get('num_guests') == 4 ? 'selected' : null : null }}>4</option>
-                                <option value="5" {{ request()->get('num_guests') ? request()->get('num_guests') == 5 ? 'selected' : null : null }}>5</option>
-                            </select>
-                        </div>
-                    </div>
-                 
-                    <div class="col-12">
-                        <div class="form-group my-1 d-flex align-items-center border-bottom">
-                            <div class="px-2 select2-icon">
-                                <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
-                            </div>
-                           
-                            <select class="form-control form-select border-0 rounded-0" id="target_fishOffCanvass" name="target_fish[]" style="width:100%">
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="col-12">
-                        <div class="form-group my-1 d-flex align-items-center border-bottom">
-                            <div class="px-2 select2-icon">
-                                <img src="{{asset('assets/images/icons/water-waves.png')}}" height="20" width="20" alt="" />
-                            </div>
-                            <select class="form-control form-select border-0  rounded-0" id="waterOffCanvass" name="water[]" style="width:100%">
-                    
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="form-group my-1 d-flex align-items-center border-bottom ">
-                            <div class="px-2 select2-icon">
-                                <img src="{{asset('assets/images/icons/fishing.png')}}" height="20" width="20" alt="" />
-                            </div>
-                            <select class="form-control form-select border-0 rounded-0" id="methodsOffCanvass" name="methods[]" style="width:100%">
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-12 mb-2">
-                        <div class="input-group my-1">
-                            <div class="input-group-prepend border-0 border-bottom ">
-                                <span class="d-flex align-items-center px-2 h-100">
-                                    <i class="fa fa-euro-sign"></i>
-                                </span>
-                            </div>
-                            <select id="price_rangeOffCanvass" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="price_range">
-                                <option selected disabled hidden>Price per Person</option>
-                                <option value="" >@lang('message.choose')...</option>
-                                <option value="1-50" {{ request()->get('price_range') ? request()->get('price_range') == '1-200' ? 'selected' : null : null }}>1 - 50 p.P.</option>
-                                <option value="51-100" {{ request()->get('price_range') ? request()->get('price_range') == '201-400' ? 'selected' : null : null }}>51 - 100 p.P.</option>
-                                <option value="101-150" {{ request()->get('price_range') ? request()->get('price_range') == '401-600' ? 'selected' : null : null }}>101 - 150 p.P.</option>
-                                <option value="151-200" {{ request()->get('price_range') ? request()->get('price_range') == '601-800' ? 'selected' : null : null }}>151 - 200 p.P.</option>
-                                <option value="201-250" {{ request()->get('price_range') ? request()->get('price_range') == '801-1000' ? 'selected' : null : null }}>201 - 250 p.P.</option>
-                                <option value="350" {{ request()->get('price_range') ? request()->get('price_range') == '1001' ? 'selected' : null : null }}>350 and more</option>
-                            </select>
-                          </div>
-                    </div>
-                    <div class="col-sm-12 col-lg-12 ps-md-0">
-                        <button class="btn btn-sm theme-primary btn-theme-new w-100 h-100" >@lang('message.Search')</button>    
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
 @endsection
 
 @section('js_after')
 
+
+<!-- <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q&libraries=places,geocoder"></script>
+<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script> -->
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q&libraries=places,geocoder"></script>
+<script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
+    ({key: "AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q", v: "weekly"});
+</script>
 <script>
     $('#sortby').on('change',function(){
         $('#form-sortby').submit();
-    });
-    $('#sortby-2').on('change',function(){
-        $('#form-sortby-2').submit();
     });
 </script>
 <script>
@@ -798,11 +742,6 @@ toggleBtn.addEventListener('click', function() {
     // Toggle the visibility of the filter container
     filterContainer.classList.toggle('d-block');
 });
-$(function(){
-    $('#toggleFilterBtn').click(function(){
-        $('#filterCard').toggle();
-    });
-});
 </script>
 
 <script>
@@ -810,11 +749,11 @@ $(function(){
 
 function initializeSelect2() {
 
-    var selectTarget = $('#target_fish, #target_fishOffCanvass');
-    var selectWater = $('#water, #waterOffCanvass');
-    var selectMethod = $('#methods, #methodsOffCanvass');
+    var selectTarget = $('#target_fish');
+    var selectWater = $('#water');
+    var selectMethod = $('#methods');
 
-    $("#target_fish, #target_fishOffCanvass").select2({
+    $("#target_fish").select2({
         multiple: true,
         placeholder: '@lang('message.target-fish')',
         width: 'resolve', // need to override the changed default
@@ -844,7 +783,7 @@ function initializeSelect2() {
     selectTarget.trigger('change');
 
 
-    $("#water, #waterOffCanvass").select2({
+    $("#water").select2({
         multiple: true,
         placeholder: '@lang('message.body-type')',
         width: 'resolve' // need to override the changed default
@@ -874,7 +813,7 @@ function initializeSelect2() {
 
 
 
-    $("#methods, #methodsOffCanvass").select2({
+    $("#methods").select2({
         multiple: true,
         placeholder: '@lang('message.fishing-technique')',
         width: 'resolve' // need to override the changed default
@@ -899,13 +838,6 @@ function initializeSelect2() {
 
     @endforeach
   
-    @if(request()->get('price_range'))
-        $('#price_range, #price_rangeOffCanvass').val('{{ request()->get('price_range') }}');
-    @endif
-  
-    @if(request()->get('ratings'))
-        $('#ratings, #ratingsOffCanvass').val('{{ request()->get('ratings') }}');
-    @endif
     // Trigger change event to update Select2 display
     selectMethod.trigger('change');
 
@@ -999,8 +931,6 @@ function initializeSelect2() {
         center: position,
         styles: mapStyle,
         mapId: "DEMO_MAP_ID",
-        mapTypeControl: false,
-        streetViewControl: false,
     });
 
     // The marker, positioned at Uluru
@@ -1050,30 +980,17 @@ function initializeSelect2() {
 
 
 
-/*function initialize() {
+function initialize() {
     var input = document.getElementById('searchPlace');
     var autocomplete = new google.maps.places.Autocomplete(input);
     google.maps.event.addListener(autocomplete, 'place_changed', function () {
-        //alert(2221);
         var place = autocomplete.getPlace();
-        document.getElementById('LocationLat').value = place.geometry.location.lat();
-        document.getElementById('LocationLng').value = place.geometry.location.lng();
+        document.getElementById('placeLat').value = place.geometry.location.lat();
+        document.getElementById('placeLng').value = place.geometry.location.lng();
     });
-}*/
+}
 
-/*function initialize2() {
-
-    var input = document.getElementById('searchPlaceOffCanvass');
-    var autocomplete = new google.maps.places.Autocomplete(input);
-    google.maps.event.addListener(autocomplete, 'place_changed', function () {
-        var place = autocomplete.getPlace();
-        document.getElementById('placeLatOffCanvass').value = place.geometry.location.lat();
-        document.getElementById('placeLngOffCanvass').value = place.geometry.location.lng();
-    });
-}*/
-
-//window.addEventListener('load', initialize);
-//window.addEventListener('load', initialize2);
+window.addEventListener('load', initialize);
 
 window.addEventListener('load', function() {
     var placeLatitude = '{{ request()->get('placeLat') }}'; // Replace with the actual value from the request
@@ -1112,8 +1029,7 @@ function codeLatLng(lat, lng) {
     geocoder.geocode({'latLng': latlng}, function (results, status) {
         if (status === google.maps.GeocoderStatus.OK) {
             if (results[0]) {
-                document.getElementById('searchPlace2').value = results[0].formatted_address;
-                //document.getElementById('searchPlaceOffCanvass').value = results[0].formatted_address;
+                document.getElementById('searchPlace').value = results[0].formatted_address;
             } else {
                 console.log('No results found');
                 return null;
@@ -1132,3 +1048,4 @@ function codeLatLng(lat, lng) {
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 
 @endsection
+

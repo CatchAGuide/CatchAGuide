@@ -65,10 +65,10 @@
   }
 
   .carousel-control-prev {
-    left: 5px;
+    left: 37.5%;
 
     @include media(">=tablet") {
-      left: 5px;
+      left: 0;
     }
 
     &-icon {
@@ -78,10 +78,10 @@
   }
 
   .carousel-control-next {
-    right: 5px;
+    right: 37.5%;
 
     @include media(">=tablet") {
-      right: 5px;
+      right: 0;
     }
 
     &-icon {
@@ -92,12 +92,12 @@
 
   .carousel-control-next,
   .carousel-control-prev {
-    width: 28px;
-    height: 28px;
-    top: 50%;
-    opacity: 1;
+    width: initial;
+    top: 40%;
+    opacity: 0.5;
     transition: opacity 0.25s ease-in-out;
     background: map-get($colors, "light");
+    height: max-content;
     transform: translateY(-50%);
     border-radius: 50%;
     padding: 10px;
@@ -108,8 +108,6 @@
 
     @include media(">=L-phone") {
       top: 50%;
-      width: 32px;
-      height: 32px;
     }
   }
 }

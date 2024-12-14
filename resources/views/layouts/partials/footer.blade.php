@@ -3,36 +3,6 @@
         <div class="container">
             <div class="site-footer__top-inner" style="{{$agent->ismobile() ? 'padding: 20px' : ''}}">
                 <div class="row">
-                <div class="col-xl-4 col-lg-6 col-md-6">
-                        <div class="footer-widget__column footer-widget__about {{$agent->ismobile() ? 'text-center' : ''}}">
-                            <div class="footer-widget__about-logo py-md-0 py-2 {{$agent->ismobile() ? 'text-center' : ''}}">
-                                <a href="{{ route('welcome') }}"><img width="300"
-                                        src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}"
-                                        alt="Logo"></a>
-                            </div>
-                            <p class="footer-widget__about-text  py-md-3 py-3">@lang('message.listHere')</p>
-                            @if(!$agent->ismobile())
-                                <ul class="footer-widget__about-contact list-unstyled">
-                                    <li>
-                                        <div class="icon">
-                                            <i class="fas fa-phone-square-alt"></i>
-                                        </div>
-                                        <div class="text">
-                                            <a href="tel:+49{{env('CONTACT_NUM')}}">+49 (0) {{env('CONTACT_NUM')}}</a>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div class="icon">
-                                            <i class="fas fa-envelope"></i>
-                                        </div>
-                                        <div class="text">
-                                            <a href="mailto:info.catchaguide@gmail.com">info.catchaguide@gmail.com</a>
-                                        </div>
-                                    </li>
-                                </ul>
-                            @endif
-                        </div>
-                    </div>
                 @if($agent->ismobile())
 
                         <ul class="footer-widget__about-contact list-unstyled">
@@ -60,6 +30,36 @@
 
                         </div>
                     @endif
+                    <div class="col-xl-4 col-lg-6 col-md-6">
+                        <div class="footer-widget__column footer-widget__about {{$agent->ismobile() ? 'text-center' : ''}}">
+                            <div class="footer-widget__about-logo {{$agent->ismobile() ? 'text-center' : ''}}">
+                                <a href="{{ route('welcome') }}"><img
+                                        src="{{ asset('assets/images/logo/400PngdpiLogo-2.png') }}"
+                                        alt="Logo"></a>
+                            </div>
+                            <p class="footer-widget__about-text">@lang('message.listHere')</p>
+                            @if(!$agent->ismobile())
+                                <ul class="footer-widget__about-contact list-unstyled">
+                                    <li>
+                                        <div class="icon">
+                                            <i class="fas fa-phone-square-alt"></i>
+                                        </div>
+                                        <div class="text">
+                                            <a href="tel:+49{{env('CONTACT_NUM')}}">+49 (0) {{env('CONTACT_NUM')}}</a>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="icon">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+                                        <div class="text">
+                                            <a href="mailto:info.catchaguide@gmail.com">info.catchaguide@gmail.com</a>
+                                        </div>
+                                    </li>
+                                </ul>
+                            @endif
+                        </div>
+                    </div>
                     <div class="col-xl-2 col-lg-6 col-md-6">
                         <div class="footer-widget__column footer-widget__company clearfix {{$agent->ismobile() ? 'text-center' : ''}}">
                             <h3 class="footer-widget__title">@lang('message.legal')</h3>

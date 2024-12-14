@@ -14,8 +14,5 @@ class Target extends Model
         return $this->belongsToMany(Guiding::class, 'guiding_targets')->withTimestamps();;
     }
 
-    public function getNameAttribute()
-    {        
-        return app()->getLocale() == 'en' ? $this->attributes['name_en'] : $this->attributes['name'];
-    }
+    
 }

@@ -16,7 +16,6 @@ return [
 
     'myGuides' => 'Meine Guidings',
     'creategiud' => 'Guiding erstellen',
-    'editguiding' => 'Guiding bearbeiten',
     'bookedWithMe' => 'Bei mir gebucht',
     'calendar' => 'Verfügbarkeit',
     'guidebookings' => 'Bei mir gebucht',

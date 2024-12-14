@@ -28,7 +28,6 @@ class   DatabaseSeeder extends Seeder
     {
         $this->call(EmployeeSeeder::class);
         $this->call(GuidingsSettingsSeeder::class);
-        // $this->call(LocationBoundarySeeder::class);
 
         #User::factory()->count(50)->create();
         #Employee::factory()->count(50)->create();

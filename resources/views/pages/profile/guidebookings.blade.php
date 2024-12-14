@@ -24,6 +24,7 @@
                 <th>@lang('profile.when')</th>
                 <th>@lang('profile.guest')</th>
                 <th>@lang('profile.price')</th>
+                <th>@lang('profile.chat')</th>
                 <th>@lang('profile.contact')</th>
                 <th>Status</th>
             </tr>
@@ -77,13 +78,13 @@
                 </td>
                 <td>{{ $booking->count_of_users }}</td>
                 <td>{{$booking->price}}€</td>
-                <!-- <td>
+                <td>
                     @if($booking->status == 'accepted')
                     <a  class="badge py-2 px-2 thm-btn" href="{{ route('chat.create', $booking->user_id) }}">@lang('profile.mess')</a>
                     @else
                     <span class="badge badge-pill badge-danger">@lang('profile.bwm-notavailable')</span>
                     @endif
-                </td> -->
+                </td>
                 <td>
                     @switch($booking->status)
                     @case('accepted')

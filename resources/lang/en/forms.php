@@ -43,9 +43,8 @@ return [
     'guests' => 'Guests',
     'timeLeangth' => 'Length of time',
     'price' => 'Price',
-    'total' => 'You don\'t have to pay yet. The price per tour includes VAT and all services, which are included. You pay the total amount of',
-    'total2' => 'directly to the guide. The guide\'s cancellation policy applies. After your booking request has been confirmed by the guide, you will receive the payment options in the booking confirmation email.',
-    'total3' => 'You will receive a confirmation or cancellation within the next 3 days.'
+    'total' => 'The total amount of',
+    'total2' => 'you pay directly to the guide. You will receive the guide\'s payment options with the booking confirmation by email.'
 
 
 ];
