@@ -1,5 +1,5 @@
 <script src="{{ asset('assets/js/jquery.js') }}" ></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBurXgYMavDEzEDzGs8Pq-TZVamhF2aZoE"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY') }}"></script>
 <script src="{{ asset('assets/js/gmaps.js') }}"></script>
 <script src="{{ asset('assets/js/map-helper.js') }}"></script>
 <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>

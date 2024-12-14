@@ -15,7 +15,7 @@
   &__content {
     border: 1px solid transparent;
     padding: 10px 15px;
-    min-height: 190px;
+    // min-height: 190px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -25,7 +25,7 @@
     }
 
     @include media(">=L-desktop") {
-      min-height: 205px;
+      // min-height: 205px;
       padding: 15px 25px 30px;
     }
   }
@@ -52,11 +52,10 @@
       margin: 0 auto;
       overflow: hidden;
       position: relative;
-      height: 300px;
     }
 
     img {
-      min-height: 300px;
+      min-height: 200px;
       max-width: 100%;
       object-fit: cover;
     }

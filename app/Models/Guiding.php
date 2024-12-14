@@ -20,6 +20,13 @@ use App\Models\FishingType;
 use App\Models\EquipmentStatus;
 use App\Models\FishingEquipment;
 use App\Models\Rating;
+use App\Models\GuidingRequirements;
+use App\Models\GuidingAdditionalInformation;
+use App\Models\GuidingRecommendations;
+use App\Models\GuidingBoatType;
+use App\Models\GuidingBoatDescription;
+use App\Models\GuidingBoatExtras;
+use App\Models\BoatExtras;
 
 class Guiding extends Model
 {
@@ -91,7 +98,12 @@ class Guiding extends Model
         'seasonal_trip',
         'allowed_booking_advance',
         'booking_window',
-        'galery_images',
+        'gallery_images',
+        'city',
+        'desc_course_of_action',
+        'desc_meeting_point',
+        'desc_starting_time',
+        'desc_tour_unique'
     ];
 
     public const LATITUDE  = 'lat';
@@ -416,28 +428,508 @@ class Guiding extends Model
         return $this->hasMany(Rating::class,'guide_id','id');
     }
 
-    public function getLowestPrice()
-    {
-        if ($this->is_newguiding) {
-            if ($this->price_type == 'per_person') {
-                $prices = json_decode($this->prices, true);
-                return $prices ? min(array_map(function($price) {
-                    return $price['person'] > 1 ? round($price['amount'] / $price['person']) : $price['amount'];
-                }, $prices)) : 0;
-            }
-            // Add handling for other price types if needed
-            return 0;
-        } else {
-            $validPrices = array_filter([
-                $this->price,
-                $this->price_two_persons / 2,
-                $this->price_three_persons / 3,
-                $this->price_four_persons / 4,
-                $this->price_five_persons / 5
-            ], function($value) { return $value > 0; });
-
-            return !empty($validPrices) ? min(array_map('round', $validPrices)) : 0;
-        }
+    public function boatType(){
+        return $this->hasOne(GuidingBoatType::class,'id','boat_type');
     }
 
+    public function getLowestPrice()
+    {
+        if ($this->price_type == 'per_person') {
+            $prices = json_decode($this->prices, true);
+            if (!$prices) {
+                return 0;
+            }
+            
+            $singlePrice = collect($prices)->where('person', 1)->first();
+            $singlePrice = $singlePrice ? $singlePrice['amount'] : PHP_FLOAT_MAX;
+            
+            $minPrice = min(array_map(function($price) {
+                return $price['person'] > 1 ? round($price['amount'] / $price['person']) : $price['amount'];
+            }, $prices));
+            
+            return min($singlePrice, $minPrice);
+        }
+        return 0;
+    }
+
+    public function getBlockedEvents()
+    {
+        $blocked_events = collect($this->user->blocked_events)
+            ->where('guiding_id', $this->id)
+            ->map(function($blocked) {
+                return [
+                    "from" => date('Y-m-d', strtotime($blocked->from)), 
+                    "due" => date('Y-m-d', strtotime($blocked->due))
+                ];
+            })->toArray();
+
+        $today = now();
+
+        // Add booking window restrictions
+        if ($this->booking_window !== 'no_limitation') {
+            $bookingWindowMonths = [
+                'six_months' => 6,
+                'nine_months' => 9,
+                'twelve_months' => 12
+            ];
+
+            if (isset($bookingWindowMonths[$this->booking_window])) {
+                $blockFrom = $today->copy()->addMonths($bookingWindowMonths[$this->booking_window])->addDay();
+                
+                $blocked_events[] = [
+                    "from" => $blockFrom->format('Y-m-d'),
+                    "due" => $blockFrom->copy()->addYears(10)->format('Y-m-d')
+                ];
+            }
+        }
+
+        // Add advance booking restrictions
+        $advanceBookingPeriods = [
+            'same_day' => fn($date) => $date->endOfDay(),
+            'three_days' => fn($date) => $date->addDays(3), 
+            'one_week' => fn($date) => $date->addWeek(),
+            'one_month' => fn($date) => $date->addMonth()
+        ];
+
+        if (isset($advanceBookingPeriods[$this->allowed_booking_advance])) {
+            $blockUntil = $advanceBookingPeriods[$this->allowed_booking_advance]($today->copy());
+            
+            $blocked_events[] = [
+                "from" => $today->format('Y-m-d'),
+                "due" => $blockUntil->format('Y-m-d')
+            ];
+        }
+
+        return $blocked_events;
+    }
+
+    /**
+     * Filter guidings based on location and radius
+     * 
+     * @param string $location City or country name
+     * @param int|null $radius Search radius in kilometers
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public static function locationFilter(string $location, ?int $radius = null)
+    {
+        // Parse location into components
+        $locationParts = self::parseLocation($location);
+        $returnData = [
+            'message' => '',
+            'ids' => []
+        ];
+        
+        // First try direct database match based on parsed location
+        $guidings = self::select('id')
+            ->where(function($query) use ($locationParts) {
+                if ($locationParts['city']) {
+                    $query->where('city', $locationParts['city']);
+                } else if ($locationParts['country']) {
+                    $query->where('country', $locationParts['country']); 
+                }
+            })
+            ->where('status', 1)
+            ->pluck('id');
+
+        if ($guidings->isNotEmpty()) {
+            $returnData['ids'] = $guidings;
+            $returnData['message'] = str_replace('#location#', $location, __('search-request.searchLevel1'));;
+            return $returnData;
+        }
+
+        // If no direct matches, use geocoding
+        $coordinates = self::getCoordinatesFromLocation($locationParts['original']);
+        
+        if (!$coordinates) {
+            return collect();
+        }
+
+        // Try radius search
+        $searchRadius = $radius ?? 200;
+        
+        $guidings = self::select('id')
+            ->whereRaw("ST_Distance_Sphere(
+                point(lng, lat),
+                point(?, ?)
+            ) <= ?", [
+                $coordinates['lng'],
+                $coordinates['lat'],
+                $searchRadius * 1000
+            ])
+            ->where('status', 1)
+            ->pluck('id');
+
+        if ($guidings->isNotEmpty()) {
+            $returnData['ids'] = $guidings;
+            $returnData['message'] = str_replace('#location#', $location, __('search-request.searchLevel2'));
+            return $returnData;
+        }
+
+        // If still no results, find nearest guiding
+        $returnData['ids'] = self::select('id')
+            ->where('status', 1)
+            ->selectRaw("ST_Distance_Sphere(
+                point(lng, lat), 
+                point(?, ?)
+            ) as distance", [
+                $coordinates['lng'],
+                $coordinates['lat']
+            ])
+            ->orderBy('distance')
+            ->pluck('id');
+        $returnData['message'] = str_replace('#location#', $location, __('search-request.searchLevel3'));
+        return $returnData;
+    }
+
+    /**
+     * Parse location string into components
+     * 
+     * @param string $location
+     * @return array
+     */
+    private static function parseLocation(string $location): array
+    {
+        // Initialize return array
+        $result = [
+            'original' => $location,
+            'city' => null,
+            'country' => null
+        ];
+
+        // Remove any extra whitespace and split by comma
+        $parts = array_map('trim', explode(',', $location));
+
+        if (count($parts) === 1) {
+            // Single location provided - need to determine if it's a city or country
+            $geocodeResult = self::geocodeLocation($location);
+            if ($geocodeResult) {
+                $result['city'] = $geocodeResult['city'];
+                $result['country'] = $geocodeResult['country'];
+            }
+        } else {
+            // City and country provided
+            $result['city'] = $parts[0];
+            $result['country'] = $parts[1];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get coordinates from location using Google Geocoding API
+     */
+    private static function getCoordinatesFromLocation(string $location): ?array
+    {
+        $geocodeResult = self::geocodeLocation($location, true);
+        if (!$geocodeResult) {
+            return null;
+        }
+
+        return [
+            'lat' => $geocodeResult['lat'],
+            'lng' => $geocodeResult['lng'],
+            'type' => $geocodeResult['types']
+        ];
+    }
+
+    /**
+     * Make request to Google Geocoding API and parse response
+     */
+    private static function geocodeLocation(string $location, bool $cityCheck = false): ?array 
+    {
+        try {
+            $client = new \GuzzleHttp\Client();
+            $response = $client->get('https://maps.googleapis.com/maps/api/geocode/json', [
+                'query' => [
+                    'address' => $location,
+                    'key' => env('GOOGLE_MAP_API_KEY')
+                ]
+            ]);
+
+            $data = json_decode($response->getBody(), true);
+
+            if ($data['status'] === 'OK') {
+                $result = $data['results'][0];
+                $location = $result['geometry']['location'];
+                
+                $parsedResult = [
+                    'lat' => $location['lat'],
+                    'lng' => $location['lng'],
+                    'city' => null,
+                    'country' => null,
+                    'types' => []
+                ];
+
+                foreach ($result['address_components'] as $component) {
+                    if (in_array('locality', $component['types'])) {
+                        $parsedResult['city'] = $component['long_name'];
+                    }
+                    if (in_array('administrative_area_level_1', $component['types'])) {
+                        // Use state/province capital if city not found
+                        if (!$parsedResult['city']) {
+                            $parsedResult['city'] = $component['long_name'];
+                        }
+                    }
+                    if (in_array('country', $component['types'])) {
+                        $parsedResult['country'] = $component['long_name'];
+                        // If no city foun
+                        if (!$parsedResult['city'] && $cityCheck) {
+                            $capitalResponse = $client->get('https://maps.googleapis.com/maps/api/place/textsearch/json', [
+                                'query' => [
+                                    'query' => "{$component['long_name']} capital city",
+                                    'key' => env('GOOGLE_MAP_API_KEY')
+                                ]
+                            ]);
+                            $capitalData = json_decode($capitalResponse->getBody(), true);
+                            if ($capitalData['status'] === 'OK' && !empty($capitalData['results'])) {
+                                $parsedResult['city'] = $capitalData['results'][0]['name'];
+                                return self::geocodeLocation("{$parsedResult['city']}, {$component['long_name']}");
+                            }
+                        }
+                    }
+                    $parsedResult['types'][] = $component['types'][0];
+                }
+
+                return $parsedResult;
+            }
+        } catch (\Exception $e) {
+            \Log::error('Google Maps API error: ' . $e->getMessage());
+        }
+
+        return null;
+    }
+
+    /**
+     * Get localized fishing method names
+     * @return array
+     */
+    public function getFishingMethodNames(): array
+    {
+        $methodIds = json_decode($this->fishing_methods) ?? [];
+        
+        if (empty($methodIds)) {
+            return [];
+        }
+
+        return Method::whereIn('id', $methodIds)
+            ->select('id', 'name', 'name_en')
+            ->get()
+            ->map(function($method) {
+                return [
+                    'id' => $method->id,
+                    'name' => app()->getLocale() == "en" && $method->name_en 
+                        ? $method->name_en 
+                        : $method->name
+                ];
+            })
+            ->toArray();
+    }
+
+
+    /**
+     * Get localized target fish names
+     * @return array
+     */
+    public function getTargetFishNames(): array
+    {
+        $targetIds = json_decode($this->target_fish) ?? [];
+        
+        if (empty($targetIds)) {
+            return [];
+        }
+
+        return Target::whereIn('id', $targetIds)
+            ->select('id', 'name', 'name_en')
+            ->get()
+            ->map(function($target) {
+                return [
+                    'id' => $target->id,
+                    'name' => app()->getLocale() == "en" && $target->name_en 
+                        ? $target->name_en 
+                        : $target->name
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Get localized inclusion names
+     * @return array
+     */
+    public function getInclusionNames(): array
+    {
+        $inclusionIds = json_decode($this->inclusions) ?? [];
+        
+        if (empty($inclusionIds)) {
+            return [];
+        }
+        
+        return Inclussion::whereIn('id', $inclusionIds)
+            ->select('id', 'name', 'name_en')
+            ->get()
+            ->map(function($inclusion) {
+                return [
+                    'id' => $inclusion->id,
+                    'name' => app()->getLocale() == "en" && $inclusion->name_en 
+                        ? $inclusion->name_en 
+                        : $inclusion->name
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Get localized water names
+     * @return array
+     */
+    public function getWaterNames(): array
+    {
+        $waterIds = json_decode($this->water_types) ?? [];
+        
+        if (empty($waterIds)) {
+            return [];
+        }
+
+        return Water::whereIn('id', $waterIds)
+            ->select('id', 'name', 'name_en')
+            ->get()
+            ->map(function($water) {
+                return [
+                    'id' => $water->id,
+                    'name' => app()->getLocale() == "en" && $water->name_en 
+                        ? $water->name_en 
+                        : $water->name
+                ];
+            })
+            ->toArray();
+    }
+
+    public function getBoatExtras(): array
+    {
+        $boatExtras = json_decode($this->boat_extras, true);
+        if (!$boatExtras) {
+            return [];
+        }
+
+        return BoatExtras::whereIn('id', $boatExtras)
+            ->get()
+            ->map(function($boatExtra) {
+                return [
+                    'id' => $boatExtra->id,
+                    'name' => $boatExtra->name
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Get the requirements associated with the guiding.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getRequirementsAttribute()
+    {
+        if (!$this->attributes['requirements']) {
+            return collect();
+        }
+
+        $requirementsData = collect(json_decode($this->attributes['requirements'], true));
+        return GuidingRequirements::whereIn('id', array_keys($requirementsData->all()))
+            ->get()
+            ->map(function ($requirement) use ($requirementsData) {
+                $data = $requirementsData[$requirement->id];
+                
+                return [
+                    'id' => $requirement->id,
+                    'value' => is_array($data) && isset($data['value']) ? $data['value'] : $data,
+                    'name' => $requirement->name
+                ];
+            });
+    }
+
+    public function getOtherInformationAttribute()
+    {
+        if (!$this->attributes['other_information']) {
+            return collect();
+        }
+
+        $otherInformationData = collect(json_decode($this->attributes['other_information'], true));
+        
+        return GuidingAdditionalInformation::whereIn('id', array_keys($otherInformationData->all()))
+            ->get()
+            ->map(function ($otherInformation) use ($otherInformationData) {
+                return [
+                    'id' => $otherInformation->id,
+                    'value' => $otherInformationData[$otherInformation->id],
+                    'name' => $otherInformation->name
+                ];
+            });
+    }
+
+    public function getRecommendationsAttribute()
+    {
+        if (!$this->attributes['recommendations']) {
+            return collect();
+        }
+
+        $recommendationsData = collect(json_decode($this->attributes['recommendations'], true));
+
+        return GuidingRecommendations::whereIn('id', array_keys($recommendationsData->all()))
+            ->get()
+            ->map(function ($recommendation) use ($recommendationsData) {
+                return [
+                    'id' => $recommendation->id,
+                    'value' => $recommendationsData[$recommendation->id],
+                    'name' => $recommendation->name
+                ];
+            });
+    }
+
+    public function getBoatInformationAttribute()
+    {
+        if (!$this->attributes['boat_information']) {
+            return collect();
+        }
+        
+        $boatInformationData = collect(json_decode($this->attributes['boat_information'], true));
+        
+        return GuidingBoatDescription::whereIn('id', array_keys($boatInformationData->all()))
+            ->get()
+            ->map(function ($boatInformation) use ($boatInformationData) {
+                return [
+                    'id' => $boatInformation->id,
+                    'value' => $boatInformationData[$boatInformation->id],
+                    'name' => $boatInformation->name
+                ];
+            });
+    }
+
+    public function getPricingExtraAttribute()
+    {
+        if (!$this->attributes['pricing_extra']) {
+            return collect();
+        }
+
+        return collect(json_decode($this->attributes['pricing_extra'], true))->map(function ($item) {
+            // Check if name is numeric (an ID)
+            if (is_numeric($item['name'])) {
+                // Try to find matching ExtrasPrice
+                $extraPrice = ExtrasPrice::find($item['name']);
+                if ($extraPrice) {
+                    return [
+                        'id' => $extraPrice->id,
+                        'name' => $extraPrice->name,
+                        'price' => $item['price']
+                    ];
+                }
+            }
+            
+            // If name is not numeric or ExtrasPrice not found, return direct values
+            return [
+                'id' => null,
+                'name' => $item['name'],
+                'price' => $item['price']
+            ];
+        });
+    }
 }

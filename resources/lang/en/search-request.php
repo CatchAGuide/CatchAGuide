@@ -20,5 +20,7 @@ return [
     'phone' => 'Telefonnummer',
     'mail_address' => 'Mailadresse',
     'comments' => 'Kommentare',
-
+    "searchLevel1" => "All fishing tours in #location#",
+    "searchLevel2" => "No results: Sorry we currently do not offer any fishing tours in #location#. There are other options available in the radius of 200km to your preferred location",
+    "searchLevel3" => "No results: Sorry we currently do not offer any fishing tours in #location#. Here are available options that are closest to your preferred location",
 ];

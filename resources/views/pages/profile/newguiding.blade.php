@@ -1,5 +1,5 @@
 @extends('pages.profile.layouts.profile')
-@section('title', __('profile.creategiud'))
+@section('title', isset($pageTitle) ? $pageTitle : __('profile.creategiud'))
 @section('custom_style')
 
 <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
@@ -122,7 +122,7 @@
 </style>
 @endsection
 @section('profile-content')
-<div class="container shadow-lg p-4">
+<div class="container shadow-lg p-0 p-md-4">
   {{-- @livewire('multi-step-form') --}}
   @include('pages.guidings.multi-step-form')
 </div>
@@ -130,5 +130,5 @@
 @endsection
 {{-- 
 @section('js_after')
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q&libraries=places,geocoder"></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q&libraries=places,geocoding"></script>
 @endsection --}}

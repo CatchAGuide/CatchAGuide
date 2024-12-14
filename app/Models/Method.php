@@ -14,4 +14,8 @@ class Method extends Model
         return $this->belongsToMany(Guiding::class, 'guiding_method')->withTimestamps();;
     }
 
+    public function getNameAttribute()
+    {        
+        return app()->getLocale() == 'en' ? $this->attributes['name_en'] : $this->attributes['name'];
+    }
 }

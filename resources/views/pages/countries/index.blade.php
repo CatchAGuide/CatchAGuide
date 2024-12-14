@@ -1,4 +1,10 @@
-@extends('layouts.app')
+@extends('layouts.app-v2')
+
+
+    @section('title', __('destination.title'))
+    @section('header_title', __('destination.header_title'))
+    @section('header_sub_title', __('destination.header_sub_title'))
+
 @section('custom_style')
     <style>
          .trending-card{
@@ -51,19 +57,27 @@
         padding: 0;
         opacity: .6;
     }
+    .read-more-btn {
+        background-color: #E8604C !important;
+        color: #fff !important;
+        border: 2px solid #E8604C !important;
+    }
     </style>
 @endsection
 @section('content')
 <div class="container">
     <section class="toptargetfish">
         <div class="container my-4">
-            <div class="section-title my-2">
-                <h1 class="h2 text-dark fw-bolder">All Countries</h1>
+            <div id="page-main-intro" class="section-title my-2">
+                <div class="page-main-intro-text">
+                    @lang('destination.introduction')
+                </div>
+                <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a></p>
             </div>
             <div class="row">
                 <div class="col-md-4 my-1">
                     <div class="trending-card">
-                        <a href="/guidings?country=Germany"> 
+                        <a href="{{ route('destination.country', ['country' => 'deutschland']) }}"> 
                             <div class="trending-card-wrapper">
                                 <img alt="Deutschland" class="trending-card-background" src="{{asset('assets/2024/germany/deutschland4.webp')}}">
                                 <div class="trending-card-wrapper-content">
@@ -84,7 +98,7 @@
                 </div>
                 <div class="col-md-4 my-1">
                     <div class="trending-card">
-                        <a href="/guidings?country=Netherlands">
+                        <a href="{{ route('destination.country', ['country' => 'niederlande']) }}">
                             <div class="trending-card-wrapper">
                                 <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/netherlands/holland1.webp')}}">
                                 <div class="trending-card-wrapper-content">
@@ -105,7 +119,7 @@
                 </div>
                 <div class="col-md-4 my-1">
                     <div class="trending-card">
-                        <a href="/guidings?country=Denmark">
+                        <a href="{{ route('destination.country', ['country' => 'danemark']) }}">
                             <div class="trending-card-wrapper">
                                 <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/denmark/denmark.webp')}}">
                                 <div class="trending-card-wrapper-content">
@@ -126,7 +140,7 @@
                 </div>
                 <div class="col-md-4 my-1">
                     <div class="trending-card">
-                        <a href="/guidings?country=Sweden"> 
+                        <a href="{{ route('destination.country', ['country' => 'schweden']) }}"> 
                             <div class="trending-card-wrapper">
                                 <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/sweden/schweden5.webp')}}">
                                 <div class="trending-card-wrapper-content">
@@ -147,7 +161,7 @@
                 </div>
                 <div class="col-md-4 my-1">
                     <div class="trending-card">
-                        <a href="/guidings?country=Spain">
+                        <a href="{{ route('destination.country', ['country' => 'spanien']) }}">
                             <div class="trending-card-wrapper">
                                 <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/spain/spain.webp')}}">
                                 <div class="trending-card-wrapper-content">
@@ -168,7 +182,7 @@
                 </div>
                 <div class="col-md-4 my-1">
                     <div class="trending-card">
-                        <a href="/guidings?country=Portugal">
+                        <a href="{{ route('destination.country', ['country' => 'portugal']) }}">
                             <div class="trending-card-wrapper">
                                 <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/portugal/portugal.webp')}}">
                                 <div class="trending-card-wrapper-content">
@@ -189,7 +203,7 @@
                 </div>
                 <div class="col-md-4 my-1">
                     <div class="trending-card">
-                        <a href="/guidings?country=Croatia">
+                        <a href="{{ route('destination.country', ['country' => 'kroatien']) }}">
                             <div class="trending-card-wrapper">
                                 <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/croatia/croatia.webp')}}">
                                 <div class="trending-card-wrapper-content">
@@ -212,4 +226,49 @@
         </div>
     </section>
 </div>
+@endsection
+@section('js_after')
+<script>
+    
+    $(function(){
+
+        var word_char_count_allowed = 520;
+        var page_main_intro = $('.page-main-intro-text');
+        var page_main_intro_text = page_main_intro.html();
+        var page_main_intro_count = page_main_intro.text().length;
+        var ellipsis = "..."; 
+        var moreText = '<a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a>';
+        var lessText = '<a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_less')</a>';
+
+        var visible_text = page_main_intro_text.substring(0, word_char_count_allowed);
+        var hidden_text  = page_main_intro_text.substring(word_char_count_allowed);
+        console.log(visible_text);
+        if (page_main_intro_count >= word_char_count_allowed) {
+            console.log(1);
+            $('.page-main-intro-text').html(visible_text + '<span class="more-ellipsis">' + ellipsis + '</span><span class="more-text" style="display:none;">' + hidden_text + '</span>');
+            //$('.more-text').show();
+            $('.see-more').click(function(e) {
+                e.preventDefault();
+                var textContainer = $(this).prev('.page-main-intro-text'); // Get the content element
+
+                if ($(this).hasClass('less')) {
+                    $(this).removeClass('less');
+                    $(this).html(moreText);
+                    textContainer.find('.more-text').hide();
+                    textContainer.find('.more-ellipsis').show();
+                } else {
+                    $(this).addClass('less');
+                    $(this).html(lessText);
+                    textContainer.find('.more-text').show();
+                    textContainer.find('.more-ellipsis').hide();
+                }
+            });
+        } else {
+            console.log(2);
+            $('.see-more').hide();
+        }
+
+    });
+
+</script>
 @endsection

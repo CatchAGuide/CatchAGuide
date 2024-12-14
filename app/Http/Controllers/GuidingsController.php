@@ -15,6 +15,11 @@ use App\Models\Inclussion;
 use App\Models\GuidingExtra;
 use App\Models\GuidingPrice;
 use App\Models\GuidingTargetFish;
+use App\Models\GuidingBoatType;
+use App\Models\GuidingBoatDescription;
+use App\Models\GuidingAdditionalInformation;
+use App\Models\GuidingRequirements;
+use App\Models\GuidingRecommendations;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -26,6 +31,9 @@ use App\Mail\GuidingRequestMail;
 use App\Mail\SearchRequestUserMail;
 use Illuminate\Support\Facades\Log;
 use App\Models\BlockedEvent;
+use App\Models\ExtrasPrice;
+use App\Models\FishingType;
+use App\Models\BoatExtras;
 
 class GuidingsController extends Controller
 {
@@ -33,195 +41,210 @@ class GuidingsController extends Controller
     {
         $locale = Config::get('app.locale');
 
+        $searchMessage = "";
         $title = '';
+        $filter_title = '';
         $randomSeed = Session::get('random_seed');
         if (!$randomSeed) {
             $randomSeed = rand();
             Session::put('random_seed', $randomSeed);
         }
 
-        $query = Guiding::query()->where('status',1)->whereNotNull('lat')->whereNotNull('lng');
+        $query = Guiding::select(['*', DB::raw('(CASE WHEN price_five_persons IS NOT NULL THEN price_five_persons/5 WHEN price_four_persons IS NOT NULL THEN price_four_persons/4 WHEN price_three_persons IS NOT NULL THEN price_three_persons/3 WHEN price_two_persons IS NOT NULL THEN price_two_persons/2 ELSE price END) AS lowest_price')])->where('status',1);
 
         if (empty($request->all())) {
             $query->orderByRaw("RAND($randomSeed)");
-            // Request has at least one parameter (input data)
-        } 
-          
+        }
+
         if($request->has('page')){
             $title .= __('guidings.Page') . ' ' . $request->page . ' - ';
         }
 
         if($request->has('num_guests') && !empty($request->get('num_guests'))){
             $title .= __('guidings.Guest') . ' ' . $request->num_guests . ' | ';
+            $filter_title .= __('guidings.Guest') . ' ' . $request->num_guests . ', ';
             $q = $query->where('max_guests','>=',$request->get('num_guests'));
         }
 
         if($request->has('sortby') && !empty($request->get('sortby'))){
-            switch ($request->get('sortby')) {
-                case 'newest':
-                    $query->orderBy('created_at','desc');
-                  break;
+            // switch ($request->get('sortby')) {
+            //     case 'newest':
+            //         $query->orderBy('created_at','desc');
+            //       break;
 
-                case 'price-asc':
-                    $query->orderBy('price','asc');
-                  break;
+            //     case 'price-asc':
+            //         $query->orderBy('lowest_price','asc');
+            //       break;
 
-                case 'price-desc':
-                    $query->orderBy('price','desc');
-                  break;
+            //     case 'price-desc':
+            //         $query->orderBy('lowest_price','desc');
+            //       break;
 
-                case 'long-duration':
-                    $query->orderBy('duration','desc');
-                break;
+            //     case 'long-duration':
+            //         $query->orderBy('duration','desc');
+            //     break;
 
-                case 'short-duration':
-                    $query->orderBy('duration','asc');
-                break;
+            //     case 'short-duration':
+            //         $query->orderBy('duration','asc');
+            //     break;
 
-                default:
-                    $query;
-            }
+            //     default:
+            //         $query;
+            // }
         }
-
 
         if($request->has('methods') && !empty($request->get('methods'))){
    
-            $requestMethods = array_filter($request->get('methods'));
+            // $requestMethods = array_filter($request->get('methods'));
 
-            if(count($requestMethods)){
-                $title .= __('guidings.Method') . ' (';
-                $method_rows = Method::whereIn('id', $request->methods)->get();
-                $title_row = '';
-                foreach ($method_rows as $row) {
-                    $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
-                }
-                $title .= substr($title_row, 0, -2);
-                $title .= ') | ';
-                $query->whereHas('guidingMethods', function ($query) use ($requestMethods) {
-                    $query->whereIn('method_id', $requestMethods);
-                });
-            }
+            // if(count($requestMethods)){
+            //     $title .= __('guidings.Method') . ' (';
+            //     $filter_title .= __('guidings.Method') . ' (';
+            //     $method_rows = Method::whereIn('id', $request->methods)->get();
+            //     $title_row = '';
+            //     foreach ($method_rows as $row) {
+            //         $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
+            //     }
+            //     $title .= substr($title_row, 0, -2);
+            //     $title .= '), ';
+            //     $filter_title .= substr($title_row, 0, -2);
+            //     $filter_title .= '), ';
+
+            //     $query->whereHas('guidingMethods', function ($query) use ($requestMethods) {
+            //         $query->whereIn('method_id', $requestMethods);
+            //     });
+            // }
             
         }
 
         if($request->has('fishing_type') && !empty($request->get('fishing_type'))){
    
-            $requestFishingTypes = $request->get('fishing_type');
+            // $requestFishingTypes = $request->get('fishing_type');
 
-            if($requestFishingTypes){
+            // if($requestFishingTypes){
 
-                $title .= __('guidings.Fishing_Type') . 'Fishing Type (';
-                $method_rows = FishType::whereIn('id', $request->fishing_type)->get();
-                $title_row = '';
-                foreach ($method_rows as $row) {
-                    $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
-                }
-                $title .= substr($title_row, 0, -2);
-                $title .= ') | ';
+            //     $title .= __('guidings.Fishing_Type') . 'Fishing Type (';
+            //     $filter_title .= __('guidings.Fishing_Type') . 'Fishing Type (';
+            //     $method_rows = FishingType::whereIn('id', $request->fishing_type)->get();
+            //     $title_row = '';
+            //     foreach ($method_rows as $row) {
+            //         $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
+            //     }
+            //     $title .= substr($title_row, 0, -2);
+            //     $title .= ') | ';
+            //     $filter_title .= substr($title_row, 0, -2);
+            //     $filter_title .= '), ';
 
-                $query->whereHas('fishingTypes', function ($query) use ($requestFishingTypes) {
-                    $query->where('id', $requestFishingTypes);
-                });
-            }
+            //     $query->whereHas('fishingTypes', function ($query) use ($requestFishingTypes) {
+            //         $query->where('id', $requestFishingTypes);
+            //     });
+            // }
         }
 
         if($request->has('duration') && !empty($request->get('duration'))){
             $title .= __('guidings.Duration') . ' ' . $request->duration . ' | ';
+            $filter_title .= __('guidings.Duration') . ' ' . $request->duration . ', ';
 
             $q = $query->where('duration','>=',$request->get('duration'));
         }
 
         if($request->has('fishingfrom') && !empty($request->get('fishingfrom'))){
    
-            $requestFishingFrom = array_filter($request->get('fishingfrom'));
+            // $requestFishingFrom = array_filter($request->get('fishingfrom'));
 
-            if(count($requestFishingFrom)){
-                $query->whereHas('fishingFrom', function ($query) use ($requestFishingFrom) {
-                    $query->whereIn('id', $requestFishingFrom);
-                });
-            }
+            // if(count($requestFishingFrom)){
+            //     $query->whereHas('fishingFrom', function ($query) use ($requestFishingFrom) {
+            //         $query->whereIn('id', $requestFishingFrom);
+            //     });
+            // }
             
         }
 
         if($request->has('water') && !empty($request->get('water'))){
 
-            $requestWater = array_filter($request->get('water'));
+            // $requestWater = array_filter($request->get('water'));
 
-            if(count($requestWater)){
+            // if(count($requestWater)){
 
-                $title .= __('guidings.Water') . ' (';
-                $method_rows = Water::whereIn('id', $request->water)->get();
-                $title_row = '';
-                foreach ($method_rows as $row) {
-                    $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
-                }
-                $title .= substr($title_row, 0, -2);
-                $title .= ') | ';
+            //     $title .= __('guidings.Water') . ' (';
+            //     $filter_title .= __('guidings.Water') . ' (';
+            //     $method_rows = Water::whereIn('id', $request->water)->get();
+            //     $title_row = '';
+            //     foreach ($method_rows as $row) {
+            //         $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
+            //     }
+            //     $title .= substr($title_row, 0, -2);
+            //     $title .= ') | ';
+            //     $filter_title .= substr($title_row, 0, -2);
+            //     $filter_title .= '), ';
 
-                $query->whereHas('guidingWaters', function ($query) use ($requestWater) {
-                    $query->whereIn('water_id', $requestWater);
-                });
-            }
+            //     $query->whereHas('guidingWaters', function ($query) use ($requestWater) {
+            //         $query->whereIn('water_id', $requestWater);
+            //     });
+            // }
           
         }
 
         if($request->has('target_fish')){
-            $requestFish = array_filter($request->get('target_fish'));
+            // $requestFish = array_filter($request->get('target_fish'));
 
-            if(count($requestFish)){
+            // if(count($requestFish)){
 
-                $title .= __('guidings.Target_Fish') . ' (';
-                $method_rows = Target::whereIn('id', $request->target_fish)->get();
-                $title_row = '';
-                foreach ($method_rows as $row) {
-                    $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
-                }
-                $title .= substr($title_row, 0, -2);
-                $title .= ') | ';
+            //     $title .= __('guidings.Target_Fish') . ' (';
+            //     $filter_title .= __('guidings.Target_Fish') . ' (';
+            //     $method_rows = Target::whereIn('id', $request->target_fish)->get();
+            //     $title_row = '';
+            //     foreach ($method_rows as $row) {
+            //         $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
+            //     }
+            //     $title .= substr($title_row, 0, -2);
+            //     $title .= ') | ';
+            //     $filter_title .= substr($title_row, 0, -2);
+            //     $filter_title .= '), ';
 
-                $query->whereHas('guidingTargets', function ($query) use ($requestFish) {
-                    $query->whereIn('target_id', $requestFish);
-                });
-            }
+            //     $query->whereHas('guidingTargets', function ($query) use ($requestFish) {
+            //         $query->whereIn('target_id', $requestFish);
+            //     });
+            // }
 
         }
 
-        if($request->has('country')){
-            $title .= __('guidings.Country') . ' ' . $request->country . ' | ';
-            $query->where('country',$request->get('country'));
+        if($request->has('price_range')){
+            $price_range = $request->get('price_range');
+            $price = explode('-', $price_range);
+
+            $title .= 'Price ' . $request->price_range . ' | ';
+            $filter_title .= 'Price ab ' . $request->price_range . ' p.P., ';
+
+            //$query->select(['*', DB::raw('(CASE WHEN price_five_persons IS NOT NULL THEN price_five_persons/5 WHEN price_four_persons IS NOT NULL THEN price_four_persons/4 WHEN price_three_persons IS NOT NULL THEN price_three_persons/3 WHEN price_two_persons IS NOT NULL THEN price_two_persons/2 ELSE price END) AS lowest_price')]);
+            if (count($price) > 1) {
+                $query->havingRaw('lowest_price >= ? AND lowest_price <= ?', $price);
+            } else {
+                $query->havingRaw('lowest_price >= ?', $price);
+            }
         }
 
         $radius = null; // Radius in miles
         if($request->has('radius')){
 
             $title .= __('guidings.Radius') . ' ' . $request->radius . 'km | ';
+            $filter_title .= __('guidings.Radius') . ' ' . $request->radius . 'km, ';
             $radius = $request->get('radius');
         }
 
         $placeLat = $request->get('placeLat');
         $placeLng = $request->get('placeLng');
 
-        if($request->has('place') && empty($request->get('place'))){
-            $title .= __('guidings.Place') . ' ' . $request->place . ' | ';
-            return redirect()->route('guidings.index', $request->except([
-                'placeLng',
-                'placeLat'
-            ]));
-        }
-
         if(!empty($placeLat) && !empty($placeLng) && !empty($request->get('place'))){
 
             $title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
-            $query->select(['guidings.*'])
-            ->selectRaw("(6371 * acos(cos(radians($placeLat)) * cos(radians(lat)) * cos(radians(lng) - radians($placeLng)) + sin(radians($placeLat)) * sin(radians(lat)))) AS distance")
-            ->where('status', 1)
-            ->orderBy('distance') // Sort the results by distance in ascending order
-            ->get();
-
+            $filter_title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ', ';
+            $guidingFilter = Guiding::locationFilter($request->get('place'), $radius);
+            $searchMessage = $guidingFilter['message'];
+            $query->whereIn('id', $guidingFilter['ids']);
         }
 
-        $allGuidings = $query->get();
-
+        $allGuidings = $query->with('boatType')->get();
 
         $otherguidings = array();
 
@@ -240,17 +263,19 @@ class GuidingsController extends Controller
             }
         }
 
-       
-        $guidings = $query->paginate(20);
+        $guidings = $query->with('boatType')->paginate(20);
 
+        $filter_title = substr($filter_title, 0, -2);
 
         $guidings->appends(request()->except('page'));
 
         return view('pages.guidings.index', [
             'title' => $title,
+            'filter_title' => $filter_title,
             'guidings' => $guidings,
             'radius' => $radius,
             'allGuidings' => $allGuidings,
+            'searchMessage' => $searchMessage,
             'otherguidings' => $otherguidings,
         ]);
         
@@ -260,8 +285,20 @@ class GuidingsController extends Controller
     {
         $locale = Config::get('app.locale');
 
-        $guiding = Guiding::where('id',$id)->where('slug',$slug)->where('status',1)->first();
-        $targetFish = $guiding->is_newguiding ? json_decode($guiding->target_fish, true) : $guiding->guidingTargets->pluck('id')->toArray();
+        //$guiding = Guiding::where('id',$id)->where('slug',$slug)->where('status',1)->first();
+        $query = Guiding::where('id',$id)->where('slug',$slug);
+
+        if (!Auth::check()) {
+            $query = $query->where('status',1);
+        }
+
+        $guiding = $query->first();
+
+        if (is_null($guiding)) {
+            abort(404);
+        }
+        // $targetFish = $guiding->is_newguiding ? json_decode($guiding->target_fish, true) : $guiding->guidingTargets->pluck('id')->toArray();
+        $targetFish = json_decode($guiding->target_fish, true);
         $fishingFrom = $guiding->fishing_from_id;
         $fishingType = $guiding->fishing_type_id;
 
@@ -273,18 +310,11 @@ class GuidingsController extends Controller
             ->where('id', '!=', $guiding->id)
             ->where(function($query) use ($guiding, $targetFish, $fishingFrom, $fishingType) {
                 $query->where(function($q) use ($guiding, $targetFish) {
-                    if ($guiding->is_newguiding) {
-                        $q->where('is_newguiding', 1)
-                          ->where(function($subQ) use ($targetFish) {
-                              foreach ($targetFish as $fish) {
-                                  $subQ->orWhereJsonContains('target_fish', $fish);
-                              }
-                          });
-                    } else {
-                        $q->whereHas('guidingTargets', function($subQ) use ($targetFish) {
-                            $subQ->whereIn('target_id', $targetFish);
-                        });
-                    }
+                    $q->where(function($subQ) use ($targetFish) {
+                        foreach ($targetFish as $fish) {
+                            $subQ->orWhereJsonContains('target_fish', $fish);
+                        }
+                    });
                 })
                 ->where(function($q) use ($guiding, $fishingFrom) {
                     $q->where('fishing_from_id', $fishingFrom)
@@ -313,6 +343,7 @@ class GuidingsController extends Controller
             'ratings' => $ratings,
             'other_guidings' => $otherGuidings,
             'average_rating' => $averageRating,
+            'blocked_events' => $guiding->getBlockedEvents(),
         ]);
     }
 
@@ -341,9 +372,37 @@ class GuidingsController extends Controller
             $data = $request->validated();
             $isDraft = $data['is_draft'] ?? false;
 
-            $guiding = new Guiding();
+            if ($request->input('is_update') == '1') {
+                $guiding = Guiding::findOrFail($request->input('guiding_id'));
+            } else {
+                // Check for duplicates only on new creation
+                $existingGuiding = Guiding::where([
+                    'title' => trim($request->input('title')),
+                    'location' => trim($request->input('location')), 
+                    'city' => trim($request->input('city')),
+                    'country' => trim($request->input('country')),
+                    'lat' => trim($request->input('latitude')),
+                    'lng' => trim($request->input('longitude')),
+                    'user_id' => auth()->id(),
+                    'duration' => $request->input('duration') == 'multi_day' ? $request->input('duration_days') : $request->input('duration_hours'),
+                    'tour_type' => $request->input('tour_type')
+                ])
+                ->where(function($query) use ($request) {
+                    $query->where('is_boat', $request->input('type_of_fishing') == 'boat' ? 1 : 0)
+                          ->where('fishing_from_id', $request->input('type_of_fishing') == 'boat' ? 1 : 2);
+                })
+                ->first();
 
-            $guiding->user_id = auth()->id();
+                if ($existingGuiding) {
+                    return response()->json([
+                        'error' => 'A similar guiding already exists.'
+                    ], 422);
+                }
+
+                $guiding = new Guiding();
+                $guiding->user_id = auth()->id();
+            }
+
             $guiding->is_newguiding = 1;
             $guiding->slug = slugify($request->input('title') . "-" . $request->input('location') . "-" . auth()->id());
 
@@ -353,6 +412,7 @@ class GuidingsController extends Controller
             $guiding->lat = $request->has('latitude') ? $request->input('latitude') : '';
             $guiding->lng = $request->has('longitude') ? $request->input('longitude') : '';
             $guiding->country = $request->has('country') ? $request->input('country') : '';
+            $guiding->city = $request->has('city') ? $request->input('city') : '';
             
             $galeryImages = [];
             if ($request->has('title_image')) {
@@ -364,16 +424,8 @@ class GuidingsController extends Controller
                     }
                     $galeryImages[] = $webp_path;
                 }
-                // foreach($request->title_image as $index => $image){
-                //     $webp_path = media_upload($image, 'guidings-images', $guiding->slug. "-". $index);
-
-                //     if ($index == $request->input('primaryImage', 0)) {
-                //         $guiding->thumbnail_path = $webp_path;
-                //     }
-                //     $galeryImages[] = $webp_path;
-                // }
             }
-            $guiding->galery_images = json_encode($galeryImages);
+            $guiding->gallery_images = json_encode($galeryImages);
 
             //step 2
             $guiding->is_boat = $request->has('type_of_fishing') ? ($request->input('type_of_fishing') == 'boat' ? 1 : 0) : 0;
@@ -381,30 +433,24 @@ class GuidingsController extends Controller
             if ($guiding->is_boat) {
                 $guiding->boat_type = $request->has('type_of_boat') ? $request->input('type_of_boat') : '';
                 $guiding->boat_information = $this->saveDescriptions($request);
-                $guiding->boat_extras = $request->has('extras') ? $request->input('extras') : '';
+
+                $boatExtras = $request->has('boat_extras') ? collect(json_decode($request->input('boat_extras')))->pluck('id') : [];
+                $guiding->boat_extras = json_encode($boatExtras);
             }
 
             //step 3
-            $guiding->target_fish = $request->has('target_fish') ? $request->input('target_fish') : '';
-            $guiding->fishing_methods = $request->has('methods') ? $request->input('methods') : '';
-            $guiding->water_types = $request->has('water_types') ? $request->input('water_types') : '';
+            $targetFish = $request->has('target_fish') ? collect(json_decode($request->input('target_fish')))->pluck('id') : [];
+            $guiding->target_fish = json_encode($targetFish);
+            
+            $methods = $request->has('methods') ? collect(json_decode($request->input('methods')))->pluck('id') : [];
+            $guiding->fishing_methods = json_encode($methods);
+            
+            $guiding->fishing_type_id = $request->has('style_of_fishing') ? $request->input('style_of_fishing') : 3; 
+            
+            $waterTypes = $request->has('water_types') ? collect(json_decode($request->input('water_types')))->pluck('id') : [];
+            $guiding->water_types = json_encode($waterTypes);
 
             //step 4
-            $guiding->experience_level = $request->has('experience_level') ? json_encode($request->input('experience_level')) : '';
-            $guiding->inclusions = $request->has('inclussions') ? $request->input('inclussions') : '';
-            if ($request->has('type_of_fishing')) {
-                $guiding->style_of_fishing = $request->input('style_of_fishing');
-
-                if ($request->input('type_of_fishing') == 'active') {
-                    $guiding->fishing_type_id = 1;
-                } else if ($request->input('type_of_fishing') == 'passive') {
-                    $guiding->fishing_type_id = 2;
-                } else {
-                    $guiding->fishing_type_id = 3;
-                }
-            }
-
-            //step 5
             $guiding->desc_course_of_action = $request->has('desc_course_of_action') ? $request->input('desc_course_of_action') : '';
             $guiding->desc_meeting_point = $request->has('desc_meeting_point') ? $request->input('desc_meeting_point') : '';
             $guiding->meeting_point = $request->has('meeting_point') ? $request->input('desc_meeting_point') : '';
@@ -412,12 +458,12 @@ class GuidingsController extends Controller
             $guiding->desc_tour_unique = $request->has('desc_tour_unique') ? $request->input('desc_tour_unique') : '';
             $guiding->description = $this->generateLongDescription($request);
 
-            //step 6
+            //step 5
             $guiding->requirements = $this->saveRequirements($request);
             $guiding->recommendations = $this->saveRecommendations($request);   
             $guiding->other_information = $this->saveOtherInformation($request);  
 
-            //step 7
+            //step 6
             $guiding->tour_type = $request->has('tour_type') ? $request->input('tour_type') : '';
 
             $guiding->duration_type = $request->has('duration') ? $request->input('duration') : '';
@@ -450,20 +496,23 @@ class GuidingsController extends Controller
                 }
             }
             
+            $inclusions = $request->has('inclusions') ? collect(json_decode($request->input('inclusions')))->pluck('id') : [];
+            $guiding->inclusions = $inclusions;
+            
             $pricingExtras = [];
             $i = 1;
             while (true) {
                 $nameKey = "extra_name_" . $i;
                 $priceKey = "extra_price_" . $i;
                 
+                $extraPrice = ExtrasPrice::where('name', $request->input($nameKey))
+                                       ->orWhere('name_en', $request->input($nameKey))
+                                       ->first();
                 if ($request->has($nameKey) && $request->has($priceKey)) {
                     $pricingExtras[] = [
-                        'name' => $request->input($nameKey),
+                        'name' => $extraPrice ? $extraPrice->id : $request->input($nameKey),
                         'price' => $request->input($priceKey)
                     ];
-                    if ($i == 1) {
-                        $guiding->price = $request->input($priceKey);
-                    }
                     $i++;
                 } else {
                     break;
@@ -471,7 +520,7 @@ class GuidingsController extends Controller
             }
             $guiding->pricing_extra = json_encode($pricingExtras);
 
-            //step 8    
+            //step 7   
             $guiding->allowed_booking_advance = $request->has('allowed_booking_advance') ? $request->input('allowed_booking_advance') : '';
             $guiding->booking_window = $request->has('booking_window') ? $request->input('booking_window') : '';
 
@@ -487,18 +536,30 @@ class GuidingsController extends Controller
                     $guiding->months = json_encode($selectedMonths);
                 }
 
-                $blockedPeriods = [];
+                if ($request->input('is_update') == '1') {
+                    BlockedEvent::where('guiding_id', $guiding->id)
+                                ->where('type', 'blockiert')
+                                ->delete();
+                }
+
                 foreach ($allMonths as $index => $month) {
                     if (!in_array($month, $selectedMonths)) {
                         $year = date('Y');
                         $monthNumber = str_pad($index + 1, 2, '0', STR_PAD_LEFT);
+                        $currentMonth = date('m');
+                        $year = date('Y');
+                        
+                        if ($monthNumber < $currentMonth) {
+                            $year++;
+                        }
+                        
                         $blockedFrom = date('Y-m-d', strtotime("$year-$monthNumber-01"));
                         $blockedTo = date('Y-m-t', strtotime($blockedFrom));
                         
                         BlockedEvent::create([
                             'user_id' => $guiding->user_id,
                             'type' => 'blockiert',
-                            'source' => 'personal',
+                            'guiding_id' => $guiding->id,
                             'from' => $blockedFrom,
                             'due' => $blockedTo,
                         ]);
@@ -510,15 +571,11 @@ class GuidingsController extends Controller
 
             DB::commit();
 
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => $isDraft ? 'Draft saved successfully!' : 'Guiding created successfully!',
-                    'redirect_url' => route('profile.myguidings'),
-                ]);
-            }
-            
-            return redirect()->route('profile.myguidings')->with('success', $isDraft ? 'Draft saved successfully!' : 'Guiding created successfully!');
+            return response()->json([
+                'success' => true,
+                'message' => $isDraft ? 'Draft saved successfully!' : 'Guiding created successfully!',
+                'redirect_url' => route('profile.myguidings'),
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error in guidingsStore: ' . $e->getMessage());
@@ -531,7 +588,6 @@ class GuidingsController extends Controller
     {
         $user = Auth::user();
         $data = $request->all();
-        Log::info($data);
         $currentStep = $request->input('current_step', 1);
 
         return response()->json(['success' => true, 'message' => 'Draft saved successfully']);
@@ -557,7 +613,7 @@ class GuidingsController extends Controller
         $descriptionData = [];
 
         foreach ($descriptions as $description) {
-            $descriptionData[$description] = $request->input($description);
+            $descriptionData[$description] = $request->input("boat_description_".$description);
         }
 
         return json_encode($descriptionData);
@@ -569,7 +625,7 @@ class GuidingsController extends Controller
         $otherInformationData = [];
 
         foreach ($otherInformations as $otherInformation) {
-            $otherInformationData[$otherInformation] = $request->input($otherInformation);
+            $otherInformationData[$otherInformation] = $request->input("other_information_".$otherInformation);
         }
 
         return json_encode($otherInformationData);
@@ -581,7 +637,7 @@ class GuidingsController extends Controller
         $requirementData = [];
 
         foreach ($requirements as $requirement) {
-            $requirementData[$requirement] = $request->input($requirement);
+            $requirementData[$requirement] = $request->input("requiements_taking_part_".$requirement);
         }
 
         return json_encode($requirementData);
@@ -593,7 +649,7 @@ class GuidingsController extends Controller
         $recommendationData = [];
 
         foreach ($recommendations as $recommendation) {
-            $recommendationData[$recommendation] = $request->input($recommendation);
+            $recommendationData[$recommendation] = $request->input("recommended_preparation_".$recommendation);
         }
 
         return json_encode($recommendationData);
@@ -601,7 +657,6 @@ class GuidingsController extends Controller
 
     public function store(StoreGuidingRequest $request)
     {
-        //dd($request->all());
         $data = $request->validated();
 
         $data['user_id'] = auth()->id();
@@ -664,12 +719,9 @@ class GuidingsController extends Controller
             abort(404);
         }
         
-
         $targetId = $guiding->guidingTargets->pluck('id')->toArray();
         $fishingfrom = $guiding->fishingFrom->id;
         $fishingtype = $guiding->fishingTypes->id;
-
-
 
         $ratings = $guiding->user->received_ratings;
         $ratingCount = $ratings->count();
@@ -690,8 +742,6 @@ class GuidingsController extends Controller
         //     ->limit(3)
         //     ->get();
 
-
-            
         return view('pages.guidings.show', [
             'guiding' => $guiding,
             'ratings' => $ratings,
@@ -749,24 +799,24 @@ class GuidingsController extends Controller
             'latitude' => $guiding->lat,
             'longitude' => $guiding->lng,
             'country' => $guiding->country,
-            'galery_images' => $guiding->galery_images,
+            'city' => $guiding->city,
+            'gallery_images' => $guiding->gallery_images,
             'thumbnail_path' => $guiding->thumbnail_path,
 
             //step 2
             'type_of_fishing' => $guiding->is_boat ? 'boat' : 'shore',
             'boat_type' => $guiding->boat_type,
-            'boat_information' => json_decode($guiding->boat_information, true),
-            'boat_extras' => json_decode($guiding->boat_extras, true),
+            'boat_information' => $guiding->getBoatInformationAttribute(),
+            'boat_extras' => $guiding->getBoatExtras(),
 
             //step 3
-            'target_fish' => json_decode($guiding->target_fish, true),
-            'methods' => json_decode($guiding->fishing_methods, true),
-            'water_types' => json_decode($guiding->water_types, true),
+            'target_fish' => $guiding->getTargetFishNames(),
+            'methods' => $guiding->getFishingMethodNames(),
+            'water_types' => $guiding->getWaterNames(),
 
             //step 4
-            'experience_level' => json_decode($guiding->experience_level, true),
-            'inclussions' => json_decode($guiding->inclusions, true),
-            'style_of_fishing' => $guiding->style_of_fishing,
+            'inclusions' => $guiding->getInclusionNames(),
+            'fishing_type' => $guiding->fishing_type_id,
 
             //step 5
             'long_description' => $guiding->description,
@@ -776,18 +826,18 @@ class GuidingsController extends Controller
             'desc_tour_unique' => $guiding->desc_tour_unique,
             
             //step 6
-            'requirements' => json_decode($guiding->requirements, true),
-            'recommendations' => json_decode($guiding->recommendations, true),
-            'other_information' => json_decode($guiding->other_information, true),
+            'requirements' => $guiding->getRequirementsAttribute(),
+            'recommendations' => $guiding->getRecommendationsAttribute(),
+            'other_information' => $guiding->getOtherInformationAttribute(),
 
             //step 7
-            'tour_type' => $guiding->tour_type,
+            'tour_type' => trim($guiding->tour_type),
             'duration' => $guiding->duration,
             'duration_type' => $guiding->duration_type,
             'no_guest' => $guiding->max_guests,
             'price_type' => $guiding->price_type,
             'prices' => json_decode($guiding->prices, true),
-            'pricing_extra' => json_decode($guiding->pricing_extra, true),
+            'pricing_extra' => $guiding->getPricingExtraAttribute(),
 
             //step 8
             'allowed_booking_advance' => $guiding->allowed_booking_advance,
@@ -796,42 +846,41 @@ class GuidingsController extends Controller
             'months' => json_decode($guiding->months, true),
         ];
 
+        // dd($formData);
         // Get necessary data for dropdowns
-        $targets = Target::all();
-        $waters = Water::all();
-        $methods = Method::all();
-        $inclussions = Inclussion::all();
-
         $locale = Config::get('app.locale');
-        if($locale == 'en') {
-            $targets = $targets->map(function ($item) {
-                return ['value' => $item->name_en, 'id' => $item->id];
-            });
-            $methods = $methods->map(function ($item) {
-                return ['value' => $item->name_en, 'id' => $item->id];
-            });
-            $waters = $waters->map(function ($item) {
-                return ['value' => $item->name_en, 'id' => $item->id];
-            });
-            $inclussions = $inclussions->map(function ($item) {
-                return ['value' => $item->name_en, 'id' => $item->id];
-            });
-        } else {
-            $targets = $targets->map(function ($item) {
-                return ['value' => $item->name, 'id' => $item->id];
-            });
-            $methods = $methods->map(function ($item) {
-                return ['value' => $item->name, 'id' => $item->id];
-            });
-            $waters = $waters->map(function ($item) {
-                return ['value' => $item->name, 'id' => $item->id];
-            });
-            $inclussions = $inclussions->map(function ($item) {
-                return ['value' => $item->name, 'id' => $item->id];
+        $nameField = $locale == 'en' ? 'name_en' : 'name';
+
+        $modelClasses = [
+            'targets' => Target::class,
+            'methods' => Method::class,
+            'waters' => Water::class,
+            'inclusions' => Inclussion::class,
+            'boat_extras' => BoatExtras::class,
+            'extras_prices' => ExtrasPrice::class,
+            'guiding_boat_types' => GuidingBoatType::class,
+            'guiding_boat_descriptions' => GuidingBoatDescription::class,
+            'guiding_additional_infos' => GuidingAdditionalInformation::class,
+            'guiding_requirements' => GuidingRequirements::class,
+            'guiding_recommendations' => GuidingRecommendations::class
+        ];
+
+        $collections = [];
+        foreach ($modelClasses as $key => $modelClass) {
+            $collections[$key] = $modelClass::all()->map(function($item) use ($nameField, $key) {
+                return [
+                    'value' => $item->$nameField,
+                    'id' => $item->id
+                ];
             });
         }
 
-        return view('pages.profile.newguiding', compact('formData', 'waters', 'methods', 'targets', 'inclussions'));
+        $pageTitle = __('profile.editguiding');
+
+        return view('pages.profile.newguiding', array_merge(
+            ['formData' => $formData, 'pageTitle' => $pageTitle],
+            $collections
+        ));
     }
 
     public function update(StoreGuidingRequest $request, Guiding $guiding)

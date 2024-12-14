@@ -433,7 +433,7 @@
     </div>
 </section>
 
-<section id="nearest-listing" class="py-1 my-5 offer d-none">
+<!-- <section id="nearest-listing" class="py-1 my-5 offer d-none">
 
     <div class="container my-4">
         <div class="my-2 section-title">
@@ -444,7 +444,7 @@
         
         </div>
     </div>
-</section>
+</section> -->
 
 
 <section class="py-1 my-5 trending">
@@ -458,9 +458,9 @@
                 @if(!$agent->ismobile())
                 <div>
                     @if(app()->getLocale() == 'de')
-                        <a href="{{route('allcountries')}}" class="color-primary fw-light">Alle Länder ansehen</a>
+                        <a href="{{route('destination')}}" class="color-primary fw-light">Alle Länder ansehen</a>
                     @else
-                        <a href="{{route('allcountries')}}" class="color-primary fw-light">Show all countries</a>
+                        <a href="{{route('destination')}}" class="color-primary fw-light">Show all countries</a>
                     @endif
                 </div>
                 @endif
@@ -617,6 +617,13 @@
                                 </a>
                             </div>
                         </div>
+                </div>
+                <div class="p-1 d-flex justify-content-end">
+                    @if(app()->getLocale() == 'de')
+                        <a href="{{route('destination')}}" class="color-primary fw-light">Alle Länder ansehen</a>
+                    @else
+                        <a href="{{route('destination')}}" class="color-primary fw-light">Show all countries</a>
+                    @endif
                 </div>
             @else
                 <div class="row">
@@ -1180,7 +1187,7 @@
         <div class="new-custom-owl owl-carousel owl-theme">
             @foreach($bookedGuidings as $most_booked_guiding)
                 <div class="item">
-                    <a href="{{ $most_booked_guiding->is_newguiding ? route('guidings.newShow', [$most_booked_guiding->id, $most_booked_guiding->slug]) : route('guidings.show', [$most_booked_guiding->id, $most_booked_guiding->slug]) }}">
+                    <a href="{{ route('guidings.show', [$most_booked_guiding->id, $most_booked_guiding->slug]) }}">
                         <div class="card" style="min-height:360px;">
                             @if(get_featured_image_link($most_booked_guiding))
                             <img src="{{get_featured_image_link($most_booked_guiding)}}" class="card-img-top">
@@ -1191,7 +1198,7 @@
                             <div class="card-body">
                             <h5 class="crop-text-2 card-title h6">{{translate($most_booked_guiding->title)}}</h5>
                             <small class="crop-text-1 small-text text-muted">{{translate($most_booked_guiding->location)}}</small>
-                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{ $most_booked_guiding->getLowestPrice() }}€</span></small>
+                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{ $most_booked_guiding->getLowestPrice() }}€</span> p.P.</small>
                             </div>
                         </div>
                     </a>
@@ -1202,7 +1209,7 @@
         <div class="custom-owl owl-carousel owl-theme">
             @foreach($bookedGuidings as $most_booked_guiding)
                 <div class="item">
-                    <a href="{{ $most_booked_guiding->is_newguiding ? route('guidings.newShow', [$most_booked_guiding->id, $most_booked_guiding->slug]) : route('guidings.show', [$most_booked_guiding->id, $most_booked_guiding->slug]) }}">
+                    <a href="{{ route('guidings.show', [$most_booked_guiding->id, $most_booked_guiding->slug]) }}">
                         <div class="card" style="min-height:360px;">
                             @if(get_featured_image_link($most_booked_guiding))
                             <img src="{{get_featured_image_link($most_booked_guiding)}}" class="card-img-top">
@@ -1212,7 +1219,7 @@
                             <div class="card-body">
                             <h5 class="crop-text-2 card-title h6">{{translate($most_booked_guiding->title)}}</h5>
                             <small class="crop-text-1 small-text text-muted">{{translate($most_booked_guiding->location)}}</small>
-                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{ $most_booked_guiding->getLowestPrice() }}€</span></small>
+                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{ $most_booked_guiding->getLowestPrice() }}€</span> p.P.</small>
                             </div>
                         </div>
                     </a>
@@ -1395,7 +1402,7 @@
             <div class="new-custom-owl owl-carousel owl-theme">
                 @foreach($newGuidings as $newGuiding)
                     <div class="item">
-                        <a href="{{ $newGuiding->is_newguiding ? route('guidings.newShow', [$newGuiding->id, $newGuiding->slug]) : route('guidings.show', [$newGuiding->id, $newGuiding->slug]) }}">
+                        <a href="{{ route('guidings.show', [$newGuiding->id, $newGuiding->slug]) }}">
                             <div class="card" style="min-height:360px;">
                                 @if(get_featured_image_link($newGuiding))
                                 <img src="{{get_featured_image_link($newGuiding)}}" class="card-img-top">
@@ -1405,7 +1412,7 @@
                                 <div class="card-body">
                                 <h5 class="crop-text-2 card-title h6">{{translate($newGuiding->title)}}</h5>
                                 <small class="crop-text-1 small-text text-muted">{{translate($newGuiding->location)}}</small>
-                                <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{ $newGuiding->getLowestPrice() }}€</span></small>
+                                <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{ $newGuiding->getLowestPrice() }}€</span> p.P.</small>
                                 </div>
                             </div>
                         </a>
@@ -1416,7 +1423,7 @@
         <div class="custom-owl owl-carousel owl-theme">
             @foreach($newGuidings as $newGuiding)
                 <div class="item">
-                    <a href="{{ $newGuiding->is_newguiding ? route('guidings.newShow', [$newGuiding->id, $newGuiding->slug]) : route('guidings.show', [$newGuiding->id, $newGuiding->slug]) }}">
+                    <a href="{{ route('guidings.show', [$newGuiding->id, $newGuiding->slug])}}">
                         <div class="card" style="min-height:360px;">
                             @if(get_featured_image_link($newGuiding))
                             <img src="{{get_featured_image_link($newGuiding)}}" class="card-img-top">
@@ -1426,7 +1433,7 @@
                             <div class="card-body">
                             <h5 class="crop-text-2 card-title h6">{{translate($newGuiding->title)}}</h5>
                             <small class="crop-text-1 small-text text-muted">{{translate($newGuiding->location)}}</small>
-                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{ $newGuiding->getLowestPrice() }}€</span></small>
+                            <small class="fw-bold text-muted">@lang('message.from') <span class="color-primary">{{ $newGuiding->getLowestPrice() }}€</span> p.P.</small>
                             </div>
                         </div>
                     </a>
@@ -1797,7 +1804,7 @@
 @endsection
 
 @section('js_after')
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q&libraries=places,geocoder"></script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY', 'AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q') }}&libraries=places,geocoding"></script>
 <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
 
 

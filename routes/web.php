@@ -186,8 +186,8 @@ Route::middleware('auth:web')->group(function () {
 
 Route::get('guidings', [GuidingsController::class, 'index'])->name('guidings.index');
 Route::get('guidings/{slug?}', [GuidingsController::class, 'redirectToNewFormat']);
-Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'show'])->name('guidings.show');
-Route::get('newguidings/{id}/{slug}', [GuidingsController::class, 'newShow'])->name('guidings.newShow');
+// Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'show'])->name('guidings.show');
+Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'newShow'])->name('guidings.show');
 Route::post('newguidings', [GuidingsController::class, 'guidingsStore'])->name('guidings.store');
 
 Route::get('searchrequest', [GuidingsController::class, 'bookingrequest'])->name('guidings.request');
@@ -202,8 +202,7 @@ Route::name('additional.')->group(function () {
     Route::get('country', [DestinationCountryController::class, 'index'])->name('country');
 });*/
 Route::get('destination', [DestinationCountryController::class, 'index'])->name('destination');
-#Route::get('destination/{country}', [DestinationCountryController::class, 'country'])->name('destination.country');
-#Route::get('destination/{country}/{region}', [DestinationCountryController::class, 'region'])->name('destination.region');
+Route::get('destinationen', [DestinationCountryController::class, 'index'])->name('destination_de');
 Route::get('destination/{country}/{region?}/{city?}', [DestinationCountryController::class, 'country'])->name('destination.country');
 
 Route::post('sendcontact', [\App\Http\Controllers\ZoisController::class, 'sendcontact'])->name('sendcontactmail');

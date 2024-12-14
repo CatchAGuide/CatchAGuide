@@ -16,23 +16,30 @@ class EmployeeSeeder extends Seeder
     public function run()
     {
 
-        Employee::create([
-            'name' => 'Ben',
-            'email' => 'ben@zois.codes',
-            'password' => \Hash::make('admin')
-        ]);
+        $employees = [
+            [
+                'name' => 'Ben',
+                'email' => 'ben@zois.codes',
+                'password' => \Hash::make('admin')
+            ],
+            [
+                'name' => 'Jonas', 
+                'email' => 'jonas@catchaguide.com',
+                'password' => \Hash::make('admin')
+            ],
+            [
+                'name' => 'Tim',
+                'email' => 'tim@catchaguide.com', 
+                'password' => \Hash::make('admin')
+            ]
+        ];
 
-        Employee::create([
-            'name' => 'Jonas',
-            'email' => 'jonas@catchaguide.com',
-            'password' => \Hash::make('admin')
-        ]);
-
-        Employee::create([
-            'name' => 'Tim',
-            'email' => 'tim@catchaguide.com',
-            'password' => \Hash::make('admin')
-        ]);
+        foreach ($employees as $employee) {
+            Employee::firstOrCreate(
+                ['email' => $employee['email']],
+                $employee
+            );
+        }
 
     }
 }

@@ -15,4 +15,8 @@ class GuidingExtras extends Model
         'price',
     ];
 
+    public function getNameAttribute()
+    {        
+        return app()->getLocale() == 'en' ? $this->attributes['name_en'] : $this->attributes['name'];
+    }
 }

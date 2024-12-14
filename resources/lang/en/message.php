@@ -56,6 +56,9 @@ return [
 
 
     // filter
+    'show_on_map' => 'Show on map',
+    'filter' => 'Filter',
+    'filter_by' => 'Filter by',
     'location' => 'Location',
     'enter-location' => 'Enter Location',
     'radius' => 'Radius',
@@ -198,7 +201,8 @@ return [
     'booking-date' => 'Booking Date',
     'guiding-price' => 'Guiding Price',
     'total-extras' => 'Total Extras',
-
+    'guiding-information' => 'Guiding Information',
+    'reservation' => 'Reservation',
 
 
     /**
@@ -274,6 +278,7 @@ return [
     'sunday' => 'Sunday',
 
 
-
+    'Booking' => 'Reserve now',
+    'From' => 'From'
 
 ];

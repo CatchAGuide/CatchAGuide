@@ -62,6 +62,9 @@ return [
     
     
     // filter
+    'show_on_map' => 'Auf Karte anzeigen',
+    'filter' => 'Filtern',
+    'filter_by' => 'Filtern nach',
     'location' => 'Ort',
     'enter-location' => 'Ort eingeben',
     'radius' => 'Radius',
@@ -190,6 +193,8 @@ return [
     'booking-date' => 'Buchungsdatum',
     'guiding-price' => 'Preis des Guidings',
     'total-extras' => 'Summe der Extras',
+    'guiding-information' => 'Guiding Informationen',
+    'reservation' => 'Reservieren',
 
     /**
      *
@@ -268,7 +273,8 @@ return [
     'sunday' => 'Sonntag',
 
 
-
+    'Booking' => 'Jetzt reservieren',
+    'From' => 'Ab'
     
 
 ];

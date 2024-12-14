@@ -23,93 +23,72 @@
         }
 
         .login-form-2 {
-            padding: 9%;
-        rgba(0, 0, 0, 0.19);
+            padding: 2rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            margin: 1rem;
         }
 
-        .login-form-2 h1 {
+        .login-form-2 h1, .login-form-2 h3 {
             text-align: center;
-            margin-bottom: 12%;
-            color: #111111;
+            margin-bottom: 2rem;
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+
+        .form-control {
+            background-color: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            margin: 8px 0;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            background-color: #FFFFFF;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
         }
 
         .btnSubmit {
             font-weight: 600;
-            width: 70% !important;
-            color: #282726;
-            background-color: #111111;
+            width: 60% !important;
+            color: #FFFFFF;
+            background: linear-gradient(45deg, #1a1a1a, #333333);
             border: none;
-            border-radius: 1.5rem;
-            padding: 2%;
+            border-radius: 10px;
+            padding: 12px;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+        }
+
+        .btnSubmit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         .btnForgetPwd {
-            color: #111111;
-            font-weight: 600;
+            color: #FFFFFF;
+            font-weight: 500;
             text-decoration: none;
+            transition: all 0.3s ease;
         }
 
         .btnForgetPwd:hover {
-            text-decoration: none;
-            color: #111111;
+            color: #FFFFFF;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
 
-        .login-logo img {
-            position: absolute;
-            width: 20%;
-            margin-top: 19%;
-            background: #282726;
-            border-radius: 4.5rem;
-            padding: 5%;
-        }
-
-
-        .login-form-1 h3 {
-            text-align: center;
-            margin-bottom: 12%;
-            color: #111111;
-        }
-
-        .login-form-2 {
-            padding: 9%;
-        rgba(0, 0, 0, 0.19);
-        }
-
-        .login-form-2 h3 {
-            text-align: center;
-            margin-bottom: 12%;
-            color: #111111;
-        }
-
-        .btnSubmit {
-            font-weight: 600;
-            width: 50%;
-            color: #111111;
-            background-color: #ffffff;
-            border: none;
-            border-radius: 1.5rem;
-            padding: 2%;
-        }
-
-
-        .btnForgetPwd {
-            color: #111111;
-            font-weight: 600;
-            text-decoration: none;
-        }
-
-        .btnForgetPwd:hover {
-            text-decoration: none;
-            color: #111111;
-        }
         .w-50 {
             width: 80% !important;
         }
 
     </style>
-    <div style="background-image:url({{asset('assets/images/mackerel_fishing.JPG')}}); width: auto; height: auto; background-repeat: no-repeat; background-position: center; background-size: cover" class="pt-4 pb-4">
+    <div style="background-image:url({{asset('assets/images/mackerel_fishing.JPG')}}); min-height: 100vh; background-repeat: no-repeat; background-position: center; background-size: cover" class="py-5">
 
-        <div class="container mb-auto" style="background-color: rgba(0, 0, 0, 0.5); border-radius: 30px; border-color:white;border-style: solid; border-width: 4px;">
+        <div class="container" style="background-color: rgba(0, 0, 0, 0.7); border-radius: 20px; border: 2px solid rgba(255, 255, 255, 0.1); box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);">
 
             <div class="row">
                 <div class="col-md-8 offset-2">
