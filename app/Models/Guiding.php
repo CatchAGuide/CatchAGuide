@@ -834,15 +834,14 @@ class Guiding extends Model
         }
 
         $requirementsData = collect(json_decode($this->attributes['requirements'], true));
-        
         return GuidingRequirements::whereIn('id', array_keys($requirementsData->all()))
             ->get()
             ->map(function ($requirement) use ($requirementsData) {
-                $originalData = $requirementsData[$requirement->id];
+                $data = $requirementsData[$requirement->id];
                 
                 return [
                     'id' => $requirement->id,
-                    'value' => $requirementsData[$requirement->id],
+                    'value' => is_array($data) && isset($data['value']) ? $data['value'] : $data,
                     'name' => $requirement->name
                 ];
             });

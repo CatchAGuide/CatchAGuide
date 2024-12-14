@@ -545,7 +545,7 @@
                                                                 <div class="ratings-score">
                                                                         <span class="text-warning">★</span>
                                                                         <span>{{$guiding->user->average_rating()}} </span>
-                                                                        /5 (No. reviews)
+                                                                        /5 ({{ $guiding->user->received_ratings->count() }} review/s)
                                                                     </div>
                                                                 </div>
                                                                 @endif

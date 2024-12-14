@@ -12,8 +12,6 @@ class BlogController extends Controller
 {
     public function index()
     {
-
-
         if(in_array(app()->getLocale(),config('app.locales'))){
 
             $query =  Thread::orderBy('id','desc');
