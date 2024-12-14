@@ -699,9 +699,9 @@
                     <div id="monthly_selection" style="display: none;">
                         <p class="mb-0" style="text-align:center;">Please select available months</p>
                         <div class="d-flex flex-wrap btn-group-toggle">
-                            @foreach(__('newguidings.months') as $month)
+                            @foreach(__('newguidings.months') as $index => $month)
                                 <div class="btn-checkbox-container" style="flex: 0 0 20%; max-width: 20%; padding: 5px;">
-                                    <input type="checkbox" name="months[]" value="{{ strtolower($month) }}" id="avail_{{ strtolower($month) }}">
+                                    <input type="checkbox" name="months[]" value="{{ $index }}" id="avail_{{ strtolower($month) }}">
                                     <label for="avail_{{ strtolower($month) }}" class="btn btn-outline-primary btn-checkbox w-100">{{ $month }}</label>
                                 </div>
                             @endforeach

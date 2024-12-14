@@ -375,6 +375,30 @@ class GuidingsController extends Controller
             if ($request->input('is_update') == '1') {
                 $guiding = Guiding::findOrFail($request->input('guiding_id'));
             } else {
+                // Check for duplicates only on new creation
+                $existingGuiding = Guiding::where([
+                    'title' => trim($request->input('title')),
+                    'location' => trim($request->input('location')), 
+                    'city' => trim($request->input('city')),
+                    'country' => trim($request->input('country')),
+                    'lat' => trim($request->input('latitude')),
+                    'lng' => trim($request->input('longitude')),
+                    'user_id' => auth()->id(),
+                    'duration' => $request->input('duration') == 'multi_day' ? $request->input('duration_days') : $request->input('duration_hours'),
+                    'tour_type' => $request->input('tour_type')
+                ])
+                ->where(function($query) use ($request) {
+                    $query->where('is_boat', $request->input('type_of_fishing') == 'boat' ? 1 : 0)
+                          ->where('fishing_from_id', $request->input('type_of_fishing') == 'boat' ? 1 : 2);
+                })
+                ->first();
+
+                if ($existingGuiding) {
+                    return response()->json([
+                        'error' => 'A similar guiding already exists.'
+                    ], 422);
+                }
+
                 $guiding = new Guiding();
                 $guiding->user_id = auth()->id();
             }
@@ -822,6 +846,7 @@ class GuidingsController extends Controller
             'months' => json_decode($guiding->months, true),
         ];
 
+        // dd($formData);
         // Get necessary data for dropdowns
         $locale = Config::get('app.locale');
         $nameField = $locale == 'en' ? 'name_en' : 'name';
