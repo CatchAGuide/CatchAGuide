@@ -144,13 +144,13 @@
                         <div class="search-input flex-grow-1">
                             <i class="fa fa-search input-icon"></i>
                             
-                            <input id="searchPlace" type="text" 
+                            <input id="searchPlaceShortDesktop" type="text" 
                                    class="form-control" 
                                    name="place" 
                                    placeholder="@lang('homepage.searchbar-destination')"
                                    value="{{ request()->place }}" autocomplete="on">
-                            <input type="hidden" id="placeLat" name="placeLat" value="{{ request()->placeLat }}"/>
-                            <input type="hidden" id="placeLng" name="placeLng" value="{{ request()->placeLng }}"/>
+                            <input type="hidden" id="LocationLatShortDesktop" name="placeLat" value="{{ request()->placeLat }}"/>
+                            <input type="hidden" id="LocationLngShortDesktop" name="placeLng" value="{{ request()->placeLng }}"/>
                         </div>
                         <div class="search-input" style="width: 200px;">
                             <i class="fa fa-user input-icon"></i>

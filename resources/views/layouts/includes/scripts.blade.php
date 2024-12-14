@@ -171,6 +171,38 @@
             document.getElementById('LocationLat2').value = place2.geometry.location.lat();
             document.getElementById('LocationLng2').value = place2.geometry.location.lng();
         });
+        
+        var searchPlaceHeaderDesktop = document.getElementById('searchPlaceHeaderDesktop');
+        var autocompleteHeaderDesktop = new google.maps.places.Autocomplete(searchPlaceHeaderDesktop);
+        google.maps.event.addListener(autocompleteHeaderDesktop, 'place_changed', function () {
+            var placeHeaderDesktop = autocompleteHeaderDesktop.getPlace();
+            document.getElementById('LocationLatHeaderDesktop').value = placeHeaderDesktop.geometry.location.lat();
+            document.getElementById('LocationLngHeaderDesktop').value = placeHeaderDesktop.geometry.location.lng();
+        });
+        
+        var searchPlaceDesktop = document.getElementById('searchPlaceDesktop');
+        var autocompleteDesktop = new google.maps.places.Autocomplete(searchPlaceDesktop);
+        google.maps.event.addListener(autocompleteDesktop, 'place_changed', function () {
+            var placeDesktop = autocompleteDesktop.getPlace();
+            document.getElementById('LocationLatDesktop').value = placeDesktop.geometry.location.lat();
+            document.getElementById('LocationLngDesktop').value = placeDesktop.geometry.location.lng();
+        });
+
+        var searchPlaceMobile = document.getElementById('searchPlaceMobile');
+        var autocompleteMobile = new google.maps.places.Autocomplete(searchPlaceMobile);
+        google.maps.event.addListener(autocompleteMobile, 'place_changed', function () {
+            var placeMobile = autocompleteMobile.getPlace();
+            document.getElementById('LocationLatMobile').value = placeMobile.geometry.location.lat();
+            document.getElementById('LocationLngMobile').value = placeMobile.geometry.location.lng();
+        });
+
+        var searchPlaceShortDesktop = document.getElementById('searchPlaceShortDesktop');
+        var autocompleteShortDesktop = new google.maps.places.Autocomplete(searchPlaceShortDesktop);
+        google.maps.event.addListener(autocompleteShortDesktop, 'place_changed', function () {
+            var placeShortDesktop = autocompleteShortDesktop.getPlace();
+            document.getElementById('LocationLatShortDesktop').value = placeShortDesktop.geometry.location.lat();
+            document.getElementById('LocationLngShortDesktop').value = placeShortDesktop.geometry.location.lng();
+        });
     }
 
     window.addEventListener('load', initialize);
