@@ -867,7 +867,8 @@ class GuidingsController extends Controller
 
         $collections = [];
         foreach ($modelClasses as $key => $modelClass) {
-            $collections[$key] = $modelClass::all()->map(function($item) use ($nameField, $key) {
+            $collections[$key] = $modelClass::all()
+            ->map(function($item) use ($nameField, $key) {
                 return [
                     'value' => $item->$nameField,
                     'id' => $item->id

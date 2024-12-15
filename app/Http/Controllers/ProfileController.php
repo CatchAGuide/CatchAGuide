@@ -173,7 +173,8 @@ class ProfileController extends Controller
 
         $collections = [];
         foreach ($modelClasses as $key => $modelClass) {
-            $collections[$key] = $modelClass::all()->map(function($item) use ($nameField) {
+            $collections[$key] = $modelClass::all()
+            ->map(function($item) use ($nameField) {
                 return [
                     'value' => $item->$nameField,
                     'id' => $item->id

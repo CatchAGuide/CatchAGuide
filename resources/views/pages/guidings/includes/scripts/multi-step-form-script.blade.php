@@ -227,7 +227,7 @@
             });
 
             const extrasTagify = initTagify('input[name="boat_extras"]', {
-                whitelist: {!! json_encode($boat_extras->toArray()) !!}.sort(),
+                whitelist: {!! json_encode(collect($boat_extras)->sortBy('value')->values()->toArray()) !!},
                 dropdown: {
                     maxItems: Infinity,
                     classname: "tagify__dropdown",
@@ -243,7 +243,7 @@
 
             //target fish
             const targetFishTagify = initTagify('input[name="target_fish"]', {
-                whitelist: {!! json_encode($targets->toArray()) !!}.sort(),
+                whitelist: {!! json_encode(collect($targets)->sortBy('value')->values()->toArray()) !!}.sort(),
                 dropdown: {
                     maxItems: Infinity,
                     classname: "tagify__dropdown",
@@ -259,7 +259,7 @@
             
             //methods
             const methodsTagify = initTagify('input[name="methods"]', {
-                whitelist: {!! json_encode($methods->toArray()) !!}.sort(),
+                whitelist: {!! json_encode(collect($methods)->sortBy('value')->values()->toArray()) !!},
                 dropdown: {
                     maxItems: Infinity,
                     classname: "tagify__dropdown",
@@ -275,7 +275,7 @@
 
             //water types
             const waterTypesTagify = initTagify('input[name="water_types"]', {
-                whitelist: {!! json_encode($waters->toArray()) !!}.sort(),
+                whitelist: {!! json_encode(collect($waters)->sortBy('value')->values()->toArray()) !!},
                 dropdown: {
                     maxItems: Infinity,
                     classname: "tagify__dropdown",
@@ -291,7 +291,7 @@
 
             //inclussions
             const inclusionsTagify = initTagify('input[name="inclusions"]', {
-                whitelist: {!! json_encode($inclusions->toArray()) !!}.sort(),
+                whitelist: {!! json_encode(collect($inclusions)->sortBy('value')->values()->toArray()) !!},
                 dropdown: {
                     maxItems: Infinity,
                     classname: "tagify__dropdown",
@@ -1049,7 +1049,7 @@
 
         // Boat Extras
         initTagify('input[name="boat_extras"]', {
-            whitelist: {!! json_encode($boat_extras->toArray()) !!}.sort(),
+            whitelist: {!! json_encode(collect($boat_extras)->sortBy('value')->values()->toArray()) !!},
             dropdown: {
                 maxItems: Infinity,
                 classname: "tagify__dropdown",
@@ -1060,7 +1060,7 @@
 
         // Target Fish
         initTagify('input[name="target_fish"]', {
-            whitelist: {!! json_encode($targets->toArray()) !!}.sort(),
+            whitelist: {!! json_encode(collect($targets)->sortBy('value')->values()->toArray()) !!},
             dropdown: {
                 maxItems: Infinity,
                 classname: "tagify__dropdown",
@@ -1071,7 +1071,7 @@
 
         // Methods
         initTagify('input[name="methods"]', {
-            whitelist: {!! json_encode($methods->toArray()) !!}.sort(),
+            whitelist: {!! json_encode(collect($methods)->sortBy('value')->values()->toArray()) !!},
             maxTags: 10,
             dropdown: {
                 maxItems: Infinity,
@@ -1083,7 +1083,7 @@
 
         // Water Types
         initTagify('input[name="water_types"]', {
-            whitelist: {!! json_encode($waters->toArray()) !!}.sort(),
+            whitelist: {!! json_encode(collect($waters)->sortBy('value')->values()->toArray()) !!},
             maxTags: 10,
             dropdown: {
                 maxItems: Infinity,
@@ -1095,7 +1095,7 @@
 
         // Inclusions
         initTagify('input[name="inclusions"]', {
-            whitelist: {!! json_encode($inclusions->toArray()) !!}.sort(),
+            whitelist: {!! json_encode(collect($inclusions)->sortBy('value')->values()->toArray()) !!},
             maxTags: 10,
             dropdown: {
                 maxItems: Infinity,
