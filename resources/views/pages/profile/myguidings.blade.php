@@ -156,7 +156,7 @@
     <div class="tours-list__right">
       <div class="tours-list__inner">
         @if(count($guidings))
-          @foreach($guidings as $guiding)
+          @foreach($guidings as $guidingIndex => $guiding)
             <div class="row m-0 mb-2">
               <div class="col-sm-6 col-md-12">
                 <div class="row border shadow-sm bg-white xszzs">
@@ -348,7 +348,7 @@
                           </div>
                           <div class="mx-2">
                             <div class="tours-list__content__trait__text" style="font-size:0.75rem">
-                              {{ translate('Fishing from ')}}: {{$guiding->is_boat ? $guiding->boat_type : translate('Shore')}}
+                              {{ translate('Fishing from ')}}:  {{$guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
                             </div>
                           </div>
                         </div>
