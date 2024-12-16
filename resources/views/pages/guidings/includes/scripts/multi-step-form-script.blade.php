@@ -191,7 +191,7 @@
                 if (radioButton) {
                     radioButton.checked = true;
                     radioButton.dispatchEvent(new Event('change'));
-                    selectOption(typeOfFishingData);
+                    selectOption(typeOfFishingData, false);
                 }
             }
 
@@ -515,7 +515,7 @@
     });
 
     // Boat/Shore selection
-    function selectOption(option) {
+    function selectOption(option, isUpdate = false) {
         $('#boatOption, #shoreOption').removeClass('active');
         $(`#${option}Option`).addClass('active');
         $('input[name="type_of_fishing"]').val(option);
@@ -524,8 +524,9 @@
             $('#extraFields').show();
         } else {
             $('#extraFields').hide();
-            // Proceed to step 3 when 'shore' is selected
-            showStep(3);
+            if (isUpdate) {
+                showStep(3);
+            }
         }
     }
 
