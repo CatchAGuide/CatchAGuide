@@ -700,15 +700,12 @@
             const croppedImages = imageManagerLoaded.getCroppedImages();
             formData.delete('title_image[]');
 
-            console.log("cropped images", croppedImages);
             croppedImages.forEach((image, index) => {
                 if (image && image.dataUrl) {
                     const blob = dataURItoBlob(image.dataUrl);
                     formData.append(`title_image[]`, blob, `cropped_image_${index}.png`);
                 }
             });
-
-            const primaryImageIndex = imageManagerLoaded.getPrimaryImageIndex();
 
             fetch(form.action, {
                 method: 'POST',

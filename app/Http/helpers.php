@@ -108,10 +108,41 @@ if (!function_exists('media_upload')) {
         $webpImage = $image->encode('webp', $quality);
         
         $webp_path = $directory . '/' . $webpImageName;
+
+        // Check if file exists and delete it
+        if (Storage::disk('public')->exists($webp_path)) {
+            Storage::disk('public')->delete($webp_path);
+        }
+        if (file_exists(public_path($webp_path))) {
+            unlink(public_path($webp_path));
+        }
+
+        // Save new file
         Storage::disk('public')->put($webp_path, $webpImage->encoded);
         $webpImage->save(public_path($webp_path));
         
         return $webp_path;
+    }
+}
+
+if (!function_exists('media_delete')) {
+    function media_delete($path)
+    {
+        // Remove any double slashes
+        $path = str_replace('//', '/', $path);
+        
+        // Delete from storage
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+        
+        // Delete from public path
+        $publicPath = public_path($path);
+        if (file_exists($publicPath)) {
+            unlink($publicPath);
+        }
+        
+        return true;
     }
 }
 

@@ -71,13 +71,25 @@ class StoreNewGuidingRequest extends FormRequest
 
     protected function prepareForValidation()
     {
+        $trimmedData = [];
+        
+        // Get all fields that have 'string' in their validation rules
+        foreach ($this->rules() as $field => $rules) {
+            if (is_string($rules) && strpos($rules, 'string') !== false && $this->has($field)) {
+                $trimmedData[$field] = trim(mb_convert_encoding($this->input($field), 'UTF-8', 'auto'));
+            }
+        }
+
+        // Keep the existing specific field formatting
         $this->merge([
-            'title' => mb_convert_encoding($this->input('title'), 'UTF-8', 'auto'),
-            'location' => mb_convert_encoding($this->input('location'), 'UTF-8', 'auto'),
-            'boat_type' => mb_convert_encoding($this->input('boat_type'), 'UTF-8', 'auto'),
-            'course_of_action' => mb_convert_encoding($this->input('desc_course_of_action'), 'UTF-8', 'auto'),
-            'meeting_point' => mb_convert_encoding($this->input('desc_meeting_point'), 'UTF-8', 'auto'),
-            'tour_unique' => mb_convert_encoding($this->input('desc_tour_unique'), 'UTF-8', 'auto'),
+            'title' => mb_convert_encoding(trim($this->input('title')), 'UTF-8', 'auto'),
+            'location' => mb_convert_encoding(trim($this->input('location')), 'UTF-8', 'auto'),
+            'boat_type' => mb_convert_encoding(trim($this->input('boat_type')), 'UTF-8', 'auto'),
+            'course_of_action' => mb_convert_encoding(trim($this->input('desc_course_of_action')), 'UTF-8', 'auto'),
+            'meeting_point' => mb_convert_encoding(trim($this->input('desc_meeting_point')), 'UTF-8', 'auto'),
+            'tour_unique' => mb_convert_encoding(trim($this->input('desc_tour_unique')), 'UTF-8', 'auto'),
         ]);
+
+        $this->merge($trimmedData);
     }
 }
