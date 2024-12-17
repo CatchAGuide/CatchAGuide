@@ -2,6 +2,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+<script src="https://cdn.jsdelivr.net/npm/browser-image-compression@latest/dist/browser-image-compression.js"></script>
 <script src="{{ asset('assets/js/ImageManager.js') }}"></script>
 
 <script>
@@ -687,7 +688,81 @@
         }
     }
 
-    // Add this function to handle form submission
+    // // Add this function to handle form submission
+    // function submitForm(form) {
+    //     const formData = new FormData(form);
+
+    //     try {
+    //         if (!imageManagerLoaded) {
+    //             console.error('ImageManager not initialized');
+    //             return;
+    //         }
+
+    //         const croppedImages = imageManagerLoaded.getCroppedImages();
+    //         formData.delete('title_image[]');
+
+    //         croppedImages.forEach((image, index) => {
+    //             if (image && image.dataUrl) {
+                    
+    //                 const blob = dataURItoBlob(image.dataUrl);
+    //                 formData.append(`title_image[]`, blob, `cropped_image_${index}.png`);
+    //             }
+    //         });
+
+    //         fetch(form.action, {
+    //             method: 'POST',
+    //             body: formData,
+    //             headers: {
+    //                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+    //                 'Accept': 'application/json'
+    //             }
+    //         })
+    //         .then(response => {
+    //             if (!response.ok) {
+    //                 return response.text().then(text => {
+    //                     try {
+    //                         return JSON.parse(text);
+    //                     } catch (e) {
+    //                         throw new Error(text);
+    //                     }
+    //                 });
+    //             }
+    //             return response.json();
+    //         })
+    //         .then(data => {
+    //             if (data.redirect_url) {
+    //                 window.location.href = data.redirect_url;
+    //             } else {
+    //                 displayValidationErrors(data.errors);
+    //             }
+    //         })
+    //         .catch(error => {
+    //             console.error('Error submitting form:', error);
+    //             if (error instanceof Error) {
+    //                 if (error.message.startsWith('<!DOCTYPE html>')) {
+    //                     console.error('Server returned an HTML error page. Check server logs for details.');
+    //                     alert('An unexpected error occurred. Please try again later.');
+    //                 } else {
+    //                     console.error(error.message);
+    //                     alert(error.message);
+    //                 }
+    //             } else if (typeof error === 'object' && error !== null) {
+    //                 displayValidationErrors(error.errors || {});
+    //             } else {
+    //                 alert('An unexpected error occurred. Please try again.');
+    //             }
+    //         })
+    //         .finally(() => {
+    //             const loadingScreen = document.getElementById('loadingScreen');
+    //             if (loadingScreen) {
+    //                 loadingScreen.style.display = 'none';
+    //             }
+    //         });
+    //     } catch (error) {
+    //         console.error('Error preparing form data:', error);
+    //         alert('An error occurred while preparing the form data. Please try again.');
+    //     }
+    // }
     function submitForm(form) {
         const formData = new FormData(form);
 
@@ -700,67 +775,122 @@
             const croppedImages = imageManagerLoaded.getCroppedImages();
             formData.delete('title_image[]');
 
-            croppedImages.forEach((image, index) => {
-                if (image && image.dataUrl) {
-                    const blob = dataURItoBlob(image.dataUrl);
-                    formData.append(`title_image[]`, blob, `cropped_image_${index}.png`);
-                }
-            });
+            // Compression options
+            const maxWidth = 1024; // Maximum width or height of the image
+            const quality = 0.7;   // Compression quality (0.1 = low, 1 = high)
 
-            fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        try {
-                            return JSON.parse(text);
-                        } catch (e) {
-                            throw new Error(text);
+            // Function to compress image
+            const compressImage = (dataUrl, maxWidth, quality) => {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.src = dataUrl;
+
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+
+                        // Set new dimensions proportionally
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height && width > maxWidth) {
+                            height *= maxWidth / width;
+                            width = maxWidth;
+                        } else if (height > width && height > maxWidth) {
+                            width *= maxWidth / height;
+                            height = maxWidth;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        // Draw and compress the image
+                        ctx.drawImage(img, 0, 0, width, height);
+                        canvas.toBlob(
+                            (blob) => {
+                                if (blob) resolve(blob);
+                                else reject(new Error('Compression failed'));
+                            },
+                            'image/jpeg',
+                            quality
+                        );
+                    };
+
+                    img.onerror = () => reject(new Error('Failed to load image for compression'));
+                });
+            };
+
+            // Process cropped images
+            Promise.all(
+                croppedImages.map((image, index) => {
+                    if (image && image.dataUrl) {
+                        return compressImage(image.dataUrl, maxWidth, quality).then((compressedBlob) => {
+                            formData.append(`title_image[]`, compressedBlob, `compressed_image_${index}.jpg`);
+                        });
+                    }
+                })
+            ).then(() => {
+                // Submit the form after compression
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.text().then(text => {
+                                try {
+                                    return JSON.parse(text);
+                                } catch (e) {
+                                    throw new Error(text);
+                                }
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.redirect_url) {
+                            window.location.href = data.redirect_url;
+                        } else {
+                            displayValidationErrors(data.errors);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error submitting form:', error);
+                        if (error instanceof Error) {
+                            if (error.message.startsWith('<!DOCTYPE html>')) {
+                                console.error('Server returned an HTML error page. Check server logs for details.');
+                                alert('An unexpected error occurred. Please try again later.');
+                            } else {
+                                console.error(error.message);
+                                alert(error.message);
+                            }
+                        } else if (typeof error === 'object' && error !== null) {
+                            displayValidationErrors(error.errors || {});
+                        } else {
+                            alert('An unexpected error occurred. Please try again.');
+                        }
+                    })
+                    .finally(() => {
+                        const loadingScreen = document.getElementById('loadingScreen');
+                        if (loadingScreen) {
+                            loadingScreen.style.display = 'none';
                         }
                     });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.redirect_url) {
-                    window.location.href = data.redirect_url;
-                } else {
-                    displayValidationErrors(data.errors);
-                }
-            })
-            .catch(error => {
-                console.error('Error submitting form:', error);
-                if (error instanceof Error) {
-                    if (error.message.startsWith('<!DOCTYPE html>')) {
-                        console.error('Server returned an HTML error page. Check server logs for details.');
-                        alert('An unexpected error occurred. Please try again later.');
-                    } else {
-                        console.error(error.message);
-                        alert(error.message);
-                    }
-                } else if (typeof error === 'object' && error !== null) {
-                    displayValidationErrors(error.errors || {});
-                } else {
-                    alert('An unexpected error occurred. Please try again.');
-                }
-            })
-            .finally(() => {
-                const loadingScreen = document.getElementById('loadingScreen');
-                if (loadingScreen) {
-                    loadingScreen.style.display = 'none';
-                }
+            }).catch(error => {
+                console.error('Image compression error:', error);
+                alert('Failed to compress images. Please try again.');
             });
+
         } catch (error) {
             console.error('Error preparing form data:', error);
             alert('An error occurred while preparing the form data. Please try again.');
         }
     }
+
 
     function displayValidationErrors(errors) {
         scrollToFormCenter();
