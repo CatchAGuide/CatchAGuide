@@ -421,7 +421,7 @@ class GuidingsController extends Controller
                     }
                     
                     $index = $index + $imageCount;
-                    $webp_path = media_upload($image, 'guidings-images', $guiding->slug. "-". $index . "-" . date('Y-m-d-H-i-s'));
+                    $webp_path = media_upload($image, 'guidings-images', $guiding->slug. "-". $index . "-" . time());
                     $galeryImages[] = $webp_path;
                 }
             }
@@ -574,35 +574,7 @@ class GuidingsController extends Controller
                 }
             }
 
-            Log::info($request->all());
-            Log::info($guiding);
-            $existingGuiding = Guiding::where([
-                'title' => trim($request->input('title')),
-                'location' => trim($request->input('location')), 
-                'city' => trim($request->input('city')),
-                'country' => trim($request->input('country')),
-                'lat' => trim($request->input('latitude')),
-                'lng' => trim($request->input('longitude')),
-                'user_id' => auth()->id(),
-                'duration' => $request->input('duration') == 'multi_day' ? $request->input('duration_days') : $request->input('duration_hours'),
-                'tour_type' => $request->input('tour_type')
-            ])
-            ->where(function($query) use ($request) {
-                $query->where('is_boat', $request->input('type_of_fishing') == 'boat' ? 1 : 0)
-                        ->where('fishing_from_id', $request->input('type_of_fishing') == 'boat' ? 1 : 2);
-            })
-            ->first();
-
-            if ($existingGuiding) {
-                Log::error('A similar guiding already exists.', $request->all());
-                return response()->json([
-                    'error' => 'A similar guiding already exists.'
-                ], 422);
-            } else {
-                $guiding->save();
-                Log::error('No similar guiding found.', $request->all());
-            }
-
+            $guiding->save();
             DB::commit();
 
             return response()->json([

@@ -103,8 +103,10 @@ if (!function_exists('media_upload')) {
             
             $image->resize($newWidth, $newHeight);
         }
-        
-        $webpImageName = pathinfo($filename, PATHINFO_FILENAME) . '.webp';
+
+        // Hash the filename
+        $hashedName = md5(pathinfo($filename, PATHINFO_FILENAME) . time());
+        $webpImageName = $hashedName . '.webp';
         $webpImage = $image->encode('webp', $quality);
         
         $webp_path = $directory . '/' . $webpImageName;

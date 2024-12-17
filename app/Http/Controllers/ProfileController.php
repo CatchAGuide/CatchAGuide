@@ -142,8 +142,54 @@ class ProfileController extends Controller
 
     public function myguidings()
     {
+        // Get all guidings for the authenticated user and check for duplicates
+        $allGuidings = Guiding::where('user_id', auth()->user()->id)->get();
+        $duplicatesRemoved = false;
+        
+        // Group guidings by their attributes to find duplicates
+        $groupedGuidings = $allGuidings->groupBy(function($guiding) {
+            return implode('|', [
+                $guiding->title,
+                $guiding->city,
+                $guiding->lat,
+                $guiding->lng,
+                $guiding->country,
+                $guiding->location,
+                $guiding->type_of_fishing,
+                $guiding->type_of_boat,
+                $guiding->target_fish,
+                $guiding->methods,
+                $guiding->water_types,
+                $guiding->style_of_fishing,
+                $guiding->tour_type,
+                $guiding->duration,
+                $guiding->no_guest,
+                $guiding->price_type
+            ]);
+        });
+
+        // For each group of duplicates, keep only the newest one
+        foreach($groupedGuidings as $group) {
+            if($group->count() > 1) {
+                $duplicatesRemoved = true;
+                // Sort by created_at in descending order and keep the first one
+                $sortedGroup = $group->sortByDesc('created_at');
+                $keepGuiding = $sortedGroup->first();
+                
+                // Delete all other duplicates
+                foreach($sortedGroup->slice(1) as $duplicate) {
+                    $duplicate->delete();
+                }
+            }
+        }
+
+        // Get fresh data after removing duplicates
         $guidings = Guiding::where('user_id', auth()->user()->id)->paginate(20);
 
+        // Add a flash message if duplicates were removed
+        if($duplicatesRemoved) {
+            session()->flash('message', 'Duplicate guidings have been automatically removed.');
+        }
 
         return view('pages.profile.myguidings',[
             'guidings' => $guidings
