@@ -2,6 +2,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+<script src="https://cdn.jsdelivr.net/npm/browser-image-compression@latest/dist/browser-image-compression.js"></script>
 <script src="{{ asset('assets/js/ImageManager.js') }}"></script>
 
 <script>
@@ -191,7 +192,7 @@
                 if (radioButton) {
                     radioButton.checked = true;
                     radioButton.dispatchEvent(new Event('change'));
-                    selectOption(typeOfFishingData);
+                    selectOption(typeOfFishingData, false);
                 }
             }
 
@@ -227,7 +228,7 @@
             });
 
             const extrasTagify = initTagify('input[name="boat_extras"]', {
-                whitelist: {!! json_encode($boat_extras->toArray()) !!}.sort(),
+                whitelist: {!! json_encode(collect($boat_extras)->sortBy('value')->values()->toArray()) !!},
                 dropdown: {
                     maxItems: Infinity,
                     classname: "tagify__dropdown",
@@ -243,7 +244,7 @@
 
             //target fish
             const targetFishTagify = initTagify('input[name="target_fish"]', {
-                whitelist: {!! json_encode($targets->toArray()) !!}.sort(),
+                whitelist: {!! json_encode(collect($targets)->sortBy('value')->values()->toArray()) !!}.sort(),
                 dropdown: {
                     maxItems: Infinity,
                     classname: "tagify__dropdown",
@@ -259,7 +260,7 @@
             
             //methods
             const methodsTagify = initTagify('input[name="methods"]', {
-                whitelist: {!! json_encode($methods->toArray()) !!}.sort(),
+                whitelist: {!! json_encode(collect($methods)->sortBy('value')->values()->toArray()) !!},
                 dropdown: {
                     maxItems: Infinity,
                     classname: "tagify__dropdown",
@@ -275,7 +276,7 @@
 
             //water types
             const waterTypesTagify = initTagify('input[name="water_types"]', {
-                whitelist: {!! json_encode($waters->toArray()) !!}.sort(),
+                whitelist: {!! json_encode(collect($waters)->sortBy('value')->values()->toArray()) !!},
                 dropdown: {
                     maxItems: Infinity,
                     classname: "tagify__dropdown",
@@ -291,7 +292,7 @@
 
             //inclussions
             const inclusionsTagify = initTagify('input[name="inclusions"]', {
-                whitelist: {!! json_encode($inclusions->toArray()) !!}.sort(),
+                whitelist: {!! json_encode(collect($inclusions)->sortBy('value')->values()->toArray()) !!},
                 dropdown: {
                     maxItems: Infinity,
                     classname: "tagify__dropdown",
@@ -515,7 +516,7 @@
     });
 
     // Boat/Shore selection
-    function selectOption(option) {
+    function selectOption(option, isUpdate = false) {
         $('#boatOption, #shoreOption').removeClass('active');
         $(`#${option}Option`).addClass('active');
         $('input[name="type_of_fishing"]').val(option);
@@ -524,8 +525,9 @@
             $('#extraFields').show();
         } else {
             $('#extraFields').hide();
-            // Proceed to step 3 when 'shore' is selected
-            showStep(3);
+            if (isUpdate) {
+                showStep(3);
+            }
         }
     }
 
@@ -686,7 +688,81 @@
         }
     }
 
-    // Add this function to handle form submission
+    // // Add this function to handle form submission
+    // function submitForm(form) {
+    //     const formData = new FormData(form);
+
+    //     try {
+    //         if (!imageManagerLoaded) {
+    //             console.error('ImageManager not initialized');
+    //             return;
+    //         }
+
+    //         const croppedImages = imageManagerLoaded.getCroppedImages();
+    //         formData.delete('title_image[]');
+
+    //         croppedImages.forEach((image, index) => {
+    //             if (image && image.dataUrl) {
+                    
+    //                 const blob = dataURItoBlob(image.dataUrl);
+    //                 formData.append(`title_image[]`, blob, `cropped_image_${index}.png`);
+    //             }
+    //         });
+
+    //         fetch(form.action, {
+    //             method: 'POST',
+    //             body: formData,
+    //             headers: {
+    //                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+    //                 'Accept': 'application/json'
+    //             }
+    //         })
+    //         .then(response => {
+    //             if (!response.ok) {
+    //                 return response.text().then(text => {
+    //                     try {
+    //                         return JSON.parse(text);
+    //                     } catch (e) {
+    //                         throw new Error(text);
+    //                     }
+    //                 });
+    //             }
+    //             return response.json();
+    //         })
+    //         .then(data => {
+    //             if (data.redirect_url) {
+    //                 window.location.href = data.redirect_url;
+    //             } else {
+    //                 displayValidationErrors(data.errors);
+    //             }
+    //         })
+    //         .catch(error => {
+    //             console.error('Error submitting form:', error);
+    //             if (error instanceof Error) {
+    //                 if (error.message.startsWith('<!DOCTYPE html>')) {
+    //                     console.error('Server returned an HTML error page. Check server logs for details.');
+    //                     alert('An unexpected error occurred. Please try again later.');
+    //                 } else {
+    //                     console.error(error.message);
+    //                     alert(error.message);
+    //                 }
+    //             } else if (typeof error === 'object' && error !== null) {
+    //                 displayValidationErrors(error.errors || {});
+    //             } else {
+    //                 alert('An unexpected error occurred. Please try again.');
+    //             }
+    //         })
+    //         .finally(() => {
+    //             const loadingScreen = document.getElementById('loadingScreen');
+    //             if (loadingScreen) {
+    //                 loadingScreen.style.display = 'none';
+    //             }
+    //         });
+    //     } catch (error) {
+    //         console.error('Error preparing form data:', error);
+    //         alert('An error occurred while preparing the form data. Please try again.');
+    //     }
+    // }
     function submitForm(form) {
         const formData = new FormData(form);
 
@@ -699,72 +775,125 @@
             const croppedImages = imageManagerLoaded.getCroppedImages();
             formData.delete('title_image[]');
 
-            console.log("cropped images", croppedImages);
-            croppedImages.forEach((image, index) => {
-                if (image && image.dataUrl) {
-                    const blob = dataURItoBlob(image.dataUrl);
-                    formData.append(`title_image[]`, blob, `cropped_image_${index}.png`);
-                }
-            });
+            // Compression options
+            const maxWidth = 1024; // Maximum width or height of the image
+            const quality = 0.7;   // Compression quality (0.1 = low, 1 = high)
 
-            const primaryImageIndex = imageManagerLoaded.getPrimaryImageIndex();
+            // Function to compress image
+            const compressImage = (dataUrl, maxWidth, quality) => {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.src = dataUrl;
 
-            fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        try {
-                            return JSON.parse(text);
-                        } catch (e) {
-                            throw new Error(text);
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+
+                        // Set new dimensions proportionally
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height && width > maxWidth) {
+                            height *= maxWidth / width;
+                            width = maxWidth;
+                        } else if (height > width && height > maxWidth) {
+                            width *= maxWidth / height;
+                            height = maxWidth;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        // Draw and compress the image
+                        ctx.drawImage(img, 0, 0, width, height);
+                        canvas.toBlob(
+                            (blob) => {
+                                if (blob) resolve(blob);
+                                else reject(new Error('Compression failed'));
+                            },
+                            'image/jpeg',
+                            quality
+                        );
+                    };
+
+                    img.onerror = () => reject(new Error('Failed to load image for compression'));
+                });
+            };
+
+            // Process cropped images
+            Promise.all(
+                croppedImages.map((image, index) => {
+                    if (image && image.dataUrl) {
+                        return compressImage(image.dataUrl, maxWidth, quality).then((compressedBlob) => {
+                            formData.append(`title_image[]`, compressedBlob, `compressed_image_${index}.jpg`);
+                        });
+                    }
+                })
+            ).then(() => {
+                // Submit the form after compression
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.text().then(text => {
+                                try {
+                                    return JSON.parse(text);
+                                } catch (e) {
+                                    throw new Error(text);
+                                }
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.redirect_url) {
+                            window.location.href = data.redirect_url;
+                        } else {
+                            displayValidationErrors(data.errors);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error submitting form:', error);
+                        if (error instanceof Error) {
+                            if (error.message.startsWith('<!DOCTYPE html>')) {
+                                console.error('Server returned an HTML error page. Check server logs for details.');
+                                alert('An unexpected error occurred. Please try again later.');
+                            } else {
+                                console.error(error.message);
+                                alert(error.message);
+                            }
+                        } else if (typeof error === 'object' && error !== null) {
+                            displayValidationErrors(error.errors || {});
+                        } else {
+                            alert('An unexpected error occurred. Please try again.');
+                        }
+                    })
+                    .finally(() => {
+                        const loadingScreen = document.getElementById('loadingScreen');
+                        if (loadingScreen) {
+                            loadingScreen.style.display = 'none';
                         }
                     });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.redirect_url) {
-                    window.location.href = data.redirect_url;
-                } else {
-                    displayValidationErrors(data.errors);
-                }
-            })
-            .catch(error => {
-                console.error('Error submitting form:', error);
-                if (error instanceof Error) {
-                    if (error.message.startsWith('<!DOCTYPE html>')) {
-                        console.error('Server returned an HTML error page. Check server logs for details.');
-                        alert('An unexpected error occurred. Please try again later.');
-                    } else {
-                        console.error(error.message);
-                        alert(error.message);
-                    }
-                } else if (typeof error === 'object' && error !== null) {
-                    displayValidationErrors(error.errors || {});
-                } else {
-                    alert('An unexpected error occurred. Please try again.');
-                }
-            })
-            .finally(() => {
-                const loadingScreen = document.getElementById('loadingScreen');
-                if (loadingScreen) {
-                    loadingScreen.style.display = 'none';
-                }
+            }).catch(error => {
+                console.error('Image compression error:', error);
+                alert('Failed to compress images. Please try again.');
             });
+
         } catch (error) {
             console.error('Error preparing form data:', error);
             alert('An error occurred while preparing the form data. Please try again.');
         }
     }
 
+
     function displayValidationErrors(errors) {
+        scrollToFormCenter();
         const errorContainer = document.getElementById('error-container');
         errorContainer.innerHTML = ''; // Clear previous errors
         errorContainer.style.display = 'block'; // Show the error container
@@ -1049,7 +1178,7 @@
 
         // Boat Extras
         initTagify('input[name="boat_extras"]', {
-            whitelist: {!! json_encode($boat_extras->toArray()) !!}.sort(),
+            whitelist: {!! json_encode(collect($boat_extras)->sortBy('value')->values()->toArray()) !!},
             dropdown: {
                 maxItems: Infinity,
                 classname: "tagify__dropdown",
@@ -1060,7 +1189,7 @@
 
         // Target Fish
         initTagify('input[name="target_fish"]', {
-            whitelist: {!! json_encode($targets->toArray()) !!}.sort(),
+            whitelist: {!! json_encode(collect($targets)->sortBy('value')->values()->toArray()) !!},
             dropdown: {
                 maxItems: Infinity,
                 classname: "tagify__dropdown",
@@ -1071,7 +1200,7 @@
 
         // Methods
         initTagify('input[name="methods"]', {
-            whitelist: {!! json_encode($methods->toArray()) !!}.sort(),
+            whitelist: {!! json_encode(collect($methods)->sortBy('value')->values()->toArray()) !!},
             maxTags: 10,
             dropdown: {
                 maxItems: Infinity,
@@ -1083,7 +1212,7 @@
 
         // Water Types
         initTagify('input[name="water_types"]', {
-            whitelist: {!! json_encode($waters->toArray()) !!}.sort(),
+            whitelist: {!! json_encode(collect($waters)->sortBy('value')->values()->toArray()) !!},
             maxTags: 10,
             dropdown: {
                 maxItems: Infinity,
@@ -1095,7 +1224,7 @@
 
         // Inclusions
         initTagify('input[name="inclusions"]', {
-            whitelist: {!! json_encode($inclusions->toArray()) !!}.sort(),
+            whitelist: {!! json_encode(collect($inclusions)->sortBy('value')->values()->toArray()) !!},
             maxTags: 10,
             dropdown: {
                 maxItems: Infinity,

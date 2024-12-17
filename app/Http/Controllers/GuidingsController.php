@@ -375,33 +375,11 @@ class GuidingsController extends Controller
             if ($request->input('is_update') == '1') {
                 $guiding = Guiding::findOrFail($request->input('guiding_id'));
             } else {
-                // Check for duplicates only on new creation
-                $existingGuiding = Guiding::where([
-                    'title' => trim($request->input('title')),
-                    'location' => trim($request->input('location')), 
-                    'city' => trim($request->input('city')),
-                    'country' => trim($request->input('country')),
-                    'lat' => trim($request->input('latitude')),
-                    'lng' => trim($request->input('longitude')),
-                    'user_id' => auth()->id(),
-                    'duration' => $request->input('duration') == 'multi_day' ? $request->input('duration_days') : $request->input('duration_hours'),
-                    'tour_type' => $request->input('tour_type')
-                ])
-                ->where(function($query) use ($request) {
-                    $query->where('is_boat', $request->input('type_of_fishing') == 'boat' ? 1 : 0)
-                          ->where('fishing_from_id', $request->input('type_of_fishing') == 'boat' ? 1 : 2);
-                })
-                ->first();
-
-                if ($existingGuiding) {
-                    return response()->json([
-                        'error' => 'A similar guiding already exists.'
-                    ], 422);
-                }
-
                 $guiding = new Guiding();
                 $guiding->user_id = auth()->id();
             }
+
+            Log::info($guiding);
 
             $guiding->is_newguiding = 1;
             $guiding->slug = slugify($request->input('title') . "-" . $request->input('location') . "-" . auth()->id());
@@ -415,21 +393,50 @@ class GuidingsController extends Controller
             $guiding->city = $request->has('city') ? $request->input('city') : '';
             
             $galeryImages = [];
-            if ($request->has('title_image')) {
-                foreach($request->file('title_image') as $index => $image){
-                    $webp_path = media_upload($image, 'guidings-images', $guiding->slug. "-". $index);
-    
-                    if ($index == $request->input('primaryImage', 0)) {
-                        $guiding->thumbnail_path = $webp_path;
+            $imageList = json_decode($request->input('image_list'));
+
+            if ($request->input('is_update') == '1') {
+                // Get existing images from request
+                $existingImagesJson = $request->input('existing_images');
+                $existingImages = json_decode($existingImagesJson, true);
+                
+                // Get image list that should be kept
+                $keepImages = array_filter($imageList);
+                
+                // Only keep images that are in the image_list
+                foreach ($existingImages as $existingImage) {
+                    if (in_array('/' . $existingImage, $keepImages)) {
+                        $galeryImages[] = $existingImage;
+                    } else {
+                        media_delete($existingImage);
                     }
+                }
+            }
+
+            if ($request->has('title_image')) {
+                $imageCount = count($galeryImages);
+                foreach($request->file('title_image') as $index => $image){
+                    if (in_array($image->getClientOriginalName(), $imageList)) {
+                        continue;
+                    }
+                    
+                    $index = $index + $imageCount;
+                    $webp_path = media_upload($image, 'guidings-images', $guiding->slug. "-". $index . "-" . time());
                     $galeryImages[] = $webp_path;
                 }
             }
+
+            foreach($galeryImages as $index => $image){
+                if($index == $request->input('primaryImage', 0)){
+                    $guiding->thumbnail_path = $image;
+                }
+            }
+
             $guiding->gallery_images = json_encode($galeryImages);
 
             //step 2
             $guiding->is_boat = $request->has('type_of_fishing') ? ($request->input('type_of_fishing') == 'boat' ? 1 : 0) : 0;
-            $guiding->fishing_from_id = $request->has('type_of_fishing') ? ($request->input('type_of_fishing') == 'boat' ? 1 : 2) : 2;
+            $guiding->fishing_from_id = (int) $request->has('type_of_fishing') ? ($request->input('type_of_fishing') == 'boat' ? 1 : 2) : 2;
             if ($guiding->is_boat) {
                 $guiding->boat_type = $request->has('type_of_boat') ? $request->input('type_of_boat') : '';
                 $guiding->boat_information = $this->saveDescriptions($request);
@@ -445,7 +452,7 @@ class GuidingsController extends Controller
             $methods = $request->has('methods') ? collect(json_decode($request->input('methods')))->pluck('id') : [];
             $guiding->fishing_methods = json_encode($methods);
             
-            $guiding->fishing_type_id = $request->has('style_of_fishing') ? $request->input('style_of_fishing') : 3; 
+            $guiding->fishing_type_id = (int) $request->has('style_of_fishing') ? $request->input('style_of_fishing') : 3; 
             
             $waterTypes = $request->has('water_types') ? collect(json_decode($request->input('water_types')))->pluck('id') : [];
             $guiding->water_types = json_encode($waterTypes);
@@ -456,7 +463,7 @@ class GuidingsController extends Controller
             $guiding->meeting_point = $request->has('meeting_point') ? $request->input('desc_meeting_point') : '';
             $guiding->desc_starting_time = $request->has('desc_starting_time') ? $request->input('desc_starting_time') : '';
             $guiding->desc_tour_unique = $request->has('desc_tour_unique') ? $request->input('desc_tour_unique') : '';
-            $guiding->description = $this->generateLongDescription($request);
+            $guiding->description = $request->has('desc_course_of_action') ? $request->input('desc_course_of_action') : $this->generateLongDescription($request);
 
             //step 5
             $guiding->requirements = $this->saveRequirements($request);
@@ -468,12 +475,12 @@ class GuidingsController extends Controller
 
             $guiding->duration_type = $request->has('duration') ? $request->input('duration') : '';
             if ($request->input('duration') == 'multi_day') {
-                $guiding->duration = $request->input('duration_days');
+                $guiding->duration = (int) $request->input('duration_days');
             } else {
-                $guiding->duration = $request->input('duration_hours');
+                $guiding->duration = (int) $request->input('duration_hours');
             }
 
-            $guiding->max_guests = $request->has('no_guest') ? $request->input('no_guest') : 0;
+            $guiding->max_guests = (int) $request->has('no_guest') ? $request->input('no_guest') : 0;
 
             if ($request->has('price_type') ) {
                 $guiding->price_type = $request->input('price_type');
@@ -491,8 +498,8 @@ class GuidingsController extends Controller
                     $guiding->prices = json_encode($pricePerPerson);
                     $guiding->price = 0;
                 } else {
-                    $guiding->prices = json_encode([ 'person' => 0, 'amount' => $request->input('price_per_boat')]);
-                    $guiding->price = $request->input('price_per_boat');
+                    $guiding->prices = json_encode([ 'person' => 0, 'amount' => (float) $request->input('price_per_boat')]);
+                    $guiding->price = (float) $request->input('price_per_boat');
                 }
             }
             
@@ -568,7 +575,6 @@ class GuidingsController extends Controller
             }
 
             $guiding->save();
-
             DB::commit();
 
             return response()->json([
@@ -846,8 +852,6 @@ class GuidingsController extends Controller
             'months' => json_decode($guiding->months, true),
         ];
 
-        // dd($formData);
-        // Get necessary data for dropdowns
         $locale = Config::get('app.locale');
         $nameField = $locale == 'en' ? 'name_en' : 'name';
 
@@ -867,7 +871,8 @@ class GuidingsController extends Controller
 
         $collections = [];
         foreach ($modelClasses as $key => $modelClass) {
-            $collections[$key] = $modelClass::all()->map(function($item) use ($nameField, $key) {
+            $collections[$key] = $modelClass::all()
+            ->map(function($item) use ($nameField, $key) {
                 return [
                     'value' => $item->$nameField,
                     'id' => $item->id

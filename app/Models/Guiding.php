@@ -717,9 +717,7 @@ class Guiding extends Model
             ->map(function($method) {
                 return [
                     'id' => $method->id,
-                    'name' => app()->getLocale() == "en" && $method->name_en 
-                        ? $method->name_en 
-                        : $method->name
+                    'name' => $method->name
                 ];
             })
             ->toArray();
@@ -744,9 +742,7 @@ class Guiding extends Model
             ->map(function($target) {
                 return [
                     'id' => $target->id,
-                    'name' => app()->getLocale() == "en" && $target->name_en 
-                        ? $target->name_en 
-                        : $target->name
+                    'name' => $target->name
                 ];
             })
             ->toArray();
@@ -770,9 +766,7 @@ class Guiding extends Model
             ->map(function($inclusion) {
                 return [
                     'id' => $inclusion->id,
-                    'name' => app()->getLocale() == "en" && $inclusion->name_en 
-                        ? $inclusion->name_en 
-                        : $inclusion->name
+                    'name' => $inclusion->name
                 ];
             })
             ->toArray();
@@ -796,9 +790,7 @@ class Guiding extends Model
             ->map(function($water) {
                 return [
                     'id' => $water->id,
-                    'name' => app()->getLocale() == "en" && $water->name_en 
-                        ? $water->name_en 
-                        : $water->name
+                    'name' => $water->name
                 ];
             })
             ->toArray();
