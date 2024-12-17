@@ -850,9 +850,10 @@ class Guiding extends Model
         return GuidingAdditionalInformation::whereIn('id', array_keys($otherInformationData->all()))
             ->get()
             ->map(function ($otherInformation) use ($otherInformationData) {
+                $data = $otherInformationData[$otherInformation->id];
                 return [
                     'id' => $otherInformation->id,
-                    'value' => $otherInformationData[$otherInformation->id],
+                    'value' => isset($data['value']) ? $data['value'] : $data,
                     'name' => $otherInformation->name
                 ];
             });
@@ -869,9 +870,10 @@ class Guiding extends Model
         return GuidingRecommendations::whereIn('id', array_keys($recommendationsData->all()))
             ->get()
             ->map(function ($recommendation) use ($recommendationsData) {
+                $data = $recommendationsData[$recommendation->id];
                 return [
                     'id' => $recommendation->id,
-                    'value' => $recommendationsData[$recommendation->id],
+                    'value' => isset($data['value']) ? $data['value'] : $data,
                     'name' => $recommendation->name
                 ];
             });
@@ -888,9 +890,10 @@ class Guiding extends Model
         return GuidingBoatDescription::whereIn('id', array_keys($boatInformationData->all()))
             ->get()
             ->map(function ($boatInformation) use ($boatInformationData) {
+                $data = $boatInformationData[$boatInformation->id];
                 return [
                     'id' => $boatInformation->id,
-                    'value' => $boatInformationData[$boatInformation->id],
+                    'value' => isset($data['value']) ? $data['value'] : $data,
                     'name' => $boatInformation->name
                 ];
             });
