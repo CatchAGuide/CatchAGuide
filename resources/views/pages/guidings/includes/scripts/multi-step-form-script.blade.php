@@ -763,6 +763,7 @@
     }
 
     function displayValidationErrors(errors) {
+        scrollToFormCenter();
         const errorContainer = document.getElementById('error-container');
         errorContainer.innerHTML = ''; // Clear previous errors
         errorContainer.style.display = 'block'; // Show the error container
