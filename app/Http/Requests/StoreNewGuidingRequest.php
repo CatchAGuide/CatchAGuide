@@ -12,7 +12,7 @@ class StoreNewGuidingRequest extends FormRequest
         $rules = [
             'is_draft' => 'sometimes|boolean',
             'title' => 'required|string|max:255',
-            'title_image' => 'required|array',
+            'title_image' => 'nullable|array',
             'title_image.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'primaryImage' => 'required|integer|min:0',
             'location' => 'required|string|max:255',
