@@ -586,7 +586,7 @@ class GuidingsController extends Controller
             DB::rollBack();
             Log::error('Error in guidingsStore: ' . $e->getMessage());
             Log::error($e->getTraceAsString());
-            return response()->json(['error' => 'An error occurred while processing your request.'], 500);
+            return response()->json(['error' => 'An error occurred while processing your request.' . $e->getMessage()], 500);
         }
     }
 
