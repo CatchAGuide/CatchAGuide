@@ -296,7 +296,9 @@ class Checkout extends Component
         $user->information->phone = $booking->phone;
         $user->information->save();
 
-        // SendCheckoutEmail::dispatch($booking,$user,$this->guiding,$this->guiding->user);
+        if (!app()->environment('local')) {
+            SendCheckoutEmail::dispatch($booking,$user,$this->guiding,$this->guiding->user);
+        }
         
         sleep(5);
 
