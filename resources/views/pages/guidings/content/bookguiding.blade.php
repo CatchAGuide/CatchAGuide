@@ -9,16 +9,9 @@
                             <div class="booking-select mb-md-3">
                                 <select class="form-select" aria-label="Personenanzahl" name="person" required>
                                     <option selected disabled>{{ translate('Please select number of people') }}</option>
-                                    @if($guiding->price_type == 'per_person')
-                                        @foreach(json_decode($guiding->prices) as $price)
-                                            <option value="{{ $price->person }}">{{ $price->person }} {{ $price->person == 1 ? 'Person' : 'Personen' }}</option>
-                                        @endforeach
-                                    @else
-                                        <option selected value="1">1 Person {{ $guiding->prices }}</option>
-                                        <option value="2">2 Personen</option>
-                                        <option value="3">3 Personen</option>
-                                        <option value="4">4 Personen</option>
-                                    @endif
+                                    @foreach(json_decode($guiding->prices) as $price)
+                                        <option value="{{ $price->person }}">{{ $price->person }} {{ $price->person == 1 ? 'Person' : 'Personen' }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <input type="hidden" name="guiding_id" value="{{ $guiding->id }}">
@@ -28,37 +21,21 @@
                     </form>
                     <div class="mt-3">
                         <h5>{{ translate('Price') }}</h5>
-                        @if($guiding->price_type == 'per_person')
-                            <ul class="list-unstyled">
-                                @foreach(json_decode($guiding->prices) as $price)
-                                    <li class="d-flex justify-content-between align-items-center">
-                                        <span class="">{{ $price->person }} {{ $price->person == 1 ? 'Person' : 'Personen' }}</span>
-                                        <span class="text-right">
-                                            @if($price->person > 1)
-                                                <span class="text-orange">{{ $price->person > 1 ? round($price->amount / $price->person) : $price->amount }}€</span>
-                                                <span class="text-black" style="font-size: 0.8em;"> p.P</span>
-                                                @else
-                                                <span class="text-orange me-3 pe-1">{{ $price->person > 1 ? round($price->amount / $price->person) : $price->amount }}€</span>
-                                            @endif
-                                        </span>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        @else
-                            <ul class="list-unstyled">
-                                @foreach(json_decode($guiding->prices) as $price)
-                                    <li class="d-flex justify-content-between align-items-center">
-                                        <span>{{ $price->person }} {{ $price->person == 1 ? 'Person' : 'Personen' }}</span>
-                                        <span class="text-right">
-                                            <span class="text-danger">{{ round($price->amount / $price->person) }}€</span>
-                                            @if($price->person > 1)
-                                                <span class="text-black" style="font-size: 0.8em;"> p.P</span>
-                                            @endif
-                                        </span>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        @endif
+                        <ul class="list-unstyled">
+                            @foreach(json_decode($guiding->prices) as $price)
+                                <li class="d-flex justify-content-between align-items-center">
+                                    <span class="">{{ $price->person }} {{ $price->person == 1 ? 'Person' : 'Personen' }}</span>
+                                    <span class="text-right">
+                                        @if($price->person > 1)
+                                            <span class="text-orange">{{ $price->person > 1 ? round($price->amount / $price->person) : $price->amount }}€</span>
+                                            <span class="text-black" style="font-size: 0.8em;"> p.P</span>
+                                            @else
+                                            <span class="text-orange me-3 pe-1">{{ $price->person > 1 ? round($price->amount / $price->person) : $price->amount }}€</span>
+                                        @endif
+                                    </span>
+                                </li>
+                            @endforeach
+                        </ul>
                     </div>
                 </div>
         </div>
