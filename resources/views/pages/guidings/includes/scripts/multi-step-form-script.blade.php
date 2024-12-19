@@ -565,12 +565,13 @@
     // Add this function to populate price fields when editing
     function populatePriceFields(priceType) {
         var prices = {!! json_encode($formData['prices'] ?? []) !!};
+        var price = {!! json_encode($formData['price'] ?? []) !!};
         if (priceType === 'per_person') {
             Object.entries(prices).forEach(([key, value]) => {
                 $(`input[name="price_per_person_${value.person}"]`).val(value.amount);
             });
         } else if (priceType === 'per_boat') {
-            $('input[name="price_per_boat"]').val(prices.amount);
+            $('input[name="price_per_boat"]').val(price);
         }
     }
 

@@ -484,8 +484,8 @@ class GuidingsController extends Controller
 
             if ($request->has('price_type') ) {
                 $guiding->price_type = $request->input('price_type');
+                $pricePerPerson = [];
                 if ( $request->input('price_type') === 'per_person') {
-                    $pricePerPerson = [];
                     foreach ($request->all() as $key => $value) {
                         if (strpos($key, 'price_per_person_') === 0) {
                             $guestNumber = substr($key, strlen('price_per_person_'));
@@ -495,12 +495,17 @@ class GuidingsController extends Controller
                             ];
                         }
                     }
-                    $guiding->prices = json_encode($pricePerPerson);
                     $guiding->price = 0;
                 } else {
-                    $guiding->prices = json_encode([ 'person' => 0, 'amount' => (float) $request->input('price_per_boat')]);
+                    for ($i = 1; $i <= $request->input('no_guest'); $i++) {
+                        $pricePerPerson[] = [
+                            'person' => $i,
+                            'amount' => (float) ( $request->input('price_per_boat') / $request->input('no_guest') ) * $i
+                        ];
+                    }
                     $guiding->price = (float) $request->input('price_per_boat');
                 }
+                $guiding->prices = json_encode($pricePerPerson);
             }
             
             $inclusions = $request->has('inclusions') ? collect(json_decode($request->input('inclusions')))->pluck('id') : [];
@@ -842,6 +847,7 @@ class GuidingsController extends Controller
             'duration_type' => $guiding->duration_type,
             'no_guest' => $guiding->max_guests,
             'price_type' => $guiding->price_type,
+            'price' => $guiding->price,
             'prices' => json_decode($guiding->prices, true),
             'pricing_extra' => $guiding->getPricingExtraAttribute(),
 

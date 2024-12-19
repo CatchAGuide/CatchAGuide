@@ -434,21 +434,19 @@ class Guiding extends Model
 
     public function getLowestPrice()
     {
-        if ($this->price_type == 'per_person') {
-            $prices = json_decode($this->prices, true);
-            if (!$prices) {
-                return 0;
-            }
-            
-            $singlePrice = collect($prices)->where('person', 1)->first();
-            $singlePrice = $singlePrice ? $singlePrice['amount'] : PHP_FLOAT_MAX;
-            
-            $minPrice = min(array_map(function($price) {
-                return $price['person'] > 1 ? round($price['amount'] / $price['person']) : $price['amount'];
-            }, $prices));
-            
-            return min($singlePrice, $minPrice);
+        $prices = json_decode($this->prices, true);
+        if (!$prices) {
+            return 0;
         }
+  
+        $singlePrice = collect($prices)->where('person', 1)->first();
+        $singlePrice = $singlePrice ? $singlePrice['amount'] : PHP_FLOAT_MAX;
+        
+        $minPrice = min(array_map(function($price) {
+            return $price['person'] > 1 ? round($price['amount'] / $price['person']) : $price['amount'];
+        }, $prices));
+        
+        return min($singlePrice, $minPrice);
         return 0;
     }
 

@@ -112,22 +112,17 @@ class Checkout extends Component
         $this->methods = $this->guiding->getFishingMethodNames();
         
         $prices = json_decode($this->guiding->prices, true);
-        if ($this->guiding->price_type == 'per_person') {
-            $this->guidingprice = 0;
-            foreach ($prices as $price) {
-                if ($price['person'] == $this->persons) {
-                    $this->guidingprice = $price['amount'];
-                    break;
-                }
+        $this->guidingprice = 0;
+        foreach ($prices as $price) {
+            if ($price['person'] == $this->persons) {
+                $this->guidingprice = $price['amount'];
+                break;
             }
-            if ($this->guidingprice == 0 && !empty($prices)) {
-                $lastPrice = end($prices);
-                $this->guidingprice = $lastPrice['amount'] * $this->persons;
-            }
-        } else {
-            $this->guidingprice = $prices[0]['amount'] ?? 0;
         }
-
+        if ($this->guidingprice == 0 && !empty($prices)) {
+            $lastPrice = end($prices);
+            $this->guidingprice = $lastPrice['amount'] * $this->persons;
+        }
         $user = auth()->user();
 
         $guidingExtras = collect(json_decode($this->guiding->pricing_extra, true) ?? [])->filter(function($extra, $index) {
