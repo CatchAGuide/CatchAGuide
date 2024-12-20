@@ -400,28 +400,14 @@ class Guiding extends Model
 
     public function getGuidingPriceByPerson($person)
     {
+        $prices = json_decode($this->prices, true);
+        foreach($prices as $price){
+            if($price['person'] == $person){
+                return $price['amount'];
+            }
 
-        switch ($person) {
-            case 1:
-                $price = $this->price;
-            break;
-            case 2:
-                $price = $this->price_two_persons;
-            break;
-            case 3:
-                $price = $this->price_three_persons;
-            break;
-            case 4:
-                $price = $this->price_four_persons;
-            break;
-            case 5:
-                $price = $this->price_five_persons;
-            break;
-            default:
-                $price = 0;
-          }
-
-        return $price;
+            return $this->price;
+        }
     }
 
     public function ratings(){

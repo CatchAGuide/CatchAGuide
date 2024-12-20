@@ -395,7 +395,7 @@
                                           <input type="hidden" id="LocationLng" value="{{ request()->get('placeLng') ? request()->get('placeLng') : null }}" name="placeLng"/>
                                         </div>
                                     </div>
-                                    <div class="col-12">
+                                    {{-- <div class="col-12">
                                         <div class="input-group my-1">
                                             <div class="input-group-prepend border-0 border-bottom ">
                                                 <span class="d-flex align-items-center px-2 h-100">
@@ -412,7 +412,7 @@
                                                 <option value="500" {{ request()->get('radius') ? request()->get('radius') == 500 ? 'selected' : null : null }}>500 km</option>
                                             </select>
                                           </div>
-                                    </div>
+                                    </div> --}}
                                     <div class="col-12">
                                         <div class="input-group my-1">
                                             <div class="input-group-prepend border-0 border-bottom ">
@@ -683,7 +683,7 @@
                           <input type="hidden" id="LocationLng2" value="{{ request()->get('placeLng') ? request()->get('placeLng') : null }}" name="placeLng"/>
                         </div>
                     </div>
-                    <div class="col-12">
+                    {{-- <div class="col-12">
                         <div class="input-group my-1">
                             <div class="input-group-prepend border-0 border-bottom ">
                                 <span class="d-flex align-items-center px-2 h-100">
@@ -700,7 +700,7 @@
                                 <option value="500" {{ request()->get('radius') ? request()->get('radius') == 500 ? 'selected' : null : null }}>500 km</option>
                             </select>
                           </div>
-                    </div>
+                    </div> --}}
                     <div class="col-12">
                         <div class="input-group my-1">
                             <div class="input-group-prepend border-0 border-bottom ">
@@ -820,24 +820,26 @@ function initializeSelect2() {
         width: 'resolve', // need to override the changed default
     });
 
+    // Add blank default option
+    var blankOption = new Option('@lang('message.choose')...', '');
+    selectTarget.append(blankOption);
+
     @foreach($alltargets as $target)
-    var targetname = '{{$target->name}}';
+        var targetname = '{{$target->name}}';
 
-    @if(app()->getLocale() == 'en')
-    targetname = '{{$target->name_en}}'
-    @endif
-
-    var targetOption = new Option(targetname, '{{ $target->id }}');
-
-    selectTarget.append(targetOption);
-
-    @if(request()->get('target_fish'))
-        @if(in_array($target->id, request()->get('target_fish')))
-        $(targetOption).prop('selected', true);
+        @if(app()->getLocale() == 'en')
+            argetname = '{{$target->name_en}}'
         @endif
-    @endif
 
+        var targetOption = new Option(targetname, '{{ $target->id }}');
 
+        selectTarget.append(targetOption);
+
+        @if(request()->get('target_fish'))
+            @if(in_array($target->id, request()->get('target_fish')))
+                $(targetOption).prop('selected', true);
+            @endif
+        @endif
     @endforeach
   
     // Trigger change event to update Select2 display
@@ -850,23 +852,25 @@ function initializeSelect2() {
         width: 'resolve' // need to override the changed default
     });
 
+    // Add blank default option
+    var blankOption = new Option('@lang('message.choose')...', '');
+    selectWater.append(blankOption);
+
     @foreach($allwaters as $water)
-    var watername = '{{$water->name}}';
+        var watername = '{{$water->name}}';
 
-    @if(app()->getLocale() == 'en')
-    watername = '{{$water->name_en}}'
-    @endif
-
-    var waterOption = new Option(watername, '{{ $water->id }}');
-    selectWater.append(waterOption);
-
-    @if(request()->get('water'))
-        @if(in_array($water->id, request()->get('water')))
-        $(waterOption).prop('selected', true);
+        @if(app()->getLocale() == 'en')
+        watername = '{{$water->name_en}}'
         @endif
-    @endif
 
+        var waterOption = new Option(watername, '{{ $water->id }}');
+        selectWater.append(waterOption);
 
+        @if(request()->get('water'))
+            @if(in_array($water->id, request()->get('water')))
+            $(waterOption).prop('selected', true);
+            @endif
+        @endif
     @endforeach
   
     // Trigger change event to update Select2 display
