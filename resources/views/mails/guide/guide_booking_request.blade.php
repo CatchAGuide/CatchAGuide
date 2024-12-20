@@ -146,7 +146,7 @@
             </h3>
             <p><strong>@lang('profile.guidetitle') : </strong><a href="{{route('guidings.show',[$guiding->id,$guiding->slug])}}" style="text-decoration: none;font-weight:bold">{{$guiding->title}}</a></p>
             <p><strong>@lang('profile.location') : </strong>{{$guiding->location}}</p>
-            <p><strong>@lang('profile.meetingPoint') :</strong> {{$guiding->meeting_point}}</p>
+            <p><strong>@lang('profile.meetingPoint') :</strong> {{$guiding->desc_meeting_point}}</p>
         </div>
         <hr>
 

@@ -395,7 +395,7 @@
                                           <input type="hidden" id="LocationLng" value="{{ request()->get('placeLng') ? request()->get('placeLng') : null }}" name="placeLng"/>
                                         </div>
                                     </div>
-                                    <div class="col-12">
+                                    {{-- <div class="col-12">
                                         <div class="input-group my-1">
                                             <div class="input-group-prepend border-0 border-bottom ">
                                                 <span class="d-flex align-items-center px-2 h-100">
@@ -412,7 +412,7 @@
                                                 <option value="500" {{ request()->get('radius') ? request()->get('radius') == 500 ? 'selected' : null : null }}>500 km</option>
                                             </select>
                                           </div>
-                                    </div>
+                                    </div> --}}
                                     <div class="col-12">
                                         <div class="input-group my-1">
                                             <div class="input-group-prepend border-0 border-bottom ">
@@ -683,7 +683,7 @@
                           <input type="hidden" id="LocationLng2" value="{{ request()->get('placeLng') ? request()->get('placeLng') : null }}" name="placeLng"/>
                         </div>
                     </div>
-                    <div class="col-12">
+                    {{-- <div class="col-12">
                         <div class="input-group my-1">
                             <div class="input-group-prepend border-0 border-bottom ">
                                 <span class="d-flex align-items-center px-2 h-100">
@@ -700,7 +700,7 @@
                                 <option value="500" {{ request()->get('radius') ? request()->get('radius') == 500 ? 'selected' : null : null }}>500 km</option>
                             </select>
                           </div>
-                    </div>
+                    </div> --}}
                     <div class="col-12">
                         <div class="input-group my-1">
                             <div class="input-group-prepend border-0 border-bottom ">
@@ -809,109 +809,70 @@ $(function(){
     initializeSelect2();
 
 function initializeSelect2() {
-
     var selectTarget = $('#target_fish, #target_fishOffCanvass');
     var selectWater = $('#water, #waterOffCanvass');
     var selectMethod = $('#methods, #methodsOffCanvass');
 
+    // Target Fish
+    selectTarget.append(new Option('@lang('message.choose')...', '', true, true));
+    @foreach($alltargets as $target)
+        var targetname = '{{$target->name}}';
+        @if(app()->getLocale() == 'en')
+            targetname = '{{$target->name_en}}';
+        @endif
+        selectTarget.append(new Option(targetname, '{{ $target->id }}', false, false));
+    @endforeach
+
+    // Water Types
+    selectWater.append(new Option('@lang('message.choose')...', '', true, true));
+    @foreach($guiding_waters as $water)
+        var watername = '{{$water->name}}';
+        @if(app()->getLocale() == 'en')
+            watername = '{{$water->name_en}}';
+        @endif
+        selectWater.append(new Option(watername, '{{ $water->id }}', false, false));
+    @endforeach
+
+    // Fishing Methods
+    selectMethod.append(new Option('@lang('message.choose')...', '', true, true));
+    @foreach($guiding_methods as $method)
+        var methodname = '{{$method->name}}';
+        @if(app()->getLocale() == 'en')
+            methodname = '{{$method->name_en}}';
+        @endif
+        selectMethod.append(new Option(methodname, '{{ $method->id }}', false, false));
+    @endforeach
+
+    // Initialize Select2 and set values
     $("#target_fish, #target_fishOffCanvass").select2({
         multiple: true,
         placeholder: '@lang('message.target-fish')',
-        width: 'resolve', // need to override the changed default
-    });
-
-    @foreach($alltargets as $target)
-    var targetname = '{{$target->name}}';
-
-    @if(app()->getLocale() == 'en')
-    targetname = '{{$target->name_en}}'
-    @endif
-
-    var targetOption = new Option(targetname, '{{ $target->id }}');
-
-    selectTarget.append(targetOption);
-
-    @if(request()->get('target_fish'))
-        @if(in_array($target->id, request()->get('target_fish')))
-        $(targetOption).prop('selected', true);
-        @endif
-    @endif
-
-
-    @endforeach
-  
-    // Trigger change event to update Select2 display
-    selectTarget.trigger('change');
-
+        width: 'resolve',
+    }).val(@json(request()->get('target_fish', [])))
+      .trigger('change');
 
     $("#water, #waterOffCanvass").select2({
         multiple: true,
         placeholder: '@lang('message.body-type')',
-        width: 'resolve' // need to override the changed default
-    });
-
-    @foreach($allwaters as $water)
-    var watername = '{{$water->name}}';
-
-    @if(app()->getLocale() == 'en')
-    watername = '{{$water->name_en}}'
-    @endif
-
-    var waterOption = new Option(watername, '{{ $water->id }}');
-    selectWater.append(waterOption);
-
-    @if(request()->get('water'))
-        @if(in_array($water->id, request()->get('water')))
-        $(waterOption).prop('selected', true);
-        @endif
-    @endif
-
-
-    @endforeach
-  
-    // Trigger change event to update Select2 display
-    selectWater.trigger('change');
-
-
+        width: 'resolve'
+    }).val(@json(request()->get('water', [])))
+      .trigger('change');
 
     $("#methods, #methodsOffCanvass").select2({
         multiple: true,
         placeholder: '@lang('message.fishing-technique')',
-        width: 'resolve' // need to override the changed default
-    });
+        width: 'resolve'
+    }).val(@json(request()->get('methods', [])))
+      .trigger('change');
 
-    @foreach($allmethods as $method)
-    var methodname = '{{$method->name}}';
-
-    @if(app()->getLocale() == 'en')
-    methodname = '{{$method->name_en}}'
-    @endif
-
-    var methodOption = new Option(methodname, '{{ $method->id }}');
-    selectMethod.append(methodOption);
-
-    @if(request()->get('methods'))
-        @if(in_array($method->id, request()->get('methods')))
-        $(methodOption).prop('selected', true);
-        @endif
-    @endif
-
-
-    @endforeach
-  
+    // Set other form values if they exist
     @if(request()->get('price_range'))
         $('#price_range, #price_rangeOffCanvass').val('{{ request()->get('price_range') }}');
     @endif
-  
-    @if(request()->get('ratings'))
-        $('#ratings, #ratingsOffCanvass').val('{{ request()->get('ratings') }}');
+
+    @if(request()->get('num_guests'))
+        $('#num-guests, #num-guestsOffCanvass').val('{{ request()->get('num_guests') }}');
     @endif
-    // Trigger change event to update Select2 display
-    selectMethod.trigger('change');
-
-
-
-
 }
 
 
@@ -989,7 +950,7 @@ function initializeSelect2() {
         $lat = isset($guidings[0]) ? $guidings[0]->lat : 51.165691;
         $lng = isset($guidings[0]) ? $guidings[0]->lng : 10.451526;
     @endphp
-    const position = { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }} , lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} };
+    const position = { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }} , lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} ;
     const { Map, InfoWindow } = await google.maps.importLibrary("maps");
     const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
 
