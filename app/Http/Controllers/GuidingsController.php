@@ -139,7 +139,7 @@ class GuidingsController extends Controller
 
                 $query->where(function($query) use ($requestMethods) {
                     foreach($requestMethods as $methodId) {
-                        $query->orWhereJsonContains('fishing_methods', $methodId);
+                        $query->orWhereJsonContains('fishing_methods', (int)$methodId);
                     }
                 });
             }
@@ -166,7 +166,7 @@ class GuidingsController extends Controller
 
                 $query->where(function($query) use ($requestWater) {
                     foreach($requestWater as $waterId) {
-                        $query->orWhereJsonContains('water_types', $waterId);
+                        $query->orWhereJsonContains('water_types', (int)$waterId);
                     }
                 });
             }
@@ -174,13 +174,12 @@ class GuidingsController extends Controller
         }
 
         if($request->has('target_fish')){
-            $requestFish = array_filter($request->get('target_fish'));
+            $requestFish = array_filter($request->target_fish);
 
             if(count($requestFish)){
-
                 $title .= __('guidings.Target_Fish') . ' (';
                 $filter_title .= __('guidings.Target_Fish') . ' (';
-                $method_rows = Target::whereIn('id', $request->target_fish)->get();
+                $method_rows = Target::whereIn('id', $requestFish)->get();
                 $title_row = '';
                 foreach ($method_rows as $row) {
                     $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
@@ -192,7 +191,7 @@ class GuidingsController extends Controller
 
                 $query->where(function($query) use ($requestFish) {
                     foreach($requestFish as $fishId) {
-                        $query->orWhereJsonContains('target_fish', $fishId);
+                        $query->orWhereJsonContains('target_fish', (int)$fishId);
                     }
                 });
             }
@@ -258,6 +257,10 @@ class GuidingsController extends Controller
 
         $guidings->appends(request()->except('page'));
 
+        $alltargets = Target::select('id', 'name', 'name_en')->get();
+        $guiding_waters = Water::select('id', 'name', 'name_en')->get();
+        $guiding_methods = Method::select('id', 'name', 'name_en')->get();
+
         return view('pages.guidings.index', [
             'title' => $title,
             'filter_title' => $filter_title,
@@ -266,6 +269,9 @@ class GuidingsController extends Controller
             'allGuidings' => $allGuidings,
             'searchMessage' => $searchMessage,
             'otherguidings' => $otherguidings,
+            'alltargets' => $alltargets,
+            'guiding_waters' => $guiding_waters,
+            'guiding_methods' => $guiding_methods,
         ]);
         
     }
