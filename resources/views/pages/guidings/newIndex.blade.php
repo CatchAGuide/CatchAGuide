@@ -1119,7 +1119,7 @@
 {{-- <script async src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY') }}&callback=initMap"></script> --}}
 
 <script>
-       $(document).ready(function(){
+$(document).ready(function(){
   $(".ratings-slider").owlCarousel({
     items: 3,
     margin: 10,
@@ -1188,6 +1188,7 @@
         });
     }
 }
+initMap();
 });
 document.querySelectorAll(".description-item .text-wrapper").forEach((item) => {
     const originalText = item.innerHTML.trim();
@@ -1241,6 +1242,9 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
     function initMap() {
+      console.log('initMap');
+      console.log('{{ $guiding->lat }}');
+      console.log('{{ $guiding->lng }}');
         //var location = { lat: 41.40338, lng: 2.17403 }; // Example coordinates
         var location = { lat: {{ $guiding->lat }}, lng: {{ $guiding->lng }} }; // Example coordinates
         var map = new google.maps.Map(document.getElementById('map'), {

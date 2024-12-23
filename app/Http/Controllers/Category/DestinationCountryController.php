@@ -83,13 +83,36 @@ class DestinationCountryController extends Controller
             Session::put('random_seed', $randomSeed);
         }
 
-        $query = Guiding::select(['*', DB::raw('(CASE WHEN price_five_persons IS NOT NULL THEN price_five_persons/5 WHEN price_four_persons IS NOT NULL THEN price_four_persons/4 WHEN price_three_persons IS NOT NULL THEN price_three_persons/3 WHEN price_two_persons IS NOT NULL THEN price_two_persons/2 ELSE price END) AS lowest_price')])->where('status',1)->whereNotNull('lat')->whereNotNull('lng');
+        $query = Guiding::select(['*', DB::raw('(
+            WITH price_per_person AS (
+                SELECT 
+                    CASE 
+                        WHEN JSON_VALID(prices) THEN (
+                            SELECT MIN(
+                                CASE 
+                                    WHEN person > 1 THEN CAST(amount AS DECIMAL(10,2)) / person
+                                    ELSE CAST(amount AS DECIMAL(10,2))
+                                END
+                            )
+                            FROM JSON_TABLE(
+                                prices,
+                                "$[*]" COLUMNS(
+                                    person INT PATH "$.person",
+                                    amount DECIMAL(10,2) PATH "$.amount"
+                                )
+                            ) as price_data
+                        )
+                        ELSE price
+                    END as lowest_pp
+            )
+            SELECT COALESCE(lowest_pp, price) 
+            FROM price_per_person
+        ) AS lowest_price')])->where('status',1)->whereNotNull('lat')->whereNotNull('lng');
 
         if (empty($request->all())) {
             $query->orderByRaw("RAND($randomSeed)");
-            // Request has at least one parameter (input data)
-        } 
-          
+        }
+
         if($request->has('page')){
             $title .= __('guidings.Page') . ' ' . $request->page . ' - ';
         }
@@ -102,33 +125,33 @@ class DestinationCountryController extends Controller
         if($request->has('sortby') && !empty($request->get('sortby'))){
             switch ($request->get('sortby')) {
                 case 'newest':
-                    $query->orderBy('created_at','desc');
-                  break;
+                    $query->orderBy('created_at', 'desc');
+                    break;
 
                 case 'price-asc':
-                    $query->orderBy('price','asc');
-                  break;
+                    $query->orderBy(DB::raw('lowest_price'), 'asc');
+                    break;
 
                 case 'price-desc':
-                    $query->orderBy('price','desc');
-                  break;
+                    $query->orderBy(DB::raw('lowest_price'), 'desc');
+                    break;
 
                 case 'long-duration':
-                    $query->orderBy('duration','desc');
-                break;
+                    $query->orderBy('duration', 'desc');
+                    break;
 
                 case 'short-duration':
-                    $query->orderBy('duration','asc');
-                break;
+                    $query->orderBy('duration', 'asc');
+                    break;
 
                 default:
-                    $query;
+                    if (empty($request->all())) {
+                        $query->orderByRaw("RAND($randomSeed)");
+                    }
             }
         }
 
-
         if($request->has('methods') && !empty($request->get('methods'))){
-   
             $requestMethods = array_filter($request->get('methods'));
 
             if(count($requestMethods)){
@@ -140,100 +163,63 @@ class DestinationCountryController extends Controller
                 }
                 $title .= substr($title_row, 0, -2);
                 $title .= ') | ';
-                $query->whereHas('guidingMethods', function ($query) use ($requestMethods) {
-                    $query->whereIn('method_id', $requestMethods);
+
+                $query->where(function($query) use ($requestMethods) {
+                    foreach($requestMethods as $methodId) {
+                        $query->orWhereJsonContains('fishing_methods', (int)$methodId);
+                    }
                 });
             }
-            
-        }
-
-        if($request->has('fishing_type') && !empty($request->get('fishing_type'))){
-   
-            $requestFishingTypes = $request->get('fishing_type');
-
-            if($requestFishingTypes){
-
-                $title .= __('guidings.Fishing_Type') . 'Fishing Type (';
-                $method_rows = FishType::whereIn('id', $request->fishing_type)->get();
-                $title_row = '';
-                foreach ($method_rows as $row) {
-                    $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
-                }
-                $title .= substr($title_row, 0, -2);
-                $title .= ') | ';
-
-                $query->whereHas('fishingTypes', function ($query) use ($requestFishingTypes) {
-                    $query->where('id', $requestFishingTypes);
-                });
-            }
-        }
-
-        if($request->has('duration') && !empty($request->get('duration'))){
-            $title .= __('guidings.Duration') . ' ' . $request->duration . ' | ';
-
-            $q = $query->where('duration','>=',$request->get('duration'));
-        }
-
-        if($request->has('fishingfrom') && !empty($request->get('fishingfrom'))){
-   
-            $requestFishingFrom = array_filter($request->get('fishingfrom'));
-
-            if(count($requestFishingFrom)){
-                $query->whereHas('fishingFrom', function ($query) use ($requestFishingFrom) {
-                    $query->whereIn('id', $requestFishingFrom);
-                });
-            }
-            
         }
 
         if($request->has('water') && !empty($request->get('water'))){
-
             $requestWater = array_filter($request->get('water'));
 
             if(count($requestWater)){
-
                 $title .= __('guidings.Water') . ' (';
-                $method_rows = Water::whereIn('id', $request->water)->get();
+                $water_rows = Water::whereIn('id', $request->water)->get();
                 $title_row = '';
-                foreach ($method_rows as $row) {
+                foreach ($water_rows as $row) {
                     $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
                 }
                 $title .= substr($title_row, 0, -2);
                 $title .= ') | ';
 
-                $query->whereHas('guidingWaters', function ($query) use ($requestWater) {
-                    $query->whereIn('water_id', $requestWater);
+                $query->where(function($query) use ($requestWater) {
+                    foreach($requestWater as $waterId) {
+                        $query->orWhereJsonContains('water_types', (int)$waterId);
+                    }
                 });
             }
-          
         }
 
         if($request->has('target_fish')){
             $requestFish = array_filter($request->get('target_fish'));
 
             if(count($requestFish)){
-
                 $title .= __('guidings.Target_Fish') . ' (';
-                $method_rows = Target::whereIn('id', $request->target_fish)->get();
+                $target_rows = Target::whereIn('id', $requestFish)->get();
                 $title_row = '';
-                foreach ($method_rows as $row) {
+                foreach ($target_rows as $row) {
                     $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
                 }
                 $title .= substr($title_row, 0, -2);
                 $title .= ') | ';
 
-                $query->whereHas('guidingTargets', function ($query) use ($requestFish) {
-                    $query->whereIn('target_id', $requestFish);
+                $query->where(function($query) use ($requestFish) {
+                    foreach($requestFish as $fishId) {
+                        $query->orWhereJsonContains('target_fish', (int)$fishId);
+                    }
                 });
             }
         }
 
         $radius = null; // Radius in miles
         if($request->has('radius')){
-
             $title .= __('guidings.Radius') . ' ' . $request->radius . 'km | ';
             $radius = $request->get('radius');
         }
+
         $geocode = $this->getCoordinates($country, $region, $city);
         
         $placeLat = $geocode['lat'];
@@ -243,52 +229,24 @@ class DestinationCountryController extends Controller
         //$query->where('country',$country);
 
         if(!empty($placeLat) && !empty($placeLng)){
-
             $title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
-            /*$query->select(['guidings.*'])
-            ->selectRaw("(6371 * acos(cos(radians($placeLat)) * cos(radians(lat)) * cos(radians(lng) - radians($placeLng)) + sin(radians($placeLat)) * sin(radians(lat)))) AS distance")
-            ->where('status', 1)
-            ->orderBy('distance') // Sort the results by distance in ascending order
-            ->get();*/
             $guidingFilter = Guiding::locationFilter($place_location, $radius);
             $searchMessage = $guidingFilter['message'];
             $query->whereIn('id', $guidingFilter['ids']);
-
         }
 
-        if($request->has('price_range')){
-            $price_range = $request->get('price_range');
-            $price = explode('-', $price_range);
-
-            $title .= 'Price ' . $request->price_range . ' | ';
-
-            //$query->select(['*', DB::raw('(CASE WHEN price_five_persons IS NOT NULL THEN price_five_persons/5 WHEN price_four_persons IS NOT NULL THEN price_four_persons/4 WHEN price_three_persons IS NOT NULL THEN price_three_persons/3 WHEN price_two_persons IS NOT NULL THEN price_two_persons/2 ELSE price END) AS lowest_price')]);
-            if (count($price) > 1) {
-                $query->havingRaw('lowest_price >= ? AND lowest_price <= ?', $price);
-            } else {
-                $query->havingRaw('lowest_price >= ?', $price);
-
-            }
-
-        }
-        
         $guidings_total = $query->count();
         $allGuidings = $query->get();
 
         $otherguidings = array();
 
         if($allGuidings->isEmpty()){
-
-            if($request->has('placeLat') && $request->has('placeLng') && !empty($request->get('placeLat')) && !empty($request->get('placeLng')) ){
+            if($request->has('placeLat') && $request->has('placeLng') && !empty($request->get('placeLat')) && !empty($request->get('placeLng'))){
                 $latitude = $request->get('placeLat');
                 $longitude = $request->get('placeLng');
-            
                 $otherguidings = $this->otherGuidingsBasedByLocation($latitude,$longitude);
-
-            }else{
-
+            } else {
                 $otherguidings = $this->otherGuidings();
-
             }
         }
 

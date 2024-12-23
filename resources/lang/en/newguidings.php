@@ -2,7 +2,7 @@
 return [
     // Step Headers
     'upload_images_title' => 'Upload images and set basic information',
-    'boat_description_title' => 'Type of fishing and boat description',
+    'boat_description_title' => 'Type of fishing and boat description', 
     'fish_method_title' => 'Specify target fish and fishing method',
     'service_description_title' => 'Write a detailed description of your service',
     'additional_info_title' => 'Add any additional information',
@@ -181,6 +181,16 @@ return [
     'nine_months_in_advance' => 'Nine months in advance',
     'twelve_months_in_advance' => 'Twelve months in advance',
 
+    // Form Placeholders
+    'tell_guests_what_they_can_expect' => 'Tell your guests what they can expect during the tour...',
+    'let_guests_know_when_you_begin' => 'Let your guests know when you typically begin with the tour...',
+    'give_guests_information_about_where_they_will_meet' => 'Give your guests information about where they will meet you...',
+    'tell_guests_about_special_highlights' => 'Tell your guests about special highlights they can experience...',
+    'add_a_comment_or_additional_information' => 'Add a comment or additional information for your guests...',
+    'select_methods' => 'Select fishing methods...',
+    'select_water_types' => 'Select water types...',
+    'select_inclusions' => 'Select inclusions...',
+    'enter_catchy_title' => 'Enter a catchy title for your fishing tour',
 
     // Additional Headers
     'write_detailed_description' => 'Write a detailed description of your service',
@@ -211,21 +221,7 @@ return [
     'available_all_year' => 'Available all year',
     'available_on_certain_months_only' => 'Available on certain months only',
 
-    // Months
-    'months' => [
-        'january' => 'January',
-        'february' => 'February',
-        'march' => 'March',
-        'april' => 'April',
-        'may' => 'May',
-        'june' => 'June',
-        'july' => 'July',
-        'august' => 'August',
-        'september' => 'September',
-        'october' => 'October',
-        'november' => 'November',
-        'december' => 'December'
-    ],
+    // Months already defined above
 
     // Boat Description Fields
     'enter_number_of_seats' => 'Enter number of seats',
@@ -245,20 +241,13 @@ return [
     'keep_catch' => 'Keep Catch',
     'catch_release_allowed' => 'Catch & Release Allowed',
     'catch_release_only' => 'Catch & Release Only',
-    
-    // Water Types
-    'water_types' => 'Water Types',
-    'select_water_types' => 'Select water types...',
-    
-    // Course of Action
-    'course_of_action' => 'Course of Action',
-    'starting_time' => 'Starting Time',
-    'meeting_point' => 'Meeting Point',
-    'tour_highlights' => 'Tour Highlights',
 
-    'add_any_additional_information' => "Add any additional information",
-    'set_your_pricing_structure' => "Set your pricing structure",
-    'set_your_pricing_structure' => "Set your pricing structure",
+    // Water Types already defined above
+
+    // Course of Action already defined above
+
+    'add_any_additional_information' => 'Add any additional information',
+    'set_your_pricing_structure' => 'Set your pricing structure',
 
     'private_tours_only' => 'Private Tours Only',
     'shared_tours_possible' => 'Shared Tours Possible',
