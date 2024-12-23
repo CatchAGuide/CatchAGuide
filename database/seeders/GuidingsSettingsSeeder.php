@@ -97,6 +97,7 @@ class GuidingsSettingsSeeder extends Seeder
             ['name' => 'Rochen', 'name_en' => 'Ray'],
             ['name' => 'Drachenkopf', 'name_en' => 'Scorpionfish'],
             ['name' => 'Europäischer Wolfsbarsch', 'name_en' => 'Seabass (European)'],
+            ['name' => 'Sechskiemenhai', 'name_en' => 'Sixgill Shark'],
             ['name' => 'Wittling', 'name_en' => 'Whiting'],
             ['name' => 'Barbe', 'name_en' => 'Barbel'],
             ['name' => 'Giebel', 'name_en' => 'Prussian Carp'],
@@ -121,7 +122,6 @@ class GuidingsSettingsSeeder extends Seeder
             ['name' => 'Kleiner Thunfisch', 'name_en' => 'Little Thunny'],
             ['name' => 'Rotbrasse', 'name_en' => 'Red Porgy'],
             ['name' => 'Drückerfisch', 'name_en' => 'Triggerfish'],
-            ['name' => 'Sechskiemenhai', 'name_en' => 'Sixgill Shark']
         ];
         foreach($targets as $target) {
             DB::table('targets')->insert($target);

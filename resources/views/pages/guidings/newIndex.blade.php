@@ -1116,7 +1116,7 @@
 @endsection
 
 @section('js_after')
-<script async src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY') }}&callback=initMap"></script>
+{{-- <script async src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY') }}&callback=initMap"></script> --}}
 
 <script>
        $(document).ready(function(){
