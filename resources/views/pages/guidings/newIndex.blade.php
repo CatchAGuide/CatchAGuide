@@ -295,7 +295,7 @@
                             <span>@lang('guidings.Course_Action')</span>
                         </div>
                         <p class="text-wrapper">
-                           {!! $guiding->desc_course_of_action !!}
+                           {!! translate($guiding->desc_course_of_action) !!}
                         </p>
                     </div>
                     @endif
@@ -1091,7 +1091,7 @@
         {{ $other_guiding->title ? translate(Str::limit($other_guiding->title, 50)) : $other_guiding->title }}
     </a>
 </h5>    
-                                <small class="crop-text-1 small-text text-muted">{{ $other_guiding->location ? translate($other_guiding->location) : $other_guiding->location }}</small>
+                                <small class="crop-text-1 small-text text-muted">{{ $other_guiding->location }}</small>
                                 <p class="fw-bold text-muted">
                                     <span>@lang('message.from') {{ $other_guiding->getLowestPrice() }}€</span>
                                 </p>
