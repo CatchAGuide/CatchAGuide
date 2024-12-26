@@ -73,7 +73,7 @@ if (! function_exists('get_galleries_image_link')) {
         if(is_array($galleries) && count($galleries)){
             foreach($galleries as $url){
                 if(!empty($url)){
-                    $links[] = $url;
+                    $links[] = asset($url);
                 }
             }
         

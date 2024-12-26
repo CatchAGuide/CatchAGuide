@@ -81,7 +81,7 @@ transform: translate3d(0,0,0); width: 100%;">
                                             @if(count(get_galleries_image_link($guiding)))
                                                 @foreach(get_galleries_image_link($guiding) as $index => $gallery_image_link)
                                                     <div class="carousel-item @if($index == 0) active @endif">
-                                                        <img  class="d-block w-100" src="{{asset($gallery_image_link)}}">
+                                                        <img  class="d-block w-100" src="{{$gallery_image_link}}">
                                                     </div>
                                                 @endforeach
                                             @endif

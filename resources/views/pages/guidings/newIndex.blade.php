@@ -948,7 +948,7 @@
                                             @if(count(get_galleries_image_link($other_guiding)))
                                                 @foreach(get_galleries_image_link($other_guiding) as $index => $gallery_image_link)
                                                     <div class="carousel-item @if($index == 0) active @endif">
-                                                        <img class="d-block" src="{{asset($gallery_image_link)}}">
+                                                        <img class="d-block" src="{{$gallery_image_link}}">
                                                     </div>
                                                 @endforeach
                                             @endif
