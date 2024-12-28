@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Intervention\Image\Facades\Image;
 use App\Models\Faq;
+use Illuminate\Support\Facades\Log;
 
 if (! function_exists('translate')) {
     function translate($string)
@@ -51,9 +52,13 @@ if (! function_exists('get_featured_image_link')) {
     {
         $link = null;
         if($model->thumbnail_path){
-            $link = $model->thumbnail_path;
+            if(file_exists(public_path($model->thumbnail_path))){
+                $link = asset($model->thumbnail_path);
+            }else{
+                $link = asset('images/placeholder_guide.jpg');
+            }
         }else{
-            $link = 'images/placeholder_guide.jpg';
+            $link = asset('images/placeholder_guide.jpg');
         }
 
         return $link;
@@ -65,14 +70,14 @@ if (! function_exists('get_galleries_image_link')) {
     {   
         $links = [];
 
-        if($model->thumbnail_path){
-            $links[] = $model->thumbnail_path;
+        if($model->thumbnail_path && file_exists(public_path($model->thumbnail_path))){
+            $links[] = asset($model->thumbnail_path);
         }
         $galleries = json_decode($model->gallery_images,true);
 
         if(is_array($galleries) && count($galleries)){
             foreach($galleries as $url){
-                if(!empty($url)){
+                if(!empty($url) && file_exists(public_path($url))){
                     $links[] = asset($url);
                 }
             }
