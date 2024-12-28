@@ -138,7 +138,7 @@
 <!-- /.preloader -->
 <div class="page-wrapper">
   
-    @include('layouts.partials.header')
+    @include('layouts.partials.newheader-short')
 
     @yield('content')
 
