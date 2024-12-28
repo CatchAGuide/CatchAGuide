@@ -264,7 +264,7 @@
                                             <img src="{{ $region->getThumbnailPath() }}" class="dimg-fluid" alt="Image Not Available">
                                         </div>
                                         <div class="card-img-overlay">
-                                            <h5>{{ $region->name }}</h5>
+                                            <h5>{{ translate($region->name) }}</h5>
                                         </div>
                                     </div>
                                 </a>
@@ -336,10 +336,10 @@
                                 <div class="btn-group border rounded-start cag-btn-inverted" role="group" style=" width:30%;">
                                     <button type="button" class="btn dropdown-toggle text-white" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-arrow-down-arrow-up me-1"></i>@lang('message.sortby')</button>
                                     <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=newest">@lang('message.newest')</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=price-asc">@lang('message.lowprice')</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=short-duration">@lang('message.shortduration')</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=long-duration">@lang('message.longduration')</a></li>
+                                        <li><a class="dropdown-item" href="{{ url()->current() }}?sortby=newest">@lang('message.newest')</a></li>
+                                        <li><a class="dropdown-item" href="{{ url()->current() }}?sortby=price-asc">@lang('message.lowprice')</a></li>
+                                        <li><a class="dropdown-item" href="{{ url()->current() }}?sortby=short-duration">@lang('message.shortduration')</a></li>
+                                        <li><a class="dropdown-item" href="{{ url()->current() }}?sortby=long-duration">@lang('message.longduration')</a></li>
                                     </ul>
 
                                     @foreach(request()->except('sortby') as $key => $value)
@@ -376,25 +376,28 @@
                                 @lang('message.sortby'):
                             </div>
                             <div class="card-body border-bottom">
-                                <form id="form-sortby-2" action="{{route('guidings.index')}}" method="get">
-                                    <select class="form-select form-select-sm" name="sortby" id="sortby-2">
-                                        <option value="" disabled selected>@lang('message.choose')...</option>
-                                        <option value="newest" {{request()->get('sortby') ? request()->get('sortby') == 'newest' ? 'selected' : '' : '' }}>@lang('message.newest')</option>
-                                        <option value="price-asc" {{request()->get('sortby') ? request()->get('sortby') == 'price-asc' ? 'selected' : '' : '' }}>@lang('message.lowprice')</option>
-                                        <option value="short-duration" {{request()->get('sortby') ? request()->get('sortby') == 'short-duration' ? 'selected' : '' : '' }}>@lang('message.shortduration')</option>
-                                        <option value="long-duration" {{request()->get('sortby') ? request()->get('sortby') == 'long-duration' ? 'selected' : '' : '' }}>@lang('message.longduration')</option>
-                                    </select>
-
-                                    @foreach(request()->except('sortby') as $key => $value)
-                                        @if(is_array($value))
-                                            @foreach($value as $arrayValue)
-                                                <input type="hidden" name="{{ $key }}[]" value="{{ $arrayValue }}">
-                                            @endforeach
+                                <div class="btn-group w-100">
+                                    <button type="button" class="btn dropdown-toggle text-dark" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fa fa-arrow-down-arrow-up me-1"></i>
+                                        @if(request()->get('sortby') == 'newest')
+                                            @lang('message.newest')
+                                        @elseif(request()->get('sortby') == 'price-asc') 
+                                            @lang('message.lowprice')
+                                        @elseif(request()->get('sortby') == 'short-duration')
+                                            @lang('message.shortduration') 
+                                        @elseif(request()->get('sortby') == 'long-duration')
+                                            @lang('message.longduration')
                                         @else
-                                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                            @lang('message.choose')...
                                         @endif
-                                    @endforeach
-                                </form>
+                                    </button>
+                                    <ul class="dropdown-menu w-100">
+                                        <li><a class="dropdown-item" href="{{ url()->current() }}?sortby=newest">@lang('message.newest')</a></li>
+                                        <li><a class="dropdown-item" href="{{ url()->current() }}?sortby=price-asc">@lang('message.lowprice')</a></li>
+                                        <li><a class="dropdown-item" href="{{ url()->current() }}?sortby=short-duration">@lang('message.shortduration')</a></li>
+                                        <li><a class="dropdown-item" href="{{ url()->current() }}?sortby=long-duration">@lang('message.longduration')</a></li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                         <div class="card d-block d-none d-sm-block">
@@ -548,7 +551,7 @@
                                                             <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
                                                         <div class="">
                                                             <div class="tours-list__content__trait__text" >
-                                                            {{$guiding->is_boat ? $guiding->boat_type : 'Shore'}}   
+                                                            {{$guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
                                                             </div>
                                                         
                                                         </div>

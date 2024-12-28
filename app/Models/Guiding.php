@@ -889,7 +889,10 @@ class Guiding extends Model
             return collect();
         }
 
-        return collect(json_decode($this->attributes['pricing_extra'], true))->map(function ($item) {
+        $maxId = ExtrasPrice::max('id') ?? 10000; // Get highest existing ID or start at 10000
+        $counter = $maxId + 1; // Start counter above highest existing ID
+        
+        return collect(json_decode($this->attributes['pricing_extra'], true))->map(function ($item) use (&$counter) {
             // Check if name is numeric (an ID)
             if (is_numeric($item['name'])) {
                 // Try to find matching ExtrasPrice
@@ -903,12 +906,14 @@ class Guiding extends Model
                 }
             }
             
-            // If name is not numeric or ExtrasPrice not found, return direct values
-            return [
-                'id' => null,
+            // If name is not numeric or ExtrasPrice not found, generate an ID
+            $result = [
+                'id' => $counter, // Use incrementing counter that's guaranteed to not overlap
                 'name' => $item['name'],
                 'price' => $item['price']
             ];
+            $counter++;
+            return $result;
         });
     }
 }

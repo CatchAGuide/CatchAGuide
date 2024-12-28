@@ -235,6 +235,25 @@ class DestinationCountryController extends Controller
             $query->whereIn('id', $guidingFilter['ids']);
         }
 
+        if($request->has('price_range') && !empty($request->get('price_range'))){
+            $price_range = explode('-', $request->get('price_range'));
+            
+            if(count($price_range) == 2) {
+                $min_price = $price_range[0];
+                $max_price = $price_range[1];
+                $title .= __('guidings.Price') . ' ' . $min_price . '€ - ' . $max_price . '€ | ';
+                
+                $query->having(DB::raw('lowest_price'), '>=', $min_price)
+                      ->having(DB::raw('lowest_price'), '<=', $max_price);
+            } elseif(count($price_range) == 1) {
+                // Handle single value (350 and more)
+                $min_price = $price_range[0];
+                $title .= __('guidings.Price') . ' ' . $min_price . '€+ | ';
+                
+                $query->having(DB::raw('lowest_price'), '>=', $min_price);
+            }
+        }
+
         $guidings_total = $query->count();
         $allGuidings = $query->get();
 
