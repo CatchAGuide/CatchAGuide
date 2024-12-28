@@ -59,6 +59,46 @@
             }
         }
 
+        .guidings-gallery {
+            min-height: 400px;
+            gap: 16px;
+            margin-bottom: 16px !important;
+        }
+
+        .guidings-gallery .left-image {
+            width: 600px;
+            padding: 0 !important;
+            height: 400px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .guidings-gallery .left-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .guidings-gallery .right-images img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            aspect-ratio: 3/2;
+        }
+
+        /* Update modal gallery images */
+        div#masonry-grid img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            aspect-ratio: 3/2;
+        }
+
     </style>
 @endsection
 
