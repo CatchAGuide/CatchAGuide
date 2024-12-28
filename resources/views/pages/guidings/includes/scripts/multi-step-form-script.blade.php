@@ -1066,10 +1066,10 @@
                     isValid = false;
                 }
                 
-                if (!document.getElementById('inclusions').value.trim()) {
-                    errors.push('Included in the price are required.');
-                    isValid = false;
-                }
+                // if (!document.getElementById('inclusions').value.trim()) {
+                //     errors.push('Included in the price are required.');
+                //     isValid = false;
+                // }
                 break;
             case 7:
                 if (!document.querySelector('input[name="allowed_booking_advance"]:checked')) {

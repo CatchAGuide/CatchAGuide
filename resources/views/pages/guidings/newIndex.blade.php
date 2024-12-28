@@ -59,6 +59,46 @@
             }
         }
 
+        .guidings-gallery {
+            min-height: 400px;
+            gap: 16px;
+            margin-bottom: 16px !important;
+        }
+
+        .guidings-gallery .left-image {
+            width: 600px;
+            padding: 0 !important;
+            height: 400px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .guidings-gallery .left-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .guidings-gallery .right-images img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            aspect-ratio: 3/2;
+        }
+
+        /* Update modal gallery images */
+        div#masonry-grid img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            aspect-ratio: 3/2;
+        }
+
     </style>
 @endsection
 
@@ -122,24 +162,26 @@
             </div>
             <div class="right-images">
                 <div class="gallery">
-                @php
+                  @php
                     $galleryImages = json_decode($guiding->gallery_images,true);
-                    $thumbnailPath = asset($guiding->thumbnail_path);
+                    $thumbnailPath = $guiding->thumbnail_path;
                     $finalImages = [];
+                    $overallImages = [];
                     $hiddenCount = 0;
 
                     // Check if thumbnail exists
-                    if (file_exists(public_path(str_replace(asset(''), '', $thumbnailPath)))) {
-                        $finalImages[] = $thumbnailPath;
+                    if (file_exists(public_path($thumbnailPath))) {
+                        $finalImages[] = asset($thumbnailPath);
+                        $overallImages[] = asset($thumbnailPath);
                     }
 
                     // Filter and validate gallery images
                     if ($galleryImages) {
                         foreach ($galleryImages as $image) {
-                            $imagePath = asset($image);
-                            if (file_exists(public_path(str_replace(asset(''), '', $imagePath))) 
-                                && $imagePath !== $thumbnailPath) {
-                                $finalImages[] = $image;
+                            if (file_exists(public_path($image)) 
+                                && $image !== $thumbnailPath) {
+                                $finalImages[] = asset($image);
+                                $overallImages[] = asset($image);
                             }
                         }
                     }
@@ -151,26 +193,29 @@
                     }
 
                     // If less than 4 images and thumbnail exists, pad with thumbnail
-                    if (count($finalImages) < 4 && file_exists(public_path(str_replace(asset(''), '', $thumbnailPath)))) {
+                    if (count($finalImages) < 4 && file_exists(public_path($thumbnailPath))) {
                         while (count($finalImages) < 4) {
-                            $finalImages[] = $thumbnailPath;
+                            $finalImages[] = asset($thumbnailPath);
                         }
                     }
-                @endphp
+                    
+                    // Remove duplicates from overallImages while preserving order
+                    $overallImages = array_values(array_unique($overallImages));
+                  @endphp
 
                     @foreach ($finalImages as $index => $image)
                         @if ($index < 3)
                             <div class="gallery-item">
-                                <img src="{{asset($image)}}" class="img-fluid" alt="Gallery Image {{ $index + 1 }}" data-bs-toggle="modal" data-bs-target="#galleryModal" data-image="{{ asset($image) }}">
+                                <img src="{{$image}}" class="img-fluid" alt="Gallery Image {{ $index + 1 }}" data-bs-toggle="modal" data-bs-target="#galleryModal" data-image="{{ $image }}">
                             </div>
                         @elseif ($index == 3 && $hiddenCount !== 0)
                             <div class="gallery-item">
-                                <img src="{{asset($image)}}" class="img-fluid" alt="Gallery Image {{ $index + 1 }} (and {{ $hiddenCount }} more)"  data-image="{{ asset($image) }}">
+                                <img src="{{$image}}" class="img-fluid" alt="Gallery Image {{ $index + 1 }} (and {{ $hiddenCount }} more)"  data-image="{{ $image }}">
                                 <span data-bs-toggle="modal" data-bs-target="#galleryModal" class="position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">+{{ $hiddenCount }} more</span>
                             </div>
                         @elseif ($index == 3)
                             <div class="gallery-item">
-                                <img src="{{asset($image)}}" class="img-fluid" alt="Gallery Image {{ $index + 1 }} (and {{ $hiddenCount }} more)"  data-image="{{ asset($image) }}">
+                                <img src="{{$image}}" class="img-fluid" alt="Gallery Image {{ $index + 1 }} (and {{ $hiddenCount }} more)"  data-image="{{ $image }}">
                             </div>
                         @endif
                     @endforeach
@@ -178,58 +223,64 @@
                 <div class="gallery-mobile">
                     @php
                     $galleryImages = json_decode($guiding->gallery_images ?? '[]');
-                    $thumbnailPath = asset($guiding->thumbnail_path);
+                    $thumbnailPath = $guiding->thumbnail_path;
                     $finalImages = [];
+                    $overallImages = [];
                     
+
                     // Validate thumbnail exists
-                    $thumbnailExists = file_exists(public_path(str_replace(asset(''), '', $thumbnailPath)));
+                    if (file_exists(public_path($thumbnailPath))) {
+                        $finalImages[] = asset($thumbnailPath);
+                        $overallImages[] = asset($thumbnailPath);
+                    }
                     
                     // Filter gallery images that exist
-                    $validGalleryImages = [];
                     if ($galleryImages) {
                         foreach ($galleryImages as $image) {
-                            $imagePath = asset($image);
-                            if (file_exists(public_path(str_replace(asset(''), '', $imagePath)))) {
-                                $validGalleryImages[] = $image;
+                            if (file_exists(public_path($image))) {
+                                $finalImages[] = asset($image);
+                                $overallImages[] = asset($image);
                             }
                         }
                     }
                     
-                    $hiddenCount = count($validGalleryImages) > 2 ? count($validGalleryImages) - 2 : 0;
+                    $hiddenCount = count($finalImages) > 2 ? count($finalImages) - 2 : 0;
 
-                    if (empty($validGalleryImages)) {
+                    if (empty($finalImages)) {
                         // No valid gallery images, use thumbnail if it exists
-                        if ($thumbnailExists) {
-                            $finalImages = array_fill(0, 2, $thumbnailPath);
+                        if (file_exists(public_path($thumbnailPath))) {
+                            $finalImages = array_fill(0, 2, asset($thumbnailPath));
                         }
-                    } elseif (count($validGalleryImages) > 3) {
+                    } elseif (count($finalImages) > 3) {
                         // More than 3 valid gallery images
-                        $finalImages = array_slice($validGalleryImages, 0, 2);
+                        $finalImages = array_slice($finalImages, 0, 2);
                     } else {
                         // 3 or fewer valid gallery images
-                        if (count($validGalleryImages) < 3) {
-                            $finalImages = $validGalleryImages;
+                        if (count($finalImages) < 3) {
+                            $finalImages = $finalImages;
                             
                             // Pad with thumbnail if it exists
-                            if ($thumbnailExists) {
+                            if (file_exists(public_path($thumbnailPath))) {
                                 while (count($finalImages) < 2) {
-                                    $finalImages[] = $thumbnailPath;
+                                    $finalImages[] = asset($thumbnailPath);
                                 }
-                            }
+                            } 
                         } else {
-                            $finalImages = array_slice($validGalleryImages, 0, 2);
+                            $finalImages = array_slice($finalImages, 0, 2);
                         }
                     }
+
+                    // Remove duplicates from overallImages while preserving order
+                    $overallImages = array_values(array_unique($overallImages));
                     @endphp
-                @endphp
                     @foreach ($finalImages as $index => $image)
                         @if ($index < 1)
                             <div class="gallery-item">
-                                <img src="{{ asset($image) }}" class="img-fluid" alt="Gallery Image {{ $index + 1 }}" data-bs-toggle="modal" data-bs-target="#galleryModal" data-image="{{ asset($image) }}">
+                                <img src="{{ $image }}" class="img-fluid" alt="Gallery Image {{ $index + 1 }}" data-bs-toggle="modal" data-bs-target="#galleryModal" data-image="{{ $image }}">
                             </div>
                         @elseif ($index == 1)
                             <div class="gallery-item">
-                                <img src="{{ asset($image) }}" class="img-fluid" alt="Gallery Image {{ $index + 1 }} (and {{ $hiddenCount }} more)" data-image="{{ asset($image) }}">
+                                <img src="{{ $image }}" class="img-fluid" alt="Gallery Image {{ $index + 1 }} (and {{ $hiddenCount }} more)" data-image="{{ $image }}">
                                 <span data-bs-toggle="modal" data-bs-target="#galleryModal" class="position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">+{{ $hiddenCount }} more</span>
                             </div>
                         @endif
@@ -248,9 +299,9 @@
                     </div>
                     <div class="modal-body">
                         <div id="masonry-grid" class="row">
-                            @foreach ($galleryImages as $image)
+                            @foreach ($overallImages as $image)
                                 <div class="col-12 mb-2">
-                                    <img src="{{ asset($image) }}" class="img-fluid" alt="Gallery Image" />
+                                    <img src="{{ $image }}" class="img-fluid" alt="Gallery Image" />
                                 </div>
                             @endforeach
                         </div>

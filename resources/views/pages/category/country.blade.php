@@ -534,17 +534,11 @@
                                                         <div class="">
                                                             <div class="tours-list__content__trait__text" >
                                                                 @php
-                                                                $guidingTargets = $guiding->guidingTargets->pluck('name')->toArray();
-                                                                if(app()->getLocale() == 'en'){
-                                                                    $guidingTargets =  $guiding->guidingTargets->pluck('name_en')->toArray();
-                                                                }
+                                                                $guidingTargets = collect($guiding->getTargetFishNames())->pluck('name')->toArray();
                                                                 @endphp
                                                                 
                                                                 @if(!empty($guidingTargets))
                                                                     {{ implode(', ', $guidingTargets) }}
-                                                                @else
-                                                                {{ translate($guiding->threeTargets()) }}
-                                                                {{$guiding->target_fish_sonstiges ? " & " . translate($guiding->target_fish_sonstiges) : ""}}
                                                                 @endif
                                                             </div>
                                                         

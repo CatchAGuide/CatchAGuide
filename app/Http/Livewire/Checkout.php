@@ -20,6 +20,7 @@ use Livewire\Component;
 use Carbon\Carbon;
 use App\Services\HelperService;
 use App\Models\GuidingExtras;
+use Illuminate\Support\Facades\Log;
 
 use App\Jobs\SendCheckoutEmail;
 
@@ -98,9 +99,9 @@ class Checkout extends Component
 
     public function mount()
     {
-        // $this->extras = json_decode($this->guiding->pricing_extra, true) ?? [];
-        $this->extras = [];
+        $this->extras = json_decode($this->guiding->pricing_extra, true) ?? [];
         $this->targets = $this->guiding->getTargetFishNames();
+
 
         foreach ($this->extras as $index => $extra) {
             $extraId = $index;
@@ -137,9 +138,7 @@ class Checkout extends Component
         }
         
         $this->totalExtraPrice = $totalExtraPrice;
-
         $this->totalPrice =  $this->totalExtraPrice + $this->guidingprice;
-
 
         $this->userData = [
             'salutation' => 'male',
@@ -173,7 +172,7 @@ class Checkout extends Component
         $extraData = [];
     
         foreach ($this->extras as $index => $extra) {
-            if ($this->selectedExtras[$index]) {
+            if (isset($this->selectedExtras[$index]) && ($index == 0 || $this->selectedExtras[$index] == true)) {
                 $quantity = $this->extraQuantities[$index] ?? 0;
                 $totalExtraPrice += $extra['price'] * $quantity;
                 $extraData[] = [
