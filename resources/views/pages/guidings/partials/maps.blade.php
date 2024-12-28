@@ -34,15 +34,18 @@ const infowindow{{$guiding->id}} = new google.maps.InfoWindow({
 content: `
     <div class="card p-0 border-0" style="width: 200px; overflow: hidden;">
         <div class="card-body border-0 p-0">
-            <a class="text-decoration-none" href="{{route('guidings.show',[$guiding->id,$guiding->slug])}}"><h5 class="card-title" style="font-size: 14px;">{{translate($guiding->title)}}</h5></a>
-            <div class="d-flex align-items-center my-1">
+            <div class="d-flex">
+                <img src="{{$guiding->thumbnail_path}}" alt="{{translate($guiding->title)}}" style="width: 100%; height: 150px; object-fit: cover;">
             </div>
-            <div class="d-flex align-items-center my-1">
+            <div class="p-2">
+                <a class="text-decoration-none" href="{{route('guidings.show',[$guiding->id,$guiding->slug])}}">
+                    <h5 class="card-title mb-1" style="font-size: 14px; font-weight: bold; color: #333;">{{translate($guiding->title)}}</h5>
+                </a>
+                <div class="text-muted small">{{$guiding->location}}</div>
+                <div class="mt-2">
+                    <span class="fw-bold">ab {{$guiding->getLowestPrice()}}€</span> p.P.
+                </div>
             </div>
-            <div class="text-center mt-2">
-                <a class="theme-primary text-center my-2" href="{{route('guidings.show',[$guiding->id,$guiding->slug])}}" style="padding:3px 7px;">@lang('message.from') {{ $guiding->getLowestPrice() }}€ p.P.</a>
-            </div>
-
         </div>
     </div>
 `

@@ -112,7 +112,13 @@
         <!-- Image Gallery -->
         <div class="guidings-gallery row mx-0 mb-3">
             <div class="left-image">
-                <img data-bs-toggle="modal" data-bs-target="#galleryModal" src="{{asset($guiding->thumbnail_path)}}" class="img-fluid" alt="Main Image">
+                @if(file_exists(public_path(str_replace(asset(''), '', asset($guiding->thumbnail_path)))))
+                    <img data-bs-toggle="modal" data-bs-target="#galleryModal" src="{{asset($guiding->thumbnail_path)}}" class="img-fluid" alt="Main Image">
+                @else
+                    <div class="text-center p-4">
+                        <p>No image found</p>
+                    </div>
+                @endif
             </div>
             <div class="right-images">
                 <div class="gallery">
@@ -120,42 +126,34 @@
                     $galleryImages = json_decode($guiding->gallery_images,true);
                     $thumbnailPath = asset($guiding->thumbnail_path);
                     $finalImages = [];
-                    $hiddenCount = count($galleryImages) > 4 ? count($galleryImages) - 4 : 0;
-                    if (!$galleryImages || count($galleryImages) === 0) {
-                        // No gallery images, duplicate thumbnailPath 4 times
-                        $finalImages = array_fill(0, 4, $thumbnailPath);
-                    } elseif (count($galleryImages) > 5) {
-                        // More than 5 gallery images, exclude the thumbnailPath and take the first 4 gallery images
-                        $finalImages = array_slice(array_filter($galleryImages, function($image) use ($thumbnailPath) {
-                            return asset($image) !== $thumbnailPath;
-                        }), 0, 4);
-                    } else {
-                        // Less than or equal to 5 gallery images
-                        $filteredGallery = array_filter($galleryImages, function($image) use ($thumbnailPath) {
-                            return asset($image) !== $thumbnailPath;
-                        });
-                        $filteredGallery = array_values($filteredGallery);
-                        
-                        if (count($filteredGallery) < 4) {
-                            $finalImages = $filteredGallery;
+                    $hiddenCount = 0;
 
-                            if (count($finalImages) == 2) {
-                                // Add the thumbnailPath and the first gallery image to complete 4 items
-                                $finalImages[] = $thumbnailPath;
-                                $finalImages[] = $filteredGallery[0];
-                            } elseif (count($finalImages) == 1) {
-                                // Add thumbnailPath and repeat the 1 gallery image and thumbnail to make 4 items
-                                $finalImages[] = $thumbnailPath;
-                                $finalImages[] = $filteredGallery[0];
-                                $finalImages[] = $thumbnailPath;
-                            } else {
-                                // Add thumbnailPath until the list reaches 4 items
-                                while (count($finalImages) < 4) {
-                                    $finalImages[] = $thumbnailPath;
-                                }
+                    // Check if thumbnail exists
+                    if (file_exists(public_path(str_replace(asset(''), '', $thumbnailPath)))) {
+                        $finalImages[] = $thumbnailPath;
+                    }
+
+                    // Filter and validate gallery images
+                    if ($galleryImages) {
+                        foreach ($galleryImages as $image) {
+                            $imagePath = asset($image);
+                            if (file_exists(public_path(str_replace(asset(''), '', $imagePath))) 
+                                && $imagePath !== $thumbnailPath) {
+                                $finalImages[] = $image;
                             }
-                        } else {
-                            $finalImages = $filteredGallery;
+                        }
+                    }
+
+                    // Calculate hidden count if more than 4 valid images
+                    if (count($finalImages) > 4) {
+                        $hiddenCount = count($finalImages) - 4;
+                        $finalImages = array_slice($finalImages, 0, 4);
+                    }
+
+                    // If less than 4 images and thumbnail exists, pad with thumbnail
+                    if (count($finalImages) < 4 && file_exists(public_path(str_replace(asset(''), '', $thumbnailPath)))) {
+                        while (count($finalImages) < 4) {
+                            $finalImages[] = $thumbnailPath;
                         }
                     }
                 @endphp
@@ -182,43 +180,47 @@
                     $galleryImages = json_decode($guiding->gallery_images ?? '[]');
                     $thumbnailPath = asset($guiding->thumbnail_path);
                     $finalImages = [];
-                    $hiddenCount = count($galleryImages) > 2 ? count($galleryImages) - 2 : 0;
-                    if (!$galleryImages || count($galleryImages) === 0) {
-                        // No gallery images, duplicate thumbnailPath 4 times
-                        $finalImages = array_fill(0, 2, $thumbnailPath);
-                    } elseif (count($galleryImages) > 3) {
-                        // More than 5 gallery images, exclude the thumbnailPath and take the first 4 gallery images
-                        $finalImages = array_slice(array_filter($galleryImages, function($image) use ($thumbnailPath) {
-                            return asset($image) !== $thumbnailPath;
-                        }), 0, 2);
-                    } else {
-                        // Less than or equal to 5 gallery images
-                        $filteredGallery = array_filter($galleryImages, function($image) use ($thumbnailPath) {
-                            return asset($image) !== $thumbnailPath;
-                        });
-                        
-                        if (count($filteredGallery) < 3) {
-                            $finalImages = $filteredGallery;
+                    
+                    // Validate thumbnail exists
+                    $thumbnailExists = file_exists(public_path(str_replace(asset(''), '', $thumbnailPath)));
+                    
+                    // Filter gallery images that exist
+                    $validGalleryImages = [];
+                    if ($galleryImages) {
+                        foreach ($galleryImages as $image) {
+                            $imagePath = asset($image);
+                            if (file_exists(public_path(str_replace(asset(''), '', $imagePath)))) {
+                                $validGalleryImages[] = $image;
+                            }
+                        }
+                    }
+                    
+                    $hiddenCount = count($validGalleryImages) > 2 ? count($validGalleryImages) - 2 : 0;
 
-                            if (count($finalImages) == 2) {
-                                // Add the thumbnailPath and the first gallery image to complete 4 items
-                                $finalImages[] = $thumbnailPath;
-                                $finalImages[] = $filteredGallery[0];
-                            } elseif (count($finalImages) == 1) {
-                                // Add thumbnailPath and repeat the 1 gallery image and thumbnail to make 4 items
-                                $finalImages[] = $thumbnailPath;
-                                $finalImages[] = $filteredGallery[0];
-                                $finalImages[] = $thumbnailPath;
-                            } else {
-                                // Add thumbnailPath until the list reaches 4 items
-                                while (count($finalImages) < 3) {
+                    if (empty($validGalleryImages)) {
+                        // No valid gallery images, use thumbnail if it exists
+                        if ($thumbnailExists) {
+                            $finalImages = array_fill(0, 2, $thumbnailPath);
+                        }
+                    } elseif (count($validGalleryImages) > 3) {
+                        // More than 3 valid gallery images
+                        $finalImages = array_slice($validGalleryImages, 0, 2);
+                    } else {
+                        // 3 or fewer valid gallery images
+                        if (count($validGalleryImages) < 3) {
+                            $finalImages = $validGalleryImages;
+                            
+                            // Pad with thumbnail if it exists
+                            if ($thumbnailExists) {
+                                while (count($finalImages) < 2) {
                                     $finalImages[] = $thumbnailPath;
                                 }
                             }
                         } else {
-                            $finalImages = $filteredGallery;
+                            $finalImages = array_slice($validGalleryImages, 0, 2);
                         }
                     }
+                    @endphp
                 @endphp
                     @foreach ($finalImages as $index => $image)
                         @if ($index < 1)
@@ -295,7 +297,7 @@
                             <span>@lang('guidings.Course_Action')</span>
                         </div>
                         <p class="text-wrapper">
-                           {!! $guiding->desc_course_of_action !!}
+                           {!! translate($guiding->desc_course_of_action) !!}
                         </p>
                     </div>
                     @endif
@@ -948,7 +950,7 @@
                                             @if(count(get_galleries_image_link($other_guiding)))
                                                 @foreach(get_galleries_image_link($other_guiding) as $index => $gallery_image_link)
                                                     <div class="carousel-item @if($index == 0) active @endif">
-                                                        <img class="d-block" src="{{asset($gallery_image_link)}}">
+                                                        <img class="d-block" src="{{$gallery_image_link}}">
                                                     </div>
                                                 @endforeach
                                             @endif
@@ -1091,7 +1093,7 @@
         {{ $other_guiding->title ? translate(Str::limit($other_guiding->title, 50)) : $other_guiding->title }}
     </a>
 </h5>    
-                                <small class="crop-text-1 small-text text-muted">{{ $other_guiding->location ? translate($other_guiding->location) : $other_guiding->location }}</small>
+                                <small class="crop-text-1 small-text text-muted">{{ $other_guiding->location }}</small>
                                 <p class="fw-bold text-muted">
                                     <span>@lang('message.from') {{ $other_guiding->getLowestPrice() }}€</span>
                                 </p>
