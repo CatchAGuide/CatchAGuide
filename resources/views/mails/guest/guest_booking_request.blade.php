@@ -163,92 +163,48 @@
             <p>
                 <strong>@lang('mailing.tagetFish'):</strong> 
                 @php
-                $guidingTargets = $guiding->guidingTargets->pluck('name')->toArray();
-
-                if(app()->getLocale() == 'en'){
-                    $guidingTargets =  $guiding->guidingTargets->pluck('name_en')->toArray();
-                }
+                $guidingTargets = collect($guiding->getTargetFishNames())->pluck('name')->toArray();
                 @endphp
                 
                 @if(!empty($guidingTargets))
                     {{ implode(', ', $guidingTargets) }}
-                @else
-                    {{ $guiding->threeTargets() }}
-                    {{$guiding->target_fish_sonstiges ? " & " . $guiding->target_fish_sonstiges : ""}}
                 @endif
 
             </p>
             
             <p>
                 <strong>@lang('mailing.fishMethod'):</strong> 
-                @if(app()->getLocale() == 'en')
-                {{$guiding->fishingTypes->name_en ? $guiding->fishingTypes->name_en : $guiding->fishingTypes->name }}
-                @else
-                    {{$guiding->fishingTypes->name}}
-                @endif
+                {{ translate($guiding->tour_type)}}
             </p>
 
 
             <p><strong> @lang('mailing.method'):</strong>
+                
                 @php
-                    $guidingMethods = $guiding->guidingMethods->pluck('name')->toArray();
-
-                    if(app()->getLocale() == 'en'){
-                        $guidingMethods =  $guiding->guidingMethods->pluck('name_en')->toArray();
-                    }
+                $guidingTargets = collect($guiding->getFishingMethodNames())->pluck('name')->toArray();
                 @endphp
                 
-                @if(!empty($guidingMethods))
-                    {{ implode(', ', $guidingMethods) }}
-                @else
-                    {{ $guiding->threeMethods() }}
-                    {{$guiding->methods_sonstiges && $guiding->threeMethods() > 0 ? " & " . $guiding->methods_sonstiges : null}}
+                @if(!empty($guidingTargets))
+                    {{ implode(', ', $guidingTargets) }}
                 @endif
             </p>
-            <p><strong>@lang('mailing.shoreOrBoat'):</strong>
-                @php
-                $whereFishing = null;
-                if($guiding->fishingFrom){
-                    if(app()->getLocale() == 'en'){
-                        $whereFishing = $guiding->fishingFrom->name_en;
-                    }else{
-                       $whereFishing =  $guiding->fishingFrom->name;
-                    }
-                }
-            
-                @endphp
-                @if($whereFishing) {{$whereFishing}} @else {{$guiding->fishing_from}} @endif
+
+            <p><strong>@lang('mailing.shoreOrBoat'):</strong>                
+                {{$app->is_boat ? ($app->boatType && $app->boatType->name !== null ? $app->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
             </p>
             <p><strong>@lang('profile.waterType'):</strong> 
                 @php
-                $guidingWaters = $guiding->guidingWaters->pluck('name')->toArray();
-
-                if(app()->getLocale() == 'en'){
-                    $guidingWaters =  $guiding->guidingWaters->pluck('name_en')->toArray();
-                }
-
+                $guidingWaters = collect($guiding->getWaterNames())->pluck('name')->toArray();
                 @endphp
-                
+                    
                 @if(!empty($guidingWaters))
                     {{ implode(', ', $guidingWaters) }}
-                @else
-                {{-- {{ translate($guiding->threeWaters()) }}
-                {{$guiding->water_sonstiges ? " & " . translate($guiding->water_sonstiges) : ""}} --}}
                 @endif
             </p>
             <p><strong>@lang('profile.meetingPoint'):</strong> {{$guiding->meeting_point}}</p>
             <p><strong>@lang('profile.inclussion'):</strong>  
                 @php
-                    $guidingInclusion = $guiding->inclussions->pluck('name')->toArray();
-                    
-                    if (app()->getLocale() == 'en') {
-                        $guidingInclusion = $guiding->inclussions->pluck('name_en')->toArray();
-                        foreach ($guidingInclusion as $index => $name) {
-                            if (empty($name)) {
-                                $guidingInclusion[$index] = $guiding->inclussions[$index]->name;
-                            }
-                        }
-                    }
+                    $guidingInclusion = collect($guiding->getInclusionNames())->pluck('name')->toArray();
                 @endphp
 
                 @if (!empty($guidingInclusion))
