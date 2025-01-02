@@ -31,7 +31,6 @@ class DestinationCountryController extends Controller
         $region_row = Destination::whereSlug($region)->whereType('region')->first();
         $city_row = Destination::whereSlug($city)->whereType('city')->first();
 
-
         if (!is_null($city)) {
             if (is_null($city_row)) {
                 abort(404);
@@ -66,13 +65,10 @@ class DestinationCountryController extends Controller
         $regions = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->whereType('region')->whereCountryId($row_data->id)->get();
         $cities = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->whereType('city')->whereCountryId($row_data->id)->get();
 
-        
         $faq = $row_data->faq;
         $fish_chart = $row_data->fish_chart;
         $fish_size_limit = $row_data->fish_size_limit;
         $fish_time_limit = $row_data->fish_time_limit;
-
-        //$guidings = Guiding::where('status', 1)->whereNotNull('lat')->whereNotNull('lng')->paginate(10);
 
         $locale = Config::get('app.locale');
 

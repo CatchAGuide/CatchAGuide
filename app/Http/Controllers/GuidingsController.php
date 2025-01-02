@@ -515,11 +515,15 @@ class GuidingsController extends Controller
                 $extraPrice = ExtrasPrice::where('name', $request->input($nameKey))
                                        ->orWhere('name_en', $request->input($nameKey))
                                        ->first();
+                $extraname = $extraPrice ? $extraPrice->name : $request->input($nameKey);
                 if ($request->has($nameKey) && $request->has($priceKey)) {
-                    $pricingExtras[] = [
-                        'name' => $extraPrice ? $extraPrice->id : $request->input($nameKey),
-                        'price' => $request->input($priceKey)
-                    ];
+
+                    if ($extraname && $request->input($priceKey)) {
+                        $pricingExtras[] = [
+                            'name' => $extraname,
+                            'price' => $request->input($priceKey)
+                        ];
+                    }
                     $i++;
                 } else {
                     break;
