@@ -41,7 +41,8 @@ class EventService {
             'due' => $due,
             'source' => 'global',
             'type' => 'booking',
-            'user_id' => $guiding->user_id
+            'user_id' => $guiding->user_id,
+            'guiding_id' => $guiding->id ?? null
         ]);
     }
 
