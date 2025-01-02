@@ -233,6 +233,36 @@
         width: 300px;
         height:300px;
     }
+    .filter-select {
+        background: url("data:image/svg+xml,<svg height='10px' width='10px' viewBox='0 0 16 16' fill='%23808080' xmlns='http://www.w3.org/2000/svg'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>") no-repeat;
+        background-position: right 0.3rem center !important;
+        padding-left: 30px !important;
+        border: 0;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .filter-group {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+
+    .filter-icon {
+        position: absolute;
+        left: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 1;
+        color: #808080;
+    }
+
+    /* Override Select2 styles to match */
+    .select2-container--default .select2-selection--single,
+    .select2-container--default .select2-selection--multiple {
+        border: 0 !important;
+        border-bottom: 1px solid #ccc !important;
+        border-radius: 0 !important;
+        padding-left: 30px !important;
+    }
 </style>
 @endsection
 
@@ -406,14 +436,11 @@
                             </div>
                             <div class="card-body border-bottom">
                                 <form method="get" action="{{ url()->current() }}">
-                                    <div class="form-group mb-3 d-flex align-items-center border-bottom">
-                                        <!-- <label for="num_guests" class="form-label">Number of Guests</label> -->
-                                        <div class="input-group-prepend border-0 ">
-                                            <span class="d-flex align-items-center px-2 h-100">
-                                                <i class="fas fa-user"></i>
-                                            </span>
+                                    <div class="filter-group">
+                                        <div class="filter-icon">
+                                            <i class="fas fa-user"></i>
                                         </div>
-                                        <select class="form-control form-select  border-0 rounded-0 custom-select" id="num_guests" name="num_guests">
+                                        <select class="form-control filter-select" id="num_guests" name="num_guests">
                                             <option disabled selected hidden>-- @lang('destination.select') --</option>
                                             <option value="">@lang('message.choose')...</option>
                                             <option value="1" {{ request()->get('num_guests') ? request()->get('num_guests') == 1 ? 'selected' : null : null }}>1</option>
@@ -424,45 +451,38 @@
                                         </select>
                                     </div>
 
-                                    <div class="form-group mb-3 d-flex align-items-center border-bottom">
-                                        <!-- <label for="target_fish" class="form-label">Target Fish</label> -->
-                                        <div class="px-2 select2-icon">
+                                    <div class="filter-group">
+                                        <div class="filter-icon">
                                             <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
                                         </div>
-                                        <select class="form-control form-select mb-3" id="target_fish" name="target_fish[]"></select>
+                                        <select class="form-control filter-select" id="target_fish" name="target_fish[]"></select>
                                     </div>
-                                    <div class="form-group mb-3 d-flex align-items-center border-bottom">
-                                        <!-- <label for="water_type" class="form-label">Water Type</label> -->
-                                        <div class="px-2 select2-icon">
+                                    <div class="filter-group">
+                                        <div class="filter-icon">
                                             <img src="{{asset('assets/images/icons/water-waves.png')}}" height="20" width="20" alt="" />
                                         </div>
-                                        <select class="form-select mb-3" id="water" name="water[]"></select>
+                                        <select class="form-control filter-select" id="water" name="water[]"></select>
                                     </div>
-                                    <div class="form-group mb-3 d-flex align-items-center border-bottom">
-                                        <!-- <label for="fishing_technique" class="form-label">Fishing Technique</label> -->
-                                        <div class="px-2 select2-icon">
+                                    <div class="filter-group">
+                                        <div class="filter-icon">
                                             <img src="{{asset('assets/images/icons/fishing.png')}}" height="20" width="20" alt="" />
                                         </div>
-                                        <select class="form-select" id="methods" name="methods[]"></select>
+                                        <select class="form-control filter-select" id="methods" name="methods[]"></select>
                                     </div>
-                                    <div class="col-12 mb-2">
-                                        <div class="input-group my-1">
-                                            <div class="input-group-prepend border-0 border-bottom ">
-                                                <span class="d-flex align-items-center px-2 h-100">
-                                                    <i class="fa fa-euro-sign"></i>
-                                                </span>
-                                            </div>
-                                            <select id="price_range" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="price_range">
-                                                <option selected disabled hidden>Price per Person</option>
-                                                <option value="" >@lang('message.choose')...</option>
-                                                <option value="1-50" {{ request()->get('price_range') ? request()->get('price_range') == '1-200' ? 'selected' : null : null }}>1 - 50 p.P.</option>
-                                                <option value="51-100" {{ request()->get('price_range') ? request()->get('price_range') == '201-400' ? 'selected' : null : null }}>51 - 100 p.P.</option>
-                                                <option value="101-150" {{ request()->get('price_range') ? request()->get('price_range') == '401-600' ? 'selected' : null : null }}>101 - 150 p.P.</option>
-                                                <option value="151-200" {{ request()->get('price_range') ? request()->get('price_range') == '601-800' ? 'selected' : null : null }}>151 - 200 p.P.</option>
-                                                <option value="201-250" {{ request()->get('price_range') ? request()->get('price_range') == '801-1000' ? 'selected' : null : null }}>201 - 250 p.P.</option>
-                                                <option value="350" {{ request()->get('price_range') ? request()->get('price_range') == '1001' ? 'selected' : null : null }}>350 and more</option>
-                                            </select>
-                                          </div>
+                                    <div class="filter-group">
+                                        <div class="filter-icon">
+                                            <i class="fa fa-euro-sign"></i>
+                                        </div>
+                                        <select class="form-control filter-select" id="price_range" name="price_range">
+                                            <option selected disabled hidden>Price per Person</option>
+                                            <option value="" >@lang('message.choose')...</option>
+                                            <option value="1-50" {{ request()->get('price_range') ? request()->get('price_range') == '1-200' ? 'selected' : null : null }}>1 - 50 p.P.</option>
+                                            <option value="51-100" {{ request()->get('price_range') ? request()->get('price_range') == '201-400' ? 'selected' : null : null }}>51 - 100 p.P.</option>
+                                            <option value="101-150" {{ request()->get('price_range') ? request()->get('price_range') == '401-600' ? 'selected' : null : null }}>101 - 150 p.P.</option>
+                                            <option value="151-200" {{ request()->get('price_range') ? request()->get('price_range') == '601-800' ? 'selected' : null : null }}>151 - 200 p.P.</option>
+                                            <option value="201-250" {{ request()->get('price_range') ? request()->get('price_range') == '801-1000' ? 'selected' : null : null }}>201 - 250 p.P.</option>
+                                            <option value="350" {{ request()->get('price_range') ? request()->get('price_range') == '1001' ? 'selected' : null : null }}>350 and more</option>
+                                        </select>
                                     </div>
                                     <button class="btn btn-sm theme-primary btn-theme-new w-100" type="submit">@lang('destination.search')</button>
                                 </form> 
