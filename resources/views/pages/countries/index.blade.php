@@ -119,7 +119,7 @@
                 </div>
                 <div class="col-md-4 my-1">
                     <div class="trending-card">
-                        <a href="{{ route('destination.country', ['country' => 'danemark']) }}">
+                        <a href="{{ route('destination.country', ['country' => 'norwegen']) }}">
                             <div class="trending-card-wrapper">
                                 <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/denmark/denmark.webp')}}">
                                 <div class="trending-card-wrapper-content">

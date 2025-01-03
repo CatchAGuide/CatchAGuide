@@ -130,6 +130,10 @@
         height: 300px!important;
         object-fit: cover;
     } */
+     
+    #offcanvasBottomSearch {
+        height: 90%!important;
+    }
 
     .btn-outline-theme {
         color: #E8604C!important;
@@ -283,59 +287,25 @@
                 @endphp
 
                 @if($region_count > 0)
-                <h5 class="mb-2">@lang('destination.all_region')</h5>
-                <div id="carousel-regions" class="owl-carousel owl-theme mb-4">
-                    @foreach($regions as $region)
-                        <div class="item">
-                            <div class="col-sm-12">
-                                <a href="{{ route('destination.country', ['country' => $region->country_slug, 'region' => $region->slug]) }}">
-                                    <div class="card">
-                                        <div class="card-img">
-                                            <img src="{{ $region->getThumbnailPath() }}" class="dimg-fluid" alt="Image Not Available">
-                                        </div>
-                                        <div class="card-img-overlay">
-                                            <h5>{{ translate($region->name) }}</h5>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-
-                <!-- <div id="carousel-regions" class="carousel slide mb-4" data-bs-ride="carousel" {!! ($region_count <= 4) ? 'data-bs-interval="false"' : '' !!}>
-                    <div class="carousel-inner" role="listbox">
+                    <h5 class="mb-2">@lang('destination.all_region')</h5>
+                    <div id="carousel-regions" class="owl-carousel owl-theme mb-4">
                         @foreach($regions as $region)
-                        <div class="carousel-item {{ (($region_counter == 0)? 'active' : '') }}">
-                            <div class="col-sm-12 col-lg-3">
-                                <a href="{{ route('destination.country', ['country' => $region->country_slug, 'region' => $region->slug]) }}">
-                                    <div class="card">
-                                        <div class="card-img">
-                                            <img src="{{ $region->getThumbnailPath() }}" class="dimg-fluid" alt="Image Not Available">
+                            <div class="item">
+                                <div class="col-sm-12">
+                                    <a href="{{ route('destination.country', ['country' => $region->country_slug, 'region' => $region->slug]) }}">
+                                        <div class="card">
+                                            <div class="card-img">
+                                                <img src="{{ $region->getThumbnailPath() }}" class="dimg-fluid" alt="Image Not Available">
+                                            </div>
+                                            <div class="card-img-overlay">
+                                                <h5>{{ translate($region->name) }}</h5>
+                                            </div>
                                         </div>
-                                        <div class="card-img-overlay">
-                                            <h5>{{ $region->name }}</h5>
-                                        </div>
-                                    </div>
-                                </a>
+                                    </a>
+                                </div>
                             </div>
-                        </div>
-                            @php
-                                $region_counter++;
-                            @endphp
                         @endforeach
                     </div>
-                    @if($region_count > 4)
-                    <button class="carousel-control-prev" type="button" data-bs-target="#carousel-regions" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#carousel-regions" data-bs-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
-                    </button>
-                    @endif
-                </div> -->
                 @endif
                 @if($city_count > 0)
                 <h5 class="mb-2">@lang('destination.all_cities')</h5>
@@ -383,7 +353,7 @@
                                     @endforeach
                                 </div>
                                 <a class="btn border-start cag-btn-inverted" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottomSearch" aria-controls="offcanvasBottomSearch" href="javascript:void(0)" style="border-left: 1px solid #ccc!important; z-index: 2; width:30%;">
-                                    <i class="fa fa-filter me-1"></i>@lang('message.filter') 
+                                    <i class="fa fa-filter me-1"></i>@lang('message.filter')
                                     @if($guidings_total > 0)
                                         @if(request()->has('radius') || request()->has('num_guests') || request()->has('target_fish') || request()->has('water') || request()->has('fishing_type') || request()->has('price_range'))
                                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="guiding-filter-counter">{{ $guidings->count() }}</span>
@@ -751,6 +721,89 @@
             </div>
         </div>
     </div>
+
+    <div class="offcanvas offcanvas-bottom" tabindex="-1" id="offcanvasBottomSearch" aria-labelledby="offcanvasBottomLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasBottomLabel">Filter</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body small">
+            <form id="filterContainerOffCanvass" action="{{ url()->current() }}" method="get" class="px-4 py-2">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="input-group my-1">
+                            <div class="input-group-prepend border-0 border-bottom ">
+                                <span class="d-flex align-items-center px-2 h-100">
+                                    <i class="fas fa-user"></i>
+                                </span>
+                            </div>
+                            <select id="num-guestsOffCanvass" class="form-control form-select  border-0 border-bottom rounded-0 custom-select" name="num_guests">
+                                <option value="">@lang('message.choose')...</option>
+                                <option value="1" {{ request()->get('num_guests') ? request()->get('num_guests') == 1 ? 'selected' : null : null }}>1</option>
+                                <option value="2" {{ request()->get('num_guests') ? request()->get('num_guests') == 2 ? 'selected' : null : null }}>2</option>
+                                <option value="3" {{ request()->get('num_guests') ? request()->get('num_guests') == 3 ? 'selected' : null : null }}>3</option>
+                                <option value="4" {{ request()->get('num_guests') ? request()->get('num_guests') == 4 ? 'selected' : null : null }}>4</option>
+                                <option value="5" {{ request()->get('num_guests') ? request()->get('num_guests') == 5 ? 'selected' : null : null }}>5</option>
+                            </select>
+                        </div>
+                    </div>
+                 
+                    <div class="col-12">
+                        <div class="form-group my-1 d-flex align-items-center border-bottom">
+                            <div class="px-2 select2-icon">
+                                <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
+                            </div>
+                           
+                            <select class="form-control form-select border-0 rounded-0" id="target_fishOffCanvass" name="target_fish[]" style="width:100%">
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <div class="form-group my-1 d-flex align-items-center border-bottom">
+                            <div class="px-2 select2-icon">
+                                <img src="{{asset('assets/images/icons/water-waves.png')}}" height="20" width="20" alt="" />
+                            </div>
+                            <select class="form-control form-select border-0  rounded-0" id="waterOffCanvass" name="water[]" style="width:100%">
+                    
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group my-1 d-flex align-items-center border-bottom ">
+                            <div class="px-2 select2-icon">
+                                <img src="{{asset('assets/images/icons/fishing.png')}}" height="20" width="20" alt="" />
+                            </div>
+                            <select class="form-control form-select border-0 rounded-0" id="methodsOffCanvass" name="methods[]" style="width:100%">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-12 mb-2">
+                        <div class="input-group my-1">
+                            <div class="input-group-prepend border-0 border-bottom ">
+                                <span class="d-flex align-items-center px-2 h-100">
+                                    <i class="fa fa-euro-sign"></i>
+                                </span>
+                            </div>
+                            <select id="price_rangeOffCanvass" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="price_range">
+                                <option selected disabled hidden>Price per Person</option>
+                                <option value="" >@lang('message.choose')...</option>
+                                <option value="1-50" {{ request()->get('price_range') ? request()->get('price_range') == '1-200' ? 'selected' : null : null }}>1 - 50 p.P.</option>
+                                <option value="51-100" {{ request()->get('price_range') ? request()->get('price_range') == '201-400' ? 'selected' : null : null }}>51 - 100 p.P.</option>
+                                <option value="101-150" {{ request()->get('price_range') ? request()->get('price_range') == '401-600' ? 'selected' : null : null }}>101 - 150 p.P.</option>
+                                <option value="151-200" {{ request()->get('price_range') ? request()->get('price_range') == '601-800' ? 'selected' : null : null }}>151 - 200 p.P.</option>
+                                <option value="201-250" {{ request()->get('price_range') ? request()->get('price_range') == '801-1000' ? 'selected' : null : null }}>201 - 250 p.P.</option>
+                                <option value="350" {{ request()->get('price_range') ? request()->get('price_range') == '1001' ? 'selected' : null : null }}>350 and more</option>
+                            </select>
+                          </div>
+                    </div>
+                    <div class="col-sm-12 col-lg-12 ps-md-0">
+                        <button class="btn btn-sm theme-primary btn-theme-new w-100 h-100" >@lang('message.Search')</button>    
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection
 
 @section('js_after')
@@ -925,11 +978,11 @@ toggleBtn.addEventListener('click', function() {
 
 function initializeSelect2() {
 
-    var selectTarget = $('#target_fish');
-    var selectWater = $('#water');
-    var selectMethod = $('#methods');
+    var selectTarget = $('#target_fish, #target_fishOffCanvass');
+    var selectWater = $('#water, #waterOffCanvass');
+    var selectMethod = $('#methods, #methodsOffCanvass');
 
-    $("#target_fish").select2({
+    selectTarget.select2({
         multiple: true,
         placeholder: '@lang('message.target-fish')',
         width: 'resolve', // need to override the changed default
@@ -963,7 +1016,7 @@ function initializeSelect2() {
     selectTarget.trigger('change');
 
 
-    $("#water").select2({
+    selectWater.select2({
         multiple: true,
         placeholder: '@lang('message.body-type')',
         width: 'resolve' // need to override the changed default
@@ -993,7 +1046,7 @@ function initializeSelect2() {
 
 
 
-    $("#methods").select2({
+    selectMethod.select2({
         multiple: true,
         placeholder: '@lang('message.fishing-technique')',
         width: 'resolve' // need to override the changed default
