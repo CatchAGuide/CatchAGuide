@@ -26,7 +26,7 @@ class Destination extends Model
         'content',
         'filters',
         'thumbnail_path',
-
+        'countrycode',
         'fish_avail_title',
         'fish_avail_intro',
         'size_limit_title',
