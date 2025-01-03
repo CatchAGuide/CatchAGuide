@@ -225,6 +225,7 @@ class DestinationCountryController extends Controller
         $title .= __('guidings.Country') . ' ' . $country . ' | ';
         //$query->where('country',$country);
 
+        // dd($);
         if(!empty($placeLat) && !empty($placeLng)){
             $title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
             $guidingFilter = Guiding::locationFilter($place_location, $radius);
