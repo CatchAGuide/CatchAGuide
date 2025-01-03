@@ -44,6 +44,8 @@ class SendCheckoutEmail implements ShouldQueue
             \App::setLocale('en');
         }
         Mail::to($this->user->email)->queue(new GuestBookingRequestMail($this->booking,$this->user,$this->guiding,$this->guide));
+        Mail::to($this->guide->email)->queue(new GuideBookingRequestMail($this->booking,$this->user,$this->guiding,$this->guide));
+
 
         \App::setLocale('de');
         Mail::to(env('TO_CEO'))->queue(new BookingRequestMailToCEO($this->booking));
