@@ -30,6 +30,7 @@ class AdminCategoryCountryController extends Controller
         $route = route('admin.category.country.store');
         $method = '';
         $language = old('language');
+        $countrycode = old('countrycode');
         $name = old('name');
         $thumbnail = 'https://place-hold.it/300x300';
         $title = old('title');
@@ -58,7 +59,7 @@ class AdminCategoryCountryController extends Controller
         $faq = old('faq');
         $faq_title = old('faq_title');
 
-        $data = compact('form', 'route', 'method', 'language', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'country', 
+        $data = compact('form', 'route', 'method', 'language', 'countrycode', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'country', 
             'fish_chart', 'fish_avail_title', 'fish_avail_intro', 
             'fish_size_limit', 'size_limit_title', 'size_limit_intro', 
             'fish_time_limit', 'time_limit_title', 'time_limit_intro', 
@@ -149,6 +150,7 @@ class AdminCategoryCountryController extends Controller
         $route = route('admin.category.country.update', $id);
         $method = 'PUT';
         $language = $row->language;
+        $countrycode = $row->countrycode;
         $name = $row->name;
         $thumbnail = $row->getThumbnailPath();
         $title = $row->title;
@@ -178,7 +180,7 @@ class AdminCategoryCountryController extends Controller
         $faq = $row->faq;
         $faq_title = $row->faq_title;
 
-        $data = compact('form', 'route', 'method', 'language', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'country', 
+        $data = compact('form', 'route', 'method', 'language', 'countrycode', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'country', 
             'fish_chart', 'fish_avail_title', 'fish_avail_intro', 
             'fish_size_limit', 'size_limit_title', 'size_limit_intro', 
             'fish_time_limit', 'time_limit_title', 'time_limit_intro', 
