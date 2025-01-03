@@ -85,6 +85,7 @@ class AdminCategoryCountryController extends Controller
             $data['slug'] = $this->slug_format($request->name);
             $data['filters'] = json_encode($request->filters);
             $data['content'] = $request->body;
+            $data['countrycode'] = $request->countrycode ?? null;
             $webp_path = null;
 
             if($request->has('thumbnailImage')) {
@@ -205,6 +206,7 @@ class AdminCategoryCountryController extends Controller
             $data['slug'] = $this->slug_format($request->name);
             $data['filters'] = json_encode($request->filters);
             $data['content'] = $request->body;
+            $data['countrycode'] = $request->countrycode ?? null;
             $webp_path = null;
 
             if($request->has('thumbnailImage')) {
