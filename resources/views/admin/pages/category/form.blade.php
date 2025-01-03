@@ -55,6 +55,18 @@ input[type=number] {
                                     </div>
                                 </div>
                                 @endif
+                                
+                                
+                                @if(!isset($countries))
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-12">
+                                        <div class="form-group">
+                                            <label for="title">Country Code</label>
+                                            <input type="text" class="form-control" name="countrycode" id="countrycode" value="{{ $countrycode }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
 
                                 <div class="row">
                                     <div class="col-lg-6 col-md-12">

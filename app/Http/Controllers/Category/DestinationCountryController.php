@@ -19,10 +19,11 @@ class DestinationCountryController extends Controller
 {
     public function index()
     {
-        return view('pages.countries.index');
+        $countries = Destination::whereType('country')->get();
+        return view('pages.countries.index', compact('countries'));
     }
 
-    public function country(Request $request, $country, $region=null, $city=null)
+    public function country(Request $request, $country, $region = null, $city=null)
     {
         $place_location = $country;
         $query = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit']);
@@ -224,6 +225,7 @@ class DestinationCountryController extends Controller
         $title .= __('guidings.Country') . ' ' . $country . ' | ';
         //$query->where('country',$country);
 
+        // dd($);
         if(!empty($placeLat) && !empty($placeLng)){
             $title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
             $guidingFilter = Guiding::locationFilter($place_location, $radius);

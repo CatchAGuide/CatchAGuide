@@ -276,7 +276,7 @@
         <div class="row">
             <div class="col-12">
                 <div id="page-main-intro" class="mb-3">
-                    <div class="page-main-intro-text mb-1">{!! nl2br($row_data->introduction) !!}</div>
+                    <div class="page-main-intro-text mb-1">{!! translate(nl2br($row_data->introduction)) !!}</div>
                     <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a></p>
                 </div>
                 @php

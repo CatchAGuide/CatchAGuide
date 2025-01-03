@@ -75,28 +75,30 @@
                 <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a></p>
             </div>
             <div class="row">
-                <div class="col-md-4 my-1">
-                    <div class="trending-card">
-                        <a href="{{ route('destination.country', ['country' => 'deutschland']) }}"> 
-                            <div class="trending-card-wrapper">
-                                <img alt="Deutschland" class="trending-card-background" src="{{asset('assets/2024/germany/deutschland4.webp')}}">
-                                <div class="trending-card-wrapper-content">
-                                    <div class="overlay-wrapper"></div>
-                                    <div class="trending-card-main">
-                                        <div class="trending-text-wrapper">
-                                            <h4 class="trending-title">Germany</h4>
-                                            <div>
-                                                <img class="mx-2" alt="Key West" width="32" height="32" src="{{asset('flags/de.svg')}}">
+                @foreach($countries as $country)
+                    <div class="col-md-4 my-1">
+                        <div class="trending-card">
+                            <a href="{{ route('destination.country', ['country' => $country->slug]) }}"> 
+                                <div class="trending-card-wrapper">
+                                    <img alt="{{translate($country->name)}}" class="trending-card-background" src="{{asset($country->thumbnail ?? 'images/placeholder_guide.jpg')}}">
+                                    <div class="trending-card-wrapper-content">
+                                        <div class="overlay-wrapper"></div>
+                                        <div class="trending-card-main">
+                                            <div class="trending-text-wrapper">
+                                                <h4 class="trending-title">{{translate($country->name)}}</h4>
+                                                <div>
+                                                    <img class="mx-2" alt="Flag" width="32" height="32" src="{{asset('flags/'.$country->countrycode.'.svg')}}">
+                                                </div>
+                                            
                                             </div>
-                                        
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </a>
+                            </a>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-4 my-1">
+                @endforeach
+                {{-- <div class="col-md-4 my-1">
                     <div class="trending-card">
                         <a href="{{ route('destination.country', ['country' => 'niederlande']) }}">
                             <div class="trending-card-wrapper">
@@ -221,7 +223,7 @@
                             </div>
                         </a>
                     </div>
-                </div>
+                </div> --}}
             </div>
         </div>
     </section>
