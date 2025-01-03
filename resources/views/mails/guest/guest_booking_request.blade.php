@@ -190,7 +190,7 @@
             </p>
 
             <p><strong>@lang('mailing.shoreOrBoat'):</strong>                
-                {{$app->is_boat ? ($app->boatType && $app->boatType->name !== null ? $app->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
+                {{$guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
             </p>
             <p><strong>@lang('profile.waterType'):</strong> 
                 @php
