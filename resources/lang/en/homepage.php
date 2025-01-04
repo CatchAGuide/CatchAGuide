@@ -7,6 +7,7 @@ return [
     'header-signup' => 'Sign up',
     'header-profile' => 'Profile',
     'header-logout' => 'Logout',
+    'header-vacations' => 'Fishing Holiday',
 
     'searchbar-destination' => 'Destination',
     'searchbar-person' => 'Guests',

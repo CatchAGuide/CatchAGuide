@@ -18,7 +18,7 @@
                     <div class="nav-link language-selector">
                         <form action="{{ route('language.switch') }}" method="POST" class="d-flex align-items-center">
                             @csrf
-                            <i class="fas fa-globe me-2"></i>
+                            <i class="fas fa-map-signs me-2"></i>
                             <select name="language" class="selectpicker header-language-select" data-width="fit" onchange="this.form.submit()">
                                 @foreach (config('app.locales') as $key => $locale)
                                     <option value="{{ $locale }}" 
@@ -98,6 +98,9 @@
                     <a href="{{ route('guidings.index') }}" class="me-4 text-white text-decoration-none">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
+                    <a href="{{ route('vacations.index') }}" class="me-4 text-white text-decoration-none">
+                        <i class="fas fa-map-signs me-2"></i>@lang('homepage.header-vacations')
+                    </a>
                     <a href="{{ route($blogPrefix.'.index') }}" class="text-white text-decoration-none">
                         <i class="fas fa-book-open me-2"></i>@lang('homepage.filter-magazine')
                     </a>
@@ -166,6 +169,9 @@
                     </a>
                     <a href="{{ route('guidings.index') }}" class="me-4 text-white text-decoration-none">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
+                    </a>
+                    <a href="{{ route('vacations.index') }}" class="me-4 text-white text-decoration-none">
+                        <i class="fas fa-map-signs me-2"></i>@lang('homepage.header-vacations')
                     </a>
                     <a href="{{ route($blogPrefix.'.index') }}" class="me-4 text-white text-decoration-none">
                         <i class="fas fa-book-open me-2"></i>@lang('homepage.filter-magazine')
@@ -919,6 +925,10 @@ input[type=number] {
                         <i class="fas fa-fish"></i>
                         <span>@lang('homepage.filter-fishing-near-me')</span>
                     </a>
+                    <a href="{{ route('vacations.index') }}" class="menu-item">
+                        <i class="fas fa-map-signs"></i>
+                        <span>@lang('homepage.header-vacations')</span>
+                    </a>
                     <a href="{{ route($blogPrefix.'.index') }}" class="menu-item">
                         <i class="fas fa-book-open"></i>
                         <span>@lang('homepage.filter-magazine')</span>
@@ -957,7 +967,7 @@ input[type=number] {
                     <div class="menu-divider"></div>
                     
                     <a href="#" class="menu-item" data-bs-toggle="modal" data-bs-target="#languageModal">
-                        <i class="fas fa-globe"></i>
+                        <i class="fas fa-map-signs"></i>
                         <span>Language <span class="fi fi-{{ array_search(app()->getLocale(), config('app.locales')) }}"></span></span>
                     </a>
                     

@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\GuidesController;
 use App\Http\Controllers\Admin\TranslationController;
 use App\Http\Controllers\Admin\GuidingsController as AdminGuidingsController;
 use App\Http\Controllers\Admin\PageAttributeController;
+use App\Http\Controllers\Admin\VacationsController as AdminVacationsController;
 use App\Http\Controllers\Blog\BlogController;
 use App\Http\Controllers\Blog\CategoriesController;
 use App\Http\Controllers\Blog\ThreadsController;
@@ -28,6 +29,7 @@ use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\GuideThreadController;
+use App\Http\Controllers\VacationsController;
 
 use App\Http\Livewire\MultiStepForm;
 use Livewire\Component;
@@ -190,6 +192,8 @@ Route::get('guidings/{slug?}', [GuidingsController::class, 'redirectToNewFormat'
 Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'newShow'])->name('guidings.show');
 Route::post('newguidings', [GuidingsController::class, 'guidingsStore'])->name('guidings.store');
 
+Route::resource('vacations', VacationsController::class);
+
 Route::get('searchrequest', [GuidingsController::class, 'bookingrequest'])->name('guidings.request');
 Route::post('searchrequest/store', [GuidingsController::class, 'bookingRequestStore'])->name('store.request');
 
@@ -273,6 +277,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/aproveoutpayments/{id}', [AdminPaymentsController::class, 'aproveoutpayments'])->name('aproveoutpayments');
             Route::get('/deletepayments/{id}', [AdminPaymentsController::class, 'deletepayments'])->name('deletepayments');
         });
+
+        Route::resource('vacations', AdminVacationsController::class);
 
         Route::prefix('settings')->name('settings.')->group(function () {
             
