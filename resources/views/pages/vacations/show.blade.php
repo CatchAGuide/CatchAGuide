@@ -11,9 +11,9 @@
 @section('share_tags')
     <meta property="og:title" content="{{translate($vacation->title)}}" />
     <meta property="og:description" content="{{translate($vacation->description)}}" />
-    {{-- @if(!empty(app('vacation')->getImagesUrl($vacation)) && is_array(app('vacation')->getImagesUrl($vacation)) && count(app('vacation')->getImagesUrl($vacation)))
-    <meta property="og:image" content="{{app('vacation')->getImagesUrl($vacation)['image_0']}}"/>
-    @endif --}}
+    @if(!empty(app('guiding')->getImagesUrl($vacation)) && is_array(app('guiding')->getImagesUrl($vacation)) && count(app('guiding')->getImagesUrl($vacation)))
+    <meta property="og:image" content="{{app('guiding')->getImagesUrl($vacation)['image_0']}}"/>
+    @endif
 
 @endsection
 
@@ -117,8 +117,8 @@
                     <div class="location-row">
                         <div class="location">
                             <a href="#" class="fs-6 text-decoration-none text-muted">
-                                <i class="bi bi-geo-alt"></i>@lang('guidings.Fishing_Trip') <strong>{{$vacation->location}}</strong>
-                            </a>
+                                    <i class="bi bi-geo-alt"></i>@lang('guidings.Fishing_Trip') <strong>{{$vacation->location}}</strong>
+                                </a>
                         </div>
                         <div class="location-map">
                             <a href="#map" class="fs-6 text-decoration-none text-muted">
@@ -130,11 +130,10 @@
                 </div>
                 {{-- @if ($average_rating)
                 <div class="col-auto pe-0 me-1">
-                  
                     <p class="mb-1">
                         <span class="text-warning">★</span> {{$average_rating}}/5 ({{$ratings->count()}} reviews)
                     </p>
-                </div>
+                </div> 
                 @endif --}}
                 <div class="col-auto p-0">
                 </div>
@@ -151,19 +150,19 @@
         <!-- Image Gallery -->
         <div class="guidings-gallery row mx-0 mb-3">
             <div class="left-image">
-                @if(file_exists(public_path(str_replace(asset(''), '', asset($vacation->thumbnail_path)))))
+                {{-- @if(file_exists(public_path(str_replace(asset(''), '', asset($vacation->thumbnail_path)))))
                     <img data-bs-toggle="modal" data-bs-target="#galleryModal" src="{{asset($vacation->thumbnail_path)}}" class="img-fluid" alt="Main Image">
-                @else
+                @else --}}
                     <div class="text-center p-4">
                         <p>No image found</p>
                     </div>
-                @endif
+                {{-- @endif --}}
             </div>
             <div class="right-images">
                 <div class="gallery">
                   @php
                     $galleryImages = json_decode($vacation->gallery,true);
-                    $thumbnailPath = $vacation->thumbnail_path ?? '';
+                    $thumbnailPath = $vacation->thumbnail_path ?? 'images/placeholder_guide.jpg';
                     $finalImages = [];
                     $overallImages = [];
                     $hiddenCount = 0;
@@ -222,7 +221,7 @@
                 <div class="gallery-mobile">
                     @php
                     $galleryImages = json_decode($vacation->gallery ?? '[]');
-                    $thumbnailPath = $vacation->thumbnail_path ?? '';
+                    $thumbnailPath = $vacation->thumbnail_path ?? 'images/placeholder_guide.jpg';
                     $finalImages = [];
                     $overallImages = [];
                     
@@ -330,10 +329,11 @@
                             </svg>
                         </i>
 
-                        {{-- <p class="mb-0">{{ __('guidings.'.$vacation->duration_type) }} : <strong>{{$vacation->duration}} {{ $vacation->duration_type == 'multi_day' ? __('guidings.days') : __('guidings.hours') }}</strong></p>                    </div> --}}
+                        {{-- <p class="mb-0">{{ __('guidings.'.$vacation->duration_type) }} : <strong>{{$vacation->duration}} {{ $vacation->duration_type == 'multi_day' ? __('guidings.days') : __('guidings.hours') }}</strong></p> --}}
+                    </div>
                     <div class="info-item">
                         <i class="fas fa-users"></i>
-                       <p class="mb-0">{{translate('Number of guests:')}} <strong>{{$vacation->max_persons}}</strong></p>
+                       <p class="mb-0">{{translate('Number of guests:')}} <strong>{{$vacation->max_guests}}</strong></p>
                     </div>
             </div>
     
@@ -341,289 +341,259 @@
             <div class="description-container card p-3 mb-5">
                 <div class="description-list">
                     <!-- Course of Action -->
-                    @if ($vacation->desc_course_of_action)
+                    @if ($vacation->best_travel_times)
                     <div class="description-item">
                         <div class="header-container">
-                            <span>@lang('guidings.Course_Action')</span>
+                            <span>{{ translate('Best travel times')}}</span>
                         </div>
                         <p class="text-wrapper">
-                           {!! translate($vacation->desc_course_of_action) !!}
+                           {!! implode(', ', json_decode($vacation->best_travel_times)) !!}
                         </p>
                     </div>
                     @endif
-                    @if ($vacation->desc_tour_unique)
+                    @if ($vacation->surroundings_description)
                     <div class="description-item">
                         <div class="header-container">
-                            <span>Tour Highlights</span>
+                            <span>{{ translate('Beschreibung der Umgebung')}}</span>
                         </div>
                         <p class="text-wrapper">
-                        {!! $vacation->desc_tour_unique !!}
+                        {!! $vacation->surroundings_description !!}
                         </p>
                     </div>
                     @endif
-                    <div class="row description-item-row">
-                        <!-- Starting Time -->
-                        @if ($vacation->desc_starting_time)
-                        <div class="description-item col-12 col-md-6">
-                            <div class="header-container">
-                                <span> @lang('guidings.Starting_Time')</span>
-                            </div>
-                            <p>{!! $vacation->desc_starting_time !!}</p>
+                    @if ($vacation->target_fish)
+                    <div class="description-item">
+                        <div class="header-container">
+                            <span>{{ translate('Target fish') }}</span>
                         </div>
-                        @endif
-                        <!-- Meeting Point -->
-                        @if ($vacation->desc_meeting_point)
-                        <div class="description-item col-12 col-md-6">
-                            <div class="header-container">
-                            <span> @lang('guidings.Meeting_Point')</span>
-                            </div>
-                            <p>{!! $vacation->desc_meeting_point !!}</p>
-                        </div>
-                        @endif
+                        <p class="text-wrapper">
+                        {!! implode(', ', json_decode($vacation->target_fish)) !!}
+                        </p>
                     </div>
+                    @endif
                 </div>
             </div>
             <div class="tabs-container mb-5">
                 <div class="nav nav-tabs" id="guiding-tab" role="tablist">
-                    <button class="nav-link active" id="nav-fishing-tab" data-bs-toggle="tab" data-bs-target="#fishing" type="button" role="tab" aria-controls="nav-fishing" aria-selected="true">@lang('guidings.Tour_Info')</button>
-                    <button class="nav-link" id="nav-include-tab" data-bs-toggle="tab" data-bs-target="#include" type="button" role="tab" aria-controls="nav-include" aria-selected="false">@lang('guidings.Inclusions')</button>
-                    @if ($vacation->is_boat)
-                    <button class="nav-link" id="nav-boat-tab" data-bs-toggle="tab" data-bs-target="#boat" type="button" role="tab" aria-controls="nav-boat" aria-selected="false">@lang('guidings.Boat_Details')</button>
-                    @endif
-                    <button class="nav-link" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab" aria-controls="nav-info" aria-selected="false">@lang('guidings.Additional_Info')</button>
+                    <button class="nav-link active" id="nav-location-tab" data-bs-toggle="tab" data-bs-target="#location" type="button" role="tab" aria-controls="nav-location" aria-selected="true">{{ translate('Location Features') }}</button>
+                    <button class="nav-link" id="nav-accommodation-tab" data-bs-toggle="tab" data-bs-target="#accommodation" type="button" role="tab" aria-controls="nav-accommodation" aria-selected="false">{{ translate('Accommodation') }}</button>
+                    <button class="nav-link" id="nav-boat-tab" data-bs-toggle="tab" data-bs-target="#boat" type="button" role="tab" aria-controls="nav-boat" aria-selected="false">{{ translate('Boat Information') }}</button>
+                    <button class="nav-link" id="nav-fishing-tab" data-bs-toggle="tab" data-bs-target="#fishing" type="button" role="tab" aria-controls="nav-fishing" aria-selected="false">{{ translate('Fishing Information') }}</button>
+                    <button class="nav-link" id="nav-pricing-tab" data-bs-toggle="tab" data-bs-target="#pricing" type="button" role="tab" aria-controls="nav-pricing" aria-selected="false">{{ translate('Pricing') }}</button>
                 </div>
     
                 <div class="tab-content mb-5" id="guidings-tabs">
     
-                    <!-- What's Included Tab -->
-                    <div class="tab-pane fade" id="include" role="tabpanel" aria-labelledby="nav-include-tab">
+                    <!-- Fishing Experience Tab -->
+                    <div class="tab-pane fade show active" id="location" role="tabpanel" aria-labelledby="nav-location-tab">
+                        <div class="row">
+                            
+                            @if(!empty($vacation->airport_distance))
+                                <div class="tab-category mb-4 col-12 col-lg-4">
+                                    <strong class="subtitle-text">{{ translate('Airport Distance') }}</strong>
+                                    <div class="row">
+                                        {{$vacation->airport_distance}}
+                                    </div>
+                                </div>
+                            @endif
+                            
+                            @if(!empty($vacation->water_distance))
+                                <div class="tab-category mb-4 col-12 col-lg-4">
+                                    <strong class="subtitle-text">{{ translate('Water Distance') }}</strong>
+                                    <div class="row">
+                                    {{$vacation->water_distance}}
+                                    </div>
+                                </div>
+                            @endif
+                            
+                            @if(!empty($vacation->shopping_distance))
+                                <div class="tab-category mb-4 col-12 col-lg-4">
+                                    <strong class="subtitle-text">{{ translate('Shopping Distance') }}</strong>
+                                    <div class="row">
+                                    {{$vacation->shopping_distance}}
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+
                         <div class="row">
                             <div class="col-6">
-                                @if(!empty($vacation->inclusions))
-                                    <div class="row">
-                                        <strong class="mb-2 subtitle-text">@lang('guidings.Inclusions')</strong>
-                                        @foreach ($vacation->getInclusionNames() as $index => $inclusion)
-                                            <div class="col-12 mb-2 text-start">
-                                            <i data-lucide="wrench"></i> {{$inclusion['name']}}
-                                            </div>
-                                        @endforeach
+                                <strong class="subtitle-text">{{ translate('Travel Included') }}</strong>
+                                {{ $vacation->travel_included || $vacation->travel_included !== null || $vacation->travel_included !== '' ? 'Yes' : 'No'}}
+                            </div>
+                            
+                            <div class="col-6">
+                                @if(!empty($vacation->travel_options))
+                                    <div class="tab-category mb-4">
+                                        <strong class="subtitle-text">{{ translate('Travel Options') }}</strong>
+                                        <div class="row">
+                                            @foreach (json_decode($vacation->travel_options) as $travel_option)
+                                                <div class="col-12 text-start">
+                                                    - {{$travel_option}}
+                                                </div>
+                                            @endforeach
+                                        </div>
                                     </div>
                                 @else
-                                    <p>@lang('guidings.No_Inclusion')</p>
-                                @endif
-                            </div>
-                            <div class="col-6">
-                            @if(!empty(json_decode($vacation->pricing_extra)))
-                                    <div class="row">
-                                        <strong class="mb-2 subtitle-text">@lang('guidings.Additional_Extra')</strong>
-                                        @foreach (json_decode($vacation->pricing_extra) as $pricing_extras)
-                                            <div class="mb-2">
-                                                <strong>{{$pricing_extras->name}}</strong> 
-                                                <span>{{$pricing_extras->price}}€ p.P</span>
-                                            </div>
-                                        @endforeach
-                                    </div>
+                                    <p class="mb-4">No travel options specified</p>
                                 @endif
                             </div>
                         </div>
-                    </div>
-    
-                    <!-- Fishing Experience Tab -->
-                    <div class="tab-pane fade show active" id="fishing" role="tabpanel" aria-labelledby="nav-fishing-tab">
-                    <div class="row">
                         
-                        @if(!empty($vacation->target_fish))
-                            <div class="tab-category mb-4 col-12 col-lg-4">
-                                <strong class="subtitle-text">@lang('guidings.Target_Fish')</strong>
-                                <div class="row">
-                                    {{-- @foreach ($vacation->getTargetFishNames() as $fish)
-                                        <div class="col-12 text-start">
-                                            {{$fish['name']}}
-                                        </div>
-                                        @if(($loop->index + 1) % 2 == 0)
-                                            </div><div class="row">
-                                        @endif
-                                    @endforeach --}}
-                                </div>
+                        <div class="row">
+                            <div class="col-4">
+                                <strong class="subtitle-text">{{ translate('Pets Allowed?') }}</strong>
+                                {{ $vacation->pets_allowed || $vacation->pets_allowed !== null || $vacation->pets_allowed !== '' ? 'Yes' : 'No'}}
                             </div>
-                        @else
-                        <!-- Fish Section -->
-                            <p class="mb-4">No fish specified</p>
-                        @endif
-                        <!-- Methods Section -->
-                        @if(!empty($vacation->fishing_methods))
-                            <div class="tab-category mb-4 col-12 col-lg-4">
-                                <strong class="subtitle-text">@lang('guidings.Fishing_Method')</strong>
-                                <div class="row">
-                                    {{-- @foreach ($vacation->getFishingMethodNames() as $index => $fishing_method)
-                                        <div class="col-12 text-start">
-                                            {{$fishing_method['name']}}
-                                        </div>
-                                        @if(($index + 1) % 2 == 0)
-                                            </div><div class="row">
-                                        @endif
-                                    @endforeach --}}
-                                </div>
+                            
+                            <div class="col-4">
+                                <strong class="subtitle-text">{{ translate('Smoking Allowed?') }}</strong>
+                                {{ $vacation->smoking_allowed || $vacation->smoking_allowed !== null || $vacation->smoking_allowed !== '' ? 'Yes' : 'No'}}
                             </div>
-                        @else
-                            <p class="mb-4">No methods specified</p>
-                        @endif
-                    
-                        <!-- Water Types Section -->
-                        @if(!empty($vacation->water_types))
-                            <div class="tab-category mb-4 col-12 col-lg-4">
-                                <strong class="subtitle-text">@lang('guidings.Water_Type')</strong>
-                                <div class="row">
-                                    {{-- @foreach ($vacation->getWaterNames() as $water)
-                                        <div class="col-12 text-start">
-                                            {{$water['name']}}
-                                        </div>
-                                        @if(($loop->index + 1) % 2 == 0)
-                                            </div><div class="row">
-                                        @endif
-                                    @endforeach --}}
-                                </div>
+                            
+                            <div class="col-4">
+                                <strong class="subtitle-text">{{ translate('Disability Friendly?') }}</strong>
+                                {{ $vacation->disability_friendly || $vacation->disability_friendly !== null || $vacation->disability_friendly !== '' ? 'Yes' : 'No'}}
                             </div>
-                        @else
-                            <p class="mb-4">No water types specified</p>
-                        @endif
+                        </div>
                     </div>
-    
-                </div>
-    
-                    @php
-                        // $boatInformation = $vacation->getBoatInformationAttribute();
-                        $boatInformation = [];
-                    @endphp
-                <div class="tab-pane fade" id="boat" role="tabpanel" aria-labelledby="nav-boat-tab">
-                    <div class="row">
-                        <div class="col-md-12">
-                            @if(!empty($boatInformation))
-                            <strong class="subtitle-text">{{translate('Boat')}}</strong>
-                            <!-- Boat Information as a Table -->
-                            <table class="table ">
-                                <tbody>
-                                    @foreach($boatInformation as $key => $value)
-                                    <tr>
-                                        <th>{{$value['name']}}</th>
-                                        <td colspan="1">{{ $value['value'] }}</td>
-                                    </tr>
+        
+                    <div class="tab-pane fade" id="accommodation" role="tabpanel" aria-labelledby="nav-accommodation-tab">
+                        <strong class="subtitle-text">{{ translate('Description of Accommodation') }}</strong>
+                        {!! $vacation->accommodation_description !!}
+
+                        <div class="row">
+                            <div class="col-4">
+                                <strong class="subtitle-text">{{ translate('Living Area') }}</strong>
+                                {{ $vacation->living_area || $vacation->living_area !== null || $vacation->living_area !== '' ? 'Yes' : 'No'}}
+                            </div>
+                            
+                            <div class="col-4">
+                                <strong class="subtitle-text">{{ translate('Number of Bedrooms') }}</strong>
+                                {{ $vacation->bedroom_count || $vacation->bedroom_count !== null || $vacation->bedroom_count !== '' ? 'Yes' : 'No'}}
+                            </div>
+                            
+                            <div class="col-4">
+                                <strong class="subtitle-text">{{ translate('Number of Beds') }}</strong>
+                                {{ $vacation->bed_count || $vacation->bed_count !== null || $vacation->bed_count !== '' ? 'Yes' : 'No'}}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <strong class="subtitle-text">{{ translate('Number of Persons') }}</strong>
+                                {{ $vacation->max_persons || $vacation->max_persons !== null || $vacation->max_persons !== '' ? 'Yes' : 'No'}}
+                            </div>
+                            
+                            <div class="col-6">
+                                <strong class="subtitle-text">{{ translate('Max Rental Days') }}</strong>
+                                {{ $vacation->max_rental_days || $vacation->max_rental_days !== null || $vacation->max_rental_days !== '' ? 'Yes' : 'No'}}
+                            </div>
+                        </div>
+
+                        @if(!empty($vacation->amenities))
+                            <div class="tab-category mb-4">
+                                <strong class="subtitle-text">{{ translate('Amenities') }}</strong>
+                                <div class="row">
+                                    @foreach (json_decode($vacation->amenities) as $amenity)
+                                        <div class="col-12 text-start">
+                                            - {{$amenity}}
+                                        </div>
                                     @endforeach
-                                </tbody>
-                            </table>
-                            @else
-                            <p>No boat information specified</p>
-                            @endif
-                        </div>
-    
-                        <div class="col-md-6">
-                            @if($vacation->boat_extras != null || $vacation->boat_extras != '' || $vacation->boat_extras != '[]')
-                                <strong class="subtitle-text">@lang('guidings.Boat_Extras'):</strong>
-                                <!-- Boat Extras as a List -->
-                                <ul>
-                                    {{-- @foreach($vacation->getBoatExtras() as $extra)
-                                        <li>{{ $extra['name'] }}</li>
-                                    @endforeach --}}
-                                </ul>
-                            @endif
-                        </div>
-                    </div>
-    
-                    @if(empty($vacation->boat_type) && empty($vacation->boat_information) && empty($vacation->boat_extras))
-                        <p>No boat information specified</p>
-                    @endif
-                </div>
-    
-    
-                    <!-- Important Information Tab -->
-                    <div class="tab-pane fade" id="info" role="tabpanel" aria-labelledby="nav-info-tab">
-    
-                    <!-- Requirements Section -->
-                    @if(!empty($vacation->requirements) && $vacation->requirements !== null && $vacation->requirements->count() > 0)
-                        <div class="tab-category mb-4">
-                            <strong class="subtitle-text">@lang('guidings.Requirements')</strong>
-                            <div class="row">
-                                {{-- @foreach ($vacation->getRequirementsAttribute() as $requirements)
-                                    <div class="col-12 text-start">
-                                        <ul>
-                                            <li>
-                                                <strong>{{ $requirements['name'] }}:</strong> {{ $requirements['value'] ?? '' }}
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    @if(($loop->index + 1) % 2 == 0)
-                                        </div><div class="row">
-                                    @endif
-                                @endforeach --}}
-                            </div>
-                        </div>
-                        <hr/>
-                    @endif
-                    <!-- Other Information Section -->
-                    @if(!empty($vacation->other_information) && $vacation->other_information !== null && $vacation->other_information->count() > 0)
-                        <div class="tab-category mb-4">
-                            <strong class="subtitle-text">@lang('guidings.Other_Info')</strong>
-                            <div class="row">
-                                {{-- @foreach ($vacation->getOtherInformationAttribute() as $otherIndex => $other)
-                                    <div class="col-12 text-start">
-                                    <ul>
-                                    <li>
-                                        <strong>{{ $other['name'] }}:</strong> {{ $other['value'] ?? '' }}
-                                    </li>
-                                    </ul>
-                                    </div>
-                                    @if(($loop->index + 1) % 2 == 0)
-                                        </div><div class="row">
-                                    @endif
-                                @endforeach --}}
-                            </div>
-                        </div>
-                        <hr/>
-                    @endif
-                    <!-- Recommended Preparation Section -->
-                    @if(!empty($vacation->recommendations ) && $vacation->recommendations !== null && $vacation->recommendations->count() > 0)
-                        <div class="tab-category mb-4">
-                            <strong class="subtitle-text">@lang('guidings.Reco_Prep')</strong>
-                            <div class="row">
-                                {{-- @foreach ($vacation->getRecommendationsAttribute() as $recIndex => $recommendations)
-                                    <div class="col-12 text-start">
-                                    <ul>
-                                    <li>
-                                        <strong>{{ $recommendations['name'] }}:</strong> {{ $recommendations['value'] ?? '' }}
-                                    </li>
-                                    </ul>
-                                    </div>
-                                    @if(($loop->index + 1) % 2 == 0)
-                                        </div><div class="row">
-                                    @endif
-                                @endforeach --}}
-                            </div>
-                        </div>
-                        <hr/>
-                    @endif
-                    <!-- Essential Details Section -->
-                    <div class="row mb-4">
-    
-                        @if(!empty($vacation->style_of_fishing))
-                        <div class="col-md-6">
-                                    <strong class="subtitle-text">@lang('guidings.Style_Fishing'):</strong> 
-                                    <span class="">{{ $vacation->style_of_fishing }}</span>
-                                </div>
-                                @endif
-                                @if(!empty($vacation->tour_type))
-                        <div class="col-md-6">
-                                <div>
-                                    <strong class="subtitle-text">@lang('guidings.Tour_Type'):</strong> 
-                                    <span class="">{{ $vacation->tour_type }}</span>
                                 </div>
                             </div>
-                            @endif
+                        @else
+                            <p class="mb-4">No amenities specified</p>
+                        @endif
                     </div>
-    
-                    @if(empty($vacation->experience_level) && empty($vacation->tour_type) && empty($vacation->style_of_fishing))
-                        <p>No information specified</p>
-                    @endif
-                </div>
+                    
+                    <div class="tab-pane fade" id="boat" role="tabpanel" aria-labelledby="nav-boat-tab">
+                        <strong class="subtitle-text">{{ translate('Boat Description') }}</strong>
+                        {!! $vacation->boat_description !!}
+
+                        @if(!empty($vacation->equipment))
+                            <div class="tab-category mb-4">
+                                <strong class="subtitle-text">{{ translate('Equipments') }}</strong>
+                                <div class="row">
+                                    @foreach (json_decode($vacation->equipment) as $equipment)
+                                        <div class="col-12 text-start">
+                                            - {{$equipment}}
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <p class="mb-4">No equipments specified</p>
+                        @endif
+                    </div>
+                    
+                    <div class="tab-pane fade" id="fishing" role="tabpanel" aria-labelledby="nav-fishing-tab">
+                        <strong class="subtitle-text">{{ translate('Fishing Description') }}</strong>
+                        {!! $vacation->basic_fishing_description !!}
+
+                        @if(!empty($vacation->catering_info))
+                            <div class="tab-category mb-4">
+                                <strong class="subtitle-text">{{ translate('Catering and More') }}</strong>
+                                <div class="row">
+                                    @foreach ((array)json_decode($vacation->catering_info) as $catering)
+                                        <div class="col-12 text-start">
+                                            - {{$catering}}
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <p class="mb-4">No catering and more specified</p>
+                        @endif
+                    </div>
+
+                    <div class="tab-pane fade" id="pricing" role="tabpanel" aria-labelledby="nav-pricing-tab">
+                        <strong class="subtitle-text">{{ translate('Total Package Prices (All-Inclusive) per Person') }}</strong>
+                        @if($vacation->max_guests > 0)
+                            {!! number_format(((float)$vacation->package_price_per_person + (float)$vacation->accommodation_price + (float)$vacation->boat_rental_price + (float)$vacation->guiding_price )/ $vacation->max_guests, 2) !!}
+                        @else
+                            {!! number_format((float)$vacation->package_price_per_person + (float)$vacation->accommodation_price + (float)$vacation->boat_rental_price + (float)$vacation->guiding_price, 2) !!}
+                        @endif
+                        
+                        <strong class="subtitle-text">{{ translate('Individual Prices (Accommodation) per Unit') }}</strong>
+                        {!! $vacation->accommodation_price !!}
+
+                        <strong class="subtitle-text">{{ translate('Individual Prices (Boat Rental) per Unit') }}</strong>
+                        {!! $vacation->boat_rental_price !!}
+
+                        <strong class="subtitle-text">{{ translate('Individual Prices (Guiding) per Tour') }}</strong>
+                        {!! $vacation->guiding_price !!}
+                        
+                        @if(!empty($vacation->additional_services))
+                            <div class="tab-category mb-4">
+                                <strong class="subtitle-text">{{ translate('Additional Services') }}</strong>
+                                <div class="row">
+                                    @foreach (json_decode($vacation->additional_services) as $additional_service)
+                                        <div class="col-12 text-start">
+                                            - {{$additional_service}}
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <p class="mb-4">No additional services specified</p>
+                        @endif
+                        
+                        @if(!empty($vacation->included_services))
+                            <div class="tab-category mb-4">
+                                <strong class="subtitle-text">{{ translate('Included Services') }}</strong>
+                                <div class="row">
+                                    @foreach (json_decode($vacation->included_services) as $included_service)
+                                        <div class="col-12 text-start">
+                                            - {{$included_service}}
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <p class="mb-4">No additional services specified</p>
+                        @endif
+                    </div>
                 </div>
             </div>
 <!-- Accordion mobile ver -->
@@ -641,7 +611,7 @@
             <div class="row">
                 <div class="col-12 mb-4">
                     @if(!empty($vacation->inclusions))
-                        {{-- @php
+                        @php
                             $inclussions = $vacation->getInclusionNames();
                             $maxToShow = 3; // Maximum number of inclusions to display
                         @endphp
@@ -652,7 +622,7 @@
                                     <i data-lucide="wrench"></i> {{$inclussion['name']}}
                                 </div>
                             @endforeach
-                        </div> --}}
+                        </div>
                     @else
                         <p>No inclusions specified</p>
                     @endif
@@ -689,14 +659,15 @@
                     <div class="col-12 mb-4">
                         <strong class="subtitle-text"> @lang('guidings.Target_Fish')</strong>
                         <div class="row">
-                            {{-- @foreach ($vacation->getTargetFishNames() as $index => $target_fish)
+                            {{-- @foreach ($vacation->getTargetFishNames() as $index => $target_fish) --}}
+                            @foreach ([] as $index => $target_fish)
                                 <div class="col-12 text-start">
                                     {{$target_fish['name']}}
                                 </div>
                                 @if(($index + 1) % 2 == 0)
                                     </div><div class="row">
                                 @endif
-                            @endforeach --}}
+                            @endforeach
                         </div>
                     </div>
                 @else
@@ -708,14 +679,15 @@
                     <div class="col-12 mb-4">
                         <strong class="subtitle-text"> @lang('guidings.Fishing_Method')</strong>
                         <div class="row">
-                            {{-- @foreach ($vacation->getFishingMethodNames() as $index => $fishing_method)
+                            {{-- @foreach ($vacation->getFishingMethodNames() as $index => $fishing_method) --}}
+                            @foreach ([] as $index => $fishing_method)
                                 <div class="col-12 text-start">
                                     {{$fishing_method['name']}}
                                 </div>
                                 @if(($index + 1) % 2 == 0)
                                     </div><div class="row">
                                 @endif
-                            @endforeach --}}
+                            @endforeach
                         </div>
                     </div>
                 @else
@@ -727,14 +699,15 @@
                     <div class="col-12 mb-3">
                         <strong class="subtitle-text"> @lang('guidings.Water_Type')</strong>
                         <div class="row">
-                            {{-- @foreach ($vacation->getWaterNames() as $index => $water_type)
+                            {{-- @foreach ($vacation->getWaterNames() as $index => $water_type) --}}
+                            @foreach ([] as $index => $water_type)
                                 <div class="col-12 text-start">
                                     {{$water_type['name']}}
                                 </div>
                                 @if(($index + 1) % 2 == 0)
                                     </div><div class="row">
                                 @endif
-                            @endforeach --}}
+                            @endforeach
                         </div>
                     </div>
                 @else
@@ -754,6 +727,16 @@
     </h2>
     <div id="collapseBoat" class="accordion-collapse collapse" aria-labelledby="headingBoat" data-bs-parent="#accordionTabs">
         <div class="accordion-body">
+            <!-- @php $boatInformation = json_decode($vacation->boat_information, true); @endphp
+            <tr><th>Seats</th><td>{{ $boatInformation['seats'] ?? '' }}</td></tr>
+            <tr><th>Length</th><td>{{ $boatInformation['length'] ?? '' }}</td></tr>
+            <tr><th>Width</th><td>{{ $boatInformation['width'] ?? '' }}</td></tr>
+            <tr><th>Year Built</th><td>{{ $boatInformation['year_built'] ?? '' }}</td></tr>
+            <tr><th>Engine Manufacturer</th><td>{{ $boatInformation['engine_manufacturer'] ?? '' }}</td></tr>
+            <tr><th>Engine Power (hp)</th><td>{{ $boatInformation['engine_power'] ?? '' }}</td></tr>
+            <tr><th>Max Speed</th><td>{{ $boatInformation['max_speed'] ?? '' }}</td></tr>
+            <tr><th>Manufacturer</th><td>{{ $boatInformation['manufacturer'] ?? '' }}</td></tr> -->
+            <!-- Check if $boatInformation is not empty -->
             @if(!empty($boatInformation))
             <strong class="subtitle-text">{{ translate('Boat') }}:</strong>
             <table class="table my-4">
@@ -772,7 +755,8 @@
             @if($vacation->boat_extras != null || $vacation->boat_extras != '' || $vacation->boat_extras != '[]')
                 <strong class="subtitle-text">@lang('guidings.Boat_Extras'):</strong>
                 <ul>
-                    @foreach($vacation->getBoatExtras() as $extra)
+                    {{-- @foreach($vacation->getBoatExtras() as $extra) --}}
+                    @foreach ([] as $extra)
                         <li>{{ $extra['name'] }}</li>
                     @endforeach
                 </ul>
@@ -920,8 +904,7 @@
                                 @endif --}}
 
                             </div>
-                            <h4 class="mt-3"
-                                {{-- style="text-align: center">{{$vacation->user->firstname}}</h4> --}}
+                            {{-- <h4 class="mt-3" style="text-align: center">{{$vacation->user->firstname}}</h4> --}}
                         </div>
                     </div>
                 </div>
@@ -933,7 +916,8 @@
                                     <i class="fa fa-check"></i>
                                 </div>
                                 <div class="text">
-                                    {{-- <p><b>{{ translate('Lieblingsfisch') }}:</b>{{ translate($vacation->user->information['favorite_fish']) }} --}}
+                                    <p>
+                                        {{-- <b>{{ translate('Lieblingsfisch') }}:</b>{{ translate($vacation->user->information['favorite_fish']) }}  --}}
                                     </p>
                                 </div>
                             </li>
@@ -971,16 +955,16 @@
             </div>
         </div>
     </div>
-    {{-- @if($same_guiding && count($same_guiding ) > 0) --}}
+    {{-- @if($same_guiding && count($same_guiding ) > 0)
     <section class="tour-details-two mb-5 p-0">
         <div class="container">
     <div class="row">
         <div class="col-lg-12 col-sm-12">
-            {{-- <h3 class="tour-details-two__title">@lang('guidings.More_Fishing') {{$vacation->user->firstname}}</h3> --}}
+            <h3 class="tour-details-two__title">@lang('guidings.More_Fishing') {{$vacation->user->firstname}}</h3>
             <div class="tours-list__right">
                 <!-- Slider container -->
                 <div class="tours-list__inner">
-                    {{-- @foreach($same_guiding as $index => $other_guiding) <!-- Removed `.take(4)` -->
+                    @foreach($same_guiding as $index => $other_guiding) <!-- Removed `.take(4)` -->
                     <div class="row m-0 mb-2 guiding-list-item {{ $index < 2 ? 'show' : '' }}">
                         <div class="col-md-12">
                             <div class="row p-2 border shadow-sm bg-white rounded">
@@ -1098,7 +1082,7 @@
                             </div>
                         </div>
                     </div>
-                    @endforeach --}}
+                    @endforeach
                 </div>
 
                 <div class="text-center">
@@ -1109,15 +1093,15 @@
     </div>
 </div>
     </section>
-    {{-- @endif --}}
-    {{-- @if ($other_guidings) --}}
+    @endif --}}
+    {{-- @if ($other_guidings)
     <section class="tour-details-two mb-5 p-0">
         <div class="container">
 
             <div class="tour-details-two__related-tours {{$agent->ismobile() ? 'text-center' : ''}}">
                 <h3 class="tour-details-two__title">@lang('guidings.Match_Guiding')</h3>
                 <div class="popular-tours__carousel owl-theme owl-carousel">
-                    {{-- @foreach($other_guidings as $other_guiding)
+                    @foreach($other_guidings as $other_guiding)
                 
                         <div class="popular-tours__single">
                             <a class="popular-tours__img" href="{{ route('guidings.show',[$other_guiding->id,$other_guiding->slug]) }}" title="Guide aufmachen">
@@ -1140,7 +1124,7 @@
                                 </p>
                             </div>
                         </div>
-                    @endforeach --}}
+                    @endforeach
                 </div>
                 <div class="text-center my-3">
                     <a href="/guidings" class="btn btn-outline-secondary">{{ translate('View all guidings') }}</a>
@@ -1149,7 +1133,7 @@
             
         </div>
     </section>
-    {{-- @endif --}}
+    @endif --}}
 </div>
 <div class="guidings-book-mobile">
             @if($agent->ismobile())
@@ -1159,6 +1143,7 @@
 @endsection
 
 @section('js_after')
+{{-- <script async src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY') }}&callback=initMap"></script> --}}
 
 <script>
 $(document).ready(function(){
@@ -1306,7 +1291,8 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        const blockedEvents = @if(!empty($blocked_events)) JSON.parse('{!! json_encode($blocked_events) !!}') @else [] @endif;
+        // Replace direct access to $blocked_events with a safe default
+        const blockedEvents = @json($blocked_events ?? []);
 
         let lockDays = [];
         if (blockedEvents && typeof blockedEvents === 'object') {
@@ -1344,12 +1330,14 @@ document.addEventListener("DOMContentLoaded", function() {
     });
     
     let currentCount = 3; // Initial count of displayed items
+    const totalItems = {{ isset($same_guiding) ? $same_guiding->count() : 0 }};
     
     document.getElementById('show-more').addEventListener('click', function() {
         const container = document.getElementById('same-guidings-container');
         
         // Fetch the next set of items
         for (let i = currentCount; i < currentCount + 3 && i < totalItems; i++) {
+            const guiding = @json($same_guiding ?? []); // Convert PHP variable to JavaScript
             const newGuiding = guiding[i];
 
             const colDiv = document.createElement('div');
