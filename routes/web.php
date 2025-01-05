@@ -279,6 +279,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::resource('vacations', AdminVacationsController::class);
+        Route::get('vacations/changeVacationStatus/{id}', [AdminVacationsController::class, 'changeVacationStatus'])->name('changeVacationStatus');
 
         Route::prefix('settings')->name('settings.')->group(function () {
             

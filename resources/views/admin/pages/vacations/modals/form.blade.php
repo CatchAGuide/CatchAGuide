@@ -64,6 +64,16 @@
                                     <label class="form-label">Surroundings Description</label>
                                     <textarea name="surroundings_description" class="form-control" rows="3" required></textarea>
                                 </div>
+                                
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Travel Included</label>
+                                    <input type="text" name="travel_included" class="form-control" required>
+                                </div>
+                                
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Travel Options</label>
+                                    <input type="text" name="travel_options" class="form-control" required>
+                                </div>
                             </div>
                         </div>
 
@@ -73,15 +83,15 @@
                             <div class="row">
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">Airport Distance (km)</label>
-                                    <input type="number" step="any" name="airport_distance" class="form-control" required>
+                                    <input type="text" step="any" name="airport_distance" class="form-control" required>
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">Water Distance (km)</label>
-                                    <input type="number" step="any" name="water_distance" class="form-control" required>
+                                    <input type="text" step="any" name="water_distance" class="form-control" required>
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">Shopping Distance (km)</label>
-                                    <input type="number" step="any" name="shopping_distance" class="form-control" required>
+                                    <input type="text" step="any" name="shopping_distance" class="form-control" required>
                                 </div>
                                 <div class="col-12 mb-3">
                                     <label class="form-label">Amenities</label>
@@ -99,20 +109,24 @@
                                     <textarea name="accommodation_description" class="form-control" rows="3" required></textarea>
                                 </div>
                                 <div class="col-md-3 mb-3">
+                                    <label class="form-label">Catering Info</label>
+                                    <input type="text" name="catering_info" class="form-control" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
                                     <label class="form-label">Living Area (m²)</label>
-                                    <input type="number" step="any" name="living_area" class="form-control" required>
+                                    <input type="text" step="any" name="living_area" class="form-control" required>
                                 </div>
                                 <div class="col-md-3 mb-3">
                                     <label class="form-label">Bedroom Count</label>
-                                    <input type="number" name="bedroom_count" class="form-control" required>
+                                    <input type="text" name="bedroom_count" class="form-control" required>
                                 </div>
                                 <div class="col-md-3 mb-3">
                                     <label class="form-label">Bed Count</label>
-                                    <input type="number" name="bed_count" class="form-control" required>
+                                    <input type="text" name="bed_count" class="form-control" required>
                                 </div>
                                 <div class="col-md-3 mb-3">
                                     <label class="form-label">Max Persons</label>
-                                    <input type="number" name="max_persons" class="form-control" required>
+                                    <input type="text" name="max_persons" class="form-control" required>
                                 </div>
                                 
                                 <!-- Checkboxes in a more organized layout -->
@@ -164,19 +178,19 @@
                             <div class="row">
                                 <div class="col-md-3 mb-3">
                                     <label class="form-label">Package Price per Person</label>
-                                    <input type="number" step="any" name="package_price_per_person" class="form-control" required>
+                                    <input type="text" step="any" name="package_price_per_person" class="form-control" required>
                                 </div>
                                 <div class="col-md-3 mb-3">
                                     <label class="form-label">Accommodation Price</label>
-                                    <input type="number" step="any" name="accommodation_price" class="form-control" required>
+                                    <input type="text" step="any" name="accommodation_price" class="form-control" required>
                                 </div>
                                 <div class="col-md-3 mb-3">
                                     <label class="form-label">Boat Rental Price</label>
-                                    <input type="number" step="any" name="boat_rental_price" class="form-control">
+                                    <input type="text" step="any" name="boat_rental_price" class="form-control">
                                 </div>
                                 <div class="col-md-3 mb-3">
                                     <label class="form-label">Guiding Price</label>
-                                    <input type="number" step="any" name="guiding_price" class="form-control">
+                                    <input type="text" step="any" name="guiding_price" class="form-control">
                                 </div>
                             </div>
                         </div>
