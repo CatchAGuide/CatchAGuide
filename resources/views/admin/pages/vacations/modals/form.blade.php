@@ -128,6 +128,10 @@
                                     <label class="form-label">Max Persons</label>
                                     <input type="text" name="max_persons" class="form-control" required>
                                 </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Min Rental Days</label>
+                                    <input type="text" name="min_rental_days" class="form-control" required>
+                                </div>
                                 
                                 <!-- Checkboxes in a more organized layout -->
                                 <div class="col-12">

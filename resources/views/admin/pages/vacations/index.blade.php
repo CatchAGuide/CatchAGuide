@@ -287,45 +287,81 @@
         fetch(`/admin/vacations/${id}/edit`)
             .then(response => response.json())
             .then(data => {
-                // Populate form fields
-                form.querySelector('input[name="title"]').value = data.title || '';
-                form.querySelector('input[name="slug"]').value = data.slug || '';
-                form.querySelector('input[name="location"]').value = data.location || '';
-                form.querySelector('input[name="city"]').value = data.city || '';
-                form.querySelector('input[name="country"]').value = data.country || '';
-                form.querySelector('input[name="region"]').value = data.region || '';
-                form.querySelector('input[name="latitude"]').value = data.latitude || '';
-                form.querySelector('input[name="longitude"]').value = data.longitude || '';
-                form.querySelector('input[name="best_travel_times"]').value = data.best_travel_times || '';
-                form.querySelector('textarea[name="surroundings_description"]').value = data.surroundings_description || '';
-                form.querySelector('input[name="airport_distance"]').value = data.airport_distance || '';
-                form.querySelector('input[name="water_distance"]').value = data.water_distance || '';
-                form.querySelector('input[name="shopping_distance"]').value = data.shopping_distance || '';
-                form.querySelector('input[name="travel_included"]').value = data.travel_included || '';
-                form.querySelector('input[name="travel_options"]').value = data.travel_options || '';
-                form.querySelector('input[name="amenities"]').value = data.amenities || '';
-                form.querySelector('input[name="target_fish"]').value = data.target_fish || '';
-                form.querySelector('input[name="accommodation_description"]').value = data.accommodation_description || '';
-                form.querySelector('input[name="living_area"]').value = data.living_area || '';
-                form.querySelector('input[name="bedroom_count"]').value = data.bedroom_count || '';
-                form.querySelector('input[name="bed_count"]').value = data.bed_count || '';
-                form.querySelector('input[name="max_persons"]').value = data.max_persons || '';
-                form.querySelector('input[name="basic_fishing_description"]').value = data.basic_fishing_description || '';
-                form.querySelector('input[name="boat_description"]').value = data.boat_description || '';
-                form.querySelector('input[name="catering_info"]').value = data.catering_info || '';
-                form.querySelector('input[name="package_price_per_person"]').value = data.package_price_per_person || '';
-                form.querySelector('input[name="accommodation_price"]').value = data.accommodation_price || '';
-                form.querySelector('input[name="boat_rental_price"]').value = data.boat_rental_price || '';
-                form.querySelector('input[name="guiding_price"]').value = data.guiding_price || '';
-                form.querySelector('input[name="additional_services"]').value = data.additional_services || '';
-                form.querySelector('input[name="included_services"]').value = data.included_services || '';
-                form.querySelector('input[name="equipment"]').value = data.equipment || '';
-                form.querySelector('input[name="target_fish"]').value = data.target_fish || '';
+                // Helper function to safely set form values
+                const setFieldValue = (fieldName, value) => {
+                    const field = form.querySelector(`[name="${fieldName}"]`);
+                    if (field) {
+                        if (field.type === 'checkbox') {
+                            field.checked = !!value;
+                        } else {
+                            field.value = value || '';
+                        }
+                    }
+                };
+
+                // Set basic fields
+                const fields = [
+                    'id', 'title', 'slug', 'location', 'city', 'country',
+                    'region', 'latitude', 'longitude', 'best_travel_times',
+                    'surroundings_description', 'airport_distance', 'water_distance',
+                    'shopping_distance', 'travel_included', 'travel_options',
+                    'amenities', 'target_fish', 'accommodation_description', 'living_area',
+                    'bedroom_count', 'bed_count', 'max_persons', 'min_rental_days',
+                    'basic_fishing_description', 'boat_description', 'catering_info', 'package_price_per_person',
+                    'accommodation_price', 'boat_rental_price', 'guiding_price',
+                    'additional_services', 'included_services', 'equipment'
+                ];
+
+                // Set values for all fields
+                fields.forEach(field => setFieldValue(field, data[field]));
 
                 // Handle checkboxes
-                form.querySelector('input[name="pets_allowed"]').checked = data.pets_allowed;
-                form.querySelector('input[name="smoking_allowed"]').checked = data.smoking_allowed;
-                form.querySelector('input[name="disability_friendly"]').checked = data.disability_friendly;
+                setFieldValue('pets_allowed', data.pets_allowed);
+                setFieldValue('smoking_allowed', data.smoking_allowed);
+                setFieldValue('disability_friendly', data.disability_friendly);
+
+                // Handle JSON fields properly
+                const jsonFields = ['best_travel_times', 'travel_options'];
+                jsonFields.forEach(field => {
+                    const fieldInput = form.querySelector(`[name="${field}"]`);
+                    if (fieldInput && data[field]) {
+                        // Parse the JSON string if it's not already an array
+                        const value = typeof data[field] === 'string' ? 
+                            JSON.parse(data[field]) : data[field];
+                        fieldInput.value = JSON.stringify(value);
+                    }
+                });
+
+                // Clear existing image preview
+                const imagePreview = document.getElementById('imagePreview');
+                if (imagePreview) {
+                    imagePreview.innerHTML = '';
+                }
+
+                // If there are existing images, display them
+                if (data.images && data.images.length) {
+                    data.images.forEach(image => {
+                        // Create preview for existing images
+                        const div = document.createElement('div');
+                        div.style.width = '100px';
+                        div.style.height = '100px';
+                        div.style.position = 'relative';
+                        
+                        const img = document.createElement('img');
+                        img.src = image.url; // Adjust based on your image URL structure
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'cover';
+                        img.style.borderRadius = '4px';
+                        
+                        div.appendChild(img);
+                        imagePreview.appendChild(div);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching vacation data:', error);
+                alert('Error loading vacation data. Please try again.');
             });
     }
 
