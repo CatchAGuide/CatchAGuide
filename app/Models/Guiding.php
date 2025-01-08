@@ -501,7 +501,7 @@ class Guiding extends Model
      * @param int|null $radius Search radius in kilometers
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public static function locationFilter(string $location, ?int $radius = null)
+    public static function locationFilter(string $location, ?int $radius = null, $placeLat = null, $placeLng = null)
     {
         // Parse location into components
         $locationParts = self::parseLocation($location);
@@ -529,7 +529,12 @@ class Guiding extends Model
         }
 
         // If no direct matches, use geocoding
-        $coordinates = self::getCoordinatesFromLocation($locationParts['original']);
+        if ($placeLat && $placeLng) {
+            $coordinates = ['lat' => $placeLat, 'lng' => $placeLng];
+        } else {
+            // $coordinates = self::getCoordinatesFromLocation($locationParts['original']);
+            $coordinates = ['lat' => 48.1373, 'lng' => 11.5755];
+        }
         
         if (!$coordinates) {
             return collect();
