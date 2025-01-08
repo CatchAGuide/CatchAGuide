@@ -16,7 +16,27 @@ class Vacation extends Model
 
     protected $fillable = ['title', 'slug', 'location', 'city', 'country', 'latitude', 'longitude', 'region', 'gallery', 'best_travel_times', 'surroundings_description', 'target_fish', 'airport_distance', 'water_distance', 'shopping_distance', 'travel_included', 'travel_options', 'pets_allowed', 'smoking_allowed', 'disability_friendly', 'accommodation_description', 'living_area', 'bedroom_count', 'bed_count', 'max_persons', 'min_rental_days', 'amenities', 'boat_description', 'equipment', 'basic_fishing_description', 'catering_info', 'package_price_per_person', 'accommodation_price', 'boat_rental_price', 'guiding_price', 'additional_services', 'included_services', 'status'];
 
-    public static function locationFilter(string $location, ?int $radius = null)
+    public function accommodations(): HasMany
+    {
+        return $this->hasMany(VacationAccommodation::class);
+    }
+
+    public function boats(): HasMany
+    {
+        return $this->hasMany(VacationBoat::class);
+    }
+
+    public function packages(): HasMany
+    {
+        return $this->hasMany(VacationPackage::class);
+    }
+
+    public function guidings(): HasMany
+    {
+        return $this->hasMany(VacationGuiding::class);
+    }
+
+    public static function locationFilter(string $location, ?int $radius = null, $placeLat = null, $placeLng = null )
     {
         $locationParts = self::parseLocation($location);
         $returnData = [
@@ -43,7 +63,12 @@ class Vacation extends Model
         }
 
         // If no direct matches, use geocoding
-        $coordinates = self::getCoordinatesFromLocation($locationParts['original']);
+        if ($placeLat && $placeLng) {
+            $coordinates = ['lat' => $placeLat, 'lng' => $placeLng];
+        } else {
+            // $coordinates = self::getCoordinatesFromLocation($locationParts['original']);
+            $coordinates = ['lat' => 48.1373, 'lng' => 11.5755];
+        }
         
         if (!$coordinates) {
             return collect();
