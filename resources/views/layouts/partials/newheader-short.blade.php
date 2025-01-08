@@ -107,7 +107,7 @@
                 <div class="search-summary" role="button" id="headerSearchTrigger">
                     <i class="fas fa-search me-2"></i>
                     @if(request()->has('place'))
-                        <span>{{ request()->place }} · 
+                        <span>{{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }} · 
                             {{ request()->num_guests ?? '0' }} guests
                             @if(request()->has('target_fish'))
                                 · {{ count((array)request()->target_fish) }} fish
@@ -154,7 +154,7 @@
                                    class="form-control" 
                                    name="place" 
                                    placeholder="@lang('homepage.searchbar-destination')"
-                                   value="{{ request()->place }}" autocomplete="on">
+                                   value="{{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }}" autocomplete="on">
                             <input type="hidden" id="LocationLatShortDesktop" name="placeLat" value="{{ request()->placeLat }}"/>
                             <input type="hidden" id="LocationLngShortDesktop" name="placeLng" value="{{ request()->placeLng }}"/>
                         </div>
@@ -718,7 +718,7 @@ input[type=number] {
                                    class="form-control ps-5" 
                                    name="place" 
                                    placeholder="@lang('homepage.searchbar-destination')"
-                                   value="{{ request()->place }}">
+                                   value="{{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }}" autocomplete="on">
                             <input type="hidden" name="placeLat" value="{{ request()->placeLat }}"/>
                             <input type="hidden" name="placeLng" value="{{ request()->placeLng }}"/>
                         </div>

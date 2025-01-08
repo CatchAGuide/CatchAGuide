@@ -823,6 +823,7 @@ function showPosition(position) {
 }
 
 function codeLatLng(lat, lng) {
+    return null;
     // var geocoder = new google.maps.Geocoder();
     // var latlng = new google.maps.LatLng(lat, lng);
     // geocoder.geocode({'latLng': latlng}, function (results, status) {
