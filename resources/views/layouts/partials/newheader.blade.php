@@ -181,7 +181,7 @@
                                    class="form-control" 
                                    name="place" 
                                    placeholder="@lang('homepage.searchbar-destination')"
-                                   value="{{ request()->place }}"
+                                   value="{{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }}"
                                    autocomplete="on">
                             <input type="hidden" id="LocationLatDesktop" name="placeLat" value="{{ request()->placeLat }}"/>
                             <input type="hidden" id="LocationLngDesktop" name="placeLng" value="{{ request()->placeLng }}"/>
@@ -836,7 +836,7 @@ input[type=number] {
                                    name="place" 
                                    placeholder="@lang('homepage.searchbar-destination')"
                                    autocomplete="on"
-                                   value="{{ request()->place }}">
+                                   value="{{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }}">
                             <input type="hidden" name="placeLat" id="LocationLatHeaderDesktop" value="{{ request()->placeLat }}"/>
                             <input type="hidden" name="placeLng" id="LocationLngHeaderDesktop" value="{{ request()->placeLng }}"/>
                         </div>
