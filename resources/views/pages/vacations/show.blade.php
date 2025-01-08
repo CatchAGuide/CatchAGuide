@@ -10,7 +10,7 @@
 
 @section('share_tags')
     <meta property="og:title" content="{{translate($vacation->title)}}" />
-    <meta property="og:description" content="{{translate($vacation->description)}}" />
+    <meta property="og:description" content="{{translate($vacation->description ?? "")}}" />
     @if(!empty(app('guiding')->getImagesUrl($vacation)) && is_array(app('guiding')->getImagesUrl($vacation)) && count(app('guiding')->getImagesUrl($vacation)))
     <meta property="og:image" content="{{app('guiding')->getImagesUrl($vacation)['image_0']}}"/>
     @endif
