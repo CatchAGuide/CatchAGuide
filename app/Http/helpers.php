@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
+use GuzzleHttp\Client;
 
 if (!function_exists('two')) {
     function two($number) {
@@ -148,3 +149,68 @@ if (!function_exists('media_delete')) {
     }
 }
 
+if (!function_exists('getCoordinatesFromLocation')) {
+    function getCoordinatesFromLocation(string $location, bool $cityCheck = false): ?array 
+    {
+        try {
+            $client = new \GuzzleHttp\Client();
+            $response = $client->get('https://maps.googleapis.com/maps/api/geocode/json', [
+                'query' => [
+                    'address' => $location,
+                    'key' => env('GOOGLE_MAP_API_KEY')
+                ]
+            ]);
+
+            $data = json_decode($response->getBody(), true);
+
+            if ($data['status'] === 'OK') {
+                $result = $data['results'][0];
+                $location = $result['geometry']['location'];
+                
+                $parsedResult = [
+                    'lat' => $location['lat'],
+                    'lng' => $location['lng'],
+                    'city' => null,
+                    'country' => null,
+                    'types' => []
+                ];
+
+                foreach ($result['address_components'] as $component) {
+                    if (in_array('locality', $component['types'])) {
+                        $parsedResult['city'] = $component['long_name'];
+                    }
+                    if (in_array('administrative_area_level_1', $component['types'])) {
+                        // Use state/province capital if city not found
+                        if (!$parsedResult['city']) {
+                            $parsedResult['city'] = $component['long_name'];
+                        }
+                    }
+                    if (in_array('country', $component['types'])) {
+                        $parsedResult['country'] = $component['long_name'];
+                        // If no city foun
+                        if (!$parsedResult['city'] && $cityCheck) {
+                            $capitalResponse = $client->get('https://maps.googleapis.com/maps/api/place/textsearch/json', [
+                                'query' => [
+                                    'query' => "{$component['long_name']} capital city",
+                                    'key' => env('GOOGLE_MAP_API_KEY')
+                                ]
+                            ]);
+                            $capitalData = json_decode($capitalResponse->getBody(), true);
+                            if ($capitalData['status'] === 'OK' && !empty($capitalData['results'])) {
+                                $parsedResult['city'] = $capitalData['results'][0]['name'];
+                                return getCoordinatesFromLocation("{$parsedResult['city']}, {$component['long_name']}");
+                            }
+                        }
+                    }
+                    $parsedResult['types'][] = $component['types'][0];
+                }
+
+                return $parsedResult;
+            }
+        } catch (\Exception $e) {
+            \Log::error('Google Maps API error: ' . $e->getMessage());
+        }
+
+        return null;
+    }
+}

@@ -501,7 +501,7 @@ class Guiding extends Model
      * @param int|null $radius Search radius in kilometers
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public static function locationFilter(string $location, ?int $radius = null)
+    public static function locationFilter(string $location, ?int $radius = null, $placeLat = null, $placeLng = null)
     {
         // Parse location into components
         $locationParts = self::parseLocation($location);
@@ -529,7 +529,12 @@ class Guiding extends Model
         }
 
         // If no direct matches, use geocoding
-        $coordinates = self::getCoordinatesFromLocation($locationParts['original']);
+        if ($placeLat && $placeLng) {
+            $coordinates = ['lat' => $placeLat, 'lng' => $placeLng];
+        } else {
+            // $coordinates = self::getCoordinatesFromLocation($locationParts['original']);
+            $coordinates = ['lat' => 48.1373, 'lng' => 11.5755];
+        }
         
         if (!$coordinates) {
             return collect();
@@ -592,7 +597,7 @@ class Guiding extends Model
 
         if (count($parts) === 1) {
             // Single location provided - need to determine if it's a city or country
-            $geocodeResult = self::geocodeLocation($location);
+            $geocodeResult = getCoordinatesFromLocation($location);
             if ($geocodeResult) {
                 $result['city'] = $geocodeResult['city'];
                 $result['country'] = $geocodeResult['country'];
@@ -611,7 +616,7 @@ class Guiding extends Model
      */
     private static function getCoordinatesFromLocation(string $location): ?array
     {
-        $geocodeResult = self::geocodeLocation($location, true);
+        $geocodeResult = getCoordinatesFromLocation($location, true);
         if (!$geocodeResult) {
             return null;
         }
@@ -621,73 +626,6 @@ class Guiding extends Model
             'lng' => $geocodeResult['lng'],
             'type' => $geocodeResult['types']
         ];
-    }
-
-    /**
-     * Make request to Google Geocoding API and parse response
-     */
-    private static function geocodeLocation(string $location, bool $cityCheck = false): ?array 
-    {
-        try {
-            $client = new \GuzzleHttp\Client();
-            $response = $client->get('https://maps.googleapis.com/maps/api/geocode/json', [
-                'query' => [
-                    'address' => $location,
-                    'key' => env('GOOGLE_MAP_API_KEY')
-                ]
-            ]);
-
-            $data = json_decode($response->getBody(), true);
-
-            if ($data['status'] === 'OK') {
-                $result = $data['results'][0];
-                $location = $result['geometry']['location'];
-                
-                $parsedResult = [
-                    'lat' => $location['lat'],
-                    'lng' => $location['lng'],
-                    'city' => null,
-                    'country' => null,
-                    'types' => []
-                ];
-
-                foreach ($result['address_components'] as $component) {
-                    if (in_array('locality', $component['types'])) {
-                        $parsedResult['city'] = $component['long_name'];
-                    }
-                    if (in_array('administrative_area_level_1', $component['types'])) {
-                        // Use state/province capital if city not found
-                        if (!$parsedResult['city']) {
-                            $parsedResult['city'] = $component['long_name'];
-                        }
-                    }
-                    if (in_array('country', $component['types'])) {
-                        $parsedResult['country'] = $component['long_name'];
-                        // If no city foun
-                        if (!$parsedResult['city'] && $cityCheck) {
-                            $capitalResponse = $client->get('https://maps.googleapis.com/maps/api/place/textsearch/json', [
-                                'query' => [
-                                    'query' => "{$component['long_name']} capital city",
-                                    'key' => env('GOOGLE_MAP_API_KEY')
-                                ]
-                            ]);
-                            $capitalData = json_decode($capitalResponse->getBody(), true);
-                            if ($capitalData['status'] === 'OK' && !empty($capitalData['results'])) {
-                                $parsedResult['city'] = $capitalData['results'][0]['name'];
-                                return self::geocodeLocation("{$parsedResult['city']}, {$component['long_name']}");
-                            }
-                        }
-                    }
-                    $parsedResult['types'][] = $component['types'][0];
-                }
-
-                return $parsedResult;
-            }
-        } catch (\Exception $e) {
-            \Log::error('Google Maps API error: ' . $e->getMessage());
-        }
-
-        return null;
     }
 
     /**

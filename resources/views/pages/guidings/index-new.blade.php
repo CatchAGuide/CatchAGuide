@@ -992,21 +992,22 @@ function showPosition(position) {
 }
 
 function codeLatLng(lat, lng) {
-    var geocoder = new google.maps.Geocoder();
-    var latlng = new google.maps.LatLng(lat, lng);
-    geocoder.geocode({'latLng': latlng}, function (results, status) {
-        if (status === google.maps.GeocoderStatus.OK) {
-            if (results[0]) {
-                document.getElementById('searchPlace').value = results[0].formatted_address;
-            } else {
-                console.log('No results found');
-                return null;
-            }
-        } else {
-            console.log('Geocoder failed due to: ' + status);
-            return null;
-        }
-    });
+    return null;
+    // var geocoder = new google.maps.Geocoder();
+    // var latlng = new google.maps.LatLng(lat, lng);
+    // geocoder.geocode({'latLng': latlng}, function (results, status) {
+    //     if (status === google.maps.GeocoderStatus.OK) {
+    //         if (results[0]) {
+    //             document.getElementById('searchPlace').value = results[0].formatted_address;
+    //         } else {
+    //             console.log('No results found');
+    //             return null;
+    //         }
+    //     } else {
+    //         console.log('Geocoder failed due to: ' + status);
+    //         return null;
+    //     }
+    // });
 }
 
        

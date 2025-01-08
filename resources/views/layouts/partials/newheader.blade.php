@@ -18,7 +18,7 @@
                     <div class="nav-link language-selector">
                         <form action="{{ route('language.switch') }}" method="POST" class="d-flex align-items-center">
                             @csrf
-                            <i class="fas fa-globe me-2"></i>
+                            <i class="fas fa-map-signs me-2"></i>
                             <select name="language" class="selectpicker header-language-select" data-width="fit" onchange="this.form.submit()">
                                 @foreach (config('app.locales') as $key => $locale)
                                     <option value="{{ $locale }}" 
@@ -98,6 +98,9 @@
                     <a href="{{ route('guidings.index') }}" class="me-4 text-white text-decoration-none">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
+                    <a href="{{ route('vacations.index') }}" class="me-4 text-white text-decoration-none">
+                        <i class="fas fa-map-signs me-2"></i>@lang('homepage.header-vacations')
+                    </a>
                     <a href="{{ route($blogPrefix.'.index') }}" class="text-white text-decoration-none">
                         <i class="fas fa-book-open me-2"></i>@lang('homepage.filter-magazine')
                     </a>
@@ -108,52 +111,39 @@
             <div id="filterContainer" class="col-12 d-md-none mt-3">
             <form class="search-form row gx-2 pe-0" id="global-search1" action="{{route('guidings.index')}}" method="get">                
                 <div id="mobileherofilter" class="shadow-lg bg-white p-2 rounded">
-                                <div class="row">
-                                    <div class="col-md-4 column-input my-2">
-                                        <div class="form-group">
-                                            <div class="d-flex align-items-center small">
-                                                <i class="fa fa-search fa-fw text-muted position-absolute ps-2"></i>
-                                                <input  id="searchPlaceMobile" name="place" type="text" class="form-control rounded-0" placeholder="@lang('homepage.searchbar-destination')"  autocomplete="on">
-                                                <input type="hidden" id="LocationLatMobile" name="placeLat"/>
-                                                <input type="hidden" id="LocationLngMobile" name="placeLng"/>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2 column-input my-2">
-                                        <div class="form-group">
-                                            <div class="d-flex align-items-center small">
-                                                <i class="fa fa-user fa-fw text-muted position-absolute ps-2"></i>
-                                                <input type="number" min="1" max="5" class="form-control rounded-0" name="num_guests" placeholder="@lang('homepage.searchbar-person')" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 column-input my-2">
-                                        <div class="d-flex align-items-center small myselect2">
-                                            <i class="fa fa-fish fa-fw text-muted position-absolute ps-1"></i>
-                                            <select class="form-control form-select" id="home_target_fish" name="target_fish[]" style="width:100%">
-                                                
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2 column-input my-2">
-                                        <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
-                                    </div>
+                    <div class="row">
+                        <div class="col-md-4 column-input my-2">
+                            <div class="form-group">
+                                <div class="d-flex align-items-center small">
+                                    <i class="fa fa-search fa-fw text-muted position-absolute ps-2"></i>
+                                    <input  id="searchPlaceMobile" name="place" type="text" class="form-control rounded-0" placeholder="@lang('homepage.searchbar-destination')"  autocomplete="on">
+                                    <input type="hidden" id="LocationLatMobile" name="placeLat"/>
+                                    <input type="hidden" id="LocationLngMobile" name="placeLng"/>
                                 </div>
-                            </div> 
+                            </div>
+                        </div>
+                        <div class="col-md-2 column-input my-2">
+                            <div class="form-group">
+                                <div class="d-flex align-items-center small">
+                                    <i class="fa fa-user fa-fw text-muted position-absolute ps-2"></i>
+                                    <input type="number" min="1" max="5" class="form-control rounded-0" name="num_guests" placeholder="@lang('homepage.searchbar-person')" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 column-input my-2">
+                            <div class="d-flex align-items-center small myselect2">
+                                <i class="fa fa-fish fa-fw text-muted position-absolute ps-1"></i>
+                                <select class="form-control form-select" id="home_target_fish" name="target_fish[]" style="width:100%">
+                                    
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2 column-input my-2">
+                            <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
+                        </div>
+                    </div>
+                </div> 
             </form>
-                <!-- <div class="search-summary" role="button" id="headerSearchTrigger">
-                    <i class="fas fa-search me-2"></i>
-                    @if(request()->has('place'))
-                        <span>{{ request()->place }} · 
-                            {{ request()->num_guests ?? '0' }} guests
-                            @if(request()->has('target_fish'))
-                                · {{ count((array)request()->target_fish) }} fish
-                            @endif
-                        </span>
-                    @else
-                        <span>@lang('homepage.searchbar-search-placeholder')</span>
-                    @endif
-                </div> -->
             </div>
         </div>
 
@@ -166,6 +156,9 @@
                     </a>
                     <a href="{{ route('guidings.index') }}" class="me-4 text-white text-decoration-none">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
+                    </a>
+                    <a href="{{ route('vacations.index') }}" class="me-4 text-white text-decoration-none">
+                        <i class="fas fa-map-signs me-2"></i>@lang('homepage.header-vacations')
                     </a>
                     <a href="{{ route($blogPrefix.'.index') }}" class="me-4 text-white text-decoration-none">
                         <i class="fas fa-book-open me-2"></i>@lang('homepage.filter-magazine')
@@ -919,6 +912,10 @@ input[type=number] {
                         <i class="fas fa-fish"></i>
                         <span>@lang('homepage.filter-fishing-near-me')</span>
                     </a>
+                    <a href="{{ route('vacations.index') }}" class="menu-item">
+                        <i class="fas fa-map-signs"></i>
+                        <span>@lang('homepage.header-vacations')</span>
+                    </a>
                     <a href="{{ route($blogPrefix.'.index') }}" class="menu-item">
                         <i class="fas fa-book-open"></i>
                         <span>@lang('homepage.filter-magazine')</span>
@@ -957,7 +954,7 @@ input[type=number] {
                     <div class="menu-divider"></div>
                     
                     <a href="#" class="menu-item" data-bs-toggle="modal" data-bs-target="#languageModal">
-                        <i class="fas fa-globe"></i>
+                        <i class="fas fa-map-signs"></i>
                         <span>Language <span class="fi fi-{{ array_search(app()->getLocale(), config('app.locales')) }}"></span></span>
                     </a>
                     

@@ -3,7 +3,7 @@
 @section('title', substr($title, 0, -3))
 @section('description', $title)
 
-@section('header_title', ((ucwords(isset($place)) ? translate('Alle Guidings bei ') . $place : translate('Alle Guidings'))))
+@section('header_title', ((ucwords(isset($place)) ? translate('Alle Vacations bei ') . $place : translate('Alle Vacations'))))
 @section('header_sub_title', '')
 
 @section('css_after')
@@ -29,21 +29,6 @@
         margin-top: -30px;
         z-index: 100;
     }
-
-    #filterCard {
-        /* position: sticky;
-        top: 20px; */
-    }
-
-    /*.carousel .carousel-control-next, 
-    .carousel .carousel-control-prev {
-        background: rgba(0,0,0,0.5);
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        top: 50%;
-        transform: translateY(-50%);
-    }*/
 
     .carousel.slide img {
         height: 300px;
@@ -74,63 +59,30 @@
         filter: none !important;
     }
 
-    /* .carousel .carousel-control-next, .carousel .carousel-control-prev {
-        top: 50%;
-        transform: translateY(-50%);
-    } */
-
     .carousel.slide img {
-        /* max-height: 265px; */
         object-fit: cover;
         background: black;
         height: 300px;
-        /* min-height: 160px; */
-        /* height:228px; */
     }
-
-    /* .carousel .carousel-control-next {
-        right: 0px;
-    }
-
-    .carousel .carousel-control-prev {
-        left: 0;
-    } */
 
     .carousel-item {
         min-height: 50px;
     }
-    /* .carousel .carousel-control-next, .carousel .carousel-control-prev {
-        padding: 3px;
-        width: 24px;
-    } */
 
     .carousel-item-next, .carousel-item-prev, .carousel-item.active {
         display: flex;
     }
 
-    /* .carousel-control-prev-icon,
-    .carousel-control-next-icon {
-        width: 10px;
-        height: 10px;
-    }
-
-    .carousel .carousel-control-next, .carousel .carousel-control-prev {
-        padding: 3px;
-        width: 24px;
-    } */
     .form-custom-input{
-    /* border: solid #e8604c 1px; */
     border: 1px solid #d4d5d6;
     border-radius: 5px;
     padding: 8px 10px;
     width:100%;
     }
     .form-control:focus{
-        /* border: solid #e8604c 1px !important; */
        box-shadow: none;
     }
     .form-custom-input:focus-visible{
-        /* border: solid #e8604c 1px !important; */
         border:0;
         outline:solid #e8604c 1px !important;
     }
@@ -296,7 +248,7 @@
                         <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                         <li><span>&#183;</span></li>
                         <li class="active">
-                            {{ucwords( isset($place) ? translate('Alle Guidings bei ') . $place : translate('Alle Guidings'))}}
+                            {{ucwords( isset($place) ? translate('Alle Vacations bei ') . $place : translate('Alle Vacations'))}}
                         </li>
                     </ul>
                 </div>
@@ -315,10 +267,10 @@
                             <div class="btn-group border rounded-start cag-btn-inverted" role="group" style=" width:30%;">
                                 <button type="button" class="btn dropdown-toggle text-white" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-arrow-down-arrow-up me-1"></i>@lang('message.sortby')</button>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=newest">@lang('message.newest')</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=price-asc">@lang('message.lowprice')</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=short-duration">@lang('message.shortduration')</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=long-duration">@lang('message.longduration')</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('vacations.index') }}?sortby=newest">@lang('message.newest')</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('vacations.index') }}?sortby=price-asc">@lang('message.lowprice')</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('vacations.index') }}?sortby=short-duration">@lang('message.shortduration')</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('vacations.index') }}?sortby=long-duration">@lang('message.longduration')</a></li>
                                 </ul>
 
                                 @foreach(request()->except('sortby') as $key => $value)
@@ -333,9 +285,9 @@
                             </div>
                             <a class="btn border-start cag-btn-inverted" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottomSearch" aria-controls="offcanvasBottomSearch" href="javascript:void(0)" style="border-left: 1px solid #ccc!important; z-index: 2; width:30%;">
                                 <i class="fa fa-filter me-1"></i>@lang('message.filter') 
-                                @if($guidings->count() > 0)
+                                @if($vacations->count() > 0)
                                     @if(request()->has('radius') || request()->has('num_guests') || request()->has('target_fish') || request()->has('water') || request()->has('fishing_type') || request()->has('price_range'))
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="guiding-filter-counter"></span>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="guidings-filter-counter"></span>
                                     @endif
                                 @endif
                             </a>
@@ -355,7 +307,7 @@
                             @lang('message.sortby'):
                         </div>
                         <div class="card-body border-bottom">
-                            <form id="form-sortby-2" action="{{route('guidings.index')}}" method="get">
+                            <form id="form-sortby-2" action="{{route('vacations.index')}}" method="get">
                                 <select class="form-select form-select-sm" name="sortby" id="sortby-2">
                                     <option value="" disabled selected>@lang('message.choose')...</option>
                                     <option value="newest" {{request()->get('sortby') ? request()->get('sortby') == 'newest' ? 'selected' : '' : '' }}>@lang('message.newest')</option>
@@ -381,7 +333,7 @@
                             @lang('destination.filter_by'):
                         </div>
                         <div class="card-body border-bottom">
-                            <form id="filterContainer" action="{{route('guidings.index')}}" method="get" class="shadow-sm px-4 py-2">
+                            <form id="filterContainer" action="{{route('vacations.index')}}" method="get" class="shadow-sm px-4 py-2">
                                 <div class="row">
                                     <div class="col-12">
                                         <div class="form-group my-1">
@@ -395,24 +347,6 @@
                                           <input type="hidden" id="LocationLng" value="{{ request()->get('placeLng') ? request()->get('placeLng') : null }}" name="placeLng"/>
                                         </div>
                                     </div>
-                                    {{-- <div class="col-12">
-                                        <div class="input-group my-1">
-                                            <div class="input-group-prepend border-0 border-bottom ">
-                                                <span class="d-flex align-items-center px-2 h-100">
-                                                    <i class="fa fa-compass"></i>
-                                                </span>
-                                            </div>
-                                            <select id="radius" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="radius">
-                                                <option selected disabled hidden>Radius</option>
-                                                <option value="" >@lang('message.choose')...</option>
-                                                <option value="50" {{ request()->has('radius') ? request()->get('radius') == 50 ? 'selected' : null : null }}>50 km</option>
-                                                <option value="100" {{ request()->get('radius') ? request()->get('radius') == 100 ? 'selected' : null : null }}>100 km</option>
-                                                <option value="150" {{ request()->get('radius') ? request()->get('radius') == 150 ? 'selected' : null : null }}>150 km</option>
-                                                <option value="250" {{ request()->get('radius') ? request()->get('radius') == 250 ? 'selected' : null : null }}>250 km</option>
-                                                <option value="500" {{ request()->get('radius') ? request()->get('radius') == 500 ? 'selected' : null : null }}>500 km</option>
-                                            </select>
-                                          </div>
-                                    </div> --}}
                                     <div class="col-12">
                                         <div class="input-group my-1">
                                             <div class="input-group-prepend border-0 border-bottom ">
@@ -428,37 +362,6 @@
                                                 <option value="3" {{ request()->get('num_guests') ? request()->get('num_guests') == 3 ? 'selected' : null : null }}>3</option>
                                                 <option value="4" {{ request()->get('num_guests') ? request()->get('num_guests') == 4 ? 'selected' : null : null }}>4</option>
                                                 <option value="5" {{ request()->get('num_guests') ? request()->get('num_guests') == 5 ? 'selected' : null : null }}>5</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                 
-                                    <div class="col-12">
-                                        <div class="form-group my-1 d-flex align-items-center border-bottom">
-                                            <div class="px-2 select2-icon">
-                                                <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
-                                            </div>
-                                           
-                                            <select class="form-control form-select border-0 rounded-0" id="target_fish" name="target_fish[]" style="width:100%">
-                                            </select>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="col-12">
-                                        <div class="form-group my-1 d-flex align-items-center border-bottom">
-                                            <div class="px-2 select2-icon">
-                                                <img src="{{asset('assets/images/icons/water-waves.png')}}" height="20" width="20" alt="" />
-                                            </div>
-                                            <select class="form-control form-select border-0  rounded-0" id="water" name="water[]" style="width:100%">
-                                    
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="form-group my-1 d-flex align-items-center border-bottom ">
-                                            <div class="px-2 select2-icon">
-                                                <img src="{{asset('assets/images/icons/fishing.png')}}" height="20" width="20" alt="" />
-                                            </div>
-                                            <select class="form-control form-select border-0 rounded-0" id="methods" name="methods[]" style="width:100%">
                                             </select>
                                         </div>
                                     </div>
@@ -500,19 +403,19 @@
 
                     <!-- column-reverse-row-normal -->
                     <div class="row">
-                    @if(count($guidings))
+                    @if(count($vacations))
                         <div class="col-lg-12 col-sm-12">
                             <div class="tours-list__right">
                                 <div class="tours-list__inner">
-                                    @foreach($guidings as $guiding)
-                                    <div class="row m-0 mb-2 guiding-list-item">
+                                    @foreach($vacations as $vacation)
+                                    <div class="row m-0 mb-2 vacation-list-item">
                                         <div class="col-md-12">
                                             <div class="row p-2 border shadow-sm bg-white rounded">
                                                 <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-0">
-                                                    <div id="carouselExampleControls-{{$guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
+                                                    <div id="carouselExampleControls-{{$vacation->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
                                                         <div class="carousel-inner">
-                                                            @if(count(get_galleries_image_link($guiding)))
-                                                                @foreach(get_galleries_image_link($guiding) as $index => $gallery_image_link)
+                                                            @if(count(get_galleries_image_link($vacation)))
+                                                                @foreach(get_galleries_image_link($vacation) as $index => $gallery_image_link)
                                                                     <div class="carousel-item @if($index == 0) active @endif">
                                                                         <img  class="d-block" src="{{asset($gallery_image_link)}}">
                                                                     </div>
@@ -520,12 +423,12 @@
                                                             @endif
                                                         </div>
 
-                                                        @if(count(get_galleries_image_link($guiding)) > 1)
-                                                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls-{{$guiding->id}}" data-bs-slide="prev">
+                                                        @if(count(get_galleries_image_link($vacation)) > 1)
+                                                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls-{{$vacation->id}}" data-bs-slide="prev">
                                                                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                                                                 <span class="visually-hidden">Previous</span>
                                                             </button>
-                                                            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls-{{$guiding->id}}" data-bs-slide="next">
+                                                            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls-{{$vacation->id}}" data-bs-slide="next">
                                                                 <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                                                 <span class="visually-hidden">Next</span>
                                                             </button>
@@ -533,47 +436,47 @@
                                                     </div>
                                             
                                                 </div>
-                                                <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 p-md-3 mt-md-1">
-                                                    <a href="{{ route('guidings.show', [$guiding->id, $guiding->slug])}}">
+                                                <div class="guidings-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 p-md-3 mt-md-1">
+                                                    <a href="{{ route('vacations.show', [$vacation->id, $vacation->slug])}}">
                                                             <div class="guidings-item">
                                                                 <div class="guidings-item-title">
-                                                                <h5 class="fw-bolder text-truncate">{{ Str::limit(translate($guiding->title), 70) }}</h5>
-                                                                <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($guiding->location) }}</span>                                      
+                                                                <h5 class="fw-bolder text-truncate">{{ Str::limit(translate($vacation->title), 70) }}</h5>
+                                                                <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($vacation->location) }}</span>                                      
                                                                 </div>
-                                                                @if ($guiding->user->average_rating())
+                                                                {{-- @if ($vacation->user->average_rating())
                                                                 <div class="guidings-item-ratings">
                                                                 <div class="ratings-score">
                                                                         <span class="text-warning">★</span>
-                                                                        <span>{{$guiding->user->average_rating()}} </span>
-                                                                        /5 ({{ $guiding->user->received_ratings->count() }} review/s)
+                                                                        <span>{{$vacation->user->average_rating()}} </span>
+                                                                        /5 ({{ $vacation->user->received_ratings->count() }} review/s)
                                                                     </div>
                                                                 </div>
-                                                                @endif
+                                                                @endif --}}
                                                             </div>
                                                             <div class="guidings-item-icon">
                                                                 <div class="guidings-icon-container"> 
                                                                             <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
                                                                         <div class="">
-                                                                            {{ $guiding->duration }} @if($guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
+                                                                            {{-- {{ $guiding->duration }} @if($guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif --}}
                                                                         </div>
                                                                 </div>
                                                                 <div class="guidings-icon-container"> 
                                                                         <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" />
                                                                         <div class="">
-                                                                        {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
+                                                                        {{-- {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif --}}
                                                                         </div>
                                                                 </div>
                                                                 <div class="guidings-icon-container"> 
                                                                             <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
                                                                         <div class="">
                                                                             <div class="tours-list__content__trait__text" >
-                                                                                @php
+                                                                                {{-- @php
                                                                                 $guidingTargets = collect($guiding->getTargetFishNames())->pluck('name')->toArray();
                                                                                 @endphp
                                                                                 
                                                                                 @if(!empty($guidingTargets))
                                                                                     {{ implode(', ', $guidingTargets) }}
-                                                                                @endif
+                                                                                @endif --}}
                                                                             </div>
                                                                         
                                                                         </div>
@@ -582,7 +485,7 @@
                                                                             <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
                                                                         <div class="">
                                                                             <div class="tours-list__content__trait__text" >
-                                                                            {{$guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
+                                                                            {{-- {{$guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}} --}}
                                                                             </div>
                                                                         
                                                                         </div>
@@ -590,7 +493,7 @@
                                                             </div>
                                                             <div class="inclusions-price">
                                                                     <div class="guidings-inclusions-container">
-                                                                        @if(!empty($guiding->getInclusionNames()))
+                                                                        {{-- @if(!empty($guiding->getInclusionNames()))
                                                                         <div class="guidings-included">
                                                                             <strong>@lang('guidings.Whats_Included')</strong>
                                                                             <div class="inclusions-list">
@@ -610,10 +513,10 @@
                                                                                 @endif
                                                                             </div>
                                                                         </div>
-                                                                        @endif
+                                                                        @endif --}}
                                                                     </div>
                                                                     <div class="guiding-item-price">
-                                                                        <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$guiding->getLowestPrice()}}€ p.P.</span></h5>
+                                                                        <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$vacation->package_price_per_person}}€ p.P.</span></h5>
                                                                         <div class="d-none d-flex flex-column mt-4">
                                                                         </div>
                                                                     </div>
@@ -624,7 +527,7 @@
                                         </div>
                                     </div>
                                     @endforeach
-                                    {!! $guidings->links('vendor.pagination.default') !!}
+                                    {!! $vacations->links('vendor.pagination.default') !!}
 
                                 </div>
                             </div>
@@ -643,8 +546,8 @@
     <!--Tours List End-->
 
     <!-- Modal -->
-    @foreach($guidings as $guiding)
-        @include('pages.guidings.content.guidingModal')
+    @foreach($vacations as $vacation)
+        @include('pages.vacations.content.vacationModal')
     @endforeach
 
 
@@ -669,7 +572,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body small">
-            <form id="filterContainerOffCanvass" action="{{route('guidings.index')}}" method="get" class="px-4 py-2">
+            <form id="filterContainerOffCanvass" action="{{route('vacations.index')}}" method="get" class="px-4 py-2">
                 <div class="row">
                     <div class="col-12">
                         <div class="form-group my-1">
@@ -683,24 +586,6 @@
                           <input type="hidden" id="LocationLng2" value="{{ request()->get('placeLng') ? request()->get('placeLng') : null }}" name="placeLng"/>
                         </div>
                     </div>
-                    {{-- <div class="col-12">
-                        <div class="input-group my-1">
-                            <div class="input-group-prepend border-0 border-bottom ">
-                                <span class="d-flex align-items-center px-2 h-100">
-                                    <i class="fa fa-compass"></i>
-                                </span>
-                            </div>
-                            <select id="radiusOffCanvass" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="radius">
-                                <option selected disabled hidden>Radius</option>
-                                <option>@lang('message.choose')...</option>
-                                <option value="50" {{ request()->get('radius') ? request()->get('radius') == 50 ? 'selected' : null : null }}>50 km</option>
-                                <option value="100" {{ request()->get('radius') ? request()->get('radius') == 100 ? 'selected' : null : null }}>100 km</option>
-                                <option value="150" {{ request()->get('radius') ? request()->get('radius') == 150 ? 'selected' : null : null }}>150 km</option>
-                                <option value="250" {{ request()->get('radius') ? request()->get('radius') == 250 ? 'selected' : null : null }}>250 km</option>
-                                <option value="500" {{ request()->get('radius') ? request()->get('radius') == 500 ? 'selected' : null : null }}>500 km</option>
-                            </select>
-                          </div>
-                    </div> --}}
                     <div class="col-12">
                         <div class="input-group my-1">
                             <div class="input-group-prepend border-0 border-bottom ">
@@ -716,37 +601,6 @@
                                 <option value="3" {{ request()->get('num_guests') ? request()->get('num_guests') == 3 ? 'selected' : null : null }}>3</option>
                                 <option value="4" {{ request()->get('num_guests') ? request()->get('num_guests') == 4 ? 'selected' : null : null }}>4</option>
                                 <option value="5" {{ request()->get('num_guests') ? request()->get('num_guests') == 5 ? 'selected' : null : null }}>5</option>
-                            </select>
-                        </div>
-                    </div>
-                 
-                    <div class="col-12">
-                        <div class="form-group my-1 d-flex align-items-center border-bottom">
-                            <div class="px-2 select2-icon">
-                                <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
-                            </div>
-                           
-                            <select class="form-control form-select border-0 rounded-0" id="target_fishOffCanvass" name="target_fish[]" style="width:100%">
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="col-12">
-                        <div class="form-group my-1 d-flex align-items-center border-bottom">
-                            <div class="px-2 select2-icon">
-                                <img src="{{asset('assets/images/icons/water-waves.png')}}" height="20" width="20" alt="" />
-                            </div>
-                            <select class="form-control form-select border-0  rounded-0" id="waterOffCanvass" name="water[]" style="width:100%">
-                    
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="form-group my-1 d-flex align-items-center border-bottom ">
-                            <div class="px-2 select2-icon">
-                                <img src="{{asset('assets/images/icons/fishing.png')}}" height="20" width="20" alt="" />
-                            </div>
-                            <select class="form-control form-select border-0 rounded-0" id="methodsOffCanvass" name="methods[]" style="width:100%">
                             </select>
                         </div>
                     </div>
@@ -809,63 +663,6 @@ $(function(){
     initializeSelect2();
 
 function initializeSelect2() {
-    var selectTarget = $('#target_fish, #target_fishOffCanvass');
-    var selectWater = $('#water, #waterOffCanvass');
-    var selectMethod = $('#methods, #methodsOffCanvass');
-
-    // Target Fish
-    selectTarget.append(new Option('@lang('message.choose')...', '', true, true));
-    @foreach($alltargets as $target)
-        var targetname = '{{$target->name}}';
-        @if(app()->getLocale() == 'en')
-            targetname = '{{$target->name_en}}';
-        @endif
-        selectTarget.append(new Option(targetname, '{{ $target->id }}', false, false));
-    @endforeach
-
-    // Water Types
-    selectWater.append(new Option('@lang('message.choose')...', '', true, true));
-    @foreach($guiding_waters as $water)
-        var watername = '{{$water->name}}';
-        @if(app()->getLocale() == 'en')
-            watername = '{{$water->name_en}}';
-        @endif
-        selectWater.append(new Option(watername, '{{ $water->id }}', false, false));
-    @endforeach
-
-    // Fishing Methods
-    selectMethod.append(new Option('@lang('message.choose')...', '', true, true));
-    @foreach($guiding_methods as $method)
-        var methodname = '{{$method->name}}';
-        @if(app()->getLocale() == 'en')
-            methodname = '{{$method->name_en}}';
-        @endif
-        selectMethod.append(new Option(methodname, '{{ $method->id }}', false, false));
-    @endforeach
-
-    // Initialize Select2 and set values
-    $("#target_fish, #target_fishOffCanvass").select2({
-        multiple: true,
-        placeholder: '@lang('message.target-fish')',
-        width: 'resolve',
-    }).val(@json(request()->get('target_fish', [])))
-      .trigger('change');
-
-    $("#water, #waterOffCanvass").select2({
-        multiple: true,
-        placeholder: '@lang('message.body-type')',
-        width: 'resolve'
-    }).val(@json(request()->get('water', [])))
-      .trigger('change');
-
-    $("#methods, #methodsOffCanvass").select2({
-        multiple: true,
-        placeholder: '@lang('message.fishing-technique')',
-        width: 'resolve'
-    }).val(@json(request()->get('methods', [])))
-      .trigger('change');
-
-    // Set other form values if they exist
     @if(request()->get('price_range'))
         $('#price_range, #price_rangeOffCanvass').val('{{ request()->get('price_range') }}');
     @endif
@@ -875,10 +672,7 @@ function initializeSelect2() {
     @endif
 }
 
-
-
 </script>
-
 
 <script type="module">
     import { MarkerClusterer } from "https://cdn.skypack.dev/@googlemaps/markerclusterer@2.3.1";
@@ -944,11 +738,10 @@ function initializeSelect2() {
           },
         ];
 
-    //const { Map } = await google.maps.importLibrary("maps");
 
     @php
-        $lat = isset($guidings[0]) ? $guidings[0]->lat : 51.165691;
-        $lng = isset($guidings[0]) ? $guidings[0]->lng : 10.451526;
+        $lat = isset($vacations[0]) ? $vacations[0]->lat : 51.165691;
+        $lng = isset($vacations[0]) ? $vacations[0]->lng : 10.451526;
     @endphp
 
     const position =  { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }} , lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} }; 
@@ -971,33 +764,21 @@ function initializeSelect2() {
         position: position,
     });
 
-
-
     const markers = [];
     const infowindows = [];
     const uniqueCoordinates = [];
     let isDuplicateCoordinate;  
 
-    @if($allGuidings->isEmpty())
-        @include('pages.guidings.partials.maps',['guidings' => $otherguidings])
+    @if($allVacations->isEmpty())
+        @include('pages.guidings.partials.maps',['guidings' => $othervacations])
     @else
-        @include('pages.guidings.partials.maps',['guidings' => $allGuidings])
+        @include('pages.guidings.partials.maps',['guidings' => $allVacations])
     @endif
-
 
     function getRandomOffset() {
       // Generate a random value between -0.00005 and 0.00005 (adjust the range as needed)
       return (Math.random() - 0.5) * 0.0080;
     }
-
-
-    /* 
-    // Create the MarkerClusterer
-    const markerCluster = new MarkerClusterer(map, markers, {
-        imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m',
-        maxZoom: 12,
-    });
-    */
    
     const markerCluster = new MarkerClusterer({ markers, map, mapStyle });
     // Add click event listeners to individual markers inside the cluster
@@ -1009,33 +790,6 @@ function initializeSelect2() {
     });
 
 }
-
-
-
-/*function initialize() {
-    var input = document.getElementById('searchPlace');
-    var autocomplete = new google.maps.places.Autocomplete(input);
-    google.maps.event.addListener(autocomplete, 'place_changed', function () {
-        //alert(2221);
-        var place = autocomplete.getPlace();
-        document.getElementById('LocationLat').value = place.geometry.location.lat();
-        document.getElementById('LocationLng').value = place.geometry.location.lng();
-    });
-}*/
-
-/*function initialize2() {
-
-    var input = document.getElementById('searchPlaceOffCanvass');
-    var autocomplete = new google.maps.places.Autocomplete(input);
-    google.maps.event.addListener(autocomplete, 'place_changed', function () {
-        var place = autocomplete.getPlace();
-        document.getElementById('placeLatOffCanvass').value = place.geometry.location.lat();
-        document.getElementById('placeLngOffCanvass').value = place.geometry.location.lng();
-    });
-}*/
-
-//window.addEventListener('load', initialize);
-//window.addEventListener('load', initialize2);
 
 window.addEventListener('load', function() {
     var placeLatitude = '{{ request()->get('placeLat') }}'; // Replace with the actual value from the request
@@ -1069,7 +823,6 @@ function showPosition(position) {
 }
 
 function codeLatLng(lat, lng) {
-    return null;
     // var geocoder = new google.maps.Geocoder();
     // var latlng = new google.maps.LatLng(lat, lng);
     // geocoder.geocode({'latLng': latlng}, function (results, status) {
@@ -1088,10 +841,8 @@ function codeLatLng(lat, lng) {
     // });
 }
 
-       
 </script>
 
-
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 
 @endsection
