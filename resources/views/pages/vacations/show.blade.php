@@ -99,6 +99,85 @@
             aspect-ratio: 3/2;
         }
 
+        /* Booking Form Styles */
+        .tour-details-two__sidebar {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .booking-type-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .booking-type-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            background: white;
+            color: #495057;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            border-radius: 5px;
+        }
+
+        .booking-type-btn:hover {
+            background: #f8f9fa;
+            border-color: #fd5d14;
+            color: #fd5d14;
+        }
+
+        .booking-type-btn.active {
+            background: #fd5d14;
+            color: white;
+            border-color: #fd5d14;
+        }
+
+        .booking-form-container {
+            margin-bottom: 20px;
+        }
+
+        .booking-form-container label {
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #495057;
+        }
+
+        .booking-form-container .form-control {
+            border: 1px solid #dee2e6;
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .booking-form-container .form-control:focus {
+            border-color: #fd5d14;
+            box-shadow: 0 0 0 0.2rem rgba(253, 93, 20, 0.25);
+        }
+
+        .btn-orange {
+            background: #fd5d14;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-orange:hover {
+            background: #e64d0c;
+            color: white;
+        }
+
+        .booking-options {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
     </style>
 @endsection
 
@@ -477,8 +556,6 @@
                              id="{{ $sectionKey }}" 
                              role="tabpanel" 
                              aria-labelledby="nav-{{ $sectionKey }}-tab">
-                            
-                             <!-- <h5 class="card-title mb-3">{{ translate('Description of ' . $sectionKey) }}</h5> -->
 
                             @foreach($section['items'] as $itemIndex => $item)
                                 <div class="card tab-card h-100 shadow mb-4">
@@ -648,11 +725,11 @@
             </div>
         </div>
 
-        <!-- Description Section -->    
+        <!-- Description Section -->  
         <!-- Right Column -->
         <div id="book-now" class="guidings-book">
             @if(!$agent->ismobile())
-                {{-- @include('pages.guidings.content.bookguiding') --}}
+                @include('pages.vacations.content.bookvacation')
             @endif
         </div>
     </section>
@@ -888,35 +965,50 @@ document.addEventListener("DOMContentLoaded", function() {
     
     let currentCount = 3; // Initial count of displayed items
     const totalItems = {{ isset($same_guiding) ? $same_guiding->count() : 0 }};
-    
-    document.getElementById('show-more').addEventListener('click', function() {
-        const container = document.getElementById('same-guidings-container');
-        
-        // Fetch the next set of items
-        for (let i = currentCount; i < currentCount + 3 && i < totalItems; i++) {
-            const guiding = @json($same_guiding ?? []); // Convert PHP variable to JavaScript
-            const newGuiding = guiding[i];
 
-            const colDiv = document.createElement('div');
-            colDiv.className = 'col-md-6 mb-3';
-            colDiv.innerHTML = `
-                <div class="card">
-                    <img src="${newGuiding.thumbnail_path}" class="card-img-top" alt="${newGuiding.title}">
-                    <div class="card-body">
-                        <h5 class="card-title">${newGuiding.title}</h5>
-                        <p class="card-text">${newGuiding.location}</p>
-                        <a href="/guidings/${newGuiding.id}/${newGuiding.slug}" class="btn btn-primary">Details</a>
-                    </div>
-                </div>
-            `;
-            container.appendChild(colDiv);
-        }
 
-        currentCount += 3; // Update the count of displayed items
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all required elements with null checks
+        const typeButtons = document.querySelectorAll('.booking-type-btn');
+        const typeInput = document.querySelector('input[name="booking_type"]');
+        const packageOptions = document.getElementById('package-options');
+        const customOptions = document.getElementById('custom-options');
 
-        // Hide the button if all items are displayed
-        if (currentCount >= totalItems) {
-            this.style.display = 'none';
+        // Only proceed if we have the necessary elements
+        if (typeButtons.length && typeInput && packageOptions && customOptions) {
+            typeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    try {
+                        // Remove active class from all buttons
+                        typeButtons.forEach(btn => btn.classList.remove('active'));
+                        
+                        // Add active class to clicked button
+                        this.classList.add('active');
+                        
+                        // Update hidden input value
+                        const bookingType = this.dataset.type;
+                        typeInput.value = bookingType;
+                        
+                        // Show/hide appropriate options
+                        if (bookingType === 'package') {
+                            packageOptions.style.display = 'block';
+                            customOptions.style.display = 'none';
+                        } else {
+                            packageOptions.style.display = 'none';
+                            customOptions.style.display = 'block';
+                        }
+                    } catch (error) {
+                        console.error('Error in booking type button click handler:', error);
+                    }
+                });
+            });
+        } else {
+            console.warn('Some booking form elements are missing:', {
+                hasButtons: typeButtons.length > 0,
+                hasTypeInput: !!typeInput,
+                hasPackageOptions: !!packageOptions,
+                hasCustomOptions: !!customOptions
+            });
         }
     });
 </script>

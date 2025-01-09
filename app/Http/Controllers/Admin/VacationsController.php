@@ -35,9 +35,6 @@ class VacationsController extends Controller
             $jsonFields = ['target_fish', 'amenities', 'equipment', 'additional_services', 'included_services', 'travel_options'];
             foreach ($jsonFields as $field) {
                 if (isset($data[$field])) {
-                    Log::info("Processing JSON field: {$field}", [
-                        'original_value' => $data[$field]
-                    ]);
                     
                     // Check if the value is a string (from tagify) and convert to array
                     if (is_string($data[$field])) {
@@ -48,9 +45,6 @@ class VacationsController extends Controller
                                 return is_array($item) && isset($item['value']) ? $item['value'] : $item;
                             }, $data[$field]);
                             
-                            Log::info("Successfully processed JSON field: {$field}", [
-                                'processed_value' => $data[$field]
-                            ]);
                         } catch (\Exception $e) {
                             Log::error("Error processing JSON field {$field}:", [
                                 'error' => $e->getMessage(),
@@ -66,9 +60,6 @@ class VacationsController extends Controller
             // Handle boolean fields
             $booleanFields = ['pets_allowed', 'smoking_allowed', 'disability_friendly', 'status'];
             foreach ($booleanFields as $field) {
-                Log::info("Processing boolean field: {$field}", [
-                    'original_value' => $data[$field] ?? null
-                ]);
                 $data[$field] = isset($data[$field]) && ($data[$field] === '1' || $data[$field] === true);
             }
 
@@ -381,6 +372,10 @@ class VacationsController extends Controller
 
             } catch (\Exception $e) {
                 DB::rollBack();
+                Log::error('Error in vacation update:', [
+                    'error' => $e->getMessage(),
+                    'stack_trace' => $e->getTraceAsString()
+                ]);
                 throw $e;
             }
 
