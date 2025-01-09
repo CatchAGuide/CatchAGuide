@@ -110,8 +110,19 @@ class VacationsController extends Controller
 
     public function show($id)
     {
-        $vacation = Vacation::find($id);
-        return view('pages.vacations.show', compact('vacation'));
+        $vacation = Vacation::find($id)->with('accommodations', 'boats', 'packages', 'guidings')->first();
+        $vacation->gallery = json_decode($vacation->gallery, true);
+        
+        $sameCountries = Vacation::where('id', '!=', $vacation->id)
+            ->where('country', $vacation->country)
+            ->limit(10)
+            ->get()
+            ->map(function($vacation) {
+                $vacation->gallery = json_decode($vacation->gallery, true);
+                return $vacation;
+            });
+            
+        return view('pages.vacations.show', compact('vacation', 'sameCountries'));
     }
 
     private function otherVacations(){

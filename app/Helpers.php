@@ -66,14 +66,19 @@ if (! function_exists('get_featured_image_link')) {
 }
 
 if (! function_exists('get_galleries_image_link')) {
-    function get_galleries_image_link($model)
+    function get_galleries_image_link($model, $type = 0)
     {   
         $links = [];
 
         if($model->thumbnail_path && file_exists(public_path($model->thumbnail_path))){
             $links[] = asset($model->thumbnail_path);
         }
-        $galleries = json_decode($model->gallery_images,true);
+
+        if($type == 0){
+            $galleries = json_decode($model->gallery_images,true);
+        }else{
+            $galleries = json_decode($model->gallery,true);
+        }
 
         if(is_array($galleries) && count($galleries)){
             foreach($galleries as $url){
