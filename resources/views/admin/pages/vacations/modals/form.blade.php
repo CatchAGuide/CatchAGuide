@@ -213,6 +213,63 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Dynamic Sections -->
+                        <div class="col-12 mb-4">
+                            <h6 class="border-bottom pb-2">Additional Options</h6>
+                            
+                            <!-- Accommodations Section -->
+                            <div class="section-wrapper mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0">Accommodations</h6>
+                                    <button type="button" class="btn btn-sm btn-primary add-item" data-type="accommodation">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                                <div id="accommodation-items" class="items-container">
+                                    <!-- Dynamic items will be added here -->
+                                </div>
+                            </div>
+
+                            <!-- Boats Section -->
+                            <div class="section-wrapper mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0">Boats</h6>
+                                    <button type="button" class="btn btn-sm btn-primary add-item" data-type="boat">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                                <div id="boat-items" class="items-container">
+                                    <!-- Dynamic items will be added here -->
+                                </div>
+                            </div>
+
+                            <!-- Packages Section -->
+                            <div class="section-wrapper mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0">Packages</h6>
+                                    <button type="button" class="btn btn-sm btn-primary add-item" data-type="package">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                                <div id="package-items" class="items-container">
+                                    <!-- Dynamic items will be added here -->
+                                </div>
+                            </div>
+
+                            <!-- Guidings Section -->
+                            <div class="section-wrapper mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0">Guidings</h6>
+                                    <button type="button" class="btn btn-sm btn-primary add-item" data-type="guiding">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                                <div id="guiding-items" class="items-container">
+                                    <!-- Dynamic items will be added here -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Vacation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class VacationsController extends Controller
 {
@@ -132,24 +133,98 @@ class VacationsController extends Controller
             $formattedData = $this->formatRequestData($request);
             
             // Handle gallery images
-            $galleryImages = $this->saveImages($request);
-            $formattedData['gallery'] = json_encode($galleryImages);
-
-            $vacation = Vacation::create($formattedData);
-
-            if($vacation) {
-                return redirect()->route('admin.vacations.index')
-                    ->with('success', 'Vacation created successfully');
+            if ($request->hasFile('gallery')) {
+                $galleryImages = $this->saveImages($request);
+                $formattedData['gallery'] = json_encode($galleryImages);
             }
-            
-            return redirect()->route('admin.vacations.index')
-                ->with('error', 'Failed to create vacation')
-                ->withInput();
-                
+
+            // Begin transaction
+            DB::beginTransaction();
+
+            try {
+                // Create the vacation
+                $vacation = Vacation::create($formattedData);
+
+                // Handle Accommodations
+                if ($request->has('accommodations')) {
+                    foreach ($request->accommodations as $accommodation) {
+                        $vacation->accommodations()->create([
+                            'description' => $accommodation['description'],
+                            'capacity' => $accommodation['capacity'],
+                            'dynamic_fields' => json_encode([
+                                'prices' => array_values($accommodation['prices'] ?? []),
+                                'living_area' => $accommodation['living_area'] ?? '',
+                                'bed_count' => $accommodation['bed_count'] ?? '',
+                                'facilities' => $accommodation['facilities'] ?? ''
+                            ])
+                        ]);
+                    }
+                }
+
+                // Handle Boats
+                if ($request->has('boats')) {
+                    foreach ($request->boats as $boat) {
+                        $vacation->boats()->create([
+                            'description' => $boat['description'],
+                            'capacity' => $boat['capacity'],
+                            'dynamic_fields' => json_encode([
+                                'prices' => array_values($boat['prices'] ?? []),
+                                'facilities' => $boat['facilities'] ?? ''
+                            ])
+                        ]);
+                    }
+                }
+
+                // Handle Packages
+                if ($request->has('packages')) {
+                    foreach ($request->packages as $package) {
+                        $vacation->packages()->create([
+                            'description' => $package['description'],
+                            'capacity' => $package['capacity'],
+                            'dynamic_fields' => json_encode([
+                                'prices' => array_values($package['prices'] ?? [])
+                            ])
+                        ]);
+                    }
+                }
+
+                // Handle Guidings
+                if ($request->has('guidings')) {
+                    foreach ($request->guidings as $guiding) {
+                        $vacation->guidings()->create([
+                            'description' => $guiding['description'],
+                            'capacity' => $guiding['capacity'],
+                            'dynamic_fields' => json_encode([
+                                'prices' => array_values($guiding['prices'] ?? [])
+                            ])
+                        ]);
+                    }
+                }
+
+                DB::commit();
+
+                return redirect()
+                    ->route('admin.vacations.index')
+                    ->with('success', 'Vacation created successfully');
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error('Error creating vacation:', [
+                    'error' => $e->getMessage(),
+                    'stack_trace' => $e->getTraceAsString()
+                ]);
+                throw $e;
+            }
+
         } catch (\Exception $e) {
-            \Log::error('Vacation creation failed: ' . $e->getMessage());
-            return redirect()->route('admin.vacations.index')
-                ->with('error', 'An error occurred while creating the vacation')
+            Log::error('Error in vacation store:', [
+                'error' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()
+                ->back()
+                ->with('error', 'An error occurred while creating the vacation: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -176,107 +251,100 @@ class VacationsController extends Controller
         try {
             $vacation = Vacation::findOrFail($id);
             
-            // Log the incoming request data
-            Log::info('Updating vacation #' . $id . ' - Incoming request data:', [
-                'request_data' => $request->all()
-            ]);
-
-            $validated = $request->validate([
-                'title' => 'required|string|max:255',
-                'slug' => 'required|string|unique:vacations,slug,' . $id,
-                'location' => 'required|string',
-                'city' => 'required|string',
-                'country' => 'required|string',
-                'latitude' => 'required|numeric',
-                'longitude' => 'required|numeric',
-                'region' => 'required|string',
-                'gallery' => 'sometimes|array',
-                'best_travel_times' => 'required|string',
-                'surroundings_description' => 'required|string',
-                'target_fish' => 'required',
-                'airport_distance' => 'required|string',
-                'water_distance' => 'required|string',
-                'shopping_distance' => 'required|numeric',
-                'pets_allowed' => 'boolean',
-                'smoking_allowed' => 'boolean',
-                'disability_friendly' => 'boolean',
-                'accommodation_description' => 'required|string',
-                'living_area' => 'required|numeric',
-                'bedroom_count' => 'required|numeric',
-                'bed_count' => 'required|numeric',
-                'max_persons' => 'required|string',
-                'min_rental_days' => 'required|numeric',
-                'amenities' => 'required',
-                'boat_description' => 'nullable|string',
-                'equipment' => 'required',
-                'basic_fishing_description' => 'required|string',
-                'catering_info' => 'nullable|string',
-                'package_price_per_person' => 'required|string',
-                'accommodation_price' => 'required|string',
-                'boat_rental_price' => 'nullable|numeric',
-                'guiding_price' => 'nullable|numeric',
-                'additional_services' => 'nullable',
-                'included_services' => 'required',
-                'travel_included' => 'required|string',
-                'travel_options' => 'required',
-            ]);
-
-            // Log successful validation
-            Log::info('Validation passed for vacation #' . $id);
-
             // Format the request data
             $formattedData = $this->formatRequestData($request);
             
-            // Log the formatted data
-            Log::info('Formatted data for vacation #' . $id . ':', [
-                'formatted_data' => $formattedData
-            ]);
-            
-            // Handle gallery images only if new images are uploaded
+            // Handle gallery images
             if ($request->hasFile('gallery')) {
-                Log::info('Processing new gallery images for vacation #' . $id);
                 $galleryImages = $this->saveImages($request);
                 $formattedData['gallery'] = json_encode($galleryImages);
-                
-                // Log gallery processing results
-                Log::info('Gallery images processed:', [
-                    'images' => $galleryImages
-                ]);
             }
 
-            // Log update attempt
-            Log::info('Attempting to update vacation #' . $id);
+            DB::beginTransaction();
 
-            if($vacation->update($formattedData)) {
-                Log::info('Successfully updated vacation #' . $id);
-                return redirect()->route('admin.vacations.index')
+            try {
+                // Update the vacation
+                $vacation->update($formattedData);
+
+                // Update Accommodations
+                $vacation->accommodations()->delete(); // Remove existing
+                if ($request->has('accommodations')) {
+                    foreach ($request->accommodations as $accommodation) {
+                        $vacation->accommodations()->create([
+                            'description' => $accommodation['description'],
+                            'capacity' => $accommodation['capacity'],
+                            'dynamic_fields' => json_encode([
+                                'prices' => array_values($accommodation['prices'] ?? []),
+                                'living_area' => $accommodation['living_area'] ?? '',
+                                'bed_count' => $accommodation['bed_count'] ?? '',
+                                'facilities' => $accommodation['facilities'] ?? ''
+                            ])
+                        ]);
+                    }
+                }
+
+                // Update Boats
+                $vacation->boats()->delete(); // Remove existing
+                if ($request->has('boats')) {
+                    foreach ($request->boats as $boat) {
+                        $vacation->boats()->create([
+                            'description' => $boat['description'],
+                            'capacity' => $boat['capacity'],
+                            'dynamic_fields' => json_encode([
+                                'prices' => array_values($boat['prices'] ?? []),
+                                'facilities' => $boat['facilities'] ?? ''
+                            ])
+                        ]);
+                    }
+                }
+
+                // Update Packages
+                $vacation->packages()->delete(); // Remove existing
+                if ($request->has('packages')) {
+                    foreach ($request->packages as $package) {
+                        $vacation->packages()->create([
+                            'description' => $package['description'],
+                            'capacity' => $package['capacity'],
+                            'dynamic_fields' => json_encode([
+                                'prices' => array_values($package['prices'] ?? [])
+                            ])
+                        ]);
+                    }
+                }
+
+                // Update Guidings
+                $vacation->guidings()->delete(); // Remove existing
+                if ($request->has('guidings')) {
+                    foreach ($request->guidings as $guiding) {
+                        $vacation->guidings()->create([
+                            'description' => $guiding['description'],
+                            'capacity' => $guiding['capacity'],
+                            'dynamic_fields' => json_encode([
+                                'prices' => array_values($guiding['prices'] ?? [])
+                            ])
+                        ]);
+                    }
+                }
+
+                DB::commit();
+
+                return redirect()
+                    ->route('admin.vacations.index')
                     ->with('success', 'Vacation updated successfully');
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
             }
-            
-            Log::warning('Failed to update vacation #' . $id . ' - Database update returned false');
-            return redirect()->route('admin.vacations.index')
-                ->with('error', 'Failed to update vacation')
-                ->withInput();
-                
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            // Specific logging for validation errors
-            Log::error('Validation failed for vacation #' . $id . ':', [
-                'errors' => $e->errors(),
-                'request_data' => $request->all()
-            ]);
-            
-            return redirect()->back()
-                ->withErrors($e->errors())
-                ->withInput();
+
         } catch (\Exception $e) {
-            // Detailed logging for other exceptions
-            Log::error('Unexpected error updating vacation #' . $id . ':', [
+            Log::error('Error in vacation update:', [
                 'error' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString(),
-                'request_data' => $request->all()
+                'stack_trace' => $e->getTraceAsString()
             ]);
             
-            return redirect()->route('admin.vacations.index')
+            return redirect()
+                ->back()
                 ->with('error', 'An error occurred while updating the vacation: ' . $e->getMessage())
                 ->withInput();
         }
