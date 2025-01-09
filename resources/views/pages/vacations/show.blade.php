@@ -127,13 +127,6 @@
                         </div>
                     </div>
                 </div>
-                {{-- @if ($average_rating)
-                <div class="col-auto pe-0 me-1">
-                    <p class="mb-1">
-                        <span class="text-warning">★</span> {{$average_rating}}/5 ({{$ratings->count()}} reviews)
-                    </p>
-                </div> 
-                @endif --}}
                 <div class="col-auto p-0">
                 </div>
             </div>
@@ -703,75 +696,53 @@
 
 <script>
 $(document).ready(function(){
-  $(".ratings-slider").owlCarousel({
-    items: 3,
-    margin: 10,
-    loop:false,
-    nav:false,
-    dots: true,
-    slideBy:3 ,
-    autoplay: true,
-    autoplayTimeout: 10000,
-    responsive: {
-      0: {
-        items: 1,
-        slideBy: 1
-      },
-      767: {
-        items: 2
-      },
-      1000: {
-        items: 3
-      }
-    }
-  });
-  initOwlCarousel(); // Initialize on page load
-    $(window).resize(initOwlCarousel); // Reinitialize on resize
+    initOwlCarousel(); // Initialize on page load
+        $(window).resize(initOwlCarousel); // Reinitialize on resize
 
-    // "Show More" button functionality for desktop
-    const showMoreBtn = document.getElementById("showMoreBtn");
-    const items = document.querySelectorAll(".guiding-list-item");
-    let isExpanded = false;
+        // "Show More" button functionality for desktop
+        const showMoreBtn = document.getElementById("showMoreBtn");
+        const items = document.querySelectorAll(".guiding-list-item");
+        let isExpanded = false;
 
-    showMoreBtn.addEventListener("click", function () {
-        isExpanded = !isExpanded;
-        items.forEach((item, index) => {
-            // Show all items if expanded, otherwise show only the first two
-            item.classList.toggle("show", isExpanded || index < 2);
+        showMoreBtn.addEventListener("click", function () {
+            isExpanded = !isExpanded;
+            items.forEach((item, index) => {
+                // Show all items if expanded, otherwise show only the first two
+                item.classList.toggle("show", isExpanded || index < 2);
+            });
+            // Toggle button text
+            showMoreBtn.textContent = isExpanded ? "Show Less" : "Show More";
         });
-        // Toggle button text
-        showMoreBtn.textContent = isExpanded ? "Show Less" : "Show More";
-    });
-  function initOwlCarousel() {
-    const $toursList = $(".tours-list__inner");
+    function initOwlCarousel() {
+        const $toursList = $(".tours-list__inner");
 
-    if ($(window).width() < 768) {
-        // Initialize Owl Carousel for mobile
-        if (!$toursList.hasClass("owl-carousel")) {
-            $toursList.addClass("owl-carousel").owlCarousel({
-                items: 1,
-                loop: false,
-                margin: 10,
-                nav: true,
-                dots: true,
+        if ($(window).width() < 768) {
+            // Initialize Owl Carousel for mobile
+            if (!$toursList.hasClass("owl-carousel")) {
+                $toursList.addClass("owl-carousel").owlCarousel({
+                    items: 1,
+                    loop: false,
+                    margin: 10,
+                    nav: true,
+                    dots: true,
+                });
+            }
+            $("#showMoreBtn").hide(); // Hide "Show More" button on mobile
+            $(".guiding-list-item").addClass("show"); // Show all items
+        } else {
+            // Destroy Owl Carousel for desktop
+            if ($toursList.hasClass("owl-carousel")) {
+                $toursList.trigger("destroy.owl.carousel").removeClass("owl-carousel owl-loaded");
+                $toursList.find(".owl-stage-outer").children().unwrap();
+            }
+            $("#showMoreBtn").show(); // Show "Show More" button on desktop
+            $(".guiding-list-item").each(function (index) {
+                // Show only the first two items on desktop
+                $(this).toggleClass("show", index < 2);
             });
         }
-        $("#showMoreBtn").hide(); // Hide "Show More" button on mobile
-        $(".guiding-list-item").addClass("show"); // Show all items
-    } else {
-        // Destroy Owl Carousel for desktop
-        if ($toursList.hasClass("owl-carousel")) {
-            $toursList.trigger("destroy.owl.carousel").removeClass("owl-carousel owl-loaded");
-            $toursList.find(".owl-stage-outer").children().unwrap();
-        }
-        $("#showMoreBtn").show(); // Show "Show More" button on desktop
-        $(".guiding-list-item").each(function (index) {
-            // Show only the first two items on desktop
-            $(this).toggleClass("show", index < 2);
-        });
     }
-}
-initMap();
+    initMap();
 });
 document.querySelectorAll(".description-item .text-wrapper").forEach((item) => {
     const originalText = item.innerHTML.trim();
@@ -825,7 +796,10 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
     function initMap() {
-        var location = { lat: {{ $vacation->latitude }}, lng: {{ $vacation->longitude }} }; // Example coordinates
+        console.log('initMap');
+        console.log('{{ $vacation->latitude }}');
+        console.log('{{ $vacation->longitude }}');
+        var location = { lat: {{ $vacation->latitude ?? 41.40338 }}, lng: {{ $vacation->longitude ?? 2.17403 }} }; // Example coordinates
         var map = new google.maps.Map(document.getElementById('map'), {
             zoom: 10,
             center: location,
