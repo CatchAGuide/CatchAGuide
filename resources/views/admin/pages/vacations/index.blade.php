@@ -277,6 +277,14 @@
                            placeholder="e.g., WiFi, TV, Kitchen" 
                            required>
                 </div>
+                <div class="col-md-4">
+                    <label class="form-label">Min Rental Days</label>
+                    <input type="text" 
+                           name="${type}s[${index}][min_rental_days]" 
+                           class="form-control" 
+                           placeholder="e.g., 3 days" 
+                           required>
+                </div>
             </div>
         `;
 
@@ -289,6 +297,19 @@
                            name="${type}s[${index}][facilities]" 
                            class="form-control" 
                            placeholder="e.g., GPS, Fish Finder, Life Jackets" 
+                           required>
+                </div>
+            </div>
+        `;
+        
+        const packageFields = `
+            <div class="row mb-3">
+                <div class="col-12">
+                    <label class="form-label">Catering Info</label>
+                    <input type="text" 
+                           name="${type}s[${index}][catering_info]" 
+                           class="form-control" 
+                           placeholder="e.g., Breakfast, Lunch, Dinner" 
                            required>
                 </div>
             </div>
@@ -314,6 +335,7 @@
                     <!-- Type-specific fields -->
                     ${type === 'accommodation' ? accommodationFields : ''}
                     ${type === 'boat' ? boatFields : ''}
+                    ${type === 'package' ? packageFields : ''}
 
                     <!-- Capacity Input -->
                     <div class="mb-3">
@@ -523,6 +545,8 @@
 
     // Add this function to handle editing
     function editVacation(id) {
+        console.log('Editing vacation:', id);
+
         // Change modal title
         document.getElementById('addVacationModalLabel').textContent = 'Edit Vacation';
         
@@ -539,10 +563,19 @@
             form.appendChild(methodField);
         }
 
+        // Show loading state
+        const modal = document.querySelector('#addVacationModal');
+        if (modal) {
+            modal.querySelector('.modal-content').style.opacity = '0.5';
+        }
+
         // Fetch vacation data
         fetch(`/admin/vacations/${id}/edit`)
             .then(response => response.json())
-            .then(data => {                // Helper function to safely set form values
+            .then(data => {
+                console.log('Received data:', data);
+
+                // Helper function to safely set form values
                 const setFieldValue = (fieldName, value) => {
                     const field = form.querySelector(`[name="${fieldName}"]`);
                     if (field) {
@@ -556,69 +589,45 @@
 
                 // Set basic fields
                 const fields = [
-                    'id', 'title', 'slug', 'location', 'city', 'country',
-                    'region', 'latitude', 'longitude', 'best_travel_times',
-                    'surroundings_description', 'airport_distance', 'water_distance',
-                    'shopping_distance', 'travel_included', 'travel_options',
-                    'amenities', 'target_fish', 'accommodation_description', 'living_area',
-                    'bedroom_count', 'bed_count', 'max_persons', 'min_rental_days',
-                    'basic_fishing_description', 'boat_description', 'catering_info', 'package_price_per_person',
-                    'accommodation_price', 'boat_rental_price', 'guiding_price',
-                    'additional_services', 'included_services', 'equipment'
+                    'title', 'slug', 'location', 'city', 'country', 'region',
+                    'latitude', 'longitude', 'best_travel_times', 'surroundings_description',
+                    'airport_distance', 'water_distance', 'shopping_distance',
+                    'travel_included', 'travel_options', 'target_fish', 'included_services'
                 ];
 
-                // Set values for all fields
-                fields.forEach(field => setFieldValue(field, data[field]));
+                // Set values for all basic fields
+                fields.forEach(field => {
+                    setFieldValue(field, data[field]);
+                });
 
-                // Handle checkboxes
-                setFieldValue('pets_allowed', data.pets_allowed);
-                setFieldValue('smoking_allowed', data.smoking_allowed);
-                setFieldValue('disability_friendly', data.disability_friendly);// Handle JSON fields properly
+                // Set checkbox fields
+                ['pets_allowed', 'smoking_allowed', 'disability_friendly'].forEach(field => {
+                    setFieldValue(field, data[field]);
+                });
 
-                const jsonFields = ['best_travel_times', 'travel_options'];
-                jsonFields.forEach(field => {
-                    const fieldInput = form.querySelector(`[name="${field}"]`);
-                    if (fieldInput && data[field]) {
-                        // Parse the JSON string if it's not already an array
-                        const value = typeof data[field] === 'string' ? 
-                            JSON.parse(data[field]) : data[field];
-                        fieldInput.value = JSON.stringify(value);
+                // Handle Tagify inputs
+                const tagifyFields = ['target_fish', 'included_services'];
+                tagifyFields.forEach(field => {
+                    const tagifyInput = form.querySelector(`[name="${field}"]`);
+                    if (tagifyInput && tagifyInput.tagify) {
+                        tagifyInput.tagify.removeAllTags();
+                        if (data[field]) {
+                            tagifyInput.tagify.addTags(data[field]);
+                        }
                     }
                 });
 
-                // Clear existing image preview
-                const imagePreview = document.getElementById('imagePreview');
-                if (imagePreview) {
-                    imagePreview.innerHTML = '';
-                } 
-
-                if (data.images && data.images.length) {
-                    data.images.forEach(image => {
-                        // Create preview for existing images
-                        const div = document.createElement('div');
-                        div.style.width = '100px';
-                        div.style.height = '100px';
-                        div.style.position = 'relative';
-                        
-                        const img = document.createElement('img');
-                        img.src = image.url; // Adjust based on your image URL structure
-                        img.style.width = '100%';
-                        img.style.height = '100%';
-                        img.style.objectFit = 'cover';
-                        img.style.borderRadius = '4px';
-                        
-                        div.appendChild(img);
-                        imagePreview.appendChild(div);
-                    });
-                }
-
                 // Load dynamic items
                 ['accommodations', 'boats', 'packages', 'guidings'].forEach(type => {
+                    console.log(`Loading ${type}:`, data[type]);
                     const container = document.getElementById(`${type.slice(0, -1)}-items`);
+                    
                     if (container && data[type] && Array.isArray(data[type])) {
                         container.innerHTML = ''; // Clear existing items
                         
                         data[type].forEach((item, index) => {
+                            console.log(`Processing ${type} item:`, item);
+                            
                             // Add the item template
                             container.insertAdjacentHTML('beforeend', getItemTemplate(type.slice(0, -1), index));
                             
@@ -626,56 +635,79 @@
                             const card = container.lastElementChild;
                             
                             // Set basic fields
-                            card.querySelector('textarea[name$="[description]"]').value = item.description;
-                            card.querySelector('input[name$="[capacity]"]').value = item.capacity;
+                            const descriptionField = card.querySelector(`textarea[name="${type.slice(0, -1)}s[${index}][description]"]`);
+                            const capacityField = card.querySelector(`input[name="${type.slice(0, -1)}s[${index}][capacity]"]`);
                             
-                            // Parse dynamic fields
-                            const dynamicFields = typeof item.dynamic_fields === 'string' 
-                                ? JSON.parse(item.dynamic_fields) 
-                                : item.dynamic_fields;
-                            
-                            console.log('Dynamic fields for', type, ':', dynamicFields); // Debug log
-
-                            // Set type-specific fields
-                            if (type === 'accommodations') {
-                                if (card.querySelector('input[name$="[living_area]"]')) {
-                                    card.querySelector('input[name$="[living_area]"]').value = dynamicFields.living_area || '';
-                                }
-                                if (card.querySelector('input[name$="[bed_count]"]')) {
-                                    card.querySelector('input[name$="[bed_count]"]').value = dynamicFields.bed_count || '';
-                                }
-                                if (card.querySelector('input[name$="[facilities]"]')) {
-                                    card.querySelector('input[name$="[facilities]"]').value = dynamicFields.facilities || '';
-                                }
+                            if (descriptionField) descriptionField.value = item.description || '';
+                            if (capacityField) {
+                                capacityField.value = item.capacity || '';
+                                // Trigger capacity change to create price inputs
+                                const event = new Event('input', { bubbles: true });
+                                capacityField.dispatchEvent(event);
                             }
                             
-                            if (type === 'boats') {
-                                if (card.querySelector('input[name$="[facilities]"]')) {
-                                    card.querySelector('input[name$="[facilities]"]').value = dynamicFields.facilities || '';
-                                }
-                            }
-
-                            // Create and populate price inputs
-                            if (dynamicFields && dynamicFields.prices) {
-                                createPriceInputs(card, item.capacity, type.slice(0, -1), index);
+                            // Handle dynamic fields
+                            if (item.dynamic_fields) {
+                                const dynamicFields = typeof item.dynamic_fields === 'string' 
+                                    ? JSON.parse(item.dynamic_fields) 
+                                    : item.dynamic_fields;
                                 
-                                const priceInputs = card.querySelectorAll('.individual-price');
-                                dynamicFields.prices.forEach((price, i) => {
-                                    if (priceInputs[i]) {
-                                        priceInputs[i].value = price;
+                                console.log(`Dynamic fields for ${type}:`, dynamicFields);
+                                
+                                // Set type-specific fields
+                                if (type === 'accommodations') {
+                                    ['living_area', 'bed_count', 'facilities', 'min_rental_days'].forEach(field => {
+                                        const inputField = card.querySelector(`input[name="${type.slice(0, -1)}s[${index}][${field}]"]`);
+                                        if (inputField) {
+                                            inputField.value = dynamicFields[field] || '';
+                                        }
+                                    });
+                                }
+                                
+                                if (type === 'boats') {
+                                    const facilitiesField = card.querySelector(`input[name="${type.slice(0, -1)}s[${index}][facilities]"]`);
+                                    if (facilitiesField) {
+                                        facilitiesField.value = dynamicFields.facilities || '';
                                     }
-                                });
+                                }
                                 
-                                // Update total price
-                                updateTotalPrice(card);
+                                if (type === 'packages') {
+                                    const cateringInfoField = card.querySelector(`input[name="${type.slice(0, -1)}s[${index}][catering_info]"]`);
+                                    if (cateringInfoField) {
+                                        cateringInfoField.value = dynamicFields.catering_info || '';
+                                    }
+                                }
+
+                                // Set prices after a small delay to ensure inputs are created
+                                setTimeout(() => {
+                                    if (dynamicFields.prices) {
+                                        const priceInputs = card.querySelectorAll('.individual-price');
+                                        dynamicFields.prices.forEach((price, i) => {
+                                            if (priceInputs[i]) {
+                                                priceInputs[i].value = price;
+                                            }
+                                        });
+                                        updateTotalPrice(card);
+                                    }
+                                }, 100);
                             }
                         });
                     }
                 });
+
+                // Restore modal state
+                if (modal) {
+                    modal.querySelector('.modal-content').style.opacity = '1';
+                }
             })
             .catch(error => {
                 console.error('Error fetching vacation data:', error);
                 alert('Error loading vacation data. Please try again.');
+                
+                // Restore modal state
+                if (modal) {
+                    modal.querySelector('.modal-content').style.opacity = '1';
+                }
             });
     }
 

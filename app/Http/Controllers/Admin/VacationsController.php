@@ -155,7 +155,8 @@ class VacationsController extends Controller
                                 'prices' => array_values($accommodation['prices'] ?? []),
                                 'living_area' => $accommodation['living_area'] ?? '',
                                 'bed_count' => $accommodation['bed_count'] ?? '',
-                                'facilities' => $accommodation['facilities'] ?? ''
+                                'facilities' => $accommodation['facilities'] ?? '',
+                                'min_rental_days' => $accommodation['min_rental_days'] ?? ''
                             ])
                         ]);
                     }
@@ -231,19 +232,45 @@ class VacationsController extends Controller
 
     public function edit($id)
     {
-        $vacation = Vacation::findOrFail($id);
-        
-        // Transform the data if needed
-        $vacation->target_fish = is_string($vacation->target_fish) ? json_decode($vacation->target_fish) : $vacation->target_fish;
-        $vacation->amenities = is_string($vacation->amenities) ? json_decode($vacation->amenities) : $vacation->amenities;
-        $vacation->equipment = is_string($vacation->equipment) ? json_decode($vacation->equipment) : $vacation->equipment;
-        $vacation->additional_services = is_string($vacation->additional_services) ? json_decode($vacation->additional_services) : $vacation->additional_services;
-        $vacation->included_services = is_string($vacation->included_services) ? json_decode($vacation->included_services) : $vacation->included_services;
-        $vacation->pets_allowed = $vacation->pets_allowed == "1" ? true : false;
-        $vacation->smoking_allowed = $vacation->smoking_allowed == "1" ? true : false;
-        $vacation->disability_friendly = $vacation->disability_friendly == "1" ? true : false;
-        
-        return response()->json($vacation);
+        try {
+            $vacation = Vacation::with(['accommodations', 'boats', 'packages', 'guidings'])->findOrFail($id);
+            
+            // Transform the data to include parsed dynamic_fields
+            $data = $vacation->toArray();
+            
+            // Parse dynamic fields for each relation
+            $data['accommodations'] = $vacation->accommodations->map(function($item) {
+                $item->dynamic_fields = json_decode($item->dynamic_fields, true);
+                return $item;
+            });
+            
+            $data['boats'] = $vacation->boats->map(function($item) {
+                $item->dynamic_fields = json_decode($item->dynamic_fields, true);
+                return $item;
+            });
+            
+            $data['packages'] = $vacation->packages->map(function($item) {
+                $item->dynamic_fields = json_decode($item->dynamic_fields, true);
+                return $item;
+            });
+            
+            $data['guidings'] = $vacation->guidings->map(function($item) {
+                $item->dynamic_fields = json_decode($item->dynamic_fields, true);
+                return $item;
+            });
+
+            // Debug log
+            \Log::info('Edit vacation data:', ['data' => $data]);
+
+            return response()->json($data);
+        } catch (\Exception $e) {
+            \Log::error('Error in vacation edit:', [
+                'error' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function update(Request $request, $id)
@@ -277,7 +304,8 @@ class VacationsController extends Controller
                                 'prices' => array_values($accommodation['prices'] ?? []),
                                 'living_area' => $accommodation['living_area'] ?? '',
                                 'bed_count' => $accommodation['bed_count'] ?? '',
-                                'facilities' => $accommodation['facilities'] ?? ''
+                                'facilities' => $accommodation['facilities'] ?? '',
+                                'min_rental_days' => $accommodation['min_rental_days'] ?? ''
                             ])
                         ]);
                     }
@@ -306,7 +334,8 @@ class VacationsController extends Controller
                             'description' => $package['description'],
                             'capacity' => $package['capacity'],
                             'dynamic_fields' => json_encode([
-                                'prices' => array_values($package['prices'] ?? [])
+                                'prices' => array_values($package['prices'] ?? []),
+                                'catering_info' => $package['catering_info'] ?? ''
                             ])
                         ]);
                     }

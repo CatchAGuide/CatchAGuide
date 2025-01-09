@@ -77,7 +77,6 @@
                             </div>
                         </div>
 
-                        <!-- Distances and Amenities -->
                         <div class="col-12 mb-4">
                             <h6 class="border-bottom pb-2">Location Features</h6>
                             <div class="row">
@@ -93,46 +92,13 @@
                                     <label class="form-label">Shopping Distance (km)</label>
                                     <input type="text" step="any" name="shopping_distance" class="form-control" required>
                                 </div>
-                                <div class="col-12 mb-3">
-                                    <label class="form-label">Amenities</label>
-                                    <input type="text" name="amenities" class="form-control tagify-input" required>
-                                </div>
                             </div>
                         </div>
 
                         <!-- Accommodation Details -->
                         <div class="col-12 mb-4">
                             <h6 class="border-bottom pb-2">Accommodation Details</h6>
-                            <div class="row">
-                                <div class="col-12 mb-3">
-                                    <label class="form-label">Accommodation Description</label>
-                                    <textarea name="accommodation_description" class="form-control" rows="3" required></textarea>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label">Catering Info</label>
-                                    <input type="text" name="catering_info" class="form-control" required>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label">Living Area (m²)</label>
-                                    <input type="text" step="any" name="living_area" class="form-control" required>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label">Bedroom Count</label>
-                                    <input type="text" name="bedroom_count" class="form-control" required>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label">Bed Count</label>
-                                    <input type="text" name="bed_count" class="form-control" required>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label">Max Persons</label>
-                                    <input type="text" name="max_persons" class="form-control" required>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label">Min Rental Days</label>
-                                    <input type="text" name="min_rental_days" class="form-control" required>
-                                </div>
-                                
+                            <div class="row">                                
                                 <!-- Checkboxes in a more organized layout -->
                                 <div class="col-12">
                                     <div class="d-flex gap-4">
@@ -161,41 +127,6 @@
                                     <label class="form-label">Target Fish</label>
                                     <input type="text" name="target_fish" class="form-control tagify-input" required>
                                 </div>
-                                <div class="col-12 mb-3">
-                                    <label class="form-label">Basic Fishing Description</label>
-                                    <textarea name="basic_fishing_description" class="form-control" rows="3" required></textarea>
-                                </div>
-                                <div class="col-12 mb-3">
-                                    <label class="form-label">Boat Description</label>
-                                    <textarea name="boat_description" class="form-control" rows="3"></textarea>
-                                </div>
-                                <div class="col-12 mb-3">
-                                    <label class="form-label">Equipment</label>
-                                    <input type="text" name="equipment" class="form-control tagify-input" required>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Pricing -->
-                        <div class="col-12 mb-4">
-                            <h6 class="border-bottom pb-2">Pricing</h6>
-                            <div class="row">
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label">Package Price per Person</label>
-                                    <input type="text" step="any" name="package_price_per_person" class="form-control" required>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label">Accommodation Price</label>
-                                    <input type="text" step="any" name="accommodation_price" class="form-control" required>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label">Boat Rental Price</label>
-                                    <input type="text" step="any" name="boat_rental_price" class="form-control">
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label">Guiding Price</label>
-                                    <input type="text" step="any" name="guiding_price" class="form-control">
-                                </div>
                             </div>
                         </div>
 
@@ -203,10 +134,10 @@
                         <div class="col-12 mb-4">
                             <h6 class="border-bottom pb-2">Services</h6>
                             <div class="row">
-                                <div class="col-12 mb-3">
+                                {{-- <div class="col-12 mb-3">
                                     <label class="form-label">Additional Services</label>
                                     <input type="text" name="additional_services" class="form-control tagify-input">
-                                </div>
+                                </div> --}}
                                 <div class="col-12 mb-3">
                                     <label class="form-label">Included Services</label>
                                     <input type="text" name="included_services" class="form-control tagify-input" required>
