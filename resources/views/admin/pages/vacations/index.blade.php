@@ -585,8 +585,6 @@
 
     // Add this function to handle editing
     function editVacation(id) {
-        console.log('Editing vacation:', id);
-
         // Change modal title
         document.getElementById('addVacationModalLabel').textContent = 'Edit Vacation';
         
@@ -613,8 +611,6 @@
         fetch(`/admin/vacations/${id}/edit`)
             .then(response => response.json())
             .then(data => {
-                console.log('Received data:', data);
-
                 // Helper function to safely set form values
                 const setFieldValue = (fieldName, value) => {
                     const field = form.querySelector(`[name="${fieldName}"]`);
@@ -659,14 +655,12 @@
 
                 // Load dynamic items
                 ['accommodations', 'boats', 'packages', 'guidings'].forEach(type => {
-                    console.log(`Loading ${type}:`, data[type]);
                     const container = document.getElementById(`${type.slice(0, -1)}-items`);
                     
                     if (container && data[type] && Array.isArray(data[type])) {
                         container.innerHTML = ''; // Clear existing items
                         
                         data[type].forEach((item, index) => {
-                            console.log(`Processing ${type} item:`, item);
                             
                             // Add the item template
                             container.insertAdjacentHTML('beforeend', getItemTemplate(type.slice(0, -1), index));
@@ -691,8 +685,6 @@
                                 const dynamicFields = typeof item.dynamic_fields === 'string' 
                                     ? JSON.parse(item.dynamic_fields) 
                                     : item.dynamic_fields;
-                                
-                                console.log(`Dynamic fields for ${type}:`, dynamicFields);
                                 
                                 // Set type-specific fields
                                 if (type === 'accommodations') {
@@ -873,7 +865,9 @@
 
     // Add this function to initialize CKEditor
     function initCKEditor() {
+        console.log('initCKEditor');
         if (document.querySelector('#surroundings_description')) {
+            console.log('initCKEditor');
             CKEDITOR.replace('surroundings_description');
         }
     }
