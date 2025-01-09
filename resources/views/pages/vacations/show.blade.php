@@ -429,45 +429,44 @@
             </div>
 
             <div class="tabs-container mb-5">
-            <div class="nav nav-tabs" id="guiding-tab" role="tablist">
-    @if (count($vacation->accomodations) !== 0)
-        <button class="nav-link {{ empty($activeTab) ? 'active' : '' }}" id="nav-accommodation-tab" data-bs-toggle="tab" data-bs-target="#accommodation" type="button" role="tab" aria-controls="nav-accommodation" aria-selected="{{ empty($activeTab) ? 'true' : 'false' }}">{{ translate('Accommodation') }}</button>
-        @php $activeTab = 'accommodation'; @endphp
-    @endif
+                <div class="nav nav-tabs" id="guiding-tab" role="tablist">
+                    @if (!empty($vacation->accommodations) && count($vacation->accommodations) > 0)
+                        <button class="nav-link {{ empty($activeTab) ? 'active' : '' }}" id="nav-accommodation-tab" data-bs-toggle="tab" data-bs-target="#accommodation" type="button" role="tab" aria-controls="nav-accommodation" aria-selected="{{ empty($activeTab) ? 'true' : 'false' }}">{{ translate('Accommodation') }}</button>
+                        @php $activeTab = 'accommodation'; @endphp
+                    @endif
 
-    @if (!empty($vacation->boats)) (count($vacation->boats) !== 0)
-        <button class="nav-link {{ $activeTab == 'boats' ? 'active' : '' }}" id="nav-boat-tab" data-bs-toggle="tab" data-bs-target="#boat" type="button" role="tab" aria-controls="nav-boat" aria-selected="{{ $activeTab == 'boats' ? 'true' : 'false' }}">{{ translate('Boat Information') }}</button>
-        @php $activeTab = 'boats'; @endphp
-    @endif
+                    @if (!empty($vacation->boats) && count($vacation->boats) > 0)
+                        <button class="nav-link {{ $activeTab == 'boats' ? 'active' : '' }}" id="nav-boat-tab" data-bs-toggle="tab" data-bs-target="#boat" type="button" role="tab" aria-controls="nav-boat" aria-selected="{{ $activeTab == 'boats' ? 'true' : 'false' }}">{{ translate('Boat Information') }}</button>
+                        @php $activeTab = 'boats'; @endphp
+                    @endif
 
-    @if (count($vacation->packages) !== 0)
-        <button class="nav-link {{ $activeTab == 'packages' ? 'active' : '' }}" id="nav-package-tab" data-bs-toggle="tab" data-bs-target="#package" type="button" role="tab" aria-controls="nav-package" aria-selected="{{ $activeTab == 'packages' ? 'true' : 'false' }}">{{ translate('Package') }}</button>
-        @php $activeTab = 'packages'; @endphp
-    @endif
+                    @if (!empty($vacation->packages) && count($vacation->packages) > 0)
+                        <button class="nav-link {{ $activeTab == 'packages' ? 'active' : '' }}" id="nav-package-tab" data-bs-toggle="tab" data-bs-target="#package" type="button" role="tab" aria-controls="nav-package" aria-selected="{{ $activeTab == 'packages' ? 'true' : 'false' }}">{{ translate('Package') }}</button>
+                        @php $activeTab = 'packages'; @endphp
+                    @endif
 
-    @if (count($vacation->guidings) !== 0)
-        <button class="nav-link {{ $activeTab == 'guidings' ? 'active' : '' }}" id="nav-guiding-tab" data-bs-toggle="tab" data-bs-target="#guiding" type="button" role="tab" aria-controls="nav-guiding" aria-selected="{{ $activeTab == 'guidings' ? 'true' : 'false' }}">{{ translate('Guiding') }}</button>
-    @endif
-</div>
-
+                    @if (!empty($vacation->guidings) && count($vacation->guidings) > 0)
+                        <button class="nav-link {{ $activeTab == 'guidings' ? 'active' : '' }}" id="nav-guiding-tab" data-bs-toggle="tab" data-bs-target="#guiding" type="button" role="tab" aria-controls="nav-guiding" aria-selected="{{ $activeTab == 'guidings' ? 'true' : 'false' }}">{{ translate('Guiding') }}</button>
+                    @endif
+                </div>
     
                 <div class="tab-content mb-5" id="guidings-tabs">
                     @php
                         $sections = [
                             'accommodation' => [
-                                'items' => $vacation->accommodations,
+                                'items' => $vacation->accommodations ?? [],
                                 'title' => 'Accommodation'
                             ],
                             'boat' => [
-                                'items' => $vacation->boats,
+                                'items' => $vacation->boats ?? [],
                                 'title' => 'Boat Information'
                             ],
                             'package' => [
-                                'items' => $vacation->packages,
+                                'items' => $vacation->packages ?? [],
                                 'title' => 'Package'
                             ],
                             'guiding' => [
-                                'items' => $vacation->guidings,
+                                'items' => $vacation->guidings ?? [],
                                 'title' => 'Guiding'
                             ]
                         ];
