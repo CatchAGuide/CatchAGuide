@@ -749,6 +749,9 @@
                 }
 
                 // Update CKEditor content
+                if (CKEDITOR.instances.surroundings_description) {
+                    CKEDITOR.instances.surroundings_description.setData(data.surroundings_description || '');
+                }
 
                 // Restore modal state
                 if (modal) {
@@ -787,6 +790,11 @@
         
         // Reset image preview
         document.getElementById('imagePreview').innerHTML = '';
+
+        // Reset CKEditor
+        if (CKEDITOR.instances.surroundings_description) {
+            CKEDITOR.instances.surroundings_description.setData('');
+        }
     });
 
     // Add this to your editVacation function
