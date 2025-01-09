@@ -10,7 +10,7 @@ class VacationAccommodation extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['vacation_id', 'description', 'capacity', 'price', 'dynamic_fields'];
+    protected $fillable = ['vacation_id', 'title', 'description', 'capacity', 'price', 'dynamic_fields'];
 
     public function vacation(): BelongsTo
     {

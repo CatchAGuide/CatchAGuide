@@ -110,7 +110,7 @@ class VacationsController extends Controller
 
     public function show($id)
     {
-        $vacation = Vacation::find($id)->with('accommodations', 'boats', 'packages', 'guidings')->first();
+        $vacation = Vacation::where('id',$id)->with('accommodations', 'boats', 'packages', 'guidings')->first();
         $vacation->gallery = json_decode($vacation->gallery, true);
         
         $sameCountries = Vacation::where('id', '!=', $vacation->id)

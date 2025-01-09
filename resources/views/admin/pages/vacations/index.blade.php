@@ -146,12 +146,7 @@
 
 @section('js_after')
 <script src="https://unpkg.com/@yaireo/tagify"></script>
-<script src="//cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
-
 <script>
-    
-    CKEDITOR.replace('surroundings_description');
-    // Define initAutocomplete function before loading the Google Maps API
     function initAutocomplete() {
         const locationInput = document.querySelector('#location');
         
@@ -219,18 +214,22 @@
 
     // Add modal event listener to reinitialize autocomplete when modal opens
     document.querySelector('#addVacationModal').addEventListener('shown.bs.modal', function () {
+        CKEDITOR.replace('surroundings_description');
+        initializeDynamicCKEditors();
         
         // Initialize add item buttons
         const addButtons = document.querySelectorAll('.add-item');
-        
         addButtons.forEach(button => {
-            // Remove existing click listeners to prevent duplicates
             button.removeEventListener('click', addItemHandler);
-            // Add new click listener
-            button.addEventListener('click', addItemHandler);
+            button.addEventListener('click', function(e) {
+                addItemHandler.call(this, e);
+                // Initialize CKEditor for newly added textarea
+                setTimeout(() => {
+                    initializeDynamicCKEditors();
+                }, 100);
+            });
         });
 
-        // Only initialize if Google Maps API is loaded
         if (window.google && window.google.maps) {
             initAutocomplete();
         }
@@ -329,10 +328,22 @@
                         </button>
                     </div>
 
+                    <!-- Title field (new) -->
+                    <div class="mb-3">
+                        <label class="form-label">Title (Optional)</label>
+                        <input type="text" 
+                               name="${type}s[${index}][title]" 
+                               class="form-control" 
+                               placeholder="Enter title">
+                    </div>
+
                     <!-- Description -->
                     <div class="mb-4">
                         <label class="form-label">Description</label>
-                        <textarea name="${type}s[${index}][description]" class="form-control" rows="3" required></textarea>
+                        <textarea name="${type}s[${index}][description]" 
+                                  class="form-control ckeditor-dynamic" 
+                                  rows="3" 
+                                  required></textarea>
                     </div>
 
                     <!-- Type-specific fields -->
@@ -808,9 +819,22 @@
                     data[`${type}s`].forEach((item, index) => {
                         container.insertAdjacentHTML('beforeend', getItemTemplate(type, index));
                         
-                        // Fill in the values
+                        // Get the newly added card
                         const card = container.lastElementChild;
-                        card.querySelector('textarea[name$="[description]"]').value = item.description;
+                        
+                        // Set title if exists
+                        if (item.title) {
+                            card.querySelector(`input[name="${type}s[${index}][title]"]`).value = item.title;
+                        }
+                        
+                        // Initialize CKEditor and set content
+                        const textarea = card.querySelector(`textarea[name="${type}s[${index}][description]"]`);
+                        CKEDITOR.replace(textarea);
+                        setTimeout(() => {
+                            CKEDITOR.instances[textarea.id].setData(item.description || '');
+                        }, 100);
+                        
+                        // Fill in the values
                         card.querySelector('input[name$="[capacity]"]').value = item.capacity;
                         
                         // Parse dynamic_fields
@@ -863,6 +887,16 @@
         
         // Clear the hidden input storing existing images
         document.getElementById('existingGallery').value = '';
+    }
+
+    // Add function to initialize CKEditor for dynamic textareas
+    function initializeDynamicCKEditors() {
+        document.querySelectorAll('.ckeditor-dynamic').forEach(textarea => {
+            if (!textarea.classList.contains('ckeditor-initialized')) {
+                CKEDITOR.replace(textarea);
+                textarea.classList.add('ckeditor-initialized');
+            }
+        });
     }
 </script>
 @endsection

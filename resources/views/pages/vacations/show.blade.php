@@ -477,7 +477,7 @@
                                         <div class="row">
                                             <!-- Description Column -->
                                             <div class="col-12 col-lg-7 mb-3 mb-lg-0">
-                                                <h6 class="card-title mb-3">{{ translate( $sectionKey . ' ' . ($itemIndex + 1)) }}</h6>
+                                                <h6 class="card-title mb-3">{{ !empty($item->title) ? $item->title : translate($sectionKey . ' ' . ($itemIndex + 1)) }}</h6>
                                                 {!! $item->description !!}
                                             </div>
 
@@ -577,7 +577,7 @@
                                             <div class="row">
                                                 <!-- Description Column -->
                                                 <div class="col-12 col-lg-7 mb-3 mb-lg-0">
-                                                    <h6 class="card-title mb-3">{{ translate($sectionKey . ' ' . ($itemIndex + 1)) }}</h6>
+                                                    <h6 class="card-title mb-3">{{ !empty($item->title) ? $item->title : translate($sectionKey . ' ' . ($itemIndex + 1)) }}</h6>
                                                     {!! $item->description !!}
                                                 </div>
 
@@ -796,9 +796,6 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
     function initMap() {
-        console.log('initMap');
-        console.log('{{ $vacation->latitude }}');
-        console.log('{{ $vacation->longitude }}');
         var location = { lat: {{ $vacation->latitude ?? 41.40338 }}, lng: {{ $vacation->longitude ?? 2.17403 }} }; // Example coordinates
         var map = new google.maps.Map(document.getElementById('map'), {
             zoom: 10,

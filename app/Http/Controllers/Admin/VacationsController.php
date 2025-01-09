@@ -149,6 +149,7 @@ class VacationsController extends Controller
                 if ($request->has('accommodations')) {
                     foreach ($request->accommodations as $accommodation) {
                         $vacation->accommodations()->create([
+                            'title' => $accommodation['title'] ?? null,
                             'description' => $accommodation['description'],
                             'capacity' => $accommodation['capacity'],
                             'dynamic_fields' => json_encode([
@@ -166,6 +167,7 @@ class VacationsController extends Controller
                 if ($request->has('boats')) {
                     foreach ($request->boats as $boat) {
                         $vacation->boats()->create([
+                            'title' => $boat['title'] ?? null,
                             'description' => $boat['description'],
                             'capacity' => $boat['capacity'],
                             'dynamic_fields' => json_encode([
@@ -180,6 +182,7 @@ class VacationsController extends Controller
                 if ($request->has('packages')) {
                     foreach ($request->packages as $package) {
                         $vacation->packages()->create([
+                            'title' => $package['title'] ?? null,
                             'description' => $package['description'],
                             'capacity' => $package['capacity'],
                             'dynamic_fields' => json_encode([
@@ -193,6 +196,7 @@ class VacationsController extends Controller
                 if ($request->has('guidings')) {
                     foreach ($request->guidings as $guiding) {
                         $vacation->guidings()->create([
+                            'title' => $guiding['title'] ?? null,
                             'description' => $guiding['description'],
                             'capacity' => $guiding['capacity'],
                             'dynamic_fields' => json_encode([
@@ -308,6 +312,7 @@ class VacationsController extends Controller
                 if ($request->has('accommodations')) {
                     foreach ($request->accommodations as $accommodation) {
                         $vacation->accommodations()->create([
+                            'title' => $accommodation['title'] ?? null,
                             'description' => $accommodation['description'],
                             'capacity' => $accommodation['capacity'],
                             'dynamic_fields' => json_encode([
@@ -326,6 +331,7 @@ class VacationsController extends Controller
                 if ($request->has('boats')) {
                     foreach ($request->boats as $boat) {
                         $vacation->boats()->create([
+                            'title' => $boat['title'] ?? null,
                             'description' => $boat['description'],
                             'capacity' => $boat['capacity'],
                             'dynamic_fields' => json_encode([
@@ -341,6 +347,7 @@ class VacationsController extends Controller
                 if ($request->has('packages')) {
                     foreach ($request->packages as $package) {
                         $vacation->packages()->create([
+                            'title' => $package['title'] ?? null,
                             'description' => $package['description'],
                             'capacity' => $package['capacity'],
                             'dynamic_fields' => json_encode([
@@ -356,6 +363,7 @@ class VacationsController extends Controller
                 if ($request->has('guidings')) {
                     foreach ($request->guidings as $guiding) {
                         $vacation->guidings()->create([
+                            'title' => $guiding['title'] ?? null,
                             'description' => $guiding['description'],
                             'capacity' => $guiding['capacity'],
                             'dynamic_fields' => json_encode([
