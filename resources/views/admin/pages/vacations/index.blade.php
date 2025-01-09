@@ -146,6 +146,7 @@
 
 @section('js_after')
 <script src="https://unpkg.com/@yaireo/tagify"></script>
+<script src="//cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
 
 <script>
     // Define initAutocomplete function before loading the Google Maps API
@@ -549,7 +550,7 @@
         div.style.marginBottom = '10px';
         
         const img = document.createElement('img');
-        img.src = isExisting ? `/storage/${src}` : src;
+        img.src = isExisting ? `/${src}` : src;
         img.style.width = '100%';
         img.style.height = '100%';
         img.style.objectFit = 'cover';
@@ -753,6 +754,11 @@
                     });
                 }
 
+                // Update CKEditor content
+                if (CKEDITOR.instances.surroundings_description) {
+                    CKEDITOR.instances.surroundings_description.setData(data.surroundings_description || '');
+                }
+
                 // Restore modal state
                 if (modal) {
                     modal.querySelector('.modal-content').style.opacity = '1';
@@ -790,6 +796,11 @@
         
         // Reset image preview
         document.getElementById('imagePreview').innerHTML = '';
+
+        // Reset CKEditor
+        if (CKEDITOR.instances.surroundings_description) {
+            CKEDITOR.instances.surroundings_description.setData('');
+        }
     });
 
     // Add this to your editVacation function
@@ -859,5 +870,17 @@
         // Clear the hidden input storing existing images
         document.getElementById('existingGallery').value = '';
     }
+
+    // Add this function to initialize CKEditor
+    function initCKEditor() {
+        if (document.querySelector('#surroundings_description')) {
+            CKEDITOR.replace('surroundings_description');
+        }
+    }
+
+    // Add this near the top of your script section
+    document.addEventListener('DOMContentLoaded', function() {
+        initCKEditor();
+    });
 </script>
 @endsection

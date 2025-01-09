@@ -70,7 +70,7 @@
                                 </div>
                                 <div class="col-12 mb-3">
                                     <label class="form-label">Surroundings Description</label>
-                                    <textarea name="surroundings_description" class="form-control" rows="3" required></textarea>
+                                    <textarea name="surroundings_description" id="surroundings_description" class="form-control" rows="3" required></textarea>
                                 </div>
                                 
                                 <div class="col-12 mb-3">
