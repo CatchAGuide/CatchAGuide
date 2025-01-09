@@ -124,4 +124,8 @@ class Vacation extends Model
             'type' => $geocodeResult['types']
         ];
     }
+
+    public function getLowestPrice(){
+        return 0;
+    }
 }

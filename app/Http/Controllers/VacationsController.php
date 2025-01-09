@@ -141,9 +141,4 @@ class VacationsController extends Controller
 
         return $nearestlisting;
     }
-
-    private function getLowestPrice(){
-        // $lowestPrice = $vacation->lowest_price;
-        // return $lowestPrice;
-    }
 }
