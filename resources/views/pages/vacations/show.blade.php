@@ -677,7 +677,7 @@
                             </h5>    
                             <small class="crop-text-1 small-text text-muted">{{ $same_country->location }}</small>
                             <p class="fw-bold text-muted">
-                                {{-- <span>@lang('message.from') {{ $same_country->getLowestPrice() }}€</span> --}}
+                                <span>@lang('message.from') {{ $same_country->getLowestPrice() }}€</span>
                             </p>
                         </div>
                     </div>

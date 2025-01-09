@@ -517,30 +517,69 @@
         const preview = document.getElementById('imagePreview');
         preview.innerHTML = '';
 
+        // First, check if there are existing images in the hidden input
+        const existingGallery = document.getElementById('existingGallery').value;
+        if (existingGallery) {
+            const existingImages = JSON.parse(existingGallery);
+            existingImages.forEach(imagePath => {
+                addImagePreview(imagePath, true);
+            });
+        }
+
+        // Then handle any newly selected files
         if (input.files) {
             Array.from(input.files).forEach(file => {
                 const reader = new FileReader();
-                
                 reader.onload = function(e) {
-                    const div = document.createElement('div');
-                    div.style.width = '100px';
-                    div.style.height = '100px';
-                    div.style.position = 'relative';
-                    
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.style.width = '100%';
-                    img.style.height = '100%';
-                    img.style.objectFit = 'cover';
-                    img.style.borderRadius = '4px';
-                    
-                    div.appendChild(img);
-                    preview.appendChild(div);
+                    addImagePreview(e.target.result, false);
                 }
-                
                 reader.readAsDataURL(file);
             });
         }
+    }
+
+    function addImagePreview(src, isExisting) {
+        const preview = document.getElementById('imagePreview');
+        
+        const div = document.createElement('div');
+        div.className = 'position-relative';
+        div.style.width = '100px';
+        div.style.height = '100px';
+        div.style.marginRight = '10px';
+        div.style.marginBottom = '10px';
+        
+        const img = document.createElement('img');
+        img.src = isExisting ? `/storage/${src}` : src;
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'cover';
+        img.style.borderRadius = '4px';
+        
+        // Add delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0';
+        deleteBtn.innerHTML = '×';
+        deleteBtn.style.padding = '0 6px';
+        deleteBtn.onclick = function(e) {
+            e.preventDefault();
+            div.remove();
+            updateExistingGallery();
+        };
+        
+        div.appendChild(img);
+        div.appendChild(deleteBtn);
+        
+        if (isExisting) {
+            div.dataset.path = src;
+        }
+        
+        preview.appendChild(div);
+    }
+
+    function updateExistingGallery() {
+        const preview = document.getElementById('imagePreview');
+        const existingImages = Array.from(preview.querySelectorAll('[data-path]')).map(div => div.dataset.path);
+        document.getElementById('existingGallery').value = JSON.stringify(existingImages);
     }
 
     // Add this function to handle editing
@@ -695,6 +734,25 @@
                     }
                 });
 
+                // Handle gallery images
+                if (data.gallery) {
+                    let galleryImages;
+                    try {
+                        galleryImages = typeof data.gallery === 'string' ? JSON.parse(data.gallery) : data.gallery;
+                    } catch (e) {
+                        galleryImages = [];
+                    }
+                    
+                    document.getElementById('existingGallery').value = JSON.stringify(galleryImages);
+                    
+                    // Clear and reload image preview
+                    const preview = document.getElementById('imagePreview');
+                    preview.innerHTML = '';
+                    galleryImages.forEach(imagePath => {
+                        addImagePreview(imagePath, true);
+                    });
+                }
+
                 // Restore modal state
                 if (modal) {
                     modal.querySelector('.modal-content').style.opacity = '1';
@@ -787,6 +845,19 @@
                 }
             }
         });
+    }
+
+    function removeAllImages() {
+        // Clear the preview container
+        const preview = document.getElementById('imagePreview');
+        preview.innerHTML = '';
+        
+        // Clear the file input
+        const fileInput = document.querySelector('input[name="gallery[]"]');
+        fileInput.value = '';
+        
+        // Clear the hidden input storing existing images
+        document.getElementById('existingGallery').value = '';
     }
 </script>
 @endsection

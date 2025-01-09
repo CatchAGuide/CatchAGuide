@@ -284,7 +284,17 @@ class VacationsController extends Controller
             // Handle gallery images
             if ($request->hasFile('gallery')) {
                 $galleryImages = $this->saveImages($request);
+                
+                // Merge with existing images if any
+                if ($request->has('existing_gallery')) {
+                    $existingGallery = json_decode($request->existing_gallery, true) ?? [];
+                    $galleryImages = array_merge($existingGallery, $galleryImages);
+                }
+                
                 $formattedData['gallery'] = json_encode($galleryImages);
+            } else if ($request->has('existing_gallery')) {
+                // Only update with existing gallery
+                $formattedData['gallery'] = $request->existing_gallery;
             }
 
             DB::beginTransaction();

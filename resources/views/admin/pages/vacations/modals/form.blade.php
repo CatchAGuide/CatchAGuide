@@ -46,8 +46,16 @@
                             <div class="row">
                                 <div class="col-12 mb-3">
                                     <label class="form-label">Gallery Images</label>
-                                    <input type="file" name="gallery[]" class="form-control" multiple accept="image/*" required onchange="previewImages(this)">
-                                    <div id="imagePreview" class="d-flex flex-wrap gap-2 mt-2"></div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <input type="file" name="gallery[]" class="form-control" multiple accept="image/*" onchange="previewImages(this)">
+                                        <button type="button" class="btn btn-danger ms-2" onclick="removeAllImages()">
+                                            <i class="fas fa-trash"></i> Remove All
+                                        </button>
+                                    </div>
+                                    <div id="imagePreview" class="d-flex flex-wrap gap-2 mt-2">
+                                        <!-- Existing images will be loaded here -->
+                                    </div>
+                                    <input type="hidden" name="existing_gallery" id="existingGallery">
                                 </div>
                             </div>
                         </div>
