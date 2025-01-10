@@ -156,6 +156,17 @@ class VacationsController extends Controller
                     }
                 }
 
+                // Handle Extras
+                if ($request->has('extras')) {
+                    foreach ($request->extras as $extra) {
+                        $vacation->extras()->create([
+                            'description' => $extra['description'],
+                            'price' => $extra['price'],
+                            'type' => $extra['price_type']
+                        ]);
+                    }
+                }
+
                 DB::commit();
 
                 return redirect()
@@ -319,6 +330,18 @@ class VacationsController extends Controller
                             'dynamic_fields' => json_encode([
                                 'prices' => array_values($guiding['prices'] ?? [])
                             ])
+                        ]);
+                    }
+                }
+
+                // Update Extras
+                $vacation->extras()->delete(); // Remove existing
+                if ($request->has('extras')) {
+                    foreach ($request->extras as $extra) {
+                        $vacation->extras()->create([
+                            'description' => $extra['description'],
+                            'price' => $extra['price'],
+                            'type' => $extra['price_type']
                         ]);
                     }
                 }

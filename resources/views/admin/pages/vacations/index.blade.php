@@ -311,6 +311,36 @@
             </div>
         `;
 
+        const extraFields = `
+            <div class="row mb-3">
+                <!-- Description -->
+                <div class="col-12 mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea name="${type}s[${index}][description]" 
+                              class="form-control" 
+                              rows="3"
+                              placeholder="Enter description"></textarea>
+                </div>
+                <!-- Price and Price Type -->
+                <div class="col-md-6">
+                    <label class="form-label">Price</label>
+                    <input type="number" 
+                           name="${type}s[${index}][price]" 
+                           class="form-control" 
+                           step="0.01"
+                           min="0"
+                           placeholder="Enter price">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Price Type</label>
+                    <select name="${type}s[${index}][price_type]" class="form-control">
+                        <option value="per_person">Per Person</option>
+                        <option value="overall">Overall</option>
+                    </select>
+                </div>
+            </div>
+        `;
+
         return `
             <div class="card mb-3 item-card">
                 <div class="card-body">
@@ -322,48 +352,50 @@
                         </button>
                     </div>
 
-                    <!-- Title field (new) -->
-                    <div class="mb-3">
-                        <label class="form-label">Title (Optional)</label>
-                        <input type="text" 
-                               name="${type}s[${index}][title]" 
-                               class="form-control" 
-                               placeholder="Enter title">
-                    </div>
+                    ${type === 'extra' ? extraFields : `
+                        <!-- Title field -->
+                        <div class="mb-3">
+                            <label class="form-label">Title (Optional)</label>
+                            <input type="text" 
+                                   name="${type}s[${index}][title]" 
+                                   class="form-control" 
+                                   placeholder="Enter title">
+                        </div>
 
-                    <!-- Description -->
-                    <div class="mb-4">
-                        <label class="form-label">Description</label>
-                        <textarea name="${type}s[${index}][description]" 
-                                  class="form-control ckeditor-dynamic" 
-                                  rows="3"></textarea>
-                    </div>
+                        <!-- Description -->
+                        <div class="mb-4">
+                            <label class="form-label">Description</label>
+                            <textarea name="${type}s[${index}][description]" 
+                                      class="form-control ckeditor-dynamic" 
+                                      rows="3"></textarea>
+                        </div>
 
-                    <!-- Type-specific fields -->
-                    ${type === 'accommodation' ? accommodationFields : ''}
-                    ${type === 'boat' ? boatFields : ''}
-                    ${type === 'package' ? packageFields : ''}
+                        <!-- Type-specific fields -->
+                        ${type === 'accommodation' ? accommodationFields : ''}
+                        ${type === 'boat' ? boatFields : ''}
+                        ${type === 'package' ? packageFields : ''}
 
-                    <!-- Capacity Input -->
-                    <div class="mb-3">
-                        <label class="form-label">Capacity (persons)</label>
-                        <input type="number" 
-                               name="${type}s[${index}][capacity]" 
-                               class="form-control capacity-input"
-                               min="1" 
-                               max="20">
-                        <small class="text-muted">Maximum 20 persons</small>
-                    </div>
+                        <!-- Capacity Input -->
+                        <div class="mb-3">
+                            <label class="form-label">Capacity (persons)</label>
+                            <input type="number" 
+                                   name="${type}s[${index}][capacity]" 
+                                   class="form-control capacity-input"
+                                   min="1" 
+                                   max="20">
+                            <small class="text-muted">Maximum 20 persons</small>
+                        </div>
 
-                    <!-- Dynamic Price Inputs Container -->
-                    <div class="price-inputs-container mb-3">
-                        <!-- Price inputs will be dynamically added here -->
-                    </div>
+                        <!-- Dynamic Price Inputs Container -->
+                        <div class="price-inputs-container mb-3">
+                            <!-- Price inputs will be dynamically added here -->
+                        </div>
 
-                    <!-- Total Price Display -->
-                    <div class="total-price-display text-end">
-                        <h6>Total Price: <span class="total-price">0.00</span> €</h6>
-                    </div>
+                        <!-- Total Price Display -->
+                        <div class="total-price-display text-end">
+                            <h6>Total Price: <span class="total-price">0.00</span> €</h6>
+                        </div>
+                    `}
                 </div>
             </div>
         `;

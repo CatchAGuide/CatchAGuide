@@ -142,10 +142,6 @@
                         <div class="col-12 mb-4">
                             <h6 class="border-bottom pb-2">Services</h6>
                             <div class="row">
-                                {{-- <div class="col-12 mb-3">
-                                    <label class="form-label">Additional Services</label>
-                                    <input type="text" name="additional_services" class="form-control tagify-input">
-                                </div> --}}
                                 <div class="col-12 mb-3">
                                     <label class="form-label">Included Services</label>
                                     <input type="text" name="included_services" class="form-control tagify-input">
@@ -157,6 +153,19 @@
                         <div class="col-12 mb-4">
                             <h6 class="border-bottom pb-2">Additional Options</h6>
                             
+                            <!-- Extras Section -->
+                            <div class="section-wrapper mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0">Extras</h6>
+                                    <button type="button" class="btn btn-sm btn-primary add-item" data-type="extra">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                                <div id="extra-items" class="items-container">
+                                    <!-- Dynamic items will be added here -->
+                                </div>
+                            </div>
+
                             <!-- Accommodations Section -->
                             <div class="section-wrapper mb-4">
                                 <div class="d-flex justify-content-between align-items-center mb-3">

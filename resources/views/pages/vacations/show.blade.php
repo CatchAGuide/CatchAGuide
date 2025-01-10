@@ -723,6 +723,52 @@
                     </div>
                 @endforeach
             </div>
+
+            <!-- Description Section -->
+            @if ($vacation->included_services || $vacation->extras)
+            <div class="description-container card p-3 mb-5">
+                <div class="description-list">
+                    @if ($vacation->included_services)
+                    <div class="description-item">
+                        <div class="header-container">
+                            <span>{{ translate('Included Services')}}</span>
+                        </div>
+                        <p class="text-wrapper">
+                            {!! implode(', ', json_decode($vacation->included_services)) !!}
+                        </p>
+                    </div>
+                    @endif
+                    @if ($vacation->extras)
+                    <div class="description-item">
+                        <div class="header-container">
+                            <span>{{ translate('Extras')}}</span>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>{{ translate('Description') }}</th>
+                                        <th>{{ translate('Price') }}</th>
+                                        <th>{{ translate('Price Type') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($vacation->extras as $itemIndex => $item)
+                                        <tr>
+                                            <td>{{ $item->description }}</td>
+                                            <td>€{{ number_format($item->price, 2, ',', '.') }}</td>
+                                            <td>{{ str_replace('_', ' ', strtoupper($item->type)) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+            @endif
         </div>
 
         <!-- Description Section -->  

@@ -36,6 +36,11 @@ class Vacation extends Model
         return $this->hasMany(VacationGuiding::class);
     }
 
+    public function extras(): HasMany
+    {
+        return $this->hasMany(VacationExtra::class);
+    }
+
     public static function locationFilter(string $location, ?int $radius = null, $placeLat = null, $placeLng = null )
     {
         $locationParts = self::parseLocation($location);
