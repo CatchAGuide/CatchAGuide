@@ -58,7 +58,7 @@ class VacationsController extends Controller
             }
 
             // Handle boolean fields
-            $booleanFields = ['pets_allowed', 'smoking_allowed', 'disability_friendly', 'status'];
+            $booleanFields = ['pets_allowed', 'smoking_allowed', 'disability_friendly'];
             foreach ($booleanFields as $field) {
                 $data[$field] = isset($data[$field]) && ($data[$field] === '1' || $data[$field] === true);
             }

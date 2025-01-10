@@ -233,7 +233,7 @@
             <div class="gallery">
                 @php
                 $galleryImages = $vacation->gallery ?? [];
-                $thumbnailPath = $vacation->thumbnail_path ?? 'images/placeholder_guide.jpg';
+                $thumbnailPath = $vacation->gallery[0] ?? 'images/placeholder_guide.jpg';
                 $finalImages = [];
                 $overallImages = [];
                 $hiddenCount = 0;
@@ -292,7 +292,7 @@
             <div class="gallery-mobile">
                 @php
                 $galleryImages = $vacation->gallery ?? '[]';
-                $thumbnailPath = $vacation->thumbnail_path ?? 'images/placeholder_guide.jpg';
+                $thumbnailPath = $vacation->gallery[0] ?? 'images/placeholder_guide.jpg';
                 $finalImages = [];
                 $overallImages = [];
                 
