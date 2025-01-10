@@ -239,10 +239,10 @@
                 $hiddenCount = 0;
 
                 // Check if thumbnail exists
-                if (file_exists(public_path($thumbnailPath))) {
-                    $finalImages[] = asset($thumbnailPath);
-                    $overallImages[] = asset($thumbnailPath);
-                }
+                // if (file_exists(public_path($thumbnailPath))) {
+                //     $finalImages[] = asset($thumbnailPath);
+                //     $overallImages[] = asset($thumbnailPath);
+                // }
 
                 // Filter and validate gallery images
                 if ($galleryImages) {
@@ -298,10 +298,10 @@
                 
 
                 // Validate thumbnail exists
-                if (file_exists(public_path($thumbnailPath))) {
-                    $finalImages[] = asset($thumbnailPath);
-                    $overallImages[] = asset($thumbnailPath);
-                }
+                // if (file_exists(public_path($thumbnailPath))) {
+                //     $finalImages[] = asset($thumbnailPath);
+                //     $overallImages[] = asset($thumbnailPath);
+                // }
                 
                 // Filter gallery images that exist
                 if ($galleryImages) {
