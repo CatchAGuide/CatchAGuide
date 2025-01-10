@@ -66,21 +66,21 @@
                             <div class="row">
                                 <div class="col-12 mb-3">
                                     <label class="form-label">Best Travel Times</label>
-                                    <input type="text" name="best_travel_times" class="form-control" required>
+                                    <input type="text" name="best_travel_times" class="form-control">
                                 </div>
                                 <div class="col-12 mb-3">
                                     <label class="form-label">Surroundings Description</label>
-                                    <textarea id="surroundings_description" cols="30" rows="10" class="form-control" name="surroundings_description" required></textarea>
+                                    <textarea id="surroundings_description" cols="30" rows="10" class="form-control" name="surroundings_description"></textarea>
                                 </div>
                                 
                                 <div class="col-12 mb-3">
                                     <label class="form-label">Travel Included</label>
-                                    <input type="text" name="travel_included" class="form-control" required>
+                                    <input type="text" name="travel_included" class="form-control">
                                 </div>
                                 
                                 <div class="col-12 mb-3">
                                     <label class="form-label">Travel Options</label>
-                                    <input type="text" name="travel_options" class="form-control" required>
+                                    <input type="text" name="travel_options" class="form-control">
                                 </div>
                             </div>
                         </div>
@@ -90,15 +90,15 @@
                             <div class="row">
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">Airport Distance (km)</label>
-                                    <input type="text" step="any" name="airport_distance" class="form-control" required>
+                                    <input type="text" step="any" name="airport_distance" class="form-control">
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">Water Distance (km)</label>
-                                    <input type="text" step="any" name="water_distance" class="form-control" required>
+                                    <input type="text" step="any" name="water_distance" class="form-control">
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">Shopping Distance (km)</label>
-                                    <input type="text" step="any" name="shopping_distance" class="form-control" required>
+                                    <input type="text" step="any" name="shopping_distance" class="form-control">
                                 </div>
                             </div>
                         </div>
@@ -133,7 +133,7 @@
                             <div class="row">
                                 <div class="col-12 mb-3">
                                     <label class="form-label">Target Fish</label>
-                                    <input type="text" name="target_fish" class="form-control tagify-input" required>
+                                    <input type="text" name="target_fish" class="form-control tagify-input">
                                 </div>
                             </div>
                         </div>
@@ -148,7 +148,7 @@
                                 </div> --}}
                                 <div class="col-12 mb-3">
                                     <label class="form-label">Included Services</label>
-                                    <input type="text" name="included_services" class="form-control tagify-input" required>
+                                    <input type="text" name="included_services" class="form-control tagify-input">
                                 </div>
                             </div>
                         </div>

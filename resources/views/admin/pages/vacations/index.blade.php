@@ -260,32 +260,28 @@
                     <input type="text" 
                            name="${type}s[${index}][living_area]" 
                            class="form-control" 
-                           placeholder="e.g., 120 m²" 
-                           required>
+                           placeholder="e.g., 120 m²">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Bed Count</label>
                     <input type="text" 
                            name="${type}s[${index}][bed_count]" 
                            class="form-control" 
-                           placeholder="e.g., 2 double beds, 1 single" 
-                           required>
+                           placeholder="e.g., 2 double beds, 1 single">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Facilities</label>
                     <input type="text" 
                            name="${type}s[${index}][facilities]" 
                            class="form-control" 
-                           placeholder="e.g., WiFi, TV, Kitchen" 
-                           required>
+                           placeholder="e.g., WiFi, TV, Kitchen">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Min Rental Days</label>
                     <input type="text" 
                            name="${type}s[${index}][min_rental_days]" 
                            class="form-control" 
-                           placeholder="e.g., 3 days" 
-                           required>
+                           placeholder="e.g., 3 days">
                 </div>
             </div>
         `;
@@ -298,8 +294,7 @@
                     <input type="text" 
                            name="${type}s[${index}][facilities]" 
                            class="form-control" 
-                           placeholder="e.g., GPS, Fish Finder, Life Jackets" 
-                           required>
+                           placeholder="e.g., GPS, Fish Finder, Life Jackets">
                 </div>
             </div>
         `;
@@ -311,8 +306,7 @@
                     <input type="text" 
                            name="${type}s[${index}][catering_info]" 
                            class="form-control" 
-                           placeholder="e.g., Breakfast, Lunch, Dinner" 
-                           required>
+                           placeholder="e.g., Breakfast, Lunch, Dinner">
                 </div>
             </div>
         `;
@@ -342,8 +336,7 @@
                         <label class="form-label">Description</label>
                         <textarea name="${type}s[${index}][description]" 
                                   class="form-control ckeditor-dynamic" 
-                                  rows="3" 
-                                  required></textarea>
+                                  rows="3"></textarea>
                     </div>
 
                     <!-- Type-specific fields -->
@@ -356,8 +349,7 @@
                         <label class="form-label">Capacity (persons)</label>
                         <input type="number" 
                                name="${type}s[${index}][capacity]" 
-                               class="form-control capacity-input" 
-                               required 
+                               class="form-control capacity-input"
                                min="1" 
                                max="20">
                         <small class="text-muted">Maximum 20 persons</small>
@@ -397,8 +389,7 @@
                         <div class="input-group">
                             <input type="number" 
                                    name="${type}[${index}][prices][${i}]" 
-                                   class="form-control individual-price" 
-                                   required 
+                                   class="form-control individual-price"
                                    min="0" 
                                    step="0.01" 
                                    placeholder="0.00">
@@ -767,6 +758,22 @@
                 // Restore modal state
                 if (modal) {
                     modal.querySelector('.modal-content').style.opacity = '1';
+                }
+
+                // Clear location field if coordinates are null
+                const locationField = form.querySelector('#location');
+                if (locationField) {
+                    if (!data.latitude || !data.longitude) {
+                        locationField.value = '';
+                        
+                        // Also clear related hidden fields
+                        ['city', 'country', 'region', 'latitude', 'longitude'].forEach(field => {
+                            const hiddenField = form.querySelector(`input[name="${field}"]`);
+                            if (hiddenField) {
+                                hiddenField.value = '';
+                            }
+                        });
+                    }
                 }
             })
             .catch(error => {
