@@ -15,7 +15,21 @@
                         </div>
                         <div class="mb-3">
                             <label>{{ translate('Duration') }} <span class="required-field">*</span></label>
-                            <input type="number" class="form-control required-input" name="duration" required>
+                            <select class="form-control required-input" name="duration_preset" id="duration_preset" required>
+                                <option value="3">3 {{ translate('days') }}</option>
+                                <option value="7">1 {{ translate('week') }}</option>
+                                <option value="14">2 {{ translate('weeks') }}</option>
+                                <option value="30">1 {{ translate('month') }}</option>
+                                <option value="other">{{ translate('Other') }}</option>
+                            </select>
+                            <div id="custom_duration_container" style="display: none;" class="mt-2">
+                                <input type="number" 
+                                       class="form-control" 
+                                       name="duration" 
+                                       id="custom_duration" 
+                                       placeholder="{{ translate('Enter number of days') }}"
+                                       min="1">
+                            </div>
                         </div>
                         <div class="booking-select mb-3">
                             <label>{{ translate('Number of Person') }} <span class="required-field">*</span></label>
@@ -780,12 +794,18 @@
         function validateBookingForm() {
             const startDate = form.querySelector('input[name="start_date"]').value;
             const endDate = form.querySelector('input[name="end_date"]').value;
-            const duration = form.querySelector('input[name="duration"]').value;
+            const durationPresetValue = document.getElementById('duration_preset').value;
+            const customDurationValue = document.getElementById('custom_duration').value;
             const persons = form.querySelector('input[name="person"]').value;
             const bookingType = form.querySelector('input[name="booking_type"]').value;
             
             // Basic validation for required fields
-            if (!startDate || !endDate || !duration || !persons) {
+            if (!startDate || !endDate || !persons) {
+                return false;
+            }
+
+            // Validate duration
+            if (durationPresetValue === 'other' && !customDurationValue) {
                 return false;
             }
 
@@ -941,6 +961,30 @@
 
         // Initial validation check
         updateProceedButton();
+
+        // Duration dropdown handling
+        const durationPreset = document.getElementById('duration_preset');
+        const customDurationContainer = document.getElementById('custom_duration_container');
+        const customDuration = document.getElementById('custom_duration');
+
+        durationPreset.addEventListener('change', function() {
+            if (this.value === 'other') {
+                customDurationContainer.style.display = 'block';
+                customDuration.required = true;
+                // Remove the required attribute from the preset dropdown
+                this.required = false;
+            } else {
+                customDurationContainer.style.display = 'none';
+                customDuration.required = false;
+                // Add the required attribute back to the preset dropdown
+                this.required = true;
+            }
+            updateProceedButton();
+        });
+
+        // Add duration fields to validation listeners
+        durationPreset.addEventListener('change', updateProceedButton);
+        customDuration.addEventListener('input', updateProceedButton);
     });
 </script>
 
