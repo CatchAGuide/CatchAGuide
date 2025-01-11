@@ -383,25 +383,22 @@
         <div class="guidings-descriptions">
             <div class="important-info">
                 <div class="info-item">
-                    <i class="fas fa-ship"></i>
-                    {{-- <strong><p class="mb-0">{{$vacation->is_boat ? ($vacation->boatType && $vacation->boatType->name !== null ? $vacation->boatType->name : __('guidings.boat')) : __('guidings.shore')}}</p></strong> --}}
-                </div>
-                <div class="info-item">
-                    <i>
-                        <svg class="time-icon" width="18px" height="18px" viewBox="0 0 347.442 347.442" xmlns="http://www.w3.org/2000/svg">
-                            <g>
-                                <g>
-                                    <path d="M173.721 347.442c95.919 0 173.721-77.802 173.721-173.721S269.64 0 173.721 0 0 77.802 0 173.721s77.802 173.721 173.721 173.721zm-12.409-272.99c0-6.825 5.584-12.409 12.409-12.409s12.409 5.584 12.409 12.409v93.313l57.39 45.912c5.336 4.281 6.204 12.098 1.923 17.434-2.42 3.04-6.018 4.653-9.679 4.653-2.73 0-5.46-.869-7.755-2.73l-62.043-49.634c-2.916-2.358-4.653-5.894-4.653-9.679v-99.269z"/>
-                                </g>
-                            </g>
-                        </svg>
-                    </i>
-
-                    {{-- <p class="mb-0">{{ __('guidings.'.$vacation->duration_type) }} : <strong>{{$vacation->duration}} {{ $vacation->duration_type == 'multi_day' ? __('guidings.days') : __('guidings.hours') }}</strong></p> --}}
-                </div>
-                <div class="info-item">
                     <i class="fas fa-users"></i>
-                    <p class="mb-0">{{translate('Number of guests:')}} <strong>{{$vacation->max_guests}}</strong></p>
+                    <small class="mb-0">{{translate('Minimum number of guests:')}}</small>
+                    <strong>{{$vacation->min_guests}}</strong>
+                </div>
+                <!-- Price Range -->
+                <div class="info-item">
+                    <i class="fas fa-tag"></i>
+                    <small class="mb-0">{{translate('Price Range:')}}</small>
+                    <strong>€{{$vacation->price_from}} - €{{$vacation->price_to}}</strong>
+                </div>
+            
+                <!-- Availability -->
+                <div class="info-item">
+                    <i class="fas fa-calendar-check"></i>
+                    <small class="mb-0">{{translate('Availability:')}}</small>
+                    <strong>{{$vacation->availability}}%</strong>
                 </div>
             </div>
     

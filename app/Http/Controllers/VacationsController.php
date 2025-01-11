@@ -113,6 +113,40 @@ class VacationsController extends Controller
         $vacation = Vacation::where('id',$id)->with('accommodations', 'boats', 'packages', 'guidings')->first();
         $vacation->gallery = json_decode($vacation->gallery, true);
         
+        // Calculate minimum guests across all services
+        $minGuests = PHP_INT_MAX; // Start with maximum possible value
+        
+        // Check accommodations
+        if ($vacation->accommodations->isNotEmpty()) {
+            $minGuests = min($minGuests, $vacation->accommodations->min('min_guests') ?? PHP_INT_MAX);
+        }
+        
+        // Check boats
+        if ($vacation->boats->isNotEmpty()) {
+            $minGuests = min($minGuests, $vacation->boats->min('min_guests') ?? PHP_INT_MAX);
+        }
+        
+        // Check packages
+        if ($vacation->packages->isNotEmpty()) {
+            $minGuests = min($minGuests, $vacation->packages->min('min_guests') ?? PHP_INT_MAX);
+        }
+        
+        // Check guidings
+        if ($vacation->guidings->isNotEmpty()) {
+            $minGuests = min($minGuests, $vacation->guidings->min('min_guests') ?? PHP_INT_MAX);
+        }
+        
+        // If no minimum was found, set to 1 as default
+        $vacation->min_guests = ($minGuests === PHP_INT_MAX) ? 1 : $minGuests;
+        
+        // Calculate price range
+        $priceRange = $this->calculatePriceRange($vacation);
+        $vacation->price_from = $priceRange['min'];
+        $vacation->price_to = $priceRange['max'];
+        
+        // Calculate availability percentage for next 3 months
+        $vacation->availability = $this->calculateAvailability($vacation);
+        
         $sameCountries = Vacation::where('id', '!=', $vacation->id)
             ->where('country', $vacation->country)
             ->limit(10)
@@ -140,5 +174,44 @@ class VacationsController extends Controller
         ->get();
 
         return $nearestlisting;
+    }
+
+    private function calculatePriceRange($vacation)
+    {
+        $prices = collect();
+        
+        // Collect all prices from different services
+        if ($vacation->accommodations->isNotEmpty()) {
+            $prices = $prices->merge($this->extractPricesFromDynamicFields($vacation->accommodations));
+        }
+        if ($vacation->boats->isNotEmpty()) {
+            $prices = $prices->merge($this->extractPricesFromDynamicFields($vacation->boats));
+        }
+        if ($vacation->packages->isNotEmpty()) {
+            $prices = $prices->merge($this->extractPricesFromDynamicFields($vacation->packages));
+        }
+        if ($vacation->guidings->isNotEmpty()) {
+            $prices = $prices->merge($this->extractPricesFromDynamicFields($vacation->guidings));
+        }
+        
+        return [
+            'min' => $prices->min() ?? 0,
+            'max' => $prices->max() ?? 0
+        ];
+    }
+
+    private function extractPricesFromDynamicFields($items)
+    {
+        return $items->flatMap(function($item) {
+            $fields = json_decode($item->dynamic_fields, true);
+            return $fields['prices'] ?? [];
+        })->filter();
+    }
+
+    private function calculateAvailability($vacation)
+    {
+        // This would need to be implemented based on your booking system
+        // For now, returning a placeholder percentage
+        return 75; // Example: 75% available
     }
 }
