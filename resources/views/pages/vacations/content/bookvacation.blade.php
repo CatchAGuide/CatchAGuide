@@ -44,6 +44,7 @@
                                 <div class="form-group">
                                     <label>{{ translate('Select Package') }}</label>
                                     <select class="form-control" name="package_id">
+                                        <option value="" selected>{{ translate('No package needed') }}</option>
                                         @foreach($vacation->packages as $packageIndex => $package)
                                             <option value="{{ $package->id }}">{{ !empty($package->title) ? $package->title : translate('Package ' . ($packageIndex + 1)) }}</option>
                                         @endforeach
@@ -57,6 +58,7 @@
                             <div class="form-group mb-3">
                                 <label>{{ translate('Accommodation') }}</label>
                                 <select class="form-control" name="accommodation_id">
+                                    <option value="" selected>{{ translate('No accommodation needed') }}</option>
                                     @foreach($vacation->accommodations as $accommodationIndex => $accommodation)
                                         <option value="{{ $accommodation->id }}">{{ !empty($accommodation->title) ? $accommodation->title : translate('Accommodation ' . ($accommodationIndex + 1)) }}</option>
                                     @endforeach
@@ -66,7 +68,7 @@
                             <div class="form-group mb-3">
                                 <label>{{ translate('Boat Rental') }}</label>
                                 <select class="form-control" name="boat_id">
-                                    <option value="">{{ translate('No boat needed') }}</option>
+                                    <option value="" selected>{{ translate('No boat needed') }}</option>
                                     @foreach($vacation->boats as $boatIndex => $boat)
                                         <option value="{{ $boat->id }}">{{ !empty($boat->title) ? $boat->title : translate('Boat ' . ($boatIndex + 1)) }}</option>
                                     @endforeach
@@ -77,20 +79,10 @@
                         <div class="form-group mb-3">
                             <label>{{ translate('Guiding') }}</label>
                             <select class="form-control" name="guiding_id">
-                                <option value="">{{ translate('No guiding needed') }}</option>
+                                <option value="" selected>{{ translate('No guiding needed') }}</option>
                                 @foreach($vacation->guidings as $guidingIndex => $guiding)
                                     <option value="{{ $guiding->id }}">{{ !empty($guiding->title) ? $guiding->title : translate('Guiding ' . ($guidingIndex + 1)) }}</option>
                                 @endforeach
-                            </select>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>{{ translate('Additional Services') }}</label>
-                            <select class="form-control" name="additional_services">
-                                <option value="">{{ translate('No additional services needed') }}</option>
-                                {{-- @foreach($vacation->additional_services as $additionalServiceIndex => $additionalService)
-                                    <option value="{{ $additionalService->id }}">{{ !empty($additionalService->title) ? $additionalService->title : translate('Additional Service ' . ($additionalServiceIndex + 1)) }}</option>
-                                @endforeach --}}
                             </select>
                         </div>
                         
@@ -98,6 +90,38 @@
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input" id="hasPets" name="has_pets">
                                 <label class="form-check-label" for="hasPets">{{ translate('Do you have pets?') }}</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label>{{ translate('Extra offers') }}</label>
+                            <div class="extra-offers-container">
+                                @foreach($vacation->extras as $extraIndex => $extra)
+                                    <div class="extra-offer-item d-flex align-items-center mb-2">
+                                        <div class="form-check">
+                                            <input type="checkbox" 
+                                                   class="form-check-input extra-offer-checkbox" 
+                                                   id="extra_{{ $extra->id }}" 
+                                                   name="extra_offers[]" 
+                                                   value="{{ $extra->id }}"
+                                                   data-price-type="{{ $extra->type }}">
+                                            <label class="form-check-label" for="extra_{{ $extra->id }}">
+                                                {{ !empty($extra->description) ? $extra->description : translate('Extra offer ' . ($extraIndex + 1)) }}
+                                                (€{{ number_format($extra->price, 2) }})
+                                            </label>
+                                        </div>
+                                        @if($extra->type === 'per_person')
+                                            <div class="quantity-input ms-2" style="display: none;">
+                                                <input type="number" 
+                                                       class="form-control form-control-sm extra-quantity" 
+                                                       name="extra_quantity[{{ $extra->id }}]" 
+                                                       min="1" 
+                                                       value="1" 
+                                                       style="width: 80px;">
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
 
@@ -108,7 +132,109 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-orange w-100">{{ translate('Proceed to booking') }}</button>
+                        <!-- Add checkout modal trigger -->
+                        <button type="button" class="btn btn-orange w-100" data-bs-toggle="modal" data-bs-target="#checkoutModal">
+                            {{ translate('Proceed to booking') }}
+                        </button>
+
+                        <!-- Add checkout modal -->
+                        <div class="modal fade" 
+                             id="checkoutModal" 
+                             tabindex="-1" 
+                             aria-labelledby="checkoutModalLabel" 
+                             aria-hidden="true"
+                             data-bs-backdrop="static"
+                             data-bs-keyboard="false">
+                            <div class="modal-dialog modal-lg modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header border-bottom">
+                                        <h5 class="modal-title" id="checkoutModalLabel">{{ translate('Contact Information') }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body p-4">
+                                        <form id="checkoutForm" action="{{ route('checkout') }}" method="POST">
+                                            @csrf
+                                            <div id="bookingDataContainer"></div>
+                                            
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">{{ translate('Title') }}</label>
+                                                        <select class="form-control" name="title" required>
+                                                            <option value="Mr">{{ translate('Mr.') }}</option>
+                                                            <option value="Mrs">{{ translate('Mrs.') }}</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">{{ translate('Name') }}</label>
+                                                        <input type="text" class="form-control" name="name" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">{{ translate('Surname') }}</label>
+                                                        <input type="text" class="form-control" name="surname" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">{{ translate('Street') }}</label>
+                                                        <input type="text" class="form-control" name="street" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">{{ translate('Post Code') }}</label>
+                                                        <input type="text" class="form-control" name="post_code" required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">{{ translate('City') }}</label>
+                                                        <input type="text" class="form-control" name="city" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">{{ translate('Country') }}</label>
+                                                        <input type="text" class="form-control" name="country" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">{{ translate('Phone + Country Code') }}</label>
+                                                        <div class="input-group">
+                                                            <select class="form-select" name="phone_country_code" style="width: 100px; min-width: 100px;" required>
+                                                                <option data-code="+1" value="+1">+1</option>
+                                                                <option data-code="+44" value="+44">+44</option>
+                                                                <option data-code="+49" value="+49">+49</option>
+                                                                <option data-code="+33" value="+33">+33</option>
+                                                                <option data-code="+34" value="+34">+34</option>
+                                                                <option data-code="+39" value="+39">+39</option>
+                                                                <option data-code="+31" value="+31">+31</option>
+                                                                <option data-code="+32" value="+32">+32</option>
+                                                                <option data-code="+41" value="+41">+41</option>
+                                                                <option data-code="+43" value="+43">+43</option>
+                                                                <option data-code="+46" value="+46">+46</option>
+                                                                <option data-code="+47" value="+47">+47</option>
+                                                                <option data-code="+45" value="+45">+45</option>
+                                                                <option data-code="+358" value="+358">+358</option>
+                                                                <option data-code="+48" value="+48">+48</option>
+                                                            </select>
+                                                            <input type="tel" class="form-control" name="phone" placeholder="Phone number" required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">{{ translate('Email') }}</label>
+                                                        <input type="email" class="form-control" name="email" required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="mb-4">
+                                                        <label class="form-label">{{ translate('Comments') }}</label>
+                                                        <textarea class="form-control" name="comments" rows="3"></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="text-end">
+                                                <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">{{ translate('Cancel') }}</button>
+                                                <button type="submit" class="btn btn-orange">{{ translate('Complete Booking') }}</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -118,8 +244,8 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Get form elements
-    const form = document.querySelector('form');
+    // Update selectors to be more specific
+    const form = document.querySelector('form[action*="checkout"]');
     const personInput = form.querySelector('input[name="person"]');
     const bookingTypeInput = form.querySelector('input[name="booking_type"]');
     const packageSelect = form.querySelector('select[name="package_id"]');
@@ -133,173 +259,315 @@ document.addEventListener('DOMContentLoaded', function() {
         packages: @json($vacation->packages),
         accommodations: @json($vacation->accommodations),
         boats: @json($vacation->boats),
-        guidings: @json($vacation->guidings)
+        guidings: @json($vacation->guidings),
+        extras: @json($vacation->extras)
     };
 
-    console.log('Vacation Data:', vacationData);
-
-    // Add this debug log to check a sample dynamic_fields structure
-    if (vacationData.accommodations && vacationData.accommodations.length > 0) {
-        console.log('Sample Accommodation Dynamic Fields:', {
-            raw: vacationData.accommodations[0].dynamic_fields,
-            parsed: typeof vacationData.accommodations[0].dynamic_fields === 'string' 
-                ? JSON.parse(vacationData.accommodations[0].dynamic_fields) 
-                : vacationData.accommodations[0].dynamic_fields
-        });
-    }
-
     function calculatePrice(persons, item) {
-        console.log('Calculating price for:', { 
-            persons, 
-            itemId: item?.id,
-            dynamicFields: item?.dynamic_fields,
-            rawItem: item 
-        });
-        
-        if (!item || !item.dynamic_fields) {
-            console.log('No item or dynamic_fields found');
+        if (!item || !persons) {
             return 0;
         }
-        
-        let dynamicFields;
+
         try {
-            dynamicFields = typeof item.dynamic_fields === 'string' 
-                ? JSON.parse(item.dynamic_fields) 
-                : item.dynamic_fields;
-            console.log('Parsed Dynamic Fields:', dynamicFields);
-        } catch (error) {
-            console.error('Error parsing dynamic_fields:', error);
-            return 0;
-        }
-
-        if (!dynamicFields.prices || !dynamicFields.prices.length) {
-            console.log('No prices found in dynamic fields');
-            return 0;
-        }
-
-        const capacity = parseInt(item.capacity) || parseInt(dynamicFields.bed_count) || dynamicFields.prices.length;
-        const prices = dynamicFields.prices.map(price => parseFloat(price));
-        const maxPrice = Math.max(...prices);
-
-        console.log('Price Calculation Details:', {
-            capacity,
-            prices,
-            maxPrice,
-            persons
-        });
-
-        if (persons <= capacity) {
-            // If persons is within capacity, use the corresponding price
-            const price = persons > 0 && persons <= prices.length ? parseFloat(prices[persons - 1]) : 0;
-            console.log('Within capacity price:', price);
-            return price;
-        } else {
-            // Calculate price for exceeding capacity
-            const fullGroups = Math.floor(persons / capacity);
-            const remainder = persons % capacity;
-            
-            let totalPrice = fullGroups * maxPrice;
-            if (remainder > 0) {
-                totalPrice += remainder <= prices.length ? parseFloat(prices[remainder - 1]) : maxPrice;
+            let dynamicFields;
+            if (typeof item.dynamic_fields === 'string') {
+                dynamicFields = JSON.parse(item.dynamic_fields);
+            } else {
+                dynamicFields = item.dynamic_fields;
             }
-            
-            console.log('Exceeding capacity price:', totalPrice);
-            return totalPrice;
+
+            if (!dynamicFields || !dynamicFields.prices || !Array.isArray(dynamicFields.prices)) {
+                return 0;
+            }
+
+            const prices = dynamicFields.prices.map(price => parseFloat(price) || 0);
+            const capacity = parseInt(item.capacity) || parseInt(dynamicFields.bed_count) || prices.length;
+            const maxPrice = Math.max(...prices);
+
+            if (persons <= capacity) {
+                const price = persons > 0 && persons <= prices.length ? prices[persons - 1] : 0;
+                return price;
+            } else {
+                const fullGroups = Math.floor(persons / capacity);
+                const remainder = persons % capacity;
+                let totalPrice = fullGroups * maxPrice;
+                
+                if (remainder > 0) {
+                    totalPrice += remainder <= prices.length ? prices[remainder - 1] : maxPrice;
+                }
+                
+                return totalPrice;
+            }
+        } catch (error) {
+            console.error('Error calculating price:', error);
+            return 0;
         }
     }
 
-    function updateTotalPrice() {
-        console.log('Updating total price...');
-        
-        // Add null checks for all inputs
+    function updateTotalPrice() {        
         const persons = personInput && personInput.value ? parseInt(personInput.value) : 0;
         const bookingType = bookingTypeInput && bookingTypeInput.value ? bookingTypeInput.value : 'custom';
         
-        console.log('Persons:', persons);
-        console.log('Booking Type:', bookingType);
-        
         let totalPrice = 0;
+        console.group('Price Calculation');
 
         if (bookingType === 'package' && packageSelect && packageSelect.value) {
-            console.log('Calculating package price...');
             const selectedPackage = vacationData.packages.find(p => p.id === parseInt(packageSelect.value));
-            console.log('Selected Package:', selectedPackage);
-            totalPrice = calculatePrice(persons, selectedPackage);
+            const packagePrice = calculatePrice(persons, selectedPackage);
+            totalPrice += packagePrice;
         } else {
-            console.log('Calculating custom price...');
-            
             // Calculate accommodation price
             if (accommodationSelect && accommodationSelect.value) {
                 const selectedAccommodation = vacationData.accommodations.find(a => a.id === parseInt(accommodationSelect.value));
-                console.log('Selected Accommodation:', selectedAccommodation);
                 const accommodationPrice = calculatePrice(persons, selectedAccommodation);
-                console.log('Accommodation Price:', accommodationPrice);
                 totalPrice += accommodationPrice;
             }
 
             // Calculate boat price
             if (boatSelect && boatSelect.value) {
                 const selectedBoat = vacationData.boats.find(b => b.id === parseInt(boatSelect.value));
-                console.log('Selected Boat:', selectedBoat);
                 const boatPrice = calculatePrice(persons, selectedBoat);
-                console.log('Boat Price:', boatPrice);
                 totalPrice += boatPrice;
             }
 
             // Calculate guiding price
             if (guidingSelect && guidingSelect.value) {
                 const selectedGuiding = vacationData.guidings.find(g => g.id === parseInt(guidingSelect.value));
-                console.log('Selected Guiding:', selectedGuiding);
                 const guidingPrice = calculatePrice(persons, selectedGuiding);
-                console.log('Guiding Price:', guidingPrice);
                 totalPrice += guidingPrice;
             }
         }
 
-        console.log('Final Total Price:', totalPrice);
+        // Calculate extras price
+        const extraCheckboxes = document.querySelectorAll('.extra-offer-checkbox:checked');
+        let extrasTotal = 0;
+        extraCheckboxes.forEach(checkbox => {
+            const extraId = checkbox.value;
+            const extra = vacationData.extras.find(e => e.id === parseInt(extraId));
+            console.log(extra);
+            console.log(extraId);
+            console.log(extra.type);
+            
+            if (extra) {
+                if (extra.type === 'per_person') {
+                    const quantityInput = checkbox.closest('.extra-offer-item').querySelector('.extra-quantity');
+                    const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
+                    const extraPrice = parseFloat(extra.price) * quantity;
+                    extrasTotal += extraPrice;
+                } else {
+                    const extraPrice = parseFloat(extra.price);
+                    extrasTotal += extraPrice;
+                }
+            }
+        });
+        
+        totalPrice += extrasTotal;
+        console.groupEnd();
 
         if (totalPriceElement) {
             totalPriceElement.textContent = `€${totalPrice.toFixed(2)}`;
         }
     }
 
-    // Add event listeners only if elements exist
-    const formElements = [personInput, packageSelect, accommodationSelect, boatSelect, guidingSelect];
-    formElements.forEach(element => {
-        if (element) {
-            element.addEventListener('change', updateTotalPrice);
-        }
-    });
+    // Add event listeners for all form elements that affect price
+    function addPriceUpdateListeners() {
+        const elements = [
+            personInput,
+            packageSelect,
+            accommodationSelect,
+            boatSelect,
+            guidingSelect
+        ];
 
-    // Add event listeners for booking type buttons
-    document.querySelectorAll('.booking-type-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const type = this.dataset.type;
-            if (bookingTypeInput) {
-                bookingTypeInput.value = type;
+        elements.forEach(element => {
+            if (element) {
+                element.addEventListener('change', () => {
+                    updateTotalPrice();
+                });
             }
-            // Update UI
-            document.querySelectorAll('.booking-type-btn').forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Show/hide appropriate options
-            const packageOptions = document.getElementById('package-options');
-            const customOptions = document.getElementById('custom-options');
-            if (packageOptions && customOptions) {
-                if (type === 'package') {
-                    packageOptions.style.display = 'block';
-                    customOptions.style.display = 'none';
-                } else {
-                    packageOptions.style.display = 'none';
-                    customOptions.style.display = 'block';
-                }
-            }
-            
-            setTimeout(updateTotalPrice, 0);
         });
-    });
+
+        // Add listeners for extra offer checkboxes and quantity inputs
+        document.querySelectorAll('.extra-offer-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                updateTotalPrice();
+            });
+        });
+
+        document.querySelectorAll('.extra-quantity').forEach(input => {
+            input.addEventListener('change', () => {
+                updateTotalPrice();
+            });
+            input.addEventListener('input', () => {
+                updateTotalPrice();
+            });
+        });
+    }
+
+    // Initialize price update listeners
+    addPriceUpdateListeners();
 
     // Initial price calculation
     updateTotalPrice();
+
+    // Initialize modal with specific options
+    const modalElement = document.getElementById('checkoutModal');
+    const modal = new bootstrap.Modal(modalElement, {
+        backdrop: 'static',
+        keyboard: false,
+        focus: true
+    });
+
+    // Add event listener for modal show
+    modalElement.addEventListener('shown.bs.modal', function () {
+        // Ensure modal is interactive after showing
+        this.style.pointerEvents = 'auto';
+        this.querySelector('.modal-content').style.pointerEvents = 'auto';
+        this.querySelector('.modal-body').style.pointerEvents = 'auto';
+    });
+
+    // Update modal trigger
+    document.querySelector('[data-bs-target="#checkoutModal"]').addEventListener('click', function(e) {
+        e.preventDefault();
+        modal.show();
+    });
+
+    // Trigger initial calculations
+    updateTotalPrice();
+
+    // Add this new code block after the existing event listeners
+    document.querySelectorAll('.extra-offer-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const quantityInput = this.closest('.extra-offer-item').querySelector('.quantity-input');
+            if (this.dataset.priceType === 'per_person') {
+                if (this.checked) {
+                    quantityInput.style.display = 'block';
+                } else {
+                    quantityInput.style.display = 'none';
+                }
+            }
+            updateTotalPrice();
+        });
+    });
+
+    const phoneSelect = document.querySelector('select[name="phone_country_code"]');
+    const countryNames = {
+        '+1': 'USA/Canada',
+        '+44': 'UK',
+        '+49': 'Germany',
+        '+33': 'France',
+        '+34': 'Spain',
+        '+39': 'Italy',
+        '+31': 'Netherlands',
+        '+32': 'Belgium',
+        '+41': 'Switzerland',
+        '+43': 'Austria',
+        '+46': 'Sweden',
+        '+47': 'Norway',
+        '+45': 'Denmark',
+        '+358': 'Finland',
+        '+48': 'Poland'
+    };
+
+    // Add titles to options for tooltip
+    phoneSelect.querySelectorAll('option').forEach(option => {
+        const code = option.value;
+        if (countryNames[code]) {
+            option.title = countryNames[code];
+        }
+    });
 });
 </script>
+
+<style>
+    /* Reset and update z-index hierarchy */
+    .modal {
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1050 !important;
+    }
+    
+    .modal-backdrop {
+        display: none !important;
+    }
+    
+    .modal-dialog {
+        z-index: 10000 !important;
+        position: relative;
+    }
+    
+    .modal-content {
+        position: relative;
+        z-index: 10001 !important;
+        border-radius: 8px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    
+    .modal-body {
+        position: relative;
+        z-index: 10002 !important;
+    }
+    
+    /* Ensure form elements are clickable */
+    .modal-body input,
+    .modal-body select,
+    .modal-body textarea,
+    .modal-body button {
+        position: relative;
+        z-index: 10003 !important;
+    }
+    
+    /* Additional modal styling */
+    .modal-lg {
+        max-width: 800px;
+    }
+    
+    .modal-header {
+        background-color: #f8f9fa;
+        padding: 1rem 1.5rem;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+    
+    .form-control {
+        border-radius: 4px;
+        border: 1px solid #ced4da;
+    }
+    
+    .form-control:focus {
+        border-color: #fd5d14;
+        box-shadow: 0 0 0 0.2rem rgba(253, 93, 20, 0.25);
+    }
+    
+    /* Add these styles to your existing style block */
+    .input-group select.form-select {
+        padding-right: 8px;
+        padding-left: 8px;
+        text-align: center;
+    }
+    
+    /* Custom styling for the select to show only the code when selected */
+    .input-group select.form-select option {
+        text-align: left;
+    }
+    
+    /* Ensure equal heights */
+    .input-group > * {
+        height: 38px;
+        line-height: 1.5;
+    }
+    
+    /* Add tooltip style for country names */
+    .input-group select.form-select option[title]:hover::after {
+        content: attr(title);
+        position: absolute;
+        background: #333;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        z-index: 1060;
+    }
+</style>
