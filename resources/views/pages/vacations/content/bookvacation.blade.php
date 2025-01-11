@@ -388,7 +388,6 @@
             const bookingType = bookingTypeInput && bookingTypeInput.value ? bookingTypeInput.value : 'custom';
             
             let totalPrice = 0;
-            console.group('Price Calculation');
 
             if (bookingType === 'package' && packageSelect && packageSelect.value) {
                 const selectedPackage = vacationData.packages.find(p => p.id === parseInt(packageSelect.value));
@@ -423,9 +422,6 @@
             extraCheckboxes.forEach(checkbox => {
                 const extraId = checkbox.value;
                 const extra = vacationData.extras.find(e => e.id === parseInt(extraId));
-                console.log(extra);
-                console.log(extraId);
-                console.log(extra.type);
                 
                 if (extra) {
                     if (extra.type === 'per_person') {
@@ -441,7 +437,6 @@
             });
             
             totalPrice += extrasTotal;
-            console.groupEnd();
 
             if (totalPriceElement) {
                 totalPriceElement.textContent = `€${totalPrice.toFixed(2)}`;
