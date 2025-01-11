@@ -574,7 +574,13 @@
             // Update hidden fields with current form values
             modalForm.querySelector('#modal_start_date').value = form.querySelector('input[name="start_date"]').value;
             modalForm.querySelector('#modal_end_date').value = form.querySelector('input[name="end_date"]').value;
-            modalForm.querySelector('#modal_duration').value = form.querySelector('input[name="duration"]').value;
+            
+            // Handle duration value based on preset or custom input
+            const durationPreset = document.getElementById('duration_preset');
+            const customDuration = document.getElementById('custom_duration');
+            const finalDuration = durationPreset.value === 'other' ? customDuration.value : durationPreset.value;
+            modalForm.querySelector('#modal_duration').value = finalDuration;
+            
             modalForm.querySelector('#modal_person').value = form.querySelector('input[name="person"]').value;
             modalForm.querySelector('#modal_booking_type').value = form.querySelector('input[name="booking_type"]').value;
             
@@ -609,7 +615,7 @@
             // Update summary sections
             const startDate = form.querySelector('input[name="start_date"]').value;
             const endDate = form.querySelector('input[name="end_date"]').value;
-            const duration = form.querySelector('input[name="duration"]').value;
+            const duration = finalDuration;
             const persons = form.querySelector('input[name="person"]').value;
             const bookingType = form.querySelector('input[name="booking_type"]').value;
             const totalPrice = document.getElementById('total-price').textContent;
@@ -985,6 +991,38 @@
         // Add duration fields to validation listeners
         durationPreset.addEventListener('change', updateProceedButton);
         customDuration.addEventListener('input', updateProceedButton);
+
+        // Add this inside the DOMContentLoaded event listener
+        bookingTypeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Update booking type
+                const bookingType = this.dataset.type;
+                bookingTypeInput.value = bookingType;
+                
+                // Toggle active class
+                bookingTypeButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show/hide relevant options
+                const packageOptions = document.getElementById('package-options');
+                const customOptions = document.getElementById('custom-options');
+                
+                if (bookingType === 'package') {
+                    packageOptions.style.display = 'block';
+                    customOptions.style.display = 'none';
+                    // Clear custom selections
+                    if (accommodationSelect) accommodationSelect.value = '';
+                    if (boatSelect) boatSelect.value = '';
+                } else {
+                    packageOptions.style.display = 'none';
+                    customOptions.style.display = 'block';
+                    if (packageSelect) packageSelect.value = '';
+                }
+                
+                // Update total price
+                updateTotalPrice();
+            });
+        });
     });
 </script>
 
