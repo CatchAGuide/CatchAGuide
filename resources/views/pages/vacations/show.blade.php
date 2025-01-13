@@ -725,7 +725,7 @@
             @if ($vacation->included_services || $vacation->extras)
             <div class="description-container card p-3 mb-5">
                 <div class="description-list">
-                    @if ($vacation->included_services && count($vacation->included_services) > 0)
+                    @if ($vacation->included_services && !empty(json_decode($vacation->included_services)))
                     <div class="description-item">
                         <div class="header-container">
                             <span>{{ translate('Included Services')}}</span>
