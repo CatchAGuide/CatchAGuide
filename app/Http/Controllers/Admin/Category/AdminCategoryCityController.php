@@ -45,6 +45,8 @@ class AdminCategoryCityController extends Controller
         $placeLat = $filter['placeLat'] ?? '';
         $placeLng = $filter['placeLng'] ?? '';
         $country = $filter['country'] ?? '';
+        $city = $filter['city'] ?? '';
+        $region = $filter['region'] ?? '';
 
         $fish_chart = old('fish_chart');
         $fish_avail_title = old('fish_avail_title');
@@ -70,7 +72,7 @@ class AdminCategoryCityController extends Controller
             'fish_chart', 'fish_avail_title', 'fish_avail_intro', 
             'fish_size_limit', 'size_limit_title', 'size_limit_intro', 
             'fish_time_limit', 'time_limit_title', 'time_limit_intro', 
-            'faq', 'faq_title', 'countries', 'regions');
+            'faq', 'faq_title', 'countries', 'regions', 'city', 'region');
 
         return view('admin.pages.category.form', $data);
     }
@@ -176,6 +178,8 @@ class AdminCategoryCityController extends Controller
         $placeLat = $filter->placeLat ?? '';
         $placeLng = $filter->placeLng ?? '';
         $country = $filter->country ?? '';
+        $city = $filter->city ?? '';
+        $region = $filter->region ?? '';
 
         $fish_chart = $row->fish_chart;
         $fish_avail_title = $row->fish_avail_title;
@@ -201,7 +205,7 @@ class AdminCategoryCityController extends Controller
             'fish_size_limit', 'size_limit_title', 'size_limit_intro', 
             'fish_time_limit', 'time_limit_title', 'time_limit_intro', 
             'faq', 'faq_title', 
-            'countries', 'regions');
+            'countries', 'regions', 'city', 'region');
 
         return view('admin.pages.category.form', $data);
     }

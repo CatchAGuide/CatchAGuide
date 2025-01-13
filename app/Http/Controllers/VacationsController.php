@@ -75,7 +75,7 @@ class VacationsController extends Controller
 
             $title .= __('vacations.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
             $filter_title .= __('vacations.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ', ';
-            $vacationFilter = Vacation::locationFilter($request->get('place'), null, $placeLat, $placeLng);
+            $vacationFilter = Vacation::locationFilter($request->get('city'), $request->get('country'), null, $placeLat, $placeLng);
             $searchMessage = $vacationFilter['message'];
             $query->whereIn('id', $vacationFilter['ids']);
         }

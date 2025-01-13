@@ -35,7 +35,8 @@ class Destination extends Model
         'time_limit_intro',
         'faq_title',
         'slug',
-        'language'
+        'language',
+        'flag'
     ];
 
     public function faq()

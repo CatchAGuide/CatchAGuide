@@ -158,6 +158,8 @@
             var place = autocomplete.getPlace();
             document.getElementById('LocationLat').value = place.geometry.location.lat();
             document.getElementById('LocationLng').value = place.geometry.location.lng();
+            document.getElementById('LocationCity').value = place.address_components[0].long_name;
+            document.getElementById('LocationCountry').value = place.address_components[1].long_name;
         });
 
         var input2 = document.getElementById('searchPlace2');
@@ -166,6 +168,8 @@
             var place2 = autocomplete2.getPlace();
             document.getElementById('LocationLat2').value = place2.geometry.location.lat();
             document.getElementById('LocationLng2').value = place2.geometry.location.lng();
+            document.getElementById('LocationCity2').value = place2.address_components[0].long_name;
+            document.getElementById('LocationCountry2').value = place2.address_components[1].long_name;
         });
         
         var searchPlaceHeaderDesktop = document.getElementById('searchPlaceHeaderDesktop');
@@ -174,6 +178,8 @@
             var placeHeaderDesktop = autocompleteHeaderDesktop.getPlace();
             document.getElementById('LocationLatHeaderDesktop').value = placeHeaderDesktop.geometry.location.lat();
             document.getElementById('LocationLngHeaderDesktop').value = placeHeaderDesktop.geometry.location.lng();
+            document.getElementById('LocationCityHeaderDesktop').value = placeHeaderDesktop.address_components[0].long_name;
+            document.getElementById('LocationCountryHeaderDesktop').value = placeHeaderDesktop.address_components[1].long_name;
         });
         
         var searchPlaceDesktop = document.getElementById('searchPlaceDesktop');
@@ -182,6 +188,8 @@
             var placeDesktop = autocompleteDesktop.getPlace();
             document.getElementById('LocationLatDesktop').value = placeDesktop.geometry.location.lat();
             document.getElementById('LocationLngDesktop').value = placeDesktop.geometry.location.lng();
+            document.getElementById('LocationCityDesktop').value = placeDesktop.address_components[0].long_name;
+            document.getElementById('LocationCountryDesktop').value = placeDesktop.address_components[1].long_name;
         });
 
         var searchPlaceMobile = document.getElementById('searchPlaceMobile');
@@ -190,6 +198,8 @@
             var placeMobile = autocompleteMobile.getPlace();
             document.getElementById('LocationLatMobile').value = placeMobile.geometry.location.lat();
             document.getElementById('LocationLngMobile').value = placeMobile.geometry.location.lng();
+            document.getElementById('LocationCityMobile').value = placeMobile.address_components[0].long_name;
+            document.getElementById('LocationCountryMobile').value = placeMobile.address_components[1].long_name;
         });
 
         var searchPlaceShortDesktop = document.getElementById('searchPlaceShortDesktop');
@@ -198,6 +208,8 @@
             var placeShortDesktop = autocompleteShortDesktop.getPlace();
             document.getElementById('LocationLatShortDesktop').value = placeShortDesktop.geometry.location.lat();
             document.getElementById('LocationLngShortDesktop').value = placeShortDesktop.geometry.location.lng();
+            document.getElementById('LocationCityShortDesktop').value = placeShortDesktop.address_components[0].long_name;
+            document.getElementById('LocationCountryShortDesktop').value = placeShortDesktop.address_components[1].long_name;
         });
     }
 

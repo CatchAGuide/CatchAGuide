@@ -157,6 +157,8 @@
                                    value="{{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }}" autocomplete="on">
                             <input type="hidden" id="LocationLatShortDesktop" name="placeLat" value="{{ request()->placeLat }}"/>
                             <input type="hidden" id="LocationLngShortDesktop" name="placeLng" value="{{ request()->placeLng }}"/>
+                            <input type="hidden" id="LocationCityShortDesktop" name="city" value="{{ request()->city }}"/>
+                            <input type="hidden" id="LocationCountryShortDesktop" name="country" value="{{ request()->country }}"/>
                         </div>
                         <div class="search-input" style="width: 200px;">
                             <i class="fa fa-user input-icon"></i>
@@ -721,6 +723,8 @@ input[type=number] {
                                    value="{{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }}" autocomplete="on">
                             <input type="hidden" name="placeLat" value="{{ request()->placeLat }}"/>
                             <input type="hidden" name="placeLng" value="{{ request()->placeLng }}"/>
+                            <input type="hidden" name="city" value="{{ request()->city }}"/>
+                            <input type="hidden" name="country" value="{{ request()->country }}"/>
                         </div>
                     </div>
 
