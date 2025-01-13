@@ -217,18 +217,18 @@ class DestinationCountryController extends Controller
             $radius = $request->get('radius');
         }
 
-        $geocode = $this->getCoordinates($country, $region, $city);
-        
-        $placeLat = $geocode['lat'];
-        $placeLng = $geocode['lng'];
+        $filterData = json_decode($row_data->filters, true);
+
+        $placeLat = $filterData['placeLat'];
+        $placeLng = $filterData['placeLng'];
+        $city = $filterData['city'];
+        $country = $filterData['country'];
 
         $title .= __('guidings.Country') . ' ' . $country . ' | ';
-        //$query->where('country',$country);
 
-        // dd($);
         if(!empty($placeLat) && !empty($placeLng)){
             $title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
-            $guidingFilter = Guiding::locationFilter($place_location, $radius, $placeLat, $placeLng);
+            $guidingFilter = Guiding::locationFilter($city, $country, $radius, $placeLat, $placeLng);
             $searchMessage = $guidingFilter['message'];
             $query->whereIn('id', $guidingFilter['ids']);
         }

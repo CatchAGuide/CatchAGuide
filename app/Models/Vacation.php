@@ -38,7 +38,32 @@ class Vacation extends Model
 
     public static function locationFilter(string $location, ?int $radius = null, $placeLat = null, $placeLng = null )
     {
-        $locationParts = self::parseLocation($location);
+        return $this->hasMany(VacationAccommodation::class);
+    }
+
+    public function boats(): HasMany
+    {
+        return $this->hasMany(VacationBoat::class);
+    }
+
+    public function packages(): HasMany
+    {
+        return $this->hasMany(VacationPackage::class);
+    }
+
+    public function guidings(): HasMany
+    {
+        return $this->hasMany(VacationGuiding::class);
+    }
+
+    public function extras(): HasMany
+    {
+        return $this->hasMany(VacationExtra::class);
+    }
+
+    public static function locationFilter(string $city = null, string $country = null, ?int $radius = null, $placeLat = null, $placeLng = null )
+    {
+        $locationParts = ['city' => $city, 'country' => $country];
         $returnData = [
             'message' => '',
             'ids' => []
@@ -58,7 +83,7 @@ class Vacation extends Model
 
         if ($vacations->isNotEmpty()) {
             $returnData['ids'] = $vacations;
-            $returnData['message'] = str_replace('#location#', $location, __('search-request.searchLevel1'));;
+            $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel1'));;
             return $returnData;
         }
 
@@ -91,7 +116,7 @@ class Vacation extends Model
 
         if ($vacations->isNotEmpty()) {
             $returnData['ids'] = $vacations;
-            $returnData['message'] = str_replace('#location#', $location, __('search-request.searchLevel2'));
+            $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel2'));
             return $returnData;
         }
 
@@ -107,7 +132,7 @@ class Vacation extends Model
             ])
             ->orderBy('distance')
             ->pluck('id');
-        $returnData['message'] = str_replace('#location#', $location, __('search-request.searchLevel3'));
+        $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel3'));
         return $returnData;
     }
     
@@ -123,5 +148,9 @@ class Vacation extends Model
             'lng' => $geocodeResult['lng'],
             'type' => $geocodeResult['types']
         ];
+    }
+
+    public function getLowestPrice(){
+        return 0;
     }
 }

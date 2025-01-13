@@ -41,6 +41,7 @@ use App\Http\Controllers\Admin\Category\AdminCategoryCountryController;
 use App\Http\Controllers\Admin\Category\AdminCategoryRegionController;
 use App\Http\Controllers\Admin\Category\AdminCategoryCityController;
 use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThreadsController;
+use App\Http\Controllers\VacationBookingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -193,6 +194,9 @@ Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'newShow'])->name
 Route::post('newguidings', [GuidingsController::class, 'guidingsStore'])->name('guidings.store');
 
 Route::resource('vacations', VacationsController::class);
+Route::post('/vacation-booking', [VacationBookingController::class, 'store'])
+    ->name('vacation.booking.store')
+    ->middleware('web');
 
 Route::get('searchrequest', [GuidingsController::class, 'bookingrequest'])->name('guidings.request');
 Route::post('searchrequest/store', [GuidingsController::class, 'bookingRequestStore'])->name('store.request');
@@ -382,5 +386,4 @@ Route::get('robots.txt', function () {
 Route::name('category.')->group(function(){
     Route::get('/{slug?}', [GuideThreadController::class, 'categoryIndex'])->name('thread');
 });
-
 

@@ -584,6 +584,8 @@
                             </div>
                           <input type="hidden" id="LocationLat2" value="{{ request()->get('placeLat') ? request()->get('placeLat') : null }}" name="placeLat"/>
                           <input type="hidden" id="LocationLng2" value="{{ request()->get('placeLng') ? request()->get('placeLng') : null }}" name="placeLng"/>
+                          <input type="hidden" id="LocationCity2" value="{{ request()->get('city') ? request()->get('city') : null }}" name="city"/>
+                          <input type="hidden" id="LocationCountry2" value="{{ request()->get('country') ? request()->get('country') : null }}" name="country"/>
                         </div>
                     </div>
                     <div class="col-12">

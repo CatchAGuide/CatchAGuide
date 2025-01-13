@@ -501,10 +501,11 @@ class Guiding extends Model
      * @param int|null $radius Search radius in kilometers
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public static function locationFilter(string $location, ?int $radius = null, $placeLat = null, $placeLng = null)
+    public static function locationFilter(string $city = null, string $country = null, ?int $radius = null, $placeLat = null, $placeLng = null)
     {
         // Parse location into components
-        $locationParts = self::parseLocation($location);
+        // $locationParts = self::parseLocation($location);
+        $locationParts = ['city' => $city, 'country' => $country];
         $returnData = [
             'message' => '',
             'ids' => []
@@ -524,7 +525,7 @@ class Guiding extends Model
 
         if ($guidings->isNotEmpty()) {
             $returnData['ids'] = $guidings;
-            $returnData['message'] = str_replace('#location#', $location, __('search-request.searchLevel1'));;
+            $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel1'));;
             return $returnData;
         }
 
@@ -557,7 +558,7 @@ class Guiding extends Model
 
         if ($guidings->isNotEmpty()) {
             $returnData['ids'] = $guidings;
-            $returnData['message'] = str_replace('#location#', $location, __('search-request.searchLevel2'));
+            $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel2'));
             return $returnData;
         }
 
@@ -573,7 +574,7 @@ class Guiding extends Model
             ])
             ->orderBy('distance')
             ->pluck('id');
-        $returnData['message'] = str_replace('#location#', $location, __('search-request.searchLevel3'));
+        $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel3'));
         return $returnData;
     }
 

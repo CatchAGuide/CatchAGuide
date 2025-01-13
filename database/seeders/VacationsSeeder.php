@@ -14,7 +14,11 @@ class VacationsSeeder extends Seeder
      */
     public function run()
     {
+        // Disable foreign key checks before truncating
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
         DB::table('vacations')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1');
+
         $csvFile = public_path('Productpage_Vacations.csv');
         $vacations = [];
         

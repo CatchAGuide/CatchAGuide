@@ -168,9 +168,11 @@ input[type=number] {
                                         <div class="form-group">
                                             <label for="location">Location</label>
                                             <input id="searchPlace" class="form-control" type="text" placeholder="Search Location" name="filters[place]" value="{{ $place }}" autocomplete="on">
-                                            <input type="hidden" id="placeLat"  value="{{ $placeLat }}" name="filters[placeLat]"/>
-                                            <input type="hidden" id="placeLng" value="{{ $placeLng }}" name="filters[placeLng]"/>
+                                            <input type="text" id="placeLat"  value="{{ $placeLat }}" name="filters[placeLat]"/>
+                                            <input type="text" id="placeLng" value="{{ $placeLng }}" name="filters[placeLng]"/>
                                             <input type="hidden" id="country" value="{{ $country }}"  name="filters[country]"/>
+                                            <input type="hidden" id="city" value="{{ $city }}"  name="filters[city]"/>
+                                            <input type="hidden" id="region" value="{{ $region }}"  name="filters[region]"/>
                                         </div>
 
                                     </div>
@@ -277,18 +279,26 @@ input[type=number] {
             document.getElementById('placeLat').value = place.geometry.location.lat();
             document.getElementById('placeLng').value = place.geometry.location.lng();
             var country = null;
+            var city = null;
+            var region = null;
+            
             for (var i = 0; i < place.address_components.length; i++) {
                 for (var j = 0; j < place.address_components[i].types.length; j++) {
                     if (place.address_components[i].types[j] === 'country') {
                         country = place.address_components[i].long_name;
-                        break;
+                    }
+                    if (place.address_components[i].types[j] === 'locality') {
+                        city = place.address_components[i].long_name;
+                    }
+                    if (place.address_components[i].types[j] === 'administrative_area_level_1') {
+                        region = place.address_components[i].long_name;
                     }
                 }
-                if (country) {
-                    break;
-                }
             }
-            document.getElementById('country').value = country;
+            
+            document.getElementById('country').value = country || '';
+            document.getElementById('city').value = city || '';
+            document.getElementById('region').value = region || '';
         });
     }
 
