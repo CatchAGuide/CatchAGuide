@@ -196,7 +196,7 @@
                     <div class="location-row">
                         <div class="location">
                             <a href="#" class="fs-6 text-decoration-none text-muted">
-                                <i class="bi bi-geo-alt"></i>@lang('guidings.Fishing_Trip') <strong>{{$vacation->location}}</strong>
+                                <i class="bi bi-geo-alt"></i>{{ translate('Fishing Trip in') }} <strong>{{$vacation->location}}</strong>
                             </a>
                         </div>
                         <div class="location-map">
