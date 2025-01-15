@@ -693,6 +693,11 @@
 }
 
 @media (max-width: 992px) {
+    #guidings-page {
+        .tabs-container{
+            display: none;
+        }
+    }
     #guidings-form {
         .monthly-selection-item {
             width: calc(33.33% - 10px);
