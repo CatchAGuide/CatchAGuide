@@ -25,7 +25,12 @@
                     <a class="side-menu__item {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.customers.index') }}"><i class="side-menu__icon fe fe-users"></i><span class="side-menu__label">Customers</span></a>
                     <a class="side-menu__item {{ request()->routeIs('admin.guides.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.guides.index') }}"><i class="side-menu__icon fe fe-anchor"></i><span class="side-menu__label">Guides</span></a>
                     <a class="side-menu__item {{ request()->routeIs('admin.guidings.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.guidings.index') }}"><i class="side-menu__icon fe fe-briefcase"></i><span class="side-menu__label">Guidings</span></a>
-                    <a class="side-menu__item {{ request()->routeIs('admin.vacations.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.vacations.index') }}"><i class="side-menu__icon fa fa-ship"></i><span class="side-menu__label">Holidays</span></a>
+                    
+                    <a class="side-menu__item {{ request()->routeIs('admin.holidays.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#"><i class="side-menu__icon fe fe-book-open"></i><span class="side-menu__label">Holidays</span><i class="angle fe fe-chevron-right"></i></a>
+                    <ul class="slide-menu">
+                        <li><a href="{{ route('admin.vacations.index') }}" class="slide-item  {{ request()->routeIs('admin.vacations.index') ? 'active' : '' }}"> List</a></li>
+                        <li><a href="{{ route('admin.vacations.bookings') }}" class="slide-item  {{ request()->routeIs('admin.vacations.bookings') ? 'active' : '' }}"> Bookings</a></li>
+                    </ul>
                     <a class="side-menu__item {{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.bookings.index') }}"><i class="side-menu__icon fe fe-dollar-sign"></i><span class="side-menu__label">Bookings</span></a>
                     {{-- <a class="side-menu__item {{ request()->routeIs('admin.payments.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.payments.index') }}"><i class="side-menu__icon fe fe-credit-card"></i><span class="side-menu__label">Zahlungen</span></a> --}}
                     <a class="side-menu__item {{ request()->routeIs('admin.guide-requests.index') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.guide-requests.index') }}"><i class="side-menu__icon fe fe-airplay"></i><span class="side-menu__label">Guide Requests</span></a>

@@ -282,8 +282,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/deletepayments/{id}', [AdminPaymentsController::class, 'deletepayments'])->name('deletepayments');
         });
 
-        Route::resource('vacations', AdminVacationsController::class);
+        Route::resource('vacations', AdminVacationsController::class)->except('show');
         Route::get('vacations/changeVacationStatus/{id}', [AdminVacationsController::class, 'changeVacationStatus'])->name('changeVacationStatus');
+        Route::get('vacations/bookings', [AdminVacationsController::class, 'bookings'])->name('vacations.bookings');
 
         Route::prefix('settings')->name('settings.')->group(function () {
             

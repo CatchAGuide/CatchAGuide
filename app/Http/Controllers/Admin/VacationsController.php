@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Vacation;
+use App\Models\VacationBooking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,12 @@ class VacationsController extends Controller
     {
         $vacations = Vacation::all();
         return view('admin.pages.vacations.index',compact('vacations'));
+    }
+
+    public function bookings()
+    {
+        $bookings = VacationBooking::with('vacation', 'package', 'accommodation', 'boat', 'guiding')->orderBy('created_at', 'desc')->get();
+        return view('admin.pages.vacations.bookings',compact('bookings'));
     }
 
     public function create()

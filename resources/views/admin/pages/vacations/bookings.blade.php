@@ -78,7 +78,7 @@
                     <div class="card">
                         <div class="card-header">
                             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addVacationModal">
-                                <i class="fas fa-plus"></i>Vacation
+                                <i class="fas fa-plus"></i>Bookings
                             </button>
                         </div>
                         <div class="card-body table-responsive">
@@ -86,32 +86,48 @@
                                 <thead>
                                     <tr>
                                         <th class="wd-15p border-bottom-0">ID</th>
-                                        <th class="wd-15p border-bottom-0">Name Name of the Vacation</th>
-                                        <th class="wd-10p border-bottom-0">Price per Person</th>
-                                        <th class="wd-10p border-bottom-0">Accommodation Price</th>
-                                        <th class="wd-25p border-bottom-0">Guiding Price</th>
+                                        <th class="wd-15p border-bottom-0">Guest Name</th>
+                                        <th class="wd-10p border-bottom-0">Contact Information</th>
+                                        <th class="wd-10p border-bottom-0">Booking Details</th>
+                                        <th class="wd-10p border-bottom-0">Total Booking Price</th>
+                                        <th class="wd-10p border-bottom-0">Status</th>
                                         <th class="wd-25p border-bottom-0">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($vacations as $vacation)
+                                    @foreach($bookings as $booking)
                                     <tr>
-                                        <td>{{$vacation->id}}</td>
+                                        <td>{{$booking->id}}</td>
+                                        <td>
+                                            {{$booking->title}} {{$booking->name}} {{$booking->surname}}
+                                        </td>
                                         <td>
                                             <div class="d-flex flex-column">
-                                                <div class="fw-bold">{{$vacation->title}}</div>
-                                                <div class="text-info">{{$vacation->location}}</div>
+                                                @if($booking->package)
+                                                    <div class="text-info">Package: {{$booking->package->title}}</div>
+                                                @endif
+                                                @if($booking->accommodation)
+                                                    <div class="text-info">Accommodation: {{$booking->accommodation->title}}</div>
+                                                @endif
+                                                @if($booking->boat)
+                                                    <div class="text-info">Boat: {{$booking->boat->title}}</div>
+                                                @endif
+                                                @if($booking->guiding)
+                                                    <div class="text-info">Guiding: {{$booking->guiding->title}}</div>
+                                                @endif
                                             </div>
-       
                                         </td>
                                         <td>
-                                            {{$vacation->price_per_person}}
+                                            <div class="d-flex flex-column">
+                                                <div class="fa fa-phone">{{$booking->phone}}</div>
+                                                <div class="fa fa-envelope">{{$booking->email}}</div>
+                                            </div>
                                         </td>
                                         <td>
-                                            {{$vacation->accommodation_price}}
+                                            {{$booking->total_price}}
                                         </td>
                                         <td>
-                                            {{$vacation->guiding_price}}
+                                            {{$booking->status}}
                                         </td>
                                         <td class="text-center">
                                             <div class="btn-group">
@@ -123,7 +139,7 @@
                                                 <a href="#" onclick="editVacation({{ $vacation->id }})" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#addVacationModal">
                                                     <i class="fa fa-pen-to-square"></i>
                                                 </a>
-                                                <a href="#" class="btn btn-sm btn-primary"><i class="fa fa-search"></i></a>
+                                                <a href="{{ route('admin.vacations', $vacation) }}" class="btn btn-sm btn-primary"><i class="fa fa-search"></i></a>
                                             </div>
                                         </td>
                                     </tr>
@@ -803,37 +819,6 @@
                             const hiddenField = form.querySelector(`input[name="${field}"]`);
                             if (hiddenField) {
                                 hiddenField.value = '';
-                            }
-                        });
-                    }
-                }
-
-                // Handle extras separately from other dynamic items
-                if (data.extras && Array.isArray(data.extras)) {
-                    console.log(data.extras);
-                    const extrasContainer = document.getElementById('extra-items');
-                    if (extrasContainer) {
-                        extrasContainer.innerHTML = ''; // Clear existing extras
-                        
-                        data.extras.forEach((extra, index) => {
-                            // First add the template
-                            const extraTemplate = getItemTemplate('extra', index);
-                            extrasContainer.insertAdjacentHTML('beforeend', extraTemplate);
-                            
-                            // Then get the newly added card and set values
-                            const card = extrasContainer.lastElementChild;
-                            if (card) {
-                                // Find and set each field
-                                const fields = {
-                                    description: card.querySelector(`textarea[name="extras[${index}][description]"]`),
-                                    price: card.querySelector(`input[name="extras[${index}][price]"]`),
-                                    price_type: card.querySelector(`select[name="extras[${index}][price_type]"]`)
-                                };
-
-                                // Set values only if elements exist
-                                if (fields.description) fields.description.value = extra.description || '';
-                                if (fields.price) fields.price.value = extra.price || '';
-                                if (fields.price_type) fields.price_type.value = extra.type || 'per_person';
                             }
                         });
                     }
