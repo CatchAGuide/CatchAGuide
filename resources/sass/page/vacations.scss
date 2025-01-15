@@ -100,5 +100,82 @@
     //     box-shadow: ;
     // }
   }
+  .inclusions{
+    .header-container{
+        span{
+            color: $font-color;
+        }
+    }
+    .table th {
+        text-align: left;
+        width: 150px !important;
+        font-size: 16px;
+        color: #787780;
+        font-weight: 400;
+      }
+  
+      .table td {
+        width: 70%;
+        font-size: 16px;
+        color: #787780;
+      }
+  }
+}
+.vacations-book-mobile{
+  display: none;
+}
 
+
+@media (max-width: 992px) {
+  .vacations-book-mobile {
+    position: fixed;
+    bottom: 0;
+    z-index: 2;
+    width: 100%;
+    display: block;
+    background-color:#faf5ee;
+    padding: 16px;
+    display: flex;
+    justify-content: center;
+    .tour-details-two__book-tours {
+      padding: 0;
+    }
+  
+    .booking-form-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-direction: column;
+      gap: 16px;
+  
+      .booking-select {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        align-items: center;
+      }
+  
+      .booking-price {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        font-weight: 600;
+        font-size: 18px;
+        min-width: 150px;
+  
+        #priceDisplay {
+          text-decoration: underline 2px $primary-color !important;
+        }
+      }
+    }
+  
+    .booking-price-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+    }
+  }
 }

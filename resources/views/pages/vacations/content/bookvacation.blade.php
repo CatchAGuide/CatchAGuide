@@ -1,5 +1,5 @@
-<div class="col-md-12 tour-details-two__sticky sticky-lg-top {{$agent->ismobile() ? 'text-center' : ''}}">
-    <div class="tour-details-two__sidebar">
+<div class="col-md-12 {{$agent->ismobile() ? 'text-center' : ''}}">
+    <div class="">
         <div class="tour-details-two__book-tours">
             <h3 class="tour-details-two__sidebar-title d-none d-md-block">{{ translate('Book Vacation') }}</h3>
             <div class="card-body">
