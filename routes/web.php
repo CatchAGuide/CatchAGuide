@@ -196,7 +196,7 @@ Route::post('newguidings', [GuidingsController::class, 'guidingsStore'])->name('
 Route::resource('vacations', VacationsController::class);
 Route::post('/vacation-booking', [VacationBookingController::class, 'store'])
     ->name('vacation.booking.store')
-    ->middleware('web');
+    ->middleware('web'); 
 
 Route::get('searchrequest', [GuidingsController::class, 'bookingrequest'])->name('guidings.request');
 Route::post('searchrequest/store', [GuidingsController::class, 'bookingRequestStore'])->name('store.request');
@@ -285,6 +285,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('vacations', AdminVacationsController::class)->except('show');
         Route::get('vacations/changeVacationStatus/{id}', [AdminVacationsController::class, 'changeVacationStatus'])->name('changeVacationStatus');
         Route::get('vacations/bookings', [AdminVacationsController::class, 'bookings'])->name('vacations.bookings');
+        Route::get('vacations/bookings/{booking}', [AdminVacationsController::class, 'show'])->name('vacations.bookings.show');
 
         Route::prefix('settings')->name('settings.')->group(function () {
             

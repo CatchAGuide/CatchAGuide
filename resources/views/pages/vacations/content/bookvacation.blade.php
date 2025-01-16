@@ -323,6 +323,31 @@
     </div>
 </div>
 
+<!-- Add thank you modal -->
+<div class="modal fade" 
+     id="thankYouModal" 
+     tabindex="-1" 
+     aria-labelledby="thankYouModalLabel" 
+     aria-hidden="true"
+     data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center px-4 py-5">
+                <i class="fas fa-check-circle text-success mb-4" style="font-size: 4rem;"></i>
+                <h3 class="mb-4">{{ translate('Thank You for Your Booking Request!') }}</h3>
+                <p class="mb-4">{{ translate('We have received your booking request and will process it shortly. You will receive a confirmation email with further details.') }}</p>
+                <p class="text-muted mb-4">{{ translate('Booking Reference:') }} <span id="bookingReference"></span></p>
+                <button type="button" class="btn btn-orange" data-bs-dismiss="modal">
+                    {{ translate('Close') }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     // Create translations object for JavaScript
     const translations = {
@@ -1032,6 +1057,116 @@
                 updateTotalPrice();
             });
         });
+
+        // Add these date-related handlers near the top of the DOMContentLoaded function
+        const startDateInput = form.querySelector('input[name="start_date"]');
+        const endDateInput = form.querySelector('input[name="end_date"]');
+
+        // Set minimum date to today for start date
+        const today = new Date();
+        const todayFormatted = today.toISOString().split('T')[0];
+        startDateInput.min = todayFormatted;
+
+        // Handle start date changes
+        startDateInput.addEventListener('change', function() {
+            const selectedStartDate = new Date(this.value);
+            
+            // Set the minimum end date to the day after the selected start date
+            const nextDay = new Date(selectedStartDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            const nextDayFormatted = nextDay.toISOString().split('T')[0];
+            
+            // Update end date input
+            endDateInput.min = nextDayFormatted;
+            
+            // If end date is before start date, reset it to the next day
+            if (endDateInput.value && new Date(endDateInput.value) <= selectedStartDate) {
+                endDateInput.value = nextDayFormatted;
+            }
+            
+            // If end date is empty, set it to next day
+            if (!endDateInput.value) {
+                endDateInput.value = nextDayFormatted;
+            }
+
+            updateProceedButton();
+            updateTotalPrice();
+        });
+
+        // Handle end date changes
+        endDateInput.addEventListener('change', function() {
+            updateProceedButton();
+            updateTotalPrice();
+        });
+
+        // Update the form submission handling
+        document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(this);
+            
+            // Disable submit button and show loading state
+            const submitBtn = document.getElementById('proceedToBookingBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{{ translate("Processing...") }}';
+            
+            // Submit form via AJAX
+            fetch('{{ route("vacation.booking.store") }}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Hide checkout modal
+                    const checkoutModal = bootstrap.Modal.getInstance(document.getElementById('checkoutModal'));
+                    checkoutModal.hide();
+                    
+                    // Set booking reference in thank you modal
+                    document.getElementById('bookingReference').textContent = data.booking.id;
+                    
+                    // Show thank you modal
+                    const thankYouModal = new bootstrap.Modal(document.getElementById('thankYouModal'));
+                    thankYouModal.show();
+                    
+                    // Reset form
+                    this.reset();
+                    bookingForm.reset();
+                } else {
+                    // Handle error
+                    alert(data.message || '{{ translate("An error occurred. Please try again.") }}');
+                }
+            })
+            .catch(error => {
+                error.text().then(errorText => {
+                    try {
+                        const errorData = JSON.parse(errorText);
+                        console.log(errorData);
+                        alert(errorData.message || '{{ translate("An error occurred. Please try again.") }}');
+                    } catch (e) {
+                        // If not valid JSON, show generic error
+                        alert('{{ translate("An error occurred. Please try again.") }}');
+                    }
+                }).catch(() => {
+                    alert('{{ translate("An error occurred. Please try again.") }}');
+                });
+            })
+            .finally(() => {
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '{{ translate("Proceed to booking") }}';
+            });
+        });
+
+        // Add event listener for thank you modal close
+        const thankYouModal = document.getElementById('thankYouModal');
+        thankYouModal.addEventListener('hidden.bs.modal', function () {
+            window.location.href = '{{ route("vacations.index") }}';
+        });
     });
 </script>
 
@@ -1283,5 +1418,33 @@
         font-weight: 500;
         color: #fd5d14;
         font-size: 0.95rem;
+    }
+
+    /* Add styles for thank you modal */
+    #thankYouModal .modal-content {
+        border-radius: 1rem;
+        border: none;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    #thankYouModal .modal-header {
+        padding: 1.5rem 1.5rem 0;
+    }
+
+    #thankYouModal .modal-body {
+        padding: 2rem;
+    }
+
+    #thankYouModal .fa-check-circle {
+        color: #28a745;
+    }
+
+    #thankYouModal .btn-orange:hover {
+        opacity: 0.9;
+    }
+
+    #bookingReference {
+        font-weight: bold;
+        color: #fd5d14;
     }
 </style>

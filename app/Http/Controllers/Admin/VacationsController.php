@@ -407,4 +407,29 @@ class VacationsController extends Controller
 
         return $galeryImages;
     }
+
+    public function show(VacationBooking $booking)
+    {
+        try {
+            // Eager load all the relationships we need
+            $booking->load([
+                'vacation',
+                'package',
+                'accommodation',
+                'boat',
+                'guiding'
+            ]);
+
+            return view('admin.pages.vacations.show', compact('booking'));
+        } catch (\Exception $e) {
+            Log::error('Error in vacation booking show:', [
+                'error' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()
+                ->route('admin.vacations.bookings')
+                ->with('error', 'An error occurred while loading the booking details: ' . $e->getMessage());
+        }
+    }
 }

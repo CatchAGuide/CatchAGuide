@@ -104,16 +104,16 @@
                                         <td>
                                             <div class="d-flex flex-column">
                                                 @if($booking->package)
-                                                    <div class="text-info">Package: {{$booking->package->title}}</div>
+                                                    <div class="text-info">Package: {{$booking->package->title ?? $booking->package->id}}</div>
                                                 @endif
                                                 @if($booking->accommodation)
-                                                    <div class="text-info">Accommodation: {{$booking->accommodation->title}}</div>
+                                                    <div class="text-info">Accommodation: {{$booking->accommodation->title ?? $booking->accommodation->id}}</div>
                                                 @endif
                                                 @if($booking->boat)
-                                                    <div class="text-info">Boat: {{$booking->boat->title}}</div>
+                                                    <div class="text-info">Boat: {{$booking->boat->title ?? $booking->boat->id}}</div>
                                                 @endif
                                                 @if($booking->guiding)
-                                                    <div class="text-info">Guiding: {{$booking->guiding->title}}</div>
+                                                    <div class="text-info">Guiding: {{$booking->guiding->title ?? $booking->guiding->id}}</div>
                                                 @endif
                                             </div>
                                         </td>
@@ -131,15 +131,15 @@
                                         </td>
                                         <td class="text-center">
                                             <div class="btn-group">
-                                                @if($vacation->status == 1)
-                                                    <a href="{{ route('admin.changeVacationStatus', $vacation->id) }}" title="Diactivate" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></a>
+                                                @if($booking->status == 1)
+                                                    <a href="{{ route('admin.changeVacationStatus', $booking->id) }}" title="Diactivate" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></a>
                                                 @else
-                                                    <a href="{{ route('admin.changeVacationStatus', $vacation->id) }}" title="Activate" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
+                                                    <a href="{{ route('admin.changeVacationStatus', $booking->id) }}" title="Activate" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
                                                 @endif
-                                                <a href="#" onclick="editVacation({{ $vacation->id }})" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#addVacationModal">
+                                                <a href="#" onclick="editVacation({{ $booking->id }})" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#addVacationModal">
                                                     <i class="fa fa-pen-to-square"></i>
                                                 </a>
-                                                <a href="{{ route('admin.vacations', $vacation) }}" class="btn btn-sm btn-primary"><i class="fa fa-search"></i></a>
+                                                <a href="{{ route('admin.vacations.bookings.show', $booking->id) }}" class="btn btn-sm btn-primary"><i class="fa fa-search"></i></a>
                                             </div>
                                         </td>
                                     </tr>
