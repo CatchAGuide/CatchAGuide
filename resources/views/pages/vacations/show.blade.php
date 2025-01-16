@@ -735,42 +735,42 @@
             <div class="description-container inclusions card p-3 mb-5">
                 <div class="description-list">
                     @if ($vacation->included_services && !empty(json_decode($vacation->included_services)))
-                    <div class="description-item">
-                        <div class="header-container">
-                            <span>{{ translate('Included Services')}}</span>
+                        <div class="description-item">
+                            <div class="header-container">
+                                <span>{{ translate('Included Services')}}</span>
+                            </div>
+                            <p class="text-wrapper">
+                                {!! implode(', ', json_decode($vacation->included_services)) !!}
+                            </p>
                         </div>
-                        <p class="text-wrapper">
-                            {!! implode(', ', json_decode($vacation->included_services)) !!}
-                        </p>
-                    </div>
                     @endif
                     @if ($vacation->extras && count($vacation->extras) > 0)
-                    <div class="description-item">
-                        <div class="header-container">
-                            <span>{{ translate('Extras')}}</span>
-                        </div>
-                        
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>{{ translate('Description') }}</th>
-                                        <th>{{ translate('Price') }}</th>
-                                        <th style="min-width:100px !important">{{ translate('Price Type') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($vacation->extras as $itemIndex => $item)
+                        <div class="description-item">
+                            <div class="header-container">
+                                <span>{{ translate('Extras')}}</span>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
                                         <tr>
-                                            <td>{{ $item->description }}</td>
-                                            <td>€{{ number_format($item->price, (floor($item->price) == $item->price) ? 0 : 2, '.', ',') }}</td>
-                                            <td style="text-transform: capitalize; min-width:100px !important">{{ str_replace('_', ' ', $item->type) }}</td>
+                                            <th>{{ translate('Description') }}</th>
+                                            <th>{{ translate('Price') }}</th>
+                                            <th style="min-width:100px !important">{{ translate('Price Type') }}</th>
                                         </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($vacation->extras as $itemIndex => $item)
+                                            <tr>
+                                                <td>{{ $item->description }}</td>
+                                                <td>€{{ number_format($item->price, (floor($item->price) == $item->price) ? 0 : 2, '.', ',') }}</td>
+                                                <td style="text-transform: capitalize; min-width:100px !important">{{ str_replace('_', ' ', $item->type) }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
                     @endif
                 </div>
             </div>

@@ -68,36 +68,43 @@
                         @else
                             <div id="custom-options" class="booking-options mb-3">
                         @endif
-                            <div class="form-group mb-3">
-                                <label>{{ translate('Accommodation') }}</label>
-                                <select class="form-control" name="accommodation_id">
-                                    <option value="" selected>{{ translate('No accommodation needed') }}</option>
-                                    @foreach($vacation->accommodations as $accommodationIndex => $accommodation)
-                                        <option value="{{ $accommodation->id }}">{{ !empty($accommodation->title) ? $accommodation->title : translate('Accommodation ' . ($accommodationIndex + 1)) }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            
-                            <div class="form-group mb-3">
-                                <label>{{ translate('Boat Rental') }}</label>
-                                <select class="form-control" name="boat_id">
-                                    <option value="" selected>{{ translate('No boat needed') }}</option>
-                                    @foreach($vacation->boats as $boatIndex => $boat)
-                                        <option value="{{ $boat->id }}">{{ !empty($boat->title) ? $boat->title : translate('Boat ' . ($boatIndex + 1)) }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+
+                            @if ($vacation->accommodations && count($vacation->accommodations) > 0)
+                                <div class="form-group mb-3">
+                                    <label>{{ translate('Accommodation') }}</label>
+                                    <select class="form-control" name="accommodation_id">
+                                        <option value="" selected>{{ translate('No accommodation needed') }}</option>
+                                        @foreach($vacation->accommodations as $accommodationIndex => $accommodation)
+                                            <option value="{{ $accommodation->id }}">{{ !empty($accommodation->title) ? $accommodation->title : translate('Accommodation ' . ($accommodationIndex + 1)) }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endif
+
+                            @if ($vacation->boats && count($vacation->boats) > 0)
+                                <div class="form-group mb-3">
+                                    <label>{{ translate('Boat Rental') }}</label>
+                                    <select class="form-control" name="boat_id">
+                                        <option value="" selected>{{ translate('No boat needed') }}</option>
+                                        @foreach($vacation->boats as $boatIndex => $boat)
+                                            <option value="{{ $boat->id }}">{{ !empty($boat->title) ? $boat->title : translate('Boat ' . ($boatIndex + 1)) }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endif
                         </div>
 
-                        <div class="form-group mb-3">
-                            <label>{{ translate('Guiding') }}</label>
-                            <select class="form-control" name="guiding_id">
-                                <option value="" selected>{{ translate('No guiding needed') }}</option>
-                                @foreach($vacation->guidings as $guidingIndex => $guiding)
-                                    <option value="{{ $guiding->id }}">{{ !empty($guiding->title) ? $guiding->title : translate('Guiding ' . ($guidingIndex + 1)) }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                        @if ($vacation->guidings && count($vacation->guidings) > 0)
+                            <div class="form-group mb-3">
+                                <label>{{ translate('Guiding') }}</label>
+                                <select class="form-control" name="guiding_id">
+                                    <option value="" selected>{{ translate('No guiding needed') }}</option>
+                                    @foreach($vacation->guidings as $guidingIndex => $guiding)
+                                        <option value="{{ $guiding->id }}">{{ !empty($guiding->title) ? $guiding->title : translate('Guiding ' . ($guidingIndex + 1)) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
                         
                         <div class="mb-3">
                             <div class="form-check">
@@ -106,37 +113,39 @@
                             </div>
                         </div>
                         
-                        <div class="form-group mb-3">
-                            <label>{{ translate('Extra offers') }}</label>
-                            <div class="extra-offers-container">
-                                @foreach($vacation->extras as $extraIndex => $extra)
-                                    <div class="extra-offer-item d-flex align-items-center mb-2">
-                                        <div class="form-check">
-                                            <input type="checkbox" 
-                                                   class="form-check-input extra-offer-checkbox" 
-                                                   id="extra_{{ $extra->id }}" 
-                                                   name="extra_offers[]" 
-                                                   value="{{ $extra->id }}"
-                                                   data-price-type="{{ $extra->type }}">
-                                            <label class="form-check-label" for="extra_{{ $extra->id }}">
-                                                {{ !empty($extra->description) ? $extra->description : translate('Extra offer ' . ($extraIndex + 1)) }}
-                                                (€{{ number_format($extra->price, 2) }})
-                                            </label>
-                                        </div>
-                                        @if($extra->type === 'per_person')
-                                            <div class="quantity-input ms-2" style="display: none;">
-                                                <input type="number" 
-                                                       class="form-control form-control-sm extra-quantity" 
-                                                       name="extra_quantity[{{ $extra->id }}]" 
-                                                       min="1" 
-                                                       value="1" 
-                                                       style="width: 80px;">
+                        @if ($vacation->extras && count($vacation->extras) > 0)
+                            <div class="form-group mb-3">
+                                <label>{{ translate('Extra offers') }}</label>
+                                <div class="extra-offers-container">
+                                    @foreach($vacation->extras as $extraIndex => $extra)
+                                        <div class="extra-offer-item d-flex align-items-center mb-2">
+                                            <div class="form-check">
+                                                <input type="checkbox" 
+                                                    class="form-check-input extra-offer-checkbox" 
+                                                    id="extra_{{ $extra->id }}" 
+                                                    name="extra_offers[]" 
+                                                    value="{{ $extra->id }}"
+                                                    data-price-type="{{ $extra->type }}">
+                                                <label class="form-check-label" for="extra_{{ $extra->id }}">
+                                                    {{ !empty($extra->description) ? $extra->description : translate('Extra offer ' . ($extraIndex + 1)) }}
+                                                    (€{{ number_format($extra->price, 2) }})
+                                                </label>
                                             </div>
-                                        @endif
-                                    </div>
-                                @endforeach
+                                            @if($extra->type === 'per_person')
+                                                <div class="quantity-input ms-2" style="display: none;">
+                                                    <input type="number" 
+                                                        class="form-control form-control-sm extra-quantity" 
+                                                        name="extra_quantity[{{ $extra->id }}]" 
+                                                        min="1" 
+                                                        value="1" 
+                                                        style="width: 80px;">
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
-                        </div>
+                        @endif
 
                         <div class="total-price-container mb-4">
                             <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
