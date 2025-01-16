@@ -6,6 +6,8 @@ use App\Models\VacationBooking;
 use Illuminate\Http\Request;
 use App\Models\Vacation;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\Ceo\VacationBookingNotification;
 
 class VacationBookingController extends Controller
 {
@@ -75,6 +77,16 @@ class VacationBookingController extends Controller
             'total_price' => $totalPrice,
             'status' => 'pending'
         ]);
+
+        // Send email notification
+        try {
+            Mail::to(env('CEO_EMAIL'))->send(new VacationBookingNotification($booking));
+        } catch (\Exception $e) {
+            Log::error('Failed to send booking notification email:', [
+                'booking_id' => $booking->id,
+                'error' => $e->getMessage()
+            ]);
+        }
 
         // Return a JSON response for AJAX handling
         return response()->json([
