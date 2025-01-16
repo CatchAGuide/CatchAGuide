@@ -23,7 +23,7 @@ A new booking request has been received with the following details:
 {{ $booking->comments }}
 @endif
 
-@component('mail::button', ['url' => config('app.url').'/admin/bookings/'.$booking->id])
+@component('mail::button', ['url' => config('app.url').'/admin/vacationsbookings/'.$booking->id])
 View Booking Details
 @endcomponent
 
