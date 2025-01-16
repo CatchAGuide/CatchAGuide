@@ -602,10 +602,13 @@
                                                                 </thead>
                                                                 <tbody>
                                                                     @foreach($value as $index => $price)
+                                                                        @php
+                                                                            $pricePerPerson = $price / ($index + 1);
+                                                                        @endphp
                                                                         <tr>
                                                                             <td style="width: 50px !important;">{{ $index + 1 }}</td>
                                                                             <td style="width: 150px !important;">
-                                                                                €{{ number_format($price, (floor($price) == $price) ? 0 : 2, '.', ',') }} p.P.
+                                                                                €{{ number_format($pricePerPerson, (floor($pricePerPerson) == $pricePerPerson) ? 0 : 2, '.', ',') }} p.P.
                                                                             </td>
                                                                         </tr>
                                                                     @endforeach
@@ -708,9 +711,12 @@
                                                                         </thead>
                                                                         <tbody>
                                                                             @foreach($value as $index => $price)
+                                                                                @php
+                                                                                    $pricePerPerson = $price / ($index + 1);
+                                                                                @endphp
                                                                                 <tr>
                                                                                     <td>{{ $index + 1 }}</td>
-                                                                                    <td>€{{ number_format($price, (floor($price) == $price) ? 0 : 2, '.', ',') }} p.P.</td>
+                                                                                    <td>€{{ number_format($pricePerPerson, (floor($pricePerPerson) == $pricePerPerson) ? 0 : 2, '.', ',') }} p.P.</td>
                                                                                 </tr>
                                                                             @endforeach
                                                                         </tbody>
@@ -761,9 +767,12 @@
                                     </thead>
                                     <tbody>
                                         @foreach($vacation->extras as $itemIndex => $item)
+                                            @php
+                                                $pricePerPerson = $item->price / ($index + 1);
+                                            @endphp
                                             <tr>
                                                 <td>{{ $item->description }}</td>
-                                                <td>€{{ number_format($item->price, (floor($item->price) == $item->price) ? 0 : 2, '.', ',') }}</td>
+                                                <td>€{{ number_format($pricePerPerson, (floor($pricePerPerson) == $pricePerPerson) ? 0 : 2, '.', ',') }} p.P.</td>
                                                 <td style="text-transform: capitalize; min-width:100px !important">{{ str_replace('_', ' ', $item->type) }}</td>
                                             </tr>
                                         @endforeach

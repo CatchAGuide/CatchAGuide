@@ -221,7 +221,7 @@ class DestinationCountryController extends Controller
 
         $placeLat = $filterData['placeLat'];
         $placeLng = $filterData['placeLng'];
-        $city = $filterData['city'];
+        $city = $filterData['city'] ?? null;
         $country = $filterData['country'];
 
         $title .= __('guidings.Country') . ' ' . $country . ' | ';

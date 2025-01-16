@@ -256,20 +256,6 @@
         const accommodationFields = `
             <div class="row mb-3">
                 <div class="col-md-4">
-                    <label class="form-label">Living Area</label>
-                    <input type="text" 
-                           name="${type}s[${index}][living_area]" 
-                           class="form-control" 
-                           placeholder="e.g., 120 m²">
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Bed Count</label>
-                    <input type="text" 
-                           name="${type}s[${index}][bed_count]" 
-                           class="form-control" 
-                           placeholder="e.g., 2 double beds, 1 single">
-                </div>
-                <div class="col-md-4">
                     <label class="form-label">Facilities</label>
                     <input type="text" 
                            name="${type}s[${index}][facilities]" 
@@ -282,6 +268,20 @@
                            name="${type}s[${index}][min_rental_days]" 
                            class="form-control" 
                            placeholder="e.g., 3 days">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Living Area</label>
+                    <input type="text" 
+                           name="${type}s[${index}][living_area]" 
+                           class="form-control" 
+                           placeholder="e.g., 120 m²">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Bed Count</label>
+                    <input type="text" 
+                           name="${type}s[${index}][bed_count]" 
+                           class="form-control" 
+                           placeholder="e.g., 2 double beds, 1 single">
                 </div>
             </div>
         `;
@@ -716,6 +716,7 @@
                             // Set basic fields
                             const descriptionField = card.querySelector(`textarea[name="${type.slice(0, -1)}s[${index}][description]"]`);
                             const capacityField = card.querySelector(`input[name="${type.slice(0, -1)}s[${index}][capacity]"]`);
+                            const titleField = card.querySelector(`input[name="${type.slice(0, -1)}s[${index}][title]"]`);
                             
                             if (descriptionField) descriptionField.value = item.description || '';
                             if (capacityField) {
@@ -724,6 +725,7 @@
                                 const event = new Event('input', { bubbles: true });
                                 capacityField.dispatchEvent(event);
                             }
+                            if (titleField) titleField.value = item.title || '';
                             
                             // Handle dynamic fields
                             if (item.dynamic_fields) {
@@ -819,7 +821,6 @@
 
                 // Handle extras separately
                 if (data.extras && Array.isArray(data.extras)) {
-                    console.log(data.extras);
                     const extrasContainer = document.getElementById('extra-items');
                     if (extrasContainer) {
                         extrasContainer.innerHTML = ''; // Clear existing extras
@@ -881,74 +882,6 @@
             CKEDITOR.instances.surroundings_description.setData('');
         }
     });
-
-    // Add this to your editVacation function
-    function loadDynamicItems(data) {
-        ['accommodation', 'boat', 'package', 'guiding'].forEach(type => {
-            const container = document.getElementById(`${type}-items`);
-            if (container) {
-                container.innerHTML = '';
-                
-                if (data[`${type}s`] && Array.isArray(data[`${type}s`])) {
-                    data[`${type}s`].forEach((item, index) => {
-                        container.insertAdjacentHTML('beforeend', getItemTemplate(type, index));
-                        
-                        // Get the newly added card
-                        const card = container.lastElementChild;
-                        
-                        // Set title if exists
-                        if (item.title) {
-                            card.querySelector(`input[name="${type}s[${index}][title]"]`).value = item.title;
-                        }
-                        
-                        // Initialize CKEditor and set content
-                        const textarea = card.querySelector(`textarea[name="${type}s[${index}][description]"]`);
-                        CKEDITOR.replace(textarea);
-                        setTimeout(() => {
-                            CKEDITOR.instances[textarea.id].setData(item.description || '');
-                        }, 100);
-                        
-                        // Fill in the values
-                        card.querySelector('input[name$="[capacity]"]').value = item.capacity;
-                        
-                        // Parse dynamic_fields
-                        const dynamicFields = JSON.parse(item.dynamic_fields || '{}');
-                        
-                        // Fill in type-specific fields
-                        if (type === 'accommodation') {
-                            if (card.querySelector('input[name$="[living_area]"]')) {
-                                card.querySelector('input[name$="[living_area]"]').value = dynamicFields.living_area || '';
-                            }
-                            if (card.querySelector('input[name$="[bed_count]"]')) {
-                                card.querySelector('input[name$="[bed_count]"]').value = dynamicFields.bed_count || '';
-                            }
-                            if (card.querySelector('input[name$="[facilities]"]')) {
-                                card.querySelector('input[name$="[facilities]"]').value = dynamicFields.facilities || '';
-                            }
-                        }
-                        
-                        if (type === 'boat') {
-                            if (card.querySelector('input[name$="[facilities]"]')) {
-                                card.querySelector('input[name$="[facilities]"]').value = dynamicFields.facilities || '';
-                            }
-                        }
-
-                        // Create price inputs
-                        if (dynamicFields.prices) {
-                            createPriceInputs(card, item.capacity, type, index);
-                            const priceInputs = card.querySelectorAll('.individual-price');
-                            dynamicFields.prices.forEach((price, i) => {
-                                if (priceInputs[i]) {
-                                    priceInputs[i].value = price;
-                                }
-                            });
-                            updateTotalPrice(card);
-                        }
-                    });
-                }
-            }
-        });
-    }
 
     function removeAllImages() {
         // Clear the preview container

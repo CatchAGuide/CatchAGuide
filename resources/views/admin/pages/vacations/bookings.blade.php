@@ -132,13 +132,10 @@
                                         <td class="text-center">
                                             <div class="btn-group">
                                                 @if($booking->status == 1)
-                                                    <a href="{{ route('admin.changeVacationStatus', $booking->id) }}" title="Diactivate" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></a>
+                                                    <a href="#" title="Diactivate" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></a>
                                                 @else
-                                                    <a href="{{ route('admin.changeVacationStatus', $booking->id) }}" title="Activate" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
+                                                    <a href="#" title="Activate" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
                                                 @endif
-                                                <a href="#" onclick="editVacation({{ $booking->id }})" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#addVacationModal">
-                                                    <i class="fa fa-pen-to-square"></i>
-                                                </a>
                                                 <a href="{{ route('admin.vacations.bookings.show', $booking->id) }}" class="btn btn-sm btn-primary"><i class="fa fa-search"></i></a>
                                             </div>
                                         </td>
@@ -862,74 +859,6 @@
             CKEDITOR.instances.surroundings_description.setData('');
         }
     });
-
-    // Add this to your editVacation function
-    function loadDynamicItems(data) {
-        ['accommodation', 'boat', 'package', 'guiding'].forEach(type => {
-            const container = document.getElementById(`${type}-items`);
-            if (container) {
-                container.innerHTML = '';
-                
-                if (data[`${type}s`] && Array.isArray(data[`${type}s`])) {
-                    data[`${type}s`].forEach((item, index) => {
-                        container.insertAdjacentHTML('beforeend', getItemTemplate(type, index));
-                        
-                        // Get the newly added card
-                        const card = container.lastElementChild;
-                        
-                        // Set title if exists
-                        if (item.title) {
-                            card.querySelector(`input[name="${type}s[${index}][title]"]`).value = item.title;
-                        }
-                        
-                        // Initialize CKEditor and set content
-                        const textarea = card.querySelector(`textarea[name="${type}s[${index}][description]"]`);
-                        CKEDITOR.replace(textarea);
-                        setTimeout(() => {
-                            CKEDITOR.instances[textarea.id].setData(item.description || '');
-                        }, 100);
-                        
-                        // Fill in the values
-                        card.querySelector('input[name$="[capacity]"]').value = item.capacity;
-                        
-                        // Parse dynamic_fields
-                        const dynamicFields = JSON.parse(item.dynamic_fields || '{}');
-                        
-                        // Fill in type-specific fields
-                        if (type === 'accommodation') {
-                            if (card.querySelector('input[name$="[living_area]"]')) {
-                                card.querySelector('input[name$="[living_area]"]').value = dynamicFields.living_area || '';
-                            }
-                            if (card.querySelector('input[name$="[bed_count]"]')) {
-                                card.querySelector('input[name$="[bed_count]"]').value = dynamicFields.bed_count || '';
-                            }
-                            if (card.querySelector('input[name$="[facilities]"]')) {
-                                card.querySelector('input[name$="[facilities]"]').value = dynamicFields.facilities || '';
-                            }
-                        }
-                        
-                        if (type === 'boat') {
-                            if (card.querySelector('input[name$="[facilities]"]')) {
-                                card.querySelector('input[name$="[facilities]"]').value = dynamicFields.facilities || '';
-                            }
-                        }
-
-                        // Create price inputs
-                        if (dynamicFields.prices) {
-                            createPriceInputs(card, item.capacity, type, index);
-                            const priceInputs = card.querySelectorAll('.individual-price');
-                            dynamicFields.prices.forEach((price, i) => {
-                                if (priceInputs[i]) {
-                                    priceInputs[i].value = price;
-                                }
-                            });
-                            updateTotalPrice(card);
-                        }
-                    });
-                }
-            }
-        });
-    }
 
     function removeAllImages() {
         // Clear the preview container

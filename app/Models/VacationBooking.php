@@ -65,4 +65,9 @@ class VacationBooking extends Model
     {
         return $this->belongsTo(VacationGuiding::class);
     }
+
+    public function extras()
+    {
+        return $this->hasMany(VacationExtra::class);
+    }
 }

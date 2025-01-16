@@ -180,13 +180,13 @@
                             @endif
                         </div>
 
-                        @if($booking->extra_offers)
+                        @if($booking->extra_offers && count($booking->extra_offers) > 0)
                         <div class="mt-3">
                             <div class="detail-label">Extra Services</div>
                             <div class="detail-value">
                                 <ul class="list-unstyled">
                                     @foreach($booking->extra_offers as $extra)
-                                    <li>• {{ $extra['description'] }} - {{ $extra['price'] }}€</li>
+                                    <li>• {{ $extra['description'] ?? 'No description available' }} - {{ $extra['price'] ?? '0' }}€</li>
                                     @endforeach
                                 </ul>
                             </div>

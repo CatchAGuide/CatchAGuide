@@ -15,4 +15,9 @@ class VacationExtra extends Model
     {
         return $this->belongsTo(Vacation::class);
     }
+
+    public function vacationBooking(): BelongsTo
+    {
+        return $this->belongsTo(VacationBooking::class);
+    }
 }
