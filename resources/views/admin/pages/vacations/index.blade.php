@@ -490,12 +490,21 @@
     document.querySelector('#addVacationModal').addEventListener('input', function(e) {
         if (e.target.classList.contains('capacity-input')) {
             const card = e.target.closest('.card');
-            const priceInput = card.querySelector('.price-input');
-            const capacity = parseInt(e.target.value) || 0;
             
-            // Base price calculation (you can adjust this formula)
-            const basePrice = capacity * 100; // Example: $100 per person
-            priceInput.value = basePrice.toFixed(2);
+            // Check if this is an extra item by looking for a parent with id 'extra-items'
+            const isExtra = card.closest('#extra-items');
+            
+            // Only proceed with price calculation if it's not an extra
+            if (!isExtra) {
+                const priceInput = card.querySelector('.price-input');
+                const capacity = parseInt(e.target.value) || 0;
+                
+                // Base price calculation (you can adjust this formula)
+                const basePrice = capacity * 100; // Example: $100 per person
+                if (priceInput) {
+                    priceInput.value = basePrice.toFixed(2);
+                }
+            }
         }
     });
 
@@ -808,7 +817,7 @@
                     }
                 }
 
-                // Handle extras separately from other dynamic items
+                // Handle extras separately
                 if (data.extras && Array.isArray(data.extras)) {
                     console.log(data.extras);
                     const extrasContainer = document.getElementById('extra-items');
@@ -816,25 +825,20 @@
                         extrasContainer.innerHTML = ''; // Clear existing extras
                         
                         data.extras.forEach((extra, index) => {
-                            // First add the template
-                            const extraTemplate = getItemTemplate('extra', index);
-                            extrasContainer.insertAdjacentHTML('beforeend', extraTemplate);
+                            // Add the template
+                            extrasContainer.insertAdjacentHTML('beforeend', getItemTemplate('extra', index));
                             
-                            // Then get the newly added card and set values
+                            // Get the newly added card
                             const card = extrasContainer.lastElementChild;
-                            if (card) {
-                                // Find and set each field
-                                const fields = {
-                                    description: card.querySelector(`textarea[name="extras[${index}][description]"]`),
-                                    price: card.querySelector(`input[name="extras[${index}][price]"]`),
-                                    price_type: card.querySelector(`select[name="extras[${index}][price_type]"]`)
-                                };
-
-                                // Set values only if elements exist
-                                if (fields.description) fields.description.value = extra.description || '';
-                                if (fields.price) fields.price.value = extra.price || '';
-                                if (fields.price_type) fields.price_type.value = extra.type || 'per_person';
-                            }
+                            
+                            // Set the values
+                            const descriptionField = card.querySelector(`textarea[name="extras[${index}][description]"]`);
+                            const priceField = card.querySelector(`input[name="extras[${index}][price]"]`);
+                            const priceTypeField = card.querySelector(`select[name="extras[${index}][price_type]"]`);
+                            
+                            if (descriptionField) descriptionField.value = extra.description || '';
+                            if (priceField) priceField.value = extra.price || '';
+                            if (priceTypeField) priceTypeField.value = extra.type || 'per_person';
                         });
                     }
                 }

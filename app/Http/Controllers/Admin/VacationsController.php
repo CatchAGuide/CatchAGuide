@@ -205,7 +205,7 @@ class VacationsController extends Controller
     public function edit($id)
     {
         try {
-            $vacation = Vacation::with(['accommodations', 'boats', 'packages', 'guidings'])->findOrFail($id);
+            $vacation = Vacation::with(['accommodations', 'boats', 'packages', 'guidings', 'extras'])->findOrFail($id);
             
             // Transform the data to include parsed dynamic_fields
             $data = $vacation->toArray();
@@ -230,9 +230,6 @@ class VacationsController extends Controller
                 $item->dynamic_fields = json_decode($item->dynamic_fields, true);
                 return $item;
             });
-
-            // Debug log
-            \Log::info('Edit vacation data:', ['data' => $data]);
 
             return response()->json($data);
         } catch (\Exception $e) {
