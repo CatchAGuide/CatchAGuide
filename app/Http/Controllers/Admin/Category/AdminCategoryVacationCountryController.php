@@ -4,6 +4,10 @@ namespace App\Http\Controllers\Admin\Category;
 
 use App\Http\Controllers\Controller;
 use App\Models\Destination;
+use App\Models\DestinationFishChart;
+use App\Models\DestinationFishSizeLimit;
+use App\Models\DestinationFishTimeLimit;
+use App\Models\DestinationFaq;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -92,37 +96,37 @@ class AdminCategoryVacationCountryController extends Controller
             $data['thumbnail_path'] = $webp_path;
             $country = Destination::create($data);
 
-            // if ($request->has('fish_chart')) {
-            //     foreach ($request->fish_chart as $key => $value) {
-            //         $value['destination_id'] = $country->id;
-            //         $value['language'] = $request->language;
-            //         DestinationFishChart::create($value);
-            //     }
-            // }
+            if ($request->has('fish_chart')) {
+                foreach ($request->fish_chart as $key => $value) {
+                    $value['destination_id'] = $country->id;
+                    $value['language'] = $request->language;
+                    DestinationFishChart::create($value);
+                }
+            }
 
-            // if ($request->has('fish_size_limit')) {
-            //     foreach ($request->fish_size_limit as $key => $value) {
-            //         $value['destination_id'] = $country->id;
-            //         $value['language'] = $request->language;
-            //         DestinationFishSizeLimit::create($value);
-            //     }
-            // }
+            if ($request->has('fish_size_limit')) {
+                foreach ($request->fish_size_limit as $key => $value) {
+                    $value['destination_id'] = $country->id;
+                    $value['language'] = $request->language;
+                    DestinationFishSizeLimit::create($value);
+                }
+            }
 
-            // if ($request->has('fish_time_limit')) {
-            //     foreach ($request->fish_time_limit as $key => $value) {
-            //         $value['destination_id'] = $country->id;
-            //         $value['language'] = $request->language;
-            //         DestinationFishTimeLimit::create($value);
-            //     }
-            // }
+            if ($request->has('fish_time_limit')) {
+                foreach ($request->fish_time_limit as $key => $value) {
+                    $value['destination_id'] = $country->id;
+                    $value['language'] = $request->language;
+                    DestinationFishTimeLimit::create($value);
+                }
+            }
 
-            // if ($request->has('faq')) {
-            //     foreach ($request->faq as $key => $value) {
-            //         $value['destination_id'] = $country->id;
-            //         $value['language'] = $request->language;
-            //         DestinationFaq::create($value);
-            //     }
-            // }
+            if ($request->has('faq')) {
+                foreach ($request->faq as $key => $value) {
+                    $value['destination_id'] = $country->id;
+                    $value['language'] = $request->language;
+                    DestinationFaq::create($value);
+                }
+            }
 
             DB::commit();
 
@@ -215,57 +219,57 @@ class AdminCategoryVacationCountryController extends Controller
             $data['thumbnail_path'] = $webp_path;
             Destination::whereId($id)->update($data);
 
-            // if ($request->has('fish_chart')) {
-            //     foreach ($request->fish_chart as $key => $value) {
-            //         $value['language'] = $request->language;
-            //         if ($value['id'] == 0) {
-            //             $value['destination_id'] = $id;
-            //             unset($value['id']);
-            //             DestinationFishChart::create($value);
-            //         } else {
-            //             DestinationFishChart::whereId($value['id'])->update($value);
-            //         }
-            //     }
-            // }
+            if ($request->has('fish_chart')) {
+                foreach ($request->fish_chart as $key => $value) {
+                    $value['language'] = $request->language;
+                    if ($value['id'] == 0) {
+                        $value['destination_id'] = $id;
+                        unset($value['id']);
+                        DestinationFishChart::create($value);
+                    } else {
+                        DestinationFishChart::whereId($value['id'])->update($value);
+                    }
+                }
+            }
 
-            // if ($request->has('fish_size_limit')) {
-            //     foreach ($request->fish_size_limit as $key => $value) {
-            //         $value['language'] = $request->language;
-            //         if ($value['id'] == 0) {
-            //             $value['destination_id'] = $id;
-            //             unset($value['id']);
-            //             DestinationFishSizeLimit::create($value);
-            //         } else {
-            //             DestinationFishSizeLimit::whereId($value['id'])->update($value);
-            //         }
-            //     }
-            // }
+            if ($request->has('fish_size_limit')) {
+                foreach ($request->fish_size_limit as $key => $value) {
+                    $value['language'] = $request->language;
+                    if ($value['id'] == 0) {
+                        $value['destination_id'] = $id;
+                        unset($value['id']);
+                        DestinationFishSizeLimit::create($value);
+                    } else {
+                        DestinationFishSizeLimit::whereId($value['id'])->update($value);
+                    }
+                }
+            }
 
-            // if ($request->has('fish_time_limit')) {
-            //     foreach ($request->fish_time_limit as $key => $value) {
-            //         $value['language'] = $request->language;
-            //         if ($value['id'] == 0) {
-            //             $value['destination_id'] = $id;
-            //             unset($value['id']);
-            //             DestinationFishTimeLimit::create($value);
-            //         } else {
-            //             DestinationFishTimeLimit::whereId($value['id'])->update($value);
-            //         }
-            //     }
-            // }
+            if ($request->has('fish_time_limit')) {
+                foreach ($request->fish_time_limit as $key => $value) {
+                    $value['language'] = $request->language;
+                    if ($value['id'] == 0) {
+                        $value['destination_id'] = $id;
+                        unset($value['id']);
+                        DestinationFishTimeLimit::create($value);
+                    } else {
+                        DestinationFishTimeLimit::whereId($value['id'])->update($value);
+                    }
+                }
+            }
 
-            // if ($request->has('faq')) {
-            //     foreach ($request->faq as $key => $value) {
-            //         $value['language'] = $request->language;
-            //         if ($value['id'] == 0) {
-            //             $value['destination_id'] = $id;
-            //             unset($value['id']);
-            //             DestinationFaq::create($value);
-            //         } else {
-            //             DestinationFaq::whereId($value['id'])->update($value);
-            //         }
-            //     }
-            // }
+            if ($request->has('faq')) {
+                foreach ($request->faq as $key => $value) {
+                    $value['language'] = $request->language;
+                    if ($value['id'] == 0) {
+                        $value['destination_id'] = $id;
+                        unset($value['id']);
+                        DestinationFaq::create($value);
+                    } else {
+                        DestinationFaq::whereId($value['id'])->update($value);
+                    }
+                }
+            }
             DB::commit();
 
             return redirect()->back()->with('success', 'Country Successfully Updated!');
