@@ -42,6 +42,7 @@ use App\Http\Controllers\Admin\Category\AdminCategoryRegionController;
 use App\Http\Controllers\Admin\Category\AdminCategoryCityController;
 use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThreadsController;
 use App\Http\Controllers\VacationBookingController;
+use App\Http\Controllers\Admin\Category\AdminCategoryVacationCountryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -364,6 +365,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('category')->name('category.')->group(function () {
             Route::resource('country', AdminCategoryCountryController::class);
+            Route::resource('vacation-country', AdminCategoryVacationCountryController::class);
             Route::resource('region', AdminCategoryRegionController::class);
             Route::resource('city', AdminCategoryCityController::class);
         });

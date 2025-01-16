@@ -84,6 +84,7 @@
                 <ul class="slide-menu">
                     <li><a href="{{ route('admin.newblog.threads.index') }}" class="slide-item  {{ request()->routeIs('admin.newblog.threads.*') ? 'active' : '' }}"> Posts</a></li>
                     <li><a href="{{ route('admin.category.country.index') }}" class="slide-item  {{ request()->routeIs('admin.category.country.*') ? 'active' : '' }}"> Country</a></li>
+                    <li><a href="{{ route('admin.category.vacation-country.index') }}" class="slide-item  {{ request()->routeIs('admin.category.vacation-country.*') ? 'active' : '' }}"> Vacation Country</a></li>
                     <li><a href="{{ route('admin.category.region.index') }}" class="slide-item  {{ request()->routeIs('admin.category.region.*') ? 'active' : '' }}"> Region</a></li>
                     <li><a href="{{ route('admin.category.city.index') }}" class="slide-item  {{ request()->routeIs('admin.category.city.*') ? 'active' : '' }}"> City</a></li>
                 </ul>

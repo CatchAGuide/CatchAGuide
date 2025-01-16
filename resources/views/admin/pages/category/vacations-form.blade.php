@@ -180,8 +180,8 @@ input[type=number] {
 
                                 <div class="form-group pb-3">
                                     <h4><button class="btn btn-secondary btn-sm mb-1" onclick="add_fish_chart_item()" type="button"><i class="fa fa-plus"></i></button> Availability of Fish</h4>
-                                    <input type="text" class="form-control mb-2" placeholder="Title" name="fish_avail_title" id="fish_avail_title" value="{{ $fish_avail_title }}">
-                                    <textarea class="form-control mb-2" cols="20" rows="4" placeholder="Content" name="fish_avail_intro" id="fish_avail_intro">{{ $fish_avail_intro }}</textarea>
+                                    <input type="text" class="form-control mb-2" placeholder="Title" name="fish_avail_title" id="fish_avail_title" value="{{ $fish_avail_title }}" readonly>
+                                    <textarea class="form-control mb-2" cols="20" rows="4" placeholder="Content" name="fish_avail_intro" id="fish_avail_intro" readonly>{{ $fish_avail_intro }}</textarea>
                                     <table class="table table-bordered table-striped" id="fish_chart_table">
                                         <thead>
                                         <tr>
@@ -198,8 +198,8 @@ input[type=number] {
 
                                 <div class="form-group pb-3">
                                     <h4><button class="btn btn-secondary btn-sm mb-1" onclick="add_fish_size_limit_item()" type="button"><i class="fa fa-plus"></i></button> Size Limit</h4>
-                                    <input type="text" class="form-control mb-2" placeholder="Title" name="size_limit_title" id="size_limit_title" value="{{ $size_limit_title }}">
-                                    <textarea class="form-control mb-2" cols="20" rows="4" placeholder="Content" name="size_limit_intro" id="size_limit_intro">{{ $size_limit_intro }}</textarea>
+                                    <input type="text" class="form-control mb-2" placeholder="Title" name="size_limit_title" id="size_limit_title" value="{{ $size_limit_title }}" readonly>
+                                    <textarea class="form-control mb-2" cols="20" rows="4" placeholder="Content" name="size_limit_intro" id="size_limit_intro" readonly>{{ $size_limit_intro }}</textarea>
                                     <table class="table table-bordered table-striped" id="fish_size_limit_table">
                                         <thead>
                                         <tr>
@@ -214,8 +214,8 @@ input[type=number] {
 
                                 <div class="form-group pb-3">
                                     <h4><button class="btn btn-secondary btn-sm mb-1" onclick="add_fish_time_limit_item()" type="button"><i class="fa fa-plus"></i></button> Time Limit</h4>
-                                    <input type="text" class="form-control mb-2" placeholder="Title" name="time_limit_title" id="time_limit_title" value="{{ $time_limit_title }}">
-                                    <textarea class="form-control mb-2" cols="20" rows="4" placeholder="Content" name="time_limit_intro" id="time_limit_intro">{{ $time_limit_intro }}</textarea>
+                                    <input type="text" class="form-control mb-2" placeholder="Title" name="time_limit_title" id="time_limit_title" value="{{ $time_limit_title }}" readonly>
+                                    <textarea class="form-control mb-2" cols="20" rows="4" placeholder="Content" name="time_limit_intro" id="time_limit_intro" readonly>{{ $time_limit_intro }}</textarea>
                                     <table class="table table-bordered table-striped" id="fish_time_limit_table">
                                         <thead>
                                         <tr>
@@ -230,7 +230,7 @@ input[type=number] {
 
                                 <div class="form-group">
                                     <h4><button class="btn btn-secondary btn-sm mb-1" onclick="add_faq_item()" type="button"><i class="fa fa-plus"></i></button> FAQ</h4>
-                                    <input type="text" class="form-control mb-2" placeholder="Title" name="faq_title" id="faq_title" value="{{ $faq_title }}">
+                                    <input type="text" class="form-control mb-2" placeholder="Title" name="faq_title" id="faq_title" value="{{ $faq_title }}" readonly>
                                     <table class="table table-bordered table-striped" id="faq_table">
                                         <thead>
                                         <tr>
@@ -412,7 +412,7 @@ input[type=number] {
                         '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'oct', oct) + '</td>' +
                         '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'nov', nov) + '</td>' +
                         '<td>' + add_fish_chart_item_input(fish_chart_item_counter, 'dec', dec) + '</td></tr>';
-        $('#fish_chart_table tbody').append(row);
+        // $('#fish_chart_table tbody').append(row);
         fish_chart_item_counter++;
     }
 
@@ -432,7 +432,7 @@ input[type=number] {
                         '</td><td>' +
                         '<input class="form-control form-control-sm mb-1" placeholder="Input" name="fish_size_limit[' + fish_size_limit_item_counter + '][data]" type="text" value="' + data + '">' +
                         '</td></tr>';
-        $('#fish_size_limit_table tbody').append(row);
+        // $('#fish_size_limit_table tbody').append(row);
         fish_size_limit_item_counter++;
     }
 
@@ -452,7 +452,7 @@ input[type=number] {
                         '</td><td>' +
                         '<input class="form-control form-control-sm mb-1" placeholder="Input" name="fish_time_limit[' + fish_time_limit_item_counter + '][data]" type="text" value="' + data + '">' +
                         '</td></tr>';
-        $('#fish_time_limit_table tbody').append(row);
+        // $('#fish_time_limit_table tbody').append(row);
         fish_time_limit_item_counter++;
     }
 
@@ -471,7 +471,7 @@ input[type=number] {
                         '</td><td>' +
                         '<input class="form-control form-control-sm" name="faq[' + faq_item_counter + '][answer]" value="' + answer + '" type="text" placeholder="Answer">' +
                         '</td></tr>';
-        $('#faq_table tbody').append(faq_row);
+        // $('#faq_table tbody').append(faq_row);
         faq_item_counter++;
     }
 
