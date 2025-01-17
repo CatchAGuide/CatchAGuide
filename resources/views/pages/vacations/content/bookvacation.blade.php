@@ -1,5 +1,5 @@
-<div class="col-md-12 tour-details-two__sticky sticky-lg-top {{$agent->ismobile() ? 'text-center' : ''}}">
-    <div class="tour-details-two__sidebar">
+<div class="col-md-12 {{$agent->ismobile() ? 'text-center' : ''}}">
+    <div class="">
         <div class="tour-details-two__book-tours">
             <h3 class="tour-details-two__sidebar-title d-none d-md-block">{{ translate('Book Vacation') }}</h3>
             <div class="card-body">
@@ -16,6 +16,7 @@
                         <div class="mb-3">
                             <label>{{ translate('Duration') }} <span class="required-field">*</span></label>
                             <select class="form-control required-input" name="duration_preset" id="duration_preset" required>
+                                <option value="0">{{ translate('Select Duration') }}</option>
                                 <option value="3">3 {{ translate('days') }}</option>
                                 <option value="7">1 {{ translate('week') }}</option>
                                 <option value="14">2 {{ translate('weeks') }}</option>
@@ -40,10 +41,10 @@
                             @if(!empty($vacation->packages) && count($vacation->packages) > 0)
                                 <div class="booking-type-buttons">
                                     <button type="button" class="booking-type-btn active" data-type="package">
-                                        {{ translate('Package') }}
+                                        {{ translate('Komplettpaket') }}
                                     </button>
                                     <button type="button" class="booking-type-btn" data-type="custom">
-                                        {{ translate('Custom') }}
+                                        {{ translate('Single Offer') }}
                                     </button>
                                 </div>
                                 <input type="hidden" name="booking_type" value="package">
@@ -68,36 +69,43 @@
                         @else
                             <div id="custom-options" class="booking-options mb-3">
                         @endif
-                            <div class="form-group mb-3">
-                                <label>{{ translate('Accommodation') }}</label>
-                                <select class="form-control" name="accommodation_id">
-                                    <option value="" selected>{{ translate('No accommodation needed') }}</option>
-                                    @foreach($vacation->accommodations as $accommodationIndex => $accommodation)
-                                        <option value="{{ $accommodation->id }}">{{ !empty($accommodation->title) ? $accommodation->title : translate('Accommodation ' . ($accommodationIndex + 1)) }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            
-                            <div class="form-group mb-3">
-                                <label>{{ translate('Boat Rental') }}</label>
-                                <select class="form-control" name="boat_id">
-                                    <option value="" selected>{{ translate('No boat needed') }}</option>
-                                    @foreach($vacation->boats as $boatIndex => $boat)
-                                        <option value="{{ $boat->id }}">{{ !empty($boat->title) ? $boat->title : translate('Boat ' . ($boatIndex + 1)) }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+
+                            @if ($vacation->accommodations && count($vacation->accommodations) > 0)
+                                <div class="form-group mb-3">
+                                    <label>{{ translate('Accommodation') }}</label>
+                                    <select class="form-control" name="accommodation_id">
+                                        <option value="" selected>{{ translate('No accommodation needed') }}</option>
+                                        @foreach($vacation->accommodations as $accommodationIndex => $accommodation)
+                                            <option value="{{ $accommodation->id }}">{{ !empty($accommodation->title) ? $accommodation->title : translate('Accommodation ' . ($accommodationIndex + 1)) }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endif
+
+                            @if ($vacation->boats && count($vacation->boats) > 0)
+                                <div class="form-group mb-3">
+                                    <label>{{ translate('Boat Rental') }}</label>
+                                    <select class="form-control" name="boat_id">
+                                        <option value="" selected>{{ translate('No boat needed') }}</option>
+                                        @foreach($vacation->boats as $boatIndex => $boat)
+                                            <option value="{{ $boat->id }}">{{ !empty($boat->title) ? $boat->title : translate('Boat ' . ($boatIndex + 1)) }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endif
                         </div>
 
-                        <div class="form-group mb-3">
-                            <label>{{ translate('Guiding') }}</label>
-                            <select class="form-control" name="guiding_id">
-                                <option value="" selected>{{ translate('No guiding needed') }}</option>
-                                @foreach($vacation->guidings as $guidingIndex => $guiding)
-                                    <option value="{{ $guiding->id }}">{{ !empty($guiding->title) ? $guiding->title : translate('Guiding ' . ($guidingIndex + 1)) }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                        @if ($vacation->guidings && count($vacation->guidings) > 0)
+                            <div class="form-group mb-3">
+                                <label>{{ translate('Guiding') }}</label>
+                                <select class="form-control" name="guiding_id">
+                                    <option value="" selected>{{ translate('No guiding needed') }}</option>
+                                    @foreach($vacation->guidings as $guidingIndex => $guiding)
+                                        <option value="{{ $guiding->id }}">{{ !empty($guiding->title) ? $guiding->title : translate('Guiding ' . ($guidingIndex + 1)) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
                         
                         <div class="mb-3">
                             <div class="form-check">
@@ -106,37 +114,39 @@
                             </div>
                         </div>
                         
-                        <div class="form-group mb-3">
-                            <label>{{ translate('Extra offers') }}</label>
-                            <div class="extra-offers-container">
-                                @foreach($vacation->extras as $extraIndex => $extra)
-                                    <div class="extra-offer-item d-flex align-items-center mb-2">
-                                        <div class="form-check">
-                                            <input type="checkbox" 
-                                                   class="form-check-input extra-offer-checkbox" 
-                                                   id="extra_{{ $extra->id }}" 
-                                                   name="extra_offers[]" 
-                                                   value="{{ $extra->id }}"
-                                                   data-price-type="{{ $extra->type }}">
-                                            <label class="form-check-label" for="extra_{{ $extra->id }}">
-                                                {{ !empty($extra->description) ? $extra->description : translate('Extra offer ' . ($extraIndex + 1)) }}
-                                                (€{{ number_format($extra->price, 2) }})
-                                            </label>
-                                        </div>
-                                        @if($extra->type === 'per_person')
-                                            <div class="quantity-input ms-2" style="display: none;">
-                                                <input type="number" 
-                                                       class="form-control form-control-sm extra-quantity" 
-                                                       name="extra_quantity[{{ $extra->id }}]" 
-                                                       min="1" 
-                                                       value="1" 
-                                                       style="width: 80px;">
+                        @if ($vacation->extras && count($vacation->extras) > 0)
+                            <div class="form-group mb-3">
+                                <label>{{ translate('Extra offers') }}</label>
+                                <div class="extra-offers-container">
+                                    @foreach($vacation->extras as $extraIndex => $extra)
+                                        <div class="extra-offer-item d-flex align-items-center mb-2">
+                                            <div class="form-check">
+                                                <input type="checkbox" 
+                                                    class="form-check-input extra-offer-checkbox" 
+                                                    id="extra_{{ $extra->id }}" 
+                                                    name="extra_offers[]" 
+                                                    value="{{ $extra->id }}"
+                                                    data-price-type="{{ $extra->type }}">
+                                                <label class="form-check-label" for="extra_{{ $extra->id }}">
+                                                    {{ !empty($extra->description) ? $extra->description : translate('Extra offer ' . ($extraIndex + 1)) }}
+                                                    (€{{ number_format($extra->price, 2) }})
+                                                </label>
                                             </div>
-                                        @endif
-                                    </div>
-                                @endforeach
+                                            @if($extra->type === 'per_person')
+                                                <div class="quantity-input ms-2" style="display: none;">
+                                                    <input type="number" 
+                                                        class="form-control form-control-sm extra-quantity" 
+                                                        name="extra_quantity[{{ $extra->id }}]" 
+                                                        min="1" 
+                                                        value="1" 
+                                                        style="width: 80px;">
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
-                        </div>
+                        @endif
 
                         <div class="total-price-container mb-4">
                             <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
@@ -267,7 +277,7 @@
                                             <div class="mb-3">
                                                 <label class="form-label">{{ translate('Phone + Country Code') }}</label>
                                                 <div class="input-group">
-                                                    <select class="form-select" name="phone_country_code" style="width: 100px; min-width: 100px;" required>
+                                                    <select class="form-select" name="phone_country_code" style=" max-width: 80px;" required>
                                                         <option data-code="+1" value="+1">+1</option>
                                                         <option data-code="+44" value="+44">+44</option>
                                                         <option data-code="+49" value="+49">+49</option>
@@ -300,7 +310,7 @@
                                         </div>
                                     </div>
                                     
-                                    <div class="text-end">
+                                    <div class="text-end d-flex">
                                         <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">{{ translate('Cancel') }}</button>
                                         <button type="submit" class="btn btn-orange">{{ translate('Complete Booking') }}</button>
                                     </div>
@@ -309,6 +319,31 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add thank you modal -->
+<div class="modal fade" 
+     id="thankYouModal" 
+     tabindex="-1" 
+     aria-labelledby="thankYouModalLabel" 
+     aria-hidden="true"
+     data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center px-4 py-5">
+                <i class="fas fa-check-circle text-success mb-4" style="font-size: 4rem;"></i>
+                <h3 class="mb-4">{{ translate('Thank You for Your Booking Request!') }}</h3>
+                <p class="mb-4">{{ translate('We have received your booking request and will process it shortly. You will receive a confirmation email with further details.') }}</p>
+                <p class="text-muted mb-4">{{ translate('Booking Reference:') }} <span id="bookingReference"></span></p>
+                <button type="button" class="btn btn-orange" data-bs-dismiss="modal">
+                    {{ translate('Close') }}
+                </button>
             </div>
         </div>
     </div>
@@ -652,7 +687,7 @@
                     selectedItemsSummary.innerHTML += `
                         <div class="selected-item">
                             <div class="d-flex justify-content-between align-items-center">
-                                <div>
+                                <div class="selected-item-info">
                                     <i class="fas fa-box me-2"></i>
                                     <span class="text-muted">${translations.package}:</span>
                                     <span class="ms-2 fw-medium">${selectedPackage.title || translations.selectedPackage}</span>
@@ -676,7 +711,7 @@
                         selectedItemsSummary.innerHTML += `
                             <div class="selected-item">
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <div>
+                                    <div class="selected-item-info">
                                         <i class="fas fa-home me-2"></i>
                                         <span class="text-muted">${translations.accommodation}:</span>
                                         <span class="ms-2 fw-medium">${selectedAccommodation.title || translations.selectedAccommodation}</span>
@@ -701,7 +736,7 @@
                         selectedItemsSummary.innerHTML += `
                             <div class="selected-item">
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <div>
+                                    <div class="selected-item-info">
                                         <i class="fas fa-ship me-2"></i>
                                         <span class="text-muted">${translations.boat}:</span>
                                         <span class="ms-2 fw-medium">${selectedBoat.title || translations.selectedBoat}</span>
@@ -726,7 +761,7 @@
                         selectedItemsSummary.innerHTML += `
                             <div class="selected-item">
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <div>
+                                    <div class="selected-item-info">
                                         <i class="fas fa-user-tie me-2"></i>
                                         <span class="text-muted">${translations.guiding}:</span>
                                         <span class="ms-2 fw-medium">${selectedGuiding.title || translations.selectedGuiding}</span>
@@ -1023,6 +1058,116 @@
                 updateTotalPrice();
             });
         });
+
+        // Add these date-related handlers near the top of the DOMContentLoaded function
+        const startDateInput = form.querySelector('input[name="start_date"]');
+        const endDateInput = form.querySelector('input[name="end_date"]');
+
+        // Set minimum date to today for start date
+        const today = new Date();
+        const todayFormatted = today.toISOString().split('T')[0];
+        startDateInput.min = todayFormatted;
+
+        // Handle start date changes
+        startDateInput.addEventListener('change', function() {
+            const selectedStartDate = new Date(this.value);
+            
+            // Set the minimum end date to the day after the selected start date
+            const nextDay = new Date(selectedStartDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            const nextDayFormatted = nextDay.toISOString().split('T')[0];
+            
+            // Update end date input
+            endDateInput.min = nextDayFormatted;
+            
+            // If end date is before start date, reset it to the next day
+            if (endDateInput.value && new Date(endDateInput.value) <= selectedStartDate) {
+                endDateInput.value = nextDayFormatted;
+            }
+            
+            // If end date is empty, set it to next day
+            if (!endDateInput.value) {
+                endDateInput.value = nextDayFormatted;
+            }
+
+            updateProceedButton();
+            updateTotalPrice();
+        });
+
+        // Handle end date changes
+        endDateInput.addEventListener('change', function() {
+            updateProceedButton();
+            updateTotalPrice();
+        });
+
+        // Update the form submission handling
+        document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(this);
+            
+            // Disable submit button and show loading state
+            const submitBtn = document.getElementById('proceedToBookingBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{{ translate("Processing...") }}';
+            
+            // Submit form via AJAX
+            fetch('{{ route("vacation.booking.store") }}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Hide checkout modal
+                    const checkoutModal = bootstrap.Modal.getInstance(document.getElementById('checkoutModal'));
+                    checkoutModal.hide();
+                    
+                    // Set booking reference in thank you modal
+                    document.getElementById('bookingReference').textContent = data.booking.id;
+                    
+                    // Show thank you modal
+                    const thankYouModal = new bootstrap.Modal(document.getElementById('thankYouModal'));
+                    thankYouModal.show();
+                    
+                    // Reset form
+                    this.reset();
+                    bookingForm.reset();
+                } else {
+                    // Handle error
+                    alert(data.message || '{{ translate("An error occurred. Please try again.") }}');
+                }
+            })
+            .catch(error => {
+                error.text().then(errorText => {
+                    try {
+                        const errorData = JSON.parse(errorText);
+                        console.log(errorData);
+                        alert(errorData.message || '{{ translate("An error occurred. Please try again.") }}');
+                    } catch (e) {
+                        // If not valid JSON, show generic error
+                        alert('{{ translate("An error occurred. Please try again.") }}');
+                    }
+                }).catch(() => {
+                    alert('{{ translate("An error occurred. Please try again.") }}');
+                });
+            })
+            .finally(() => {
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '{{ translate("Proceed to booking") }}';
+            });
+        });
+
+        // Add event listener for thank you modal close
+        const thankYouModal = document.getElementById('thankYouModal');
+        thankYouModal.addEventListener('hidden.bs.modal', function () {
+            window.location.href = '{{ route("vacations.index") }}';
+        });
     });
 </script>
 
@@ -1060,7 +1205,7 @@
     .modal-body textarea,
     .modal-body button {
         position: relative;
-        z-index: 10003 !important;
+        /* z-index: 10003 !important; */
     }
     
     /* Additional modal styling */
@@ -1274,5 +1419,78 @@
         font-weight: 500;
         color: #fd5d14;
         font-size: 0.95rem;
+    }
+
+    /* Add styles for thank you modal */
+    #thankYouModal .modal-content {
+        border-radius: 1rem;
+        border: none;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    #thankYouModal .modal-header {
+        padding: 1.5rem 1.5rem 0;
+    }
+
+    #thankYouModal .modal-body {
+        padding: 2rem;
+    }
+
+    #thankYouModal .fa-check-circle {
+        color: #28a745;
+    }
+
+    #thankYouModal .btn-orange:hover {
+        opacity: 0.9;
+    }
+
+    #bookingReference {
+        font-weight: bold;
+        color: #fd5d14;
+    }
+
+    /* Add these styles to your existing style block */
+    input[type="date"] {
+        cursor: pointer;
+        position: relative;
+        background-color: #fff;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: auto;
+        height: auto;
+        color: transparent;
+        background: transparent;
+        cursor: pointer;
+    }
+
+    /* Optional: Add a visual indicator that the whole field is clickable */
+    input[type="date"] {
+        padding-right: 30px; /* Make space for the custom calendar icon */
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23495057' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='16' y1='2' x2='16' y2='6'%3E%3C/line%3E%3Cline x1='8' y1='2' x2='8' y2='6'%3E%3C/line%3E%3Cline x1='3' y1='10' x2='21' y2='10'%3E%3C/line%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        background-size: 16px;
+    }
+
+    /* Hide the default calendar icon in Edge */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        opacity: 0;
+    }
+
+    /* Ensure the field remains styled consistently with other form controls */
+    input[type="date"]:hover {
+        border-color: #fd5d14;
+    }
+
+    input[type="date"]:focus {
+        border-color: #fd5d14;
+        box-shadow: 0 0 0 0.2rem rgba(253, 93, 20, 0.25);
+        outline: 0;
     }
 </style>

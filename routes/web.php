@@ -42,6 +42,7 @@ use App\Http\Controllers\Admin\Category\AdminCategoryRegionController;
 use App\Http\Controllers\Admin\Category\AdminCategoryCityController;
 use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThreadsController;
 use App\Http\Controllers\VacationBookingController;
+use App\Http\Controllers\Admin\Category\AdminCategoryVacationCountryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -197,6 +198,7 @@ Route::resource('vacations', VacationsController::class);
 Route::post('/vacation-booking', [VacationBookingController::class, 'store'])
     ->name('vacation.booking.store')
     ->middleware('web');
+Route::get('vacations/location/{country}', [VacationsController::class, 'category'])->name('vacations.category');
 
 Route::get('searchrequest', [GuidingsController::class, 'bookingrequest'])->name('guidings.request');
 Route::post('searchrequest/store', [GuidingsController::class, 'bookingRequestStore'])->name('store.request');
@@ -282,8 +284,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/deletepayments/{id}', [AdminPaymentsController::class, 'deletepayments'])->name('deletepayments');
         });
 
-        Route::resource('vacations', AdminVacationsController::class);
+        Route::resource('vacations', AdminVacationsController::class)->except('show');
         Route::get('vacations/changeVacationStatus/{id}', [AdminVacationsController::class, 'changeVacationStatus'])->name('changeVacationStatus');
+        Route::get('vacations/bookings', [AdminVacationsController::class, 'bookings'])->name('vacations.bookings');
+        Route::get('vacations/bookings/{booking}', [AdminVacationsController::class, 'show'])->name('vacations.bookings.show');
 
         Route::prefix('settings')->name('settings.')->group(function () {
             
@@ -362,6 +366,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('category')->name('category.')->group(function () {
             Route::resource('country', AdminCategoryCountryController::class);
+            Route::resource('vacation-country', AdminCategoryVacationCountryController::class);
             Route::resource('region', AdminCategoryRegionController::class);
             Route::resource('city', AdminCategoryCityController::class);
         });

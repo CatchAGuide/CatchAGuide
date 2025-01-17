@@ -78,7 +78,7 @@
                     <div class="card">
                         <div class="card-header">
                             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addVacationModal">
-                                <i class="fas fa-plus"></i>Vacation
+                                <i class="fas fa-plus"></i>Bookings
                             </button>
                         </div>
                         <div class="card-body table-responsive">
@@ -86,44 +86,57 @@
                                 <thead>
                                     <tr>
                                         <th class="wd-15p border-bottom-0">ID</th>
-                                        <th class="wd-15p border-bottom-0">Name Name of the Vacation</th>
-                                        <th class="wd-10p border-bottom-0">Price per Person</th>
-                                        <th class="wd-10p border-bottom-0">Accommodation Price</th>
-                                        <th class="wd-25p border-bottom-0">Guiding Price</th>
+                                        <th class="wd-15p border-bottom-0">Guest Name</th>
+                                        <th class="wd-10p border-bottom-0">Contact Information</th>
+                                        <th class="wd-10p border-bottom-0">Booking Details</th>
+                                        <th class="wd-10p border-bottom-0">Total Booking Price</th>
+                                        <th class="wd-10p border-bottom-0">Status</th>
                                         <th class="wd-25p border-bottom-0">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($vacations as $vacation)
+                                    @foreach($bookings as $booking)
                                     <tr>
-                                        <td>{{$vacation->id}}</td>
+                                        <td>{{$booking->id}}</td>
+                                        <td>
+                                            {{$booking->title}} {{$booking->name}} {{$booking->surname}}
+                                        </td>
                                         <td>
                                             <div class="d-flex flex-column">
-                                                <div class="fw-bold">{{$vacation->title}}</div>
-                                                <div class="text-info">{{$vacation->location}}</div>
+                                                @if($booking->package)
+                                                    <div class="text-info">Package: {{$booking->package->title ?? $booking->package->id}}</div>
+                                                @endif
+                                                @if($booking->accommodation)
+                                                    <div class="text-info">Accommodation: {{$booking->accommodation->title ?? $booking->accommodation->id}}</div>
+                                                @endif
+                                                @if($booking->boat)
+                                                    <div class="text-info">Boat: {{$booking->boat->title ?? $booking->boat->id}}</div>
+                                                @endif
+                                                @if($booking->guiding)
+                                                    <div class="text-info">Guiding: {{$booking->guiding->title ?? $booking->guiding->id}}</div>
+                                                @endif
                                             </div>
-       
                                         </td>
                                         <td>
-                                            {{$vacation->price_per_person}}
+                                            <div class="d-flex flex-column">
+                                                <div class="fa fa-phone">{{$booking->phone}}</div>
+                                                <div class="fa fa-envelope">{{$booking->email}}</div>
+                                            </div>
                                         </td>
                                         <td>
-                                            {{$vacation->accommodation_price}}
+                                            {{$booking->total_price}}
                                         </td>
                                         <td>
-                                            {{$vacation->guiding_price}}
+                                            {{$booking->status}}
                                         </td>
                                         <td class="text-center">
                                             <div class="btn-group">
-                                                @if($vacation->status == 1)
-                                                    <a href="{{ route('admin.changeVacationStatus', $vacation->id) }}" title="Diactivate" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></a>
+                                                @if($booking->status == 1)
+                                                    <a href="#" title="Diactivate" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></a>
                                                 @else
-                                                    <a href="{{ route('admin.changeVacationStatus', $vacation->id) }}" title="Activate" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
+                                                    <a href="#" title="Activate" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
                                                 @endif
-                                                <a href="#" onclick="editVacation({{ $vacation->id }})" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#addVacationModal">
-                                                    <i class="fa fa-pen-to-square"></i>
-                                                </a>
-                                                <a href="#" class="btn btn-sm btn-primary"><i class="fa fa-search"></i></a>
+                                                <a href="{{ route('admin.vacations.bookings.show', $booking->id) }}" class="btn btn-sm btn-primary"><i class="fa fa-search"></i></a>
                                             </div>
                                         </td>
                                     </tr>
@@ -256,13 +269,6 @@
         const accommodationFields = `
             <div class="row mb-3">
                 <div class="col-md-4">
-                    <label class="form-label">Bed Count</label>
-                    <input type="text" 
-                           name="${type}s[${index}][bed_count]" 
-                           class="form-control" 
-                           placeholder="e.g., 2 double beds, 1 single">
-                </div>
-                <div class="col-md-4">
                     <label class="form-label">Living Area</label>
                     <input type="text" 
                            name="${type}s[${index}][living_area]" 
@@ -270,11 +276,11 @@
                            placeholder="e.g., 120 m²">
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">Min Rental Days</label>
+                    <label class="form-label">Bed Count</label>
                     <input type="text" 
-                           name="${type}s[${index}][min_rental_days]" 
+                           name="${type}s[${index}][bed_count]" 
                            class="form-control" 
-                           placeholder="e.g., 3 days">
+                           placeholder="e.g., 2 double beds, 1 single">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Facilities</label>
@@ -282,6 +288,13 @@
                            name="${type}s[${index}][facilities]" 
                            class="form-control" 
                            placeholder="e.g., WiFi, TV, Kitchen">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Min Rental Days</label>
+                    <input type="text" 
+                           name="${type}s[${index}][min_rental_days]" 
+                           class="form-control" 
+                           placeholder="e.g., 3 days">
                 </div>
             </div>
         `;
@@ -490,21 +503,12 @@
     document.querySelector('#addVacationModal').addEventListener('input', function(e) {
         if (e.target.classList.contains('capacity-input')) {
             const card = e.target.closest('.card');
+            const priceInput = card.querySelector('.price-input');
+            const capacity = parseInt(e.target.value) || 0;
             
-            // Check if this is an extra item by looking for a parent with id 'extra-items'
-            const isExtra = card.closest('#extra-items');
-            
-            // Only proceed with price calculation if it's not an extra
-            if (!isExtra) {
-                const priceInput = card.querySelector('.price-input');
-                const capacity = parseInt(e.target.value) || 0;
-                
-                // Base price calculation (you can adjust this formula)
-                const basePrice = capacity * 100; // Example: $100 per person
-                if (priceInput) {
-                    priceInput.value = basePrice.toFixed(2);
-                }
-            }
+            // Base price calculation (you can adjust this formula)
+            const basePrice = capacity * 100; // Example: $100 per person
+            priceInput.value = basePrice.toFixed(2);
         }
     });
 
@@ -661,7 +665,7 @@
                     const field = form.querySelector(`[name="${fieldName}"]`);
                     if (field) {
                         if (field.type === 'checkbox') {
-                            field.checked = parseInt(value);
+                            field.checked = !!value;
                         } else {
                             field.value = value || '';
                         }
@@ -716,7 +720,6 @@
                             // Set basic fields
                             const descriptionField = card.querySelector(`textarea[name="${type.slice(0, -1)}s[${index}][description]"]`);
                             const capacityField = card.querySelector(`input[name="${type.slice(0, -1)}s[${index}][capacity]"]`);
-                            const titleField = card.querySelector(`input[name="${type.slice(0, -1)}s[${index}][title]"]`);
                             
                             if (descriptionField) descriptionField.value = item.description || '';
                             if (capacityField) {
@@ -725,7 +728,6 @@
                                 const event = new Event('input', { bubbles: true });
                                 capacityField.dispatchEvent(event);
                             }
-                            if (titleField) titleField.value = item.title || '';
                             
                             // Handle dynamic fields
                             if (item.dynamic_fields) {
@@ -815,31 +817,6 @@
                             if (hiddenField) {
                                 hiddenField.value = '';
                             }
-                        });
-                    }
-                }
-
-                // Handle extras separately
-                if (data.extras && Array.isArray(data.extras)) {
-                    const extrasContainer = document.getElementById('extra-items');
-                    if (extrasContainer) {
-                        extrasContainer.innerHTML = ''; // Clear existing extras
-                        
-                        data.extras.forEach((extra, index) => {
-                            // Add the template
-                            extrasContainer.insertAdjacentHTML('beforeend', getItemTemplate('extra', index));
-                            
-                            // Get the newly added card
-                            const card = extrasContainer.lastElementChild;
-                            
-                            // Set the values
-                            const descriptionField = card.querySelector(`textarea[name="extras[${index}][description]"]`);
-                            const priceField = card.querySelector(`input[name="extras[${index}][price]"]`);
-                            const priceTypeField = card.querySelector(`select[name="extras[${index}][price_type]"]`);
-                            
-                            if (descriptionField) descriptionField.value = extra.description || '';
-                            if (priceField) priceField.value = extra.price || '';
-                            if (priceTypeField) priceTypeField.value = extra.type || 'per_person';
                         });
                     }
                 }

@@ -5,39 +5,49 @@ namespace App\Http\Controllers;
 use App\Models\VacationBooking;
 use Illuminate\Http\Request;
 use App\Models\Vacation;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\Ceo\VacationBookingNotification;
 
 class VacationBookingController extends Controller
 {
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'vacation_id' => 'required|exists:vacations,id',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
-            'duration' => 'required|integer|min:1',
-            'person' => 'required|integer|min:1',
-            'booking_type' => 'required|in:package,custom',
-            'package_id' => 'nullable|exists:vacation_packages,id',
-            'accommodation_id' => 'nullable|exists:vacation_accommodations,id',
-            'boat_id' => 'nullable|exists:vacation_boats,id',
-            'guiding_id' => 'nullable|exists:vacation_guidings,id',
-            'title' => 'required|in:Mr,Mrs',
-            'name' => 'required|string',
-            'surname' => 'required|string',
-            'street' => 'required|string',
-            'post_code' => 'required|string',
-            'city' => 'required|string',
-            'country' => 'required|string',
-            'phone_country_code' => 'required|string',
-            'phone' => 'required|string',
-            'email' => 'required|email',
-            'comments' => 'nullable|string',
-            'has_pets' => 'boolean',
-            'extra_offers' => 'nullable|array',
-            'extra_quantity' => 'nullable|array',
-        ]);
+        try {
+            $validated = $request->validate([
+                'vacation_id' => 'required|exists:vacations,id',
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after:start_date',
+                'duration' => 'required|integer|min:1',
+                'person' => 'required|integer|min:1',
+                'booking_type' => 'required|in:package,custom',
+                'package_id' => 'nullable|exists:vacation_packages,id',
+                'accommodation_id' => 'nullable|exists:vacation_accommodations,id',
+                'boat_id' => 'nullable|exists:vacation_boats,id',
+                'guiding_id' => 'nullable|exists:vacation_guidings,id',
+                'title' => 'required|in:Mr,Mrs',
+                'name' => 'required|string',
+                'surname' => 'required|string',
+                'street' => 'required|string',
+                'post_code' => 'required|string',
+                'city' => 'required|string',
+                'country' => 'required|string',
+                'phone_country_code' => 'required|string',
+                'phone' => 'required|string',
+                'email' => 'required|email',
+                'comments' => 'nullable|string',
+                'has_pets' => 'nullable|in:true,false,0,1',
+                'extra_offers' => 'nullable|array',
+                'extra_quantity' => 'nullable|array',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation failed:', [
+                'errors' => $e->errors(),
+                'request_data' => $request->all()
+            ]);
+            throw $e;
+        }
 
-        // Calculate total price based on selections
         $totalPrice = $this->calculateTotalPrice($request);
 
         $booking = VacationBooking::create([
@@ -62,14 +72,28 @@ class VacationBookingController extends Controller
             'phone' => $validated['phone'],
             'email' => $validated['email'],
             'comments' => $validated['comments'],
-            'has_pets' => $validated['has_pets'] ?? false,
+            'has_pets' => $validated['has_pets'] == 'true' ? 1 : 0,
             'extra_offers' => $this->formatExtraOffers($validated['extra_offers'] ?? [], $validated['extra_quantity'] ?? []),
             'total_price' => $totalPrice,
             'status' => 'pending'
         ]);
 
-        // Redirect with success message
-        return redirect()->back()->with('success', 'Booking submitted successfully!');
+        // Send email notification
+        try {
+            Mail::to(env('TO_CEO'))->send(new VacationBookingNotification($booking));
+        } catch (\Exception $e) {
+            Log::error('Failed to send booking notification email:', [
+                'booking_id' => $booking->id,
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        // Return a JSON response for AJAX handling
+        return response()->json([
+            'success' => true,
+            'message' => translate('Your booking request has been submitted successfully!'),
+            'booking' => $booking
+        ]);
     }
 
     private function formatExtraOffers($extraOffers, $quantities)

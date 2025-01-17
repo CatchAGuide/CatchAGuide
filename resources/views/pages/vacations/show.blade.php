@@ -74,7 +74,7 @@
             overflow: hidden;
         }
 
-        .guidings-gallery .left-image img {
+        /* .guidings-gallery .left-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -82,7 +82,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-        }
+        } */
 
         .guidings-gallery .right-images img {
             width: 100%;
@@ -126,14 +126,14 @@
 
         .booking-type-btn:hover {
             background: #f8f9fa;
-            border-color: #fd5d14;
-            color: #fd5d14;
+            border-color: #E85B40;
+            color: #E85B40;
         }
 
         .booking-type-btn.active {
-            background: #fd5d14;
+            background: #E85B40;
             color: white;
-            border-color: #fd5d14;
+            border-color: #E85B40;
         }
 
         .booking-form-container {
@@ -154,12 +154,12 @@
         }
 
         .booking-form-container .form-control:focus {
-            border-color: #fd5d14;
+            border-color: #E85B40;
             box-shadow: 0 0 0 0.2rem rgba(253, 93, 20, 0.25);
         }
 
         .btn-orange {
-            background: #fd5d14;
+            /* background: #E85B40; */
             color: white;
             border: none;
             padding: 12px;
@@ -196,7 +196,7 @@
                     <div class="location-row">
                         <div class="location">
                             <a href="#" class="fs-6 text-decoration-none text-muted">
-                                <i class="bi bi-geo-alt"></i>@lang('guidings.Fishing_Trip') <strong>{{$vacation->location}}</strong>
+                                <i class="bi bi-geo-alt"></i>{{ translate('Fishing Trip in') }} <strong>{{$vacation->location}}</strong>
                             </a>
                         </div>
                         <div class="location-map">
@@ -382,23 +382,25 @@
     <section class="guidings-description-container mb-5">
         <div class="guidings-descriptions">
             <div class="important-info">
+                <!-- Boat Availability -->
                 <div class="info-item">
-                    <i class="fas fa-users"></i>
-                    <small class="mb-0">{{translate('Minimum number of guests:')}}</small>
-                    <strong>{{$vacation->min_guests}}</strong>
+                    <i class="fas fa-ship"></i>
+                    <small class="mb-0">{{translate('Boat Available:')}}</small>
+                    <strong><i class="fas {{ count($vacation->boats) > 0 ? 'fa-check text-success' : 'fa-times text-danger' }}"></i></strong>
                 </div>
-                <!-- Price Range -->
+
+                <!-- Guiding Availability -->
                 <div class="info-item">
-                    <i class="fas fa-tag"></i>
-                    <small class="mb-0">{{translate('Price Range:')}}</small>
-                    <strong>€{{$vacation->price_from}} - €{{$vacation->price_to}}</strong>
+                    <i class="fas fa-user-tie"></i>
+                    <small class="mb-0">@lang('vacation.guiding')</small>
+                    <strong><i class="fas {{ count($vacation->guidings) > 0 ? 'fa-check text-success' : 'fa-times text-danger' }}"></i></strong>
                 </div>
-            
-                <!-- Availability -->
+
+                <!-- Pets -->
                 <div class="info-item">
-                    <i class="fas fa-calendar-check"></i>
-                    <small class="mb-0">{{translate('Availability:')}}</small>
-                    <strong>{{$vacation->availability}}%</strong>
+                    <i class="fas fa-paw"></i>
+                    <small class="mb-0">{{translate('Pets:')}}</small>
+                    <strong><i class="fas {{ $vacation->pets_allowed ? 'fa-check text-success' : 'fa-times text-danger' }}"></i></strong>
                 </div>
             </div>
     
@@ -409,13 +411,14 @@
                     @if ($vacation->surroundings_description)
                     <div class="description-item">
                         <div class="header-container">
-                            <span>{{ translate('Beschreibung der Umgebung')}}</span>
+                            <span>{{ translate('Beschreibung')}}</span>
                         </div>
                         <span class="text-wrapper">
                             {!! $vacation->surroundings_description !!}
                         </span>
                     </div>
                     @endif
+                    <hr>
                     @if ($vacation->best_travel_times)
                     <div class="description-item">
                         <div class="header-container">
@@ -437,12 +440,15 @@
                     </div>
                     @endif
                     <div class="row">
-                        <div class="col-6">
-                            <strong class="subtitle-text">{{ translate('Travel Included') }}</strong>
-                            {{ $vacation->travel_included || $vacation->travel_included !== null || $vacation->travel_included !== '' ? 'Yes' : 'No'}}
+                        <div class="col-12">
+                            <strong class="subtitle-text">{{ translate('Anreise') }}</strong>
                         </div>
-                        
-                        <div class="col-12 mt-4">
+                        <ol class="px-3">
+                            <li class="mx-4">
+                                <strong class="subtitle-text">{{ translate('Travel Included') }}</strong>
+                                {{ translate($vacation->travel_included || $vacation->travel_included !== null || $vacation->travel_included !== '' ? 'Yes' : 'No')}}
+                            </li>
+                            <li class="mx-4">
                             @if(!empty($vacation->travel_options))
                                 <div class="tab-category mb-4">
                                     <strong class="subtitle-text">{{ translate('Travel Options') }}</strong>
@@ -457,45 +463,48 @@
                             @else
                                 <p class="mb-4">No travel options specified</p>
                             @endif
-                        </div>
+                            </li>
+                        </ol>
+                       
                     </div>
+                    <hr>
                     <div class="row mx-4">
                         <table class="table">
                             <tbody>
                                 @if(!empty($vacation->airport_distance))
                                 <tr>
-                                    <td>{{ translate('Airport Distance') }}</td>
+                                    <td><strong>{{ translate('Nächster Flughafen') }}</strong></td>
                                     <td>{{$vacation->airport_distance}}</td>
                                 </tr>
                                 @endif
                                 @if(!empty($vacation->water_distance))
                                 <tr>
-                                    <td>{{ translate('Water Distance') }}</td>
+                                    <td><strong>{{ translate('Entfernung zum Wasser') }}</strong></td>
                                     <td>{{$vacation->water_distance}}</td>
                                 </tr>
                                 @endif
                                 @if(!empty($vacation->shopping_distance))
                                 <tr>
-                                    <td>{{ translate('Shopping Distance') }}</td>
+                                    <td><strong>{{ translate('Einkaufsmöglichkeiten') }}</strong></td>
                                     <td>{{$vacation->shopping_distance}}</td>
                                 </tr>
                                 @endif
                                 @if(!empty($vacation->pets_allowed))
                                 <tr>
-                                    <td>{{ translate('Pets Allowed') }}</td>
-                                    <td>{{ $vacation->pets_allowed || $vacation->pets_allowed !== null || $vacation->pets_allowed !== '' ? 'Yes' : 'No'}}</td>
+                                    <td><strong>{{ translate('Pets Allowed') }}</td>
+                                    <td>{{ translate($vacation->pets_allowed || $vacation->pets_allowed !== null || $vacation->pets_allowed !== '' ? 'Yes' : 'No')}}</td>
                                 </tr>
                                 @endif
                                 @if(!empty($vacation->smoking_allowed))
                                 <tr>
-                                    <td><strong>{{ translate('Smoking Allowed?') }}</strong></td>
-                                    <td>{{ $vacation->smoking_allowed || $vacation->smoking_allowed !== null || $vacation->smoking_allowed !== '' ? 'Yes' : 'No'}}</td>
+                                    <td><strong>{{ translate('Smoking Allowed') }}</strong></td>
+                                    <td>{{translate($vacation->smoking_allowed || $vacation->smoking_allowed !== null || $vacation->smoking_allowed !== '' ? 'Yes' : 'No')}}</td>
                                 </tr>
                                 @endif
                                 @if(!empty($vacation->disability_friendly))
                                 <tr>
-                                    <td>{{ translate('Disability Friendly?') }}</td>
-                                    <td>{{ $vacation->disability_friendly || $vacation->disability_friendly !== null || $vacation->disability_friendly !== '' ? 'Yes' : 'No'}}</td>
+                                    <td><strong>{{ translate('Disability Friendly') }}</strong></td>
+                                    <td>{{translate($vacation->disability_friendly || $vacation->disability_friendly !== null || $vacation->disability_friendly !== '' ? 'Yes' : 'No')}}</td>
                                 </tr>
                                 @endif
                             </tbody>
@@ -506,23 +515,71 @@
 
             <div class="tabs-container mb-5">
                 <div class="nav nav-tabs" id="guiding-tab" role="tablist">
+                    @php 
+                        // Initialize activeTab based on available sections
+                        $activeTab = '';
+                        if (!empty($vacation->accommodations) && count($vacation->accommodations) > 0) {
+                            $activeTab = 'accommodation';
+                        } elseif (!empty($vacation->boats) && count($vacation->boats) > 0) {
+                            $activeTab = 'boat';
+                        } elseif (!empty($vacation->packages) && count($vacation->packages) > 0) {
+                            $activeTab = 'package';
+                        } elseif (!empty($vacation->guidings) && count($vacation->guidings) > 0) {
+                            $activeTab = 'guiding';
+                        }
+                    @endphp
+                    
                     @if (!empty($vacation->accommodations) && count($vacation->accommodations) > 0)
-                        <button class="nav-link {{ empty($activeTab) ? 'active' : '' }}" id="nav-accommodation-tab" data-bs-toggle="tab" data-bs-target="#accommodation" type="button" role="tab" aria-controls="nav-accommodation" aria-selected="{{ empty($activeTab) ? 'true' : 'false' }}">{{ translate('Accommodation') }}</button>
-                        @php $activeTab = 'accommodation'; @endphp
+                        <button class="nav-link {{ $activeTab == 'accommodation' ? 'active' : '' }}" 
+                                id="nav-accommodation-tab" 
+                                data-bs-toggle="tab" 
+                                data-bs-target="#nav-accommodation" 
+                                type="button" 
+                                role="tab" 
+                                aria-controls="nav-accommodation" 
+                                aria-selected="{{ $activeTab == 'accommodation' ? 'true' : 'false' }}">
+                            {{ translate('Accommodation') }}
+                        </button>
                     @endif
 
                     @if (!empty($vacation->boats) && count($vacation->boats) > 0)
-                        <button class="nav-link {{ $activeTab == 'boats' ? 'active' : '' }}" id="nav-boat-tab" data-bs-toggle="tab" data-bs-target="#boat" type="button" role="tab" aria-controls="nav-boat" aria-selected="{{ $activeTab == 'boats' ? 'true' : 'false' }}">{{ translate('Boat Information') }}</button>
-                        @php $activeTab = 'boats'; @endphp
+                        <button class="nav-link {{ $activeTab == 'boat' ? 'active' : '' }}" 
+                                id="nav-boat-tab" 
+                                data-bs-toggle="tab" 
+                                data-bs-target="#nav-boat" 
+                                type="button" 
+                                role="tab" 
+                                aria-controls="nav-boat" 
+                                aria-selected="{{ $activeTab == 'boat' ? 'true' : 'false' }}">
+                            {{ translate('Mietboot') }}
+                        </button>
                     @endif
 
                     @if (!empty($vacation->packages) && count($vacation->packages) > 0)
-                        <button class="nav-link {{ $activeTab == 'packages' ? 'active' : '' }}" id="nav-package-tab" data-bs-toggle="tab" data-bs-target="#package" type="button" role="tab" aria-controls="nav-package" aria-selected="{{ $activeTab == 'packages' ? 'true' : 'false' }}">{{ translate('Package') }}</button>
-                        @php $activeTab = 'packages'; @endphp
+                        <button class="nav-link {{ $activeTab == 'package' ? 'active' : '' }}" 
+                                id="nav-package-tab" 
+                                data-bs-toggle="tab" 
+                                data-bs-target="#nav-package" 
+                                type="button" 
+                                role="tab" 
+                                aria-controls="nav-package" 
+                                aria-selected="{{ $activeTab == 'package' ? 'true' : 'false' }}">
+                            {{ translate('Komplettpaket') }}
+                        </button>
                     @endif
 
                     @if (!empty($vacation->guidings) && count($vacation->guidings) > 0)
-                        <button class="nav-link {{ $activeTab == 'guidings' ? 'active' : '' }}" id="nav-guiding-tab" data-bs-toggle="tab" data-bs-target="#guiding" type="button" role="tab" aria-controls="nav-guiding" aria-selected="{{ $activeTab == 'guidings' ? 'true' : 'false' }}">{{ translate('Guiding') }}</button>
+                        <button class="nav-link {{ $activeTab == 'guiding' ? 'active' : '' }}" 
+                                id="nav-guiding-tab" 
+                                data-bs-toggle="tab" 
+                                data-bs-target="#nav-guiding" 
+                                type="button" 
+                                role="tab" 
+                                aria-controls="nav-guiding" 
+                                aria-selected="{{ $activeTab == 'guiding' ? 'true' : 'false' }}">
+                            <!-- {{ translate('Guiding') }} -->
+                            Guiding
+                        </button>
                     @endif
                 </div>
     
@@ -535,11 +592,11 @@
                             ],
                             'boat' => [
                                 'items' => $vacation->boats ?? [],
-                                'title' => 'Boat Information'
+                                'title' => 'Mietboot'
                             ],
                             'package' => [
                                 'items' => $vacation->packages ?? [],
-                                'title' => 'Package'
+                                'title' => 'Komplettpaket'
                             ],
                             'guiding' => [
                                 'items' => $vacation->guidings ?? [],
@@ -549,8 +606,8 @@
                     @endphp
 
                     @foreach($sections as $sectionKey => $section)
-                        <div class="tab-pane fade {{ $sectionKey === 'accommodation' ? 'show active' : '' }}" 
-                             id="{{ $sectionKey }}" 
+                        <div class="tab-pane fade {{ $sectionKey === $activeTab ? 'show active' : '' }}" 
+                             id="nav-{{ $sectionKey }}" 
                              role="tabpanel" 
                              aria-labelledby="nav-{{ $sectionKey }}-tab">
 
@@ -569,10 +626,40 @@
                                                 <div class="row mt-4">
                                                     @foreach($dynamicFields as $field => $value)
                                                         @if($field !== 'prices')
-                                                            <div class="details-row">
-                                                                <h6 class="mb-1">{{ translate(ucwords(str_replace('_', ' ', $field))) }}</h6>
-                                                                <p class="mb-0">{{ $value }}</p>
-                                                            </div>
+                                                            @if($sectionKey === 'accommodation')
+                                                                @php
+                                                                    // Define priority fields and their order for accommodation
+                                                                    $priorityFields = ['bed_count', 'living_area', 'min_rental_days', 'facilities'];
+                                                                    
+                                                                    // Skip if this field has already been displayed
+                                                                    if (in_array($field, $priorityFields) && $field !== current($priorityFields)) {
+                                                                        continue;
+                                                                    }
+                                                                    
+                                                                    // Display priority fields first
+                                                                    foreach ($priorityFields as $priorityField) {
+                                                                        if (isset($dynamicFields->$priorityField)) {
+                                                                            echo '<div class="details-row">
+                                                                                    <h6 class="mb-1">' . translate(ucwords(str_replace('_', ' ', $priorityField))) . ':</h6>
+                                                                                    <p class="mb-0">' . $dynamicFields->$priorityField . '</p>
+                                                                                </div>';
+                                                                        }
+                                                                    }
+                                                                    
+                                                                    // Display remaining fields if not in priority list
+                                                                    if (!in_array($field, $priorityFields)) {
+                                                                        echo '<div class="details-row">
+                                                                                <h6 class="mb-1">' . translate(ucwords(str_replace('_', ' ', $field))) . '</h6>
+                                                                                <p class="mb-0">' . $value . '</p>
+                                                                            </div>';
+                                                                    }
+                                                                @endphp
+                                                            @else
+                                                                <div class="details-row">
+                                                                    <h6 class="mb-1">{{ translate(ucwords(str_replace('_', ' ', $field))) }}:</h6>
+                                                                    <p class="mb-0">{{ $value }}</p>
+                                                                </div>
+                                                            @endif
                                                         @endif
                                                     @endforeach
                                                 </div>
@@ -595,10 +682,13 @@
                                                                 </thead>
                                                                 <tbody>
                                                                     @foreach($value as $index => $price)
+                                                                        @php
+                                                                            $pricePerPerson = $price / ($index + 1);
+                                                                        @endphp
                                                                         <tr>
                                                                             <td style="width: 50px !important;">{{ $index + 1 }}</td>
                                                                             <td style="width: 150px !important;">
-                                                                                €{{ number_format($price, (floor($price) == $price) ? 0 : 2, ',', '.') }} p.P.
+                                                                                €{{ number_format($pricePerPerson, (floor($pricePerPerson) == $pricePerPerson) ? 0 : 2, '.', ',') }} p.P.
                                                                             </td>
                                                                         </tr>
                                                                     @endforeach
@@ -628,11 +718,11 @@
                         ],
                         'boat' => [
                             'items' => $vacation->boats,
-                            'title' => 'Boat Information'
+                            'title' => 'Mietboot'
                         ],
                         'package' => [
                             'items' => $vacation->packages,
-                            'title' => 'Package'
+                            'title' => 'Komplettpaket'
                         ],
                         'guiding' => [
                             'items' => $vacation->guidings,
@@ -643,6 +733,7 @@
 
                 @foreach($sections as $sectionKey => $section)
                     <div class="accordion-item">
+                    @if (!empty($section['items']) && count($section['items']) > 0)
                         <h2 class="accordion-header" id="heading{{ $sectionKey }}">
                             <button class="accordion-button {{ $sectionKey === 'accommodation' ? '' : 'collapsed' }}" 
                                     type="button" 
@@ -653,13 +744,14 @@
                                 {{ translate($section['title']) }}
                             </button>
                         </h2>
+                    @endif
                         <div id="collapse{{ $sectionKey }}" 
                             class="accordion-collapse collapse {{ $sectionKey === 'accommodation' ? 'show' : '' }}" 
                             aria-labelledby="heading{{ $sectionKey }}" 
                             data-bs-parent="#guidings-accordion">
                             <div class="accordion-body">
                                 @foreach($section['items'] as $itemIndex => $item)
-                                    <div class="card h-100 shadow-sm mb-4">
+                                    <div class="card h-100 shadow mb-4">
                                         <div class="card-body">
                                             <div class="row">
                                                 <!-- Description Column -->
@@ -668,6 +760,48 @@
                                                     <span class="text-wrapper">
                                                         {!! $item->description !!}
                                                     </span>
+                                                    <!-- Other Details Row -->
+                                                    @php $dynamicFields = json_decode($item->dynamic_fields) @endphp
+                                            <div class="row mt-4">
+                                                @foreach($dynamicFields as $field => $value)
+                                                    @if($field !== 'prices')
+                                                        @if($sectionKey === 'accommodation')
+                                                            @php
+                                                                // Define priority fields and their order for accommodation
+                                                                $priorityFields = ['bed_count', 'living_area', 'min_rental_days', 'facilities'];
+                                                                
+                                                                // Skip if this field has already been displayed
+                                                                if (in_array($field, $priorityFields) && $field !== current($priorityFields)) {
+                                                                    continue;
+                                                                }
+                                                                
+                                                                // Display priority fields first
+                                                                foreach ($priorityFields as $priorityField) {
+                                                                    if (isset($dynamicFields->$priorityField)) {
+                                                                        echo '<div class="details-row">
+                                                                                <h6 class="mb-1">' . translate(ucwords(str_replace('_', ' ', $priorityField))) . ':</h6>
+                                                                                <p class="mb-0">' . $dynamicFields->$priorityField . '</p>
+                                                                            </div>';
+                                                                    }
+                                                                }
+                                                                
+                                                                // Display remaining fields if not in priority list
+                                                                if (!in_array($field, $priorityFields)) {
+                                                                    echo '<div class="details-row">
+                                                                            <h6 class="mb-1">' . translate(ucwords(str_replace('_', ' ', $field))) . '</h6>
+                                                                            <p class="mb-0">' . $value . '</p>
+                                                                        </div>';
+                                                                }
+                                                            @endphp
+                                                        @else
+                                                            <div class="details-row">
+                                                                <h6 class="mb-1">{{ translate(ucwords(str_replace('_', ' ', $field))) }}:</h6>
+                                                                <p class="mb-0">{{ $value }}</p>
+                                                            </div>
+                                                        @endif
+                                                    @endif
+                                                @endforeach
+                                            </div>
                                                 </div>
 
                                                 <!-- Pricing Column -->
@@ -687,9 +821,12 @@
                                                                         </thead>
                                                                         <tbody>
                                                                             @foreach($value as $index => $price)
+                                                                                @php
+                                                                                    $pricePerPerson = $price / ($index + 1);
+                                                                                @endphp
                                                                                 <tr>
                                                                                     <td>{{ $index + 1 }}</td>
-                                                                                    <td>€{{ number_format($price, 2, ',', '.') }}</td>
+                                                                                    <td>€{{ number_format($pricePerPerson, (floor($pricePerPerson) == $pricePerPerson) ? 0 : 2, '.', ',') }} p.P.</td>
                                                                                 </tr>
                                                                             @endforeach
                                                                         </tbody>
@@ -699,18 +836,6 @@
                                                         @endif
                                                     @endforeach
                                                 </div>
-                                            </div>
-
-                                            <!-- Other Details Row -->
-                                            <div class="row mt-4">
-                                                @foreach($dynamicFields as $field => $value)
-                                                    @if($field !== 'prices')
-                                                        <div class="col-12 col-sm-6 col-md-4 mb-3">
-                                                            <h6 class="mb-1">{{ translate(ucwords(str_replace('_', ' ', $field))) }}</h6>
-                                                            <p class="mb-0">{{ $value }}</p>
-                                                        </div>
-                                                    @endif
-                                                @endforeach
                                             </div>
                                         </div>
                                     </div>
@@ -723,45 +848,48 @@
 
             <!-- Description Section -->
             @if ($vacation->included_services || $vacation->extras)
-            <div class="description-container card p-3 mb-5">
+            <div class="description-container inclusions card p-3 mb-5">
                 <div class="description-list">
                     @if ($vacation->included_services && !empty(json_decode($vacation->included_services)))
-                    <div class="description-item">
-                        <div class="header-container">
-                            <span>{{ translate('Included Services')}}</span>
+                        <div class="description-item">
+                            <div class="header-container">
+                                <span>{{ translate('Included Services')}}</span>
+                            </div>
+                            <p class="text-wrapper">
+                                {!! implode(', ', json_decode($vacation->included_services)) !!}
+                            </p>
                         </div>
-                        <p class="text-wrapper">
-                            {!! implode(', ', json_decode($vacation->included_services)) !!}
-                        </p>
-                    </div>
                     @endif
                     @if ($vacation->extras && count($vacation->extras) > 0)
-                    <div class="description-item">
-                        <div class="header-container">
-                            <span>{{ translate('Extras')}}</span>
-                        </div>
-                        
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>{{ translate('Description') }}</th>
-                                        <th>{{ translate('Price') }}</th>
-                                        <th>{{ translate('Price Type') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($vacation->extras as $itemIndex => $item)
+                        <div class="description-item">
+                            <div class="header-container">
+                                <span>{{ translate('Extras')}}</span>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
                                         <tr>
-                                            <td>{{ $item->description }}</td>
-                                            <td>€{{ number_format($item->price, 2, ',', '.') }}</td>
-                                            <td>{{ str_replace('_', ' ', strtoupper($item->type)) }}</td>
+                                            <th>{{ translate('Description') }}</th>
+                                            <th>{{ translate('Price') }}</th>
+                                            <th style="min-width:100px !important">{{ translate('Price Type') }}</th>
                                         </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($vacation->extras as $itemIndex => $item)
+                                            @php
+                                                $pricePerPerson = $item->price / ($index + 1);
+                                            @endphp
+                                            <tr>
+                                                <td>{{ $item->description }}</td>
+                                                <td>€{{ number_format($pricePerPerson, (floor($pricePerPerson) == $pricePerPerson) ? 0 : 2, '.', ',') }}</td>
+                                                <td style="text-transform: capitalize; min-width:100px !important">{{ translate(str_replace('_', ' ', $item->type)) }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
                     @endif
                 </div>
             </div>
@@ -770,7 +898,7 @@
 
         <!-- Description Section -->  
         <!-- Right Column -->
-        <div id="book-now" class="guidings-book">
+        <div id="book-now" class="vacation-book">
             @if(!$agent->ismobile())
                 @include('pages.vacations.content.bookvacation')
             @endif
@@ -819,10 +947,24 @@
     </section>
     @endif
 </div>
-<div class="guidings-book-mobile">
-    @if($agent->ismobile())
-        {{-- @include('pages.guidings.content.bookguidingmobile') --}}
-    @endif
+<div class="vacations-book-mobile">
+<button type="button" class="btn btn-orange w-100" data-bs-toggle="modal" data-bs-target="#vacationModalLabel">
+{{ translate('Book Vacation') }}
+</button>
+<div class="modal fade" id="vacationModalLabel" tabindex="-1" aria-labelledby="vacationModalLabel" aria-hidden="true">
+<div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">{{ translate('Book Vacation') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+         @include('pages.vacations.content.bookvacation')
+      </div>
+    </div>
+  </div>
+   
+</div>
 </div>
 @endsection
 
@@ -1033,7 +1175,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         typeInput.value = bookingType;
                         
                         // Show/hide appropriate options
-                        if (bookingType === 'package') {
+                        if (bookingType === 'Komplettpaket') {
                             packageOptions.style.display = 'block';
                             customOptions.style.display = 'none';
                         } else {

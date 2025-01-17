@@ -885,10 +885,7 @@ div#masonry-grid {
         font-weight: bold;
         color: $font-color;
 
-        &:not(.collapsed) {
-          background-color: #faf5ee;
-          color: $font-color;
-        }
+        background-color: #faf5ee;
 
         &:focus {
           box-shadow: none;

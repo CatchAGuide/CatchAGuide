@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Vacation;
+use App\Models\VacationBooking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,12 @@ class VacationsController extends Controller
     {
         $vacations = Vacation::all();
         return view('admin.pages.vacations.index',compact('vacations'));
+    }
+
+    public function bookings()
+    {
+        $bookings = VacationBooking::with('vacation', 'package', 'accommodation', 'boat', 'guiding')->orderBy('created_at', 'desc')->get();
+        return view('admin.pages.vacations.bookings',compact('bookings'));
     }
 
     public function create()
@@ -104,10 +111,10 @@ class VacationsController extends Controller
                             'capacity' => $accommodation['capacity'],
                             'dynamic_fields' => json_encode([
                                 'prices' => array_values($accommodation['prices'] ?? []),
-                                'living_area' => $accommodation['living_area'] ?? '',
                                 'bed_count' => $accommodation['bed_count'] ?? '',
-                                'facilities' => $accommodation['facilities'] ?? '',
-                                'min_rental_days' => $accommodation['min_rental_days'] ?? ''
+                                'living_area' => $accommodation['living_area'] ?? '',
+                                'min_rental_days' => $accommodation['min_rental_days'] ?? '',
+                                'facilities' => $accommodation['facilities'] ?? ''
                             ])
                         ]);
                     }
@@ -198,7 +205,7 @@ class VacationsController extends Controller
     public function edit($id)
     {
         try {
-            $vacation = Vacation::with(['accommodations', 'boats', 'packages', 'guidings'])->findOrFail($id);
+            $vacation = Vacation::with(['accommodations', 'boats', 'packages', 'guidings', 'extras'])->findOrFail($id);
             
             // Transform the data to include parsed dynamic_fields
             $data = $vacation->toArray();
@@ -223,9 +230,6 @@ class VacationsController extends Controller
                 $item->dynamic_fields = json_decode($item->dynamic_fields, true);
                 return $item;
             });
-
-            // Debug log
-            \Log::info('Edit vacation data:', ['data' => $data]);
 
             return response()->json($data);
         } catch (\Exception $e) {
@@ -272,16 +276,16 @@ class VacationsController extends Controller
                 $vacation->accommodations()->delete(); // Remove existing
                 if ($request->has('accommodations')) {
                     foreach ($request->accommodations as $accommodation) {
-                        $vacation->accommodations()->create([
+                        $data = $vacation->accommodations()->create([
                             'title' => $accommodation['title'] ?? null,
                             'description' => $accommodation['description'],
                             'capacity' => $accommodation['capacity'],
                             'dynamic_fields' => json_encode([
                                 'prices' => array_values($accommodation['prices'] ?? []),
-                                'living_area' => $accommodation['living_area'] ?? '',
                                 'bed_count' => $accommodation['bed_count'] ?? '',
-                                'facilities' => $accommodation['facilities'] ?? '',
-                                'min_rental_days' => $accommodation['min_rental_days'] ?? ''
+                                'living_area' => $accommodation['living_area'] ?? '',
+                                'min_rental_days' => $accommodation['min_rental_days'] ?? '',
+                                'facilities' => $accommodation['facilities'] ?? ''
                             ])
                         ]);
                     }
@@ -402,5 +406,30 @@ class VacationsController extends Controller
         }
 
         return $galeryImages;
+    }
+
+    public function show(VacationBooking $booking)
+    {
+        try {
+            // Eager load all the relationships we need
+            $booking->load([
+                'vacation',
+                'package',
+                'accommodation',
+                'boat',
+                'guiding'
+            ]);
+
+            return view('admin.pages.vacations.show', compact('booking'));
+        } catch (\Exception $e) {
+            Log::error('Error in vacation booking show:', [
+                'error' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()
+                ->route('admin.vacations.bookings')
+                ->with('error', 'An error occurred while loading the booking details: ' . $e->getMessage());
+        }
     }
 }

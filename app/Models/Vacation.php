@@ -36,26 +36,6 @@ class Vacation extends Model
         return $this->hasMany(VacationGuiding::class);
     }
 
-    public static function locationFilter(string $location, ?int $radius = null, $placeLat = null, $placeLng = null )
-    {
-        return $this->hasMany(VacationAccommodation::class);
-    }
-
-    public function boats(): HasMany
-    {
-        return $this->hasMany(VacationBoat::class);
-    }
-
-    public function packages(): HasMany
-    {
-        return $this->hasMany(VacationPackage::class);
-    }
-
-    public function guidings(): HasMany
-    {
-        return $this->hasMany(VacationGuiding::class);
-    }
-
     public function extras(): HasMany
     {
         return $this->hasMany(VacationExtra::class);
@@ -150,7 +130,58 @@ class Vacation extends Model
         ];
     }
 
-    public function getLowestPrice(){
-        return 0;
+    public function getLowestPrice(): float
+    {
+        $lowestPackagePrice = $this->packages->map(function ($package) {
+            $dynamicFields = json_decode($package->dynamic_fields, true);
+            if (!isset($dynamicFields['prices']) || empty($dynamicFields['prices'])) {
+                return PHP_FLOAT_MAX;
+            }
+
+            // Calculate price per person for each capacity
+            $pricesPerPerson = collect($dynamicFields['prices'])->map(function ($price, $index) {
+                $personCount = $index + 1; // Index 0 = 1 person, 1 = 2 persons, etc.
+                return floatval($price) / $personCount;
+            });
+
+            return $pricesPerPerson->min();
+        })->min();
+
+        $lowestAccommodationPrice = $this->accommodations->map(function ($accommodation) {
+            $dynamicFields = json_decode($accommodation->dynamic_fields, true);
+            if (!isset($dynamicFields['prices']) || empty($dynamicFields['prices'])) {
+                return PHP_FLOAT_MAX;
+            }
+
+            // Calculate price per person for each capacity
+            $pricesPerPerson = collect($dynamicFields['prices'])->map(function ($price, $index) {
+                $personCount = $index + 1;
+                return floatval($price) / $personCount;
+            });
+
+            return $pricesPerPerson->min();
+        })->min();
+
+        // If no valid prices found, return null
+        if ($lowestPackagePrice === PHP_FLOAT_MAX && $lowestAccommodationPrice === PHP_FLOAT_MAX) {
+            return null;
+        }
+
+        // Return the lower of the two prices
+        return (float)min(
+            $lowestPackagePrice === PHP_FLOAT_MAX ? PHP_FLOAT_MAX : $lowestPackagePrice,
+            $lowestAccommodationPrice === PHP_FLOAT_MAX ? PHP_FLOAT_MAX : $lowestAccommodationPrice
+        );
+    }
+
+    /**
+     * Get the total capacity across all accommodations
+     *
+     * @return int
+     */
+    public function getTotalCapacity(): int
+    {
+        return $this->accommodations->sum('capacity');
+
     }
 }

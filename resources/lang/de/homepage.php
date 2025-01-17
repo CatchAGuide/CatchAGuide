@@ -7,7 +7,7 @@ return [
     'header-signup' => 'Registrieren',
     'header-profile' => 'Profil',
     'header-logout' => 'Logout',
-    'header-vacations' => 'Angelurlaub',
+    'header-vacations' => 'Alle Angelurlaube',
 
     'searchbar-destination' => 'Länder',
     'searchbar-person' => 'Personen',
