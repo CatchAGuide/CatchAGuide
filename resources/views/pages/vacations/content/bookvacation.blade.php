@@ -41,10 +41,10 @@
                             @if(!empty($vacation->packages) && count($vacation->packages) > 0)
                                 <div class="booking-type-buttons">
                                     <button type="button" class="booking-type-btn active" data-type="package">
-                                        {{ translate('Package') }}
+                                        {{ translate('Komplettpaket') }}
                                     </button>
                                     <button type="button" class="booking-type-btn" data-type="custom">
-                                        {{ translate('Custom') }}
+                                        {{ translate('Single Offer') }}
                                     </button>
                                 </div>
                                 <input type="hidden" name="booking_type" value="package">
@@ -277,7 +277,7 @@
                                             <div class="mb-3">
                                                 <label class="form-label">{{ translate('Phone + Country Code') }}</label>
                                                 <div class="input-group">
-                                                    <select class="form-select" name="phone_country_code" style="width: 100px; min-width: 100px;" required>
+                                                    <select class="form-select" name="phone_country_code" style=" max-width: 80px;" required>
                                                         <option data-code="+1" value="+1">+1</option>
                                                         <option data-code="+44" value="+44">+44</option>
                                                         <option data-code="+49" value="+49">+49</option>
@@ -310,7 +310,7 @@
                                         </div>
                                     </div>
                                     
-                                    <div class="text-end">
+                                    <div class="text-end d-flex">
                                         <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">{{ translate('Cancel') }}</button>
                                         <button type="submit" class="btn btn-orange">{{ translate('Complete Booking') }}</button>
                                     </div>
@@ -687,7 +687,7 @@
                     selectedItemsSummary.innerHTML += `
                         <div class="selected-item">
                             <div class="d-flex justify-content-between align-items-center">
-                                <div>
+                                <div class="selected-item-info">
                                     <i class="fas fa-box me-2"></i>
                                     <span class="text-muted">${translations.package}:</span>
                                     <span class="ms-2 fw-medium">${selectedPackage.title || translations.selectedPackage}</span>
@@ -711,7 +711,7 @@
                         selectedItemsSummary.innerHTML += `
                             <div class="selected-item">
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <div>
+                                    <div class="selected-item-info">
                                         <i class="fas fa-home me-2"></i>
                                         <span class="text-muted">${translations.accommodation}:</span>
                                         <span class="ms-2 fw-medium">${selectedAccommodation.title || translations.selectedAccommodation}</span>
@@ -736,7 +736,7 @@
                         selectedItemsSummary.innerHTML += `
                             <div class="selected-item">
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <div>
+                                    <div class="selected-item-info">
                                         <i class="fas fa-ship me-2"></i>
                                         <span class="text-muted">${translations.boat}:</span>
                                         <span class="ms-2 fw-medium">${selectedBoat.title || translations.selectedBoat}</span>
@@ -761,7 +761,7 @@
                         selectedItemsSummary.innerHTML += `
                             <div class="selected-item">
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <div>
+                                    <div class="selected-item-info">
                                         <i class="fas fa-user-tie me-2"></i>
                                         <span class="text-muted">${translations.guiding}:</span>
                                         <span class="ms-2 fw-medium">${selectedGuiding.title || translations.selectedGuiding}</span>
@@ -1205,7 +1205,7 @@
     .modal-body textarea,
     .modal-body button {
         position: relative;
-        z-index: 10003 !important;
+        /* z-index: 10003 !important; */
     }
     
     /* Additional modal styling */
