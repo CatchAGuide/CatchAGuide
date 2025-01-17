@@ -74,7 +74,7 @@
             overflow: hidden;
         }
 
-        .guidings-gallery .left-image img {
+        /* .guidings-gallery .left-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -82,7 +82,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-        }
+        } */
 
         .guidings-gallery .right-images img {
             width: 100%;

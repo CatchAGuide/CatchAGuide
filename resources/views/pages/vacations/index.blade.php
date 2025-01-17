@@ -34,13 +34,7 @@
         height: 200px;
         background-image: url({{ url('') }}/assets/images/map-bg.png);
         text-align: center;
-        padding-top: 40%;
-    }
-    #map-placeholder button {
-        position: absolute;
-        top: 44%;
-        left: 37%;
-    }     
+    }    
     #offcanvasBottomSearch {
         height: 90%!important;
     }
@@ -323,6 +317,13 @@
                                                 @endif
                                                 <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($vacation->location) }} </span>                                      
                                             </div>
+                                            <div class="inclusions-price">
+                                            <div class="guiding-item-price">
+                                                <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$vacation->getLowestPrice()}}€ p.P.</span></h5>
+                                                <div class="d-none d-flex flex-column mt-4">
+                                                </div>
+                                            </div>
+                                        </div>  
                                             {{-- @if ($vacation->user->average_rating())
                                             <div class="guidings-item-ratings">
                                             <div class="ratings-score">
@@ -332,38 +333,35 @@
                                             </div>
                                             @endif --}}
                                         </div>
-                                        <div class="guidings-item-icon">
-                                            <div class="guidings-icon-container"> 
-                                                <span class="fw-ship">{{translate('Boat Available')}}</span>
-                                                <strong><i class="fas {{ count($vacation->boats) > 0 ? 'fa-check text-success' : 'fa-times text-danger' }}"></i></strong>
+                                        <div class="vacations-item-row">
+                                            <div class="vacations-item-row-top">
                                             </div>
-                                            <div class="guidings-icon-container"> 
-                                                <span class="fw-bold">{{translate('Distance to the water')}}</span>
-                                                <div class="">
-                                                    {{ $vacation->water_distance }}
+                                                <div class="vacations-info-container"> 
+                                                    <span class="fw-bold">{{translate('Boat Available')}}:</span>
+                                                    <span class="text-regular">{{ count($vacation->boats) > 0 ? translate('Available') : translate('Unavailable') }}</span>
+                                                    <!-- <strong><i class="fas {{ count($vacation->boats) > 0 ? 'fa-check text-success' : 'fa-times text-danger' }}"></i></strong> -->
                                                 </div>
-                                            </div>
-                                            <div class="guidings-icon-container"> 
-                                                <span class="fw-bold">{{translate('Target Fish')}}</span>
-                                                <div class="">
+                                                <div class="vacations-info-container"> 
+                                                    <span class="fw-bold">{{translate('Distance to the water')}}:</span>
+                                                    <div class="">
+                                                        {{ $vacation->water_distance }}
+                                                    </div>
+                                                </div>
+                                            <div class="vacations-info-container"> 
+                                                <span class="fw-bold">{{translate('Target Fish')}}:</span>
+                                                <div class="d-flex">
                                                     @php
                                                         $target_fish = json_decode($vacation->target_fish);
                                                     @endphp
-                                                    <ul class="list-unstyled mb-0">
-                                                        @foreach($target_fish as $fish)
-                                                            <li>{{ $fish }}</li>
-                                                        @endforeach
+                                                    <ul class="list-unstyled mb-0 d-flex">
+                                                        <!-- @foreach($target_fish as $fish)
+                                                            <li>{{ $fish }},</li>
+                                                        @endforeach -->
+                                                        {{ \Str::limit(implode(', ', $target_fish), limit:50 ) }}
                                                     </ul>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="inclusions-price">
-                                            <div class="guiding-item-price">
-                                                <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$vacation->getLowestPrice()}}€ p.P.</span></h5>
-                                                <div class="d-none d-flex flex-column mt-4">
-                                                </div>
-                                            </div>
-                                        </div>    
+                                        </div>  
                                     </a>
                                 </div>
                                 </div>
