@@ -197,9 +197,8 @@ Route::post('newguidings', [GuidingsController::class, 'guidingsStore'])->name('
 Route::resource('vacations', VacationsController::class);
 Route::post('/vacation-booking', [VacationBookingController::class, 'store'])
     ->name('vacation.booking.store')
-    ->middleware('web'); 
-Route::get('vacations/category', [VacationsController::class, 'categoryIndex'])->name('vacations.category.index');
-Route::get('vacations/category/{country}', [VacationsController::class, 'category'])->name('vacations.category');
+    ->middleware('web');
+Route::get('vacations/location/{country}', [VacationsController::class, 'category'])->name('vacations.category');
 
 Route::get('searchrequest', [GuidingsController::class, 'bookingrequest'])->name('guidings.request');
 Route::post('searchrequest/store', [GuidingsController::class, 'bookingRequestStore'])->name('store.request');

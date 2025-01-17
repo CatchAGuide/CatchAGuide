@@ -392,7 +392,7 @@
                 <!-- Guiding Availability -->
                 <div class="info-item">
                     <i class="fas fa-user-tie"></i>
-                    <small class="mb-0">{{translate('Guiding Available:')}}</small>
+                    <small class="mb-0">@lang('vacation.guiding')</small>
                     <strong><i class="fas {{ count($vacation->guidings) > 0 ? 'fa-check text-success' : 'fa-times text-danger' }}"></i></strong>
                 </div>
 
