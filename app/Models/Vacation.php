@@ -162,13 +162,13 @@ class Vacation extends Model
             return $pricesPerPerson->min();
         })->min();
 
-        // If no valid prices found, return 0
+        // If no valid prices found, return null
         if ($lowestPackagePrice === PHP_FLOAT_MAX && $lowestAccommodationPrice === PHP_FLOAT_MAX) {
-            return 0;
+            return null;
         }
 
         // Return the lower of the two prices
-        return min(
+        return (float)min(
             $lowestPackagePrice === PHP_FLOAT_MAX ? PHP_FLOAT_MAX : $lowestPackagePrice,
             $lowestAccommodationPrice === PHP_FLOAT_MAX ? PHP_FLOAT_MAX : $lowestAccommodationPrice
         );

@@ -513,24 +513,74 @@
 
             <div class="tabs-container mb-5">
                 <div class="nav nav-tabs" id="guiding-tab" role="tablist">
-                    @php $activeTab = ''; @endphp
+                    @php
+                        $sections = [
+                            'accommodation' => $vacation->accommodations,
+                            'boats' => $vacation->boats,
+                            'packages' => $vacation->packages,
+                            'guidings' => $vacation->guidings
+                        ];
+                        
+                        // Find first non-empty section
+                        $activeTab = null;
+                        foreach($sections as $key => $section) {
+                            if (!empty($section) && count($section) > 0) {
+                                $activeTab = $key;
+                                break;
+                            }
+                        }
+                    @endphp
+
                     @if (!empty($vacation->accommodations) && count($vacation->accommodations) > 0)
-                        <button class="nav-link {{ empty($activeTab) ? 'active' : '' }}" id="nav-accommodation-tab" data-bs-toggle="tab" data-bs-target="#accommodation" type="button" role="tab" aria-controls="nav-accommodation" aria-selected="{{ empty($activeTab) ? 'true' : 'false' }}">{{ translate('Accommodation') }}</button>
-                        @php $activeTab = 'accommodation'; @endphp
+                        <button class="nav-link {{ $activeTab == 'accommodation' ? 'active' : '' }}" 
+                                id="nav-accommodation-tab" 
+                                data-bs-toggle="tab" 
+                                data-bs-target="#accommodation" 
+                                type="button" 
+                                role="tab" 
+                                aria-controls="nav-accommodation" 
+                                aria-selected="{{ $activeTab == 'accommodation' ? 'true' : 'false' }}">
+                            {{ translate('Accommodation') }}
+                        </button>
                     @endif
 
                     @if (!empty($vacation->boats) && count($vacation->boats) > 0)
-                        <button class="nav-link {{ $activeTab == 'boats' ? 'active' : '' }}" id="nav-boat-tab" data-bs-toggle="tab" data-bs-target="#boat" type="button" role="tab" aria-controls="nav-boat" aria-selected="{{ $activeTab == 'boats' ? 'true' : 'false' }}">{{ translate('Boat Information') }}</button>
-                        @php $activeTab = 'boats'; @endphp
+                        <button class="nav-link {{ $activeTab == 'boats' ? 'active' : '' }}" 
+                                id="nav-boat-tab" 
+                                data-bs-toggle="tab" 
+                                data-bs-target="#boat" 
+                                type="button" 
+                                role="tab" 
+                                aria-controls="nav-boat" 
+                                aria-selected="{{ $activeTab == 'boats' ? 'true' : 'false' }}">
+                            {{ translate('Boat Information') }}
+                        </button>
                     @endif
 
                     @if (!empty($vacation->packages) && count($vacation->packages) > 0)
-                        <button class="nav-link {{ $activeTab == 'packages' ? 'active' : '' }}" id="nav-package-tab" data-bs-toggle="tab" data-bs-target="#package" type="button" role="tab" aria-controls="nav-package" aria-selected="{{ $activeTab == 'packages' ? 'true' : 'false' }}">{{ translate('Package') }}</button>
-                        @php $activeTab = 'packages'; @endphp
+                        <button class="nav-link {{ $activeTab == 'packages' ? 'active' : '' }}" 
+                                id="nav-package-tab" 
+                                data-bs-toggle="tab" 
+                                data-bs-target="#package" 
+                                type="button" 
+                                role="tab" 
+                                aria-controls="nav-package" 
+                                aria-selected="{{ $activeTab == 'packages' ? 'true' : 'false' }}">
+                            {{ translate('Package') }}
+                        </button>
                     @endif
 
                     @if (!empty($vacation->guidings) && count($vacation->guidings) > 0)
-                        <button class="nav-link {{ $activeTab == 'guidings' ? 'active' : '' }}" id="nav-guiding-tab" data-bs-toggle="tab" data-bs-target="#guiding" type="button" role="tab" aria-controls="nav-guiding" aria-selected="{{ $activeTab == 'guidings' ? 'true' : 'false' }}">{{ translate('Guiding') }}</button>
+                        <button class="nav-link {{ $activeTab == 'guidings' ? 'active' : '' }}" 
+                                id="nav-guiding-tab" 
+                                data-bs-toggle="tab" 
+                                data-bs-target="#guiding" 
+                                type="button" 
+                                role="tab" 
+                                aria-controls="nav-guiding" 
+                                aria-selected="{{ $activeTab == 'guidings' ? 'true' : 'false' }}">
+                            {{ translate('Guiding') }}
+                        </button>
                     @endif
                 </div>
     
