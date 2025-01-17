@@ -382,23 +382,25 @@
     <section class="guidings-description-container mb-5">
         <div class="guidings-descriptions">
             <div class="important-info">
+                <!-- Boat Availability -->
                 <div class="info-item">
-                    <i class="fas fa-users"></i>
-                    <small class="mb-0">{{translate('Minimum number of guests:')}}</small>
-                    <strong>{{$vacation->min_guests}}</strong>
+                    <i class="fas fa-ship"></i>
+                    <small class="mb-0">{{translate('Boat Available:')}}</small>
+                    <strong><i class="fas {{ count($vacation->boats) > 0 ? 'fa-check text-success' : 'fa-times text-danger' }}"></i></strong>
                 </div>
-                <!-- Price Range -->
+
+                <!-- Guiding Availability -->
                 <div class="info-item">
-                    <i class="fas fa-tag"></i>
-                    <small class="mb-0">{{translate('Price Range:')}}</small>
-                    <strong>€{{$vacation->price_from}} - €{{$vacation->price_to}}</strong>
+                    <i class="fas fa-user-tie"></i>
+                    <small class="mb-0">{{translate('Guiding Available:')}}</small>
+                    <strong><i class="fas {{ count($vacation->guidings) > 0 ? 'fa-check text-success' : 'fa-times text-danger' }}"></i></strong>
                 </div>
-            
-                <!-- Availability -->
+
+                <!-- Pets -->
                 <div class="info-item">
-                    <i class="fas fa-calendar-check"></i>
-                    <small class="mb-0">{{translate('Availability:')}}</small>
-                    <strong>{{$vacation->availability}}%</strong>
+                    <i class="fas fa-paw"></i>
+                    <small class="mb-0">{{translate('Pets:')}}</small>
+                    <strong><i class="fas {{ $vacation->pets_allowed ? 'fa-check text-success' : 'fa-times text-danger' }}"></i></strong>
                 </div>
             </div>
     
@@ -513,29 +515,25 @@
 
             <div class="tabs-container mb-5">
                 <div class="nav nav-tabs" id="guiding-tab" role="tablist">
-                    @php
-                        $sections = [
-                            'accommodation' => $vacation->accommodations,
-                            'boats' => $vacation->boats,
-                            'packages' => $vacation->packages,
-                            'guidings' => $vacation->guidings
-                        ];
-                        
-                        // Find first non-empty section
-                        $activeTab = null;
-                        foreach($sections as $key => $section) {
-                            if (!empty($section) && count($section) > 0) {
-                                $activeTab = $key;
-                                break;
-                            }
+                    @php 
+                        // Initialize activeTab based on available sections
+                        $activeTab = '';
+                        if (!empty($vacation->accommodations) && count($vacation->accommodations) > 0) {
+                            $activeTab = 'accommodation';
+                        } elseif (!empty($vacation->boats) && count($vacation->boats) > 0) {
+                            $activeTab = 'boat';
+                        } elseif (!empty($vacation->packages) && count($vacation->packages) > 0) {
+                            $activeTab = 'package';
+                        } elseif (!empty($vacation->guidings) && count($vacation->guidings) > 0) {
+                            $activeTab = 'guiding';
                         }
                     @endphp
-
+                    
                     @if (!empty($vacation->accommodations) && count($vacation->accommodations) > 0)
                         <button class="nav-link {{ $activeTab == 'accommodation' ? 'active' : '' }}" 
                                 id="nav-accommodation-tab" 
                                 data-bs-toggle="tab" 
-                                data-bs-target="#accommodation" 
+                                data-bs-target="#nav-accommodation" 
                                 type="button" 
                                 role="tab" 
                                 aria-controls="nav-accommodation" 
@@ -545,40 +543,40 @@
                     @endif
 
                     @if (!empty($vacation->boats) && count($vacation->boats) > 0)
-                        <button class="nav-link {{ $activeTab == 'boats' ? 'active' : '' }}" 
+                        <button class="nav-link {{ $activeTab == 'boat' ? 'active' : '' }}" 
                                 id="nav-boat-tab" 
                                 data-bs-toggle="tab" 
-                                data-bs-target="#boat" 
+                                data-bs-target="#nav-boat" 
                                 type="button" 
                                 role="tab" 
                                 aria-controls="nav-boat" 
-                                aria-selected="{{ $activeTab == 'boats' ? 'true' : 'false' }}">
+                                aria-selected="{{ $activeTab == 'boat' ? 'true' : 'false' }}">
                             {{ translate('Boat Information') }}
                         </button>
                     @endif
 
                     @if (!empty($vacation->packages) && count($vacation->packages) > 0)
-                        <button class="nav-link {{ $activeTab == 'packages' ? 'active' : '' }}" 
+                        <button class="nav-link {{ $activeTab == 'package' ? 'active' : '' }}" 
                                 id="nav-package-tab" 
                                 data-bs-toggle="tab" 
-                                data-bs-target="#package" 
+                                data-bs-target="#nav-package" 
                                 type="button" 
                                 role="tab" 
                                 aria-controls="nav-package" 
-                                aria-selected="{{ $activeTab == 'packages' ? 'true' : 'false' }}">
+                                aria-selected="{{ $activeTab == 'package' ? 'true' : 'false' }}">
                             {{ translate('Package') }}
                         </button>
                     @endif
 
                     @if (!empty($vacation->guidings) && count($vacation->guidings) > 0)
-                        <button class="nav-link {{ $activeTab == 'guidings' ? 'active' : '' }}" 
+                        <button class="nav-link {{ $activeTab == 'guiding' ? 'active' : '' }}" 
                                 id="nav-guiding-tab" 
                                 data-bs-toggle="tab" 
-                                data-bs-target="#guiding" 
+                                data-bs-target="#nav-guiding" 
                                 type="button" 
                                 role="tab" 
                                 aria-controls="nav-guiding" 
-                                aria-selected="{{ $activeTab == 'guidings' ? 'true' : 'false' }}">
+                                aria-selected="{{ $activeTab == 'guiding' ? 'true' : 'false' }}">
                             {{ translate('Guiding') }}
                         </button>
                     @endif
@@ -607,8 +605,8 @@
                     @endphp
 
                     @foreach($sections as $sectionKey => $section)
-                        <div class="tab-pane fade {{ $sectionKey === 'accommodation' ? 'show active' : '' }}" 
-                             id="{{ $sectionKey }}" 
+                        <div class="tab-pane fade {{ $sectionKey === $activeTab ? 'show active' : '' }}" 
+                             id="nav-{{ $sectionKey }}" 
                              role="tabpanel" 
                              aria-labelledby="nav-{{ $sectionKey }}-tab">
 
@@ -627,10 +625,40 @@
                                                 <div class="row mt-4">
                                                     @foreach($dynamicFields as $field => $value)
                                                         @if($field !== 'prices')
-                                                            <div class="details-row">
-                                                                <h6 class="mb-1">{{ translate(ucwords(str_replace('_', ' ', $field))) }}</h6>
-                                                                <p class="mb-0">{{ $value }}</p>
-                                                            </div>
+                                                            @if($sectionKey === 'accommodation')
+                                                                @php
+                                                                    // Define priority fields and their order for accommodation
+                                                                    $priorityFields = ['bed_count', 'living_area', 'min_rental_days', 'facilities'];
+                                                                    
+                                                                    // Skip if this field has already been displayed
+                                                                    if (in_array($field, $priorityFields) && $field !== current($priorityFields)) {
+                                                                        continue;
+                                                                    }
+                                                                    
+                                                                    // Display priority fields first
+                                                                    foreach ($priorityFields as $priorityField) {
+                                                                        if (isset($dynamicFields->$priorityField)) {
+                                                                            echo '<div class="details-row">
+                                                                                    <h6 class="mb-1">' . translate(ucwords(str_replace('_', ' ', $priorityField))) . '</h6>
+                                                                                    <p class="mb-0">' . $dynamicFields->$priorityField . '</p>
+                                                                                </div>';
+                                                                        }
+                                                                    }
+                                                                    
+                                                                    // Display remaining fields if not in priority list
+                                                                    if (!in_array($field, $priorityFields)) {
+                                                                        echo '<div class="details-row">
+                                                                                <h6 class="mb-1">' . translate(ucwords(str_replace('_', ' ', $field))) . '</h6>
+                                                                                <p class="mb-0">' . $value . '</p>
+                                                                            </div>';
+                                                                    }
+                                                                @endphp
+                                                            @else
+                                                                <div class="details-row">
+                                                                    <h6 class="mb-1">{{ translate(ucwords(str_replace('_', ' ', $field))) }}</h6>
+                                                                    <p class="mb-0">{{ $value }}</p>
+                                                                </div>
+                                                            @endif
                                                         @endif
                                                     @endforeach
                                                 </div>
@@ -736,10 +764,40 @@
                                             <div class="row mt-4">
                                                 @foreach($dynamicFields as $field => $value)
                                                     @if($field !== 'prices')
-                                                        <div class="col-12 col-sm-6 col-md-4 mb-3">
-                                                            <h6 class="mb-1">{{ translate(ucwords(str_replace('_', ' ', $field))) }}</h6>
-                                                            <p class="mb-0">{{ $value }}</p>
-                                                        </div>
+                                                        @if($sectionKey === 'accommodation')
+                                                            @php
+                                                                // Define priority fields and their order for accommodation
+                                                                $priorityFields = ['bed_count', 'living_area', 'min_rental_days', 'facilities'];
+                                                                
+                                                                // Skip if this field has already been displayed
+                                                                if (in_array($field, $priorityFields) && $field !== current($priorityFields)) {
+                                                                    continue;
+                                                                }
+                                                                
+                                                                // Display priority fields first
+                                                                foreach ($priorityFields as $priorityField) {
+                                                                    if (isset($dynamicFields->$priorityField)) {
+                                                                        echo '<div class="details-row">
+                                                                                <h6 class="mb-1">' . translate(ucwords(str_replace('_', ' ', $priorityField))) . '</h6>
+                                                                                <p class="mb-0">' . $dynamicFields->$priorityField . '</p>
+                                                                            </div>';
+                                                                    }
+                                                                }
+                                                                
+                                                                // Display remaining fields if not in priority list
+                                                                if (!in_array($field, $priorityFields)) {
+                                                                    echo '<div class="details-row">
+                                                                            <h6 class="mb-1">' . translate(ucwords(str_replace('_', ' ', $field))) . '</h6>
+                                                                            <p class="mb-0">' . $value . '</p>
+                                                                        </div>';
+                                                                }
+                                                            @endphp
+                                                        @else
+                                                            <div class="details-row">
+                                                                <h6 class="mb-1">{{ translate(ucwords(str_replace('_', ' ', $field))) }}</h6>
+                                                                <p class="mb-0">{{ $value }}</p>
+                                                            </div>
+                                                        @endif
                                                     @endif
                                                 @endforeach
                                             </div>

@@ -111,10 +111,10 @@ class VacationsController extends Controller
                             'capacity' => $accommodation['capacity'],
                             'dynamic_fields' => json_encode([
                                 'prices' => array_values($accommodation['prices'] ?? []),
-                                'living_area' => $accommodation['living_area'] ?? '',
                                 'bed_count' => $accommodation['bed_count'] ?? '',
-                                'facilities' => $accommodation['facilities'] ?? '',
-                                'min_rental_days' => $accommodation['min_rental_days'] ?? ''
+                                'living_area' => $accommodation['living_area'] ?? '',
+                                'min_rental_days' => $accommodation['min_rental_days'] ?? '',
+                                'facilities' => $accommodation['facilities'] ?? ''
                             ])
                         ]);
                     }
@@ -276,16 +276,16 @@ class VacationsController extends Controller
                 $vacation->accommodations()->delete(); // Remove existing
                 if ($request->has('accommodations')) {
                     foreach ($request->accommodations as $accommodation) {
-                        $vacation->accommodations()->create([
+                        $data = $vacation->accommodations()->create([
                             'title' => $accommodation['title'] ?? null,
                             'description' => $accommodation['description'],
                             'capacity' => $accommodation['capacity'],
                             'dynamic_fields' => json_encode([
                                 'prices' => array_values($accommodation['prices'] ?? []),
-                                'living_area' => $accommodation['living_area'] ?? '',
                                 'bed_count' => $accommodation['bed_count'] ?? '',
-                                'facilities' => $accommodation['facilities'] ?? '',
-                                'min_rental_days' => $accommodation['min_rental_days'] ?? ''
+                                'living_area' => $accommodation['living_area'] ?? '',
+                                'min_rental_days' => $accommodation['min_rental_days'] ?? '',
+                                'facilities' => $accommodation['facilities'] ?? ''
                             ])
                         ]);
                     }

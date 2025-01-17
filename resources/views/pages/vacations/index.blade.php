@@ -334,30 +334,26 @@
                                         </div>
                                         <div class="guidings-item-icon">
                                             <div class="guidings-icon-container"> 
-                                                <span class="fw-bold">{{translate('Accomodation')}}</span>
+                                                <span class="fw-ship">{{translate('Boat Available')}}</span>
+                                                <strong><i class="fas {{ count($vacation->boats) > 0 ? 'fa-check text-success' : 'fa-times text-danger' }}"></i></strong>
+                                            </div>
+                                            <div class="guidings-icon-container"> 
+                                                <span class="fw-bold">{{translate('Distance to the water')}}</span>
                                                 <div class="">
-                                                    {{ $vacation->getTotalCapacity() }}
+                                                    {{ $vacation->water_distance }}
                                                 </div>
                                             </div>
                                             <div class="guidings-icon-container"> 
-                                                
-                                                <span class="fw-bold">{{translate('Package Available')}}</span>
+                                                <span class="fw-bold">{{translate('Target Fish')}}</span>
                                                 <div class="">
-                                                    {{ $vacation->packages ? 'Yes' : 'No' }}
-                                                </div>
-                                            </div>
-                                            <div class="guidings-icon-container"> 
-                                                
-                                                <span class="fw-bold">{{translate('Boat Available')}}</span>
-                                                <div class="">
-                                                    {{ $vacation->boats ? 'Yes' : 'No' }}
-                                                </div>
-                                            </div>
-                                            <div class="guidings-icon-container"> 
-                                                
-                                                <span class="fw-bold">{{translate('Guiding Available')}}</span>
-                                                <div class="">
-                                                    {{ $vacation->guidings ? 'Yes' : 'No' }}
+                                                    @php
+                                                        $target_fish = json_decode($vacation->target_fish);
+                                                    @endphp
+                                                    <ul class="list-unstyled mb-0">
+                                                        @foreach($target_fish as $fish)
+                                                            <li>{{ $fish }}</li>
+                                                        @endforeach
+                                                    </ul>
                                                 </div>
                                             </div>
                                         </div>

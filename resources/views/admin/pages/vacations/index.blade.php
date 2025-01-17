@@ -256,18 +256,11 @@
         const accommodationFields = `
             <div class="row mb-3">
                 <div class="col-md-4">
-                    <label class="form-label">Facilities</label>
+                    <label class="form-label">Bed Count</label>
                     <input type="text" 
-                           name="${type}s[${index}][facilities]" 
+                           name="${type}s[${index}][bed_count]" 
                            class="form-control" 
-                           placeholder="e.g., WiFi, TV, Kitchen">
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Min Rental Days</label>
-                    <input type="text" 
-                           name="${type}s[${index}][min_rental_days]" 
-                           class="form-control" 
-                           placeholder="e.g., 3 days">
+                           placeholder="e.g., 2 double beds, 1 single">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Living Area</label>
@@ -277,11 +270,18 @@
                            placeholder="e.g., 120 m²">
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">Bed Count</label>
+                    <label class="form-label">Min Rental Days</label>
                     <input type="text" 
-                           name="${type}s[${index}][bed_count]" 
+                           name="${type}s[${index}][min_rental_days]" 
                            class="form-control" 
-                           placeholder="e.g., 2 double beds, 1 single">
+                           placeholder="e.g., 3 days">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Facilities</label>
+                    <input type="text" 
+                           name="${type}s[${index}][facilities]" 
+                           class="form-control" 
+                           placeholder="e.g., WiFi, TV, Kitchen">
                 </div>
             </div>
         `;
