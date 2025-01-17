@@ -513,6 +513,7 @@
 
             <div class="tabs-container mb-5">
                 <div class="nav nav-tabs" id="guiding-tab" role="tablist">
+                    @php $activeTab = ''; @endphp
                     @if (!empty($vacation->accommodations) && count($vacation->accommodations) > 0)
                         <button class="nav-link {{ empty($activeTab) ? 'active' : '' }}" id="nav-accommodation-tab" data-bs-toggle="tab" data-bs-target="#accommodation" type="button" role="tab" aria-controls="nav-accommodation" aria-selected="{{ empty($activeTab) ? 'true' : 'false' }}">{{ translate('Accommodation') }}</button>
                         @php $activeTab = 'accommodation'; @endphp
