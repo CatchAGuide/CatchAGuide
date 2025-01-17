@@ -87,9 +87,9 @@
             <!-- Categories Row - Mobile -->
             <div class="col-12 d-md-none mt-2">
                 <div class="d-flex categories-mobile">
-                    <a href="{{ route('destination') }}" class="me-4 text-white text-decoration-none">
+                    {{-- <a href="{{ route('destination') }}" class="me-4 text-white text-decoration-none">
                         <i class="fas fa-map-marker-alt me-2"></i>@lang('homepage.searchbar-destination')
-                    </a>
+                    </a> --}}
                     <a href="{{ route('guidings.index') }}" class="me-4 text-white text-decoration-none">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
@@ -124,9 +124,9 @@
         <div class="row categories-row d-none d-md-block">
             <div class="col-12">
                 <div class="d-flex">
-                    <a href="{{ route('destination') }}" class="me-4 text-white text-decoration-none">
+                    {{-- <a href="{{ route('destination') }}" class="me-4 text-white text-decoration-none">
                         <i class="fas fa-map-marker-alt me-2"></i>@lang('homepage.searchbar-destination')
-                    </a>
+                    </a> --}}
                     <a href="{{ route('guidings.index') }}" class="me-4 text-white text-decoration-none">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
@@ -790,10 +790,10 @@ input[type=number] {
             <!-- Rest of the modal content remains the same -->
             <div class="modal-body p-0">
                 <div class="mobile-menu-items">
-                    <a href="{{ route('destination') }}" class="menu-item">
+                    {{-- <a href="{{ route('destination') }}" class="menu-item">
                         <i class="fas fa-map-marker-alt"></i>
                         <span>@lang('homepage.searchbar-destination')</span>
-                    </a>
+                    </a> --}}
                     <a href="{{ route('guidings.index') }}" class="menu-item">
                         <i class="fas fa-fish"></i>
                         <span>@lang('homepage.filter-fishing-near-me')</span>
