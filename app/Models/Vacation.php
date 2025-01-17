@@ -182,5 +182,6 @@ class Vacation extends Model
     public function getTotalCapacity(): int
     {
         return $this->accommodations->sum('capacity');
+
     }
 }

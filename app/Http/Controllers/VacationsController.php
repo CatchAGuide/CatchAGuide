@@ -255,7 +255,6 @@ class VacationsController extends Controller
 
         $data = compact('row_data', 'faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit', 'vacations', 'allVacations', 'othervacations', 'title', 'vacations_total');
 
-
         return view('pages.vacations.index', $data);
     }
 
