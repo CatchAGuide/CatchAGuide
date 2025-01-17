@@ -661,7 +661,7 @@
                     const field = form.querySelector(`[name="${fieldName}"]`);
                     if (field) {
                         if (field.type === 'checkbox') {
-                            field.checked = !!value;
+                            field.checked = parseInt(value);
                         } else {
                             field.value = value || '';
                         }
