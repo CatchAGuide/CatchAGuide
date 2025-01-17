@@ -42,16 +42,18 @@ class VacationsController extends Controller
             $jsonFields = ['target_fish', 'amenities', 'equipment', 'additional_services', 'included_services', 'travel_options'];
             foreach ($jsonFields as $field) {
                 if (isset($data[$field])) {
-                    
                     // Check if the value is a string (from tagify) and convert to array
                     if (is_string($data[$field])) {
                         try {
-                            $data[$field] = json_decode($data[$field], true);
-                            // Extract only the 'value' property from each tag if it exists
-                            $data[$field] = array_map(function($item) {
-                                return is_array($item) && isset($item['value']) ? $item['value'] : $item;
-                            }, $data[$field]);
-                            
+                            $decodedValue = json_decode($data[$field], true);
+                            if (is_array($decodedValue)) {
+                                // Extract only the 'value' property from each tag if it exists
+                                $data[$field] = array_map(function($item) {
+                                    return is_array($item) && isset($item['value']) ? $item['value'] : $item;
+                                }, $decodedValue);
+                            } else {
+                                $data[$field] = [];
+                            }
                         } catch (\Exception $e) {
                             Log::error("Error processing JSON field {$field}:", [
                                 'error' => $e->getMessage(),
@@ -60,7 +62,12 @@ class VacationsController extends Controller
                             $data[$field] = [];
                         }
                     }
-                    $data[$field] = json_encode($data[$field]);
+                    // Only encode if we have a valid array
+                    if (is_array($data[$field])) {
+                        $data[$field] = json_encode($data[$field]);
+                    } else {
+                        $data[$field] = json_encode([]);
+                    }
                 }
             }
 
