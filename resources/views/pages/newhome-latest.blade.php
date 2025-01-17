@@ -739,7 +739,7 @@
         <div class="new-custom-owl owl-carousel owl-theme">
             <div class="item">
                 <div class="trending-card">
-                    <a href="/destination/Netherlands">
+                    <a href="/destination/niederlande">
                         <div class="trending-card-wrapper">
                             <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/netherlands/holland1.webp')}}">
                             <div class="trending-card-wrapper-content">
@@ -781,7 +781,7 @@
             </div>
             <div class="item">
                 <div class="trending-card">
-                    <a href="/destination/Spain">
+                    <a href="/destination/spanien">
                         <div class="trending-card-wrapper">
                             <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/spain/spain.webp')}}">
                             <div class="trending-card-wrapper-content">
@@ -823,7 +823,7 @@
             </div>
             <div class="item">
                 <div class="trending-card">
-                    <a href="/destination/Croatia">
+                    <a href="/destination/kroatien">
                         <div class="trending-card-wrapper">
                             <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/croatia/croatia.webp')}}">
                             <div class="trending-card-wrapper-content">
