@@ -238,12 +238,6 @@
                 $overallImages = [];
                 $hiddenCount = 0;
 
-                // Check if thumbnail exists
-                // if (file_exists(public_path($thumbnailPath))) {
-                //     $finalImages[] = asset($thumbnailPath);
-                //     $overallImages[] = asset($thumbnailPath);
-                // }
-
                 // Filter and validate gallery images
                 if ($galleryImages) {
                     foreach ($galleryImages as $image) {
@@ -296,13 +290,6 @@
                 $finalImages = [];
                 $overallImages = [];
                 
-
-                // Validate thumbnail exists
-                // if (file_exists(public_path($thumbnailPath))) {
-                //     $finalImages[] = asset($thumbnailPath);
-                //     $overallImages[] = asset($thumbnailPath);
-                // }
-                
                 // Filter gallery images that exist
                 if ($galleryImages) {
                     foreach ($galleryImages as $image) {
@@ -315,12 +302,7 @@
                 
                 $hiddenCount = count($finalImages) > 2 ? count($finalImages) - 2 : 0;
 
-                if (empty($finalImages)) {
-                    // No valid gallery images, use thumbnail if it exists
-                    if (file_exists(public_path($thumbnailPath))) {
-                        $finalImages = array_fill(0, 2, asset($thumbnailPath));
-                    }
-                } elseif (count($finalImages) > 3) {
+                if (count($finalImages) > 3) {
                     // More than 3 valid gallery images
                     $finalImages = array_slice($finalImages, 0, 2);
                 } else {
@@ -329,11 +311,11 @@
                         $finalImages = $finalImages;
                         
                         // Pad with thumbnail if it exists
-                        if (file_exists(public_path($thumbnailPath))) {
-                            while (count($finalImages) < 2) {
-                                $finalImages[] = asset($thumbnailPath);
-                            }
-                        } 
+                        // if (file_exists(public_path($thumbnailPath))) {
+                        //     while (count($finalImages) < 2) {
+                        //         $finalImages[] = asset($thumbnailPath);
+                        //     }
+                        // } 
                     } else {
                         $finalImages = array_slice($finalImages, 0, 2);
                     }
@@ -386,13 +368,13 @@
                 <div class="info-item">
                     <i class="fas fa-ship"></i>
                     <small class="mb-0">{{translate('Boat Available:')}}</small>
-                    <strong><i class="fas {{ count($vacation->boats) > 0 ? 'fa-check text-success' : 'fa-times text-danger' }}"></i></strong>
+                    <strong><i class="fas {{ count($vacation->boats) > 0 || count($vacation->packages) > 0 ? 'fa-check text-success' : 'fa-times text-danger' }}"></i></strong>
                 </div>
 
                 <!-- Guiding Availability -->
                 <div class="info-item">
                     <i class="fas fa-user-tie"></i>
-                    <small class="mb-0">@lang('vacation.guiding')</small>
+                    <small class="mb-0">Guiding</small>
                     <strong><i class="fas {{ count($vacation->guidings) > 0 ? 'fa-check text-success' : 'fa-times text-danger' }}"></i></strong>
                 </div>
 
@@ -441,17 +423,17 @@
                     @endif
                     <div class="row">
                         <div class="col-12">
-                            <strong class="subtitle-text">{{ translate('Anreise') }}</strong>
+                            <strong class="subtitle-text">{{ translate('Reiseinformationen') }}</strong>
                         </div>
                         <ol class="px-3">
                             <li class="mx-4">
-                                <strong class="subtitle-text">{{ translate('Travel Included') }}</strong>
-                                {{ translate($vacation->travel_included || $vacation->travel_included !== null || $vacation->travel_included !== '' ? 'Yes' : 'No')}}
+                                <strong class="subtitle-text">{{ translate('Hin- & Rückreise') }}:</strong>
+                                {{ translate($vacation->travel_included)}}
                             </li>
                             <li class="mx-4">
                             @if(!empty($vacation->travel_options))
                                 <div class="tab-category mb-4">
-                                    <strong class="subtitle-text">{{ translate('Travel Options') }}</strong>
+                                    <strong class="subtitle-text">{{ translate('Reiseempfehlung') }}:</strong>
                                     <div class="row">
                                         @foreach (json_decode($vacation->travel_options) as $travel_option)
                                             <div class="col-12 text-start">
@@ -735,18 +717,18 @@
                     <div class="accordion-item">
                     @if (!empty($section['items']) && count($section['items']) > 0)
                         <h2 class="accordion-header" id="heading{{ $sectionKey }}">
-                            <button class="accordion-button {{ $sectionKey === 'accommodation' ? '' : 'collapsed' }}" 
+                            <button class="accordion-button {{ $sectionKey === $activeTab ? '' : 'collapsed' }}" 
                                     type="button" 
                                     data-bs-toggle="collapse" 
                                     data-bs-target="#collapse{{ $sectionKey }}" 
-                                    aria-expanded="{{ $sectionKey === 'accommodation' ? 'true' : 'false' }}" 
+                                    aria-expanded="{{ $sectionKey === $activeTab ? 'true' : 'false' }}" 
                                     aria-controls="collapse{{ $sectionKey }}">
                                 {{ translate($section['title']) }}
                             </button>
                         </h2>
                     @endif
                         <div id="collapse{{ $sectionKey }}" 
-                            class="accordion-collapse collapse {{ $sectionKey === 'accommodation' ? 'show' : '' }}" 
+                            class="accordion-collapse collapse {{ $sectionKey === $activeTab ? 'show' : '' }}" 
                             aria-labelledby="heading{{ $sectionKey }}" 
                             data-bs-parent="#guidings-accordion">
                             <div class="accordion-body">
@@ -877,12 +859,9 @@
                                     </thead>
                                     <tbody>
                                         @foreach($vacation->extras as $itemIndex => $item)
-                                            @php
-                                                $pricePerPerson = $item->price / ($index + 1);
-                                            @endphp
                                             <tr>
                                                 <td>{{ $item->description }}</td>
-                                                <td>€{{ number_format($pricePerPerson, (floor($pricePerPerson) == $pricePerPerson) ? 0 : 2, '.', ',') }}</td>
+                                                <td>€ {{ $item->price }}</td>
                                                 <td style="text-transform: capitalize; min-width:100px !important">{{ translate(str_replace('_', ' ', $item->type)) }}</td>
                                             </tr>
                                         @endforeach

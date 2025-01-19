@@ -1107,8 +1107,13 @@
             // Get form data
             const formData = new FormData(this);
             
-            // Disable submit button and show loading state
             const submitBtn = document.getElementById('proceedToBookingBtn');
+            // Show loading overlay
+            const loadingOverlay = document.querySelector('.loading-overlay');
+            loadingOverlay.style.display = 'flex';
+            
+            // Disable submit button
+            const submitBtn = this.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{{ translate("Processing...") }}';
             
@@ -1157,6 +1162,9 @@
                 });
             })
             .finally(() => {
+                // Hide loading overlay
+                loadingOverlay.style.display = 'none';
+                
                 // Re-enable submit button
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '{{ translate("Proceed to booking") }}';
@@ -1493,4 +1501,61 @@
         box-shadow: 0 0 0 0.2rem rgba(253, 93, 20, 0.25);
         outline: 0;
     }
+
+    /* Add these styles to handle loading state visibility */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999; /* Higher than modal z-index */
+    }
+
+    .loading-spinner {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Update modal z-index hierarchy */
+    .modal {
+        z-index: 1050;
+    }
+
+    #checkoutModal {
+        z-index: 1060;
+    }
+
+    #thankYouModal {
+        z-index: 1070;
+    }
+
+    /* Ensure loading state is visible */
+    .btn:disabled {
+        position: relative;
+        z-index: 1080;
+    }
+
+    .spinner-border {
+        position: relative;
+        z-index: 1081;
+    }
 </style>
+
+<!-- Add loading overlay div -->
+<div class="loading-overlay">
+    <div class="loading-spinner">
+        <div class="spinner-border text-orange" role="status">
+            <span class="visually-hidden">{{ translate('Loading...') }}</span>
+        </div>
+        <span>{{ translate('Processing your booking...') }}</span>
+    </div>
+</div>
