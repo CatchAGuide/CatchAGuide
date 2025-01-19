@@ -145,6 +145,8 @@ class Vacation extends Model
             });
 
             return $pricesPerPerson->min();
+        })->filter(function($price) {
+            return $price !== PHP_FLOAT_MAX;
         })->min();
 
         $lowestAccommodationPrice = $this->accommodations->map(function ($accommodation) {
@@ -160,18 +162,16 @@ class Vacation extends Model
             });
 
             return $pricesPerPerson->min();
+        })->filter(function($price) {
+            return $price !== PHP_FLOAT_MAX;
         })->min();
 
-        // If no valid prices found, return null
-        if ($lowestPackagePrice === PHP_FLOAT_MAX && $lowestAccommodationPrice === PHP_FLOAT_MAX) {
-            return null;
+        // Return the lower of the two prices, defaulting to the non-PHP_FLOAT_MAX value if one exists
+        if ($lowestPackagePrice && $lowestAccommodationPrice) {
+            return (float)min($lowestPackagePrice, $lowestAccommodationPrice);
         }
-
-        // Return the lower of the two prices
-        return (float)min(
-            $lowestPackagePrice === PHP_FLOAT_MAX ? PHP_FLOAT_MAX : $lowestPackagePrice,
-            $lowestAccommodationPrice === PHP_FLOAT_MAX ? PHP_FLOAT_MAX : $lowestAccommodationPrice
-        );
+        
+        return (float)($lowestPackagePrice ?: $lowestAccommodationPrice ?: 0);
     }
 
     /**
