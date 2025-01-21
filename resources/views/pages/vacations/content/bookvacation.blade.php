@@ -1135,7 +1135,14 @@
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(text);
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     // Hide checkout modal
@@ -1149,27 +1156,27 @@
                     const thankYouModal = new bootstrap.Modal(document.getElementById('thankYouModal'));
                     thankYouModal.show();
                     
-                    // Reset form
+                    // Reset forms - Fix the form reset
                     this.reset();
-                    bookingForm.reset();
+                    document.getElementById('bookingForm').reset();
                 } else {
                     // Handle error
                     alert(data.message || '{{ translate("An error occurred. Please try again.") }}');
                 }
             })
             .catch(error => {
-                error.text().then(errorText => {
-                    try {
-                        const errorData = JSON.parse(errorText);
-                        console.log(errorData);
-                        alert(errorData.message || '{{ translate("An error occurred. Please try again.") }}');
-                    } catch (e) {
-                        // If not valid JSON, show generic error
-                        alert('{{ translate("An error occurred. Please try again.") }}');
-                    }
-                }).catch(() => {
-                    alert('{{ translate("An error occurred. Please try again.") }}');
-                });
+                console.error('Error:', error);
+                let errorMessage = '{{ translate("An error occurred. Please try again.") }}';
+                
+                try {
+                    const errorData = JSON.parse(error.message);
+                    errorMessage = errorData.message || errorMessage;
+                } catch (e) {
+                    // If not valid JSON, use the error message directly
+                    errorMessage = error.message || errorMessage;
+                }
+                
+                alert(errorMessage);
             })
             .finally(() => {
                 // Hide loading overlay
