@@ -138,10 +138,10 @@ class Vacation extends Model
                 return PHP_FLOAT_MAX;
             }
 
-            // Calculate price per person for each capacity
+            // Calculate price per person for each capacity and round to whole numbers
             $pricesPerPerson = collect($dynamicFields['prices'])->map(function ($price, $index) {
                 $personCount = $index + 1; // Index 0 = 1 person, 1 = 2 persons, etc.
-                return floatval($price) / $personCount;
+                return round((float)$price / $personCount); // Round to whole number
             });
 
             return $pricesPerPerson->min();
@@ -155,10 +155,10 @@ class Vacation extends Model
                 return PHP_FLOAT_MAX;
             }
 
-            // Calculate price per person for each capacity
+            // Calculate price per person for each capacity and round to whole numbers
             $pricesPerPerson = collect($dynamicFields['prices'])->map(function ($price, $index) {
                 $personCount = $index + 1;
-                return floatval($price) / $personCount;
+                return round((float)$price / $personCount); // Round to whole number
             });
 
             return $pricesPerPerson->min();
@@ -167,11 +167,11 @@ class Vacation extends Model
         })->min();
 
         // Return the lower of the two prices, defaulting to the non-PHP_FLOAT_MAX value if one exists
-        if ($lowestPackagePrice && $lowestAccommodationPrice) {
-            return (float)min($lowestPackagePrice, $lowestAccommodationPrice);
-        }
-        
-        return (float)($lowestPackagePrice ?: $lowestAccommodationPrice ?: 0);
+        $lowestPrice = $lowestPackagePrice && $lowestAccommodationPrice 
+            ? min($lowestPackagePrice, $lowestAccommodationPrice)
+            : ($lowestPackagePrice ?: $lowestAccommodationPrice ?: 0);
+
+        return round((float)$lowestPrice); // Round the final result to whole number
     }
 
     /**

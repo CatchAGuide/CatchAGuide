@@ -396,7 +396,7 @@
                             <span>{{ translate('Beschreibung')}}</span>
                         </div>
                         <span class="text-wrapper">
-                            {!! $vacation->surroundings_description !!}
+                            {!! translate($vacation->surroundings_description) !!}
                         </span>
                     </div>
                     @endif
@@ -407,7 +407,7 @@
                             <span>{{ translate('Best travel times')}}</span>
                         </div>
                         <p class="text-wrapper">
-                           {!! implode(', ', json_decode($vacation->best_travel_times)) !!}
+                           {!! implode(', ', json_decode(translate($vacation->best_travel_times))) !!}
                         </p>
                     </div>
                     @endif
@@ -417,7 +417,7 @@
                             <span>{{ translate('Target fish') }}</span>
                         </div>
                         <p class="text-wrapper">
-                        {!! implode(', ', json_decode($vacation->target_fish)) !!}
+                        {!! implode(', ', json_decode(translate($vacation->target_fish))) !!}
                         </p>
                     </div>
                     @endif
@@ -456,19 +456,19 @@
                                 @if(!empty($vacation->airport_distance))
                                 <tr>
                                     <td><strong>{{ translate('Nächster Flughafen') }}</strong></td>
-                                    <td>{{$vacation->airport_distance}}</td>
+                                    <td>{{translate($vacation->airport_distance)}}</td>
                                 </tr>
                                 @endif
                                 @if(!empty($vacation->water_distance))
                                 <tr>
                                     <td><strong>{{ translate('Entfernung zum Wasser') }}</strong></td>
-                                    <td>{{$vacation->water_distance}}</td>
+                                    <td>{{translate($vacation->water_distance)}}</td>
                                 </tr>
                                 @endif
                                 @if(!empty($vacation->shopping_distance))
                                 <tr>
                                     <td><strong>{{ translate('Einkaufsmöglichkeiten') }}</strong></td>
-                                    <td>{{$vacation->shopping_distance}}</td>
+                                    <td>{{translate($vacation->shopping_distance)}}</td>
                                 </tr>
                                 @endif
                                 @if(!empty($vacation->pets_allowed))
@@ -740,7 +740,7 @@
                                                 <div class="col-12 col-lg-7 mb-3 mb-lg-0 tab-item">
                                                     <h6 class="card-title mb-3">{{ !empty($item->title) ? $item->title : translate($sectionKey . ' ' . ($itemIndex + 1)) }}</h6>
                                                     <span class="text-wrapper">
-                                                        {!! $item->description !!}
+                                                        {!! translate($item->description) !!}
                                                     </span>
                                                     <!-- Other Details Row -->
                                                     @php $dynamicFields = json_decode($item->dynamic_fields) @endphp
@@ -829,16 +829,16 @@
             </div>
 
             <!-- Description Section -->
-            @if ($vacation->included_services || $vacation->extras)
+            @if ( ($vacation->included_services && !empty(json_decode(translate($vacation->included_services)))) || ($vacation->extras && count($vacation->extras) > 0))
             <div class="description-container inclusions card p-3 mb-5">
                 <div class="description-list">
-                    @if ($vacation->included_services && !empty(json_decode($vacation->included_services)))
+                    @if ($vacation->included_services && !empty(json_decode(translate($vacation->included_services))))
                         <div class="description-item">
                             <div class="header-container">
                                 <span>{{ translate('Included Services')}}</span>
                             </div>
                             <p class="text-wrapper">
-                                {!! implode(', ', json_decode($vacation->included_services)) !!}
+                                {!! implode(', ', json_decode(translate($vacation->included_services))) !!}
                             </p>
                         </div>
                     @endif
@@ -860,7 +860,7 @@
                                     <tbody>
                                         @foreach($vacation->extras as $itemIndex => $item)
                                             <tr>
-                                                <td>{{ $item->description }}</td>
+                                                <td>{{ translate($item->description) }}</td>
                                                 <td>€ {{ $item->price }}</td>
                                                 <td style="text-transform: capitalize; min-width:100px !important">{{ translate(str_replace('_', ' ', $item->type)) }}</td>
                                             </tr>
@@ -887,11 +887,11 @@
     <!-- Map Section -->
     <div id="map" class="mb-5" style="height: 400px;"></div>
 
-    @if ($sameCountries)
+    @if ($sameCountries && count($sameCountries) > 0)
     <section class="tour-details-two mb-5 p-0">
         <div class="container">
             <div class="tour-details-two__related-tours {{$agent->ismobile() ? 'text-center' : ''}}">
-                <h3 class="tour-details-two__title">{{ translate('Same Country Vacations') }}</h3>
+                <h3 class="tour-details-two__title">{{ translate('Other Vacations in' . $vacation->country) }}</h3>
                 <div class="popular-tours__carousel owl-theme owl-carousel">
                     @foreach($sameCountries as $same_country)
                 
@@ -948,7 +948,7 @@
 @endsection
 
 @section('js_after')
-<script async src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY') }}&callback=initMap"></script>
+{{-- <script async src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY') }}&callback=initMap"></script> --}}
 
 <script>
 $(document).ready(function(){
