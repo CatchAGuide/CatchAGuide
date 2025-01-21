@@ -38,23 +38,34 @@
                         </div>
                         <input type="hidden" name="vacation_id" value="{{ $vacation->id }}">
                         <div class="mb-3">
-                            @if(!empty($vacation->packages) && count($vacation->packages) > 0)
-                                <div class="booking-type-buttons">
-                                    <button type="button" class="booking-type-btn active" data-type="package">
-                                        {{ translate('Komplettpaket') }}
-                                    </button>
-                                    <button type="button" class="booking-type-btn" data-type="custom">
-                                        {{ translate('Single Offer') }}
-                                    </button>
-                                </div>
-                                <input type="hidden" name="booking_type" value="package">
-                            @else
-                                <input type="hidden" name="booking_type" value="custom">
+                            @php
+                                $hasPackages = !empty($vacation->packages) && count($vacation->packages) > 0;
+                                $hasCustomOptions = (!empty($vacation->accommodations) && count($vacation->accommodations) > 0) ||
+                                                   (!empty($vacation->boats) && count($vacation->boats) > 0) ||
+                                                   (!empty($vacation->guidings) && count($vacation->guidings) > 0);
+                            @endphp
+
+                            @if($hasPackages || $hasCustomOptions)
+                                @if($hasPackages && $hasCustomOptions)
+                                    <div class="booking-type-buttons">
+                                        <button type="button" class="booking-type-btn active" data-type="package">
+                                            {{ translate('Komplettpaket') }}
+                                        </button>
+                                        <button type="button" class="booking-type-btn" data-type="custom">
+                                            {{ translate('Single Offer') }}
+                                        </button>
+                                    </div>
+                                    <input type="hidden" name="booking_type" value="package">
+                                @elseif($hasPackages)
+                                    <input type="hidden" name="booking_type" value="package">
+                                @else
+                                    <input type="hidden" name="booking_type" value="custom">
+                                @endif
                             @endif
                         </div>
 
-                        @if(!empty($vacation->packages) && count($vacation->packages) > 0)
-                            <div id="package-options" class="booking-options mb-3">
+                        @if($hasPackages)
+                            <div id="package-options" class="booking-options mb-3" style="display: {{ $hasCustomOptions ? 'block' : 'block' }}">
                                 <div class="form-group">
                                     <label>{{ translate('Select Package') }}</label>
                                     <select class="form-control" name="package_id">
@@ -65,35 +76,35 @@
                                     </select>
                                 </div>
                             </div>
-                            <div id="custom-options" class="booking-options mb-3" style="display: none;">
-                        @else
-                            <div id="custom-options" class="booking-options mb-3">
                         @endif
 
-                            @if ($vacation->accommodations && count($vacation->accommodations) > 0)
-                                <div class="form-group mb-3">
-                                    <label>{{ translate('Accommodation') }}</label>
-                                    <select class="form-control" name="accommodation_id">
-                                        <option value="" selected>{{ translate('No accommodation needed') }}</option>
-                                        @foreach($vacation->accommodations as $accommodationIndex => $accommodation)
-                                            <option value="{{ $accommodation->id }}">{{ !empty($accommodation->title) ? $accommodation->title : translate('Accommodation ' . ($accommodationIndex + 1)) }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            @endif
+                        @if($hasCustomOptions)
+                            <div id="custom-options" class="booking-options mb-3" style="display: {{ $hasPackages ? 'none' : 'block' }}">
+                                @if ($vacation->accommodations && count($vacation->accommodations) > 0)
+                                    <div class="form-group mb-3">
+                                        <label>{{ translate('Accommodation') }}</label>
+                                        <select class="form-control" name="accommodation_id">
+                                            <option value="" selected>{{ translate('No accommodation needed') }}</option>
+                                            @foreach($vacation->accommodations as $accommodationIndex => $accommodation)
+                                                <option value="{{ $accommodation->id }}">{{ !empty($accommodation->title) ? $accommodation->title : translate('Accommodation ' . ($accommodationIndex + 1)) }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                @endif
 
-                            @if ($vacation->boats && count($vacation->boats) > 0)
-                                <div class="form-group mb-3">
-                                    <label>{{ translate('Boat Rental') }}</label>
-                                    <select class="form-control" name="boat_id">
-                                        <option value="" selected>{{ translate('No boat needed') }}</option>
-                                        @foreach($vacation->boats as $boatIndex => $boat)
-                                            <option value="{{ $boat->id }}">{{ !empty($boat->title) ? $boat->title : translate('Boat ' . ($boatIndex + 1)) }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            @endif
-                        </div>
+                                @if ($vacation->boats && count($vacation->boats) > 0)
+                                    <div class="form-group mb-3">
+                                        <label>{{ translate('Boat Rental') }}</label>
+                                        <select class="form-control" name="boat_id">
+                                            <option value="" selected>{{ translate('No boat needed') }}</option>
+                                            @foreach($vacation->boats as $boatIndex => $boat)
+                                                <option value="{{ $boat->id }}">{{ !empty($boat->title) ? $boat->title : translate('Boat ' . ($boatIndex + 1)) }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
 
                         @if ($vacation->guidings && count($vacation->guidings) > 0)
                             <div class="form-group mb-3">
@@ -352,8 +363,8 @@
 <script>
     // Create translations object for JavaScript
     const translations = {
-        package: '{{ translate("Package") }}',
-        custom: '{{ translate("Custom") }}',
+        package: '{{ translate("Komplettpaket") }}',
+        custom: '{{ translate("Single Offer") }}',
         selectedPackage: '{{ translate("Selected Package") }}',
         selectedAccommodation: '{{ translate("Selected Accommodation") }}',
         selectedBoat: '{{ translate("Selected Boat") }}',
@@ -1113,7 +1124,6 @@
             loadingOverlay.style.display = 'flex';
             
             // Disable submit button
-            const submitBtn = this.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{{ translate("Processing...") }}';
             
@@ -1547,6 +1557,20 @@
     .spinner-border {
         position: relative;
         z-index: 1081;
+    }
+
+    /* Add or update these styles */
+    @media (min-width: 768px) {
+        .tour-details-two__book-tours {
+            width: 400px; /* Fixed width for desktop */
+            margin-left: auto; /* Center if needed */
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .tour-details-two__book-tours {
+            width: 100%; /* Fluid width for mobile */
+        }
     }
 </style>
 
