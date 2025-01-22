@@ -1,9 +1,9 @@
 @extends('layouts.app-v2')
 
-@section('title', $row_data->name)
-@section('description', $row_data->title)
-@section('header_title', $row_data->title)
-@section('header_sub_title', $row_data->sub_title)
+@section('title', translate($row_data->name))
+@section('description', translate($row_data->title))
+@section('header_title', translate($row_data->title))
+@section('header_sub_title', translate($row_data->sub_title))
 
 @section('custom_style')
 <style>
@@ -328,7 +328,7 @@
                     @endforeach
                 </div>
                 @endif
-                <h5 class="mb-2">{{ translate('Fishing tours in') }} {{ $row_data-> name }}</h5>
+                <h5 class="mb-2">{{ translate('Fishing tours in' . translate($row_data->name)) }}</h5>
                 <div class="row mb-5">
                     <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
                         <div class="d-grid gap-2 w-100">
@@ -531,7 +531,7 @@
                                                                 @endphp
                                                                 
                                                                 @if(!empty($guidingTargets))
-                                                                    {{ implode(', ', $guidingTargets) }}
+                                                                    {{ translate(implode(', ', $guidingTargets)) }}
                                                                 @endif
                                                             </div>
                                                         
@@ -560,7 +560,7 @@
 
                                                                 @foreach ($inclusions as $index => $inclusion)
                                                                     @if ($index < $maxToShow)
-                                                                        <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclusion['name'] }}</span>
+                                                                        <span class="inclusion-item"><i class="fa fa-check"></i>{{ translate($inclusion['name']) }}</span>
                                                                     @endif
                                                                 @endforeach
 
@@ -574,10 +574,6 @@
                                                     <div class="guiding-item-price">
                                                         <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$guiding->getLowestPrice()}}€ p.P.</span></h5>
                                                         <div class="d-none d-flex flex-column mt-4">
-                                                            <!-- <a class="btn theme-primary btn-theme-new btn-sm" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">Details</a>
-                                                            <a class="btn btn-sm mt-2   {{ (auth()->check() ? (auth()->user()->isWishItem($guiding->id) ? 'btn-danger' : 'btn-outline-theme ') : 'btn-outline-theme') }}" href="{{ route('wishlist.add-or-remove', $guiding->id) }}">
-                                                                {{ (auth()->check() ? (auth()->user()->isWishItem($guiding->id) ? 'Added to Favorites' : 'Add to Favorites') : 'Add to Favorites') }}
-                                                            </a> -->
                                                         </div>
                                                     </div>
                                             </div>    
@@ -591,11 +587,11 @@
                     </div>
                 </div>
 
-                <div class="mb-3">{!! $row_data->content !!}</div>
+                <div class="mb-3">{!! translate($row_data->content) !!}</div>
 
                 @if($row_data->fish_avail_title != '' && $row_data->fish_avail_intro != '')
-                    <h2 class="mb-2 mt-5">{{ $row_data->fish_avail_title }}</h2>
-                    <p>{!! $row_data->fish_avail_intro !!}</p>
+                    <h2 class="mb-2 mt-5">{{ translate($row_data->fish_avail_title) }}</h2>
+                    <p>{!! translate($row_data->fish_avail_intro) !!}</p>
                     @if($fish_chart->count() > 0)
                     <div class="table-responsive">
                         <table class="table table-bordered " id="fish_chart_table">
@@ -643,8 +639,8 @@
                 <div class="row">
                     @if($row_data->size_limit_title != '' && $row_data->size_limit_intro != '')
                     <div class="col-sm-12 col-md-12 col-lg-12 mt-5">
-                        <h2>{{ $row_data->size_limit_title }}</h2>
-                        <p>{!! $row_data->size_limit_intro !!}</p>
+                        <h2>{{ translate($row_data->size_limit_title) }}</h2>
+                        <p>{!! translate($row_data->size_limit_intro) !!}</p>
                         @if(!empty($fish_size_limit))
                         <table class="table table-bordered table-striped" id="fish_size_limit_table">
                             <thead>
@@ -657,8 +653,8 @@
                             @if(!empty($fish_size_limit))
                                 @foreach($fish_size_limit as $row)
                                 <tr>
-                                    <td>{{ $row->fish }}</td>
-                                    <td>{{ $row->data }}</td>
+                                    <td>{{ translate($row->fish) }}</td>
+                                    <td>{{ translate($row->data) }}</td>
                                 </tr>
                                 @endforeach
                             @endif
@@ -669,8 +665,8 @@
                     @endif
                     @if($row_data->time_limit_title != '' && $row_data->time_limit_intro != '')
                     <div class="col-sm-12 col-md-12 col-lg-12 mt-5">
-                        <h2>{{ $row_data->time_limit_title }}</h2>
-                        <p>{!! $row_data->time_limit_intro !!}</p>
+                        <h2>{{ translate($row_data->time_limit_title) }}</h2>
+                        <p>{!! translate($row_data->time_limit_intro) !!}</p>
                         @if(!empty($fish_time_limit))
                         <table class="table table-bordered table-striped" id="fish_time_limit_table">
                             <thead>
@@ -683,8 +679,8 @@
                             @if(!empty($fish_time_limit))
                                 @foreach($fish_time_limit as $row)
                                 <tr>
-                                    <td>{{ $row->fish }}</td>
-                                    <td>{{ $row->data }}</td>
+                                    <td>{{ translate($row->fish) }}</td>
+                                    <td>{{ translate($row->data) }}</td>
                                 </tr>
                                 @endforeach
                             @endif
@@ -695,15 +691,15 @@
                     @endif
                 </div>
                 @if($row_data->faq_title != '' && $faq->count() > 0)
-                <h2 class="mb-3 mt-5">{{ $row_data->faq_title }}</h2>
+                <h2 class="mb-3 mt-5">{{ translate($row_data->faq_title) }}</h2>
                     <div class="accordion mb-5" id="faq">
                         @foreach($faq as $row)
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ $row->id }}" aria-expanded="true" aria-controls="faq{{ $row->id }}">{{ $row->question }}</button>
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ $row->id }}" aria-expanded="true" aria-controls="faq{{ $row->id }}">{{ translate($row->question) }}</button>
                                 </h2>
                                 <div class="accordion-collapse collapse" id="faq{{ $row->id }}" data-bs-parent="#faq">
-                                    <div class="accordion-body ">{{ $row->answer }}</div>
+                                    <div class="accordion-body ">{{ translate($row->answer) }}</div>
                                 </div>
                             </div>
                         @endforeach
@@ -786,7 +782,7 @@
                                 </span>
                             </div>
                             <select id="price_rangeOffCanvass" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="price_range">
-                                <option selected disabled hidden>Price per Person</option>
+                                <option selected disabled hidden>{{ translate('Price per Person') }}</option>
                                 <option value="" >@lang('message.choose')...</option>
                                 <option value="1-50" {{ request()->get('price_range') ? request()->get('price_range') == '1-200' ? 'selected' : null : null }}>1 - 50 p.P.</option>
                                 <option value="51-100" {{ request()->get('price_range') ? request()->get('price_range') == '201-400' ? 'selected' : null : null }}>51 - 100 p.P.</option>
@@ -807,54 +803,11 @@
 @endsection
 
 @section('js_after')
-{{-- <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY') }}&libraries=places,geocoding"></script>
-<script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
-    ({key: "{{ env('GOOGLE_MAP_API_KEY') }}", v: "weekly"});
-</script> --}}
 <script>
     $('#sortby').on('change',function(){
         $('#form-sortby').submit();
     });
-
-    /*let itemsCollapse = document.querySelectorAll('.carousel .carousel-item');
-
-    itemsCollapse.forEach((el) => {
-        const minPerSlide = 4
-        let next = el.nextElementSibling
-        for (var i=1; i<minPerSlide; i++) {
-            if (!next) {
-                // wrap carousel by using first child
-                next = itemsCollapse[0]
-            }
-            let cloneChild = next.cloneNode(true)
-            el.appendChild(cloneChild.children[0])
-            next = next.nextElementSibling
-        }
-    });*/
-    /*window.addEventListener('resize', function() {
-        var innerWidth = window.innerWidth;
-        var innerHeight = window.innerHeight;
-
-        if (innerWidth < 767) {
-
-        } else {
-
-        }
-
-    });*/
-    // let itemsCollapseRegions = document.querySelectorAll('#carousel-regions .carousel-item');
-    // itemsCollapseRegions.forEach((el) => {
-    //     const minPerSlide = (itemsCollapseRegions.length >= 4) ? 4 : itemsCollapseRegions.length;
-    //     let next = el.nextElementSibling;
-    //     for (var i=1; i<minPerSlide; i++) {
-    //         if (!next) {
-    //             next = itemsCollapseRegions[0]
-    //         }
-    //         let cloneChild = next.cloneNode(true)
-    //         el.appendChild(cloneChild.children[0])
-    //         next = next.nextElementSibling
-    //     }
-    // });
+    
     $(document).ready(function(){
     $('#carousel-regions').owlCarousel({
         loop: false,
