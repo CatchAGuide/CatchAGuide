@@ -184,7 +184,7 @@
                                    name="place" 
                                    placeholder="@lang('homepage.searchbar-destination')"
                                    value="{{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }}"
-                                   autocomplete="on">
+                                   autocomplete="on"/>
                             <input type="hidden" id="LocationLatDesktop" name="placeLat" value="{{ request()->placeLat }}"/>
                             <input type="hidden" id="LocationLngDesktop" name="placeLng" value="{{ request()->placeLng }}"/>
                             <input type="hidden" id="LocationCityDesktop" name="city" value="{{ request()->city }}"/>
