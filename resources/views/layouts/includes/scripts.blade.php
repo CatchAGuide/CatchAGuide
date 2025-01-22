@@ -1,12 +1,3 @@
-{{-- <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script> --}}
-
-{{-- <script>
-    tinymce.init({
-        selector: 'textarea#editor',
-        menubar: false
-    });
-</script> --}}
-
 <script src="{{ asset('assets/js/jquery.min.js') }}"></script>
 <script src="{{ asset('assets/vendors/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ asset('assets/vendors/jarallax/jarallax.min.js') }}"></script>
@@ -47,6 +38,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous" async></script>
 <script src="/js/app.js"></script>
+
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY') }}&libraries=places,geocoding,marker"></script>
 @stack('js_push')
 
 <script>
@@ -110,13 +103,10 @@
         document.getElementById('guestDropdown').innerText = text;
     }
 </script>
+@endstack
 @livewireScripts
 @yield('js_after')
 @stack('js_push')
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY') }}&libraries=places,geocoding"></script>
-<script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
-    ({key: "{{ env('GOOGLE_MAP_API_KEY') }}", v: "weekly"});
-</script>
 
 <script>
     // asdffff
@@ -151,67 +141,85 @@
     selectTarget.trigger('change');
 </script>
 <script>
-    function initialize() {
-        var input = document.getElementById('searchPlace');
-        var autocomplete = new google.maps.places.Autocomplete(input);
-        google.maps.event.addListener(autocomplete, 'place_changed', function () {
-            var place = autocomplete.getPlace();
-            document.getElementById('LocationLat').value = place.geometry.location.lat();
-            document.getElementById('LocationLng').value = place.geometry.location.lng();
-            document.getElementById('LocationCity').value = place.address_components[0].long_name;
-            document.getElementById('LocationCountry').value = place.address_components[1].long_name;
-        });
+    // Initialize all search inputs with Google Places Autocomplete
+    function initializeGooglePlaces() {
+        const searchInputs = [
+            {
+                input: 'searchPlace',
+                lat: 'LocationLat',
+                lng: 'LocationLng',
+                city: 'LocationCity',
+                country: 'LocationCountry'
+            },
+            {
+                input: 'searchPlaceDesktop',
+                lat: 'LocationLatDesktop',
+                lng: 'LocationLngDesktop',
+                city: 'LocationCityDesktop',
+                country: 'LocationCountryDesktop'
+            },
+            {
+                input: 'searchPlaceMobile',
+                lat: 'LocationLatMobile',
+                lng: 'LocationLngMobile',
+                city: 'LocationCityMobile',
+                country: 'LocationCountryMobile'
+            },
+            {
+                input: 'searchPlaceShortDesktop',
+                lat: 'LocationLatShortDesktop',
+                lng: 'LocationLngShortDesktop',
+                city: 'LocationCityShortDesktop',
+                country: 'LocationCountryShortDesktop'
+            }
+        ];
 
-        var input2 = document.getElementById('searchPlace2');
-        var autocomplete2 = new google.maps.places.Autocomplete(input2);
-        google.maps.event.addListener(autocomplete2, 'place_changed', function () {
-            var place2 = autocomplete2.getPlace();
-            document.getElementById('LocationLat2').value = place2.geometry.location.lat();
-            document.getElementById('LocationLng2').value = place2.geometry.location.lng();
-            document.getElementById('LocationCity2').value = place2.address_components[0].long_name;
-            document.getElementById('LocationCountry2').value = place2.address_components[1].long_name;
-        });
-        
-        var searchPlaceHeaderDesktop = document.getElementById('searchPlaceHeaderDesktop');
-        var autocompleteHeaderDesktop = new google.maps.places.Autocomplete(searchPlaceHeaderDesktop);
-        google.maps.event.addListener(autocompleteHeaderDesktop, 'place_changed', function () {
-            var placeHeaderDesktop = autocompleteHeaderDesktop.getPlace();
-            document.getElementById('LocationLatHeaderDesktop').value = placeHeaderDesktop.geometry.location.lat();
-            document.getElementById('LocationLngHeaderDesktop').value = placeHeaderDesktop.geometry.location.lng();
-            document.getElementById('LocationCityHeaderDesktop').value = placeHeaderDesktop.address_components[0].long_name;
-            document.getElementById('LocationCountryHeaderDesktop').value = placeHeaderDesktop.address_components[1].long_name;
-        });
-        
-        var searchPlaceDesktop = document.getElementById('searchPlaceDesktop');
-        var autocompleteDesktop = new google.maps.places.Autocomplete(searchPlaceDesktop);
-        google.maps.event.addListener(autocompleteDesktop, 'place_changed', function () {
-            var placeDesktop = autocompleteDesktop.getPlace();
-            document.getElementById('LocationLatDesktop').value = placeDesktop.geometry.location.lat();
-            document.getElementById('LocationLngDesktop').value = placeDesktop.geometry.location.lng();
-            document.getElementById('LocationCityDesktop').value = placeDesktop.address_components[0].long_name;
-            document.getElementById('LocationCountryDesktop').value = placeDesktop.address_components[1].long_name;
-        });
+        searchInputs.forEach(config => {
+            const inputElement = document.getElementById(config.input);
+            if (inputElement) {
+                const autocomplete = new google.maps.places.Autocomplete(inputElement);
+                autocomplete.addListener('place_changed', function() {
+                    const place = autocomplete.getPlace();
+                    if (!place.geometry) {
+                        console.warn("Place details not found for input: " + config.input);
+                        return;
+                    }
 
-        var searchPlaceMobile = document.getElementById('searchPlaceMobile');
-        var autocompleteMobile = new google.maps.places.Autocomplete(searchPlaceMobile);
-        google.maps.event.addListener(autocompleteMobile, 'place_changed', function () {
-            var placeMobile = autocompleteMobile.getPlace();
-            document.getElementById('LocationLatMobile').value = placeMobile.geometry.location.lat();
-            document.getElementById('LocationLngMobile').value = placeMobile.geometry.location.lng();
-            document.getElementById('LocationCityMobile').value = placeMobile.address_components[0].long_name;
-            document.getElementById('LocationCountryMobile').value = placeMobile.address_components[1].long_name;
-        });
+                    document.getElementById(config.lat).value = place.geometry.location.lat();
+                    document.getElementById(config.lng).value = place.geometry.location.lng();
 
-        var searchPlaceShortDesktop = document.getElementById('searchPlaceShortDesktop');
-        var autocompleteShortDesktop = new google.maps.places.Autocomplete(searchPlaceShortDesktop);
-        google.maps.event.addListener(autocompleteShortDesktop, 'place_changed', function () {
-            var placeShortDesktop = autocompleteShortDesktop.getPlace();
-            document.getElementById('LocationLatShortDesktop').value = placeShortDesktop.geometry.location.lat();
-            document.getElementById('LocationLngShortDesktop').value = placeShortDesktop.geometry.location.lng();
-            document.getElementById('LocationCityShortDesktop').value = placeShortDesktop.address_components[0].long_name;
-            document.getElementById('LocationCountryShortDesktop').value = placeShortDesktop.address_components[1].long_name;
+                    // Extract city and country from address components
+                    const addressComponents = place.address_components;
+                    let city = '', country = '';
+                    
+                    for (const component of addressComponents) {
+                        if (component.types.includes('locality')) {
+                            city = component.long_name;
+                        }
+                        if (component.types.includes('country')) {
+                            country = component.long_name;
+                        }
+                    }
+
+                    document.getElementById(config.city).value = city;
+                    document.getElementById(config.country).value = country;
+                });
+            }
         });
     }
 
-    window.addEventListener('load', initialize);
+    // Initialize on page load
+    window.addEventListener('load', initializeGooglePlaces);
+
+    // Also initialize when any modal containing a search input is shown
+    document.addEventListener('DOMContentLoaded', function() {
+        const modals = ['searchModal', 'mobileMenuModal'];
+        modals.forEach(modalId => {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.addEventListener('shown.bs.modal', initializeGooglePlaces);
+            }
+        });
+    });
 </script>
+@endstack

@@ -1169,7 +1169,6 @@
 @endsection
 
 @section('js_after')
-{{-- <script async src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY') }}&callback=initMap"></script> --}}
 
 <script>
 $(document).ready(function(){
@@ -1305,10 +1304,13 @@ document.addEventListener("DOMContentLoaded", function() {
             center: location,
             mapTypeControl: false,
             streetViewControl: false,
+            mapId: '8f348c2f6c51f6f0'
         });
-        var marker = new google.maps.Marker({
+
+        // Create an AdvancedMarkerElement with the required Map ID
+        const marker = new google.maps.marker.AdvancedMarkerElement({
+            map,
             position: location,
-            map: map
         });
     }
 

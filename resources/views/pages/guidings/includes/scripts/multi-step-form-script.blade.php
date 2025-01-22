@@ -1310,6 +1310,5 @@
     document.getElementById('newGuidingForm').addEventListener('submit', handleSubmit);
 </script>
 
-{{-- <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY') }}&libraries=places&callback=initAutocomplete" async defer></script> --}}
 @endpush
 

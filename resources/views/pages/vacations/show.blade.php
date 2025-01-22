@@ -949,29 +949,46 @@
 @endsection
 
 @section('js_after')
-{{-- <script async src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY') }}&callback=initMap"></script> --}}
-
 <script>
-$(document).ready(function(){
-    initOwlCarousel(); // Initialize on page load
-        $(window).resize(initOwlCarousel); // Reinitialize on resize
 
-        // "Show More" button functionality for desktop
-        const showMoreBtn = document.getElementById("showMoreBtn");
-        const items = document.querySelectorAll(".guiding-list-item");
-        let isExpanded = false;
+function initMap() {
+    console.log('initMap called');
+    var location = { 
+        lat: {{ $vacation->latitude ?? 41.40338 }}, 
+        lng: {{ $vacation->longitude ?? 2.17403 }} 
+    };
+    var map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 10,
+        center: location,
+        mapTypeControl: false,
+        streetViewControl: false,
+        mapId: '8f348c2f6c51f6f0'
+    });
 
-        showMoreBtn.addEventListener("click", function () {
-            isExpanded = !isExpanded;
-            items.forEach((item, index) => {
-                // Show all items if expanded, otherwise show only the first two
-                item.classList.toggle("show", isExpanded || index < 2);
-            });
-            // Toggle button text
-            showMoreBtn.textContent = isExpanded ? "Show Less" : "Show More";
-        });
+    // Create an AdvancedMarkerElement with the required Map ID
+    const marker = new google.maps.marker.AdvancedMarkerElement({
+        map,
+        position: location,
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    // Load Google Maps API dynamically with marker library
+    if (typeof google === 'undefined') {
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY', 'AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q') }}&libraries=marker&callback=initMap`;
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+    } else {
+        // If Google Maps API is already loaded, just call initMap
+        initMap();
+    }
+
+    // Define initOwlCarousel function first
     function initOwlCarousel() {
         const $toursList = $(".tours-list__inner");
+        const $popularTours = $(".popular-tours__carousel");
 
         if ($(window).width() < 768) {
             // Initialize Owl Carousel for mobile
@@ -993,55 +1010,82 @@ $(document).ready(function(){
                 $toursList.find(".owl-stage-outer").children().unwrap();
             }
             $("#showMoreBtn").show(); // Show "Show More" button on desktop
-            $(".guiding-list-item").each(function (index) {
+            $(".guiding-list-item").each(function(index) {
                 // Show only the first two items on desktop
                 $(this).toggleClass("show", index < 2);
             });
         }
-    }
-    initMap();
-});
-document.querySelectorAll(".description-item .text-wrapper").forEach((item) => {
-    const originalText = item.innerHTML.trim();
-    const words = originalText.split(/\s+/);
-    if (words.length > 30) {
-        const truncatedText = words.slice(0, 30).join(" ") + "... ";
-        item.innerHTML = truncatedText;
-        const toggle = document.createElement("small");
-        toggle.textContent = "See More";
-        toggle.style.cursor = "pointer";
-        toggle.classList.add("text-orange")
-        toggle.onclick = () => {
-            const isExpanded = toggle.textContent === "See Less";
-            item.innerHTML = isExpanded ? truncatedText : originalText + " ";
-            toggle.textContent = isExpanded ? "See More" : "See Less";
-            item.appendChild(toggle);
-        };
-        item.appendChild(toggle);
-    }
-});
-document.querySelectorAll(".tab-item .text-wrapper").forEach((item) => {
-    const originalText = item.innerHTML.trim();
-    const words = originalText.split(/\s+/);
-    if (words.length > 30) {
-        const truncatedText = words.slice(0, 30).join(" ") + "... ";
-        item.innerHTML = truncatedText;
-        const toggle = document.createElement("small");
-        toggle.textContent = "See More";
-        toggle.style.cursor = "pointer";
-        toggle.classList.add("text-orange")
-        toggle.onclick = () => {
-            const isExpanded = toggle.textContent === "See Less";
-            item.innerHTML = isExpanded ? truncatedText : originalText + " ";
-            toggle.textContent = isExpanded ? "See More" : "See Less";
-            item.appendChild(toggle);
-        };
-        item.appendChild(toggle);
-    }
-});
 
+        // Initialize popular tours carousel if it exists
+        if ($popularTours.length) {
+            $popularTours.owlCarousel({
+                loop: true,
+                margin: 30,
+                nav: true,
+                dots: true,
+                responsive: {
+                    0: {
+                        items: 1
+                    },
+                    768: {
+                        items: 2
+                    },
+                    992: {
+                        items: 3
+                    }
+                }
+            });
+        }
+    }
 
-document.addEventListener("DOMContentLoaded", function() {
+    // Initialize owl carousel
+    initOwlCarousel(); // Initialize on page load
+    $(window).resize(initOwlCarousel); // Reinitialize on resize
+
+    // Show More button functionality
+    const showMoreBtn = document.getElementById("showMoreBtn");
+    if (showMoreBtn) {
+        const items = document.querySelectorAll(".guiding-list-item");
+        if (items.length > 0) {
+            let isExpanded = false;
+            showMoreBtn.addEventListener("click", function() {
+                isExpanded = !isExpanded;
+                items.forEach((item, index) => {
+                    item.classList.toggle("show", isExpanded || index < 2);
+                });
+                showMoreBtn.textContent = isExpanded ? "Show Less" : "Show More";
+            });
+        }
+    }
+
+    // Description text truncation
+    const truncateText = (elements) => {
+        elements.forEach((item) => {
+            const originalText = item.innerHTML.trim();
+            const words = originalText.split(/\s+/);
+            if (words.length > 30) {
+                const truncatedText = words.slice(0, 30).join(" ") + "... ";
+                item.innerHTML = truncatedText;
+                const toggle = document.createElement("small");
+                toggle.textContent = "See More";
+                toggle.style.cursor = "pointer";
+                toggle.classList.add("text-orange");
+                toggle.onclick = () => {
+                    const isExpanded = toggle.textContent === "See Less";
+                    item.innerHTML = isExpanded ? truncatedText : originalText + " ";
+                    toggle.textContent = isExpanded ? "See More" : "See Less";
+                    item.appendChild(toggle);
+                };
+                item.appendChild(toggle);
+            }
+        });
+    };
+
+    // Apply truncation to description items
+    truncateText(document.querySelectorAll(".description-item .text-wrapper"));
+    truncateText(document.querySelectorAll(".tab-item .text-wrapper"));
+
+    // Comment content functionality
     document.querySelectorAll('.comment-content').forEach(content => {
         const descriptionElement = content.querySelector('.description');
         const seeMore = content.querySelector('.see-more');
@@ -1070,36 +1114,47 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
     });
-});
-    function initMap() {
-        var location = { lat: {{ $vacation->latitude ?? 41.40338 }}, lng: {{ $vacation->longitude ?? 2.17403 }} }; // Example coordinates
-        var map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 10,
-            center: location,
-            mapTypeControl: false,
-            streetViewControl: false,
-        });
-        var marker = new google.maps.Marker({
-            position: location,
-            map: map
+
+    // Booking form functionality
+    const typeButtons = document.querySelectorAll('.booking-type-btn');
+    const typeInput = document.querySelector('input[name="booking_type"]');
+    const packageOptions = document.getElementById('package-options');
+    const customOptions = document.getElementById('custom-options');
+
+    if (typeButtons.length && typeInput && packageOptions && customOptions) {
+        typeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                try {
+                    typeButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const bookingType = this.dataset.type;
+                    typeInput.value = bookingType;
+                    
+                    if (bookingType === 'Komplettpaket') {
+                        packageOptions.style.display = 'block';
+                        customOptions.style.display = 'none';
+                    } else {
+                        packageOptions.style.display = 'none';
+                        customOptions.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Error in booking type button click handler:', error);
+                }
+            });
         });
     }
 
-    function initCheckNumberOfColumns() {
-        return window.innerWidth < 768 ? 1 : 2;
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        // Replace direct access to $blocked_events with a safe default
+    // Initialize datepicker if element exists
+    const datepickerElement = document.getElementById('lite-datepicker');
+    if (datepickerElement) {
         const blockedEvents = @json($blocked_events ?? []);
-
         let lockDays = [];
+        
         if (blockedEvents && typeof blockedEvents === 'object') {
             lockDays = Object.values(blockedEvents).flatMap(event => {
                 const fromDate = new Date(event.from);
                 const dueDate = new Date(event.due);
-
-                // Create an array of all dates in the range
                 const dates = [];
                 for (let d = fromDate; d <= dueDate; d.setDate(d.getDate() + 1)) {
                     dates.push(new Date(d));
@@ -1108,8 +1163,8 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         }
 
-        const picker = new Litepicker({
-            element: document.getElementById('lite-datepicker'),
+        new Litepicker({
+            element: datepickerElement,
             inlineMode: true,
             singleDate: true,
             numberOfColumns: initCheckNumberOfColumns(),
@@ -1126,56 +1181,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 });
             },
         });
-    });
-    
-    let currentCount = 3; // Initial count of displayed items
-    const totalItems = {{ isset($same_guiding) ? $same_guiding->count() : 0 }};
+    }
+});
 
-
-    document.addEventListener('DOMContentLoaded', function() {
-        // Get all required elements with null checks
-        const typeButtons = document.querySelectorAll('.booking-type-btn');
-        const typeInput = document.querySelector('input[name="booking_type"]');
-        const packageOptions = document.getElementById('package-options');
-        const customOptions = document.getElementById('custom-options');
-
-        // Only proceed if we have the necessary elements
-        if (typeButtons.length && typeInput && packageOptions && customOptions) {
-            typeButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    try {
-                        // Remove active class from all buttons
-                        typeButtons.forEach(btn => btn.classList.remove('active'));
-                        
-                        // Add active class to clicked button
-                        this.classList.add('active');
-                        
-                        // Update hidden input value
-                        const bookingType = this.dataset.type;
-                        typeInput.value = bookingType;
-                        
-                        // Show/hide appropriate options
-                        if (bookingType === 'Komplettpaket') {
-                            packageOptions.style.display = 'block';
-                            customOptions.style.display = 'none';
-                        } else {
-                            packageOptions.style.display = 'none';
-                            customOptions.style.display = 'block';
-                        }
-                    } catch (error) {
-                        console.error('Error in booking type button click handler:', error);
-                    }
-                });
-            });
-        } else {
-            console.warn('Some booking form elements are missing:', {
-                hasButtons: typeButtons.length > 0,
-                hasTypeInput: !!typeInput,
-                hasPackageOptions: !!packageOptions,
-                hasCustomOptions: !!customOptions
-            });
-        }
-    });
+function initCheckNumberOfColumns() {
+    return window.innerWidth < 768 ? 1 : 2;
+}
 </script>
 @endsection
-

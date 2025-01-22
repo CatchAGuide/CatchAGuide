@@ -318,7 +318,6 @@
 @section('js_after')
 
 
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY', 'AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q') }}&libraries=places,geocoding"></script>
 <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
 
 
@@ -521,12 +520,13 @@ function initializeMap(guidingData) {
     const map = new google.maps.Map(document.getElementById("map"), {
         zoom: 5,
         center: { lat: parseFloat('{{ request()->get('placeLat') ?: 51.165691 }}'), lng: parseFloat('{{ request()->get('placeLng') ?: 10.451526 }}') },
+        mapId: '8f348c2f6c51f6f0'
     });
 
     // If guidingData is not empty, add markers for each guiding
     if (guidingData.length > 0) {
         const markers = guidingData.map((guiding) => {
-            return new google.maps.Marker({
+            return new google.maps.marker.AdvancedMarkerElement({
                 position: { lat: parseFloat(guiding.lat), lng: parseFloat(guiding.lng) },
                 map: map,
             });
