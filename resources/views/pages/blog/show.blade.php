@@ -1,9 +1,9 @@
 @extends('layouts.app-v2')
 
-@section('title', $thread->title)
-@section('description',$thread->excerpt)
+@section('title', translate($thread->title))
+@section('description', translate($thread->excerpt))
 
-@section('header_title', $thread->title)
+@section('header_title', translate($thread->title))
 @section('header_sub_title', '')
 
 @section('share_tags')

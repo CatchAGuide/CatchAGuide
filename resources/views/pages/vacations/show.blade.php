@@ -407,7 +407,7 @@
                             <span>{{ translate('Best travel times')}}</span>
                         </div>
                         <p class="text-wrapper">
-                           {!! implode(', ', json_decode(translate($vacation->best_travel_times))) !!}
+                           {!! translate(implode(', ', json_decode($vacation->best_travel_times))) !!}
                         </p>
                     </div>
                     @endif
@@ -417,7 +417,7 @@
                             <span>{{ translate('Target fish') }}</span>
                         </div>
                         <p class="text-wrapper">
-                        {!! implode(', ', json_decode(translate($vacation->target_fish))) !!}
+                        {!! translate(implode(', ', json_decode($vacation->target_fish))) !!}
                         </p>
                     </div>
                     @endif
@@ -437,7 +437,7 @@
                                     <div class="row">
                                         @foreach (json_decode($vacation->travel_options) as $travel_option)
                                             <div class="col-12 text-start">
-                                                - {{$travel_option}}
+                                                - {{translate($travel_option)}}
                                             </div>
                                         @endforeach
                                     </div>
@@ -829,7 +829,8 @@
             </div>
 
             <!-- Description Section -->
-            @if ( ($vacation->included_services && !empty(json_decode(translate($vacation->included_services)))) || ($vacation->extras && count($vacation->extras) > 0))
+            @if ( ($vacation->included_services && !empty(json_decode($vacation->included_services))) || ($vacation->extras && count($vacation->extras) > 0))
+
             <div class="description-container inclusions card p-3 mb-5">
                 <div class="description-list">
                     @if ($vacation->included_services && !empty(json_decode(translate($vacation->included_services))))
@@ -838,7 +839,7 @@
                                 <span>{{ translate('Included Services')}}</span>
                             </div>
                             <p class="text-wrapper">
-                                {!! implode(', ', json_decode(translate($vacation->included_services))) !!}
+                                {!! translate(implode(', ', json_decode($vacation->included_services))) !!}
                             </p>
                         </div>
                     @endif

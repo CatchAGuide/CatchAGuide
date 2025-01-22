@@ -1,7 +1,7 @@
 @extends('layouts.app-v2-1')
 
-@section('title', substr($title, 0, -3))
-@section('description', $title)
+@section('title', translate(substr($title, 0, -3)))
+@section('description', translate($title))
 
 @section('header_title', ((ucwords(isset($place)) ? translate('Alle Guidings bei ') . $place : translate('Alle Guidings'))))
 @section('header_sub_title', '')

@@ -1,9 +1,9 @@
 @extends('layouts.app-v2')
 
-@section('title', $row_data->name)
-@section('description', $row_data->title)
-@section('header_title', $row_data->title)
-@section('header_sub_title', $row_data->sub_title)
+@section('title', translate($row_data->name))
+@section('description', translate($row_data->title))
+@section('header_title', translate($row_data->title))
+@section('header_sub_title', translate($row_data->sub_title))
 
 @section('custom_style')
 <style>
@@ -164,7 +164,7 @@
                     <div class="page-main-intro-text mb-1">{!! translate(nl2br($row_data->introduction)) !!}</div>
                     <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('vacations.read_more')</a></p>
                 </div>
-                <h5 class="mb-2">{{ translate('Vacations in') }} {{ $row_data->name }}</h5>
+                <h5 class="mb-2">{{ translate('Vacations in' . translate($row_data->name)) }}</h5>
                 <div class="row mb-5">
                     <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
                         <div class="d-grid gap-2 w-100">
@@ -339,7 +339,6 @@
                                                 <div class="vacations-info-container"> 
                                                     <span class="fw-bold">{{translate('Boat Available')}}:</span>
                                                     <span class="text-regular">{{ count($vacation->boats) > 0 ? translate('Available') : translate('Unavailable') }}</span>
-                                                    <!-- <strong><i class="fas {{ count($vacation->boats) > 0 ? 'fa-check text-success' : 'fa-times text-danger' }}"></i></strong> -->
                                                 </div>
                                                 <div class="vacations-info-container"> 
                                                     <span class="fw-bold">{{translate('Distance to the water')}}:</span>
@@ -354,10 +353,7 @@
                                                         $target_fish = json_decode($vacation->target_fish);
                                                     @endphp
                                                     <ul class="list-unstyled mb-0 d-flex">
-                                                        <!-- @foreach($target_fish as $fish)
-                                                            <li>{{ $fish }},</li>
-                                                        @endforeach -->
-                                                        {{ \Str::limit(implode(', ', $target_fish), limit:50 ) }}
+                                                        {{ translate(\Str::limit(implode(', ', $target_fish), limit:50 )) }}
                                                     </ul>
                                                 </div>
                                             </div>

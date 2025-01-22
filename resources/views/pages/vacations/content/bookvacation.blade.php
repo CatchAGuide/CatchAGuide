@@ -857,7 +857,7 @@
             }
 
             // Validate duration
-            if (durationPresetValue === 'other' && !customDurationValue) {
+            if (!durationPresetValue && !customDurationValue) {
                 return false;
             }
 
