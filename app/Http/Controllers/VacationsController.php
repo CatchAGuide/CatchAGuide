@@ -19,7 +19,12 @@ class VacationsController extends Controller
 
     public function show($id)
     {
-        $vacation = Vacation::where('id',$id)->with('accommodations', 'boats', 'packages', 'guidings')->first();
+        $vacation = Vacation::where('id',$id)->where('status',1)->with('accommodations', 'boats', 'packages', 'guidings')->first();
+        
+        if (!$vacation) {
+            abort(404);
+        }
+
         $vacation->gallery = json_decode($vacation->gallery, true);
         
         // Calculate minimum guests across all services
