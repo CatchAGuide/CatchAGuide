@@ -135,8 +135,18 @@
                         <div class="col-md-4 column-input my-2">
                             <div class="d-flex align-items-center small myselect2">
                                 <i class="fa fa-fish fa-fw text-muted position-absolute ps-1"></i>
-                                <select class="form-control form-select" id="home_target_fish" name="target_fish[]" style="width:100%">
-                                    
+                                <select class="form-control form-select border-0" name="target_fish[]" style="width:100%">
+                                    <option value="">Select fish...</option>
+                                    @php
+                                        // Assuming targets()::getAllTargets() returns an array or collection of targets
+                                        $targets = collect(targets()::getAllTargets())->sortBy('name');
+                                    @endphp
+                                    @foreach($targets as $target)
+                                        <option value="{{ $target['id'] }}" 
+                                            {{ in_array($target['id'], (array) request()->target_fish) ? 'selected' : '' }}>
+                                            {{ $target['name'] }}
+                                        </option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>
