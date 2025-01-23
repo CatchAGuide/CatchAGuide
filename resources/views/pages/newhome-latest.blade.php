@@ -1143,7 +1143,7 @@
                 <div class="px-3 row">
                     @include('pages.partials.slider',['models' => $boatFishing])
                     <div class="p-1 d-flex justify-content-end">
-                        <a href="/guidings?methods[]=3" class="color-primary">@lang('homepage.see-more')</a>
+                        <a href="/guidings?methods[]=16" class="color-primary">@lang('homepage.see-more')</a>
                     </div>
      
                 </div>
@@ -1152,7 +1152,7 @@
                 <div class="px-3 row">
                     @include('pages.partials.slider',['models' => $flyshings])
                     <div class="p-1 d-flex justify-content-end">
-                        <a href="/guidings?methods[]=4" class="color-primary">@lang('homepage.see-more')</a>
+                        <a href="/guidings?methods[]=1" class="color-primary">@lang('homepage.see-more')</a>
                     </div>
               
                 </div>
@@ -1161,7 +1161,7 @@
                 <div class="px-3 row">
                     @include('pages.partials.slider',['models' => $shoreFishings])
                     <div class="p-1 d-flex justify-content-end">
-                        <a href="/guidings?methods[]=1" class="color-primary">@lang('homepage.see-more')</a>
+                        <a href="/guidings?methods[]=2" class="color-primary">@lang('homepage.see-more')</a>
                     </div>
             
                 </div>
@@ -1240,7 +1240,7 @@
         @if($agent->ismobile())
         <div class="methods-custom-owl owl-carousel owl-theme">
             <div class="item">
-                <a href="/guidings?methods[]=1">
+                <a href="/guidings?methods[]=3">
                     <div class="flex-row card align-items-center">
                         <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/15_bank_fishing.webp')}}"  style="width:150px;height:100px"/>
                         <div class="card-body">
@@ -1250,7 +1250,7 @@
                 </a>
             </div>
             <div class="item">
-                <a href="/guidings?fishingfrom[]=1">
+                <a href="/guidings?methods[]=16">
                     <div class="flex-row card align-items-center">
                         <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/13_boatfishing.webp')}}"  style="width:150px;height:100px"/>
                         <div class="card-body">
@@ -1261,7 +1261,7 @@
                 </a> 
             </div>
             <div class="item">
-                <a href="/guidings?water[]=2">
+                <a href="/guidings?methods[]=7">
                     <div class="flex-row card align-items-center">
                         <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/14_seafishing.webp')}}"  style="width:150px;height:100px"/>
                         <div class="card-body">
@@ -1272,7 +1272,7 @@
                 </a>
             </div>
             <div class="item">
-                <a href="/guidings?methods[]=4">
+                <a href="/guidings?methods[]=1">
                     <div class="flex-row card align-items-center">
                         <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/02_flyfishing.webp')}}"  style="width:150px;height:100px"/>
                         <div class="card-body">
@@ -1283,7 +1283,7 @@
                 </a>
             </div>
             <div class="item">
-                <a href="/guidings?fishingfrom[]=2">
+                <a href="/guidings?methods[]=2">
                     <div class="flex-row card align-items-center">
                         <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/08_shorefishing.webp')}}"  style="width:150px;height:100px"/>
                         <div class="card-body">
@@ -1296,7 +1296,7 @@
         @else
         <div class="row">
             <div class="my-1 col-md-4">
-                <a href="/guidings?methods[]=1">
+                <a href="/guidings?methods[]=3">
                 <div class="flex-row card align-items-center">
                     <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/15_bank_fishing.webp')}}"  style="width:150px;height:100px"/>
                     <div class="card-body">
@@ -1307,7 +1307,7 @@
                 </a>
             </div>
             <div class="my-1 col-md-4">
-                <a href="/guidings?fishingfrom[]=1">
+                <a href="/guidings?methods[]=16">
                     <div class="flex-row card align-items-center">
                         <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/13_boatfishing.webp')}}"  style="width:150px;height:100px"/>
                         <div class="card-body">
@@ -1318,7 +1318,7 @@
                 </a>
             </div>
             <div class="my-1 col-md-4">
-                <a href="/guidings?water[]=2">
+                <a href="/guidings?methods[]=7">
                     <div class="flex-row card align-items-center">
                         <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/14_seafishing.webp')}}"  style="width:150px;height:100px"/>
                         <div class="card-body">
@@ -1329,7 +1329,7 @@
                 </a>
             </div>
             <div class="my-1 col-md-4">
-                <a href="/guidings?methods[]=4">
+                <a href="/guidings?methods[]=1">
                     <div class="flex-row card align-items-center">
                         <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/02_flyfishing.webp')}}"  style="width:150px;height:100px"/>
                         <div class="card-body">
@@ -1340,7 +1340,7 @@
                 </a>
             </div>
             <div class="my-1 col-md-4">
-                <a href="/guidings?fishingfrom[]=2">
+                <a href="/guidings?methods[]=2">
                     <div class="flex-row card align-items-center">
                         <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/08_shorefishing.webp')}}"  style="width:150px;height:100px"/>
                         <div class="card-body">
@@ -1460,7 +1460,7 @@
             <div class="item">
                 <div class="row">
                     <div class="my-1 col">
-                        <a href="/guidings?target_fish%5B0%5D=4">
+                        <a href="/guidings?target_fish[]=11">
                             <div class="flex-row card align-items-center">
                                 <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/04_pike.webp')}}" style="width:150px;height:100px"/>
                                 <div class="card-body">
@@ -1471,7 +1471,7 @@
                         </a>
                     </div>
                     <div class="my-1 col">
-                        <a href="/guidings?target_fish%5B0%5D=3">
+                        <a href="/guidings?target_fish[]=8">
                             <div class="flex-row card align-items-center">
                                 <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/11_perch.webp')}}" style="width:150px;height:100px"/>
                                 <div class="card-body">
@@ -1487,7 +1487,7 @@
             <div class="item">
                 <div class="row">
                     <div class="my-1 col">
-                        <a href="/guidings?target_fish%5B0%5D=12">
+                        <a href="/guidings?target_fish[]=14">
                             <div class="flex-row card align-items-center">
                                 <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/10_zander.webp')}}" style="width:150px;height:100px"/>
                                 <div class="card-body">
@@ -1498,7 +1498,7 @@
                         </a>
                     </div>
                     <div class="my-1 col">
-                        <a href="/guidings?target_fish%5B0%5D=11">
+                        <a href="/guidings?target_fish[]=6">
                             <div class="flex-row card align-items-center">
                                 <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/07_catfish.webp')}}" style="width:150px;height:100px"/>
                                 <div class="card-body">
@@ -1513,7 +1513,7 @@
             <div class="item">
                 <div class="row">
                     <div class="my-1 col">
-                        <a href="/guidings?target_fish%5B0%5D=49">
+                        <a href="/guidings?target_fish[]=69">
                             <div class="flex-row card align-items-center">
                                 <img class="card-img-left example-card-img-responsive img-top" alt="@lang('homepage.targetfish-blackbass')" src="{{asset('assets/2024/12_blackbass.webp')}}" style="width:150px;height:100px"/>
                                 <div class="card-body">
@@ -1523,7 +1523,7 @@
                         </a>
                     </div>
                     <div class="my-1 col">
-                        <a href="/guidings?target_fish%5B0%5D=2">
+                        <a href="/guidings?target_fish[]=36">
                             <div class="flex-row card align-items-center">
                                 <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/09_trout.webp')}}" style="width:150px;height:100px"/>
                                 <div class="card-body">
@@ -1538,7 +1538,7 @@
             <div class="item">
                 <div class="row">
                     <div class="my-1 col">
-                        <a href="/guidings?target_fish%5B0%5D=44">
+                        <a href="/guidings?target_fish[]=40">
                             <div class="flex-row card align-items-center">
                                 <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/06_tuna.webp')}}" style="width:150px;height:100px"/>
                                 <div class="card-body">
@@ -1549,7 +1549,7 @@
                         </a>
                     </div>
                     <div class="my-1 col">
-                        <a href="/guidings?target_fish%5B0%5D=17">
+                        <a href="/guidings?target_fish[]=5">
                             <div class="flex-row card align-items-center">
                                 <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/03_carp.webp')}}" style="width:150px;height:100px"/>
                                 <div class="card-body">
@@ -1564,7 +1564,7 @@
             <div class="item">
                 <div class="row">
                     <div class="my-1 col">
-                        <a href="/guidings?target_fish%5B0%5D=6">
+                        <a href="/guidings?target_fish[]=18">
                             <div class="flex-row card align-items-center">
                                 <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/05_salmon.webp')}}" style="width:150px;height:100px"/>
                                 <div class="card-body">
@@ -1580,7 +1580,7 @@
         @else
         <div class="row">
             <div class="my-1 col-md-4">
-                <a href="/guidings?target_fish%5B0%5D=4">
+                <a href="/guidings?target_fish[]=11">
                     <div class="flex-row card align-items-center">
                         <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/04_pike.webp')}}" style="width:150px;height:100px"/>
                         <div class="card-body">
@@ -1592,7 +1592,7 @@
 
             </div>
             <div class="my-1 col-md-4">
-                <a href="/guidings?target_fish%5B0%5D=3">
+                <a href="/guidings?target_fish[]=8">
                     <div class="flex-row card align-items-center">
                         <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/11_perch.webp')}}" style="width:150px;height:100px"/>
                         <div class="card-body">
@@ -1604,7 +1604,7 @@
 
             </div>
             <div class="my-1 col-md-4">
-                <a href="/guidings?target_fish%5B0%5D=12">
+                <a href="/guidings?target_fish[]=14">
                     <div class="flex-row card align-items-center">
                         <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/10_zander.webp')}}" style="width:150px;height:100px"/>
                         <div class="card-body">
@@ -1615,7 +1615,7 @@
                 </a>
             </div>
             <div class="my-1 col-md-4">
-                <a href="/guidings?target_fish%5B0%5D=11">
+                <a href="/guidings?target_fish[]=6">
                     <div class="flex-row card align-items-center">
                         <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/07_catfish.webp')}}" style="width:150px;height:100px"/>
                         <div class="card-body">
@@ -1626,7 +1626,7 @@
                 </a>
             </div>
             <div class="my-1 col-md-4">
-                <a href="/guidings?target_fish%5B0%5D=49">
+                <a href="/guidings?target_fish[]=69">
                     <div class="flex-row card align-items-center">
                         <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/12_blackbass.webp')}}" style="width:150px;height:100px"/>
                         <div class="card-body">
@@ -1638,7 +1638,7 @@
 
             </div>
             <div class="my-1 col-md-4">
-                <a href="/guidings?target_fish%5B0%5D=2">
+                <a href="/guidings?target_fish[]=36">
                     <div class="flex-row card align-items-center">
                         <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/09_trout.webp')}}" style="width:150px;height:100px"/>
                         <div class="card-body">
@@ -1649,7 +1649,7 @@
                 </a>
             </div>
             <div class="my-1 col-md-4">
-                <a href="/guidings?target_fish%5B0%5D=44">
+                <a href="/guidings?target_fish[]=40">
                     <div class="flex-row card align-items-center">
                         <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/06_tuna.webp')}}" style="width:150px;height:100px"/>
                         <div class="card-body">
@@ -1660,7 +1660,7 @@
                 </a>
             </div>
             <div class="my-1 col-md-4">
-                <a href="/guidings?target_fish%5B0%5D=17">
+                <a href="/guidings?target_fish[]=5">
                     <div class="flex-row card align-items-center">
                         <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/03_carp.webp')}}" style="width:150px;height:100px"/>
                         <div class="card-body">
@@ -1671,7 +1671,7 @@
                 </a>
             </div>
             <div class="my-1 col-md-4">
-                <a href="/guidings?target_fish%5B0%5D=6">
+                <a href="/guidings?target_fish[]=18">
                     <div class="flex-row card align-items-center">
                         <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/05_salmon.webp')}}" style="width:150px;height:100px"/>
                         <div class="card-body">
