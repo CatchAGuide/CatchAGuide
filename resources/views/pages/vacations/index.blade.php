@@ -164,7 +164,7 @@
                     <div class="page-main-intro-text mb-1">{!! translate(nl2br($row_data->introduction)) !!}</div>
                     <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('vacations.read_more')</a></p>
                 </div>
-                <h5 class="mb-2">{{ translate('Vacations in' . translate($row_data->name)) }}</h5>
+                <h5 class="mb-2">{{ translate('Vacations in ' . translate($row_data->name)) }}</h5>
                 <div class="row mb-5">
                     <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
                         <div class="d-grid gap-2 w-100">

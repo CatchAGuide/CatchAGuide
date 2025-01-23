@@ -196,7 +196,7 @@
                     <div class="location-row">
                         <div class="location">
                             <a href="#" class="fs-6 text-decoration-none text-muted">
-                                <i class="bi bi-geo-alt"></i>{{ translate('Fishing Trip in') }} <strong>{{$vacation->location}}</strong>
+                                <i class="bi bi-geo-alt"></i>{{ translate('Fishing Trip in') }} <strong>{{translate($vacation->location)}}</strong>
                             </a>
                         </div>
                         <div class="location-map">
@@ -554,7 +554,6 @@
                                 role="tab" 
                                 aria-controls="nav-guiding" 
                                 aria-selected="{{ $activeTab == 'guiding' ? 'true' : 'false' }}">
-                            <!-- {{ translate('Guiding') }} -->
                             Guiding
                         </button>
                     @endif
@@ -565,15 +564,15 @@
                         $sections = [
                             'accommodation' => [
                                 'items' => $vacation->accommodations ?? [],
-                                'title' => 'Accommodation'
+                                'title' => translate('Accommodation')
                             ],
                             'boat' => [
                                 'items' => $vacation->boats ?? [],
-                                'title' => 'Mietboot'
+                                'title' => translate('Mietboot')
                             ],
                             'package' => [
                                 'items' => $vacation->packages ?? [],
-                                'title' => 'Komplettpaket'
+                                'title' => translate('Komplettpaket')
                             ],
                             'guiding' => [
                                 'items' => $vacation->guidings ?? [],
@@ -594,9 +593,9 @@
                                         <div class="row">
                                             <!-- Description Column -->
                                             <div class="col-12 col-lg-7 mb-3 mb-lg-0 tab-item">
-                                                <h6 class="card-title mb-3">{{ !empty($item->title) ? $item->title : translate($sectionKey . ' ' . ($itemIndex + 1)) }}</h6>
+                                                <h6 class="card-title mb-3">{{ !empty($item->title) ? translate($item->title) : translate($sectionKey . ' ' . ($itemIndex + 1)) }}</h6>
                                                 <span class="text-wrapper">
-                                                    {!! $item->description !!}
+                                                    {!! translate($item->description) !!}
                                                 </span>
                                                 <!-- Other Details Row -->
                                                 @php $dynamicFields = json_decode($item->dynamic_fields) @endphp
@@ -618,7 +617,7 @@
                                                                         if (isset($dynamicFields->$priorityField)) {
                                                                             echo '<div class="details-row">
                                                                                     <h6 class="mb-1">' . translate(ucwords(str_replace('_', ' ', $priorityField))) . ':</h6>
-                                                                                    <p class="mb-0">' . $dynamicFields->$priorityField . '</p>
+                                                                                    <p class="mb-0">' . translate($dynamicFields->$priorityField)    . '</p>
                                                                                 </div>';
                                                                         }
                                                                     }
@@ -627,14 +626,14 @@
                                                                     if (!in_array($field, $priorityFields)) {
                                                                         echo '<div class="details-row">
                                                                                 <h6 class="mb-1">' . translate(ucwords(str_replace('_', ' ', $field))) . '</h6>
-                                                                                <p class="mb-0">' . $value . '</p>
+                                                                                <p class="mb-0">' . translate($value) . '</p>
                                                                             </div>';
                                                                     }
                                                                 @endphp
                                                             @else
                                                                 <div class="details-row">
                                                                     <h6 class="mb-1">{{ translate(ucwords(str_replace('_', ' ', $field))) }}:</h6>
-                                                                    <p class="mb-0">{{ $value }}</p>
+                                                                    <p class="mb-0">{{ translate($value) }}</p>
                                                                 </div>
                                                             @endif
                                                         @endif
@@ -691,15 +690,15 @@
                     $sections = [
                         'accommodation' => [
                             'items' => $vacation->accommodations,
-                            'title' => 'Accommodation'
+                            'title' => translate('Accommodation')
                         ],
                         'boat' => [
                             'items' => $vacation->boats,
-                            'title' => 'Mietboot'
+                            'title' => translate('Mietboot')
                         ],
                         'package' => [
                             'items' => $vacation->packages,
-                            'title' => 'Komplettpaket'
+                            'title' => translate('Komplettpaket')
                         ],
                         'guiding' => [
                             'items' => $vacation->guidings,
@@ -733,7 +732,7 @@
                                             <div class="row">
                                                 <!-- Description Column -->
                                                 <div class="col-12 col-lg-7 mb-3 mb-lg-0 tab-item">
-                                                    <h6 class="card-title mb-3">{{ !empty($item->title) ? $item->title : translate($sectionKey . ' ' . ($itemIndex + 1)) }}</h6>
+                                                    <h6 class="card-title mb-3">{{ !empty($item->title) ? translate($item->title) : translate($sectionKey . ' ' . ($itemIndex + 1)) }}</h6>
                                                     <span class="text-wrapper">
                                                         {!! translate($item->description) !!}
                                                     </span>
@@ -757,7 +756,7 @@
                                                                     if (isset($dynamicFields->$priorityField)) {
                                                                         echo '<div class="details-row">
                                                                                 <h6 class="mb-1">' . translate(ucwords(str_replace('_', ' ', $priorityField))) . ':</h6>
-                                                                                <p class="mb-0">' . $dynamicFields->$priorityField . '</p>
+                                                                                <p class="mb-0">' . translate($dynamicFields->$priorityField) . '</p>
                                                                             </div>';
                                                                     }
                                                                 }
@@ -766,14 +765,14 @@
                                                                 if (!in_array($field, $priorityFields)) {
                                                                     echo '<div class="details-row">
                                                                             <h6 class="mb-1">' . translate(ucwords(str_replace('_', ' ', $field))) . '</h6>
-                                                                            <p class="mb-0">' . $value . '</p>
+                                                                            <p class="mb-0">' . translate($value) . '</p>
                                                                         </div>';
                                                                 }
                                                             @endphp
                                                         @else
                                                             <div class="details-row">
                                                                 <h6 class="mb-1">{{ translate(ucwords(str_replace('_', ' ', $field))) }}:</h6>
-                                                                <p class="mb-0">{{ $value }}</p>
+                                                                <p class="mb-0">{{ translate($value) }}</p>
                                                             </div>
                                                         @endif
                                                     @endif
@@ -892,7 +891,7 @@
                     @foreach($sameCountries as $same_country)
                 
                         <div class="popular-tours__single">
-                            <a class="popular-tours__img" href="{{ route('guidings.show',[$same_country->id,$same_country->slug]) }}" title="Guide aufmachen">
+                            <a class="popular-tours__img" href="{{ route('guidings.show',[$same_country->id,$same_country->slug]) }}" title="{{ translate('Guide aufmachen') }}">
                                 <div class="popular-tours__img__wrapper">
                                     @if($same_country->gallery)
                                         <img src="{{ asset($same_country->gallery[0]) }}" alt="{{ $same_country->title }}"/>
@@ -903,10 +902,10 @@
                             <div class="popular-tours__content">
                             <h5 class="crop-text-2 card-title h6">
                                 <a href="{{ route('guidings.show', [$same_country->id, $same_country->slug]) }}">
-                                    {{ $same_country->title ? translate(Str::limit($same_country->title, 50)) : $same_country->title }}
+                                    {{ $same_country->title ? translate(Str::limit($same_country->title, 50)) : translate($same_country->title) }}
                                 </a>
                             </h5>    
-                            <small class="crop-text-1 small-text text-muted">{{ $same_country->location }}</small>
+                            <small class="crop-text-1 small-text text-muted">{{ translate($same_country->location) }}</small>
                             <p class="fw-bold text-muted">
                                 <span>@lang('message.from') {{ $same_country->getLowestPrice() }}€</span>
                             </p>
