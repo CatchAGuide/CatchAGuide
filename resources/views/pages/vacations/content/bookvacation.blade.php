@@ -41,8 +41,7 @@
                             @php
                                 $hasPackages = !empty($vacation->packages) && count($vacation->packages) > 0;
                                 $hasCustomOptions = (!empty($vacation->accommodations) && count($vacation->accommodations) > 0) ||
-                                                   (!empty($vacation->boats) && count($vacation->boats) > 0) ||
-                                                   (!empty($vacation->guidings) && count($vacation->guidings) > 0);
+                                                   (!empty($vacation->boats) && count($vacation->boats) > 0);
                             @endphp
 
                             @if($hasPackages || $hasCustomOptions)
@@ -65,7 +64,7 @@
                         </div>
 
                         @if($hasPackages)
-                            <div id="package-options" class="booking-options mb-3" style="display: {{ $hasCustomOptions ? 'block' : 'block' }}">
+                            <div id="package-options" class="booking-options{{ $hasCustomOptions ? '-show' : '-show' }} mb-3">
                                 <div class="form-group">
                                     <label>{{ translate('Select Package') }}</label>
                                     <select class="form-control" name="package_id">
@@ -79,7 +78,7 @@
                         @endif
 
                         @if($hasCustomOptions)
-                            <div id="custom-options" class="booking-options mb-3" style="display: {{ $hasPackages ? 'none' : 'block' }}">
+                            <div id="custom-options" class="booking-options{{ $hasPackages ? '-hide' : '-show' }} mb-3">
                                 @if ($vacation->accommodations && count($vacation->accommodations) > 0)
                                     <div class="form-group mb-3">
                                         <label>{{ translate('Accommodation') }}</label>
@@ -541,9 +540,6 @@
         // Initialize price update listeners
         addPriceUpdateListeners();
 
-        // Initial price calculation
-        updateTotalPrice();
-
         // Initialize modal with specific options
         const modalElement = document.getElementById('checkoutModal');
         const modal = new bootstrap.Modal(modalElement, {
@@ -565,9 +561,6 @@
             e.preventDefault();
             modal.show();
         });
-
-        // Trigger initial calculations
-        updateTotalPrice();
 
         // Add this new code block after the existing event listeners
         document.querySelectorAll('.extra-offer-checkbox').forEach(checkbox => {
@@ -857,7 +850,7 @@
             }
 
             // Validate duration
-            if (!durationPresetValue && !customDurationValue) {
+            if ((!durationPresetValue || durationPresetValue === '0' || durationPresetValue === 'other') && !customDurationValue) {
                 return false;
             }
 
@@ -915,15 +908,6 @@
             }
         });
 
-        // Add listener for booking type changes
-        const bookingTypeButtons = document.querySelectorAll('.booking-type-btn');
-        bookingTypeButtons.forEach(button => {
-            button.addEventListener('click', updateProceedButton);
-        });
-
-        // Initial validation check
-        updateProceedButton();
-
         // Initialize tooltips
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -959,9 +943,6 @@
                 }
             }
         }
-
-        // Initialize tooltip on page load
-        initializeTooltip();
 
         // Get list of missing required fields
         function getMissingRequiredFields() {
@@ -1006,14 +987,6 @@
             }
         });
 
-        // Add input event listeners for real-time validation
-        form.querySelectorAll('.required-input').forEach(input => {
-            input.addEventListener('input', updateProceedButton);
-        });
-
-        // Initial validation check
-        updateProceedButton();
-
         // Duration dropdown handling
         const durationPreset = document.getElementById('duration_preset');
         const customDurationContainer = document.getElementById('custom_duration_container');
@@ -1038,35 +1011,48 @@
         durationPreset.addEventListener('change', updateProceedButton);
         customDuration.addEventListener('input', updateProceedButton);
 
-        // Add this inside the DOMContentLoaded event listener
+        // Update the booking type button handler
+        const bookingTypeButtons = document.querySelectorAll('.booking-type-btn');
         bookingTypeButtons.forEach(button => {
             button.addEventListener('click', function() {
-                // Update booking type
                 const bookingType = this.dataset.type;
                 bookingTypeInput.value = bookingType;
                 
-                // Toggle active class
-                bookingTypeButtons.forEach(btn => btn.classList.remove('active'));
-                this.classList.add('active');
-                
-                // Show/hide relevant options
+                // Get option containers
                 const packageOptions = document.getElementById('package-options');
                 const customOptions = document.getElementById('custom-options');
                 
+                // Remove all display styles first
+                if (packageOptions) {
+                    packageOptions.style.removeProperty('display');
+                    packageOptions.classList.remove('booking-options-show', 'booking-options-hide');
+                }
+                if (customOptions) {
+                    customOptions.style.removeProperty('display');
+                    customOptions.classList.remove('booking-options-show', 'booking-options-hide');
+                }
+                
+                // Toggle classes instead of styles
                 if (bookingType === 'package') {
-                    packageOptions.style.display = 'block';
-                    customOptions.style.display = 'none';
+                    if (packageOptions) packageOptions.classList.add('booking-options-show');
+                    if (customOptions) customOptions.classList.add('booking-options-hide');
                     // Clear custom selections
                     if (accommodationSelect) accommodationSelect.value = '';
                     if (boatSelect) boatSelect.value = '';
                 } else {
-                    packageOptions.style.display = 'none';
-                    customOptions.style.display = 'block';
+                    if (packageOptions) packageOptions.classList.add('booking-options-hide');
+                    if (customOptions) customOptions.classList.add('booking-options-show');
+                    // Clear package selection
                     if (packageSelect) packageSelect.value = '';
                 }
                 
-                // Update total price
+                // Toggle active class on buttons
+                bookingTypeButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update total price and validation
                 updateTotalPrice();
+                updateProceedButton();
             });
         });
 
@@ -1193,6 +1179,10 @@
         thankYouModal.addEventListener('hidden.bs.modal', function () {
             window.location.href = '{{ route("vacations.index") }}';
         });
+        
+        updateProceedButton();
+        updateTotalPrice();
+        initializeTooltip();
     });
 </script>
 
@@ -1578,6 +1568,14 @@
         .tour-details-two__book-tours {
             width: 100%; /* Fluid width for mobile */
         }
+    }
+    
+    .booking-options-show {
+        display: block !important;
+    }
+
+    .booking-options-hide {
+        display: none !important;
     }
 </style>
 

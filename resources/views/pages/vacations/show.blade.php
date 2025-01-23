@@ -294,8 +294,10 @@
                 if ($galleryImages) {
                     foreach ($galleryImages as $image) {
                         if (file_exists(public_path($image))) {
-                            $finalImages[] = asset($image);
                             $overallImages[] = asset($image);
+                            if ($image !== $thumbnailPath) {
+                                $finalImages[] = asset($image);
+                            }   
                         }
                     }
                 }
@@ -309,13 +311,6 @@
                     // 3 or fewer valid gallery images
                     if (count($finalImages) < 3) {
                         $finalImages = $finalImages;
-                        
-                        // Pad with thumbnail if it exists
-                        // if (file_exists(public_path($thumbnailPath))) {
-                        //     while (count($finalImages) < 2) {
-                        //         $finalImages[] = asset($thumbnailPath);
-                        //     }
-                        // } 
                     } else {
                         $finalImages = array_slice($finalImages, 0, 2);
                     }
@@ -952,7 +947,6 @@
 <script>
 
 function initMap() {
-    console.log('initMap called');
     var location = { 
         lat: {{ $vacation->latitude ?? 41.40338 }}, 
         lng: {{ $vacation->longitude ?? 2.17403 }} 
