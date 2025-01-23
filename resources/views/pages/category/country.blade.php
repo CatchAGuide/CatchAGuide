@@ -319,7 +319,7 @@
                                             <img src="{{ $city->getThumbnailPath() }}" class="dimg-fluid" alt="Image Not Available">
                                         </div>
                                         <div class="card-img-overlay">
-                                            <h5>{{ $city->name }}</h5>
+                                            <h5>{{ translate($city->name) }}</h5>
                                         </div>
                                     </div>
                                 </a>
@@ -328,7 +328,7 @@
                     @endforeach
                 </div>
                 @endif
-                <h5 class="mb-2">{{ translate('Fishing tours in' . translate($row_data->name)) }}</h5>
+                <h5 class="mb-2">{{ translate('Fishing tours in ' . $row_data->name) }}</h5>
                 <div class="row mb-5">
                     <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
                         <div class="d-grid gap-2 w-100">
@@ -444,7 +444,7 @@
                                             <i class="fa fa-euro-sign"></i>
                                         </div>
                                         <select class="form-control filter-select" id="price_range" name="price_range">
-                                            <option selected disabled hidden>Price per Person</option>
+                                            <option selected disabled hidden>{{ translate('Price per Person') }}</option>
                                             <option value="" >@lang('message.choose')...</option>
                                             <option value="1-50" {{ request()->get('price_range') ? request()->get('price_range') == '1-200' ? 'selected' : null : null }}>1 - 50 p.P.</option>
                                             <option value="51-100" {{ request()->get('price_range') ? request()->get('price_range') == '201-400' ? 'selected' : null : null }}>51 - 100 p.P.</option>
@@ -496,7 +496,7 @@
                                                 <h5 class="fw-bolder text-truncate">{{translate($guiding->title)}}</h5>
                                                 @endif
                                                 @if($agent->ismobile())
-                                                    <h5 class="fw-bolder text-truncate">{{ \Str::limit(translate($guiding->title), 45) }}</h5>
+                                                    <h5 class="fw-bolder text-truncate">{{ translate(Str::limit($guiding->title, 45)) }}</h5>
                                                 @endif
                                                     <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($guiding->location) }} </span>                                      
                                                 </div>
@@ -598,18 +598,18 @@
                             <thead>
                                 <tr>
                                     <th width="28%">@lang('destination.fish')</th>
-                                    <th width="6%" class="text-center">Jan</th>
-                                    <th width="6%" class="text-center">Feb</th>
-                                    <th width="6%" class="text-center">Mar</th>
-                                    <th width="6%" class="text-center">Apr</th>
-                                    <th width="6%" class="text-center">May</th>
-                                    <th width="6%" class="text-center">Jun</th>
-                                    <th width="6%" class="text-center">Jul</th>
-                                    <th width="6%" class="text-center">Aug</th>
-                                    <th width="6%" class="text-center">Sep</th>
-                                    <th width="6%" class="text-center">Oct</th>
-                                    <th width="6%" class="text-center">Nov</th>
-                                    <th width="6%" class="text-center">Dec</th>
+                                    <th width="6%" class="text-center">{{ translate('Jan') }}</th>
+                                    <th width="6%" class="text-center">{{ translate('Feb') }}</th>
+                                    <th width="6%" class="text-center">{{ translate('Mar') }}</th>
+                                    <th width="6%" class="text-center">{{ translate('Apr') }}</th>
+                                    <th width="6%" class="text-center">{{ translate('May') }}</th>
+                                    <th width="6%" class="text-center">{{ translate('Jun') }}</th>
+                                    <th width="6%" class="text-center">{{ translate('Jul') }}</th>
+                                    <th width="6%" class="text-center">{{ translate('Aug') }}</th>
+                                    <th width="6%" class="text-center">{{ translate('Sep') }}</th>
+                                    <th width="6%" class="text-center">{{ translate('Oct') }}</th>
+                                    <th width="6%" class="text-center">{{ translate('Nov') }}</th>
+                                    <th width="6%" class="text-center">{{ translate('Dec') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -720,7 +720,7 @@
 
     <div class="offcanvas offcanvas-bottom" tabindex="-1" id="offcanvasBottomSearch" aria-labelledby="offcanvasBottomLabel">
         <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasBottomLabel">Filter</h5>
+            <h5 class="offcanvas-title" id="offcanvasBottomLabel">{{ translate('Filter') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body small">

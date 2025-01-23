@@ -164,7 +164,7 @@
                     <div class="page-main-intro-text mb-1">{!! translate(nl2br($row_data->introduction)) !!}</div>
                     <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('vacations.read_more')</a></p>
                 </div>
-                <h5 class="mb-2">{{ translate('Vacations in' . translate($row_data->name)) }}</h5>
+                <h5 class="mb-2">{{ translate('Vacations in ' . translate($row_data->name)) }}</h5>
                 <div class="row mb-5">
                     <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
                         <div class="d-grid gap-2 w-100">
@@ -590,48 +590,55 @@
     });
     
     $(function() {
-        var word_char_count_allowed = $(window).width() <= 768 ? 300 : 1200;  // Adjust character count based on screen size
-        var page_main_intro = $('.page-main-intro-text');
-        var page_main_intro_text = page_main_intro.html();
-        var page_main_intro_count = page_main_intro.text().length;
-        var ellipsis = "..."; 
+        var word_char_count_allowed = $(window).width() <= 768 ? 300 : 1200;
+        var content = $('#page-main-intro .page-main-intro-text');
+        var seeMoreBtn = $('.see-more');
+        var fullText = content.html();
+        var textLength = content.text().length;
+        var ellipsis = "...";
         var moreText = '<a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('vacations.read_more')</a>';
         var lessText = '<a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('vacations.read_less')</a>';
 
-        var visible_text = page_main_intro_text.substring(0, word_char_count_allowed);
-        var hidden_text = page_main_intro_text.substring(word_char_count_allowed);
-
-        if (page_main_intro_count >= word_char_count_allowed) {
-            $('.page-main-intro-text').html(visible_text + '<span class="more-ellipsis">' + ellipsis + '</span><span class="more-text" style="display:none;">' + hidden_text + '</span>');
-            //$('.more-text').show();
-            $('.see-more').click(function(e) {
+        if (textLength > word_char_count_allowed) {
+            content.html('<div class="content-wrapper">' + fullText + '</div>');
+            var wrapper = content.find('.content-wrapper');
+            
+            wrapper.hide();
+            content.append('<div class="truncated-content">' + 
+                fullText.substring(0, word_char_count_allowed) + 
+                '<span class="more-ellipsis">' + ellipsis + '</span>' +
+            '</div>');
+            
+            seeMoreBtn.show();
+            
+            seeMoreBtn.find('a').click(function(e) {
                 e.preventDefault();
-                var textContainer = $(this).prev('.page-main-intro-text'); // Get the content element
-
                 if ($(this).hasClass('less')) {
                     $(this).removeClass('less');
                     $(this).html(moreText);
-                    textContainer.find('.more-text').hide();
-                    textContainer.find('.more-ellipsis').show();
+                    content.find('.truncated-content').show();
+                    wrapper.hide();
                 } else {
                     $(this).addClass('less');
                     $(this).html(lessText);
-                    textContainer.find('.more-text').show();
-                    textContainer.find('.more-ellipsis').hide();
+                    content.find('.truncated-content').hide();
+                    wrapper.show();
                 }
             });
         } else {
-            $('.see-more').hide();
+            seeMoreBtn.hide();
         }
 
-        // Re-adjust the text length if window is resized
         $(window).resize(function() {
             word_char_count_allowed = $(window).width() <= 768 ? 300 : 1200;
-            visible_text = page_main_intro_text.substring(0, word_char_count_allowed);
-            hidden_text = page_main_intro_text.substring(word_char_count_allowed);
-
-            if (page_main_intro_count >= word_char_count_allowed) {
-                $('.page-main-intro-text').html(visible_text + '<span class="more-ellipsis">' + ellipsis + '</span><span class="more-text" style="display:none;">' + hidden_text + '</span>');
+            if (textLength > word_char_count_allowed && content.find('.truncated-content').length) {
+                content.find('.truncated-content').html(
+                    fullText.substring(0, word_char_count_allowed) + 
+                    '<span class="more-ellipsis">' + ellipsis + '</span>'
+                );
+                seeMoreBtn.show();
+            } else {
+                seeMoreBtn.hide();
             }
         });
     });
