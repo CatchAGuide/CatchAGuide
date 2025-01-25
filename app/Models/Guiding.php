@@ -503,21 +503,39 @@ class Guiding extends Model
      */
     public static function locationFilter(string $city = null, string $country = null, ?int $radius = null, $placeLat = null, $placeLng = null)
     {
-        // Parse location into components
-        // $locationParts = self::parseLocation($location);
-        $locationParts = ['city' => $city, 'country' => $country];
+        // Get standardized English names using the helper
+        if ($city || $country) {
+            $searchQuery = array_filter([$city, $country], fn($val) => !empty($val));
+            $searchString = implode(', ', $searchQuery);
+            
+            $translated  = getLocationDetails($searchString);
+            if ($translated) {
+                $locationParts = ['city_en' => $translated['city'], 'country_en' => $translated['country']];
+            }
+        }
+
+        $locationParts = array_merge(['city' => $city, 'country' => $country], $locationParts ?? []);
+
         $returnData = [
             'message' => '',
             'ids' => []
         ];
         
-        // First try direct database match based on parsed location
+        // Try direct database match based on standardized names
         $guidings = self::select('id')
             ->where(function($query) use ($locationParts) {
                 if ($locationParts['city']) {
-                    $query->where('city', $locationParts['city']);
+                    if (isset($locationParts['city_en'])) {
+                        $query->where('city', $locationParts['city'])->orWhere('city', $locationParts['city_en']);
+                    } else {
+                        $query->where('city', $locationParts['city']);
+                    }
                 } else if ($locationParts['country']) {
-                    $query->where('country', $locationParts['country']); 
+                    if (isset($locationParts['country_en'])) {
+                        $query->where('country', $locationParts['country'])->orWhere('country', $locationParts['country_en']);
+                    } else {
+                        $query->where('country', $locationParts['country']);
+                    }
                 }
             })
             ->where('status', 1)

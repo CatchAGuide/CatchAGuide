@@ -138,7 +138,11 @@
 <!-- /.preloader -->
 <div class="page-wrapper">
   
-    @include('layouts.partials.newheader-short')
+    {{-- @if(request()->is('vacation*'))
+        @include('layouts.partials.newheader-vacation-short')
+    @else --}}
+        @include('layouts.partials.newheader-short')
+    {{-- @endif --}}
 
     @yield('content')
 
