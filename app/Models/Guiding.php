@@ -501,20 +501,20 @@ class Guiding extends Model
      * @param int|null $radius Search radius in kilometers
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public static function locationFilter(string $city = null, string $country = null, ?int $radius = null, $placeLat = null, $placeLng = null)
+    public static function locationFilter(string $city = null, string $country = null, $region = null, ?int $radius = null, $placeLat = null, $placeLng = null)
     {
         // Get standardized English names using the helper
         if ($city || $country) {
-            $searchQuery = array_filter([$city, $country], fn($val) => !empty($val));
+            $searchQuery = array_filter([$city, $country, $region], fn($val) => !empty($val));
             $searchString = implode(', ', $searchQuery);
             
             $translated  = getLocationDetails($searchString);
             if ($translated) {
-                $locationParts = ['city_en' => $translated['city'], 'country_en' => $translated['country']];
+                $locationParts = ['city_en' => $translated['city'], 'country_en' => $translated['country'], 'region_en' => $translated['region']];
             }
         }
 
-        $locationParts = array_merge(['city' => $city, 'country' => $country], $locationParts ?? []);
+        $locationParts = array_merge(['city' => $city, 'country' => $country, 'region' => $region], $locationParts ?? []);
 
         $returnData = [
             'message' => '',
@@ -535,6 +535,13 @@ class Guiding extends Model
                         $query->where('country', $locationParts['country'])->orWhere('country', $locationParts['country_en']);
                     } else {
                         $query->where('country', $locationParts['country']);
+                    }
+                }
+                if ($locationParts['region']) {
+                    if (isset($locationParts['region_en'])) {
+                        $query->where('region', $locationParts['region'])->orWhere('region', $locationParts['region_en']);
+                    } else {
+                        $query->where('region', $locationParts['region']);
                     }
                 }
             })

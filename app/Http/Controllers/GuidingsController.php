@@ -377,7 +377,7 @@ class GuidingsController extends Controller
             Log::info($guiding);
 
             $guiding->is_newguiding = 1;
-            $guiding->slug = slugify($request->input('title') . "-" . $request->input('location') . "-" . auth()->id());
+            $guiding->slug = slugify($request->input('title') . "-in-" . $request->input('location'));
 
             //step 1
             $guiding->location = $request->has('location') ? $request->input('location') : '';

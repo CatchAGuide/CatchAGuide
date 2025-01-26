@@ -220,29 +220,32 @@ if (!function_exists('getLocationDetails')) {
     function getLocationDetails(string $searchString): ?array 
     {
         // First check in the locations table
-        $location = \App\Models\Location::where(function($query) use ($searchString) {
-            $query->whereJsonContains('translation->city', $searchString)
-                  ->orWhereRaw("JSON_EXTRACT(translation, '$.city') LIKE ?", ['%' . $searchString . '%'])
-                  ->orWhereJsonContains('translation->country', $searchString)
-                  ->orWhereRaw("JSON_EXTRACT(translation, '$.country') LIKE ?", ['%' . $searchString . '%']);
-        })->first();
+        // $location = \App\Models\Location::where(function($query) use ($searchString) {
+        //     $query->whereJsonContains('translation->city', $searchString)
+        //           ->orWhereRaw("JSON_EXTRACT(translation, '$.city') LIKE ?", ['%' . $searchString . '%'])
+        //           ->orWhereJsonContains('translation->country', $searchString)
+        //           ->orWhereRaw("JSON_EXTRACT(translation, '$.country') LIKE ?", ['%' . $searchString . '%']);
+        // })->first();
         
-        if ($location) {
-            return [
-                'city' => $location->city,
-                'country' => $location->country
-            ];
-        }
+        // if ($location) {
+        //     return [
+        //         'city' => $location->city,
+        //         'country' => $location->country,
+        //         'region' => $location->region
+        //     ];
+        // }
 
         try {
             $client = new \GuzzleHttp\Client();
+
+            dump($searchString);
             
             // First try with regions (countries) if the search string is short (likely a country name)
             if (str_word_count($searchString) === 1) {
                 $autocompleteResponse = $client->get('https://maps.googleapis.com/maps/api/place/autocomplete/json', [
                     'query' => [
                         'input' => $searchString,
-                        'types' => '(regions)',  // Try countries first
+                        'types' => '(regions)',  // This includes countries and administrative areas
                         'language' => 'en',
                         'key' => env('GOOGLE_MAP_API_KEY')
                     ]
@@ -270,19 +273,35 @@ if (!function_exists('getLocationDetails')) {
                     }
                 }
             } else {
-                // If search string has multiple words, try cities first
-                $autocompleteResponse = $client->get('https://maps.googleapis.com/maps/api/place/autocomplete/json', [
+                // Try with a text search first for more flexible matching
+                $searchResponse = $client->get('https://maps.googleapis.com/maps/api/place/textsearch/json', [
                     'query' => [
-                        'input' => $searchString,
-                        'types' => '(cities)',
+                        'query' => $searchString,
+                        'type' => 'locality',  // Focus on localities/cities
                         'language' => 'en',
                         'key' => env('GOOGLE_MAP_API_KEY')
                     ]
                 ]);
-                $autocompleteResult = json_decode($autocompleteResponse->getBody(), true);
+                
+                $searchResult = json_decode($searchResponse->getBody(), true);
 
-                if ($autocompleteResult['status'] === 'OK' && !empty($autocompleteResult['predictions'])) {
-                    $placeId = $autocompleteResult['predictions'][0]['place_id'];
+                if ($searchResult['status'] === 'OK' && !empty($searchResult['results'])) {
+                    $placeId = $searchResult['results'][0]['place_id'];
+                } else {
+                    // Fallback to autocomplete if text search doesn't work
+                    $autocompleteResponse = $client->get('https://maps.googleapis.com/maps/api/place/autocomplete/json', [
+                        'query' => [
+                            'input' => $searchString,
+                            'types' => '(cities)',
+                            'language' => 'en',
+                            'key' => env('GOOGLE_MAP_API_KEY')
+                        ]
+                    ]);
+                    $autocompleteResult = json_decode($autocompleteResponse->getBody(), true);
+
+                    if ($autocompleteResult['status'] === 'OK' && !empty($autocompleteResult['predictions'])) {
+                        $placeId = $autocompleteResult['predictions'][0]['place_id'];
+                    }
                 }
             }
             
@@ -290,34 +309,38 @@ if (!function_exists('getLocationDetails')) {
                 $detailsResponse = $client->get('https://maps.googleapis.com/maps/api/place/details/json', [
                     'query' => [
                         'place_id' => $placeId,
-                        'fields' => 'address_component',
+                        'fields' => 'address_component',  // Removed invalid field
                         'language' => 'en',
                         'key' => env('GOOGLE_MAP_API_KEY')
                     ]
                 ]);
                 
                 $detailsResult = json_decode($detailsResponse->getBody(), true);
+                dd($detailsResult);
                 
                 if ($detailsResult['status'] === 'OK') {
                     $components = $detailsResult['result']['address_components'];
                     $location = [
                         'city' => null,
                         'country' => null,
+                        'region' => null,
                         'original' => $searchString,
-                        'language' => $detailsResult['result']['language'] ?? null
+                        'language' => null
                     ];
-                    
+
                     foreach ($components as $component) {
-                        if (in_array('locality', $component['types']) || 
-                            (empty($location['city']) && in_array('administrative_area_level_1', $component['types']))) {
+                        if (in_array('locality', $component['types'])) {
                             $location['city'] = $component['long_name'];
+                        }
+                        if (in_array('administrative_area_level_1', $component['types'])) {
+                            $location['region'] = $component['long_name'];
+                            $location['language'] = $component['short_name'];
                         }
                         if (in_array('country', $component['types'])) {
                             $location['country'] = $component['long_name'];
-                        }
-
-                        if (!$location['language']) {
-                            $location['language'] = $component['short_name'] ?? null;
+                            if (!$location['language']) {
+                                $location['language'] = $component['short_name'];
+                            }
                         }
                     }
                     
@@ -336,16 +359,18 @@ if (!function_exists('getLocationDetails')) {
                         }
 
                         if (!empty($translation['city']) || !empty($translation['country'])) {
-                            $locationss = \App\Models\Location::create([
+                            \App\Models\Location::create([
                                 'city' => $location['city'],
                                 'country' => $location['country'],
+                                'region' => $location['region'],
                                 'translation' => $translation
                             ]);
                         }
 
                         return [
                             'city' => $location['city'],
-                            'country' => $location['country']
+                            'country' => $location['country'],
+                            'region' => $location['region']
                         ];
                     }
                 }
