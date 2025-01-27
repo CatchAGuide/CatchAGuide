@@ -11,6 +11,7 @@
     window.totalSteps = window.totalSteps || 7;
     window.autocomplete = window.autocomplete || null;
     window.city = window.city || null;
+    window.region = window.region || null;
     window.country = window.country || null;
     window.postal_code = window.postal_code || null;
     window.errorMapping = window.errorMapping || {
@@ -61,6 +62,9 @@
                 } else if (types.includes('postal_code')) {
                     postal_code = component.long_name;
                     $('#postal_code').val(postal_code);
+                } else if (types.includes('administrative_area_level_1')) {
+                    region = component.long_name;
+                    $('#region').val(region);
                 }
             });
         });

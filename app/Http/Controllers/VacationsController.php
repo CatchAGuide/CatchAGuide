@@ -213,9 +213,18 @@ class VacationsController extends Controller
         if(!empty($placeLat) && !empty($placeLng) && !empty($request->get('place'))){
 
             $title .= __('vacations.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
-            $vacationFilter = Vacation::locationFilter($request->get('city'), $request->get('country'), null, $placeLat, $placeLng);
+            $vacationFilter = Vacation::locationFilter($request->get('city'), $request->get('country'), $request->get('region') ?? null, $placeLat, $placeLng);
             $searchMessage = $vacationFilter['message'];
-            $query->whereIn('id', $vacationFilter['ids']);
+            
+            // Add a subquery to order by the position in the filtered IDs array
+            $orderByCase = 'CASE vacations.id ';
+            foreach($vacationFilter['ids'] as $position => $id) {
+                $orderByCase .= "WHEN $id THEN $position ";
+            }
+            $orderByCase .= 'ELSE ' . count($vacationFilter['ids']) . ' END';
+            
+            $query->whereIn('vacations.id', $vacationFilter['ids'])
+                  ->orderByRaw($orderByCase);
         }
 
         // if($request->has('price_range') && !empty($request->get('price_range'))){

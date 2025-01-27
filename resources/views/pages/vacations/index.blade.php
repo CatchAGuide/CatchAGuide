@@ -315,7 +315,7 @@
                                                 @if($agent->ismobile())
                                                     <h5 class="fw-bolder text-truncate">{{ \Str::limit(translate($vacation->title), 45) }}</h5>
                                                 @endif
-                                                <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($vacation->location) }} </span>                                      
+                                                <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ $vacation->location }} </span>                                      
                                             </div>
                                             <div class="inclusions-price">
                                             <div class="guiding-item-price">

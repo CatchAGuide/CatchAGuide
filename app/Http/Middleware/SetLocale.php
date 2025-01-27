@@ -13,20 +13,21 @@ class SetLocale
     public function handle($request, Closure $next)
     {
 
-      $domain = $request->getHost();
+      if (env('APP_ENV') == 'production') {
+        $domain = $request->getHost();
       
-
-      if ($domain === 'catchaguide.com') {
-        \App::setLocale('en');
-      } elseif ($domain === 'catchaguide.de') {
-        \App::setLocale('de');
+        if ($domain === 'catchaguide.com') {
+          \App::setLocale('en');
+        } elseif ($domain === 'catchaguide.de') {
+          \App::setLocale('de');
+        }
       }
 
-      // if(session()->has('locale')){
-      //   \App::setLocale(session()->get('locale'));
-      // }
+      if(session()->has('locale')){
+        \App::setLocale(session()->get('locale'));
+      }
         
-        return $next($request);
+      return $next($request);
     }
 
 }

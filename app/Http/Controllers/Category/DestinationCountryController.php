@@ -105,7 +105,7 @@ class DestinationCountryController extends Controller
             SELECT COALESCE(lowest_pp, price) 
             FROM price_per_person
         ) AS lowest_price')])->where('status',1)->whereNotNull('lat')->whereNotNull('lng');
-
+        
         if (empty($request->all())) {
             $query->orderByRaw("RAND($randomSeed)");
         }
@@ -222,15 +222,25 @@ class DestinationCountryController extends Controller
         $placeLat = $filterData['placeLat'];
         $placeLng = $filterData['placeLng'];
         $city = $filterData['city'] ?? null;
-        $country = $filterData['country'];
+        $country = $filterData['country'] ?? null;
+        $region = $filterData['region'] ?? null;
 
         $title .= __('guidings.Country') . ' ' . $country . ' | ';
 
         if(!empty($placeLat) && !empty($placeLng)){
             $title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
-            $guidingFilter = Guiding::locationFilter($city, $country, $radius, $placeLat, $placeLng);
+            $guidingFilter = Guiding::locationFilter($city, $country, $region, $radius, $placeLat, $placeLng);
             $searchMessage = $guidingFilter['message'];
-            $query->whereIn('id', $guidingFilter['ids']);
+            
+            // Add a subquery to order by the position in the filtered IDs array
+            $orderByCase = 'CASE guidings.id ';
+            foreach($guidingFilter['ids'] as $position => $id) {
+                $orderByCase .= "WHEN $id THEN $position ";
+            }
+            $orderByCase .= 'ELSE ' . count($guidingFilter['ids']) . ' END';
+            
+            $query->whereIn('guidings.id', $guidingFilter['ids'])
+                  ->orderByRaw($orderByCase);
         }
 
         if($request->has('price_range') && !empty($request->get('price_range'))){

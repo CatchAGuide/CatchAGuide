@@ -498,7 +498,7 @@
                                                 @if($agent->ismobile())
                                                     <h5 class="fw-bolder text-truncate">{{ translate(Str::limit($guiding->title, 45)) }}</h5>
                                                 @endif
-                                                    <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($guiding->location) }} </span>                                      
+                                                    <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }} </span>                                      
                                                 </div>
                                                 @if ($guiding->user->average_rating())
                                                 <div class="guidings-item-ratings">

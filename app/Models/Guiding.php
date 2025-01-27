@@ -100,6 +100,7 @@ class Guiding extends Model
         'booking_window',
         'gallery_images',
         'city',
+        'region',
         'desc_course_of_action',
         'desc_meeting_point',
         'desc_starting_time',
@@ -501,23 +502,57 @@ class Guiding extends Model
      * @param int|null $radius Search radius in kilometers
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public static function locationFilter(string $city = null, string $country = null, ?int $radius = null, $placeLat = null, $placeLng = null)
+    public static function locationFilter(string $city = null, string $country = null, $region = null, ?int $radius = null, $placeLat = null, $placeLng = null)
     {
-        // Parse location into components
-        // $locationParts = self::parseLocation($location);
-        $locationParts = ['city' => $city, 'country' => $country];
+        // Get standardized English names using the helper
+        if ($city || $country) {
+            $searchQuery = array_filter([$city, $country, $region], fn($val) => !empty($val));
+            $searchString = implode(', ', $searchQuery);
+            
+            $translated  = getLocationDetails($searchString);
+            if ($translated) {
+                $locationParts = ['city_en' => $translated['city'], 'country_en' => $translated['country'], 'region_en' => $translated['region']];
+            }
+        }
+
+        $locationParts = array_merge(['city' => $city, 'country' => $country, 'region' => $region], $locationParts ?? []);
+
         $returnData = [
             'message' => '',
             'ids' => []
         ];
         
-        // First try direct database match based on parsed location
+        // Try direct database match based on standardized names
         $guidings = self::select('id')
             ->where(function($query) use ($locationParts) {
+                // City conditions
                 if ($locationParts['city']) {
-                    $query->where('city', $locationParts['city']);
-                } else if ($locationParts['country']) {
-                    $query->where('country', $locationParts['country']); 
+                    $query->where(function($q) use ($locationParts) {
+                        $q->where('city', $locationParts['city']);
+                        if (isset($locationParts['city_en'])) {
+                            $q->orWhere('city', $locationParts['city_en']);
+                        }
+                    });
+                }
+                
+                // Country conditions
+                if ($locationParts['country']) {
+                    $query->where(function($q) use ($locationParts) {
+                        $q->where('country', $locationParts['country']);
+                        if (isset($locationParts['country_en'])) {
+                            $q->orWhere('country', $locationParts['country_en']);
+                        }
+                    });
+                }
+                
+                // Region conditions
+                if ($locationParts['region']) {
+                    $query->where(function($q) use ($locationParts) {
+                        $q->where('region', $locationParts['region']);
+                        if (isset($locationParts['region_en'])) {
+                            $q->orWhere('region', $locationParts['region_en']);
+                        }
+                    });
                 }
             })
             ->where('status', 1)
@@ -543,8 +578,14 @@ class Guiding extends Model
 
         // Try radius search
         $searchRadius = $radius ?? 200;
-        
         $guidings = self::select('id')
+            ->selectRaw("ST_Distance_Sphere(
+                point(lng, lat),
+                point(?, ?)
+            ) as distance", [
+                $coordinates['lng'],
+                $coordinates['lat']
+            ])
             ->whereRaw("ST_Distance_Sphere(
                 point(lng, lat),
                 point(?, ?)
@@ -554,6 +595,7 @@ class Guiding extends Model
                 $searchRadius * 1000
             ])
             ->where('status', 1)
+            ->orderBy('distance')  // Sort by distance ascending
             ->pluck('id');
 
         if ($guidings->isNotEmpty()) {
@@ -564,14 +606,14 @@ class Guiding extends Model
 
         // If still no results, find nearest guiding
         $returnData['ids'] = self::select('id')
-            ->where('status', 1)
             ->selectRaw("ST_Distance_Sphere(
-                point(lng, lat), 
+                point(lng, lat),
                 point(?, ?)
             ) as distance", [
                 $coordinates['lng'],
                 $coordinates['lat']
             ])
+            ->where('status', 1)
             ->orderBy('distance')
             ->pluck('id');
         $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel3'));

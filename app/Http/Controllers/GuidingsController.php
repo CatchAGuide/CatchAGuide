@@ -224,12 +224,20 @@ class GuidingsController extends Controller
         $placeLng = $request->get('placeLng');
 
         if(!empty($placeLat) && !empty($placeLng) && !empty($request->get('place'))){
-
             $title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
             $filter_title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ', ';
-            $guidingFilter = Guiding::locationFilter($request->get('city'), $request->get('country'), $radius, $placeLat, $placeLng);
+            $guidingFilter = Guiding::locationFilter($request->get('city'), $request->get('country'), $request->get('region') ?? null, $radius, $placeLat, $placeLng);
             $searchMessage = $guidingFilter['message'];
-            $query->whereIn('id', $guidingFilter['ids']);
+            
+            // Add a subquery to order by the position in the filtered IDs array
+            $orderByCase = 'CASE guidings.id ';
+            foreach($guidingFilter['ids'] as $position => $id) {
+                $orderByCase .= "WHEN $id THEN $position ";
+            }
+            $orderByCase .= 'ELSE ' . count($guidingFilter['ids']) . ' END';
+            
+            $query->whereIn('guidings.id', $guidingFilter['ids'])
+                  ->orderByRaw($orderByCase);
         }
 
         $allGuidings = $query->with('boatType')->get();
@@ -377,7 +385,7 @@ class GuidingsController extends Controller
             Log::info($guiding);
 
             $guiding->is_newguiding = 1;
-            $guiding->slug = slugify($request->input('title') . "-" . $request->input('location') . "-" . auth()->id());
+            $guiding->slug = slugify($request->input('title') . "-in-" . $request->input('location'));
 
             //step 1
             $guiding->location = $request->has('location') ? $request->input('location') : '';
@@ -386,6 +394,7 @@ class GuidingsController extends Controller
             $guiding->lng = $request->has('longitude') ? $request->input('longitude') : '';
             $guiding->country = $request->has('country') ? $request->input('country') : '';
             $guiding->city = $request->has('city') ? $request->input('city') : '';
+            $guiding->region = $request->has('region') ? $request->input('region') : '';
             
             $galeryImages = [];
             $imageList = json_decode($request->input('image_list'));
@@ -810,6 +819,7 @@ class GuidingsController extends Controller
             'longitude' => $guiding->lng,
             'country' => $guiding->country,
             'city' => $guiding->city,
+            'region' => $guiding->region,
             'gallery_images' => $guiding->gallery_images,
             'thumbnail_path' => $guiding->thumbnail_path,
 

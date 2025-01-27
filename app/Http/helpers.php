@@ -214,3 +214,197 @@ if (!function_exists('getCoordinatesFromLocation')) {
         return null;
     }
 }
+
+
+if (!function_exists('getLocationDetails')) {
+    function getLocationDetails(string $searchString): ?array 
+    {
+        // First check in the locations table
+        $location = \App\Models\Location::where(function($query) use ($searchString) {
+            $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.city')) = ?", [$searchString])
+                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.city')) LIKE ?", ['%' . $searchString . '%'])
+                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.country')) = ?", [$searchString])
+                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.country')) LIKE ?", ['%' . $searchString . '%']);
+        })
+        ->select('city', 'country', 'region')
+        ->first();
+        
+        if ($location) {
+            if ($location->city || $location->country || $location->region) {
+                return [
+                    'city' => $location->city,
+                    'country' => $location->country, 
+                    'region' => $location->region
+                ];
+            }
+        }
+
+        try {
+            $client = new \GuzzleHttp\Client();
+            
+            $placeId = null;
+            // First try with regions (countries) if the search string is short (likely a country name)
+            if (str_word_count($searchString) === 1) {
+                $autocompleteResponse = $client->get('https://maps.googleapis.com/maps/api/place/autocomplete/json', [
+                    'query' => [
+                        'input' => $searchString,
+                        'types' => '(regions)',  // This includes countries and administrative areas
+                        'language' => 'en',
+                        'key' => env('GOOGLE_MAP_API_KEY')
+                    ]
+                ]);
+                
+                $autocompleteResult = json_decode($autocompleteResponse->getBody(), true);
+                
+                if ($autocompleteResult['status'] === 'OK' && !empty($autocompleteResult['predictions'])) {
+                    // Process country result
+                    $placeId = $autocompleteResult['predictions'][0]['place_id'];
+                } else {
+                    // If no country found, try cities
+                    $autocompleteResponse = $client->get('https://maps.googleapis.com/maps/api/place/autocomplete/json', [
+                        'query' => [
+                            'input' => $searchString,
+                            'types' => '(cities)',
+                            'language' => 'en',
+                            'key' => env('GOOGLE_MAP_API_KEY')
+                        ]
+                    ]);
+                    $autocompleteResult = json_decode($autocompleteResponse->getBody(), true);
+                    
+                    if ($autocompleteResult['status'] === 'OK' && !empty($autocompleteResult['predictions'])) {
+                        $placeId = $autocompleteResult['predictions'][0]['place_id'];
+                    }
+                }
+            } else {
+                // First try with administrative areas for region searches
+                $regionResponse = $client->get('https://maps.googleapis.com/maps/api/place/textsearch/json', [
+                    'query' => [
+                        'query' => $searchString,
+                        'type' => 'administrative_area_level_1',
+                        'language' => 'en',
+                        'key' => env('GOOGLE_MAP_API_KEY')
+                    ]
+                ]);
+                
+                $regionResult = json_decode($regionResponse->getBody(), true);
+                
+                if ($regionResult['status'] === 'OK' && !empty($regionResult['results'])) {
+                    $placeId = $regionResult['results'][0]['place_id'];
+                } else {
+                    // Try with a text search for cities if region search fails
+                    $searchResponse = $client->get('https://maps.googleapis.com/maps/api/place/textsearch/json', [
+                        'query' => [
+                            'query' => $searchString,
+                            'type' => 'locality',  // Focus on localities/cities
+                            'language' => 'en',
+                            'key' => env('GOOGLE_MAP_API_KEY')
+                        ]
+                    ]);
+                    
+                    $searchResult = json_decode($searchResponse->getBody(), true);
+
+                    if ($searchResult['status'] === 'OK' && !empty($searchResult['results'])) {
+                        $placeId = $searchResult['results'][0]['place_id'];
+                    } else {
+                        // Fallback to autocomplete if text search doesn't work
+                        $autocompleteResponse = $client->get('https://maps.googleapis.com/maps/api/place/autocomplete/json', [
+                            'query' => [
+                                'input' => $searchString,
+                                'types' => '(cities)',
+                                'language' => 'en',
+                                'key' => env('GOOGLE_MAP_API_KEY')
+                            ]
+                        ]);
+                        $autocompleteResult = json_decode($autocompleteResponse->getBody(), true);
+
+                        if ($autocompleteResult['status'] === 'OK' && !empty($autocompleteResult['predictions'])) {
+                            $placeId = $autocompleteResult['predictions'][0]['place_id'];
+                        }
+                    }
+                }
+            }
+
+            if (isset($placeId)) {
+                $detailsResponse = $client->get('https://maps.googleapis.com/maps/api/place/details/json', [
+                    'query' => [
+                        'place_id' => $placeId,
+                        'fields' => 'address_component',  // Removed invalid field
+                        'language' => 'en',
+                        'key' => env('GOOGLE_MAP_API_KEY')
+                    ]
+                ]);
+                
+                $detailsResult = json_decode($detailsResponse->getBody(), true);
+                
+                if ($detailsResult['status'] === 'OK') {
+                    $components = $detailsResult['result']['address_components'];
+                    $location = [
+                        'city' => null,
+                        'country' => null,
+                        'region' => null,
+                        'original' => $searchString,
+                        'language' => null
+                    ];
+
+                    foreach ($components as $component) {
+                        if (in_array('locality', $component['types'])) {
+                            $location['city'] = $component['long_name'];
+                        }
+                        if (in_array('administrative_area_level_1', $component['types'])) {
+                            $location['region'] = $component['long_name'];
+                            $location['language'] = $component['short_name'];
+                        }
+                        if (in_array('country', $component['types'])) {
+                            $location['country'] = $component['long_name'];
+                            if (!$location['language']) {
+                                $location['language'] = $component['short_name'];
+                            }
+                        }
+                    }
+                    
+                    if ($location['city'] || $location['country']) {
+                        // Save to locations table
+                        $translation = [
+                            'city' => [],
+                            'country' => [],
+                            'region' => []
+                        ];
+
+                        if ($location['city'] && $searchString !== $location['city']) {
+                            $translation['city'][$searchString] = $location['language'];
+                        }
+                        if ($location['country'] && $searchString !== $location['country']) {
+                            $translation['country'][$searchString] = $location['language'];
+                        }
+                        if ($location['region'] && $searchString !== $location['region']) {
+                            $translation['region'][$searchString] = $location['language'];
+                        }
+
+                        if (!empty($translation['city']) || !empty($translation['country'])) {
+                            \App\Models\Location::updateOrCreate(
+                                [
+                                    'city' => $location['city'],
+                                    'country' => $location['country'],
+                                    'region' => $location['region']
+                                ],
+                                [
+                                    'translation' => $translation
+                                ]
+                            );
+                        }
+
+                        return [
+                            'city' => $location['city'],
+                            'country' => $location['country'],
+                            'region' => $location['region']
+                        ];
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::error('Google Places API Error: ' . $e->getMessage());
+        }
+
+        return null;
+    }
+}

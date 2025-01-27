@@ -119,6 +119,7 @@
                                     <input  id="searchPlaceMobile" name="place" type="text" class="form-control rounded-0" placeholder="@lang('homepage.searchbar-destination')"  autocomplete="on">
                                     <input type="hidden" id="LocationCityMobile" name="city"/>
                                     <input type="hidden" id="LocationCountryMobile" name="country"/>
+                                    <input type="hidden" id="LocationRegionMobile" name="region"/>
                                     <input type="hidden" id="LocationLatMobile" name="placeLat"/>
                                     <input type="hidden" id="LocationLngMobile" name="placeLng"/>
                                 </div>
@@ -199,6 +200,7 @@
                             <input type="hidden" id="LocationLngDesktop" name="placeLng" value="{{ request()->placeLng }}"/>
                             <input type="hidden" id="LocationCityDesktop" name="city" value="{{ request()->city }}"/>
                             <input type="hidden" id="LocationCountryDesktop" name="country" value="{{ request()->country }}"/>
+                            <input type="hidden" id="LocationRegionDesktop" name="region" value="{{ request()->region }}"/>
                         </div>
                         <div class="search-input" style="width: 200px;">
                             <i class="fa fa-user input-icon"></i>
@@ -855,6 +857,7 @@ input[type=number] {
                             <input type="hidden" name="placeLng" id="LocationLngHeaderDesktop" value="{{ request()->placeLng }}"/>
                             <input type="hidden" name="city" id="LocationCityHeaderDesktop" value="{{ request()->city }}"/>
                             <input type="hidden" name="country" id="LocationCountryHeaderDesktop" value="{{ request()->country }}"/>
+                            <input type="hidden" name="region" id="LocationRegionHeaderDesktop" value="{{ request()->region }}"/>
                         </div>
                     </div>
 

@@ -43,7 +43,19 @@ class Vacation extends Model
 
     public static function locationFilter(string $city = null, string $country = null, ?int $radius = null, $placeLat = null, $placeLng = null )
     {
-        $locationParts = ['city' => $city, 'country' => $country];
+        // Get standardized English names using the helper
+        if ($city || $country) {
+            $searchQuery = array_filter([$city, $country], fn($val) => !empty($val));
+            $searchString = implode(', ', $searchQuery);
+            
+            $translated  = getLocationDetails($searchString);
+            if ($translated) {
+                $locationParts = ['city_en' => $translated['city'], 'country_en' => $translated['country']];
+            }
+        }
+
+        $locationParts = array_merge(['city' => $city, 'country' => $country], $locationParts ?? []);
+
         $returnData = [
             'message' => '',
             'ids' => []
@@ -52,10 +64,24 @@ class Vacation extends Model
         // First try direct database match based on parsed location
         $vacations = self::select('id')
             ->where(function($query) use ($locationParts) {
+                // City conditions
                 if ($locationParts['city']) {
-                    $query->where('city', $locationParts['city']);
-                } else if ($locationParts['country']) {
-                    $query->where('country', $locationParts['country']); 
+                    $query->where(function($q) use ($locationParts) {
+                        $q->where('city', $locationParts['city']);
+                        if (isset($locationParts['city_en'])) {
+                            $q->orWhere('city', $locationParts['city_en']);
+                        }
+                    });
+                }
+                
+                // Country conditions
+                if ($locationParts['country']) {
+                    $query->where(function($q) use ($locationParts) {
+                        $q->where('country', $locationParts['country']);
+                        if (isset($locationParts['country_en'])) {
+                            $q->orWhere('country', $locationParts['country_en']);
+                        }
+                    });
                 }
             })
             ->where('status', 1)
@@ -81,10 +107,16 @@ class Vacation extends Model
 
         // Try radius search
         $searchRadius = $radius ?? 200;
-        
         $vacations = self::select('id')
+            ->selectRaw("ST_Distance_Sphere(
+                point(longitude, latitude),
+                point(?, ?)
+            ) as distance", [
+                $coordinates['lng'],
+                $coordinates['lat']
+            ])
             ->whereRaw("ST_Distance_Sphere(
-                point(lng, lat),
+                point(longitude, latitude),
                 point(?, ?)
             ) <= ?", [
                 $coordinates['lng'],
@@ -92,6 +124,7 @@ class Vacation extends Model
                 $searchRadius * 1000
             ])
             ->where('status', 1)
+            ->orderBy('distance')  // Sort by distance ascending
             ->pluck('id');
 
         if ($vacations->isNotEmpty()) {
@@ -100,16 +133,16 @@ class Vacation extends Model
             return $returnData;
         }
 
-        // If still no results, find nearest guiding
+        // If still no results, find nearest vacation
         $returnData['ids'] = self::select('id')
-            ->where('status', 1)
             ->selectRaw("ST_Distance_Sphere(
-                point(lng, lat), 
+                point(longitude, latitude),
                 point(?, ?)
             ) as distance", [
                 $coordinates['lng'],
                 $coordinates['lat']
             ])
+            ->where('status', 1)
             ->orderBy('distance')
             ->pluck('id');
         $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel3'));

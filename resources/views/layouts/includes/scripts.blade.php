@@ -149,28 +149,32 @@
                 lat: 'LocationLat',
                 lng: 'LocationLng',
                 city: 'LocationCity',
-                country: 'LocationCountry'
+                country: 'LocationCountry',
+                region: 'LocationRegion'
             },
             {
                 input: 'searchPlaceDesktop',
                 lat: 'LocationLatDesktop',
                 lng: 'LocationLngDesktop',
                 city: 'LocationCityDesktop',
-                country: 'LocationCountryDesktop'
+                country: 'LocationCountryDesktop',
+                region: 'LocationRegionDesktop'
             },
             {
                 input: 'searchPlaceMobile',
                 lat: 'LocationLatMobile',
                 lng: 'LocationLngMobile',
                 city: 'LocationCityMobile',
-                country: 'LocationCountryMobile'
+                country: 'LocationCountryMobile',
+                region: 'LocationRegionMobile'
             },
             {
                 input: 'searchPlaceShortDesktop',
                 lat: 'LocationLatShortDesktop',
                 lng: 'LocationLngShortDesktop',
                 city: 'LocationCityShortDesktop',
-                country: 'LocationCountryShortDesktop'
+                country: 'LocationCountryShortDesktop',
+                region: 'LocationRegionShortDesktop'
             }
         ];
 
