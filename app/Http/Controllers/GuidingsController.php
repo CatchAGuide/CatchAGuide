@@ -227,7 +227,7 @@ class GuidingsController extends Controller
 
             $title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
             $filter_title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ', ';
-            $guidingFilter = Guiding::locationFilter($request->get('city'), $request->get('country'), $radius, $placeLat, $placeLng);
+            $guidingFilter = Guiding::locationFilter($request->get('city'), $request->get('country'), $request->get('region') ?? null, $radius, $placeLat, $placeLng);
             $searchMessage = $guidingFilter['message'];
             $query->whereIn('id', $guidingFilter['ids']);
         }

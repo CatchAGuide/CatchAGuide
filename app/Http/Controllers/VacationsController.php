@@ -213,7 +213,7 @@ class VacationsController extends Controller
         if(!empty($placeLat) && !empty($placeLng) && !empty($request->get('place'))){
 
             $title .= __('vacations.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
-            $vacationFilter = Vacation::locationFilter($request->get('city'), $request->get('country'), null, $placeLat, $placeLng);
+            $vacationFilter = Vacation::locationFilter($request->get('city'), $request->get('country'), $request->get('region') ?? null, $placeLat, $placeLng);
             $searchMessage = $vacationFilter['message'];
             $query->whereIn('id', $vacationFilter['ids']);
         }

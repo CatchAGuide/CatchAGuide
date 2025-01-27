@@ -159,6 +159,7 @@
                             <input type="hidden" id="LocationLngShortDesktop" name="placeLng" value="{{ request()->placeLng }}"/>
                             <input type="hidden" id="LocationCityShortDesktop" name="city" value="{{ request()->city }}"/>
                             <input type="hidden" id="LocationCountryShortDesktop" name="country" value="{{ request()->country }}"/>
+                            <input type="hidden" id="LocationRegionShortDesktop" name="region" value="{{ request()->region }}"/>
                         </div>
                         <div class="search-input" style="width: 200px;">
                             <i class="fa fa-user input-icon"></i>
@@ -725,6 +726,7 @@ input[type=number] {
                             <input type="hidden" name="placeLng" value="{{ request()->placeLng }}"/>
                             <input type="hidden" name="city" value="{{ request()->city }}"/>
                             <input type="hidden" name="country" value="{{ request()->country }}"/>
+                            <input type="hidden" name="region" value="{{ request()->region }}"/>
                         </div>
                     </div>
 

@@ -220,25 +220,25 @@ if (!function_exists('getLocationDetails')) {
     function getLocationDetails(string $searchString): ?array 
     {
         // First check in the locations table
-        // $location = \App\Models\Location::where(function($query) use ($searchString) {
-        //     $query->whereJsonContains('translation->city', $searchString)
-        //           ->orWhereRaw("JSON_EXTRACT(translation, '$.city') LIKE ?", ['%' . $searchString . '%'])
-        //           ->orWhereJsonContains('translation->country', $searchString)
-        //           ->orWhereRaw("JSON_EXTRACT(translation, '$.country') LIKE ?", ['%' . $searchString . '%']);
-        // })->first();
+        $location = \App\Models\Location::where(function($query) use ($searchString) {
+            $query->whereJsonContains('translation->city', $searchString)
+                  ->orWhereRaw("JSON_EXTRACT(translation, '$.city') LIKE ?", ['%' . $searchString . '%'])
+                  ->orWhereJsonContains('translation->country', $searchString)
+                  ->orWhereRaw("JSON_EXTRACT(translation, '$.country') LIKE ?", ['%' . $searchString . '%']);
+        })->first();
         
-        // if ($location) {
-        //     return [
-        //         'city' => $location->city,
-        //         'country' => $location->country,
-        //         'region' => $location->region
-        //     ];
-        // }
+        if ($location) {
+            if ($location->city || $location->country || $location->region) {
+                return [
+                    'city' => $location->city,
+                    'country' => $location->country, 
+                    'region' => $location->region
+                ];
+            }
+        }
 
         try {
             $client = new \GuzzleHttp\Client();
-
-            dump($searchString);
             
             // First try with regions (countries) if the search string is short (likely a country name)
             if (str_word_count($searchString) === 1) {
@@ -316,7 +316,6 @@ if (!function_exists('getLocationDetails')) {
                 ]);
                 
                 $detailsResult = json_decode($detailsResponse->getBody(), true);
-                dd($detailsResult);
                 
                 if ($detailsResult['status'] === 'OK') {
                     $components = $detailsResult['result']['address_components'];
@@ -348,7 +347,8 @@ if (!function_exists('getLocationDetails')) {
                         // Save to locations table
                         $translation = [
                             'city' => [],
-                            'country' => []
+                            'country' => [],
+                            'region' => []
                         ];
 
                         if ($location['city'] && $searchString !== $location['city']) {
@@ -357,14 +357,21 @@ if (!function_exists('getLocationDetails')) {
                         if ($location['country'] && $searchString !== $location['country']) {
                             $translation['country'][$searchString] = $location['language'];
                         }
+                        if ($location['region'] && $searchString !== $location['region']) {
+                            $translation['region'][$searchString] = $location['language'];
+                        }
 
                         if (!empty($translation['city']) || !empty($translation['country'])) {
-                            \App\Models\Location::create([
-                                'city' => $location['city'],
-                                'country' => $location['country'],
-                                'region' => $location['region'],
-                                'translation' => $translation
-                            ]);
+                            \App\Models\Location::updateOrCreate(
+                                [
+                                    'city' => $location['city'],
+                                    'country' => $location['country'],
+                                    'region' => $location['region']
+                                ],
+                                [
+                                    'translation' => $translation
+                                ]
+                            );
                         }
 
                         return [
