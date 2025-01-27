@@ -118,7 +118,7 @@
                     <div class="location-row">
                         <div class="location">
                             <a href="#" class="fs-6 text-decoration-none text-muted">
-                                    <i class="bi bi-geo-alt"></i>@lang('guidings.Fishing_Trip') <strong>{{ translate($guiding->location) }}</strong>
+                                    <i class="bi bi-geo-alt"></i>@lang('guidings.Fishing_Trip') <strong>{{ $guiding->location }}</strong>
                                 </a>
                         </div>
                         <div class="location-map">
@@ -230,7 +230,7 @@
 
                     // Validate thumbnail exists
                     if (file_exists(public_path($thumbnailPath))) {
-                        $finalImages[] = asset($thumbnailPath);
+                        // $finalImages[] = asset($thumbnailPath);
                         $overallImages[] = asset($thumbnailPath);
                     }
                     
@@ -1024,7 +1024,7 @@
                                             <div class="guidings-item">
                                                 <div class="guidings-item-title">
                                                     <h5 class="fw-bolder text-truncate">{{translate($other_guiding->title)}}</h5>
-                                                    <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($other_guiding->location) }}</span>                                      
+                                                    <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ $other_guiding->location }}</span>                                      
                                                 </div>
                                                 @if ($other_guiding->user->average_rating())
                                                 <div class="guidings-item-ratings">
@@ -1145,7 +1145,7 @@
                                         {{ $other_guiding->title ? translate(Str::limit($other_guiding->title, 50)) : translate($other_guiding->title) }}
                                     </a>
                                 </h5>    
-                                <small class="crop-text-1 small-text text-muted">{{ translate($other_guiding->location) }}</small>
+                                <small class="crop-text-1 small-text text-muted">{{ $other_guiding->location }}</small>
                                 <p class="fw-bold text-muted">
                                     <span>@lang('message.from') {{ $other_guiding->getLowestPrice() }}€</span>
                                 </p>
