@@ -317,7 +317,6 @@ if (!function_exists('getLocationDetails')) {
                         ]);
                         $autocompleteResult = json_decode($autocompleteResponse->getBody(), true);
 
-                        dump($autocompleteResult);
                         if ($autocompleteResult['status'] === 'OK' && !empty($autocompleteResult['predictions'])) {
                             $placeId = $autocompleteResult['predictions'][0]['place_id'];
                         }

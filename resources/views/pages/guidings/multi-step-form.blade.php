@@ -88,6 +88,7 @@
                     <input type="hidden" name="longitude" id="longitude" value="{{ $formData['longitude'] ?? '' }}">
                     <input type="hidden" name="country" id="country" value="{{ $formData['country'] ?? '' }}">
                     <input type="hidden" name="city" id="city" value="{{ $formData['city'] ?? '' }}">
+                    <input type="hidden" name="region" id="region" value="{{ $formData['region'] ?? '' }}">
                     <input type="hidden" name="postal_code" id="postal_code" value="{{ $formData['postal_code'] ?? '' }}">
                 </div>
 

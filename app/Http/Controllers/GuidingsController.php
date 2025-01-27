@@ -394,6 +394,7 @@ class GuidingsController extends Controller
             $guiding->lng = $request->has('longitude') ? $request->input('longitude') : '';
             $guiding->country = $request->has('country') ? $request->input('country') : '';
             $guiding->city = $request->has('city') ? $request->input('city') : '';
+            $guiding->region = $request->has('region') ? $request->input('region') : '';
             
             $galeryImages = [];
             $imageList = json_decode($request->input('image_list'));
@@ -818,6 +819,7 @@ class GuidingsController extends Controller
             'longitude' => $guiding->lng,
             'country' => $guiding->country,
             'city' => $guiding->city,
+            'region' => $guiding->region,
             'gallery_images' => $guiding->gallery_images,
             'thumbnail_path' => $guiding->thumbnail_path,
 

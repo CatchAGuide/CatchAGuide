@@ -100,6 +100,7 @@ class Guiding extends Model
         'booking_window',
         'gallery_images',
         'city',
+        'region',
         'desc_course_of_action',
         'desc_meeting_point',
         'desc_starting_time',
