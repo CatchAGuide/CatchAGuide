@@ -224,12 +224,20 @@ class GuidingsController extends Controller
         $placeLng = $request->get('placeLng');
 
         if(!empty($placeLat) && !empty($placeLng) && !empty($request->get('place'))){
-
             $title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
             $filter_title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ', ';
             $guidingFilter = Guiding::locationFilter($request->get('city'), $request->get('country'), $request->get('region') ?? null, $radius, $placeLat, $placeLng);
             $searchMessage = $guidingFilter['message'];
-            $query->whereIn('id', $guidingFilter['ids']);
+            
+            // Add a subquery to order by the position in the filtered IDs array
+            $orderByCase = 'CASE guidings.id ';
+            foreach($guidingFilter['ids'] as $position => $id) {
+                $orderByCase .= "WHEN $id THEN $position ";
+            }
+            $orderByCase .= 'ELSE ' . count($guidingFilter['ids']) . ' END';
+            
+            $query->whereIn('guidings.id', $guidingFilter['ids'])
+                  ->orderByRaw($orderByCase);
         }
 
         $allGuidings = $query->with('boatType')->get();

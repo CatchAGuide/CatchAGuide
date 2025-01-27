@@ -101,10 +101,16 @@ class Vacation extends Model
 
         // Try radius search
         $searchRadius = $radius ?? 200;
-        
         $vacations = self::select('id')
+            ->selectRaw("ST_Distance_Sphere(
+                point(longitude, latitude),
+                point(?, ?)
+            ) as distance", [
+                $coordinates['lng'],
+                $coordinates['lat']
+            ])
             ->whereRaw("ST_Distance_Sphere(
-                point(lng, lat),
+                point(longitude, latitude),
                 point(?, ?)
             ) <= ?", [
                 $coordinates['lng'],
@@ -112,6 +118,7 @@ class Vacation extends Model
                 $searchRadius * 1000
             ])
             ->where('status', 1)
+            ->orderBy('distance')  // Sort by distance ascending
             ->pluck('id');
 
         if ($vacations->isNotEmpty()) {
@@ -120,16 +127,16 @@ class Vacation extends Model
             return $returnData;
         }
 
-        // If still no results, find nearest guiding
+        // If still no results, find nearest vacation
         $returnData['ids'] = self::select('id')
-            ->where('status', 1)
             ->selectRaw("ST_Distance_Sphere(
-                point(lng, lat), 
+                point(longitude, latitude),
                 point(?, ?)
             ) as distance", [
                 $coordinates['lng'],
                 $coordinates['lat']
             ])
+            ->where('status', 1)
             ->orderBy('distance')
             ->pluck('id');
         $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel3'));

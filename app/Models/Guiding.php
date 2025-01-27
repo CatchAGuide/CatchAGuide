@@ -568,8 +568,14 @@ class Guiding extends Model
 
         // Try radius search
         $searchRadius = $radius ?? 200;
-        
         $guidings = self::select('id')
+            ->selectRaw("ST_Distance_Sphere(
+                point(lng, lat),
+                point(?, ?)
+            ) as distance", [
+                $coordinates['lng'],
+                $coordinates['lat']
+            ])
             ->whereRaw("ST_Distance_Sphere(
                 point(lng, lat),
                 point(?, ?)
@@ -579,6 +585,7 @@ class Guiding extends Model
                 $searchRadius * 1000
             ])
             ->where('status', 1)
+            ->orderBy('distance')  // Sort by distance ascending
             ->pluck('id');
 
         if ($guidings->isNotEmpty()) {
@@ -589,14 +596,14 @@ class Guiding extends Model
 
         // If still no results, find nearest guiding
         $returnData['ids'] = self::select('id')
-            ->where('status', 1)
             ->selectRaw("ST_Distance_Sphere(
-                point(lng, lat), 
+                point(lng, lat),
                 point(?, ?)
             ) as distance", [
                 $coordinates['lng'],
                 $coordinates['lat']
             ])
+            ->where('status', 1)
             ->orderBy('distance')
             ->pluck('id');
         $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel3'));
