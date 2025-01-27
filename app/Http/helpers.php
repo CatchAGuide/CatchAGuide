@@ -221,11 +221,13 @@ if (!function_exists('getLocationDetails')) {
     {
         // First check in the locations table
         $location = \App\Models\Location::where(function($query) use ($searchString) {
-            $query->whereJsonContains('translation->city', $searchString)
-                  ->orWhereRaw("JSON_EXTRACT(translation, '$.city') LIKE ?", ['%' . $searchString . '%'])
-                  ->orWhereJsonContains('translation->country', $searchString)
-                  ->orWhereRaw("JSON_EXTRACT(translation, '$.country') LIKE ?", ['%' . $searchString . '%']);
-        })->first();
+            $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.city')) = ?", [$searchString])
+                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.city')) LIKE ?", ['%' . $searchString . '%'])
+                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.country')) = ?", [$searchString])
+                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.country')) LIKE ?", ['%' . $searchString . '%']);
+        })
+        ->select('city', 'country', 'region')
+        ->first();
         
         if ($location) {
             if ($location->city || $location->country || $location->region) {
@@ -240,6 +242,7 @@ if (!function_exists('getLocationDetails')) {
         try {
             $client = new \GuzzleHttp\Client();
             
+            $placeId = null;
             // First try with regions (countries) if the search string is short (likely a country name)
             if (str_word_count($searchString) === 1) {
                 $autocompleteResponse = $client->get('https://maps.googleapis.com/maps/api/place/autocomplete/json', [
@@ -273,38 +276,55 @@ if (!function_exists('getLocationDetails')) {
                     }
                 }
             } else {
-                // Try with a text search first for more flexible matching
-                $searchResponse = $client->get('https://maps.googleapis.com/maps/api/place/textsearch/json', [
+                // First try with administrative areas for region searches
+                $regionResponse = $client->get('https://maps.googleapis.com/maps/api/place/textsearch/json', [
                     'query' => [
                         'query' => $searchString,
-                        'type' => 'locality',  // Focus on localities/cities
+                        'type' => 'administrative_area_level_1',
                         'language' => 'en',
                         'key' => env('GOOGLE_MAP_API_KEY')
                     ]
                 ]);
                 
-                $searchResult = json_decode($searchResponse->getBody(), true);
-
-                if ($searchResult['status'] === 'OK' && !empty($searchResult['results'])) {
-                    $placeId = $searchResult['results'][0]['place_id'];
+                $regionResult = json_decode($regionResponse->getBody(), true);
+                
+                if ($regionResult['status'] === 'OK' && !empty($regionResult['results'])) {
+                    $placeId = $regionResult['results'][0]['place_id'];
                 } else {
-                    // Fallback to autocomplete if text search doesn't work
-                    $autocompleteResponse = $client->get('https://maps.googleapis.com/maps/api/place/autocomplete/json', [
+                    // Try with a text search for cities if region search fails
+                    $searchResponse = $client->get('https://maps.googleapis.com/maps/api/place/textsearch/json', [
                         'query' => [
-                            'input' => $searchString,
-                            'types' => '(cities)',
+                            'query' => $searchString,
+                            'type' => 'locality',  // Focus on localities/cities
                             'language' => 'en',
                             'key' => env('GOOGLE_MAP_API_KEY')
                         ]
                     ]);
-                    $autocompleteResult = json_decode($autocompleteResponse->getBody(), true);
+                    
+                    $searchResult = json_decode($searchResponse->getBody(), true);
 
-                    if ($autocompleteResult['status'] === 'OK' && !empty($autocompleteResult['predictions'])) {
-                        $placeId = $autocompleteResult['predictions'][0]['place_id'];
+                    if ($searchResult['status'] === 'OK' && !empty($searchResult['results'])) {
+                        $placeId = $searchResult['results'][0]['place_id'];
+                    } else {
+                        // Fallback to autocomplete if text search doesn't work
+                        $autocompleteResponse = $client->get('https://maps.googleapis.com/maps/api/place/autocomplete/json', [
+                            'query' => [
+                                'input' => $searchString,
+                                'types' => '(cities)',
+                                'language' => 'en',
+                                'key' => env('GOOGLE_MAP_API_KEY')
+                            ]
+                        ]);
+                        $autocompleteResult = json_decode($autocompleteResponse->getBody(), true);
+
+                        dump($autocompleteResult);
+                        if ($autocompleteResult['status'] === 'OK' && !empty($autocompleteResult['predictions'])) {
+                            $placeId = $autocompleteResult['predictions'][0]['place_id'];
+                        }
                     }
                 }
             }
-            
+
             if (isset($placeId)) {
                 $detailsResponse = $client->get('https://maps.googleapis.com/maps/api/place/details/json', [
                     'query' => [

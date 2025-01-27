@@ -105,7 +105,7 @@ class DestinationCountryController extends Controller
             SELECT COALESCE(lowest_pp, price) 
             FROM price_per_person
         ) AS lowest_price')])->where('status',1)->whereNotNull('lat')->whereNotNull('lng');
-
+        
         if (empty($request->all())) {
             $query->orderByRaw("RAND($randomSeed)");
         }
@@ -222,7 +222,8 @@ class DestinationCountryController extends Controller
         $placeLat = $filterData['placeLat'];
         $placeLng = $filterData['placeLng'];
         $city = $filterData['city'] ?? null;
-        $country = $filterData['country'];
+        $country = $filterData['country'] ?? null;
+        $region = $filterData['region'] ?? null;
 
         $title .= __('guidings.Country') . ' ' . $country . ' | ';
 

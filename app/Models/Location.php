@@ -17,6 +17,7 @@ class Location extends Model
         'city',
         'country',
         'translation',
+        'region',
     ];
 
     public function getTranslationAttribute($value)
