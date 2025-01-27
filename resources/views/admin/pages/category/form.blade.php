@@ -168,8 +168,8 @@ input[type=number] {
                                         <div class="form-group">
                                             <label for="location">Location</label>
                                             <input id="searchPlace" class="form-control" type="text" placeholder="Search Location" name="filters[place]" value="{{ $place }}" autocomplete="on">
-                                            <input type="text" id="placeLat"  value="{{ $placeLat }}" name="filters[placeLat]"/>
-                                            <input type="text" id="placeLng" value="{{ $placeLng }}" name="filters[placeLng]"/>
+                                            <input type="hidden" id="placeLat"  value="{{ $placeLat }}" name="filters[placeLat]"/>
+                                            <input type="hidden" id="placeLng" value="{{ $placeLng }}" name="filters[placeLng]"/>
                                             <input type="hidden" id="country" value="{{ $country }}"  name="filters[country]"/>
                                             <input type="hidden" id="city" value="{{ $city }}"  name="filters[city]"/>
                                             <input type="hidden" id="region" value="{{ $region }}"  name="filters[region]"/>

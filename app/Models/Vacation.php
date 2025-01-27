@@ -64,18 +64,24 @@ class Vacation extends Model
         // First try direct database match based on parsed location
         $vacations = self::select('id')
             ->where(function($query) use ($locationParts) {
+                // City conditions
                 if ($locationParts['city']) {
-                    if (isset($locationParts['city_en'])) {
-                        $query->where('city', $locationParts['city'])->orWhere('city', $locationParts['city_en']);
-                    } else {
-                        $query->where('city', $locationParts['city']);
-                    }
-                } else if ($locationParts['country']) {
-                    if (isset($locationParts['country_en'])) {
-                        $query->where('country', $locationParts['country'])->orWhere('country', $locationParts['country_en']);
-                    } else {
-                        $query->where('country', $locationParts['country']);
-                    }
+                    $query->where(function($q) use ($locationParts) {
+                        $q->where('city', $locationParts['city']);
+                        if (isset($locationParts['city_en'])) {
+                            $q->orWhere('city', $locationParts['city_en']);
+                        }
+                    });
+                }
+                
+                // Country conditions
+                if ($locationParts['country']) {
+                    $query->where(function($q) use ($locationParts) {
+                        $q->where('country', $locationParts['country']);
+                        if (isset($locationParts['country_en'])) {
+                            $q->orWhere('country', $locationParts['country_en']);
+                        }
+                    });
                 }
             })
             ->where('status', 1)
