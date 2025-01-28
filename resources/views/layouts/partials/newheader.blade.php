@@ -113,26 +113,26 @@
                 <div id="mobileherofilter" class="shadow-lg bg-white p-2 rounded">
                     <div class="row">
                         @if ($isVacation)
+                        
                             <div class="col-md-4 column-input my-2">
-                                <div class="form-group">
-                                    <div class="d-flex align-items-center small">
-                                        <i class="fa fa-globe text-muted position-absolute ps-"></i>
-                                        <select class="form-select" name="country" onchange="updateFormAction(this, 'global-search1')">
-                                            <option value="">{{translate('Select Country')}}</option>
-                                            @php
-                                                $countries = \App\Models\Vacation::select('country')
-                                                    ->where('status', 1)
-                                                    ->distinct()
-                                                    ->pluck('country')
-                                                    ->sort();
-                                            @endphp
-                                            @foreach($countries as $country)
-                                                <option value="{{ $country }}" {{ request()->country == $country ? 'selected' : '' }}>
-                                                    {{ $country }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+                                <div class="d-flex align-items-center small myselect2">
+                                    <i class="fa fa-globe fa-fw text-muted position-absolute ps-1"></i>
+                                    <select class="form-control form-select border-0" name="country" onchange="updateFormAction(this, 'global-search1')">
+                                        <option value="">{{translate('Select Country')}}</option>
+                                        @php
+                                            $countries = \App\Models\Vacation::select('country')
+                                                ->where('status', 1)
+                                                ->distinct()
+                                                ->pluck('country')
+                                                ->sort();
+                                        @endphp
+                                        @foreach($countries as $country)
+                                            <option value="{{ $country }}" 
+                                                {{ request()->country == $country ? 'selected' : '' }}>
+                                                {{ $country }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                         @else
@@ -214,7 +214,7 @@
                 <div class="search-box">
                     <div class="search-row">
                         @if ($isVacation)
-                            <div class="search-input flex-grow-1">
+                            <div class="search-input" style="width: 300px;">
                                 <i class="fa fa-globe input-icon"></i>
                                 <select class="form-select" name="country" onchange="updateFormAction(this, 'global-search')">
                                     <option value="">{{translate('Select Country')}}</option>
@@ -278,8 +278,7 @@
 
 <style>
     #filterContainer{
-        height: 200px;
-
+        height: {{ $isVacation ? '70px' : '200px' }};
     }
     #mobileherofilter {
     position: absolute;
@@ -882,14 +881,16 @@ input[type=number] {
             <div class="modal-body">
                 <form id="mobile-search" action="{{ $isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index') }}" method="get">
                     @if ($isVacation)
+                    
                         <div class="mb-3">
-                            <label class="form-label">Location</label>
+                            <label class="form-label">{{translate('Country')}}</label>
                             <div class="position-relative">
-                                <i class="fa fa-globe input-icon"></i>
-                                <select class="form-select" name="country" onchange="updateFormAction(this, 'mobile-search')">
+                                <i class="fas fa-globe position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
+                                <select class="form-select ps-5" name="country" onchange="updateFormAction(this, 'mobile-search')">
                                     <option value="">{{translate('Select Country')}}</option>
                                     @foreach($countries as $country)
-                                        <option value="{{ $country }}" {{ request()->country == $country ? 'selected' : '' }}>
+                                        <option value="{{ $country }}" 
+                                            {{ request()->country == $country ? 'selected' : '' }}>
                                             {{ $country }}
                                         </option>
                                     @endforeach
