@@ -138,11 +138,7 @@
 <!-- /.preloader -->
 <div class="page-wrapper">
   
-    {{-- @if(request()->is('vacation*'))
-        @include('layouts.partials.newheader-vacation-short')
-    @else --}}
-        @include('layouts.partials.newheader-short')
-    {{-- @endif --}}
+    @include('layouts.partials.newheader-short', ['isVacation' => request()->is('vacations*')])
 
     @yield('content')
 
