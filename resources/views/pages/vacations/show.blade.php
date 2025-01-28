@@ -178,6 +178,50 @@
             border-radius: 5px;
             margin-bottom: 15px;
         }
+
+        /* Contact Card Styles */
+        .contact-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            margin-left: auto;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .contact-card__title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .contact-card__content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .contact-card__content .contact-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .contact-card__content .btn-outline-orange {
+            border-color: #E85B40;
+            color: #E85B40;
+        }
+
+        .contact-card__content .btn-outline-orange:hover {
+            background: #E85B40;
+            color: white;
+        }
+
+        @media screen and (max-width: 767px) {
+            .contact-card {
+                margin-left: 0;
+            }
+        }
     </style>
 @endsection
 
@@ -684,6 +728,25 @@
                 </div>
             </div>
 
+            @if($agent->ismobile())
+                <div class="contact-card mb-4">
+                    <h5 class="contact-card__title">{{ translate('Contact Card') }}</h5>
+                    <div class="contact-card__content">
+                        <p class="text-muted">{{ translate('Do you have questions about this vacation? Our team is here to help!') }}</p>
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                            <div class="contact-info">
+                                <i class="fas fa-phone-alt me-2"></i>
+                                <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>
+                            </div>
+                            <a href="{{ route('additional.contact') }}" class="btn btn-outline-orange">
+                                {{ translate('Contact Form') }}
+                                <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- Accordion mobile ver -->
             <div class="accordion mb-5" id="guidings-accordion">
                 @php
@@ -933,7 +996,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-         @include('pages.vacations.content.bookvacation')
+         @include('pages.vacations.content.bookvacation', ['inModal' => true])
       </div>
     </div>
   </div>

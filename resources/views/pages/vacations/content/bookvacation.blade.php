@@ -1,4 +1,24 @@
 <div class="col-md-12 {{$agent->ismobile() ? 'text-center' : ''}}">
+    <!-- Add Contact Card - Only show when not in modal -->
+    @if(!$agent->ismobile() || !isset($inModal))
+        <div class="contact-card mb-4 tour-details-two__book-tours">
+            <h5 class="contact-card__title">{{ translate('Contact Card') }}</h5>
+            <div class="contact-card__content">
+                <p class="text-muted">{{ translate('Do you have questions about this vacation? Our team is here to help!') }}</p>
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div class="contact-info">
+                        <i class="fas fa-phone-alt me-2"></i>
+                        <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>
+                    </div>
+                    <a href="{{ route('additional.contact') }}" class="btn btn-outline-orange">
+                        {{ translate('Contact Form') }}
+                        <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    @endif
+    
     <div class="">
         <div class="tour-details-two__book-tours">
             <h3 class="tour-details-two__sidebar-title d-none d-md-block">{{ translate('Book Vacation') }}</h3>
@@ -1576,6 +1596,59 @@
 
     .booking-options-hide {
         display: none !important;
+    }
+
+    /* Add Contact Card styles */
+    .contact-card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        border: 1px solid #eee;
+    }
+
+    .contact-card__title {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .contact-card__content {
+        color: #6c757d;
+    }
+
+    .contact-info {
+        color: #fd5d14;
+        font-weight: 500;
+    }
+
+    .contact-info a {
+        color: inherit;
+    }
+
+    .contact-info a:hover {
+        color: #dc4d11;
+    }
+
+    .btn-outline-orange {
+        color: #fd5d14;
+        border-color: #fd5d14;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-orange:hover {
+        background-color: #fd5d14;
+        color: #fff;
+    }
+
+    @media (max-width: 767.98px) {
+        .contact-card {
+            text-align: center;
+        }
+        
+        .contact-card__content > div {
+            justify-content: center;
+        }
     }
 </style>
 
