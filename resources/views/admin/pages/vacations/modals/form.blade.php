@@ -122,6 +122,14 @@
                                             <input type="checkbox" name="disability_friendly" class="form-check-input" value="1" id="disabilityFriendly">
                                             <label class="form-check-label" for="disabilityFriendly">Disability Friendly</label>
                                         </div>
+                                        <div class="form-check">
+                                            <input type="checkbox" name="has_boat" class="form-check-input" value="1" id="hasBoat">
+                                            <label class="form-check-label" for="hasBoat">Has Boat</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input type="checkbox" name="has_guiding" class="form-check-input" value="1" id="hasGuiding">
+                                            <label class="form-check-label" for="hasGuiding">Has Guiding</label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

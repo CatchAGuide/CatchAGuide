@@ -407,14 +407,14 @@
                 <div class="info-item">
                     <i class="fas fa-ship"></i>
                     <small class="mb-0">{{translate('Boat Available:')}}</small>
-                    <strong><i class="fas {{ count($vacation->boats) > 0 || count($vacation->packages) > 0 ? 'fa-check text-success' : 'fa-times text-danger' }}"></i></strong>
+                    <strong><i class="fas {{ $vacation->has_boat ? 'fa-check text-success' : 'fa-times text-danger' }}"></i></strong>
                 </div>
 
                 <!-- Guiding Availability -->
                 <div class="info-item">
                     <i class="fas fa-user-tie"></i>
                     <small class="mb-0">Guiding</small>
-                    <strong><i class="fas {{ count($vacation->guidings) > 0 ? 'fa-check text-success' : 'fa-times text-danger' }}"></i></strong>
+                    <strong><i class="fas {{ $vacation->has_guiding ? 'fa-check text-success' : 'fa-times text-danger' }}"></i></strong>
                 </div>
 
                 <!-- Pets -->
