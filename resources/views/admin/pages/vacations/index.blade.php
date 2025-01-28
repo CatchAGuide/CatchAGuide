@@ -682,7 +682,7 @@
                 });
 
                 // Set checkbox fields
-                ['pets_allowed', 'smoking_allowed', 'disability_friendly'].forEach(field => {
+                ['pets_allowed', 'smoking_allowed', 'disability_friendly', 'has_boat', 'has_guiding'].forEach(field => {
                     setFieldValue(field, data[field]);
                 });
 

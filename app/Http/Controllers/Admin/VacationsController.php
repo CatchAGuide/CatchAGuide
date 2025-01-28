@@ -33,11 +33,6 @@ class VacationsController extends Controller
         try {
             $data = $request->all();
             
-            // Log initial data
-            Log::info('Starting formatRequestData - Initial data:', [
-                'initial_data' => $data
-            ]);
-            
             // Handle JSON fields
             $jsonFields = ['target_fish', 'amenities', 'equipment', 'additional_services', 'included_services', 'travel_options'];
             foreach ($jsonFields as $field) {
@@ -72,14 +67,10 @@ class VacationsController extends Controller
             }
 
             // Handle boolean fields
-            $booleanFields = ['pets_allowed', 'smoking_allowed', 'disability_friendly'];
+            $booleanFields = ['pets_allowed', 'smoking_allowed', 'disability_friendly', 'has_boat', 'has_guiding'];
             foreach ($booleanFields as $field) {
                 $data[$field] = isset($data[$field]) && ($data[$field] === '1' || $data[$field] === true);
             }
-
-            Log::info('Completed formatRequestData', [
-                'final_data' => $data
-            ]);
 
             return $data;
         } catch (\Exception $e) {

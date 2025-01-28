@@ -144,47 +144,67 @@
     <!-- Search Row - Floating (Desktop Only) -->
     <div class="floating-search-container d-none d-md-block">
         <div class="container">
-            <form id="global-search" action="{{route('guidings.index')}}" method="get">
+            <form id="global-search" action="{{$isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index')}}" method="get">
                 <div class="search-box">
                     <div class="search-row">
-                        <div class="search-input flex-grow-1">
-                            <i class="fa fa-search input-icon"></i>
-                            
-                            <input id="searchPlaceShortDesktop" type="text" 
-                                   class="form-control" 
-                                   name="place" 
-                                   placeholder="@lang('homepage.searchbar-destination')"
-                                   value="{{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }}" autocomplete="on">
-                            <input type="hidden" id="LocationLatShortDesktop" name="placeLat" value="{{ request()->placeLat }}"/>
-                            <input type="hidden" id="LocationLngShortDesktop" name="placeLng" value="{{ request()->placeLng }}"/>
-                            <input type="hidden" id="LocationCityShortDesktop" name="city" value="{{ request()->city }}"/>
-                            <input type="hidden" id="LocationCountryShortDesktop" name="country" value="{{ request()->country }}"/>
-                            <input type="hidden" id="LocationRegionShortDesktop" name="region" value="{{ request()->region }}"/>
-                        </div>
-                        <div class="search-input" style="width: 200px;">
-                            <i class="fa fa-user input-icon"></i>
-                            <input type="number" 
-                                   class="form-control" 
-                                   name="num_guests" 
-                                   placeholder="@lang('homepage.searchbar-person')"
-                                   value="{{ request()->num_guests }}">
-                        </div>
-                        <div class="search-input" style="width: 300px;">
-                            <i class="fa fa-fish input-icon"></i>
-                            <select class="form-select" name="target_fish[]" id="target_fish_search">
-                                <option value="">@lang('homepage.searchbar-targetfish')...</option>
-                                @php
-                                    // Assuming targets()::getAllTargets() returns an array or collection of targets
-                                    $targets = collect(targets()::getAllTargets())->sortBy('name');
-                                @endphp
-                                @foreach($targets as $target)
-                                    <option value="{{ $target['id'] }}" 
-                                        {{ in_array($target['id'], (array) request()->target_fish) ? 'selected' : '' }}>
-                                        {{ $target['name'] }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                        @if($isVacation)
+                            <div class="search-input flex-grow-1">
+                                <i class="fa fa-globe input-icon"></i>
+                                <select class="form-select" name="country" onchange="updateFormAction(this, 'global-search1')">
+                                    <option value="">{{translate('Select Country')}}</option>
+                                    @php
+                                        $countries = \App\Models\Vacation::select('country')
+                                            ->where('status', 1)
+                                            ->distinct()
+                                            ->pluck('country')
+                                            ->sort();
+                                    @endphp
+                                    @foreach($countries as $country)
+                                        <option value="{{ $country }}" {{ request()->country == $country ? 'selected' : '' }}>
+                                            {{ $country }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @else
+                            <div class="search-input flex-grow-1">
+                                <i class="fa fa-search input-icon"></i>
+                                <input id="searchPlaceShortDesktop" type="text" 
+                                    class="form-control" 
+                                    name="place" 
+                                    placeholder="@lang('homepage.searchbar-destination')"
+                                    value="{{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }}" autocomplete="on">
+                                <input type="hidden" id="LocationLatShortDesktop" name="placeLat" value="{{ request()->placeLat }}"/>
+                                <input type="hidden" id="LocationLngShortDesktop" name="placeLng" value="{{ request()->placeLng }}"/>
+                                <input type="hidden" id="LocationCityShortDesktop" name="city" value="{{ request()->city }}"/>
+                                <input type="hidden" id="LocationCountryShortDesktop" name="country" value="{{ request()->country }}"/>
+                                <input type="hidden" id="LocationRegionShortDesktop" name="region" value="{{ request()->region }}"/>
+                            </div>
+                            <div class="search-input" style="width: 200px;">
+                                <i class="fa fa-user input-icon"></i>
+                                <input type="number" 
+                                    class="form-control" 
+                                    name="num_guests" 
+                                    placeholder="@lang('homepage.searchbar-person')"
+                                    value="{{ request()->num_guests }}">
+                            </div>
+                            <div class="search-input" style="width: 300px;">
+                                <i class="fa fa-fish input-icon"></i>
+                                <select class="form-select" name="target_fish[]" id="target_fish_search">
+                                    <option value="">@lang('homepage.searchbar-targetfish')...</option>
+                                    @php
+                                        // Assuming targets()::getAllTargets() returns an array or collection of targets
+                                        $targets = collect(targets()::getAllTargets())->sortBy('name');
+                                    @endphp
+                                    @foreach($targets as $target)
+                                        <option value="{{ $target['id'] }}" 
+                                            {{ in_array($target['id'], (array) request()->target_fish) ? 'selected' : '' }}>
+                                            {{ $target['name'] }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
                         <div class="my-1 px-0">
                             <button type="submit" class="search-button">@lang('homepage.searchbar-search')</button>
                         </div>
@@ -712,55 +732,72 @@ input[type=number] {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="mobile-search" action="{{route('guidings.index')}}" method="get">
-                    <div class="mb-3">
-                        <label class="form-label">Location</label>
-                        <div class="position-relative">
-                            <i class="fas fa-search position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
-                            <input type="text" 
-                                   class="form-control ps-5" 
-                                   name="place" 
-                                   placeholder="@lang('homepage.searchbar-destination')"
-                                   value="{{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }}" autocomplete="on">
-                            <input type="hidden" name="placeLat" value="{{ request()->placeLat }}"/>
-                            <input type="hidden" name="placeLng" value="{{ request()->placeLng }}"/>
-                            <input type="hidden" name="city" value="{{ request()->city }}"/>
-                            <input type="hidden" name="country" value="{{ request()->country }}"/>
-                            <input type="hidden" name="region" value="{{ request()->region }}"/>
+                <form id="mobile-search" action="{{$isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index')}}" method="get">
+                    @if($isVacation)
+                        <div class="mb-3">
+                            <label class="form-label">{{ translate('Country') }}</label>
+                            <div class="position-relative">
+                                <i class="fa fa-globe position-absolute top-50 translate-middle-y"></i>
+                                <select class="form-select" name="country" onchange="updateFormAction(this, 'global-search1')">
+                                    <option value="">{{translate('Select Country')}}</option>
+                                    @foreach($countries as $country)
+                                        <option value="{{ $country }}" {{ request()->country == $country ? 'selected' : '' }}>
+                                            {{ $country }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
-                    </div>
+                    @else
+                        <div class="mb-3">
+                            <label class="form-label">{{ translate('Location') }}</label>
+                            <div class="position-relative">
+                                <i class="fas fa-search position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
+                                <input type="text" 
+                                    class="form-control ps-5" 
+                                    name="place" 
+                                    placeholder="@lang('homepage.searchbar-destination')"
+                                    value="{{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }}" autocomplete="on">
+                                <input type="hidden" name="placeLat" value="{{ request()->placeLat }}"/>
+                                <input type="hidden" name="placeLng" value="{{ request()->placeLng }}"/>
+                                <input type="hidden" name="city" value="{{ request()->city }}"/>
+                                <input type="hidden" name="country" value="{{ request()->country }}"/>
+                                <input type="hidden" name="region" value="{{ request()->region }}"/>
+                            </div>
+                        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Number of Persons</label>
-                        <div class="position-relative">
-                            <i class="fas fa-user position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
-                            <input type="number" 
-                                   class="form-control ps-5" 
-                                   name="num_guests" 
-                                   placeholder="@lang('homepage.searchbar-person')"
-                                   value="{{ request()->num_guests }}">
+                        <div class="mb-3">
+                            <label class="form-label">{{ translate('Number of Persons') }}</label>
+                            <div class="position-relative">
+                                <i class="fas fa-user position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
+                                <input type="number" 
+                                    class="form-control ps-5" 
+                                    name="num_guests" 
+                                    placeholder="@lang('homepage.searchbar-person')"
+                                    value="{{ request()->num_guests }}">
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Target Fish</label>
-                        <div class="position-relative">
-                            <i class="fas fa-fish position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
-                            <select class="form-select ps-5" name="target_fish[]">
-                                <option value="">Select fish...</option>
-                                @php
-                                    // Assuming targets()::getAllTargets() returns an array or collection of targets
-                                    $targets = collect(targets()::getAllTargets())->sortBy('name');
-                                @endphp
-                                @foreach($targets as $target)
-                                    <option value="{{ $target['id'] }}" 
-                                        {{ in_array($target['id'], (array) request()->target_fish) ? 'selected' : '' }}>
-                                        {{ $target['name'] }}
-                                    </option>
-                                @endforeach
-                            </select>
+                        <div class="mb-3">
+                            <label class="form-label">Target Fish</label>
+                            <div class="position-relative">
+                                <i class="fas fa-fish position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
+                                <select class="form-select ps-5" name="target_fish[]">
+                                    <option value="">Select fish...</option>
+                                    @php
+                                        // Assuming targets()::getAllTargets() returns an array or collection of targets
+                                        $targets = collect(targets()::getAllTargets())->sortBy('name');
+                                    @endphp
+                                    @foreach($targets as $target)
+                                        <option value="{{ $target['id'] }}" 
+                                            {{ in_array($target['id'], (array) request()->target_fish) ? 'selected' : '' }}>
+                                            {{ $target['name'] }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
-                    </div>
+                    @endif
 
                     <button type="submit" class="btn btn-primary w-100">Search</button>
                 </form>
@@ -903,6 +940,16 @@ input[type=number] {
 </div>
 
 <script>
+    
+function updateFormAction(selectElement, formId) {
+    const form = document.getElementById(formId);
+    const selectedCountry = selectElement.value;
+    
+    // Use 'all' as default if no country is selected
+    const country = selectedCountry || 'all';
+    form.action = "{{ route('vacations.category', ['country' => 'all']) }}".replace('all', country);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const searchTrigger = document.getElementById('headerSearchTrigger');
     const searchModal = document.getElementById('searchModal');
@@ -920,5 +967,20 @@ document.addEventListener('DOMContentLoaded', function() {
         style: 'btn-link',
         size: 4
     });
+    
+    // Add onchange handlers to all country selects
+    const countrySelects = {
+        'global-search1': document.querySelector('#global-search1 select[name="country"]'),
+        'global-search': document.querySelector('#global-search select[name="country"]'),
+        'mobile-search': document.querySelector('#mobile-search select[name="country"]')
+    };
+
+    for (const [formId, select] of Object.entries(countrySelects)) {
+        if (select) {
+            select.addEventListener('change', function() {
+                updateFormAction(this, formId);
+            });
+        }
+    }
 });
 </script>

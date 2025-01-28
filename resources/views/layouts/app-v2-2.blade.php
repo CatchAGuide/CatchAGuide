@@ -211,7 +211,7 @@
 <!-- /.preloader -->
 <div class="page-wrapper">
   
-    @include('layouts.partials.newheader-short')
+    @include('layouts.partials.newheader-short', ['isVacation' => request()->is('vacations*')])
 
     @yield('content')
 
