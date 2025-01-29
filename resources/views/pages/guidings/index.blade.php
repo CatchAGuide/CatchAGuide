@@ -972,7 +972,7 @@ function initializeSelect2() {
     // The marker, positioned at Uluru
     const marker = new AdvancedMarkerElement({
         map: map,
-        position: position,
+        // position: position,
     });
 
 

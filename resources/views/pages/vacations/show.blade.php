@@ -240,7 +240,7 @@
                     <div class="location-row">
                         <div class="location">
                             <a href="#" class="fs-6 text-decoration-none text-muted">
-                                <i class="bi bi-geo-alt"></i>{{ translate('Fishing Trip in') }} <strong>{{translate($vacation->location)}}</strong>
+                                <i class="bi bi-geo-alt"></i>{{ translate('Fishing Trip in') }} <strong>{{$vacation->location}}</strong>
                             </a>
                         </div>
                         <div class="location-map">
@@ -968,7 +968,7 @@
                                     {{ $same_country->title ? translate(Str::limit($same_country->title, 50)) : translate($same_country->title) }}
                                 </a>
                             </h5>    
-                            <small class="crop-text-1 small-text text-muted">{{ translate($same_country->location) }}</small>
+                            <small class="crop-text-1 small-text text-muted">{{ $same_country->location }}</small>
                             <p class="fw-bold text-muted">
                                 <span>@lang('message.from') {{ $same_country->getLowestPrice() }}€</span>
                             </p>

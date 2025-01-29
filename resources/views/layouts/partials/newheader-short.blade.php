@@ -755,14 +755,15 @@ input[type=number] {
                                 <i class="fas fa-search position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
                                 <input type="text" 
                                     class="form-control ps-5" 
+                                    id="searchPlace"
                                     name="place" 
                                     placeholder="@lang('homepage.searchbar-destination')"
                                     value="{{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }}" autocomplete="on">
-                                <input type="hidden" name="placeLat" value="{{ request()->placeLat }}"/>
-                                <input type="hidden" name="placeLng" value="{{ request()->placeLng }}"/>
-                                <input type="hidden" name="city" value="{{ request()->city }}"/>
-                                <input type="hidden" name="country" value="{{ request()->country }}"/>
-                                <input type="hidden" name="region" value="{{ request()->region }}"/>
+                                <input type="hidden" id="LocationLat" name="placeLat" value="{{ request()->placeLat }}"/>
+                                <input type="hidden" id="LocationLng" name="placeLng" value="{{ request()->placeLng }}"/>
+                                <input type="hidden" id="LocationCity" name="city" value="{{ request()->city }}"/>
+                                <input type="hidden" id="LocationCountry" name="country" value="{{ request()->country }}"/>
+                                <input type="hidden" id="LocationRegion" name="region" value="{{ request()->region }}"/>
                             </div>
                         </div>
 
