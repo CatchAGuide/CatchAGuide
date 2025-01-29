@@ -28,7 +28,7 @@
                             <button class="btn btn-primary"><i class="fa fa-plus"></i> Guiding</button>
                         </div>
                         <div class="card-body table-responsive">
-                            <table id="guidingtable" class="table">
+                            <table id="guiding-datatable" class="table">
                                 <thead>
                                     <tr>
                                         <th class="wd-15p border-bottom-0">ID</th>
@@ -60,7 +60,7 @@
                                                 @else
                                                     <a href="{{ route('admin.changeGuidingStatus', $guiding->id) }}" title="Guiding aktivieren" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
                                                 @endif
-                                                <a href="{{ route('admin.guidings.edit', $guiding) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pencil"></i></a>
+                                                <a href="{{ route('admin.guidings.edit', $guiding) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pen"></i></a>
                                                 <a href="{{ route('admin.guidings.show', $guiding) }}" class="btn btn-sm btn-primary"><i class="fa fa-search"></i></a>
                                             </div>
                                         </td>
@@ -124,7 +124,7 @@
                                                 @else
                                                     <a href="{{ route('admin.changeGuidingStatus', $guiding->id) }}" title="Guiding aktivieren" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
                                                 @endif
-                                                <a href="{{ route('admin.guidings.edit', $guiding) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pencil"></i></a>
+                                                <a href="{{ route('admin.guidings.edit', $guiding) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pen"></i></a>
                                                 <a href="{{ route('admin.guidings.show', $guiding) }}" class="btn btn-sm btn-primary"><i class="fa fa-search"></i></a>
                                             </div>
                                         </td>
@@ -147,6 +147,12 @@
 
 @section('js_after')
 <script>
-    let guidingtable = new DataTable('#guidingtable');
+    $(function(e) {
+        $('#guiding-datatable').DataTable({
+            order: [
+                [0, 'desc']
+            ]
+        });
+    });
 </script>
 @endsection

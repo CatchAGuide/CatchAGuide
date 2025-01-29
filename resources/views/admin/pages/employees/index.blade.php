@@ -42,7 +42,7 @@
                                             <tr>
                                                 <td>{{ $employee->name }}</td>
                                                 <td>{{ $employee->email }}</td>
-                                                <td class="text-center"><a href="{{ route('admin.employees.edit', $employee) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pencil"></i></a></td>
+                                                <td class="text-center"><a href="{{ route('admin.employees.edit', $employee) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pen"></i></a></td>
                                             </tr>
                                         @endforeach
                                     </tbody>

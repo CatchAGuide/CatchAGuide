@@ -171,7 +171,6 @@
 
                     // Check if thumbnail exists
                     if (file_exists(public_path($thumbnailPath))) {
-                        $finalImages[] = asset($thumbnailPath);
                         $overallImages[] = asset($thumbnailPath);
                     }
 
@@ -227,17 +226,15 @@
                     $finalImages = [];
                     $overallImages = [];
                     
-
                     // Validate thumbnail exists
                     if (file_exists(public_path($thumbnailPath))) {
-                        // $finalImages[] = asset($thumbnailPath);
                         $overallImages[] = asset($thumbnailPath);
                     }
-                    
                     // Filter gallery images that exist
                     if ($galleryImages) {
                         foreach ($galleryImages as $image) {
-                            if (file_exists(public_path($image))) {
+                            if (file_exists(public_path($image))
+                                && $image !== $thumbnailPath) {
                                 $finalImages[] = asset($image);
                                 $overallImages[] = asset($image);
                             }

@@ -60,7 +60,7 @@
 
                                         <td class="text-center">
                                             <div class="btn-group">
-                                                <a href="{{ route('admin.faq.edit', [$faq,$page]) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pencil"></i></a>
+                                                <a href="{{ route('admin.faq.edit', [$faq,$page]) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pen"></i></a>
                                                 <a href="{{ route('admin.faq.destroy', $faq) }}" class="btn btn-sm btn-primary"><i class="fa fa-trash"></i></a>
                                             </div>
                                         </td>

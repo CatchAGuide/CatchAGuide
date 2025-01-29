@@ -60,7 +60,7 @@
                                                     @else
                                                         <a href="{{ route('admin.guides.change-status', $guide) }}" title="Guide Zugang aktivieren" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
                                                     @endif
-                                                    <a href="{{ route('admin.guides.edit', $guide) }}" title="Guide bearbeiten" class="btn btn-sm btn-danger"><i class="fa fa-pencil"></i></a>
+                                                    <a href="{{ route('admin.guides.edit', $guide) }}" title="Guide bearbeiten" class="btn btn-sm btn-danger"><i class="fa fa-pen"></i></a>
                                                     <a href="{{ route('admin.guides.show', $guide) }}" title="Guide ansehen" class="btn btn-sm btn-primary"><i class="fa fa-search"></i></a>
                                                 </div>
                                             </td>
