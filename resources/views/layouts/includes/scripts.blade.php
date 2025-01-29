@@ -145,12 +145,12 @@
     function initializeGooglePlaces() {
         const searchInputs = [
             {
-                input: 'searchPlace',
-                lat: 'LocationLat',
-                lng: 'LocationLng',
-                city: 'LocationCity',
-                country: 'LocationCountry',
-                region: 'LocationRegion'
+                input: 'searchPlaceMobile',
+                lat: 'LocationLatMobile',
+                lng: 'LocationLngMobile',
+                city: 'LocationCityMobile',
+                country: 'LocationCountryMobile',
+                region: 'LocationRegionMobile'
             },
             {
                 input: 'searchPlaceDesktop',
@@ -161,12 +161,12 @@
                 region: 'LocationRegionDesktop'
             },
             {
-                input: 'searchPlaceMobile',
-                lat: 'LocationLatMobile',
-                lng: 'LocationLngMobile',
-                city: 'LocationCityMobile',
-                country: 'LocationCountryMobile',
-                region: 'LocationRegionMobile'
+                input: 'searchPlaceHeaderDesktop',
+                lat: 'LocationLatHeaderDesktop',
+                lng: 'LocationLngHeaderDesktop',
+                city: 'LocationCityHeaderDesktop',
+                country: 'LocationCountryHeaderDesktop',
+                region: 'LocationRegionHeaderDesktop'
             },
             {
                 input: 'searchPlaceShortDesktop',
@@ -175,6 +175,14 @@
                 city: 'LocationCityShortDesktop',
                 country: 'LocationCountryShortDesktop',
                 region: 'LocationRegionShortDesktop'
+            },
+            {
+                input: 'searchPlace',
+                lat: 'LocationLat',
+                lng: 'LocationLng',
+                city: 'LocationCity',
+                country: 'LocationCountry',
+                region: 'LocationRegion'
             }
         ];
 

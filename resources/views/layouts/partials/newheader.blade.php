@@ -140,7 +140,7 @@
                                 <div class="form-group">
                                     <div class="d-flex align-items-center small">
                                         <i class="fa fa-search fa-fw text-muted position-absolute ps-2"></i>
-                                        <input  id="searchPlaceMobile" name="place" type="text" class="form-control rounded-0" placeholder="@lang('homepage.searchbar-destination')"  autocomplete="on">
+                                        <input  id="searchPlaceMobile" name="place" type="text" class="form-control rounded-0" placeholder="@lang('homepage.searchbar-destination')" autocomplete="on">
                                         <input type="hidden" id="LocationCityMobile" name="city"/>
                                         <input type="hidden" id="LocationCountryMobile" name="country"/>
                                         <input type="hidden" id="LocationRegionMobile" name="region"/>
@@ -214,9 +214,9 @@
                 <div class="search-box">
                     <div class="search-row">
                         @if ($isVacation)
-                            <div class="search-input" style="width: 300px;">
+                            <div class="search-input flex-grow-1">
                                 <i class="fa fa-globe input-icon"></i>
-                                <select class="form-select" name="country" onchange="updateFormAction(this, 'global-search')">
+                                <select class="form-select" name="country" onchange="updateFormAction(this, 'global-search1')">
                                     <option value="">{{translate('Select Country')}}</option>
                                     @foreach($countries as $country)
                                         <option value="{{ $country }}" {{ request()->country == $country ? 'selected' : '' }}>
@@ -881,6 +881,7 @@ input[type=number] {
             <div class="modal-body">
                 <form id="mobile-search" action="{{ $isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index') }}" method="get">
                     @if ($isVacation)
+                    
                     
                         <div class="mb-3">
                             <label class="form-label">{{translate('Country')}}</label>
