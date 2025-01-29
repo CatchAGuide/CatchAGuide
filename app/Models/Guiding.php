@@ -595,6 +595,7 @@ class Guiding extends Model
                 $searchRadius * 1000
             ])
             ->where('status', 1)
+            ->orderByRaw('CASE WHEN distance IS NULL THEN 1 ELSE 0 END')
             ->orderBy('distance')  // Sort by distance ascending
             ->pluck('id');
 
@@ -614,6 +615,7 @@ class Guiding extends Model
                 $coordinates['lat']
             ])
             ->where('status', 1)
+            ->orderByRaw('CASE WHEN distance IS NULL THEN 1 ELSE 0 END')
             ->orderBy('distance')
             ->pluck('id');
         $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel3'));
