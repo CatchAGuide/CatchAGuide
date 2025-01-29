@@ -214,7 +214,7 @@
                 <div class="search-box">
                     <div class="search-row">
                         @if ($isVacation)
-                            <div class="search-input flex-grow-1">
+                            <div class="search-input" style="width: 300px;">
                                 <i class="fa fa-globe input-icon"></i>
                                 <select class="form-select" name="country" onchange="updateFormAction(this, 'global-search1')">
                                     <option value="">{{translate('Select Country')}}</option>
@@ -882,7 +882,7 @@ input[type=number] {
                 <form id="mobile-search" action="{{ $isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index') }}" method="get">
                     @if ($isVacation)
                     
-                    
+                   
                         <div class="mb-3">
                             <label class="form-label">{{translate('Country')}}</label>
                             <div class="position-relative">
