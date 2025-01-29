@@ -241,7 +241,6 @@ class GuidingsController extends Controller
         }
 
         $allGuidings = $query->with('boatType')->get();
-
         $otherguidings = array();
 
         if($allGuidings->isEmpty()){
