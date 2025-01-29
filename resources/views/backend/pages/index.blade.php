@@ -49,7 +49,7 @@
                                     <td class="text-center">{{$camper->max_person}}</td>
                                     <td>
                                         <div class="btn-group">
-                                            <a class="btn btn-outline-secondary mt-3" title="Fahrzeug bearbeiten" href="{{ route('admin.edit', $camper->id) }}" role="button"><i class="fa fa-pencil"></i> </a>
+                                            <a class="btn btn-outline-secondary mt-3" title="Fahrzeug bearbeiten" href="{{ route('admin.edit', $camper->id) }}" role="button"><i class="fa fa-pen"></i> </a>
                                             <a class="btn btn-outline-danger mt-3" title="Fahrzeug löschen"  href="javascript:deleteResource('{{ route('admin.delete', $camper->id, false) }}')" role="button"><i class="fa fa-trash"></i> </a>
                                         </div>
                                     </td>

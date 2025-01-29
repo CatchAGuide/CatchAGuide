@@ -160,6 +160,13 @@
 @section('js_after')
 <script src="https://unpkg.com/@yaireo/tagify"></script>
 <script>
+    $(function(e) {
+        $('#vacationtable').DataTable({
+            order: [
+                [0, 'desc']
+            ]
+        });
+    });
     function initAutocomplete() {
         const locationInput = document.querySelector('#location');
         
@@ -559,9 +566,6 @@
             }
         }
     });
-
-    // Initialize DataTable
-    let vacationtable = new DataTable('#vacationtable');
 
     function previewImages(input) {
         const preview = document.getElementById('imagePreview');

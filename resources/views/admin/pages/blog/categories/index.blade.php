@@ -53,7 +53,7 @@
                                             </td>
                                             <td>{{ $category->slug }}</td>
                                             <td>
-                                                <a href="javascript:void(0)" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#editCategoryModal-{{ $category->id }}"><i class="fa fa-pencil"></i></a>
+                                                <a href="javascript:void(0)" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#editCategoryModal-{{ $category->id }}"><i class="fa fa-pen"></i></a>
                                                 <a href="{{route('admin.blog.category.delete',$category)}}" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></a>
                                             </td>
                                         </tr>

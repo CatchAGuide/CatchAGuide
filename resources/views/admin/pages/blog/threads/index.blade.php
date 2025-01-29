@@ -48,7 +48,7 @@
                                                 <td>{{ $thread->slug }}</td>
                                                 <td>{{ $thread->category->name }}</td>
                                                 <td>
-                                                    <a href="{{ route('admin.blog.threads.edit', $thread) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pencil"></i></a>
+                                                    <a href="{{ route('admin.blog.threads.edit', $thread) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pen"></i></a>
                                                     <a href="{{ route('admin.blog.delete', $thread) }}" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></a>
                                                 </td>
                                             </tr>

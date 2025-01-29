@@ -61,7 +61,7 @@
                                             }
                                             @endphp
                                             <div class="btn-group">
-                                                <button {!! $button_disabled !!} class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#updateAttribute{{$index}}"><i class="fa fa-pencil"></i></button>
+                                                <button {!! $button_disabled !!} class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#updateAttribute{{$index}}"><i class="fa fa-pen"></i></button>
                                             </div>
                                             <div class="btn-group">
                                                 <a {!! $button_disabled !!} href="{{ $button_delete_url }}" class="btn btn-sm btn-danger {{ $button_delete_url_disabled }}"><i class="fa fa-trash"></i></a>

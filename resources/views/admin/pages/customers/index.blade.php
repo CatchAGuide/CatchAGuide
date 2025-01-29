@@ -57,7 +57,7 @@
                                                         @else
                                                             <a href="{{ route('admin.guides.change-status', $customer) }}" title="Guide Zugang aktivieren" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
                                                         @endif
-                                                        <a title="Kunden ansehen" href="{{ route('admin.customers.edit', $customer) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pencil"></i></a>
+                                                        <a title="Kunden ansehen" href="{{ route('admin.customers.edit', $customer) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pen"></i></a>
                                                         <a title="Kunden löschen" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deletemodal{{$customer->id}}">
                                                             <i style="color:white;" class="fa fa-trash"></i>
                                                         </a>
