@@ -92,16 +92,16 @@
             <!-- Categories Row - Mobile -->
             <div class="col-12 d-md-none mt-1">
                 <div class="d-flex categories-mobile">
-                    {{-- <a href="{{ route('destination') }}" class="me-4 text-white text-decoration-none">
-                        <i class="fas fa-map-marker-alt me-2"></i>@lang('homepage.searchbar-destination')
-                    </a> --}}
-                    <a href="{{ route('guidings.index') }}" class="me-4 text-white text-decoration-none">
+                    <a href="{{ route('guidings.index') }}" 
+                       class="me-4 text-white text-decoration-none {{ request()->is('guidings*') ? 'active' : '' }}">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
-                    <a href="{{ route('vacations.index') }}" class="me-4 text-white text-decoration-none">
+                    <a href="{{ route('vacations.index') }}" 
+                       class="me-4 text-white text-decoration-none {{ request()->is('vacations*') ? 'active' : '' }}">
                         <i class="fas fa-map-signs me-2"></i>@lang('homepage.header-vacations')
                     </a>
-                    <a href="{{ route($blogPrefix.'.index') }}" class="text-white text-decoration-none">
+                    <a href="{{ route($blogPrefix.'.index') }}" 
+                       class="text-white text-decoration-none {{ request()->is('angelmagazin*') ? 'active' : '' }}">
                         <i class="fas fa-book-open me-2"></i>@lang('homepage.filter-magazine')
                     </a>
                 </div>
@@ -189,16 +189,16 @@
         <div class="row categories-row d-none d-md-block">
             <div class="col-12">
                 <div class="d-flex">
-                    {{-- <a href="{{ route('destination') }}" class="me-4 text-white text-decoration-none">
-                        <i class="fas fa-map-marker-alt me-2"></i>@lang('homepage.searchbar-destination')
-                    </a> --}}
-                    <a href="{{ route('guidings.index') }}" class="me-4 text-white text-decoration-none">
+                    <a href="{{ route('guidings.index') }}" 
+                       class="me-4 text-white text-decoration-none {{ request()->is('guidings*') ? 'active' : '' }}">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
-                    <a href="{{ route('vacations.index') }}" class="me-4 text-white text-decoration-none">
+                    <a href="{{ route('vacations.index') }}" 
+                       class="me-4 text-white text-decoration-none {{ request()->is('vacations*') ? 'active' : '' }}">
                         <i class="fas fa-map-signs me-2"></i>@lang('homepage.header-vacations')
                     </a>
-                    <a href="{{ route($blogPrefix.'.index') }}" class="me-4 text-white text-decoration-none">
+                    <a href="{{ route($blogPrefix.'.index') }}" 
+                       class="me-4 text-white text-decoration-none {{ request()->is('angelmagazin*') ? 'active' : '' }}">
                         <i class="fas fa-book-open me-2"></i>@lang('homepage.filter-magazine')
                     </a>
                 </div>
@@ -214,7 +214,7 @@
                 <div class="search-box">
                     <div class="search-row">
                         @if ($isVacation)
-                            <div class="search-input" style="width: 300px;">
+                            <div class="search-input flex-grow-1">
                                 <i class="fa fa-globe input-icon"></i>
                                 <select class="form-select" name="country" onchange="updateFormAction(this, 'global-search1')">
                                     <option value="">{{translate('Select Country')}}</option>
@@ -457,7 +457,7 @@ input[type=number] {
         margin-right: 8px !important;
         white-space: nowrap !important;
         font-size: 14px !important;
-        background-color: rgba(255, 255, 255, 0.1) !important;
+        background-color: rgba(255, 255, 255, 0.1);
         border-radius: 50px !important;
     }
 
@@ -868,6 +868,44 @@ input[type=number] {
 .header-language-select::-ms-expand {
     display: none;
 }
+
+
+/* Add these new styles for desktop and mobile active states */
+.categories-row a.active,
+.categories-mobile a.active,
+.mobile-menu-items .menu-item.active {
+    background-color: #E85B40 !important;
+    color: white !important;
+    font-weight: 500;
+}
+
+/* Specific styles for mobile menu active items */
+.mobile-menu-items .menu-item.active i {
+    color: white;
+}
+
+/* Hover effects for non-active items */
+.categories-row a:not(.active):hover,
+.categories-mobile a:not(.active):hover,
+.mobile-menu-items .menu-item:not(.active):hover {
+    background-color: rgba(232, 91, 64, 0.1);
+    color: #E85B40;
+}
+
+.mobile-menu-items .menu-item:not(.active):hover i {
+    color: #E85B40;
+}
+
+/* Base styles for mobile menu items */
+.mobile-menu-items .menu-item {
+    border-radius: 8px;
+    margin-bottom: 4px;
+    transition: all 0.2s ease;
+}
+
+.mobile-menu-items .menu-item i {
+    transition: color 0.2s ease;
+}
 </style>
 
 <!-- Search Modal for Mobile -->
@@ -981,19 +1019,15 @@ input[type=number] {
             <!-- Rest of the modal content remains the same -->
             <div class="modal-body p-0">
                 <div class="mobile-menu-items">
-                    {{-- <a href="{{ route('destination') }}" class="menu-item">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>@lang('homepage.searchbar-destination')</span>
-                    </a> --}}
-                    <a href="{{ route('guidings.index') }}" class="menu-item">
+                    <a href="{{ route('guidings.index') }}" class="menu-item {{ request()->is('guidings*') ? 'active' : '' }}">
                         <i class="fas fa-fish"></i>
                         <span>@lang('homepage.filter-fishing-near-me')</span>
                     </a>
-                    <a href="{{ route('vacations.index') }}" class="menu-item">
+                    <a href="{{ route('vacations.index') }}" class="menu-item {{ request()->is('vacations*') ? 'active' : '' }}">
                         <i class="fas fa-map-signs"></i>
                         <span>@lang('homepage.header-vacations')</span>
                     </a>
-                    <a href="{{ route($blogPrefix.'.index') }}" class="menu-item">
+                    <a href="{{ route($blogPrefix.'.index') }}" class="menu-item {{ request()->is('angelmagazin*') ? 'active' : '' }}">
                         <i class="fas fa-book-open"></i>
                         <span>@lang('homepage.filter-magazine')</span>
                     </a>

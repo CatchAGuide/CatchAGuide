@@ -224,13 +224,12 @@ class AdminCategoryRegionController extends Controller
             $data['filters'] = json_encode($request->filters);
             $data['content'] = $request->body;
             $data['slug'] = $this->slug_format($request->name);
-            $webp_path = null;
 
             if($request->has('thumbnailImage')) {
                 $webp_path = $this->upload_thumbnail($request->thumbnailImage);
+                $data['thumbnail_path'] = $webp_path;
             }
 
-            $data['thumbnail_path'] = $webp_path;
             Destination::whereId($id)->update($data);
 
             if ($request->has('fish_chart')) {

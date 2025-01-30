@@ -7,7 +7,7 @@ return [
     'header-signup' => 'Registrieren',
     'header-profile' => 'Profil',
     'header-logout' => 'Logout',
-    'header-vacations' => 'Alle Angelurlaube',
+    'header-vacations' => 'Angelurlaub',
 
     'searchbar-destination' => 'Länder',
     'searchbar-person' => 'Personen',
@@ -15,7 +15,7 @@ return [
     'searchbar-search' => 'Suchen',
     'searchbar-search-placeholder' => 'Entdecken Sie Ihr Traumangelziel...',
 
-    'filter-fishing-near-me' => 'Alle Angeltouren',
+    'filter-fishing-near-me' => 'Angeltouren',
     'filter-magazine' => 'Angelmagazin',
 
     'usps-first' => 'Einfache und direkte Online-Buchung',
