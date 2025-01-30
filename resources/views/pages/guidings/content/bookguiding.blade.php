@@ -1,3 +1,22 @@
+@if(!$agent->ismobile())
+    <div class="contact-card mb-4 tour-details-two__book-tours">
+        <h5 class="contact-card__title">{{ translate('Contact Card') }}</h5>
+        <div class="contact-card__content">
+            <p class="text-muted">{{ translate('Do you have questions about this vacation? Our team is here to help!') }}</p>
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <div class="contact-info">
+                    <i class="fas fa-phone-alt me-2"></i>
+                    <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>
+                </div>
+                <a href="{{ route('additional.contact') }}" class="btn btn-outline-orange">
+                    {{ translate('Contact Form') }}
+                    <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+@endif
+
 <div class="col-md-12 tour-details-two__sticky sticky-lg-top {{$agent->ismobile() ? 'text-center' : ''}}">
     <div class="tour-details-two__sidebar">
         <div class="tour-details-two__book-tours">
