@@ -106,45 +106,54 @@ class DestinationCountryController extends Controller
             FROM price_per_person
         ) AS lowest_price')])->where('status',1)->whereNotNull('lat')->whereNotNull('lng');
         
-        if (empty($request->all())) {
+        // Get or generate a random seed and store it in the session
+        $randomSeed = Session::get('random_seed');
+        if (!$randomSeed) {
+            $randomSeed = rand();
+            Session::put('random_seed', $randomSeed);
+        }
+
+        // Only apply random ordering if:
+        // 1. There are no query parameters except page
+        // 2. We're on page 1 or no page is specified
+        $hasOnlyPageParam = count(array_diff(array_keys($request->all()), ['page'])) === 0;
+        $isFirstPage = !$request->has('page') || $request->get('page') == 1;
+
+        if ($hasOnlyPageParam && $isFirstPage) {
             $query->orderByRaw("RAND($randomSeed)");
+        } else {
+            // Default ordering for all other cases
+            if (!$request->has('sortby')) {
+                $query->latest();
+            }
         }
 
         if($request->has('page')){
             $title .= __('guidings.Page') . ' ' . $request->page . ' - ';
         }
-
         if($request->has('num_guests') && !empty($request->get('num_guests'))){
             $title .= __('guidings.Guest') . ' ' . $request->num_guests . ' | ';
             $q = $query->where('max_guests','>=',$request->get('num_guests'));
         }
 
+        // Apply sorting if specified
         if($request->has('sortby') && !empty($request->get('sortby'))){
             switch ($request->get('sortby')) {
                 case 'newest':
                     $query->orderBy('created_at', 'desc');
                     break;
-
                 case 'price-asc':
                     $query->orderBy(DB::raw('lowest_price'), 'asc');
                     break;
-
                 case 'price-desc':
                     $query->orderBy(DB::raw('lowest_price'), 'desc');
                     break;
-
                 case 'long-duration':
                     $query->orderBy('duration', 'desc');
                     break;
-
                 case 'short-duration':
                     $query->orderBy('duration', 'asc');
                     break;
-
-                default:
-                    if (empty($request->all())) {
-                        $query->orderByRaw("RAND($randomSeed)");
-                    }
             }
         }
 

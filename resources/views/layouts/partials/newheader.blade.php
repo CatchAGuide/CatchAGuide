@@ -113,7 +113,6 @@
                 <div id="mobileherofilter" class="shadow-lg bg-white p-2 rounded">
                     <div class="row">
                         @if ($isVacation)
-                        
                             <div class="col-md-4 column-input my-2">
                                 <div class="d-flex align-items-center small myselect2">
                                     <i class="fa fa-globe fa-fw text-muted position-absolute ps-1"></i>
@@ -919,8 +918,6 @@ input[type=number] {
             <div class="modal-body">
                 <form id="mobile-search" action="{{ $isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index') }}" method="get">
                     @if ($isVacation)
-                    
-                   
                         <div class="mb-3">
                             <label class="form-label">{{translate('Country')}}</label>
                             <div class="position-relative">

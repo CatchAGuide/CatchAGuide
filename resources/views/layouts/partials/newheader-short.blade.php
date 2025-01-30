@@ -87,9 +87,6 @@
             <!-- Categories Row - Mobile -->
             <div class="col-12 d-md-none mt-2">
                 <div class="d-flex categories-mobile">
-                    {{-- <a href="{{ route('destination') }}" class="me-4 text-white text-decoration-none">
-                        <i class="fas fa-map-marker-alt me-2"></i>@lang('homepage.searchbar-destination')
-                    </a> --}}
                     <a href="{{ route('guidings.index') }}" 
                        class="me-4 text-white text-decoration-none {{ request()->is('guidings*') ? 'active' : '' }}">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
@@ -105,31 +102,65 @@
                 </div>
             </div>
 
+            @php
+                $countries = \App\Models\Vacation::select('country')
+                    ->where('status', 1)
+                    ->distinct()
+                    ->pluck('country')
+                    ->sort();
+            @endphp
+
             <!-- Mobile Search Summary -->
-            <div class="col-12 d-md-none mt-2">
-                <div class="search-summary" role="button" id="headerSearchTrigger">
-                    <i class="fas fa-search me-2"></i>
-                    @if(request()->has('place'))
-                        <span>{{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }} · 
-                            {{ request()->num_guests ?? '0' }} guests
-                            @if(request()->has('target_fish'))
-                                · {{ count((array)request()->target_fish) }} fish
-                            @endif
-                        </span>
-                    @else
-                        <span>@lang('homepage.searchbar-search-placeholder')</span>
-                    @endif
+            @if(!$isVacation)
+                <div class="col-12 d-md-none mt-2">
+                    <div class="search-summary" role="button" id="headerSearchTrigger">
+                        <i class="fas fa-search me-2"></i>
+                        @if(request()->has('place'))
+                            <span>{{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }} · 
+                                {{ request()->num_guests ?? '0' }} guests
+                                @if(request()->has('target_fish'))
+                                    · {{ count((array)request()->target_fish) }} fish
+                                @endif
+                            </span>
+                        @else
+                            <span>@lang('homepage.searchbar-search-placeholder')</span>
+                        @endif
+                    </div>
                 </div>
-            </div>
+            @else
+                <div id="filterContainer" class="col-12 d-md-none mt-3">
+                    <form class="search-form row gx-2 pe-0" id="global-search1" action="{{ $isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index') }}" method="get">                
+                        <div id="mobileherofilter" class="shadow-lg bg-white p-2 rounded">
+                            <div class="row">
+                                <div class="col-md-4 column-input my-2">
+                                    <div class="d-flex align-items-center small myselect2">
+                                        <i class="fa fa-globe fa-fw text-muted position-absolute ps-1"></i>
+                                        <select class="form-control form-select border-0" name="country" onchange="updateFormAction(this, 'global-search1')">
+                                            <option value="">{{translate('Select Country')}}</option>
+                                            @foreach($countries as $country)
+                                                <option value="{{ $country }}" 
+                                                    {{ request()->country == $country ? 'selected' : '' }}>
+                                                    {{ $country }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-2 column-input my-2">
+                                    <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            @endif
         </div>
 
         <!-- Categories Row - Desktop -->
         <div class="row categories-row d-none d-md-block">
             <div class="col-12">
                 <div class="d-flex">
-                    {{-- <a href="{{ route('destination') }}" class="me-4 text-white text-decoration-none">
-                        <i class="fas fa-map-marker-alt me-2"></i>@lang('homepage.searchbar-destination')
-                    </a> --}}
                     <a href="{{ route('guidings.index') }}" 
                        class="me-4 text-white text-decoration-none {{ request()->is('guidings*') ? 'active' : '' }}">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
@@ -158,13 +189,6 @@
                                 <i class="fa fa-globe input-icon"></i>
                                 <select class="form-select" name="country" onchange="updateFormAction(this, 'global-search1')">
                                     <option value="">{{translate('Select Country')}}</option>
-                                    @php
-                                        $countries = \App\Models\Vacation::select('country')
-                                            ->where('status', 1)
-                                            ->distinct()
-                                            ->pluck('country')
-                                            ->sort();
-                                    @endphp
                                     @foreach($countries as $country)
                                         <option value="{{ $country }}" {{ request()->country == $country ? 'selected' : '' }}>
                                             {{ $country }}
@@ -764,6 +788,77 @@ input[type=number] {
 
 .mobile-menu-items .menu-item i {
     transition: color 0.2s ease;
+}
+
+/* Add these new styles for the filter container */
+#filterContainer {
+    height: {{ $isVacation ? '70px' : '200px' }};
+}
+
+#mobileherofilter {
+    position: absolute;
+    left: 0;
+    right: 0;
+    width: 95%;
+    margin: auto;
+}
+
+#mobileherofilter .column-input input {
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: 1px solid #a7a7a7 !important;
+    outline: none !important;
+}
+
+#mobileherofilter .column-input i {
+    color: #E8604C !important;
+}
+
+#mobileherofilter .column-input input,
+#mobileherofilter .column-input select {
+    padding-left: 30px !important;
+}
+
+#mobileherofilter .form-control:focus {
+    border-color: inherit;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    outline: none !important;
+}
+
+#mobileherofilter .myselect2 {
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: 1px solid #a7a7a7 !important;
+    padding: 2px 0px;
+    border-width: 1px !important;
+    background-color: white;
+}
+
+#mobileherofilter .myselect2 li.select2-selection__choice {
+    background-color: #313041 !important;
+    color: #fff !important;
+    border: 0 !important;
+    font-size: 14px;
+    vertical-align: middle !important;
+    margin-top: 0 !important;
+}
+
+#mobileherofilter .myselect2 button.select2-selection__choice__remove {
+    border: 0 !important;
+    color: #fff !important;
+}
+
+#mobileherofilter .new-filter-btn {
+    background-color: #E8604C;
+    color: #fff;
+    padding: 6px 12px;
+}
+
+#mobileherofilter .new-filter-btn:hover {
+    background-color: #313041;
 }
 </style>
 
