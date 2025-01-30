@@ -12,15 +12,17 @@ use App\Events\BookingStatusChanged;
 class BookingController extends Controller
 {
     public function accept($token){
+        $tokenParts = explode('|', $token);
+        $token = $tokenParts[0];
+        $source = $tokenParts[1] ?? null; 
+        
         $booking = Booking::where('token',$token)->first();
 
-        
         if(!$booking){
             abort(404);
         }
 
-
-        if($booking && $booking->status != 'pending'){
+        if($booking && $booking->status != 'pending' && $source == null){
             if($booking->guiding->user->language == 'en'){
                 \App::setLocale('en');
             }    
@@ -31,6 +33,10 @@ class BookingController extends Controller
         }
 
         $booking->status = 'accepted';
+        if($source !== null || $source !== 'null' || $source !== ''){
+            $booking->last_employee_id = $source;
+        }
+        
         $booking->save();
 
         $blockedevent = BlockedEvent::find($booking->blocked_event_id);
@@ -39,6 +45,9 @@ class BookingController extends Controller
 
         event(new BookingStatusChanged($booking, 'accepted'));
 
+        if($source !== null || $source !== 'null' || $source !== ''){
+            return back();
+        }
         return view('pages.additional.accepted');
     }
 

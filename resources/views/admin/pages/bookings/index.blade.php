@@ -60,7 +60,15 @@
                                                     @endif
                                                 </td>
                                                 <td>{{ $booking->transaction_id }}</td>
-                                                <td>{{ $booking->status }}</td>
+                                                <td>
+                                                    <span class="@if($booking->status == 'rejected' || $booking->status == 'cancelled') text-danger @elseif($booking->status == 'accepted') text-success @else text-warning glow @endif">
+                                                        {{ strtoupper($booking->status) }}
+                                                    </span>
+                                                    @if($booking->last_employee_id)
+                                                        <br>
+                                                        <span class="text-info">by {{ $booking->employee->name }}</span>
+                                                    @endif
+                                                </td>
                                                 <td>
                                                     <a href="{{route('admin.guides.edit', $booking->guiding->user->id)}}">
                                                         {{ $booking->guiding->user->full_name }}
@@ -72,6 +80,10 @@
                                                     </a>
                                                 </td>
                                                 <td>
+                                                    @if($booking->status == 'pending')
+                                                        <a href="{{ route('booking.accept', $booking->token . '|' . auth()->user()->id) }}" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
+                                                    @endif
+
                                                     <a href="{{ route('admin.bookings.edit', $booking) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pen"></i></a>
                                                     <a href="javascript:deleteResource('{{ route('admin.bookings.destroy', $booking, false) }}')" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></a>
                                                 </td>

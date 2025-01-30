@@ -32,6 +32,7 @@ class Booking extends Model
         'book_date',
         'additional_information',
         'phone',
+        'last_employee_id',
         'expires_at',
         'created_at',
         'updated_at',
@@ -115,6 +116,10 @@ class Booking extends Model
 
         
      
+    }
+
+    public function employee(): BelongsTo{
+        return $this->belongsTo(Employee::class, 'last_employee_id');
     }
 
     /*

@@ -7,7 +7,7 @@ return [
     'header-signup' => 'Sign up',
     'header-profile' => 'Profile',
     'header-logout' => 'Logout',
-    'header-vacations' => 'All Fishing Holiday',
+    'header-vacations' => 'Fishing Vacations',
 
     'searchbar-destination' => 'Destination',
     'searchbar-person' => 'Guests',
@@ -15,7 +15,7 @@ return [
     'searchbar-search' => 'Search',
     'searchbar-search-placeholder' => 'Discover your dream fishing destination...',
 
-    'filter-fishing-near-me' => 'All Fishing Trips',
+    'filter-fishing-near-me' => 'Fishing Tours',
     'filter-magazine' => 'Fishing Magazine',
 
     'usps-first' => 'Easy & direct online booking',
