@@ -40,10 +40,11 @@ class GuidingsController extends Controller
     public function index(Request $request)
     {
         $locale = Config::get('app.locale');
-
         $searchMessage = "";
         $title = '';
         $filter_title = '';
+
+        // Get or generate a random seed and store it in the session
         $randomSeed = Session::get('random_seed');
         if (!$randomSeed) {
             $randomSeed = rand();
@@ -76,9 +77,14 @@ class GuidingsController extends Controller
             FROM price_per_person
         ) AS lowest_price')])->where('status',1);
 
-        // Only apply random ordering on the first page with no other parameters
-        if (empty($request->except('page')) && !$request->has('page')) {
-            $query->inRandomOrder($randomSeed);
+        // Only apply random ordering if:
+        // 1. There are no query parameters except page
+        // 2. We're on page 1 or no page is specified
+        $hasOnlyPageParam = count(array_diff(array_keys($request->all()), ['page'])) === 0;
+        $isFirstPage = !$request->has('page') || $request->get('page') == 1;
+
+        if ($hasOnlyPageParam && $isFirstPage) {
+            $query->orderByRaw("RAND($randomSeed)");
         } else {
             // Default ordering for all other cases
             if (!$request->has('sortby')) {
@@ -96,31 +102,27 @@ class GuidingsController extends Controller
             $q = $query->where('max_guests','>=',$request->get('num_guests'));
         }
 
+        // Apply sorting if specified
         if($request->has('sortby') && !empty($request->get('sortby'))){
             switch ($request->get('sortby')) {
                 case 'newest':
                     $query->orderBy('created_at', 'desc');
                     break;
-
                 case 'price-asc':
                     $query->orderBy(DB::raw('lowest_price'), 'asc');
                     break;
-
                 case 'price-desc':
                     $query->orderBy(DB::raw('lowest_price'), 'desc');
                     break;
-
                 case 'long-duration':
                     $query->orderBy('duration', 'desc');
                     break;
-
                 case 'short-duration':
                     $query->orderBy('duration', 'asc');
                     break;
-
                 default:
                     // Keep default ordering if no valid sort option is provided
-                    if (empty($request->all())) {
+                    if (!$hasOnlyPageParam) {
                         $query->latest();
                     }
             }
@@ -265,10 +267,9 @@ class GuidingsController extends Controller
         }
 
         $guidings = $query->with('boatType')->paginate(20);
+        $guidings->appends(request()->except('page'));
 
         $filter_title = substr($filter_title, 0, -2);
-
-        $guidings->appends(request()->except('page'));
 
         $alltargets = Target::select('id', 'name', 'name_en')->get();
         $guiding_waters = Water::select('id', 'name', 'name_en')->get();
