@@ -76,8 +76,14 @@ class GuidingsController extends Controller
             FROM price_per_person
         ) AS lowest_price')])->where('status',1);
 
-        if (empty($request->all())) {
-            $query->orderByRaw("RAND($randomSeed)");
+        // Only apply random ordering on the first page with no other parameters
+        if (empty($request->except('page')) && !$request->has('page')) {
+            $query->inRandomOrder($randomSeed);
+        } else {
+            // Default ordering for all other cases
+            if (!$request->has('sortby')) {
+                $query->latest();
+            }
         }
 
         if($request->has('page')){
@@ -115,7 +121,7 @@ class GuidingsController extends Controller
                 default:
                     // Keep default ordering if no valid sort option is provided
                     if (empty($request->all())) {
-                        $query->orderByRaw("RAND($randomSeed)");
+                        $query->latest();
                     }
             }
         }
