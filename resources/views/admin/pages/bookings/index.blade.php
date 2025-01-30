@@ -83,6 +83,7 @@
                                                     @if($booking->status == 'pending')
                                                         <a href="{{ route('booking.accept', $booking->token . '|' . auth()->user()->id) }}" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
                                                     @endif
+
                                                     <a href="{{ route('admin.bookings.edit', $booking) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pen"></i></a>
                                                     <a href="javascript:deleteResource('{{ route('admin.bookings.destroy', $booking, false) }}')" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></a>
                                                 </td>
