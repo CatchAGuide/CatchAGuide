@@ -1,5 +1,9 @@
 @import "../settings/variables";
-
+#filterCard{
+  form#filterContainer{
+    height: auto;
+  }
+}
 .small-text {
   font-size: 12px;
 }
@@ -191,6 +195,9 @@
       display: flex;
       justify-content: space-between;
       width: 100%;
+    }
+    .title-left-container{
+      width: calc(100% - 200px);
     }
 
     .guiding-title {
@@ -864,7 +871,9 @@ div#masonry-grid {
         width: 100%;
         margin-bottom: 16px;
       }
-
+      .title-left-container{
+        width: calc(100%);
+      }
       .title-right-container {
         display: none;
 
