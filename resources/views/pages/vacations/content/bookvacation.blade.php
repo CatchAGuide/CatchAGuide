@@ -2,10 +2,10 @@
     <!-- Add Contact Card - Only show when not in modal -->
     @if(!$agent->ismobile() || !isset($inModal))
         <div class="contact-card mb-4 tour-details-two__book-tours">
-            <h5 class="contact-card__title">{{ translate('Contact Card') }}</h5>
+            <h5 class="contact-card__title">{{ translate('Contact Us') }}</h5>
             <div class="contact-card__content">
-                <p class="text-muted">{{ translate('Do you have questions about this vacation? Our team is here to help!') }}</p>
-                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <p class="">{{ translate('Do you have questions about this vacation? Our team is here to help!') }}</p>
+                <div class="">
                     <div class="contact-info">
                         <i class="fas fa-phone-alt me-2"></i>
                         <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>
@@ -1264,7 +1264,7 @@
     }
     
     .form-control:focus {
-        border-color: #fd5d14;
+        border-color: #E85B40;
         box-shadow: 0 0 0 0.2rem rgba(253, 93, 20, 0.25);
     }
     
@@ -1310,7 +1310,7 @@
     }
 
     .required-input:invalid:focus {
-        border-color: #fd5d14;
+        border-color: #E85B40;
         box-shadow: 0 0 0 0.2rem rgba(253, 93, 20, 0.25);
     }
 
@@ -1369,7 +1369,7 @@
 
     .selected-item i {
         width: 20px;
-        color: #fd5d14;
+        color: #E85B40;
     }
 
     .selected-item ul li {
@@ -1387,7 +1387,7 @@
     /* Add these new styles */
     .price-tag {
         font-weight: 500;
-        color: #fd5d14;
+        color: #E85B40;
         font-size: 0.95rem;
     }
 
@@ -1405,7 +1405,7 @@
 
     .selected-item i {
         width: 20px;
-        color: #fd5d14;
+        color: #E85B40;
     }
 
     .selected-item ul li {
@@ -1452,7 +1452,7 @@
 
     .price-tag {
         font-weight: 500;
-        color: #fd5d14;
+        color: #E85B40;
         font-size: 0.95rem;
     }
 
@@ -1481,7 +1481,7 @@
 
     #bookingReference {
         font-weight: bold;
-        color: #fd5d14;
+        color: #E85B40;
     }
 
     /* Add these styles to your existing style block */
@@ -1520,11 +1520,11 @@
 
     /* Ensure the field remains styled consistently with other form controls */
     input[type="date"]:hover {
-        border-color: #fd5d14;
+        border-color: #E85B40;
     }
 
     input[type="date"]:focus {
-        border-color: #fd5d14;
+        border-color: #E85B40;
         box-shadow: 0 0 0 0.2rem rgba(253, 93, 20, 0.25);
         outline: 0;
     }
@@ -1600,7 +1600,7 @@
 
     /* Add Contact Card styles */
     .contact-card {
-        background: #fff;
+        background-color: #313041;
         border-radius: 8px;
         padding: 1.5rem;
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
@@ -1608,44 +1608,41 @@
     }
 
     .contact-card__title {
-        color: #2c3e50;
+        color: #fff;
         margin-bottom: 1rem;
         font-weight: 600;
     }
 
     .contact-card__content {
-        color: #6c757d;
+        color: #fff;
     }
 
     .contact-info {
-        color: #fd5d14;
+        color: #fff;
         font-weight: 500;
+        margin-bottom: 1rem;
     }
 
     .contact-info a {
         color: inherit;
     }
 
-    .contact-info a:hover {
+    .contact-info:hover a, .contact-info:hover i {
         color: #dc4d11;
     }
 
     .btn-outline-orange {
-        color: #fd5d14;
-        border-color: #fd5d14;
+        border-color: #E85B40 !important;
         transition: all 0.3s ease;
+        background-color: #E85B40;
     }
 
     .btn-outline-orange:hover {
-        background-color: #fd5d14;
+        background-color: #fff;
         color: #fff;
     }
 
-    @media (max-width: 767.98px) {
-        .contact-card {
-            text-align: center;
-        }
-        
+    @media (max-width: 767.98px) {        
         .contact-card__content > div {
             justify-content: center;
         }

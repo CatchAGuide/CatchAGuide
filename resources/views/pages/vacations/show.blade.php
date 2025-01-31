@@ -198,8 +198,9 @@
         .contact-card__content {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            text-align: center;
+            align-items: flex-start;
+            justify-content: flex-start;
+            text-align: left;
         }
 
         .contact-card__content .contact-info {
@@ -208,12 +209,13 @@
         }
 
         .contact-card__content .btn-outline-orange {
-            border-color: #E85B40;
-            color: #E85B40;
+            border-color: #fff;
+            color: #fff;
         }
 
         .contact-card__content .btn-outline-orange:hover {
             background: #E85B40;
+            border-color: #E85B40;
             color: white;
         }
 
@@ -730,10 +732,10 @@
 
             @if($agent->ismobile())
                 <div class="contact-card mb-4">
-                    <h5 class="contact-card__title">{{ translate('Contact Card') }}</h5>
+                    <h5 class="contact-card__title">{{ translate('Contact Us') }}</h5>
                     <div class="contact-card__content">
-                        <p class="text-muted">{{ translate('Do you have questions about this vacation? Our team is here to help!') }}</p>
-                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <p class="">{{ translate('Do you have questions about this vacation? Our team is here to help!') }}</p>
+                        <div class="">
                             <div class="contact-info">
                                 <i class="fas fa-phone-alt me-2"></i>
                                 <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>

@@ -115,7 +115,7 @@
                         @if ($isVacation)
                             <div class="col-md-4 column-input my-2">
                                 <div class="d-flex align-items-center small myselect2">
-                                    <i class="fa fa-globe fa-fw text-muted position-absolute ps-1"></i>
+                                    <i class="fa fa-map-marker-alt position-absolute ps-1"></i>
                                     <select class="form-control form-select border-0" name="country" onchange="updateFormAction(this, 'global-search1')">
                                         <option value="">{{translate('Select Country')}}</option>
                                         @php
@@ -175,8 +175,9 @@
                                 </div>
                             </div>
                         @endif
-                        <div class="col-md-2 column-input my-2">
-                            <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
+                        <div class="col-md-2 column-button my-2">
+                                    <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
+                                    <button type="submit" class="form-control new-filter-btn mobile"><i class="icon-magnifying-glass"></i></button>
                         </div>
                     </div>
                 </div> 
@@ -481,9 +482,39 @@ input[type=number] {
         background-color: #313041;
     }
 }
-
+@media (max-width: 768px) {
+    #mobileherofilter .row .col-md-4{
+        margin: 0!important;
+    }
+    #mobileherofilter .column-input{
+        width: calc(100% - 80px);
+        padding-left: 0;
+    }
+    #mobileherofilter .column-input i{
+        font-size: 24px;
+    }
+    #mobileherofilter .column-button{
+        width: auto;
+        margin: 0 !important;
+        padding: 0;
+    }
+    .new-filter-btn{
+        display: none;
+    }
+    .new-filter-btn.mobile{
+        display: block;
+        width: 80px;
+        height: 100%;
+    }
+    #mobileherofilter .new-filter-btn.mobile i{
+        color: #fff !important;
+    }
+}
 /* Desktop Header Styles */
 @media (min-width: 768px) {
+    .new-filter-btn.mobile{
+        display: none;
+    }
     .short-header .container {
         max-width: 1200px;
         padding: 0 15px;
@@ -873,26 +904,29 @@ input[type=number] {
 .categories-row a.active,
 .categories-mobile a.active,
 .mobile-menu-items .menu-item.active {
-    background-color: #E85B40 !important;
-    color: white !important;
+    background-color: #fff !important;
+    color: #313041 !important;
     font-weight: 500;
 }
-
-/* Specific styles for mobile menu active items */
+.categories-row a.active i,
+.categories-mobile a.active i,
 .mobile-menu-items .menu-item.active i {
-    color: white;
+    color: #E85B40 !important;
 }
+/* Specific styles for mobile menu active items */
 
 /* Hover effects for non-active items */
 .categories-row a:not(.active):hover,
 .categories-mobile a:not(.active):hover,
 .mobile-menu-items .menu-item:not(.active):hover {
-    background-color: rgba(232, 91, 64, 0.1);
-    color: #E85B40;
+    background-color: #fff;
+    color: #313041 !important;
 }
-
+.categories-row a:not(.active):hover i,
+.categories-mobile a:not(.active):hover i,
 .mobile-menu-items .menu-item:not(.active):hover i {
-    color: #E85B40;
+    background-color: #fff;
+    color: #E85B40 !important;
 }
 
 /* Base styles for mobile menu items */

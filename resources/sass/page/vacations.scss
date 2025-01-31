@@ -24,6 +24,9 @@
 .vacations-info-container{
   display: flex;
   gap: 8px;
+  span{
+    text-wrap-mode: nowrap;
+  }
   ul.list-unstyled{
       display: flex;
       align-items: center;
@@ -35,13 +38,29 @@
   .inclusions-price{
     min-height: auto;
   }
-  .guidings-item-title {
-    width: calc(100% - 130px);
+  .guiding-item-desc{
     color: #444;
+  }
+  .guidings-item-title {
+    width: calc(100% - 145px);
+    color: #444;
+  }
 }
+.guiding-list-item{
+  .vacations-item-row{
+    color: #444;
+  }
 }
 .guiding-item-desc a{
   gap: 8px;
+}
+.guiding-list-item {
+  &:hover {
+    box-shadow: 0 0 4px 0px #00000073;
+    .vacations-item-row{
+      color: #444;
+    }
+  }
 }
 }
 
