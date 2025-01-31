@@ -556,7 +556,7 @@
                                                                 <div class="guidings-icon-container"> 
                                                                             <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
                                                                         <div class="">
-                                                                            {{ $guiding->duration }} @if($guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
+                                                                            {{$guiding->duration}} {{ $guiding->duration_type == 'multi_day' ? __('guidings.days') : __('guidings.hours') }}
                                                                         </div>
                                                                 </div>
                                                                 <div class="guidings-icon-container"> 
