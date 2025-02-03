@@ -19,6 +19,23 @@
     margin-bottom: 0!important;
 }
 </style>
+
+<div class="container">
+    <section class="page-header">
+        <div class="page-header__bottom">
+            <div class="container">
+                <div class="page-header__bottom-inner">
+                    <ul class="thm-breadcrumb list-unstyled">
+                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                        <li><span>&#183;</span></li>
+                        <li><a href="{{ route($blogPrefix.'.index') }}">@lang('message.Magazine')</a></li>
+                        <li><span>&#183;</span></li>
+                        <li class="active">{{ $thread->title }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
     <!--News One Start-->
     <section class="news-details">
         <div class="container">
@@ -102,4 +119,5 @@
         </div>
     </section>
     <!--News One End-->
+</div>
 @endsection

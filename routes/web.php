@@ -125,23 +125,36 @@ Route::get('/info',function(){
     return phpinfo();
 });
 
-Route::middleware(['check_domain:catchaguide.com'])->group(function () {
+
+if (app()->environment('production')) {
+    Route::middleware(['check_domain:catchaguide.de'])->group(function () {
+        Route::prefix('angelmagazin')->name('blogde.')->group(function () {
+            Route::resource('/categories', CategoriesController::class)->only(['show']);
+            Route::get('/', [BlogController::class, 'index'])->name('index');
+            Route::get('/{slug}', [ThreadsController::class, 'show'])->name('thread.show');
+        });
+    });
+    
+    Route::middleware(['check_domain:catchaguide.com'])->group(function () {
+        Route::prefix('fishing-magazine')->name('blog.')->group(function () {
+            Route::resource('/categories', CategoriesController::class)->only(['show']);
+            Route::get('/', [BlogController::class, 'index'])->name('index');
+            Route::get('/{slug}', [ThreadsController::class, 'show'])->name('thread.show');
+        });
+    });
+} else {
+    Route::prefix('angelmagazin')->name('blogde.')->group(function () {
+        Route::resource('/categories', CategoriesController::class)->only(['show']); 
+        Route::get('/', [BlogController::class, 'index'])->name('index');
+        Route::get('/{slug}', [ThreadsController::class, 'show'])->name('thread.show');
+    });
+    
     Route::prefix('fishing-magazine')->name('blog.')->group(function () {
         Route::resource('/categories', CategoriesController::class)->only(['show']);
         Route::get('/', [BlogController::class, 'index'])->name('index');
         Route::get('/{slug}', [ThreadsController::class, 'show'])->name('thread.show');
     });
-
-});
-
-Route::middleware(['check_domain:catchaguide.de'])->group(function () {
-    Route::prefix('angelmagazin')->name('blogde.')->group(function () {
-        Route::resource('/categories', CategoriesController::class)->only(['show']);
-        Route::get('/', [BlogController::class, 'index'])->name('index');
-        Route::get('/{slug}', [ThreadsController::class, 'show'])->name('thread.show');
-    });
- 
-});
+}
 
 Route::post('/search', [\App\Http\Controllers\SearchController::class, 'search'])->name('search');
 Route::prefix('guides')->name('guides.')->group(function () {});

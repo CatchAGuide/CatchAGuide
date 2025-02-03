@@ -9,7 +9,20 @@
 
 @section('content')
 
-
+<div class="container">
+    <section class="page-header">
+        <div class="page-header__bottom">
+            <div class="container">
+                <div class="page-header__bottom-inner">
+                    <ul class="thm-breadcrumb list-unstyled">
+                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                        <li><span>&#183;</span></li>
+                        <li class="active">{{ __('message.Magazine') }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
     <!--News One Start-->
     <section class="news-one" style="padding: 25px;">
         <div class="container">
@@ -44,5 +57,6 @@
             </div>
         </div>
     </section>
+</div>
     <!--News One End-->
 @endsection
