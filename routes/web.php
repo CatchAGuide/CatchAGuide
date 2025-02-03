@@ -307,6 +307,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('vacations/changeVacationStatus/{id}', [AdminVacationsController::class, 'changeVacationStatus'])->name('changeVacationStatus');
         Route::get('vacations/bookings', [AdminVacationsController::class, 'bookings'])->name('vacations.bookings');
         Route::get('vacations/bookings/{booking}', [AdminVacationsController::class, 'show'])->name('vacations.bookings.show');
+        Route::get('vacations/{id}/{slug}', [VacationsController::class, 'show'])->name('vacations.show');
 
         Route::prefix('settings')->name('settings.')->group(function () {
             

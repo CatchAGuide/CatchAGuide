@@ -6,6 +6,26 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 @endsection
 @section('profile-content')
+
+<div class="container">
+    <section class="page-header">
+        <div class="page-header__bottom">
+            <div class="container">
+                <div class="page-header__bottom-inner">
+                    <ul class="thm-breadcrumb list-unstyled">
+                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                        <li><span>&#183;</span></li>
+                        <li><a href="{{ route('profile.index') }}">{{ translate('Profile') }}</a></li>
+                        <li><span>&#183;</span></li>
+                        <li class="active">
+                            {{ translate('Von mir gebucht') }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
     {{-- @if(count($authUser->guidings)) 
         @foreach($authUser->guidings as $guiding)
             @if(count($guiding->bookings))

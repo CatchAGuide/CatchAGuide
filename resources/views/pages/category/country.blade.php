@@ -273,6 +273,41 @@
 @section('content')
     <!--News One Start-->
     <div class="container" id="destination">
+        
+        <section class="page-header">
+            <div class="page-header__bottom">
+                <div class="container">
+                    <div class="page-header__bottom-inner">
+                        <ul class="thm-breadcrumb list-unstyled">
+                            <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                            <li><span>&#183;</span></li>
+                            @if($row_data->type == 'country')
+                                <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
+                            
+                            @elseif($row_data->type == 'region')
+                                <li><a href="{{ route('destination.country', ['country' => $row_data->country_slug]) }}">
+                                    {{ translate('Fishing Destinations in ')}} {{ $row_data->country_name }}
+                                </a></li>
+                                <li><span>&#183;</span></li>    
+                                <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
+                            
+                            @elseif($row_data->type == 'city')
+                                <li><a href="{{ route('destination.country', ['country' => $row_data->country_slug]) }}">
+                                    {{ translate('Fishing Destinations in ')}} {{ $row_data->country_name }}
+                                </a></li>
+                                <li><span>&#183;</span></li>
+                                <li><a href="{{ route('destination.country', ['country' => $row_data->country_slug, 'region' => $row_data->region_slug]) }}">
+                                    {{ translate('Fishing Destinations in ')}} {{ $row_data->region_name }}
+                                </a></li>
+                                <li><span>&#183;</span></li>
+                                <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
+                            @endif
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <div class="row">
             <div class="col-12">
                 <div id="page-main-intro" class="mb-3">
@@ -489,7 +524,7 @@
                                         </div>
                                     </div>
                                     <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 p-md-3 mt-md-1">
-                                    <a href="{{ route('guidings.show', [$guiding->id, $guiding->slug]) }}">
+                                    <a href="{{ route('guidings.show', ['id' => $guiding->id, 'slug' => $guiding->slug, 'from_destination' => true, 'destination_id' => $row_data->id]) }}">
                                             <div class="guidings-item">
                                                 <div class="guidings-item-title">
                                                 @if(!$agent->ismobile())

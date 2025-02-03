@@ -122,6 +122,26 @@
 </style>
 @endsection
 @section('profile-content')
+
+<div class="container">
+  <section class="page-header">
+      <div class="page-header__bottom">
+          <div class="container">
+              <div class="page-header__bottom-inner">
+                  <ul class="thm-breadcrumb list-unstyled">
+                      <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                      <li><span>&#183;</span></li>
+                      <li><a href="{{ route('profile.index') }}">{{ translate('Profile') }}</a></li>
+                      <li><span>&#183;</span></li>
+                      <li class="active">
+                          {{ translate('Neues Führungsangebot') }}
+                      </li>
+                  </ul>
+              </div>
+          </div>
+      </div>
+  </section>
+</div>
 <div class="container shadow-lg p-0 p-md-4">
   {{-- @livewire('multi-step-form') --}}
   @include('pages.guidings.multi-step-form')

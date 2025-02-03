@@ -69,8 +69,13 @@ class VacationsController extends Controller
                 $vacation->gallery = json_decode($vacation->gallery, true);
                 return $vacation;
             });
+
+
+        $destinationId = session('vacation_destination_id');
+        $destination = Destination::find($destinationId);
+        session()->forget('vacation_destination_id');
             
-        return view('pages.vacations.show', compact('vacation', 'sameCountries'));
+        return view('pages.vacations.show', compact('vacation', 'sameCountries', 'destination'));
     }
 
     private function otherVacations(){

@@ -10,6 +10,26 @@
             border: 1px solid black;
         }
     </style>
+    <div class="container">
+        <section class="page-header">
+            <div class="page-header__bottom">
+                <div class="container">
+                    <div class="page-header__bottom-inner">
+                        <ul class="thm-breadcrumb list-unstyled">
+                            <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                            <li><span>&#183;</span></li>
+                            <li><a href="{{ route('profile.index') }}">{{ translate('Profile') }}</a></li>
+                            <li><span>&#183;</span></li>
+                            <li class="active">
+                                {{ translate('Account') }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
     @if($errors)
         @foreach ($errors->all() as $error)
             <div>{{ $error }}</div>

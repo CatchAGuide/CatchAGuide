@@ -34,6 +34,7 @@ use App\Models\BlockedEvent;
 use App\Models\ExtrasPrice;
 use App\Models\FishingType;
 use App\Models\BoatExtras;
+use App\Models\Destination;
 
 class GuidingsController extends Controller
 {
@@ -43,12 +44,37 @@ class GuidingsController extends Controller
         $searchMessage = "";
         $title = '';
         $filter_title = '';
+        $destination = null;
 
         // Get or generate a random seed and store it in the session
         $randomSeed = Session::get('random_seed');
         if (!$randomSeed) {
             $randomSeed = rand();
             Session::put('random_seed', $randomSeed);
+        }
+
+        // If coming from destination page, get the destination context
+        if ($request->has('from_destination')) {
+            $destination = Destination::where('id', $request->input('destination_id'))->first();
+            
+            dd($destination);
+            // Apply location-based filtering
+            if ($destination) {
+                switch ($destination->type) {
+                    case 'country':
+                        $query->where('country', $destination->name);
+                        break;
+                    case 'region':
+                        $query->where('region', $destination->name)
+                              ->where('country', $destination->country_name);
+                        break;
+                    case 'city':
+                        $query->where('city', $destination->name)
+                              ->where('region', $destination->region_name)
+                              ->where('country', $destination->country_name);
+                        break;
+                }
+            }
         }
 
         $query = Guiding::select(['*', DB::raw('(
@@ -286,19 +312,26 @@ class GuidingsController extends Controller
             'alltargets' => $alltargets,
             'guiding_waters' => $guiding_waters,
             'guiding_methods' => $guiding_methods,
+            'destination' => $destination,
         ]);
         
     }
 
-    public function newShow($id,$slug)
+    public function newShow($id, $slug, Request $request)
     {
         $locale = Config::get('app.locale');
+        
+        $query = Guiding::where('id', $id)->where('slug', $slug);
+        
+        $destination = null;
 
-        //$guiding = Guiding::where('id',$id)->where('slug',$slug)->where('status',1)->first();
-        $query = Guiding::where('id',$id)->where('slug',$slug);
+        // If coming from destination page, get the destination context
+        if ($request->has('from_destination')) {
+            $destination = Destination::where('id', $request->input('destination_id'))->first();
+        }
 
         if (!Auth::check()) {
-            $query = $query->where('status',1);
+            $query = $query->where('status', 1);
         }
 
         $guiding = $query->first();
@@ -352,6 +385,7 @@ class GuidingsController extends Controller
             'ratings' => $ratings,
             'other_guidings' => $otherGuidings,
             'average_rating' => $averageRating,
+            'destination' => $destination,
             'blocked_events' => $guiding->getBlockedEvents(),
         ]);
     }
