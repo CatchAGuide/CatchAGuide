@@ -48,37 +48,31 @@
                           <span class="fw-bold">{{ translate('Personal Information') }}</span>
                         </div>
                         <div class="row">
-                          <div class="col-sm-6">
+                          <div class="col-12">
+                            <div class="form-group">
+                              <label>{{translate('Name')}}<span style="color: #e8604c !important;">*</span></label>
+                              <div class="input-group">
+                                <select class="form-control w-25 rounded-start @error('userData.title') is-invalid @enderror" 
+                                        id="title" wire:model="userData.title" style="max-width: 80px;">
+                                  <option value="">{{translate('Title')}}</option>
+                                  <option value="Mr">{{translate('Mr')}}</option>
+                                  <option value="Mrs">{{translate('Mrs')}}</option>
+                                  <option value="Ms">{{translate('Ms')}}</option>
+                                </select>
+                                <input type="text" class="form-control @error('userData.firstname') is-invalid @enderror" 
+                                       placeholder="{{translate('First Name')}}" id="firstname" wire:model="userData.firstname" required>
+                                <input type="text" class="form-control @error('userData.lastname') is-invalid @enderror" 
+                                       placeholder="{{translate('Last Name')}}" id="lastname" wire:model="userData.lastname" required>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-sm-6 col-md-4">
                             <div class="form-group">
                               <label for="salutation">@lang('forms.salut')</label>
                               <Select type="text" class="form-control rounded" id="salutation" wire:model="userData.salutation">
-                                <option value="male">Herr</option>
-                                <option value="female">Frau</option>
+                                <option value="male">{{translate('Male')}}</option>
+                                <option value="female">{{translate('Female')}}</option>
                               </select>
-                            </div>
-                          </div>
-                          <div class="col-sm-6">
-                            <div class="form-group">
-                              <label for="title">@lang('forms.title')</label>
-                              <input type="text" class="form-control rounded" id="title" wire:model="userData.title">
-                            </div>
-                          </div>
-                          <div class="col-sm-6">
-                            <div class="form-group">
-                              <label for="firstname">@lang('forms.name')<span style="color: #e8604c !important;">*</span></label>
-                              <input type="text" class="form-control rounded @error('userData.firstname') is-invalid @enderror" id="firstname" wire:model="userData.firstname" required>
-                            </div>
-                          </div>
-                          <div class="col-sm-6">
-                            <div class="form-group">
-                              <label for="lastname">@lang('forms.lastName')<span style="color: #e8604c !important">*</span></label>
-                              <input type="text" class="form-control rounded  @error('userData.lastname') is-invalid @enderror" id="lastname" wire:model="userData.lastname" required>
-                            </div>
-                          </div>
-                          <div class="col-12">
-                            <div class="form-group">
-                              <label for="street">@lang('forms.street')<span style="color: #e8604c !important">*</span></label>
-                              <input type="text" class="form-control rounded @error('userData.address') is-invalid @enderror" id="street" wire:model="userData.address" required>
                             </div>
                           </div>
                           <div class="col-sm-6 col-md-4">
@@ -87,23 +81,30 @@
                               <input type="text" class="form-control rounded @error('userData.postal') is-invalid @enderror" id="zip" wire:model="userData.postal" required>
                             </div>
                           </div>
-                          <div class="col-sm-6 col-md-8">
+                          <div class="col-12">
                             <div class="form-group">
-                              <label for="city">@lang('forms.loc')<span style="color: #e8604c !important">*</span></label>
+                              <label for="street">@lang('forms.street')<span style="color: #e8604c !important">*</span></label>
+                              <input type="text" class="form-control rounded @error('userData.address') is-invalid @enderror" id="street" wire:model="userData.address" required>
+                            </div>
+                          </div>
+                          <div class="col-sm-6">
+                            <div class="form-group">
+                              <label for="city">{{translate('State/City/Region')}}<span style="color: #e8604c !important">*</span></label>
                               <input type="text" class="form-control rounded @error('userData.city') is-invalid @enderror" id="city" wire:model="userData.city" required>
                             </div>
                           </div>
-                          <div class="col-sm-12">
+                          <div class="col-sm-6">
                             <div class="form-group">
-                              <label for="country">@lang('forms.land')</label>
+                              <label for="country">{{translate('Country')}}</label>
                               <input type="text" class="form-control rounded" id="country" wire:model="userData.country">
                             </div>
                           </div>
-                          <div class="col-sm-12">
+                          <div class="col-12">
                             <div class="form-group">
                               <label for="phone">@lang('forms.pNumber').<span style="color: #e8604c !important; font-size: 12px;">* @lang('forms.pNumberMsg')</span></label>
                               <div class="d-flex">
-                                <select class="form-control rounded w-25 me-2 @error('userData.countryCode') is-invalid @enderror" id="countryCode" wire:model="userData.countryCode" required>
+                                <select class="form-control rounded w-25 me-2 @error('userData.countryCode') is-invalid @enderror" 
+                                        id="countryCode" wire:model="userData.countryCode" style="max-width: 120px;" required>
                                   <option value="+49">+49 (Germany)</option>
                                   <option value="+1">+1 (USA/Canada)</option>
                                   <option value="+44">+44 (UK)</option>
@@ -151,14 +152,16 @@
                                   <option value="+971">+971 (UAE)</option>
                                   <option value="+966">+966 (Saudi Arabia)</option>
                                 </select>
-                                <input type="tel" class="form-control rounded @error('userData.phone') is-invalid @enderror" id="phone" wire:model="userData.phone" name="userData.phone" value="{{ old('userData.phone') }}" required>
+                                <input type="tel" class="form-control rounded @error('userData.phone') is-invalid @enderror" 
+                                       id="phone" wire:model="userData.phone" required>
                               </div>
                             </div>
                           </div>
-                          <div class="col-sm-12">
+                          <div class="col-12">
                             <div class="form-group">
                               <label for="email">E-Mail<span style="color: #e8604c">*</span></label>
-                              <input type="text" class="form-control rounded" id="email" wire:model="userData.email" required>
+                              <input type="email" class="form-control rounded @error('userData.email') is-invalid @enderror" 
+                                     id="email" wire:model="userData.email" required>
                             </div>
                           </div>
                           <div class="col-md-12">
@@ -603,6 +606,42 @@ button.btn-gray, a.btn-gray  {
   }
   .note-box strong {
     color: #0c5460;
+  }
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 576px) {
+    .input-group {
+        flex-direction: column;
+    }
+    
+    .input-group > * {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 0.5rem;
+        border-radius: 0.25rem !important;
+    }
+    
+    .input-group > *:not(:last-child) {
+        border-right: 1px solid #ced4da;
+    }
+    
+    .d-flex.phone-container {
+        flex-direction: column;
+    }
+    
+    .phone-container select {
+        margin-bottom: 0.5rem;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+  }
+
+  @media (min-width: 577px) {
+    .input-group > *:not(:first-child) {
+        border-left: none;
+    }
   }
 </style>
 @endsection

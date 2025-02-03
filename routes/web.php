@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AuthenticationController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\LoginAuthController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Admin\Blog\CategoriesController as AdminCategoriesController;
@@ -81,6 +82,8 @@ Route::get('/booking-request/thank-you',function(){
     return view('pages.additional.thank_you_request');
 })->name('request.thank-you');
 
+Route::get('thank-you/{booking}', [CheckoutController::class, 'thankYou'])->name('thank-you');
+
 Route::get('/all-countries',function(){
     return view('pages.countries.index');
 })->name('allcountries');
@@ -151,17 +154,13 @@ Route::middleware(['check_domain:catchaguide.de'])->group(function () {
  
 });
 
-
-
 Route::post('/search', [\App\Http\Controllers\SearchController::class, 'search'])->name('search');
-Route::prefix('guides')->name('guides.')->group(function () {
+Route::prefix('guides')->name('guides.')->group(function () {});
 
-});
+Route::get('/checkout', [CheckoutController::class, 'checkoutView'])->name('checkout.index');
+Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
 
 Route::middleware('auth:web')->group(function () {
-    Route::get('/checkout', [CheckoutController::class, 'checkoutView'])->name('checkout.index');
-    Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
-    Route::get('thank-you/{booking}', [CheckoutController::class, 'thankYou'])->name('thank-you');
     Route::get('/transaction', [CheckoutController::class, 'completeTransaction'])->name('transaction');
 
     Route::get('events', [\App\Http\Controllers\Api\EventsController::class, 'index']);
@@ -234,12 +233,32 @@ Route::name('law.')->group(function() {
 Route::get('login', [LoginAuthController::class, 'index'])->name('login');//->middleware('guest:employees');
 Route::post('login', [LoginAuthController::class, 'login'])->name('login');//->middleware('guest:employees');
 Route::post('register', [RegisterController::class, 'register'])->name('register');//->middleware('guest:employees');
-Route::post('register', [RegisterController::class, 'register'])->name('register');//->middleware('guest:employees');
 Route::get('registration-verfication', [RegisterController::class, 'verfication'])->name('registration-verfication');//->middleware('guest:employees');
 Route::get('password/reset', [ForgotPasswordController::class, 'index'])->name('password.request');
 Route::post('password/reset', [ForgotPasswordController::class, 'reset'])->name('password.update');
 Route::get('password/reset/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
+Route::get('test', [\App\Http\Controllers\TestController::class, 'index']);
+
+Route::get('robots.txt', function () {
+    if (request()->getHost() == 'catchaguide.com') {
+        return response("User-agent: *\nDisallow: \nSitemap:https://catchaguide.com/NewENSitemap.xml", 200)
+        ->header('Content-Type', 'text/plain');
+    } else {
+        return response("User-agent: *\nDisallow: \nSitemap:https://catchaguide.de/de/catchaguideDE.xml", 200)
+        ->header('Content-Type', 'text/plain');
+    }
+});
+
+Route::name('category.')->group(function(){
+    Route::get('/{slug?}', [GuideThreadController::class, 'categoryIndex'])->name('thread');
+});
+
+Route::post('/change-password', [PasswordController::class, 'changePassword'])
+    ->name('password.change')
+    ->middleware('auth');
+
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::name('auth.')->group(function () {
         Route::get('logins', [AuthenticationController::class, 'index'])->name('logins');//->middleware('guest:employees');
@@ -375,20 +394,3 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('request-as-guide', [\App\Http\Controllers\GuideRequestsController::class, 'index'])->name('guide-requests.index');
     });
 });
-
-Route::get('test', [\App\Http\Controllers\TestController::class, 'index']);
-
-Route::get('robots.txt', function () {
-    if (request()->getHost() == 'catchaguide.com') {
-        return response("User-agent: *\nDisallow: \nSitemap:https://catchaguide.com/NewENSitemap.xml", 200)
-        ->header('Content-Type', 'text/plain');
-    } else {
-        return response("User-agent: *\nDisallow: \nSitemap:https://catchaguide.de/de/catchaguideDE.xml", 200)
-        ->header('Content-Type', 'text/plain');
-    }
-});
-
-Route::name('category.')->group(function(){
-    Route::get('/{slug?}', [GuideThreadController::class, 'categoryIndex'])->name('thread');
-});
-

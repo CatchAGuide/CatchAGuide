@@ -37,7 +37,8 @@ class User extends Authenticatable
         'paypaldetails',
         'merchant_id',
         'language',
-        'taxId'
+        'taxId',
+        'is_temp_password'
     ];
 
     /**

@@ -5,6 +5,7 @@ namespace App\Http\Livewire;
 
 use App\Mail\Guest\GuestBookingRequestMail;
 use App\Mail\Guide\GuideBookingRequestMail;
+use App\Mail\Guest\AutomaticRegistrationMail;
 use Mail;
 
 use Illuminate\Support\Str;
@@ -23,6 +24,7 @@ use App\Models\GuidingExtras;
 use Illuminate\Support\Facades\Log;
 
 use App\Jobs\SendCheckoutEmail;
+use App\Models\UserInformation;
 
 class Checkout extends Component
 {
@@ -237,7 +239,6 @@ class Checkout extends Component
 
     public function checkout()
     {
-
         $this->loading = true;
 
         $this->validateData();
@@ -245,15 +246,50 @@ class Checkout extends Component
             'extraQuantities.*' => ['required', 'numeric', 'max:' . $this->persons],
         ]);
 
-        $user = auth()->user(); 
+        // More reliable way to check authentication
+        $currentUser = auth()->user();
+        
+        if ($currentUser) {
+            $user = $currentUser;
+        } else {
+            $existingUser = User::where('email', $this->userData['email'])->first();
 
-      //  $guide = User::find($this->guiding->user_id);
+            if ($existingUser) {
+                session()->flash('error', __('Email used for another account. Please use a different email address or login to your account.'));
+                return redirect()->route('login');
+            }
+
+            $randomPassword = Str::random(10);
+            $user = User::create([
+                'firstname' => $this->userData['firstname'], 
+                'lastname' => $this->userData['lastname'],
+                'email' => $this->userData['email'],
+                'is_temp_password' => 1,
+                'password' => \Hash::make($randomPassword),
+            ]);
+
+            // Create UserInformation record
+            $userInformation = UserInformation::create([
+                'phone' => $this->userData['phone'],
+                'address' => $this->userData['address'],
+                'postal' => $this->userData['postal'],
+                'city' => $this->userData['city'],
+                'country' => $this->userData['country'],
+            ]);
+
+            // Update user with the information ID
+            $user->user_information_id = $userInformation->id;
+            $user->save();
+
+            if ($user && !app()->environment('local')) {
+                Mail::to($user->email)->queue(new AutomaticRegistrationMail($user, $randomPassword));
+            }
+        }
 
         $blockedEvent = (new EventService())->createBlockedEvent($this->selectedTime, $this->selectedDate, $this->guiding);
 
         $fee = (new HelperService())->calculateRates($this->guidingprice);
         $partnerFee = (new HelperService())->convertAmountToString($fee);
-
 
         $expiresAt = Carbon::now()->addHours(24); // Default expiration time (24 hours)
 

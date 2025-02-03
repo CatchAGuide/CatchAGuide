@@ -22,7 +22,7 @@
         <div class="tour-details-two__book-tours">
             <h3 class="tour-details-two__sidebar-title d-none d-md-block">@lang('message.bookaguide')</h3>
                 <div class="card-body">
-                    <form action="{{ route('checkout') }}" method="POST">
+                    <form action="{{ route('checkout') }}" method="POST" class="checkout-form">
                         @csrf
                         <div class="booking-form-container">
                             <div class="booking-select mb-md-3">
@@ -41,7 +41,6 @@
                             </div>
                             <input type="hidden" name="guiding_id" value="{{ $guiding->id }}">
                             <button type="submit" class="btn btn-orange w-100">@lang('message.Booking')</button>
-
                         </div>
                     </form>
                     <div class="mt-3">
@@ -81,3 +80,48 @@
         </div>
     </div>
 </div>
+
+<!-- Checkout Modal -->
+<div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="checkoutModalLabel">{{ translate('Checkout Options') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-grid gap-3">
+                    <button type="button" class="btn btn-orange w-100" id="guestCheckout">
+                        {{ translate('Continue as Guest') }}
+                    </button>
+                    <a href="{{ route('login') }}" class="btn btn-outline-orange w-100">
+                        {{ translate('Login to Continue') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkoutForms = document.querySelectorAll('.checkout-form');
+    const isLoggedIn = {{ auth()->check() ? 'true' : 'false' }};
+    const checkoutModal = new bootstrap.Modal(document.getElementById('checkoutModal'));
+    
+    checkoutForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            if (!isLoggedIn) {
+                e.preventDefault();
+                checkoutModal.show();
+            }
+        });
+    });
+
+    // Handle guest checkout
+    document.getElementById('guestCheckout').addEventListener('click', function() {
+        const activeForm = document.querySelector('.checkout-form');
+        activeForm.submit();
+    });
+});
+</script>
