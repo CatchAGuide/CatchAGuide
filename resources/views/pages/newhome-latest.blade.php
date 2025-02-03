@@ -6,6 +6,15 @@
     @section('title','Geführte Angeltouren finden & online buchen')
 @endif
 
+@section('share_tags')
+    <meta property="og:title" content="{{__('homepage.header-title')}}" />
+    <meta property="og:description" content="{{__('homepage.header-message')}}" />
+    
+    @if(file_exists(public_path(str_replace(asset(''), '', asset('assets/images/logo/CatchAGuide_LogoOnly_JPEG.jpg')))))
+        <meta property="og:image" content="{{asset('assets/images/logo/CatchAGuide_LogoOnly_JPEG.jpg')}}"/>
+    @endif
+@endsection
+
 @section('header_title', __('homepage.header-title'))
 @section('header_sub_title', __('homepage.header-message'))
 
