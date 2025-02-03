@@ -785,11 +785,12 @@
 @section('js_after')
 
 <script>
-    $('#sortby').on('change',function(){
-        $('#form-sortby').submit();
-    });
-    $('#sortby-2').on('change',function(){
-        $('#form-sortby-2').submit();
+    $('#sortby, #sortby-2').on('change', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('sortby', $(this).val());
+        
+        const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+        window.location.href = newUrl;
     });
 </script>
 <script>
@@ -878,19 +879,13 @@ function initializeSelect2() {
         $('#num-guests, #num-guestsOffCanvass').val('{{ request()->get('num_guests') }}');
     @endif
 }
-
-
-
 </script>
 
 
 <script type="module">
     import { MarkerClusterer } from "https://cdn.skypack.dev/@googlemaps/markerclusterer@2.3.1";
-     initializeMap();
-
-
-     async function initializeMap() {
-
+    initializeMap();
+    async function initializeMap() {
         var mapStyle = [
           {
             featureType: "poi",
@@ -948,154 +943,78 @@ function initializeSelect2() {
           },
         ];
 
-    //const { Map } = await google.maps.importLibrary("maps");
+        @php
+            $lat = isset($guidings[0]) ? $guidings[0]->lat : 51.165691;
+            $lng = isset($guidings[0]) ? $guidings[0]->lng : 10.451526;
+        @endphp
 
-    @php
-        $lat = isset($guidings[0]) ? $guidings[0]->lat : 51.165691;
-        $lng = isset($guidings[0]) ? $guidings[0]->lng : 10.451526;
-    @endphp
+        const position =  { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }} , lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} }; 
+        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
+        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
 
-    const position =  { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }} , lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} }; 
-    const { Map, InfoWindow } = await google.maps.importLibrary("maps");
-    const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
+        const map = new Map(document.getElementById("map"), {
+            zoom: 5,
+            center: position,
+            styles: mapStyle,
+            mapId: "DEMO_MAP_ID",
+            mapTypeControl: false,
+            streetViewControl: false,
+        });
 
-    //map = new google.maps.Map(document.getElementById("map"), {
-    const map = new Map(document.getElementById("map"), {
-        zoom: 5,
-        center: position,
-        styles: mapStyle,
-        mapId: "DEMO_MAP_ID",
-        mapTypeControl: false,
-        streetViewControl: false,
-    });
+        const marker = new AdvancedMarkerElement({
+            map: map,
+        });
 
-    // The marker, positioned at Uluru
-    const marker = new AdvancedMarkerElement({
-        map: map,
-        // position: position,
-    });
+        const markers = [];
+        const infowindows = [];
+        const uniqueCoordinates = [];
+        let isDuplicateCoordinate;  
 
+        @if($allGuidings->isEmpty())
+            @include('pages.guidings.partials.maps',['guidings' => $otherguidings])
+        @else
+            @include('pages.guidings.partials.maps',['guidings' => $allGuidings])
+        @endif
 
+        function getRandomOffset() {
+        // Generate a random value between -0.00005 and 0.00005 (adjust the range as needed)
+        return (Math.random() - 0.5) * 0.0080;
+        }
 
-    const markers = [];
-    const infowindows = [];
-    const uniqueCoordinates = [];
-    let isDuplicateCoordinate;  
-
-    @if($allGuidings->isEmpty())
-        @include('pages.guidings.partials.maps',['guidings' => $otherguidings])
-    @else
-        @include('pages.guidings.partials.maps',['guidings' => $allGuidings])
-    @endif
-
-
-    function getRandomOffset() {
-      // Generate a random value between -0.00005 and 0.00005 (adjust the range as needed)
-      return (Math.random() - 0.5) * 0.0080;
+        const markerCluster = new MarkerClusterer({ markers, map, mapStyle });
+        // Add click event listeners to individual markers inside the cluster
+        google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
+            map.setZoom(map.getZoom() + 2);
+            map.setCenter(cluster.getCenter());
+        });
     }
 
+    window.addEventListener('load', function() {
+        var placeLatitude = '{{ request()->get('placeLat') }}'; // Replace with the actual value from the request
+        var placeLongitude = '{{ request()->get('placeLng') }}'; // Replace with the actual value from the request
 
-    /* 
-    // Create the MarkerClusterer
-    const markerCluster = new MarkerClusterer(map, markers, {
-        imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m',
-        maxZoom: 12,
-    });
-    */
-   
-    const markerCluster = new MarkerClusterer({ markers, map, mapStyle });
-    // Add click event listeners to individual markers inside the cluster
-    google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
-        // You can control the zoom level here
-        // For example, zoom in by 2 levels when clicking on a cluster
-        map.setZoom(map.getZoom() + 2);
-        map.setCenter(cluster.getCenter());
+        if (placeLatitude && placeLongitude) {
+            // The place latitude and longitude are present, so set the values in the form fields
+            document.getElementById('placeLat').value = placeLatitude;
+            document.getElementById('placeLng').value = placeLongitude;
+        } 
     });
 
-}
-
-
-
-/*function initialize() {
-    var input = document.getElementById('searchPlace');
-    var autocomplete = new google.maps.places.Autocomplete(input);
-    google.maps.event.addListener(autocomplete, 'place_changed', function () {
-        //alert(2221);
-        var place = autocomplete.getPlace();
-        document.getElementById('LocationLat').value = place.geometry.location.lat();
-        document.getElementById('LocationLng').value = place.geometry.location.lng();
-    });
-}*/
-
-/*function initialize2() {
-
-    var input = document.getElementById('searchPlaceOffCanvass');
-    var autocomplete = new google.maps.places.Autocomplete(input);
-    google.maps.event.addListener(autocomplete, 'place_changed', function () {
-        var place = autocomplete.getPlace();
-        document.getElementById('placeLatOffCanvass').value = place.geometry.location.lat();
-        document.getElementById('placeLngOffCanvass').value = place.geometry.location.lng();
-    });
-}*/
-
-//window.addEventListener('load', initialize);
-//window.addEventListener('load', initialize2);
-
-window.addEventListener('load', function() {
-    var placeLatitude = '{{ request()->get('placeLat') }}'; // Replace with the actual value from the request
-    var placeLongitude = '{{ request()->get('placeLng') }}'; // Replace with the actual value from the request
-
-    if (placeLatitude && placeLongitude) {
-        // The place latitude and longitude are present, so set the values in the form fields
-        document.getElementById('placeLat').value = placeLatitude;
-        document.getElementById('placeLng').value = placeLongitude;
-    } else {
-        // The place latitude and longitude are not present, so execute the geolocation function
-        // getLocation();
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+            console.log('Geolocation is not supported by this browser.');
+        }
     }
-});
 
-function getLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showPosition);
-    } else {
-        console.log('Geolocation is not supported by this browser.');
+    function showPosition(position) {
+        var lat = position.coords.latitude;
+        var lng = position.coords.longitude;
+        document.getElementById('placeLat').value = lat;
+        document.getElementById('placeLng').value = lng;
     }
-}
 
-function showPosition(position) {
-    var lat = position.coords.latitude;
-    var lng = position.coords.longitude;
-    document.getElementById('placeLat').value = lat;
-    document.getElementById('placeLng').value = lng;
-    
-    codeLatLng(lat, lng);
-}
-
-function codeLatLng(lat, lng) {
-    return null;
-    // var geocoder = new google.maps.Geocoder();
-    // var latlng = new google.maps.LatLng(lat, lng);
-    // geocoder.geocode({'latLng': latlng}, function (results, status) {
-    //     if (status === google.maps.GeocoderStatus.OK) {
-    //         if (results[0]) {
-    //             document.getElementById('searchPlace2').value = results[0].formatted_address;
-    //             //document.getElementById('searchPlaceOffCanvass').value = results[0].formatted_address;
-    //         } else {
-    //             console.log('No results found');
-    //             return null;
-    //         }
-    //     } else {
-    //         console.log('Geocoder failed due to: ' + status);
-    //         return null;
-    //     }
-    // });
-}
-
-       
 </script>
-
-
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
-
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 @endsection

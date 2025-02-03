@@ -14,7 +14,6 @@
     @if(!empty(app('guiding')->getImagesUrl($guiding)) && is_array(app('guiding')->getImagesUrl($guiding)) && count(app('guiding')->getImagesUrl($guiding)))
     <meta property="og:image" content="{{app('guiding')->getImagesUrl($guiding)['image_0']}}"/>
     @endif
-
 @endsection
 
 @section('css_after')
