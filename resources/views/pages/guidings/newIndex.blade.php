@@ -6,13 +6,13 @@
     @section('title',$guiding->title)
 @endif
 
-@section('description',translate($guiding->excerpt))
+@section('description',translate($guiding->desc_course_of_action ?? ""))
 
 @section('share_tags')
     <meta property="og:title" content="{{translate($guiding->title)}}" />
-    <meta property="og:description" content="{{translate($guiding->excerpt)}}" />
-    @if(!empty(app('guiding')->getImagesUrl($guiding)) && is_array(app('guiding')->getImagesUrl($guiding)) && count(app('guiding')->getImagesUrl($guiding)))
-    <meta property="og:image" content="{{app('guiding')->getImagesUrl($guiding)['image_0']}}"/>
+    <meta property="og:description" content="{{translate($guiding->desc_course_of_action ?? "")}}" />
+    @if(file_exists(public_path(str_replace(asset(''), '', asset($guiding->thumbnail_path)))))
+        <meta property="og:image" content="{{asset($guiding->thumbnail_path)}}"/>
     @endif
 @endsection
 

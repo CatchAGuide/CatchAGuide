@@ -11,10 +11,10 @@
 @section('share_tags')
     <meta property="og:title" content="{{translate($vacation->title)}}" />
     <meta property="og:description" content="{{translate($vacation->description ?? "")}}" />
-    @if(!empty(app('guiding')->getImagesUrl($vacation)) && is_array(app('guiding')->getImagesUrl($vacation)) && count(app('guiding')->getImagesUrl($vacation)))
-    <meta property="og:image" content="{{app('guiding')->getImagesUrl($vacation)['image_0']}}"/>
+    
+    @if(isset($vacation->gallery) && is_array($vacation->gallery) && !empty($vacation->gallery[0]) && file_exists(public_path(str_replace(asset(''), '', asset($vacation->gallery[0])))))
+        <meta property="og:image" content="{{asset($vacation->gallery[0])}}"/>
     @endif
-
 @endsection
 
 @section('css_after')
