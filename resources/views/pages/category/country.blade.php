@@ -267,7 +267,7 @@
             </div>
         </section>
 
-        <div class="row">
+        <div class="container">
             <div class="col-12">
                 <div id="page-main-intro" class="mb-3">
                     <div class="page-main-intro-text mb-1">{!! translate(nl2br($row_data->introduction)) !!}</div>

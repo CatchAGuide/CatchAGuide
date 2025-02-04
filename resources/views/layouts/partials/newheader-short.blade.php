@@ -391,27 +391,27 @@ input[type=number] {
     #mobileherofilter .row .col-md-4{
         margin: 0!important;
     }
-    #mobileherofilter .column-input{
+    .short-header #mobileherofilter .column-input{
         width: calc(100% - 80px);
         padding-left: 0;
     }
-    #mobileherofilter .column-input i{
+    .short-header #mobileherofilter .column-input i{
         font-size: 24px;
     }
-    #mobileherofilter .column-button{
+    .short-header #mobileherofilter .column-button{
         width: auto;
         margin: 0 !important;
         padding: 0;
     }
-    .new-filter-btn{
+    .short-header .new-filter-btn{
         display: none;
     }
-    .new-filter-btn.mobile{
+    .short-header .new-filter-btn.mobile{
         display: block;
         width: 80px;
         height: 100%;
     }
-    #mobileherofilter .new-filter-btn.mobile i{
+    .short-header #mobileherofilter .new-filter-btn.mobile i{
         color: #fff !important;
     }
 }

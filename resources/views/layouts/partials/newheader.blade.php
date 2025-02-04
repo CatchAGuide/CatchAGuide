@@ -115,6 +115,7 @@
                 <div id="mobileherofilter" class="shadow-lg bg-white p-2 rounded">
                     <div class="row">
                         @if ($isVacation)
+                        <div class="vacation-header">
                             <div class="col-md-4 column-input my-2">
                                 <div class="d-flex align-items-center small myselect2">
                                     <i class="fa fa-map-marker-alt position-absolute ps-1"></i>
@@ -136,6 +137,10 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="">
+                            <button type="submit" class="form-control new-filter-btn mobile"><i class="icon-magnifying-glass"></i></button>
+                            </div>
+                        </div>
                         @else
                             <div class="col-md-4 column-input my-2">
                                 <div class="form-group">
@@ -177,9 +182,8 @@
                                 </div>
                             </div>
                         @endif
-                        <div class="col-md-2 column-button my-2">
-                                    <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
-                                    <button type="submit" class="form-control new-filter-btn mobile"><i class="icon-magnifying-glass"></i></button>
+                        <div class="col-md-2 column-input my-2">
+                            <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
                         </div>
                     </div>
                 </div> 
@@ -289,6 +293,9 @@
     width: 95%;
     margin: auto;
 }
+    #mobileherofilter:has(.vacation-header) .new-filter-btn{
+        display: none;
+    }
      #mobileherofilter .column-input input{
         border-top:none !important;
         border-left:none !important;
@@ -339,7 +346,7 @@
     #mobileherofilter .new-filter-btn:hover{
         background-color:#313041;
     }
-.short-header.navbar-custom {
+.short-header.long-header.navbar-custom {
     background-color: #313041;
     padding: 16px 0 35px;
     position: relative;
@@ -485,23 +492,29 @@ input[type=number] {
     }
 }
 @media (max-width: 768px) {
-    #mobileherofilter .row .col-md-4{
-        margin: 0!important;
+    #mobileherofilter:has(.vacation-header) .new-filter-btn.mobile{
+        display: block;
     }
-    #mobileherofilter .column-input{
+    .vacation-header{
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    #mobileherofilter:has(.vacation-header) .column-input{
         width: calc(100% - 80px);
         padding-left: 0;
     }
-    #mobileherofilter .column-input i{
+    #mobileherofilter:has(.vacation-header) .column-input i{
         font-size: 24px;
+    }
+
+    #mobileherofilter .row .col-md-4{
+        margin: 0!important;
     }
     #mobileherofilter .column-button{
         width: auto;
         margin: 0 !important;
         padding: 0;
-    }
-    .new-filter-btn{
-        display: none;
     }
     .new-filter-btn.mobile{
         display: block;

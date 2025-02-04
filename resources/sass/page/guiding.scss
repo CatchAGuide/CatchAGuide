@@ -715,7 +715,7 @@ div#masonry-grid {
     a {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 8px;
     }
   }
 
@@ -778,7 +778,6 @@ div#masonry-grid {
     align-items: flex-end;
     gap: 16px;
     justify-content: space-between;
-    min-height: 54px;
 
     .guiding-item-price {
       span {
