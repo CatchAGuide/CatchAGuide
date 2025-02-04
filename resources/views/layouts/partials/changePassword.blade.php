@@ -43,11 +43,11 @@
 </script>
 @endif
 
-@if($errors->any())
+{{-- @if($errors->any())
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var myModal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
         myModal.show();
     });
 </script>
-@endif
+@endif --}}

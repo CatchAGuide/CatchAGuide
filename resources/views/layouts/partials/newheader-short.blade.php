@@ -1,3 +1,6 @@
+@include('layouts.modal.loginModal')
+@include('layouts.modal.registerModal')
+
 <nav class="navbar-custom short-header {{ request()->is('/') ? 'with-bg' : '' }} {{ request()->is('guidings*') ? 'no-search' : '' }}">
     <div class="container">
         <!-- Top Row -->
@@ -55,10 +58,10 @@
                             </div>
                         </div>
                     @else
-                        <a href="{{ route('login') }}" class="nav-link login-link">
+                        <a href="#" class="nav-link login-link" data-bs-toggle="modal" data-bs-target="#loginModal">
                             @lang('homepage.header-login')
                         </a>
-                        <a href="{{ route('login') }}" class="btn btn-outline-light signup-btn">
+                        <a href="#" class="btn btn-outline-light signup-btn" data-bs-toggle="modal" data-bs-target="#registerModal">
                             @lang('homepage.header-signup')
                         </a>
                     @endauth
@@ -74,7 +77,7 @@
                                  alt="Profile">
                         </a>
                     @else
-                        <a href="{{ route('login') }}" class="text-white me-3">
+                        <a href="#" class="text-white me-3" data-bs-toggle="modal" data-bs-target="#loginModal">
                             <i class="far fa-user-circle" style="font-size: 24px;"></i>
                         </a>
                     @endauth

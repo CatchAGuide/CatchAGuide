@@ -186,7 +186,7 @@
                                             placeholder="@lang('forms.rpass')" value=""/>
                                 </div>
                                 <div class="form-group w-50">
-                                    <input style="margin: 5px;" type="checkbox" class="form-check-inline" id="agb" required>
+                                    <input style="margin: 5px;" type="checkbox" class="form-check-inline" id="agb" name='agb' required>
                                     <label for="agb" class="text-white">
                                         {{ translate('Ich akzeptiere die') }}
                                         <a href="{{ route('law.agb') }}">{{ translate('AGB') }}</a>
