@@ -9,7 +9,6 @@
 @section('css_after')
 <style>
     .container {
-        max-width: 1400px;
         margin: 0 auto;
         padding: 0 15px;
     }
@@ -233,9 +232,9 @@
     .new-bg{
         background:#313041;
     }
-    .container {
+    /* .container {
         max-width:1600px;
-    }
+    } */
 
     #map-placeholder {
         position: relative;
@@ -288,9 +287,9 @@
 @include('layouts.schema.listings')
 @endsection
 @section('content')
+<div class="container">
     <section class="page-header">
         <div class="page-header__bottom">
-            <div class="container">
                 <div class="page-header__bottom-inner">
                     <ul class="thm-breadcrumb list-unstyled">
                         <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
@@ -301,11 +300,11 @@
                     </ul>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </div>
 
     <!--Tours List Start-->
-    <section class="tours-list" style="padding-top: 20px;">
+    <section class="tours-list container" style="padding-top: 20px;">
 
         <div class="container-fluid">
             <div class="row">
