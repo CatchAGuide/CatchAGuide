@@ -56,6 +56,18 @@
                         <div class="my-4">
                           <span class="fw-bold">{{ translate('Date Selection') }}</span>
                         </div>
+                        @if(!$selectedDate)
+                        <div class="alert alert-info mb-3" role="alert">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            {{ translate('Please select a date from the calendar to proceed') }}
+                        </div>
+                        @endif
+                        @error('selectedDate')
+                        <div class="alert alert-danger mb-3" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            {{ $message }}
+                        </div>
+                        @enderror
                         <div class="col-md-12 d-flex justify-content-center">
                           <div id="lite-datepicker" wire:ignore></div>
                         </div>
@@ -67,10 +79,12 @@
                         @if($errors->any())
                         <div class="alert alert-danger m-0 p-2 my-2" role="alert">
                           <div class="d-flex flex-column">
-                            <small class="text-danger">@lang('message.error-msg')</small>
+                            @foreach($errors->all() as $error)
+                              <small class="text-danger">{{ $error }}</small>
+                            @endforeach
                           </div>
                         </div>
-                        @enderror
+                        @endif
                         <div class="row">
                           <div class="col-12">
                             <div class="form-group">
@@ -83,13 +97,30 @@
                                   <option value="Mrs">{{translate('Mrs')}}</option>
                                   <option value="Ms">{{translate('Ms')}}</option>
                                 </select>
+                                @error('userData.title')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
                                 <input type="text" class="form-control @error('userData.firstname') is-invalid @enderror" 
                                        placeholder="{{translate('First Name')}}" id="firstname" wire:model="userData.firstname" required>
+                                @error('userData.firstname')
+
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
                                 <input type="text" class="form-control @error('userData.lastname') is-invalid @enderror" 
                                        placeholder="{{translate('Last Name')}}" id="lastname" wire:model="userData.lastname" required>
+                                @error('userData.lastname')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
                               </div>
                             </div>
                           </div>
+
                           <div class="col-sm-6 col-md-4">
                             <div class="form-group">
                               <label for="salutation">@lang('forms.salut')</label>
@@ -97,27 +128,51 @@
                                 <option value="male">{{translate('Male')}}</option>
                                 <option value="female">{{translate('Female')}}</option>
                               </select>
+                              @error('userData.salutation')
+                                  <div class="invalid-feedback">
+                                      {{ $message }}
+                                  </div>
+                              @enderror
                             </div>
                           </div>
                           <div class="col-sm-6 col-md-4">
+
                             <div class="form-group">
                               <label for="zip">@lang('forms.postal')<span style="color: #e8604c !important">*</span></label>
                               <input type="text" class="form-control rounded @error('userData.postal') is-invalid @enderror" id="zip" wire:model="userData.postal" required>
+                              @error('userData.postal')
+                                  <div class="invalid-feedback">
+                                      {{ $message }}
+                                  </div>
+                              @enderror
                             </div>
                           </div>
                           <div class="col-12">
+
                             <div class="form-group">
                               <label for="street">@lang('forms.street')<span style="color: #e8604c !important">*</span></label>
                               <input type="text" class="form-control rounded @error('userData.address') is-invalid @enderror" id="street" wire:model="userData.address" required>
+                              @error('userData.address')
+                                  <div class="invalid-feedback">
+                                      {{ $message }}
+                                  </div>
+                              @enderror
                             </div>
                           </div>
                           <div class="col-sm-6">
+
                             <div class="form-group">
                               <label for="city">{{translate('State/City/Region')}}<span style="color: #e8604c !important">*</span></label>
                               <input type="text" class="form-control rounded @error('userData.city') is-invalid @enderror" id="city" wire:model="userData.city" required>
+                              @error('userData.city')
+                                  <div class="invalid-feedback">
+                                      {{ $message }}
+                                  </div>
+                              @enderror
                             </div>
                           </div>
                           <div class="col-sm-6">
+
                             <div class="form-group">
                               <label for="country">{{translate('Country')}}</label>
                               <input type="text" class="form-control rounded" id="country" wire:model="userData.country">
@@ -184,8 +239,11 @@
                           <div class="col-12">
                             <div class="form-group">
                               <label for="email">E-Mail<span style="color: #e8604c">*</span></label>
-                              <input type="email" class="form-control rounded @error('userData.email') is-invalid @enderror" 
-                                     id="email" wire:model="userData.email" required>
+                              <input type="email" 
+                                     class="form-control rounded @error('userData.email') is-invalid @enderror" 
+                                     id="email" 
+                                     wire:model="userData.email" 
+                                     required>
                               @error('userData.email')
                                   <div class="invalid-feedback">
                                       {{ $message }}
@@ -197,7 +255,8 @@
                             <div class="col-12">
                               <div class="form-group">
                                 <div class="form-check">
-                                  <input type="checkbox" class="form-check-input @error('userData.createAccount') is-invalid @enderror" 
+                                  <input type="checkbox" 
+                                         class="form-check-input @error('userData.createAccount') is-invalid @enderror" 
                                          id="createAccount" 
                                          wire:model="userData.createAccount">
                                   <label class="form-check-label" for="createAccount">
@@ -381,39 +440,36 @@
                                 <div class="row p-2">
                                   <div>
                                     @foreach($extras as $index => $extra)
-                                    <div class="col-md-12 extra-container"> <!-- Added extra-container class -->
-                                      <div class="d-flex flex-column">
-                                        <div class="form-check p-0">
-                                          <label class="form-check-label text-dark">
-                                              <input 
-                                                type="checkbox" 
-                                                class="form-check-input me-1" 
-                                                name="extra" 
-                                                value="{{$index}}" 
-                                                wire:model="selectedExtras.{{$index}}"
-                                                wire:change="$emit('extraChanged', '{{$index}}')"
-                                              >
-                                              {{$extra['name']}} - €{{$extra['price']}}
-                                          </label>
-                                        </div>
-                                          <div class="quantity-container" style="display: none;">
-                                            <div class="d-flex align-items-center mb-2">
-                                              <label for="quantity_{{$index}}">Quantity:</label>
-                                              <input 
-                                                id="quantity_{{$index}}"
-                                                class="w-25 form-control form-control-sm mx-2 quantity-input" 
-                                                type="number"
-                                                min="1"
-                                                step="1"
-                                                name="quantity"
-                                                value="1"
-                                                max="{{$persons}}"
-                                                wire:model="extraQuantities.{{ $index }}"
-                                                wire:change="calculateTotalPrice"
-                                              >
+                                    <div class="col-md-12 extra-container">
+                                        <div class="d-flex flex-column">
+                                            <div class="form-check p-0">
+                                                <label class="form-check-label text-dark">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        class="form-check-input me-1" 
+                                                        wire:model="selectedExtras.{{$index}}"
+                                                        wire:change="$refresh"
+                                                    >
+                                                    {{$extra['name']}} - €{{$extra['price']}}
+                                                </label>
                                             </div>
-                                          </div>
-                                      </div>
+                                            @if($selectedExtras[$index])
+                                                <div class="quantity-container">
+                                                    <div class="d-flex align-items-center mb-2">
+                                                        <label for="quantity_{{$index}}">Quantity:</label>
+                                                        <input 
+                                                            id="quantity_{{$index}}"
+                                                            class="w-25 form-control form-control-sm mx-2 quantity-input" 
+                                                            type="number"
+                                                            min="1"
+                                                            max="{{$persons}}"
+                                                            wire:model="extraQuantities.{{$index}}"
+                                                            wire:change="calculateTotalPrice"
+                                                        >
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
                                     </div>
                                     @endforeach
                                   </div>
