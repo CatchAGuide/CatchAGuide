@@ -42,20 +42,9 @@ class CheckoutController extends Controller
 
     public function thankYou(Booking $booking)
     {
-      
-        // Mail::to($user->email)->queue(new GuestBookingRequestMail($booking,$user,$guiding,$guide));
-        // Mail::to($guide->email)->queue(new GuideBookingRequestMail($booking,$user,$guiding,$guide));
-
-
-
-        // $booking->sendBookingConfirmationMail(Session::get('phone'));
-        // $booking->sendBookingConfirmationMailGuest(Session::get('phone'));
-        // $booking->sendBookingMailToCEO();
-        return view('pages.additional.thank_you',
-            [
-                'bookingid' => $booking->id,
-            ]
-        );
+        return view('pages.additional.thank_you', [
+            'booking' => $booking
+        ]);
     }
 
 

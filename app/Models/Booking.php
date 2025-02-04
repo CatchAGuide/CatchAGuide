@@ -34,13 +34,16 @@ class Booking extends Model
         'phone',
         'last_employee_id',
         'expires_at',
+        'is_guest',
         'created_at',
         'updated_at',
     ];
     
-    public function user(): BelongsTo
+    public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->is_guest 
+            ? $this->belongsTo(UserGuest::class, 'user_id')
+            : $this->belongsTo(User::class, 'user_id');
     }
 
     /**

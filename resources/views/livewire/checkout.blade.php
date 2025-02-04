@@ -13,19 +13,36 @@
   <div id="all">
     <div id="content">
       <div class="container shadow-lg rounded p-0 my-4">
+
         <div class="card px-0 pt-5 pb-0 mt-3">
           <div class="text-center">
             <div class="my-2">
               <h2><strong>Checkout</strong></h2>
             </div>
-            <div>
-            </div>
           </div>
-
+          
           <ul id="progressbar">
-            <li class="active" id="account"><strong>Information</strong></li>
+            <li class="active" id="account"><strong>{{ translate('Booking Information')}}</strong></li>
             <li class="{{ $this->page === 2 ? 'active' : '' }}" id="personal"><strong>{{ translate('Reservation') }}</strong></li>
           </ul>
+          
+          @if($this->page === 1 && !auth()->check())
+            <div class="checkout-options-container">
+              <div class="checkout-options">
+                <button class="checkout-option-btn {{ $checkoutType === 'guest' ? 'active' : '' }}" wire:click="$set('checkoutType', 'guest')">
+                  {{translate('GUEST CHECKOUT')}}
+                </button>
+                
+                <a href="#" class="checkout-option-btn {{ $checkoutType === 'login' ? 'active' : '' }}" data-bs-toggle="modal" data-bs-target="#loginModal" wire:click="$set('checkoutType', 'login')">
+                  <i class="fas fa-sign-in-alt me-2"></i>{{translate('LOGIN TO CHECKOUT')}}
+                </a>
+              </div>
+
+              <div class="mt-2 text-center text-muted small">
+                {{translate('Create an account to enjoy faster bookings, manage your reservations, and receive exclusive fishing offers!')}}
+              </div>
+            </div>
+          @endif
         </div>
 
         <div class="row p-4">
@@ -164,6 +181,28 @@
                                      id="email" wire:model="userData.email" required>
                             </div>
                           </div>
+                          @if($checkoutType === 'guest')
+                            <div class="col-12">
+                              <div class="form-group">
+                                <div class="form-check">
+                                  <input type="checkbox" class="form-check-input @error('userData.createAccount') is-invalid @enderror" 
+                                         id="createAccount" 
+                                         wire:model="userData.createAccount">
+                                  <label class="form-check-label" for="createAccount">
+                                    {{ translate('Save my data and create an account. I accept the') }}
+                                    <a href="{{ route('law.agb') }}" target="_blank">{{ translate('Terms and Conditions') }}</a>
+                                    {{ translate('and') }}
+                                    <a href="{{ route('law.data-protection') }}" target="_blank">{{ translate('Privacy Policy') }}</a>
+                                  </label>
+                                  @error('userData.createAccount')
+                                    <div class="invalid-feedback">
+                                      {{ $message }}
+                                    </div>
+                                  @enderror
+                                </div>
+                              </div>
+                            </div>
+                          @endif
                           <div class="col-md-12">
                             <div class="row-buttons">
                               <div class="button-container">  
@@ -641,6 +680,54 @@ button.btn-gray, a.btn-gray  {
   @media (min-width: 577px) {
     .input-group > *:not(:first-child) {
         border-left: none;
+    }
+  }
+
+  .checkout-options-container {
+    width: 100%;
+    max-width: 600px; /* Match the width of your step indicators */
+    margin: 0 auto 2rem;
+    padding: 0 15px;
+  }
+
+  .checkout-options {
+    display: flex;
+    gap: 1px;
+    width: 100%;
+    background-color: #e5e5e5;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .checkout-option-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .checkout-option-btn.active {
+    background-color: var(--thm-primary);
+    color: white;
+  }
+
+  .checkout-option-btn:hover:not(.active) {
+    background-color: #f8f9fa;
+  }
+
+  @media (max-width: 576px) {
+    .checkout-options {
+        flex-direction: column;
+    }
+    
+    .checkout-option-btn {
+        width: 100%;
+        padding: 10px;
+        font-size: 13px;
     }
   }
 </style>

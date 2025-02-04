@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Log;
 
 use App\Jobs\SendCheckoutEmail;
 use App\Models\UserInformation;
+use App\Models\UserGuest;
 
 class Checkout extends Component
 {
@@ -68,8 +69,11 @@ class Checkout extends Component
         'city' => '',
         'country' => '',
         'phone' => '',
-        'email' => ''
+        'email' => '',
+        'createAccount' => false,
     ];
+
+    public $checkoutType = 'guest';
 
     protected $rules = [
         // 'userData.firstname' => 'required|string',
@@ -142,6 +146,9 @@ class Checkout extends Component
         $this->totalExtraPrice = $totalExtraPrice;
         $this->totalPrice =  $this->totalExtraPrice + $this->guidingprice;
 
+        // Set checkoutType based on authentication status
+        $this->checkoutType = $user ? 'login' : 'guest';
+        
         $this->userData = [
             'salutation' => 'male',
             'title' => '',
@@ -152,7 +159,8 @@ class Checkout extends Component
             'city' => ($user->information->city ?? ''),
             'country' => ($user->information->country ?? 'Deutschland'),
             'phone' => ($user->phone ?? ''),
-            'email' => ($user->email ?? '')
+            'email' => ($user->email ?? ''),
+            'createAccount' => false,
         ];
     }
 
@@ -246,43 +254,85 @@ class Checkout extends Component
             'extraQuantities.*' => ['required', 'numeric', 'max:' . $this->persons],
         ]);
 
-        // More reliable way to check authentication
         $currentUser = auth()->user();
         
         if ($currentUser) {
             $user = $currentUser;
-        } else {
-            $existingUser = User::where('email', $this->userData['email'])->first();
-
-            if ($existingUser) {
-                session()->flash('error', __('Email used for another account. Please use a different email address or login to your account.'));
-                return redirect()->route('login');
+            $isGuest = false;
+            
+            // Update phone for registered user
+            if (!$user->is_guide) {
+                $user->phone = $this->userData['phone'];
+                $user->save();
             }
 
-            $randomPassword = Str::random(10);
-            $user = User::create([
-                'firstname' => $this->userData['firstname'], 
-                'lastname' => $this->userData['lastname'],
-                'email' => $this->userData['email'],
-                'is_temp_password' => 1,
-                'password' => \Hash::make($randomPassword),
-            ]);
+            if ($user->information) {
+                $user->information->phone = $this->userData['phone'];
+                $user->information->save();
+            }
+        } else {
+            if ($this->userData['createAccount']) {
+                // Create regular user if checkbox is checked
+                $randomPassword = Str::random(10);
+                $user = User::create([
+                    'firstname' => $this->userData['firstname'],
+                    'lastname' => $this->userData['lastname'],
+                    'email' => $this->userData['email'],
+                    'is_temp_password' => 1,
+                    'password' => \Hash::make($randomPassword),
+                ]);
 
-            // Create UserInformation record
-            $userInformation = UserInformation::create([
-                'phone' => $this->userData['phone'],
-                'address' => $this->userData['address'],
-                'postal' => $this->userData['postal'],
-                'city' => $this->userData['city'],
-                'country' => $this->userData['country'],
-            ]);
+                // Create UserInformation record
+                $userInformation = UserInformation::create([
+                    'phone' => $this->userData['phone'],
+                    'address' => $this->userData['address'],
+                    'postal' => $this->userData['postal'],
+                    'city' => $this->userData['city'],
+                    'country' => $this->userData['country'],
+                ]);
 
-            // Update user with the information ID
-            $user->user_information_id = $userInformation->id;
-            $user->save();
+                $user->user_information_id = $userInformation->id;
+                $user->save();
 
-            if ($user && !app()->environment('local')) {
-                Mail::to($user->email)->queue(new AutomaticRegistrationMail($user, $randomPassword));
+                if (!app()->environment('local')) {
+                    Mail::to($user->email)->queue(new AutomaticRegistrationMail($user, $randomPassword));
+                }
+                
+                $isGuest = false;
+            } else {
+                // Check if guest user already exists with this email
+                $user = UserGuest::where('email', $this->userData['email'])->first();
+
+                if (!$user) {
+                    // Create new guest user if not found
+                    $user = UserGuest::create([
+                        'salutation' => $this->userData['salutation'],
+                        'title' => $this->userData['title'],
+                        'firstname' => $this->userData['firstname'],
+                        'lastname' => $this->userData['lastname'],
+                        'address' => $this->userData['address'],
+                        'postal' => $this->userData['postal'],
+                        'city' => $this->userData['city'],
+                        'country' => $this->userData['country'],
+                        'phone' => $this->userData['phone'],
+                        'email' => $this->userData['email'],
+                    ]);
+                } else {
+                    // Update existing guest user information
+                    $user->update([
+                        'salutation' => $this->userData['salutation'],
+                        'title' => $this->userData['title'],
+                        'firstname' => $this->userData['firstname'],
+                        'lastname' => $this->userData['lastname'],
+                        'address' => $this->userData['address'],
+                        'postal' => $this->userData['postal'],
+                        'city' => $this->userData['city'],
+                        'country' => $this->userData['country'],
+                        'phone' => $this->userData['phone'],
+                    ]);
+                }
+                
+                $isGuest = true;
             }
         }
 
@@ -303,6 +353,7 @@ class Checkout extends Component
 
         $booking = Booking::create([
             'user_id' => $user->id,
+            'is_guest' => $isGuest,
             'guiding_id' => $this->guiding->id,
             'blocked_event_id' => $blockedEvent->id,
             'is_paid' => false,
@@ -318,23 +369,14 @@ class Checkout extends Component
             'token' => $this->generateBookingToken($blockedEvent->id),
         ]);
 
-        if (!$user->is_guide) {
-            $user->phone = $booking->phone;
-            $user->save();
-        }
-
-        $user->information->phone = $booking->phone;
-        $user->information->save();
-
         if (!app()->environment('local')) {
-            SendCheckoutEmail::dispatch($booking,$user,$this->guiding,$this->guiding->user);
+            SendCheckoutEmail::dispatch($booking, $user, $this->guiding, $this->guiding->user);
         }
         
         sleep(5);
 
         $this->loading = false;
-        return redirect(route('thank-you',[$booking]));
-
+        return redirect(route('thank-you', [$booking]));
     }
     
     public function generateBookingToken($eventID) {
