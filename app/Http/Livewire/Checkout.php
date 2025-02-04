@@ -87,8 +87,17 @@ class Checkout extends Component
     ];
 
     protected $messages = [
-        'userData.firstname.required' => 'Bitte gebe Deinen Vornamen an.',
-        'userData.email.required' => 'Bitte gebe eine gültige Emailadresse an',
+        'selectedDate.required' => 'Bitte wählen Sie ein Datum aus dem Kalender.',
+        'userData.firstname.required' => 'Bitte geben Sie Ihren Vornamen ein.',
+        'userData.lastname.required' => 'Bitte geben Sie Ihren Nachnamen ein.',
+        'userData.address.required' => 'Bitte geben Sie Ihre Straße und Hausnummer ein.',
+        'userData.postal.required' => 'Bitte geben Sie Ihre Postleitzahl ein.',
+        'userData.city.required' => 'Bitte geben Sie Ihre Stadt ein.',
+        'userData.phone.required' => 'Bitte geben Sie Ihre Telefonnummer ein.',
+        'userData.email.required' => 'Bitte geben Sie Ihre E-Mail-Adresse ein.',
+        'userData.email.email' => 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
+        'userData.email.unique' => 'Diese E-Mail-Adresse ist bereits vergeben.',
+        'extraQuantities.*.max' => 'Die Anzahl der Extras darf nicht größer als die Anzahl der Personen sein.',
     ];
 
     public function render()
@@ -108,13 +117,10 @@ class Checkout extends Component
         $this->extras = json_decode($this->guiding->pricing_extra, true) ?? [];
         $this->targets = $this->guiding->getTargetFishNames();
 
-
-        foreach ($this->extras as $index => $extra) {
-            $extraId = $index;
-            $this->selectedExtras[$extraId] = false;
-            $this->extraQuantities[$extraId] = $this->persons;
-        }
-
+        // Initialize arrays with default values
+        $this->selectedExtras = array_fill(0, count($this->extras), false);
+        $this->extraQuantities = array_fill(0, count($this->extras), 1);
+        
         $this->waters = $this->guiding->getWaterNames();
         $this->methods = $this->guiding->getFishingMethodNames();
         
@@ -162,10 +168,21 @@ class Checkout extends Component
             'email' => ($user->email ?? ''),
             'createAccount' => false,
         ];
+
+        $this->selectedDate = null; // Ensure it starts as null
     }
 
-    public function updatedSelectedExtras()
+    public function updatedSelectedExtras($value, $index)
     {
+        // Convert string 'true'/'false' to boolean if needed
+        if (is_string($value)) {
+            $this->selectedExtras[$index] = $value === 'true';
+        } else {
+            $this->selectedExtras[$index] = (bool)$value;
+        }
+        
+        \Log::info("Extra {$index} selected state changed to: " . ($this->selectedExtras[$index] ? 'true' : 'false'));
+        
         $this->calculateTotalPrice();
     }
 
@@ -180,38 +197,47 @@ class Checkout extends Component
     {
         $totalExtraPrice = 0;
         $extraData = [];
-    
+
         foreach ($this->extras as $index => $extra) {
-            if (isset($this->selectedExtras[$index]) && ($index == 0 || $this->selectedExtras[$index] == true)) {
-                $quantity = $this->extraQuantities[$index] ?? 0;
-                $totalExtraPrice += $extra['price'] * $quantity;
+            \Log::info("Processing extra {$index}: Selected=" . var_export($this->selectedExtras[$index], true));
+            
+            if (!empty($this->selectedExtras[$index])) {
+                $quantity = $this->extraQuantities[$index] ?? 1;
+                $price = floatval($extra['price']);
+                $subtotal = $price * intval($quantity);
+                
+                $totalExtraPrice += $subtotal;
+                
+                \Log::info("Adding extra {$index}: Price={$price}, Quantity={$quantity}, Subtotal={$subtotal}");
+                
                 $extraData[] = [
                     'extra_id' => $index,
                     'extra_name' => $extra['name'],
-                    'extra_price' => $extra['price'],
+                    'extra_price' => $price,
                     'extra_quantity' => $quantity,
-                    'extra_total_price' => $extra['price'] * $quantity,
+                    'extra_total_price' => $subtotal,
                 ];
             }
         }
-    
+
         $this->extraData = !empty($extraData) ? serialize($extraData) : null;
         $this->totalExtraPrice = $totalExtraPrice;
         $this->totalPrice = $this->totalExtraPrice + $this->guidingprice;
+        
+        \Log::info("Final calculation: Extra Price={$this->totalExtraPrice}, Total Price={$this->totalPrice}");
     }
 
     public function next()
     {   
-        // Validate data including email uniqueness
+        // Validate data
         $this->validateData();
 
-        // Check if the email already exists in the users table
-        if ($this->checkoutType === 'guest') {
+        // Check if the email already exists only if creating account
+        if ($this->checkoutType === 'guest' && $this->userData['createAccount']) {
             $existingUser = User::where('email', $this->userData['email'])->first();
             if ($existingUser) {
-                // Add a validation error if the email is already taken
                 $this->addError('userData.email', 'Diese E-Mail-Adresse ist bereits vergeben.');
-                return; // Stop the process if the email is taken
+                return;
             }
         }
 
@@ -223,9 +249,9 @@ class Checkout extends Component
         $this->page--;
     }
 
-    public function updated($propertyName){
-        
-        $this->validateOnly($propertyName,[
+    public function updated($propertyName)
+    {
+        $rules = [
             'selectedDate' => ['required', 'string'],
             'userData.firstname' => 'required|string',
             'userData.lastname' => 'required|string',
@@ -234,18 +260,24 @@ class Checkout extends Component
             'userData.city' => 'required|string',
             'userData.phone' => 'required|string',
             'userData.email' => 'required|email',
-        ]);
+        ];
 
-        if ($propertyName === 'userData.email') {
-            $this->validateOnly($propertyName, [
-                'userData.email' => 'required|email|unique:users,email',
-            ]);
+        // Only validate email uniqueness if creating account
+        if ($propertyName === 'userData.email' && $this->checkoutType === 'guest' && $this->userData['createAccount']) {
+            $rules['userData.email'] = 'required|email|unique:users,email';
         }
+
+        $this->validateOnly($propertyName, $rules);
     }
 
-    public function validateData(){
+    public function validateData()
+    {
         if ($this->page == 1) {
-            $this->validate([
+            if (!$this->selectedDate) {
+                $this->addError('selectedDate', 'Bitte wählen Sie ein Datum aus dem Kalender.');
+                return false;
+            }
+            $rules = [
                 'selectedDate' => ['required', 'string'],
                 'userData.firstname' => 'required|string',
                 'userData.lastname' => 'required|string',
@@ -253,8 +285,15 @@ class Checkout extends Component
                 'userData.postal' => 'required|string',
                 'userData.city' => 'required|string',
                 'userData.phone' => 'required|string',
-                'userData.email' => 'required|email|unique:users,email',
-            ]);
+                'userData.email' => 'required|email',
+            ];
+
+            // Only validate email uniqueness if creating account
+            if ($this->checkoutType === 'guest' && $this->userData['createAccount']) {
+                $rules['userData.email'] = 'required|email|unique:users,email';
+            }
+
+            $this->validate($rules);
         }
     }
 

@@ -160,70 +160,7 @@
             font-size: 0.9rem;
             position: relative;
         }
-
-        .countdown-bar {
-            width: 100%;
-            height: 2px;
-            background: #eee;
-            margin-top: 8px;
-            border-radius: 2px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .countdown-progress {
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            background: var(--thm-primary);
-            width: 0;
-            animation: countdown 10s linear forwards;
-        }
-
-        .countdown-number {
-            color: var(--thm-primary);
-            font-weight: 600;
-            display: inline-block;
-            min-width: 20px;
-        }
-
-        @keyframes countdown {
-            from {
-                width: 0%;
-            }
-            to {
-                width: 100%;
-            }
-        }
     </style>
-
-    <script>
-        window.onload = function() {
-            let timeLeft = 10;
-            const timerElement = document.getElementById('redirect-timer');
-            const numberElement = document.getElementById('countdown-number');
-            
-            // Initial setup of the timer display
-            timerElement.innerHTML = `
-                <span id="countdown-number" class="countdown-number">${timeLeft}</span> 
-                {{translate('seconds until redirect to guidings page')}}
-                <div class="countdown-bar">
-                    <div class="countdown-progress"></div>
-                </div>
-            `;
-
-            const timer = setInterval(function() {
-                timeLeft--;
-                if (timeLeft >= 0) {
-                    document.getElementById('countdown-number').textContent = timeLeft;
-                } else {
-                    clearInterval(timer);
-                    window.location.href = '{{ route('guidings.index') }}';
-                }
-            }, 1000);
-        }
-    </script>
 
     <div class="thankyou-page">
         <div class="container">
@@ -279,14 +216,6 @@
                         <a href="{{ route('guidings.index') }}" class="btn btn-back">
                             {{ translate('Back to Guidings') }}
                         </a>
-                    </div>
-
-                    <div class="redirect-timer" id="redirect-timer">
-                        <span id="countdown-number" class="countdown-number">10</span> 
-                        {{ translate('seconds until redirect to guidings page') }}
-                        <div class="countdown-bar">
-                            <div class="countdown-progress"></div>
-                        </div>
                     </div>
                 </div>
             </div>
