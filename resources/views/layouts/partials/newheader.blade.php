@@ -182,8 +182,9 @@
                                 </div>
                             </div>
                         @endif
-                        <div class="col-md-2 column-input my-2">
-                            <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
+                        <div class="col-md-2 column-button my-2">
+                                    <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
+                                    <button type="submit" class="form-control new-filter-btn mobile"><i class="icon-magnifying-glass"></i></button>
                         </div>
                     </div>
                 </div> 
