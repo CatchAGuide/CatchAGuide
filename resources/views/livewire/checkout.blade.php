@@ -64,6 +64,13 @@
                         <div class="my-4">
                           <span class="fw-bold">{{ translate('Personal Information') }}</span>
                         </div>
+                        @if($errors->any())
+                        <div class="alert alert-danger m-0 p-2 my-2" role="alert">
+                          <div class="d-flex flex-column">
+                            <small class="text-danger">@lang('message.error-msg')</small>
+                          </div>
+                        </div>
+                        @enderror
                         <div class="row">
                           <div class="col-12">
                             <div class="form-group">
@@ -179,6 +186,11 @@
                               <label for="email">E-Mail<span style="color: #e8604c">*</span></label>
                               <input type="email" class="form-control rounded @error('userData.email') is-invalid @enderror" 
                                      id="email" wire:model="userData.email" required>
+                              @error('userData.email')
+                                  <div class="invalid-feedback">
+                                      {{ $message }}
+                                  </div>
+                              @enderror
                             </div>
                           </div>
                           @if($checkoutType === 'guest')
@@ -436,14 +448,6 @@
                   </div>
                 </div>
               </form>
-
-              @if($errors->any())
-              <div class="alert alert-danger m-0 p-2 my-2" role="alert">
-                <div class="d-flex flex-column">
-                  <small class="text-danger">@lang('message.error-msg')</small>
-                </div>
-              </div>
-              @enderror
             </div>
           </div>
         </div>

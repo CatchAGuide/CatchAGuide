@@ -45,9 +45,17 @@
                                     </thead>
                                     <tbody>
                                         @foreach($bookings as $booking)
-                                            <tr>
+                                            <tr class="{{ $booking->is_guest ? 'bg-warning' : '' }}">
                                                 <td>{{ $booking->id }}</td>
-                                                <td>{{ $booking->user->full_name }}</td>
+                                                <td>
+                                                    @if ($booking->user)
+                                                        @if($booking->is_guest)
+                                                            {{ $booking->user->firstname ?? 'Guest' }} {{ $booking->user->lastname ?? '' }}
+                                                        @else
+                                                            {{ $booking->user->full_name ?? 'No Name' }}
+                                                        @endif
+                                                    @endif
+                                                </td>
                                                 <td>{{ $booking->phone }}</td>
                                                 <td>{{ two($booking->price) }} €</td>
                                                 <td>{{ two($booking->price - $booking->cag_percent) }} €</td>

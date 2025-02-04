@@ -202,8 +202,18 @@ class Checkout extends Component
 
     public function next()
     {   
-
+        // Validate data including email uniqueness
         $this->validateData();
+
+        // Check if the email already exists in the users table
+        if ($this->checkoutType === 'guest') {
+            $existingUser = User::where('email', $this->userData['email'])->first();
+            if ($existingUser) {
+                // Add a validation error if the email is already taken
+                $this->addError('userData.email', 'Diese E-Mail-Adresse ist bereits vergeben.');
+                return; // Stop the process if the email is taken
+            }
+        }
 
         $this->page++;
     }
@@ -226,11 +236,15 @@ class Checkout extends Component
             'userData.email' => 'required|email',
         ]);
 
+        if ($propertyName === 'userData.email') {
+            $this->validateOnly($propertyName, [
+                'userData.email' => 'required|email|unique:users,email',
+            ]);
+        }
     }
 
     public function validateData(){
         if ($this->page == 1) {
-
             $this->validate([
                 'selectedDate' => ['required', 'string'],
                 'userData.firstname' => 'required|string',
@@ -239,9 +253,8 @@ class Checkout extends Component
                 'userData.postal' => 'required|string',
                 'userData.city' => 'required|string',
                 'userData.phone' => 'required|string',
-                'userData.email' => 'required|email',
+                'userData.email' => 'required|email|unique:users,email',
             ]);
-
         }
     }
 
