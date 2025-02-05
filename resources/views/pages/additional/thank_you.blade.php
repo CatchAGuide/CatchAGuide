@@ -42,7 +42,7 @@
         }
         .thankyou-page ._box {
             margin: auto;
-            max-width: 800px;
+            max-width: 1200px;
             padding: 40px;
             background: white;
             border-radius: 12px;
@@ -57,11 +57,20 @@
             border-left: 4px solid #4caf50;
         }
         .booking-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
             margin-top: 30px;
             padding: 25px;
             background: #f8f9fa;
             border-radius: 12px;
             border: 1px solid #e9ecef;
+        }
+        .booking-details .section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         .booking-details h3 {
             color: var(--thm-primary);
@@ -160,6 +169,34 @@
             font-size: 0.9rem;
             position: relative;
         }
+        .guide-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .guide-info img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .tour-info {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .payment-info {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #ffc107;
+        }
     </style>
 
     <div class="thankyou-page">
@@ -177,29 +214,79 @@
 
                     @if(isset($booking))
                     <div class="booking-details">
-                        <h3>{{ translate('Booking Details') }}</h3>
-                        <div class="detail-row">
-                            <span class="detail-label">{{ translate('Booking ID') }}</span>
-                            <span class="detail-value">#{{ $booking->id }}</span>
+                        <div class="section">
+                            <h3>{{ translate('Booking Information') }}</h3>
+                            <div class="detail-row">
+                                <span class="detail-label">{{ translate('Booking ID') }}</span>
+                                <span class="detail-value">#{{ $booking->id }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">{{ translate('Booking Status') }}</span>
+                                <span class="detail-value">
+                                    <span class="badge bg-warning">{{ translate('Pending Confirmation') }}</span>
+                                </span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">{{ translate('Tour Date') }}</span>
+                                <span class="detail-value">{{ \Carbon\Carbon::parse($booking->book_date)->format('d.m.Y') }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">{{ translate('Number of Participants') }}</span>
+                                <span class="detail-value">{{ $booking->count_of_users }}</span>
+                            </div>
                         </div>
-                        <div class="detail-row">
-                            <span class="detail-label">{{ translate('Tour Date') }}</span>
-                            <span class="detail-value">{{ \Carbon\Carbon::parse($booking->book_date)->format('d.m.Y') }}</span>
+
+                        <div class="section">
+                            <h3>{{ translate('Guide Information') }}</h3>
+                            <div class="guide-info">
+                                @if($booking->guiding->user->avatar)
+                                    <img src="{{ $booking->guiding->user->avatar }}" alt="Guide Photo">
+                                @endif
+                                <div>
+                                    <h4>{{ $booking->guiding->user->firstname }} {{ $booking->guiding->user->lastname }}</h4>
+                                    <p>{{ translate('Professional Fishing Guide') }}</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="detail-row">
-                            <span class="detail-label">{{ translate('Number of Participants') }}</span>
-                            <span class="detail-value">{{ $booking->count_of_users }}</span>
+
+                        <div class="section">
+                            <h3>{{ translate('Tour Details') }}</h3>
+                            <div class="detail-row">
+                                <span class="detail-label">{{ translate('Tour Name') }}</span>
+                                <span class="detail-value">{{ $booking->guiding->title }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">{{ translate('Duration') }}</span>
+                                <span class="detail-value">{{ $booking->guiding->duration }} {{ translate('hours') }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">{{ translate('Location') }}</span>
+                                <span class="detail-value">{{ $booking->guiding->location }}</span>
+                            </div>
                         </div>
-                        @if($booking->extras)
-                        <div class="detail-row">
-                            <span class="detail-label">{{ translate('Extras') }}</span>
-                            <span class="detail-value">€{{ number_format($booking->total_extra_price, 2, ',', '.') }}</span>
+
+                        <div class="section">
+                            <h3>{{ translate('Price Breakdown') }}</h3>
+                            <div class="detail-row">
+                                <span class="detail-label">{{ translate('Base Price') }}</span>
+                                <span class="detail-value">€{{ number_format($booking->price - $booking->total_extra_price, 2, ',', '.') }}</span>
+                            </div>
+                            @if($booking->extras)
+                            <div class="detail-row">
+                                <span class="detail-label">{{ translate('Extras') }}</span>
+                                <span class="detail-value">€{{ number_format($booking->total_extra_price, 2, ',', '.') }}</span>
+                            </div>
+                            @endif
+                            <div class="detail-row">
+                                <span class="detail-label">{{ translate('Total Price') }}</span>
+                                <span class="detail-value fw-bold">€{{ number_format($booking->price, 2, ',', '.') }}</span>
+                            </div>
                         </div>
-                        @endif
-                        <div class="detail-row">
-                            <span class="detail-label">{{ translate('Total Price') }}</span>
-                            <span class="detail-value fw-bold">€{{ number_format($booking->price, 2, ',', '.') }}</span>
-                        </div>
+                    </div>
+
+                    <div class="payment-info mt-4">
+                        <h4 class="mb-3">{{ translate('Payment Information') }}</h4>
+                        <p>{{ translate('Payment will be handled directly with your guide after the booking is confirmed.') }}</p>
                     </div>
                     @endif
 
