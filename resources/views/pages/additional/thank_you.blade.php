@@ -9,7 +9,6 @@
             padding: 50px 0;
             background: #f8f9fa;
             min-height: 100vh;
-            margin-bottom: -200px; /* Remove extra space at bottom */
         }
         .thankyou-page ._header {
             background: linear-gradient(135deg, var(--thm-primary) 0%, #2c3e50 100%);
@@ -57,8 +56,8 @@
             border-left: 4px solid #4caf50;
         }
         .booking-details {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            display: flex;
+            flex-wrap: wrap;
             gap: 30px;
             margin-top: 30px;
             padding: 25px;
@@ -67,6 +66,7 @@
             border: 1px solid #e9ecef;
         }
         .booking-details .section {
+            width: calc(100% / 2 - 15px);
             background: white;
             padding: 20px;
             border-radius: 8px;
@@ -96,6 +96,7 @@
             margin-bottom: 15px;
             padding-bottom: 15px;
             border-bottom: 1px solid #e9ecef;
+            flex-wrap: wrap;
         }
         .detail-row:last-child {
             border-bottom: none;
@@ -196,6 +197,18 @@
             border-radius: 8px;
             margin-top: 20px;
             border-left: 4px solid #ffc107;
+        }
+        @media (max-width: 992px) {
+            .booking-details .section {
+                width: 100%;
+            }
+            
+        }
+        @media (max-width: 768px) {
+            .booking-details .section {
+                width: 100%;
+            }
+            
         }
     </style>
 

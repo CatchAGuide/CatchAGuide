@@ -270,7 +270,7 @@
                     <div class="location-row">
                         <div class="location">
                             <a href="#" class="fs-6 text-decoration-none text-muted">
-                                <i class="bi bi-geo-alt"></i>{{ translate('Fishing Trip in') }} <strong>{{$vacation->location}}</strong>
+                                <i class="bi bi-geo-alt"></i>@lang('vacations.vacation_in') <strong>{{$vacation->location}}</strong>
                             </a>
                         </div>
                         <div class="location-map">
@@ -492,17 +492,17 @@
                     @endif
                     <div class="row">
                         <div class="col-12">
-                            <strong class="subtitle-text">{{ translate('Reiseinformationen') }}</strong>
+                            <strong class="subtitle-text">@lang('vacations.travel_information')</strong>
                         </div>
                         <ol class="px-3">
                             <li class="mx-4">
-                                <strong class="subtitle-text">{{ translate('Hin- & Rückreise') }}:</strong>
+                                <strong class="subtitle-text">@lang('vacations.round_trip'):</strong>
                                 {{ translate($vacation->travel_included)}}
                             </li>
                             <li class="mx-4">
                             @if(!empty($vacation->travel_options))
                                 <div class="tab-category mb-4">
-                                    <strong class="subtitle-text">{{ translate('Reiseempfehlung') }}:</strong>
+                                    <strong class="subtitle-text">@lang('vacations.travel_recommendation'):</strong>
                                     <div class="row">
                                         @foreach (json_decode($vacation->travel_options) as $travel_option)
                                             <div class="col-12 text-start">
@@ -524,37 +524,37 @@
                             <tbody>
                                 @if(!empty($vacation->airport_distance))
                                 <tr>
-                                    <td><strong>{{ translate('Nächster Flughafen') }}</strong></td>
+                                    <td><strong>@lang('vacations.nearest_airport')</strong></td>
                                     <td>{{translate($vacation->airport_distance)}}</td>
                                 </tr>
                                 @endif
                                 @if(!empty($vacation->water_distance))
                                 <tr>
-                                    <td><strong>{{ translate('Entfernung zum Wasser') }}</strong></td>
+                                    <td><strong>@lang('vacations.distance_water')</strong></td>
                                     <td>{{translate($vacation->water_distance)}}</td>
                                 </tr>
                                 @endif
                                 @if(!empty($vacation->shopping_distance))
                                 <tr>
-                                    <td><strong>{{ translate('Einkaufsmöglichkeiten') }}</strong></td>
+                                    <td><strong>@lang('vacations.distance_shoping')</strong></td>
                                     <td>{{translate($vacation->shopping_distance)}}</td>
                                 </tr>
                                 @endif
                                 @if(!empty($vacation->pets_allowed))
                                 <tr>
-                                    <td><strong>{{ translate('Pets Allowed') }}</td>
+                                    <td><strong>@lang('vacations.pets_allowed')</td>
                                     <td>{{ translate($vacation->pets_allowed || $vacation->pets_allowed !== null || $vacation->pets_allowed !== '' ? 'Yes' : 'No')}}</td>
                                 </tr>
                                 @endif
                                 @if(!empty($vacation->smoking_allowed))
                                 <tr>
-                                    <td><strong>{{ translate('Smoking Allowed') }}</strong></td>
+                                    <td><strong>@lang('vacations.smoking_allowed')</strong></td>
                                     <td>{{translate($vacation->smoking_allowed || $vacation->smoking_allowed !== null || $vacation->smoking_allowed !== '' ? 'Yes' : 'No')}}</td>
                                 </tr>
                                 @endif
                                 @if(!empty($vacation->disability_friendly))
                                 <tr>
-                                    <td><strong>{{ translate('Disability Friendly') }}</strong></td>
+                                    <td><strong>@lang('vacations.disability_friendly')</strong></td>
                                     <td>{{translate($vacation->disability_friendly || $vacation->disability_friendly !== null || $vacation->disability_friendly !== '' ? 'Yes' : 'No')}}</td>
                                 </tr>
                                 @endif
@@ -589,7 +589,7 @@
                                 role="tab" 
                                 aria-controls="nav-accommodation" 
                                 aria-selected="{{ $activeTab == 'accommodation' ? 'true' : 'false' }}">
-                            {{ translate('Accommodation') }}
+                            @lang('vacations.accommodations')
                         </button>
                     @endif
 
@@ -602,7 +602,7 @@
                                 role="tab" 
                                 aria-controls="nav-boat" 
                                 aria-selected="{{ $activeTab == 'boat' ? 'true' : 'false' }}">
-                            {{ translate('Mietboot') }}
+                                @lang('vacations.boats')
                         </button>
                     @endif
 
@@ -615,7 +615,7 @@
                                 role="tab" 
                                 aria-controls="nav-package" 
                                 aria-selected="{{ $activeTab == 'package' ? 'true' : 'false' }}">
-                            {{ translate('Komplettpaket') }}
+                                @lang('vacations.package')
                         </button>
                     @endif
 
@@ -760,16 +760,16 @@
 
             @if($agent->ismobile())
                 <div class="contact-card mb-4">
-                    <h5 class="contact-card__title">{{ translate('Contact Us') }}</h5>
+                    <h5 class="contact-card__title">@lang('vacations.contact_us'){{ translate('Contact Us') }}</h5>
                     <div class="contact-card__content">
-                        <p class="">{{ translate('Do you have questions about this vacation? Our team is here to help!') }}</p>
+                        <p class="">>@lang('vacations.contact_us_message')</p>
                         <div class="">
                             <div class="contact-info">
                                 <i class="fas fa-phone-alt me-2"></i>
                                 <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>
                             </div>
                             <a href="{{ route('additional.contact') }}" class="btn btn-outline-orange">
-                                {{ translate('Contact Form') }}
+                            >@lang('vacations.contact_us_button')
                                 <i class="fas fa-arrow-right ms-2"></i>
                             </a>
                         </div>
@@ -783,19 +783,23 @@
                     $sections = [
                         'accommodation' => [
                             'items' => $vacation->accommodations,
-                            'title' => translate('Accommodation')
+                            'title' => translate('Accommodation'),
+                            'lang' => 'accommodations',
                         ],
                         'boat' => [
                             'items' => $vacation->boats,
-                            'title' => translate('Mietboot')
+                            'title' => translate('Mietboot'),
+                            'lang' => 'boats',
                         ],
                         'package' => [
                             'items' => $vacation->packages,
-                            'title' => translate('Komplettpaket')
+                            'title' => translate('Komplettpaket'),
+                            'lang' => 'package',
                         ],
                         'guiding' => [
                             'items' => $vacation->guidings,
-                            'title' => 'Guiding'
+                            'title' => 'Guiding',
+                            'lang' => 'guidings',
                         ]
                     ];
                 @endphp
@@ -810,7 +814,7 @@
                                     data-bs-target="#collapse{{ $sectionKey }}" 
                                     aria-expanded="{{ $sectionKey === $activeTab ? 'true' : 'false' }}" 
                                     aria-controls="collapse{{ $sectionKey }}">
-                                {{ translate($section['title']) }}
+                                    @lang('vacations.' . $section['lang'])
                             </button>
                         </h2>
                     @endif
@@ -923,7 +927,7 @@
                     @if ($vacation->included_services && !empty(json_decode(translate($vacation->included_services))))
                         <div class="description-item">
                             <div class="header-container">
-                                <span>{{ translate('Included Services')}}</span>
+                                <span>@lang('vacations.included_services')</span>
                             </div>
                             <p class="text-wrapper">
                                 {!! translate(implode(', ', json_decode($vacation->included_services))) !!}
@@ -947,10 +951,11 @@
                                     </thead>
                                     <tbody>
                                         @foreach($vacation->extras as $itemIndex => $item)
-                                            <tr>
+                                            <tr> 
                                                 <td>{{ translate($item->description) }}</td>
                                                 <td>€ {{ $item->price }}</td>
-                                                <td style="text-transform: capitalize; min-width:100px !important">{{ translate(str_replace('_', ' ', $item->type)) }}</td>
+                                                <!-- <td style="text-transform: capitalize; min-width:100px !important">{{ translate(str_replace('_', ' ', $item->type)) }}</td> -->
+                                                <td style="text-transform: capitalize; min-width:100px !important">  @lang('vacations.' . $item->type)</td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -1016,13 +1021,13 @@
 </div>
 <div class="vacations-book-mobile">
 <button type="button" class="btn btn-orange w-100" data-bs-toggle="modal" data-bs-target="#vacationModalLabel">
-{{ translate('Book Vacation') }}
+@lang('vacations.book_vacations')
 </button>
 <div class="modal fade" id="vacationModalLabel" tabindex="-1" aria-labelledby="vacationModalLabel" aria-hidden="true">
 <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">{{ translate('Book Vacation') }}</h5>
+        <h5 class="modal-title" id="exampleModalLabel">@lang('vacations.book_vacations')</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">

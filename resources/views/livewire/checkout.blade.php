@@ -33,282 +33,286 @@
                 <div class="tab-content" id="pills-tabContent">
                   <div class="tab-pane fade {{ $this->page === 1 ? 'show active' : '' }}" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
                     <div class="row">
-                      <div class="col-md-6 my-3">
-                        <div class="my-4">
-                          <span class="fw-bold">{{ translate('Date Selection') }}</span>
-                        </div>
-                        @if(!$selectedDate)
-                        <div class="alert alert-warning mb-3" role="alert">
-                            <i class="fas fa-calendar-alt me-2"></i>
-                            {{ translate('Please select a date from the calendar to proceed') }}
-                        </div>
-                        @endif
-                        @error('selectedDate')
-                        <div class="alert alert-danger mb-3" role="alert">
-                            <i class="fas fa-exclamation-circle me-2"></i>
-                            {{ $message }}
-                        </div>
-                        @enderror
-                        <div class="col-md-12 d-flex justify-content-center">
-                          <div id="lite-datepicker" wire:ignore></div>
+                      <div class="col-lg-6 my-3 p-0">
+                        <div class="card shadow px-2 pb-3">
+                          <div class="my-4">
+                            <span class="fw-bold">{{ translate('Date Selection') }}</span>
+                          </div>
+                          @if(!$selectedDate)
+                          <div class="alert alert-warning mb-3" role="alert">
+                              <i class="fas fa-calendar-alt me-2"></i>
+                              {{ translate('Please select a date from the calendar to proceed') }}
+                          </div>
+                          @endif
+                          @error('selectedDate')
+                          <div class="alert alert-danger mb-3" role="alert">
+                              <i class="fas fa-exclamation-circle me-2"></i>
+                              {{ $message }}
+                          </div>
+                          @enderror
+                          <div class="col-md-12 d-flex justify-content-center">
+                            <div id="lite-datepicker" wire:ignore></div>
+                          </div>
                         </div>
                       </div>
                       
-                      <div class="col-md-6 my-3">          
-                        @if($this->page === 1 && !auth()->check())
-                          <div class="checkout-options-container mb-4">
-                            <div class="d-flex align-items-start">
-                              <i class="fas fa-user text-primary fs-4 me-3"></i>
-                              <span>
-                                <a href="#" class="text-primary fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#loginModal" wire:click="$set('checkoutType', 'login')">{{ translate('Sign in') }}</a>
-                                {{ translate('to book with your saved data, or') }}
-                                <a href="#" class="text-primary fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#registerModal" wire:click="$set('checkoutType', 'register')">{{ translate('Sign up') }}</a>
-                                {{ translate('to process your bookings on the go!') }}
-                              </span>
-                            </div>
-                          </div>
-                        @endif
-
-                        <div class="mb-4">
-                          <h5 class="fw-bold">{{ translate('Fill in your details') }}</h5>
-                        </div>
-                        <div class="alert alert-warning mb-3" role="alert">
-                          <i class="fas fa-info-circle me-2"></i>
-                          {{ translate('Almost done! All you have to do is fill in the') }} 
-                          <span class="text-danger">*</span> 
-                          {{ translate('required fields') }}
-                        </div>
-
-                        @if($errors->any())
-                        <div class="alert alert-danger m-0 p-2 my-2" role="alert">
-                          <div class="d-flex flex-column">
-                            @foreach($errors->all() as $error)
-                              <small class="text-danger">{{ $error }}</small>
-                            @endforeach
-                          </div>
-                        </div>
-                        @endif
-
-                        <div class="row">
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <label>{{translate('Forename')}}<span class="text-danger">*</span></label>
-                              <input type="text" 
-                                     class="form-control @error('userData.firstname') is-invalid @enderror" 
-                                     placeholder="{{translate('First Name')}}" 
-                                     id="firstname" 
-                                     wire:model="userData.firstname" 
-                                     required>
-                              @error('userData.firstname')
-                                <div class="invalid-feedback">
-                                  {{ $message }}
-                                </div>
-                              @enderror
-                            </div>
-                          </div>
-
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <label>{{translate('Surname')}}<span class="text-danger">*</span></label>
-                              <input type="text" 
-                                     class="form-control @error('userData.lastname') is-invalid @enderror" 
-                                     placeholder="{{translate('Last Name')}}" 
-                                     id="lastname" 
-                                     wire:model="userData.lastname" 
-                                     required>
-                              @error('userData.lastname')
-                                <div class="invalid-feedback">
-                                  {{ $message }}
-                                </div>
-                              @enderror
-                            </div>
-                          </div>
-
-                          <div class="col-12">
-                            <div class="form-group">
-                              <label>{{translate('E-mail address')}}<span class="text-danger">*</span></label>
-                              <input type="email" 
-                                     class="form-control @error('userData.email') is-invalid @enderror" 
-                                     id="email" 
-                                     wire:model="userData.email" 
-                                     required>
-                              <small class="text-muted">{{translate('The confirmation email will be sent to this address')}}</small>
-                              @error('userData.email')
-                                <div class="invalid-feedback">
-                                  {{ $message }}
-                                </div>
-                              @enderror
-                            </div>
-                          </div>
-                          
-                          <div class="col-12">
-                            <h5 class="fw-bold">{{ translate('Your address') }}</h5>
-                          </div>
-                          <br>
-
-                          <div class="col-12">
-                            <div class="form-group">
-                              <label>{{translate('Address')}}<span class="text-danger">*</span></label>
-                              <input type="text" 
-                                     class="form-control @error('userData.address') is-invalid @enderror" 
-                                     id="address" 
-                                     wire:model="userData.address" 
-                                     required>
-                              @error('userData.address')
-                                <div class="invalid-feedback">
-                                  {{ $message }}
-                                </div>
-                              @enderror
-                            </div>
-                          </div>
-
-                          <div class="col-6">
-                            <div class="form-group">
-                              <label>{{translate('City')}}<span class="text-danger">*</span></label>
-                              <input type="text" 
-                                     class="form-control @error('userData.city') is-invalid @enderror" 
-                                     id="city" 
-                                     wire:model="userData.city" 
-                                     required>
-                              @error('userData.city')
-                                <div class="invalid-feedback">
-                                  {{ $message }}
-                                </div>
-                              @enderror
-                            </div>
-                          </div>
-
-                          <div class="col-sm-6">
-                            <div class="form-group">
-                              <label for="country">{{translate('Country / Region')}} <span class="text-danger">*</span></label>
-                              <input type="text" class="form-control" id="country" wire:model="userData.country" required>
-                            </div>
-                          </div>
-
-                          <div class="col-6">
-                            <div class="form-group">
-                              <label>{{translate('Postal code')}} <span class="text-muted">(optional)</span></label>
-                              <input type="text" 
-                                     class="form-control @error('userData.postal') is-invalid @enderror" 
-                                     id="postal" 
-                                     wire:model="userData.postal">
-                              @error('userData.postal')
-                                <div class="invalid-feedback">
-                                  {{ $message }}
-                                </div>
-                              @enderror
-                            </div>
-                          </div>
-
-                          <div class="col-12">
-                            <div class="form-group">
-                              <label for="phone">@lang('forms.pNumber')<span style="color: #e8604c !important; font-size: 12px;">*</span></label>
-                              <div class="d-flex">
-                                <select class="form-control rounded w-25 me-2 @error('userData.countryCode') is-invalid @enderror" 
-                                        id="countryCode" wire:model="userData.countryCode" style="max-width: 120px;" required>
-                                  <option value="+49">+49 (Germany)</option>
-                                  <option value="+1">+1 (USA/Canada)</option>
-                                  <option value="+44">+44 (UK)</option>
-                                  <option value="+33">+33 (France)</option>
-                                  <option value="+39">+39 (Italy)</option>
-                                  <option value="+34">+34 (Spain)</option>
-                                  <option value="+81">+81 (Japan)</option>
-                                  <option value="+86">+86 (China)</option>
-                                  <option value="+91">+91 (India)</option>
-                                  <option value="+61">+61 (Australia)</option>
-                                  <option value="+353">+353 (Ireland)</option>
-                                  <option value="+31">+31 (Netherlands)</option>
-                                  <option value="+46">+46 (Sweden)</option>
-                                  <option value="+47">+47 (Norway)</option>
-                                  <option value="+45">+45 (Denmark)</option>
-                                  <option value="+358">+358 (Finland)</option>
-                                  <option value="+32">+32 (Belgium)</option>
-                                  <option value="+41">+41 (Switzerland)</option>
-                                  <option value="+43">+43 (Austria)</option>
-                                  <option value="+48">+48 (Poland)</option>
-                                  <option value="+351">+351 (Portugal)</option>
-                                  <option value="+30">+30 (Greece)</option>
-                                  <option value="+420">+420 (Czech Republic)</option>
-                                  <option value="+36">+36 (Hungary)</option>
-                                  <option value="+7">+7 (Russia)</option>
-                                  <option value="+380">+380 (Ukraine)</option>
-                                  <option value="+90">+90 (Turkey)</option>
-                                  <option value="+20">+20 (Egypt)</option>
-                                  <option value="+27">+27 (South Africa)</option>
-                                  <option value="+55">+55 (Brazil)</option>
-                                  <option value="+52">+52 (Mexico)</option>
-                                  <option value="+54">+54 (Argentina)</option>
-                                  <option value="+56">+56 (Chile)</option>
-                                  <option value="+57">+57 (Colombia)</option>
-                                  <option value="+51">+51 (Peru)</option>
-                                  <option value="+64">+64 (New Zealand)</option>
-                                  <option value="+65">+65 (Singapore)</option>
-                                  <option value="+60">+60 (Malaysia)</option>
-                                  <option value="+66">+66 (Thailand)</option>
-                                  <option value="+62">+62 (Indonesia)</option>
-                                  <option value="+63">+63 (Philippines)</option>
-                                  <option value="+84">+84 (Vietnam)</option>
-                                  <option value="+82">+82 (South Korea)</option>
-                                  <option value="+972">+972 (Israel)</option>
-                                  <option value="+971">+971 (UAE)</option>
-                                  <option value="+966">+966 (Saudi Arabia)</option>
-                                </select>
-                                <input type="tel" class="form-control rounded @error('userData.phone') is-invalid @enderror" 
-                                       id="phone" wire:model="userData.phone" required>
+                      <div class="col-lg-6 my-3">    
+                        <div class="card shadow p-3">
+                          @if($this->page === 1 && !auth()->check())
+                            <div class="checkout-options-container mb-4">
+                              <div class="d-flex align-items-start">
+                                <i class="fas fa-user text-primary fs-4 me-3"></i>
+                                <span>
+                                  <a href="#" class="text-primary fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#loginModal" wire:click="$set('checkoutType', 'login')">{{ translate('Sign in') }}</a>
+                                  {{ translate('to book with your saved data, or') }}
+                                  <a href="#" class="text-primary fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#registerModal" wire:click="$set('checkoutType', 'register')">{{ translate('Sign up') }}</a>
+                                  {{ translate('to process your bookings on the go!') }}
+                                </span>
                               </div>
-                              <small class="text-muted">@lang('forms.pNumberMsg')</small>
+                            </div>
+                          @endif
+  
+                          <div class="mb-4">
+                            <h5 class="fw-bold">{{ translate('Fill in your details') }}</h5>
+                          </div>
+                          <div class="alert alert-warning mb-3" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            {{ translate('Almost done! All you have to do is fill in the') }} 
+                            <span class="text-danger">*</span> 
+                            {{ translate('required fields') }}
+                          </div>
+  
+                          @if($errors->any())
+                          <div class="alert alert-danger m-0 p-2 my-2" role="alert">
+                            <div class="d-flex flex-column">
+                              @foreach($errors->all() as $error)
+                                <small class="text-danger">{{ $error }}</small>
+                              @endforeach
                             </div>
                           </div>
-
-                          @if($checkoutType === 'guest')
-                            <div class="col-12">
+                          @endif
+  
+                          <div class="row">
+                            <div class="col-md-6">
                               <div class="form-group">
-                                <div class="d-flex align-items-start">
-                                  <input type="checkbox" 
-                                         class="form-check-input mt-1 me-2 @error('userData.createAccount') is-invalid @enderror" 
-                                         id="createAccount" 
-                                         wire:model="userData.createAccount"
-                                         style="min-width: 16px;">
-                                  <label class="form-check-label" for="createAccount" style="font-size: 14px;">
-                                    {{ translate('Save my data and create an account. I accept the') }}
-                                    <a href="{{ route('law.agb') }}" target="_blank">{{ translate('Terms and Conditions') }}</a>
-                                    {{ translate('and') }}
-                                    <a href="{{ route('law.data-protection') }}" target="_blank">{{ translate('Privacy Policy') }}</a>
-                                  </label>
-                                </div>
-                                @error('userData.createAccount')
+                                <label>{{translate('Forename')}}<span class="text-danger">*</span></label>
+                                <input type="text" 
+                                       class="form-control @error('userData.firstname') is-invalid @enderror" 
+                                       placeholder="{{translate('First Name')}}" 
+                                       id="firstname" 
+                                       wire:model="userData.firstname" 
+                                       required>
+                                @error('userData.firstname')
                                   <div class="invalid-feedback">
                                     {{ $message }}
                                   </div>
                                 @enderror
                               </div>
                             </div>
-                          @endif
-                          
-                          <div class="col-md-12">
-                            <div class="row-buttons">
-                              <div class="button-container">  
-                                <!-- zurück -->
-                              <button class="thm-btn" type="button" onclick="window.history.back()"> <i class="fa fa-chevron-left"></i> @lang('message.return') </button>
+  
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                <label>{{translate('Surname')}}<span class="text-danger">*</span></label>
+                                <input type="text" 
+                                       class="form-control @error('userData.lastname') is-invalid @enderror" 
+                                       placeholder="{{translate('Last Name')}}" 
+                                       id="lastname" 
+                                       wire:model="userData.lastname" 
+                                       required>
+                                @error('userData.lastname')
+                                  <div class="invalid-feedback">
+                                    {{ $message }}
+                                  </div>
+                                @enderror
                               </div>
-                              <div class="button-container">
-                                @if($page === 1)
-                                  <div class="pull-right">
-                                    @if($selectedTime !== null)
-                                      <button class="thm-btn" type="button" wire:click="next">@lang('message.further') <i class="fa fa-chevron-right"></i></button>
-                                    @else
-                                      <button class="thm-btn thm-btn-disabled" type="button" wire:click="next" disabled>@lang('message.further')<i class="fa fa-chevron-right"></i></button>
-                                    @endif
+                            </div>
+  
+                            <div class="col-12">
+                              <div class="form-group">
+                                <label>{{translate('E-mail address')}}<span class="text-danger">*</span></label>
+                                <input type="email" 
+                                       class="form-control @error('userData.email') is-invalid @enderror" 
+                                       id="email" 
+                                       wire:model="userData.email" 
+                                       required>
+                                <small class="text-muted">{{translate('The confirmation email will be sent to this address')}}</small>
+                                @error('userData.email')
+                                  <div class="invalid-feedback">
+                                    {{ $message }}
                                   </div>
-                                @elseif ($page !== 2)
-                                  <div class="pull-right">
-                                    <button class="thm-btn" wire:click="next">@lang('message.further') <i class="fa fa-chevron-right"></i></button>
+                                @enderror
+                              </div>
+                            </div>
+                            
+                            <div class="col-12">
+                              <h5 class="fw-bold">{{ translate('Your address') }}</h5>
+                            </div>
+                            <br>
+  
+                            <div class="col-12">
+                              <div class="form-group">
+                                <label>{{translate('Address')}}<span class="text-danger">*</span></label>
+                                <input type="text" 
+                                       class="form-control @error('userData.address') is-invalid @enderror" 
+                                       id="address" 
+                                       wire:model="userData.address" 
+                                       required>
+                                @error('userData.address')
+                                  <div class="invalid-feedback">
+                                    {{ $message }}
                                   </div>
-                                @endif
+                                @enderror
+                              </div>
+                            </div>
+  
+                            <div class="col-6">
+                              <div class="form-group">
+                                <label>{{translate('City')}}<span class="text-danger">*</span></label>
+                                <input type="text" 
+                                       class="form-control @error('userData.city') is-invalid @enderror" 
+                                       id="city" 
+                                       wire:model="userData.city" 
+                                       required>
+                                @error('userData.city')
+                                  <div class="invalid-feedback">
+                                    {{ $message }}
+                                  </div>
+                                @enderror
+                              </div>
+                            </div>
+  
+                            <div class="col-sm-6">
+                              <div class="form-group">
+                                <label for="country">{{translate('Country / Region')}} <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="country" wire:model="userData.country" required>
+                              </div>
+                            </div>
+  
+                            <div class="col-6">
+                              <div class="form-group">
+                                <label>{{translate('Postal code')}} <span class="text-muted">(optional)</span></label>
+                                <input type="text" 
+                                       class="form-control @error('userData.postal') is-invalid @enderror" 
+                                       id="postal" 
+                                       wire:model="userData.postal">
+                                @error('userData.postal')
+                                  <div class="invalid-feedback">
+                                    {{ $message }}
+                                  </div>
+                                @enderror
+                              </div>
+                            </div>
+  
+                            <div class="col-12">
+                              <div class="form-group">
+                                <label for="phone">@lang('forms.pNumber')<span style="color: #e8604c !important; font-size: 12px;">*</span></label>
+                                <div class="d-flex">
+                                  <select class="form-control rounded w-25 me-2 @error('userData.countryCode') is-invalid @enderror" 
+                                          id="countryCode" wire:model="userData.countryCode" style="max-width: 120px;" required>
+                                    <option value="+49">+49 (Germany)</option>
+                                    <option value="+1">+1 (USA/Canada)</option>
+                                    <option value="+44">+44 (UK)</option>
+                                    <option value="+33">+33 (France)</option>
+                                    <option value="+39">+39 (Italy)</option>
+                                    <option value="+34">+34 (Spain)</option>
+                                    <option value="+81">+81 (Japan)</option>
+                                    <option value="+86">+86 (China)</option>
+                                    <option value="+91">+91 (India)</option>
+                                    <option value="+61">+61 (Australia)</option>
+                                    <option value="+353">+353 (Ireland)</option>
+                                    <option value="+31">+31 (Netherlands)</option>
+                                    <option value="+46">+46 (Sweden)</option>
+                                    <option value="+47">+47 (Norway)</option>
+                                    <option value="+45">+45 (Denmark)</option>
+                                    <option value="+358">+358 (Finland)</option>
+                                    <option value="+32">+32 (Belgium)</option>
+                                    <option value="+41">+41 (Switzerland)</option>
+                                    <option value="+43">+43 (Austria)</option>
+                                    <option value="+48">+48 (Poland)</option>
+                                    <option value="+351">+351 (Portugal)</option>
+                                    <option value="+30">+30 (Greece)</option>
+                                    <option value="+420">+420 (Czech Republic)</option>
+                                    <option value="+36">+36 (Hungary)</option>
+                                    <option value="+7">+7 (Russia)</option>
+                                    <option value="+380">+380 (Ukraine)</option>
+                                    <option value="+90">+90 (Turkey)</option>
+                                    <option value="+20">+20 (Egypt)</option>
+                                    <option value="+27">+27 (South Africa)</option>
+                                    <option value="+55">+55 (Brazil)</option>
+                                    <option value="+52">+52 (Mexico)</option>
+                                    <option value="+54">+54 (Argentina)</option>
+                                    <option value="+56">+56 (Chile)</option>
+                                    <option value="+57">+57 (Colombia)</option>
+                                    <option value="+51">+51 (Peru)</option>
+                                    <option value="+64">+64 (New Zealand)</option>
+                                    <option value="+65">+65 (Singapore)</option>
+                                    <option value="+60">+60 (Malaysia)</option>
+                                    <option value="+66">+66 (Thailand)</option>
+                                    <option value="+62">+62 (Indonesia)</option>
+                                    <option value="+63">+63 (Philippines)</option>
+                                    <option value="+84">+84 (Vietnam)</option>
+                                    <option value="+82">+82 (South Korea)</option>
+                                    <option value="+972">+972 (Israel)</option>
+                                    <option value="+971">+971 (UAE)</option>
+                                    <option value="+966">+966 (Saudi Arabia)</option>
+                                  </select>
+                                  <input type="tel" class="form-control rounded @error('userData.phone') is-invalid @enderror" 
+                                         id="phone" wire:model="userData.phone" required>
+                                </div>
+                                <small class="text-muted">@lang('forms.pNumberMsg')</small>
+                              </div>
+                            </div>
+  
+                            @if($checkoutType === 'guest')
+                              <div class="col-12">
+                                <div class="form-group">
+                                  <div class="d-flex align-items-start">
+                                    <input type="checkbox" 
+                                           class="form-check-input mt-1 me-2 @error('userData.createAccount') is-invalid @enderror" 
+                                           id="createAccount" 
+                                           wire:model="userData.createAccount"
+                                           style="min-width: 16px;">
+                                    <label class="form-check-label" for="createAccount" style="font-size: 14px;">
+                                      {{ translate('Save my data and create an account. I accept the') }}
+                                      <a href="{{ route('law.agb') }}" target="_blank">{{ translate('Terms and Conditions') }}</a>
+                                      {{ translate('and') }}
+                                      <a href="{{ route('law.data-protection') }}" target="_blank">{{ translate('Privacy Policy') }}</a>
+                                    </label>
+                                  </div>
+                                  @error('userData.createAccount')
+                                    <div class="invalid-feedback">
+                                      {{ $message }}
+                                    </div>
+                                  @enderror
+                                </div>
+                              </div>
+                            @endif
+                            
+                            <div class="col-md-12">
+                              <div class="row-buttons">
+                                <div class="button-container">  
+                                  <!-- zurück -->
+                                <button class="thm-btn" type="button" onclick="window.history.back()"> <i class="fa fa-chevron-left"></i> @lang('message.return') </button>
+                                </div>
+                                <div class="button-container">
+                                  @if($page === 1)
+                                    <div class="pull-right">
+                                      @if($selectedTime !== null)
+                                        <button class="thm-btn" type="button" wire:click="next">@lang('message.further') <i class="fa fa-chevron-right"></i></button>
+                                      @else
+                                        <button class="thm-btn thm-btn-disabled" type="button" wire:click="next" disabled>@lang('message.further')<i class="fa fa-chevron-right"></i></button>
+                                      @endif
+                                    </div>
+                                  @elseif ($page !== 2)
+                                    <div class="pull-right">
+                                      <button class="thm-btn" wire:click="next">@lang('message.further') <i class="fa fa-chevron-right"></i></button>
+                                    </div>
+                                  @endif
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
+                        </div>      
                       </div>
                     </div>
                   </div>
@@ -320,7 +324,7 @@
                     <div class="row d-flex justify-content-center checkout-container">
                       <div class="col-lg-8 col-md-8 col-sm-12 my-2">
                         <!-- Guiding Information Card -->
-                        <div class="card mb-4">
+                        <div class="card mb-4 shadow p-1">
                           <div class="card-header bg-light">
                             <h5 class="mb-0">{{$guiding->title}}</h5>
                             <div class="d-flex align-items-center">
@@ -426,7 +430,7 @@
                         </div>
 
                         <!-- Personal Information Card -->
-                        <div class="card mb-4">
+                        <div class="card mb-4 shadow p-1">
                           <div class="card-header bg-light">
                             <h5 class="mb-0">{{ translate('Personal Information') }}</h5>
                           </div>
@@ -468,9 +472,8 @@
                           </div>
                         </div>
                       </div>
-                      <div class="col-lg-4 col-md-4 col-sm-12 my-2">
-                        <div class="row">
-                          <div class="shadow-sm p-3 rounded d-flex flex-column">
+                      <div class="col-lg-4 col-md-4 col-sm-12 my-2 card shadow p-2 booking-overview">
+                          <div class="p-3 rounded d-flex flex-column">
                             <div class="ml-3"><h5>@lang('message.booking-overview')</h5></div>
                             <div class="my-2">
                               <div class="px-2 py-1 d-flex">
@@ -551,7 +554,6 @@
                           <button class="btn thm-btn rounded border mt-1 p-3" type="submit">@lang('message.reservation')</button>
                           <button class="btn thm-btn btn-gray rounded border mt-1 p-3" type="button" wire:click="prev" >@lang('message.return')</button>
                           <a class="btn thm-btn  btn-gray rounded border mt-1 p-3" href="{{route('guidings.index')}}" >@lang('message.booking-cancel')</a>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -685,6 +687,9 @@ document.addEventListener('livewire:next', function () {
 
 @section('css_after')
 <style>
+  .booking-overview{
+    height: fit-content;
+  }
   .row-buttons{
     display: flex;
     justify-content: space-between;
