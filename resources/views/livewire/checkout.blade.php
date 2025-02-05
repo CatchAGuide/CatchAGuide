@@ -5,7 +5,7 @@
         <div class="spinner-icon" style="background-image: url({{asset('/assets/images/fish.png')}})"></div>
       </div>
       <div class="message">
-        Please wait while processing...
+        {{ translate('Please wait while processing...') }}
       </div>
     </div>
   </div>
@@ -17,32 +17,13 @@
         <div class="card px-0 pt-5 pb-0 mt-3">
           <div class="text-center">
             <div class="my-2">
-              <h2><strong>Checkout</strong></h2>
+              <h2><strong>{{ translate('Checkout') }}</strong></h2>
             </div>
           </div>
-          
           <ul id="progressbar">
             <li class="active" id="account"><strong>{{ translate('Booking Information')}}</strong></li>
             <li class="{{ $this->page === 2 ? 'active' : '' }}" id="personal"><strong>{{ translate('Reservation') }}</strong></li>
           </ul>
-          
-          @if($this->page === 1 && !auth()->check())
-            <div class="checkout-options-container">
-              <div class="checkout-options">
-                <button class="checkout-option-btn {{ $checkoutType === 'guest' ? 'active' : '' }}" wire:click="$set('checkoutType', 'guest')">
-                  {{translate('GUEST CHECKOUT')}}
-                </button>
-                
-                <a href="#" class="checkout-option-btn {{ $checkoutType === 'login' ? 'active' : '' }}" data-bs-toggle="modal" data-bs-target="#loginModal" wire:click="$set('checkoutType', 'login')">
-                  <i class="fas fa-sign-in-alt me-2"></i>{{translate('LOGIN TO CHECKOUT')}}
-                </a>
-              </div>
-
-              <div class="mt-2 text-center text-muted small">
-                {{translate('Create an account to enjoy faster bookings, manage your reservations, and receive exclusive fishing offers!')}}
-              </div>
-            </div>
-          @endif
         </div>
 
         <div class="row p-4">
@@ -57,7 +38,7 @@
                           <span class="fw-bold">{{ translate('Date Selection') }}</span>
                         </div>
                         @if(!$selectedDate)
-                        <div class="alert alert-info mb-3" role="alert">
+                        <div class="alert alert-warning mb-3" role="alert">
                             <i class="fas fa-calendar-alt me-2"></i>
                             {{ translate('Please select a date from the calendar to proceed') }}
                         </div>
@@ -72,10 +53,32 @@
                           <div id="lite-datepicker" wire:ignore></div>
                         </div>
                       </div>
-                      <div class="col-md-6 my-3">
-                        <div class="my-4">
-                          <span class="fw-bold">{{ translate('Personal Information') }}</span>
+                      
+                      <div class="col-md-6 my-3">          
+                        @if($this->page === 1 && !auth()->check())
+                          <div class="checkout-options-container mb-4">
+                            <div class="d-flex align-items-start">
+                              <i class="fas fa-user text-primary fs-4 me-3"></i>
+                              <span>
+                                <a href="#" class="text-primary fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#loginModal" wire:click="$set('checkoutType', 'login')">{{ translate('Sign in') }}</a>
+                                {{ translate('to book with your saved data, or') }}
+                                <a href="#" class="text-primary fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#registerModal" wire:click="$set('checkoutType', 'register')">{{ translate('Sign up') }}</a>
+                                {{ translate('to process your bookings on the go!') }}
+                              </span>
+                            </div>
+                          </div>
+                        @endif
+
+                        <div class="mb-4">
+                          <h5 class="fw-bold">{{ translate('Fill in your details') }}</h5>
                         </div>
+                        <div class="alert alert-warning mb-3" role="alert">
+                          <i class="fas fa-info-circle me-2"></i>
+                          {{ translate('Almost done! All you have to do is fill in the') }} 
+                          <span class="text-danger">*</span> 
+                          {{ translate('required fields') }}
+                        </div>
+
                         @if($errors->any())
                         <div class="alert alert-danger m-0 p-2 my-2" role="alert">
                           <div class="d-flex flex-column">
@@ -85,102 +88,121 @@
                           </div>
                         </div>
                         @endif
+
                         <div class="row">
-                          <div class="col-12">
+                          <div class="col-md-6">
                             <div class="form-group">
-                              <label>{{translate('Name')}}<span style="color: #e8604c !important;">*</span></label>
-                              <div class="input-group">
-                                <select class="form-control w-25 rounded-start @error('userData.title') is-invalid @enderror" 
-                                        id="title" wire:model="userData.title" style="max-width: 80px;">
-                                  <option value="">{{translate('Title')}}</option>
-                                  <option value="Mr">{{translate('Mr')}}</option>
-                                  <option value="Mrs">{{translate('Mrs')}}</option>
-                                  <option value="Ms">{{translate('Ms')}}</option>
-                                </select>
-                                @error('userData.title')
-                                    <div class="invalid-feedback">
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-                                <input type="text" class="form-control @error('userData.firstname') is-invalid @enderror" 
-                                       placeholder="{{translate('First Name')}}" id="firstname" wire:model="userData.firstname" required>
-                                @error('userData.firstname')
-
-                                    <div class="invalid-feedback">
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-                                <input type="text" class="form-control @error('userData.lastname') is-invalid @enderror" 
-                                       placeholder="{{translate('Last Name')}}" id="lastname" wire:model="userData.lastname" required>
-                                @error('userData.lastname')
-                                    <div class="invalid-feedback">
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-                              </div>
-                            </div>
-                          </div>
-
-                          <div class="col-sm-6 col-md-4">
-                            <div class="form-group">
-                              <label for="salutation">@lang('forms.salut')</label>
-                              <Select type="text" class="form-control rounded" id="salutation" wire:model="userData.salutation">
-                                <option value="male">{{translate('Male')}}</option>
-                                <option value="female">{{translate('Female')}}</option>
-                              </select>
-                              @error('userData.salutation')
-                                  <div class="invalid-feedback">
-                                      {{ $message }}
-                                  </div>
+                              <label>{{translate('Forename')}}<span class="text-danger">*</span></label>
+                              <input type="text" 
+                                     class="form-control @error('userData.firstname') is-invalid @enderror" 
+                                     placeholder="{{translate('First Name')}}" 
+                                     id="firstname" 
+                                     wire:model="userData.firstname" 
+                                     required>
+                              @error('userData.firstname')
+                                <div class="invalid-feedback">
+                                  {{ $message }}
+                                </div>
                               @enderror
                             </div>
                           </div>
-                          <div class="col-sm-6 col-md-4">
 
+                          <div class="col-md-6">
                             <div class="form-group">
-                              <label for="zip">@lang('forms.postal')<span style="color: #e8604c !important">*</span></label>
-                              <input type="text" class="form-control rounded @error('userData.postal') is-invalid @enderror" id="zip" wire:model="userData.postal" required>
-                              @error('userData.postal')
-                                  <div class="invalid-feedback">
-                                      {{ $message }}
-                                  </div>
+                              <label>{{translate('Surname')}}<span class="text-danger">*</span></label>
+                              <input type="text" 
+                                     class="form-control @error('userData.lastname') is-invalid @enderror" 
+                                     placeholder="{{translate('Last Name')}}" 
+                                     id="lastname" 
+                                     wire:model="userData.lastname" 
+                                     required>
+                              @error('userData.lastname')
+                                <div class="invalid-feedback">
+                                  {{ $message }}
+                                </div>
                               @enderror
                             </div>
                           </div>
-                          <div class="col-12">
 
+                          <div class="col-12">
                             <div class="form-group">
-                              <label for="street">@lang('forms.street')<span style="color: #e8604c !important">*</span></label>
-                              <input type="text" class="form-control rounded @error('userData.address') is-invalid @enderror" id="street" wire:model="userData.address" required>
+                              <label>{{translate('E-mail address')}}<span class="text-danger">*</span></label>
+                              <input type="email" 
+                                     class="form-control @error('userData.email') is-invalid @enderror" 
+                                     id="email" 
+                                     wire:model="userData.email" 
+                                     required>
+                              <small class="text-muted">{{translate('The confirmation email will be sent to this address')}}</small>
+                              @error('userData.email')
+                                <div class="invalid-feedback">
+                                  {{ $message }}
+                                </div>
+                              @enderror
+                            </div>
+                          </div>
+                          
+                          <div class="col-12">
+                            <h5 class="fw-bold">{{ translate('Your address') }}</h5>
+                          </div>
+                          <br>
+
+                          <div class="col-12">
+                            <div class="form-group">
+                              <label>{{translate('Address')}}<span class="text-danger">*</span></label>
+                              <input type="text" 
+                                     class="form-control @error('userData.address') is-invalid @enderror" 
+                                     id="address" 
+                                     wire:model="userData.address" 
+                                     required>
                               @error('userData.address')
-                                  <div class="invalid-feedback">
-                                      {{ $message }}
-                                  </div>
+                                <div class="invalid-feedback">
+                                  {{ $message }}
+                                </div>
                               @enderror
                             </div>
                           </div>
-                          <div class="col-sm-6">
 
+                          <div class="col-6">
                             <div class="form-group">
-                              <label for="city">{{translate('State/City/Region')}}<span style="color: #e8604c !important">*</span></label>
-                              <input type="text" class="form-control rounded @error('userData.city') is-invalid @enderror" id="city" wire:model="userData.city" required>
+                              <label>{{translate('City')}}<span class="text-danger">*</span></label>
+                              <input type="text" 
+                                     class="form-control @error('userData.city') is-invalid @enderror" 
+                                     id="city" 
+                                     wire:model="userData.city" 
+                                     required>
                               @error('userData.city')
-                                  <div class="invalid-feedback">
-                                      {{ $message }}
-                                  </div>
+                                <div class="invalid-feedback">
+                                  {{ $message }}
+                                </div>
                               @enderror
                             </div>
                           </div>
-                          <div class="col-sm-6">
 
+                          <div class="col-sm-6">
                             <div class="form-group">
-                              <label for="country">{{translate('Country')}}</label>
-                              <input type="text" class="form-control rounded" id="country" wire:model="userData.country">
+                              <label for="country">{{translate('Country / Region')}} <span class="text-danger">*</span></label>
+                              <input type="text" class="form-control" id="country" wire:model="userData.country" required>
                             </div>
                           </div>
+
+                          <div class="col-6">
+                            <div class="form-group">
+                              <label>{{translate('Postal code')}} <span class="text-muted">(optional)</span></label>
+                              <input type="text" 
+                                     class="form-control @error('userData.postal') is-invalid @enderror" 
+                                     id="postal" 
+                                     wire:model="userData.postal">
+                              @error('userData.postal')
+                                <div class="invalid-feedback">
+                                  {{ $message }}
+                                </div>
+                              @enderror
+                            </div>
+                          </div>
+
                           <div class="col-12">
                             <div class="form-group">
-                              <label for="phone">@lang('forms.pNumber').<span style="color: #e8604c !important; font-size: 12px;">* @lang('forms.pNumberMsg')</span></label>
+                              <label for="phone">@lang('forms.pNumber')<span style="color: #e8604c !important; font-size: 12px;">*</span></label>
                               <div class="d-flex">
                                 <select class="form-control rounded w-25 me-2 @error('userData.countryCode') is-invalid @enderror" 
                                         id="countryCode" wire:model="userData.countryCode" style="max-width: 120px;" required>
@@ -234,46 +256,35 @@
                                 <input type="tel" class="form-control rounded @error('userData.phone') is-invalid @enderror" 
                                        id="phone" wire:model="userData.phone" required>
                               </div>
+                              <small class="text-muted">@lang('forms.pNumberMsg')</small>
                             </div>
                           </div>
-                          <div class="col-12">
-                            <div class="form-group">
-                              <label for="email">E-Mail<span style="color: #e8604c">*</span></label>
-                              <input type="email" 
-                                     class="form-control rounded @error('userData.email') is-invalid @enderror" 
-                                     id="email" 
-                                     wire:model="userData.email" 
-                                     required>
-                              @error('userData.email')
-                                  <div class="invalid-feedback">
-                                      {{ $message }}
-                                  </div>
-                              @enderror
-                            </div>
-                          </div>
+
                           @if($checkoutType === 'guest')
                             <div class="col-12">
                               <div class="form-group">
-                                <div class="form-check">
+                                <div class="d-flex align-items-start">
                                   <input type="checkbox" 
-                                         class="form-check-input @error('userData.createAccount') is-invalid @enderror" 
+                                         class="form-check-input mt-1 me-2 @error('userData.createAccount') is-invalid @enderror" 
                                          id="createAccount" 
-                                         wire:model="userData.createAccount">
-                                  <label class="form-check-label" for="createAccount">
+                                         wire:model="userData.createAccount"
+                                         style="min-width: 16px;">
+                                  <label class="form-check-label" for="createAccount" style="font-size: 14px;">
                                     {{ translate('Save my data and create an account. I accept the') }}
                                     <a href="{{ route('law.agb') }}" target="_blank">{{ translate('Terms and Conditions') }}</a>
                                     {{ translate('and') }}
                                     <a href="{{ route('law.data-protection') }}" target="_blank">{{ translate('Privacy Policy') }}</a>
                                   </label>
-                                  @error('userData.createAccount')
-                                    <div class="invalid-feedback">
-                                      {{ $message }}
-                                    </div>
-                                  @enderror
                                 </div>
+                                @error('userData.createAccount')
+                                  <div class="invalid-feedback">
+                                    {{ $message }}
+                                  </div>
+                                @enderror
                               </div>
                             </div>
                           @endif
+                          
                           <div class="col-md-12">
                             <div class="row-buttons">
                               <div class="button-container">  
@@ -307,115 +318,157 @@
                       @lang('forms.guidTitleMsg')
                     </div>
                     <div class="row d-flex justify-content-center checkout-container">
-                      <div class="col-lg-8 col-md-8 col-sm-5 my-2">
-                        <div class="row">
-                          <div class="my-2">
-                            <div class="card">
-                              <div class="card-body p-0">
-                                <h5 class="card-title">{{$guiding->title}}</h5>
-                                <div class="d-flex align-items-center">
-                                  <div>
-                                    @if($guiding->user->profil_image)
-                                      <img class="rounded-circle" src="{{asset('images/'. $guiding->user->profil_image)}}" alt="" width="24" height="24">
-                                    @else
-                                      <img class="rounded-circle" src="{{asset('images/placeholder_guide.jpg')}}" alt="" width="24" height="24">
+                      <div class="col-lg-8 col-md-8 col-sm-12 my-2">
+                        <!-- Guiding Information Card -->
+                        <div class="card mb-4">
+                          <div class="card-header bg-light">
+                            <h5 class="mb-0">{{$guiding->title}}</h5>
+                            <div class="d-flex align-items-center">
+                              <div>
+                                @if($guiding->user->profil_image)
+                                  <img class="rounded-circle" src="{{asset('images/'. $guiding->user->profil_image)}}" alt="" width="24" height="24">
+                                @else
+                                  <img class="rounded-circle" src="{{asset('images/placeholder_guide.jpg')}}" alt="" width="24" height="24">
+                                @endif
+                              </div>
+                              <div class="mx-2">
+                                <span>{{$guiding->user->firstname}}</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div class="card-body">
+                            <div class="guide-info mt-3">
+                              <div class="mb-2">
+                                <h5><span class="bordered-heading">@lang('message.guiding-information')</span></h5>
+                              </div>
+                              <div class="p-3 bg-light rounded">
+                                @if($guiding->is_boat)
+                                  <div class="flex-column border-bottom">
+                                    <div class="my-2">
+                                      <span class="text-dark fw-bold">{{ translate('Fishing from ')}}:</span>
+                                    </div>
+                                    <div class="px-2 text-dark">
+                                      {{$guiding->is_boat ? $guiding->boat_type : ''}}
+                                    </div>
+                                  </div>
+                                @else
+                                  <div class="flex-column border-bottom">
+                                    <div class="my-2">
+                                      <span class="text-dark fw-bold">{{ translate('Shore') }}</span>
+                                    </div>
+                                  </div>
+                                @endif
+
+                                <div class="flex-column border-bottom">
+                                  <div class="my-2">
+                                    <span class="text-dark fw-bold">{{ translate('Location')}}:</span>
+                                  </div>
+                                  <div class="px-2 text-dark">
+                                    {{$guiding->location ? $guiding->location : ''}}
+                                  </div>
+                                </div>
+
+                                <div class="flex-column border-bottom">
+                                  <div class="my-2">
+                                    <span class="text-dark fw-bold">@lang('profile.duration'):</span>
+                                  </div>
+                                  <div class="px-2 text-dark">
+                                    <p>{{$guiding->duration}} @if($guiding->duration_type == 'multi_day') days @else @lang('message.hours') @endif</p>
+                                  </div>
+                                </div>
+
+                                <div class="flex-column border-bottom">
+                                  <div class="my-2">
+                                    <span class="text-dark fw-bold">@lang('profile.targetFish'):</span>
+                                  </div>
+                                  <div class="px-2 text-dark">
+                                    <p>
+                                      {{implode(', ', collect($guiding->getTargetFishNames())->pluck('name')->toArray())}}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                @php
+                                  $guidingInclusions = $guiding->getInclusionNames();
+                                  $guidingInclusions = !empty($guidingInclusions) ? array_column($guidingInclusions, 'name') : [];
+                                @endphp
+
+                                @if (!empty($guidingInclusions))
+                                <div class="flex-column border-bottom">
+                                  <div class="my-2">
+                                    <span class="text-dark fw-bold">@lang('profile.inclussion'):</span>
+                                  </div>
+                                  <div class="px-2 text-dark">
+                                    {{ implode(', ', array_filter($guidingInclusions)) }}
+                                  </div>
+                                </div>
+                                @endif
+
+                                @if($guiding->requirements)
+                                <div class="flex-column">
+                                  <div class="my-2">
+                                    <span class="text-dark fw-bold">{{ translate('Requirements for taking part')}}:</span>
+                                  </div>
+                                  <div class="px-2 text-dark">
+                                    @if($guiding->requirements)
+                                    @foreach($guiding->getRequirementsAttribute() as $requirement)
+                                      {!! $requirement['name'] !!}: {!! $requirement['value'] !!}
+                                      <br>
+                                    @endforeach
                                     @endif
                                   </div>
-                                  <div class="mx-2">
-                                    <span>{{$guiding->user->firstname}}</span>
-                                  </div>
                                 </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div class="guide-info mt-3">
-                          <div class="mb-2">
-                            <h5><span class="bordered-heading">@lang('message.guiding-information')</span></h5>
-                          </div>
-                          <div class="p-3 bg-light rounded">
-                            @if($guiding->is_boat)
-                              <div class="flex-column border-bottom">
-                                <div class="my-2">
-                                  <span class="text-dark fw-bold">{{ translate('Fishing from ')}}:</span>
-                                </div>
-                                <div class="px-2 text-dark">
-                                  {{$guiding->is_boat ? $guiding->boat_type : ''}}
-                                </div>
-                              </div>
-                            @else
-                              <div class="flex-column border-bottom">
-                                <div class="my-2">
-                                  <span class="text-dark fw-bold">{{ translate('Shore') }}</span>
-                                </div>
-                              </div>
-                            @endif
-
-                            <div class="flex-column border-bottom">
-                              <div class="my-2">
-                                <span class="text-dark fw-bold">{{ translate('Location')}}:</span>
-                              </div>
-                              <div class="px-2 text-dark">
-                                {{$guiding->location ? $guiding->location : ''}}
-                              </div>
-                            </div>
-
-                            <div class="flex-column border-bottom">
-                              <div class="my-2">
-                                <span class="text-dark fw-bold">@lang('profile.duration'):</span>
-                              </div>
-                              <div class="px-2 text-dark">
-                                <p>{{$guiding->duration}} @if($guiding->duration_type == 'multi_day') days @else @lang('message.hours') @endif</p>
-                              </div>
-                            </div>
-
-                            <div class="flex-column border-bottom">
-                              <div class="my-2">
-                                <span class="text-dark fw-bold">@lang('profile.targetFish'):</span>
-                              </div>
-                              <div class="px-2 text-dark">
-                                <p>
-                                  {{implode(', ', collect($guiding->getTargetFishNames())->pluck('name')->toArray())}}
-                                </p>
-                              </div>
-                            </div>
-
-                            @php
-                              $guidingInclusions = $guiding->getInclusionNames();
-                              $guidingInclusions = !empty($guidingInclusions) ? array_column($guidingInclusions, 'name') : [];
-                            @endphp
-
-                            @if (!empty($guidingInclusions))
-                            <div class="flex-column border-bottom">
-                              <div class="my-2">
-                                <span class="text-dark fw-bold">@lang('profile.inclussion'):</span>
-                              </div>
-                              <div class="px-2 text-dark">
-                                {{ implode(', ', array_filter($guidingInclusions)) }}
-                              </div>
-                            </div>
-                            @endif
-
-                            @if($guiding->requirements)
-                            <div class="flex-column">
-                              <div class="my-2">
-                                <span class="text-dark fw-bold">{{ translate('Requirements for taking part')}}:</span>
-                              </div>
-                              <div class="px-2 text-dark">
-                                @if($guiding->requirements)
-                                @foreach($guiding->getRequirementsAttribute() as $requirement)
-                                  {!! $requirement['name'] !!}: {!! $requirement['value'] !!}
-                                  <br>
-                                @endforeach
                                 @endif
                               </div>
                             </div>
-                            @endif
+                          </div>
+                        </div>
+
+                        <!-- Personal Information Card -->
+                        <div class="card mb-4">
+                          <div class="card-header bg-light">
+                            <h5 class="mb-0">{{ translate('Personal Information') }}</h5>
+                          </div>
+                          <div class="card-body">
+                            <div class="row g-3">
+                              <div class="col-md-6">
+                                <label class="form-label">{{ translate('First Name') }}</label>
+                                <p class="form-control-static">{{ $userData['firstname'] }}</p>
+                              </div>
+                              <div class="col-md-6">
+                                <label class="form-label">{{ translate('Last Name') }}</label>
+                                <p class="form-control-static">{{ $userData['lastname'] }}</p>
+                              </div>
+                              <div class="col-12">
+                                <label class="form-label">{{ translate('E-mail address') }}</label>
+                                <p class="form-control-static">{{ $userData['email'] }}</p>
+                              </div>
+                              <div class="col-12">
+                                <label class="form-label">{{ translate('Address') }}</label>
+                                <p class="form-control-static">{{ $userData['address'] }}</p>
+                              </div>
+                              <div class="col-md-4">
+                                <label class="form-label">{{ translate('Postal code') }}</label>
+                                <p class="form-control-static">{{ $userData['postal'] }}</p>
+                              </div>
+                              <div class="col-md-4">
+                                <label class="form-label">{{ translate('City') }}</label>
+                                <p class="form-control-static">{{ $userData['city'] }}</p>
+                              </div>
+                              <div class="col-md-4">
+                                <label class="form-label">{{ translate('Country / Region') }}</label>
+                                <p class="form-control-static">{{ $userData['country'] }}</p>
+                              </div>
+                              <div class="col-12">
+                                <label class="form-label">{{ translate('Phone Number') }}</label>
+                                <p class="form-control-static">{{ $userData['phone'] }}</p>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
-                      <div class="col-sm-3 col-md-4 mobile my-2">
+                      <div class="col-lg-4 col-md-4 col-sm-12 my-2">
                         <div class="row">
                           <div class="shadow-sm p-3 rounded d-flex flex-column">
                             <div class="ml-3"><h5>@lang('message.booking-overview')</h5></div>
@@ -635,11 +688,11 @@ document.addEventListener('livewire:next', function () {
   .row-buttons{
     display: flex;
     justify-content: space-between;
-}
-button.btn-gray, a.btn-gray  {
-    background-color: #777;
-    color: #fff;
-}
+  }
+  button.btn-gray, a.btn-gray  {
+      background-color: #777;
+      color: #fff;
+  }
   .litepicker .container__days .day-item.is-today.is-locked{
     color: #fff !important;
     background: green !important;
@@ -744,52 +797,118 @@ button.btn-gray, a.btn-gray  {
   }
 
   .checkout-options-container {
-    width: 100%;
-    max-width: 600px; /* Match the width of your step indicators */
-    margin: 0 auto 2rem;
-    padding: 0 15px;
+    padding: 16px;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   }
 
-  .checkout-options {
-    display: flex;
-    gap: 1px;
-    width: 100%;
-    background-color: #e5e5e5;
-    border-radius: 4px;
-    overflow: hidden;
+  .checkout-options-container i {
+    color: #0d6efd;
+    margin-top: 2px; /* Aligns icon with text */
   }
 
-  .checkout-option-btn {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    background: white;
+  .checkout-options-container a {
+    font-weight: 600;
+  }
+
+  .checkout-options-container a:hover {
+    text-decoration: underline !important;
+  }
+
+  .form-check {
+    padding-left: 1.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .form-check-input {
+    position: absolute;
+    margin-top: 0.3rem;
+    margin-left: -1.75rem;
+  }
+  
+  .form-check-label {
+    margin-bottom: 0;
+    padding-top: 1px;
+  }
+  
+  @media (max-width: 768px) {
+    .form-check {
+      padding-left: 2rem;
+    }
+    
+    .form-check-label {
+      display: inline;
+      line-height: 1.5;
+    }
+    
+    .form-check-input {
+      margin-left: -2rem;
+      margin-top: 0.25rem;
+    }
+  }
+
+  .form-check-input {
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 14px;
-    font-weight: 500;
+  }
+  
+  .form-check-label {
+    cursor: pointer;
+    color: #666;
+  }
+  
+  @media (max-width: 768px) {
+    .form-check-label {
+      line-height: 1.4;
+    }
   }
 
-  .checkout-option-btn.active {
-    background-color: var(--thm-primary);
-    color: white;
+  /* Added styles for personal information card */
+  .form-label {
+    font-weight: 600;
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 0.2rem;
   }
 
-  .checkout-option-btn:hover:not(.active) {
-    background-color: #f8f9fa;
+  .form-control-static {
+    padding: 0.375rem 0;
+    margin-bottom: 0;
+    color: #333;
+    border-bottom: 1px solid #eee;
+  }
+
+  @media (max-width: 768px) {
+    .card {
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .card-header {
+      padding: 1rem;
+    }
+
+    .card-body {
+      padding: 1rem;
+    }
+
+    .form-control-static {
+      font-size: 0.95rem;
+    }
+  }
+
+  /* Improved responsive grid spacing */
+  .g-3 {
+    --bs-gutter-y: 1rem;
+    --bs-gutter-x: 1rem;
   }
 
   @media (max-width: 576px) {
-    .checkout-options {
-        flex-direction: column;
-    }
-    
-    .checkout-option-btn {
-        width: 100%;
-        padding: 10px;
-        font-size: 13px;
+    .g-3 {
+      --bs-gutter-y: 0.75rem;
+      --bs-gutter-x: 0.75rem;
     }
   }
 </style>
 @endsection
-
