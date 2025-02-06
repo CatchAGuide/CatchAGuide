@@ -109,7 +109,11 @@
 
                     <div class="d-grid mt-3">
                         <button type="submit" class="btn theme-primary">
-                            @lang('forms.register')
+                            <span class="normal-state">@lang('forms.register')</span>
+                            <span class="loading-state d-none">
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                Loading...
+                            </span>
                         </button>
                     </div>
                 </form>
@@ -171,6 +175,11 @@
     background-color: #313041;
 }
 
+#registerModal .theme-primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
 #registerModal a {
     color: #E8604C;
 }
@@ -200,6 +209,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Clear previous errors
         clearErrors(this);
         
+        // Show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.querySelector('.normal-state').classList.add('d-none');
+        submitBtn.querySelector('.loading-state').classList.remove('d-none');
+        
         const formData = new FormData(this);
         
         fetch(this.action, {
@@ -210,16 +225,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 'Accept': 'application/json'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (response.status === 419) {
+                window.location.reload();
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
-                // Close the modal
-                const modal = bootstrap.Modal.getInstance(document.querySelector('#registerModal'));
-                modal.hide();
-                
-                // Refresh the current page
+                // Keep loading state while page reloads
                 window.location.reload();
             } else {
+                // Reset loading state
+                submitBtn.disabled = false;
+                submitBtn.querySelector('.normal-state').classList.remove('d-none');
+                submitBtn.querySelector('.loading-state').classList.add('d-none');
+                
                 // Display errors in the form
                 Object.keys(data.errors).forEach(field => {
                     const input = registerForm.querySelector(`[name="${field}"]`);
@@ -245,6 +266,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(error => {
+            // Reset loading state
+            submitBtn.disabled = false;
+            submitBtn.querySelector('.normal-state').classList.remove('d-none');
+            submitBtn.querySelector('.loading-state').classList.add('d-none');
+            
             // Add a general error message at the top of the form
             const errorDiv = document.createElement('div');
             errorDiv.className = 'alert alert-danger mb-3';

@@ -46,15 +46,20 @@ class LoginAuthController extends Controller
     }
 
     /**
-     * @return RedirectResponse
+     * @return JsonResponse|RedirectResponse
      */
-    public function logout(): RedirectResponse
+    public function logout()
     {
         Auth::guard('employees')->logout();
         Auth::logout();
 
-        return redirect()->route('login'); // Login
+        if (request()->ajax()) {
+            return response()->json(['success' => true]);
+        }
+
+        return redirect()->route('login');
     }
+
 
     /**
      * @param Request $request

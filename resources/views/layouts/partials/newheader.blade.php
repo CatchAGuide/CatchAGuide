@@ -48,7 +48,7 @@
                                     <i class="fas fa-user me-2"></i> @lang('homepage.header-profile')
                                 </a>
                                 <div class="dropdown-divider"></div>
-                                <form method="POST" action="{{ route('admin.auth.logout') }}">
+                                <form method="POST" action="{{ route('admin.auth.logout') }}" class="logout-form">
                                     @csrf
                                     <button type="submit" class="dropdown-item">
                                         <i class="fas fa-sign-out-alt me-2"></i> @lang('homepage.header-logout')
@@ -76,7 +76,7 @@
                                  alt="Profile">
                         </a>
                     @else
-                        <a href="{{ route('login') }}" class="text-white me-3">
+                        <a href="#" class="text-white me-3" data-bs-toggle="modal" data-bs-target="#loginModal">
                             <i class="far fa-user-circle" style="font-size: 24px;"></i>
                         </a>
                     @endauth
@@ -1117,24 +1117,23 @@ input[type=number] {
                     
                     @auth
                         <div class="menu-divider"></div>
-                        <form method="POST" action="{{ route('admin.auth.logout') }}">
+                        <form method="POST" action="{{ route('admin.auth.logout') }}" class="logout-form">
                             @csrf
                             <button type="submit" class="menu-item text-danger">
                                 <i class="fas fa-sign-out-alt"></i>
                                 <span>@lang('homepage.header-logout')</span>
                             </button>
                         </form>
-                        @else
-
-                    <div class="menu-divider"></div>
-                    <a href="{{ route('login') }}"  type="submit" class="menu-item">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>@lang('homepage.header-signup')</span>
-                    </a>
-                    <a href="{{ route('login') }}" type="submit" class="menu-item">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>@lang('homepage.header-login')</span>
-                    </a>
+                    @else
+                        <div class="menu-divider"></div>
+                        <a href="#" class="menu-item" data-bs-toggle="modal" data-bs-target="#registerModal" onclick="closeMobileMenu()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>@lang('homepage.header-signup')</span>
+                        </a>
+                        <a href="#" class="menu-item" data-bs-toggle="modal" data-bs-target="#loginModal" onclick="closeMobileMenu()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>@lang('homepage.header-login')</span>
+                        </a>
                     @endauth
                 </div>
             </div>
@@ -1180,6 +1179,14 @@ function updateFormAction(selectElement, formId) {
     form.action = "{{ route('vacations.category', ['country' => 'all']) }}".replace('all', country);
 }
 
+function closeMobileMenu() {
+    // Close the mobile menu modal before opening login modal
+    const mobileMenuModal = bootstrap.Modal.getInstance(document.getElementById('mobileMenuModal'));
+    if (mobileMenuModal) {
+        mobileMenuModal.hide();
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const searchTrigger = document.getElementById('headerSearchTrigger');
     const searchModal = document.getElementById('searchModal');
@@ -1212,5 +1219,34 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
+
+    // Update logout form handling
+    document.querySelectorAll('.logout-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'  // This explicitly marks it as an AJAX request
+                },
+                body: JSON.stringify({
+                    _token: document.querySelector('meta[name="csrf-token"]').content
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    });
 });
 </script>
