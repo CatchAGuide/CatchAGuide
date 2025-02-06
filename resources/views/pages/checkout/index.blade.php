@@ -4374,7 +4374,7 @@ select.list-dt:focus {
 
 #progressbar li {
     list-style-type: none;
-    font-size: 12px;
+    font-size: 16px;
     width: 50%;
     float: left;
     position: relative;
