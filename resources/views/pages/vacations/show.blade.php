@@ -229,11 +229,11 @@
 
 @section('content')
 <div class="container">
-    {{-- <section class="page-header">
+    <section class="page-header">
         <div class="page-header__bottom">
             <div class="container">
                 <div class="page-header__bottom-inner">
-                    <ul class="thm-breadcrumb list-unstyled">
+                    {{-- <ul class="thm-breadcrumb list-unstyled">
                         <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                         <li><span>&#183;</span></li>
                         <li><a href="{{ route('vacations.index') }}">{{ translate('Fishing Vacations')}}</a></li>
@@ -249,11 +249,11 @@
                         <li class="active">
                             {{ translate($vacation->title) }}
                         </li>
-                    </ul>
+                    </ul> --}}
                 </div>
             </div>
         </div>
-    </section> --}}
+    </section>
 </div>
 
  <div id="guidings-page" class="container vacations-single">
