@@ -26,7 +26,7 @@ return [
     'msgYG' => 'Message your guest',
 
 
-    'salut' =>  'Salutation',
+    'salut' =>  'Gender',
     'title' =>  'Title',
     'name' =>  'First name',
     'lastName' =>  'Sure name',

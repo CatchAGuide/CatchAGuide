@@ -9,9 +9,10 @@
 @section('css_after')
 <style>
     .container {
-        max-width: 1400px;
+        max-width: 1200px;
         margin: 0 auto;
         padding: 0 15px;
+        width: 100%;
     }
 
     .page-header {
@@ -29,21 +30,6 @@
         margin-top: -30px;
         z-index: 100;
     }
-
-    #filterCard {
-        /* position: sticky;
-        top: 20px; */
-    }
-
-    /*.carousel .carousel-control-next, 
-    .carousel .carousel-control-prev {
-        background: rgba(0,0,0,0.5);
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        top: 50%;
-        transform: translateY(-50%);
-    }*/
 
     .carousel.slide img {
         height: 300px;
@@ -74,63 +60,29 @@
         filter: none !important;
     }
 
-    /* .carousel .carousel-control-next, .carousel .carousel-control-prev {
-        top: 50%;
-        transform: translateY(-50%);
-    } */
-
     .carousel.slide img {
-        /* max-height: 265px; */
         object-fit: cover;
         background: black;
         height: 300px;
-        /* min-height: 160px; */
-        /* height:228px; */
     }
-
-    /* .carousel .carousel-control-next {
-        right: 0px;
-    }
-
-    .carousel .carousel-control-prev {
-        left: 0;
-    } */
 
     .carousel-item {
         min-height: 50px;
     }
-    /* .carousel .carousel-control-next, .carousel .carousel-control-prev {
-        padding: 3px;
-        width: 24px;
-    } */
 
     .carousel-item-next, .carousel-item-prev, .carousel-item.active {
         display: flex;
     }
-
-    /* .carousel-control-prev-icon,
-    .carousel-control-next-icon {
-        width: 10px;
-        height: 10px;
-    }
-
-    .carousel .carousel-control-next, .carousel .carousel-control-prev {
-        padding: 3px;
-        width: 24px;
-    } */
     .form-custom-input{
-    /* border: solid #e8604c 1px; */
     border: 1px solid #d4d5d6;
     border-radius: 5px;
     padding: 8px 10px;
     width:100%;
     }
     .form-control:focus{
-        /* border: solid #e8604c 1px !important; */
        box-shadow: none;
     }
     .form-custom-input:focus-visible{
-        /* border: solid #e8604c 1px !important; */
         border:0;
         outline:solid #e8604c 1px !important;
     }
@@ -233,10 +185,6 @@
     .new-bg{
         background:#313041;
     }
-    .container {
-        max-width:1600px;
-    }
-
     #map-placeholder {
         position: relative;
         width:100%;
@@ -281,6 +229,53 @@
         padding-left: 15px;
         padding-right: 15px;
     }
+
+    /* Tours list section spacing */
+    .tours-list {
+        padding-top: 20px;
+        padding-bottom: 40px;
+    }
+
+    /* Main content layout */
+    .tours-list__right {
+        width: 100%;
+    }
+
+    /* Filter sidebar */
+    #filterCard {
+        position: sticky;
+        top: 20px;
+    }
+
+    /* Guiding list item container */
+    .guiding-list-item {
+        margin: 0 0 20px 0;
+    }
+
+    /* Remove unnecessary container nesting */
+    .tours-list .container-fluid {
+        padding: 0;
+    }
+
+    /* Adjust row margins */
+    .row {
+        margin-left: -15px;
+        margin-right: -15px;
+    }
+
+    /* Column padding adjustments */
+    .col-sm-12,
+    .col-lg-3,
+    .col-lg-9 {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    @media (min-width: 992px) {
+        .tours-list__inner {
+            padding-left: 15px;
+        }
+    }
 </style>
 
 @endsection
@@ -288,9 +283,9 @@
 @include('layouts.schema.listings')
 @endsection
 @section('content')
-    <section class="page-header">
+<div class="container">
+    {{-- <section class="page-header">
         <div class="page-header__bottom">
-            <div class="container">
                 <div class="page-header__bottom-inner">
                     <ul class="thm-breadcrumb list-unstyled">
                         <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
@@ -302,12 +297,11 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> --}}
 
     <!--Tours List Start-->
-    <section class="tours-list" style="padding-top: 20px;">
-
-        <div class="container-fluid">
+    <section class="tours-list">
+        <div class="container">
             <div class="row">
                 <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
                     <div class="d-grid gap-2 w-100">
@@ -556,7 +550,7 @@
                                                                 <div class="guidings-icon-container"> 
                                                                             <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
                                                                         <div class="">
-                                                                            {{ $guiding->duration }} @if($guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
+                                                                            {{$guiding->duration}} {{ $guiding->duration_type == 'multi_day' ? __('guidings.days') : __('guidings.hours') }}
                                                                         </div>
                                                                 </div>
                                                                 <div class="guidings-icon-container"> 
@@ -785,11 +779,12 @@
 @section('js_after')
 
 <script>
-    $('#sortby').on('change',function(){
-        $('#form-sortby').submit();
-    });
-    $('#sortby-2').on('change',function(){
-        $('#form-sortby-2').submit();
+    $('#sortby, #sortby-2').on('change', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('sortby', $(this).val());
+        
+        const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+        window.location.href = newUrl;
     });
 </script>
 <script>
@@ -878,19 +873,13 @@ function initializeSelect2() {
         $('#num-guests, #num-guestsOffCanvass').val('{{ request()->get('num_guests') }}');
     @endif
 }
-
-
-
 </script>
 
 
 <script type="module">
     import { MarkerClusterer } from "https://cdn.skypack.dev/@googlemaps/markerclusterer@2.3.1";
-     initializeMap();
-
-
-     async function initializeMap() {
-
+    initializeMap();
+    async function initializeMap() {
         var mapStyle = [
           {
             featureType: "poi",
@@ -948,154 +937,78 @@ function initializeSelect2() {
           },
         ];
 
-    //const { Map } = await google.maps.importLibrary("maps");
+        @php
+            $lat = isset($guidings[0]) ? $guidings[0]->lat : 51.165691;
+            $lng = isset($guidings[0]) ? $guidings[0]->lng : 10.451526;
+        @endphp
 
-    @php
-        $lat = isset($guidings[0]) ? $guidings[0]->lat : 51.165691;
-        $lng = isset($guidings[0]) ? $guidings[0]->lng : 10.451526;
-    @endphp
+        const position =  { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }} , lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} }; 
+        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
+        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
 
-    const position =  { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }} , lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} }; 
-    const { Map, InfoWindow } = await google.maps.importLibrary("maps");
-    const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
+        const map = new Map(document.getElementById("map"), {
+            zoom: 5,
+            center: position,
+            styles: mapStyle,
+            mapId: "DEMO_MAP_ID",
+            mapTypeControl: false,
+            streetViewControl: false,
+        });
 
-    //map = new google.maps.Map(document.getElementById("map"), {
-    const map = new Map(document.getElementById("map"), {
-        zoom: 5,
-        center: position,
-        styles: mapStyle,
-        mapId: "DEMO_MAP_ID",
-        mapTypeControl: false,
-        streetViewControl: false,
-    });
+        const marker = new AdvancedMarkerElement({
+            map: map,
+        });
 
-    // The marker, positioned at Uluru
-    const marker = new AdvancedMarkerElement({
-        map: map,
-        // position: position,
-    });
+        const markers = [];
+        const infowindows = [];
+        const uniqueCoordinates = [];
+        let isDuplicateCoordinate;  
 
+        @if($allGuidings->isEmpty())
+            @include('pages.guidings.partials.maps',['guidings' => $otherguidings])
+        @else
+            @include('pages.guidings.partials.maps',['guidings' => $allGuidings])
+        @endif
 
+        function getRandomOffset() {
+        // Generate a random value between -0.00005 and 0.00005 (adjust the range as needed)
+        return (Math.random() - 0.5) * 0.0080;
+        }
 
-    const markers = [];
-    const infowindows = [];
-    const uniqueCoordinates = [];
-    let isDuplicateCoordinate;  
-
-    @if($allGuidings->isEmpty())
-        @include('pages.guidings.partials.maps',['guidings' => $otherguidings])
-    @else
-        @include('pages.guidings.partials.maps',['guidings' => $allGuidings])
-    @endif
-
-
-    function getRandomOffset() {
-      // Generate a random value between -0.00005 and 0.00005 (adjust the range as needed)
-      return (Math.random() - 0.5) * 0.0080;
+        const markerCluster = new MarkerClusterer({ markers, map, mapStyle });
+        // Add click event listeners to individual markers inside the cluster
+        google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
+            map.setZoom(map.getZoom() + 2);
+            map.setCenter(cluster.getCenter());
+        });
     }
 
+    window.addEventListener('load', function() {
+        var placeLatitude = '{{ request()->get('placeLat') }}'; // Replace with the actual value from the request
+        var placeLongitude = '{{ request()->get('placeLng') }}'; // Replace with the actual value from the request
 
-    /* 
-    // Create the MarkerClusterer
-    const markerCluster = new MarkerClusterer(map, markers, {
-        imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m',
-        maxZoom: 12,
-    });
-    */
-   
-    const markerCluster = new MarkerClusterer({ markers, map, mapStyle });
-    // Add click event listeners to individual markers inside the cluster
-    google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
-        // You can control the zoom level here
-        // For example, zoom in by 2 levels when clicking on a cluster
-        map.setZoom(map.getZoom() + 2);
-        map.setCenter(cluster.getCenter());
+        if (placeLatitude && placeLongitude) {
+            // The place latitude and longitude are present, so set the values in the form fields
+            document.getElementById('placeLat').value = placeLatitude;
+            document.getElementById('placeLng').value = placeLongitude;
+        } 
     });
 
-}
-
-
-
-/*function initialize() {
-    var input = document.getElementById('searchPlace');
-    var autocomplete = new google.maps.places.Autocomplete(input);
-    google.maps.event.addListener(autocomplete, 'place_changed', function () {
-        //alert(2221);
-        var place = autocomplete.getPlace();
-        document.getElementById('LocationLat').value = place.geometry.location.lat();
-        document.getElementById('LocationLng').value = place.geometry.location.lng();
-    });
-}*/
-
-/*function initialize2() {
-
-    var input = document.getElementById('searchPlaceOffCanvass');
-    var autocomplete = new google.maps.places.Autocomplete(input);
-    google.maps.event.addListener(autocomplete, 'place_changed', function () {
-        var place = autocomplete.getPlace();
-        document.getElementById('placeLatOffCanvass').value = place.geometry.location.lat();
-        document.getElementById('placeLngOffCanvass').value = place.geometry.location.lng();
-    });
-}*/
-
-//window.addEventListener('load', initialize);
-//window.addEventListener('load', initialize2);
-
-window.addEventListener('load', function() {
-    var placeLatitude = '{{ request()->get('placeLat') }}'; // Replace with the actual value from the request
-    var placeLongitude = '{{ request()->get('placeLng') }}'; // Replace with the actual value from the request
-
-    if (placeLatitude && placeLongitude) {
-        // The place latitude and longitude are present, so set the values in the form fields
-        document.getElementById('placeLat').value = placeLatitude;
-        document.getElementById('placeLng').value = placeLongitude;
-    } else {
-        // The place latitude and longitude are not present, so execute the geolocation function
-        // getLocation();
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+            console.log('Geolocation is not supported by this browser.');
+        }
     }
-});
 
-function getLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showPosition);
-    } else {
-        console.log('Geolocation is not supported by this browser.');
+    function showPosition(position) {
+        var lat = position.coords.latitude;
+        var lng = position.coords.longitude;
+        document.getElementById('placeLat').value = lat;
+        document.getElementById('placeLng').value = lng;
     }
-}
 
-function showPosition(position) {
-    var lat = position.coords.latitude;
-    var lng = position.coords.longitude;
-    document.getElementById('placeLat').value = lat;
-    document.getElementById('placeLng').value = lng;
-    
-    codeLatLng(lat, lng);
-}
-
-function codeLatLng(lat, lng) {
-    return null;
-    // var geocoder = new google.maps.Geocoder();
-    // var latlng = new google.maps.LatLng(lat, lng);
-    // geocoder.geocode({'latLng': latlng}, function (results, status) {
-    //     if (status === google.maps.GeocoderStatus.OK) {
-    //         if (results[0]) {
-    //             document.getElementById('searchPlace2').value = results[0].formatted_address;
-    //             //document.getElementById('searchPlaceOffCanvass').value = results[0].formatted_address;
-    //         } else {
-    //             console.log('No results found');
-    //             return null;
-    //         }
-    //     } else {
-    //         console.log('Geocoder failed due to: ' + status);
-    //         return null;
-    //     }
-    // });
-}
-
-       
 </script>
-
-
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
-
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 @endsection

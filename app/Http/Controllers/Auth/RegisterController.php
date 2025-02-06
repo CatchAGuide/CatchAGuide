@@ -57,13 +57,20 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
-        return Validator::make($data, [
+        $rules = [
             'firstname' => ['required', 'string', 'max:255'],
             'lastname' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'g-recaptcha-response' => 'recaptcha',
-        ]);
+            'agb' => ['required', 'accepted'],
+        ];
+
+        // Only add reCAPTCHA validation in production
+        if (app()->environment('production')) {
+            $rules['g-recaptcha-response'] = 'recaptcha';
+        }
+
+        return Validator::make($data, $rules);
     }
 
     /**
@@ -89,22 +96,41 @@ class RegisterController extends Controller
     
     public function register(Request $request)
     {
-        $this->validator($request->all())->validate();
+        $validator = $this->validator($request->all());
 
-        event(new Registered($user = $this->create($request->all())));
-
-        $this->guard()->login($user);
-
-        if ($response = $this->registered($request, $user)) {
-            return $response;
+        if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
         }
 
-        Mail::send(new RegistrationVerification($user));
-        $request->session()->flash('success-message', 'Success!');
+        // Create and get the user
+        $user = $this->create($request->all());
 
-        return $request->wantsJson()
-                    ? new JsonResponse([], 201)
-                    : redirect($this->redirectPath());
+        // Fire registered event
+        event(new Registered($user));
+
+        // Log the user in
+        Auth::login($user);
+
+        // Send verification email
+        Mail::send(new RegistrationVerification($user));
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Registration successful!'
+            ]);
+        }
+
+        return redirect($this->redirectPath())
+            ->with('success-message', 'Success!');
     }
 
     protected function guard()
@@ -127,12 +153,7 @@ class RegisterController extends Controller
         Auth::guard('employees')->logout();
         Auth::logout();
 
-        return url('/login');//->with('success-message', 'Success!');
-
-        if (method_exists($this, 'redirectTo')) {
-            return $this->redirectTo();
-        }
-        return property_exists($this, 'redirectTo') ? $this->redirectTo : '/home';
+        return url('/login');
     }
 
     public function verfication(Request $request)

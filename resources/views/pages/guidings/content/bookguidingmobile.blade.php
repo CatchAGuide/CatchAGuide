@@ -2,7 +2,7 @@
     <div class="tour-details-two__sidebar">
         <div class="tour-details-two__book-tours">
             <div class="card-body">
-            <form action="{{ route('checkout') }}" method="POST">
+            <form action="{{ route('checkout') }}" method="POST" class="checkout-form">
                 @csrf
                 <div class="booking-form-container">
                     <div class="booking-select position-relative">

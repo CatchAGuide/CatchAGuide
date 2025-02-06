@@ -23,46 +23,44 @@ class DestinationCountryController extends Controller
         return view('pages.countries.index', compact('countries'));
     }
 
-    public function country(Request $request, $country, $region = null, $city=null)
+    public function country(Request $request, $country, $region = null, $city = null)
     {
+        // Validate existence of parent records first
+        $country_row = Destination::whereSlug($country)
+            ->whereType('country')
+            ->firstOrFail(); // Use firstOrFail instead of first()
+
+        $region_row = null;
+        $city_row = null;
+
+        if ($region) {
+            $region_row = Destination::whereSlug($region)
+                ->whereType('region')
+                ->whereCountryId($country_row->id)
+                ->firstOrFail();
+        }
+
+        if ($city) {
+            $city_row = Destination::whereSlug($city)
+                ->whereType('city')
+                ->whereCountryId($country_row->id)
+                ->whereRegionId($region_row->id)
+                ->firstOrFail();
+        }
+
         $place_location = $country;
         $query = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit']);
 
-        $country_row = Destination::whereSlug($country)->whereType('country')->first();
-        $region_row = Destination::whereSlug($region)->whereType('region')->first();
-        $city_row = Destination::whereSlug($city)->whereType('city')->first();
-
-        if (!is_null($city)) {
-            if (is_null($city_row)) {
-                abort(404);
-            } elseif (is_null($region_row)) {
-                abort(404);
-            } elseif (is_null($country_row)) {
-                abort(404);
-            }
-            $place_location = $city;
-            $query = $query->whereType('city')->whereCountryId($country_row->id)->whereRegionId($region_row->id)->whereId($city_row->id);
-        } elseif (!is_null($region)) {
-            if (is_null($region_row)) {
-                abort(404);
-            } elseif (is_null($country_row)) {
-                abort(404);
-            }
-            $place_location = $region;
-            $query = $query->whereType('region')->whereCountryId($country_row->id)->whereId($region_row->id);
+        if ($city_row) {
+            $query->whereType('city')->whereId($city_row->id);
+        } elseif ($region_row) {
+            $query->whereType('region')->whereId($region_row->id);
         } else {
-            if (is_null($country_row)) {
-                abort(404);
-            }
-            $query = $query->whereType('country')->whereId($country_row->id);
+            $query->whereType('country')->whereId($country_row->id);
         }
 
-        $row_data = $query->first();
+        $row_data = $query->firstOrFail();
 
-        if (is_null($row_data)) {
-            abort(404);
-        }
-        
         $regions = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->whereType('region')->whereCountryId($row_data->id)->get();
         $cities = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->whereType('city')->whereCountryId($row_data->id)->get();
 

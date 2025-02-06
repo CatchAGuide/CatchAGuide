@@ -433,6 +433,7 @@
 
 
 @include('layouts.includes.scripts')
+@include('layouts.partials.changePassword')
 <script>
     if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(function (position) {
@@ -716,7 +717,6 @@ document.addEventListener('DOMContentLoaded', function () {
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     })(window, document, "clarity", "script", "i9xet5addk");
 </script>
-
 
 </body>
 

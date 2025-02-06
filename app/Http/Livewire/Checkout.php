@@ -5,6 +5,7 @@ namespace App\Http\Livewire;
 
 use App\Mail\Guest\GuestBookingRequestMail;
 use App\Mail\Guide\GuideBookingRequestMail;
+use App\Mail\Guest\AutomaticRegistrationMail;
 use Mail;
 
 use Illuminate\Support\Str;
@@ -23,6 +24,8 @@ use App\Models\GuidingExtras;
 use Illuminate\Support\Facades\Log;
 
 use App\Jobs\SendCheckoutEmail;
+use App\Models\UserInformation;
+use App\Models\UserGuest;
 
 class Checkout extends Component
 {
@@ -65,9 +68,14 @@ class Checkout extends Component
         'postal' => '',
         'city' => '',
         'country' => '',
+        'countryCode' => '+49',
         'phone' => '',
-        'email' => ''
+        'email' => '',
+        'createAccount' => false,
+        'guestCheckTerms' => false,
     ];
+
+    public $checkoutType = 'guest';
 
     protected $rules = [
         // 'userData.firstname' => 'required|string',
@@ -81,8 +89,17 @@ class Checkout extends Component
     ];
 
     protected $messages = [
-        'userData.firstname.required' => 'Bitte gebe Deinen Vornamen an.',
-        'userData.email.required' => 'Bitte gebe eine gültige Emailadresse an',
+        'selectedDate.required' => 'Bitte wählen Sie ein Datum aus dem Kalender.',
+        'userData.firstname.required' => 'Bitte geben Sie Ihren Vornamen ein.',
+        'userData.lastname.required' => 'Bitte geben Sie Ihren Nachnamen ein.',
+        'userData.address.required' => 'Bitte geben Sie Ihre Straße und Hausnummer ein.',
+        'userData.postal.required' => 'Bitte geben Sie Ihre Postleitzahl ein.',
+        'userData.city.required' => 'Bitte geben Sie Ihre Stadt ein.',
+        'userData.phone.required' => 'Bitte geben Sie Ihre Telefonnummer ein.',
+        'userData.email.required' => 'Bitte geben Sie Ihre E-Mail-Adresse ein.',
+        'userData.email.email' => 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
+        'userData.email.unique' => 'Diese E-Mail-Adresse ist bereits vergeben.',
+        'extraQuantities.*.max' => 'Die Anzahl der Extras darf nicht größer als die Anzahl der Personen sein.',
     ];
 
     public function render()
@@ -102,13 +119,10 @@ class Checkout extends Component
         $this->extras = json_decode($this->guiding->pricing_extra, true) ?? [];
         $this->targets = $this->guiding->getTargetFishNames();
 
-
-        foreach ($this->extras as $index => $extra) {
-            $extraId = $index;
-            $this->selectedExtras[$extraId] = false;
-            $this->extraQuantities[$extraId] = $this->persons;
-        }
-
+        // Initialize arrays with default values
+        $this->selectedExtras = array_fill(0, count($this->extras), false);
+        $this->extraQuantities = array_fill(0, count($this->extras), 1);
+        
         $this->waters = $this->guiding->getWaterNames();
         $this->methods = $this->guiding->getFishingMethodNames();
         
@@ -140,6 +154,9 @@ class Checkout extends Component
         $this->totalExtraPrice = $totalExtraPrice;
         $this->totalPrice =  $this->totalExtraPrice + $this->guidingprice;
 
+        // Set checkoutType based on authentication status
+        $this->checkoutType = $user ? 'login' : 'guest';
+        
         $this->userData = [
             'salutation' => 'male',
             'title' => '',
@@ -149,13 +166,27 @@ class Checkout extends Component
             'postal' => ($user->information->postal ?? ''),
             'city' => ($user->information->city ?? ''),
             'country' => ($user->information->country ?? 'Deutschland'),
+            'countryCode' => '+49',
             'phone' => ($user->phone ?? ''),
-            'email' => ($user->email ?? '')
+            'email' => ($user->email ?? ''),
+            'createAccount' => false,
+            'guestCheckTerms' => false,
         ];
+
+        $this->selectedDate = null; // Ensure it starts as null
     }
 
-    public function updatedSelectedExtras()
+    public function updatedSelectedExtras($value, $index)
     {
+        // Convert string 'true'/'false' to boolean if needed
+        if (is_string($value)) {
+            $this->selectedExtras[$index] = $value === 'true';
+        } else {
+            $this->selectedExtras[$index] = (bool)$value;
+        }
+        
+        \Log::info("Extra {$index} selected state changed to: " . ($this->selectedExtras[$index] ? 'true' : 'false'));
+        
         $this->calculateTotalPrice();
     }
 
@@ -170,30 +201,49 @@ class Checkout extends Component
     {
         $totalExtraPrice = 0;
         $extraData = [];
-    
+
         foreach ($this->extras as $index => $extra) {
-            if (isset($this->selectedExtras[$index]) && ($index == 0 || $this->selectedExtras[$index] == true)) {
-                $quantity = $this->extraQuantities[$index] ?? 0;
-                $totalExtraPrice += $extra['price'] * $quantity;
+            \Log::info("Processing extra {$index}: Selected=" . var_export($this->selectedExtras[$index], true));
+            
+            if (!empty($this->selectedExtras[$index])) {
+                $quantity = $this->extraQuantities[$index] ?? 1;
+                $price = floatval($extra['price']);
+                $subtotal = $price * intval($quantity);
+                
+                $totalExtraPrice += $subtotal;
+                
+                \Log::info("Adding extra {$index}: Price={$price}, Quantity={$quantity}, Subtotal={$subtotal}");
+                
                 $extraData[] = [
                     'extra_id' => $index,
                     'extra_name' => $extra['name'],
-                    'extra_price' => $extra['price'],
+                    'extra_price' => $price,
                     'extra_quantity' => $quantity,
-                    'extra_total_price' => $extra['price'] * $quantity,
+                    'extra_total_price' => $subtotal,
                 ];
             }
         }
-    
+
         $this->extraData = !empty($extraData) ? serialize($extraData) : null;
         $this->totalExtraPrice = $totalExtraPrice;
         $this->totalPrice = $this->totalExtraPrice + $this->guidingprice;
+        
+        \Log::info("Final calculation: Extra Price={$this->totalExtraPrice}, Total Price={$this->totalPrice}");
     }
 
     public function next()
     {   
-
+        // Validate data
         $this->validateData();
+
+        // Check if the email already exists only if creating account
+        if ($this->checkoutType === 'guest' && $this->userData['createAccount']) {
+            $existingUser = User::where('email', $this->userData['email'])->first();
+            if ($existingUser) {
+                $this->addError('userData.email', 'Diese E-Mail-Adresse ist bereits vergeben.');
+                return;
+            }
+        }
 
         $this->page++;
     }
@@ -203,9 +253,9 @@ class Checkout extends Component
         $this->page--;
     }
 
-    public function updated($propertyName){
-        
-        $this->validateOnly($propertyName,[
+    public function updated($propertyName)
+    {
+        $rules = [
             'selectedDate' => ['required', 'string'],
             'userData.firstname' => 'required|string',
             'userData.lastname' => 'required|string',
@@ -214,14 +264,24 @@ class Checkout extends Component
             'userData.city' => 'required|string',
             'userData.phone' => 'required|string',
             'userData.email' => 'required|email',
-        ]);
+        ];
 
+        // Only validate email uniqueness if creating account
+        if ($propertyName === 'userData.email' && $this->checkoutType === 'guest' && $this->userData['createAccount']) {
+            $rules['userData.email'] = 'required|email|unique:users,email';
+        }
+
+        $this->validateOnly($propertyName, $rules);
     }
 
-    public function validateData(){
+    public function validateData()
+    {
         if ($this->page == 1) {
-
-            $this->validate([
+            if (!$this->selectedDate) {
+                $this->addError('selectedDate', 'Bitte wählen Sie ein Datum aus dem Kalender.');
+                return false;
+            }
+            $rules = [
                 'selectedDate' => ['required', 'string'],
                 'userData.firstname' => 'required|string',
                 'userData.lastname' => 'required|string',
@@ -230,14 +290,30 @@ class Checkout extends Component
                 'userData.city' => 'required|string',
                 'userData.phone' => 'required|string',
                 'userData.email' => 'required|email',
-            ]);
+            ];
 
+            // Only validate email uniqueness if creating account
+            if ($this->checkoutType === 'guest' && $this->userData['createAccount']) {
+                $rules['userData.email'] = 'required|email|unique:users,email';
+            }
+
+            $this->validate($rules);
+        }
+        
+        if ($this->page === 2) {
+            if ($this->checkoutType === 'guest' && !$this->userData['createAccount']) {
+                $this->validate([
+                    'userData.guestCheckTerms' => 'required|accepted',
+                ], [
+                    'userData.guestCheckTerms.required' => 'You must accept the Terms and Conditions to proceed.',
+                    'userData.guestCheckTerms.accepted' => 'You must accept the Terms and Conditions to proceed.',
+                ]);
+            }
         }
     }
 
     public function checkout()
     {
-
         $this->loading = true;
 
         $this->validateData();
@@ -245,15 +321,92 @@ class Checkout extends Component
             'extraQuantities.*' => ['required', 'numeric', 'max:' . $this->persons],
         ]);
 
-        $user = auth()->user(); 
+        $currentUser = auth()->user();
+        
+        if ($currentUser) {
+            $user = $currentUser;
+            $isGuest = false;
+            
+            // Update phone for registered user
+            if (!$user->is_guide) {
+                $user->phone = $this->userData['phone'];
+                $user->save();
+            }
 
-      //  $guide = User::find($this->guiding->user_id);
+            if ($user->information) {
+                $user->information->phone = $this->userData['phone'];
+                $user->information->save();
+            }
+        } else {
+            if ($this->userData['createAccount']) {
+                // Create regular user if checkbox is checked
+                $randomPassword = Str::random(10);
+                $user = User::create([
+                    'firstname' => $this->userData['firstname'],
+                    'lastname' => $this->userData['lastname'],
+                    'email' => $this->userData['email'],
+                    'is_temp_password' => 1,
+                    'password' => \Hash::make($randomPassword),
+                ]);
+
+                // Create UserInformation record
+                $userInformation = UserInformation::create([
+                    'phone' => $this->userData['phone'],
+                    'address' => $this->userData['address'],
+                    'postal' => $this->userData['postal'],
+                    'city' => $this->userData['city'],
+                    'country' => $this->userData['country'],
+                ]);
+
+                $user->user_information_id = $userInformation->id;
+                $user->save();
+
+                if (!app()->environment('local')) {
+                    Mail::to($user->email)->queue(new AutomaticRegistrationMail($user, $randomPassword));
+                }
+                
+                $isGuest = false;
+            } else {
+                // Check if guest user already exists with this email
+                $user = UserGuest::where('email', $this->userData['email'])->first();
+
+                if (!$user) {
+                    // Create new guest user if not found
+                    $user = UserGuest::create([
+                        'salutation' => $this->userData['salutation'],
+                        'title' => $this->userData['title'],
+                        'firstname' => $this->userData['firstname'],
+                        'lastname' => $this->userData['lastname'],
+                        'address' => $this->userData['address'],
+                        'postal' => $this->userData['postal'],
+                        'city' => $this->userData['city'],
+                        'country' => $this->userData['country'],
+                        'phone' => $this->userData['phone'],
+                        'email' => $this->userData['email'],
+                    ]);
+                } else {
+                    // Update existing guest user information
+                    $user->update([
+                        'salutation' => $this->userData['salutation'],
+                        'title' => $this->userData['title'],
+                        'firstname' => $this->userData['firstname'],
+                        'lastname' => $this->userData['lastname'],
+                        'address' => $this->userData['address'],
+                        'postal' => $this->userData['postal'],
+                        'city' => $this->userData['city'],
+                        'country' => $this->userData['country'],
+                        'phone' => $this->userData['phone'],
+                    ]);
+                }
+                
+                $isGuest = true;
+            }
+        }
 
         $blockedEvent = (new EventService())->createBlockedEvent($this->selectedTime, $this->selectedDate, $this->guiding);
 
         $fee = (new HelperService())->calculateRates($this->guidingprice);
         $partnerFee = (new HelperService())->convertAmountToString($fee);
-
 
         $expiresAt = Carbon::now()->addHours(24); // Default expiration time (24 hours)
 
@@ -267,6 +420,7 @@ class Checkout extends Component
 
         $booking = Booking::create([
             'user_id' => $user->id,
+            'is_guest' => $isGuest,
             'guiding_id' => $this->guiding->id,
             'blocked_event_id' => $blockedEvent->id,
             'is_paid' => false,
@@ -282,23 +436,14 @@ class Checkout extends Component
             'token' => $this->generateBookingToken($blockedEvent->id),
         ]);
 
-        if (!$user->is_guide) {
-            $user->phone = $booking->phone;
-            $user->save();
-        }
-
-        $user->information->phone = $booking->phone;
-        $user->information->save();
-
         if (!app()->environment('local')) {
-            SendCheckoutEmail::dispatch($booking,$user,$this->guiding,$this->guiding->user);
+            SendCheckoutEmail::dispatch($booking, $user, $this->guiding, $this->guiding->user);
         }
         
         sleep(5);
 
         $this->loading = false;
-        return redirect(route('thank-you',[$booking]));
-
+        return redirect(route('thank-you', [$booking]));
     }
     
     public function generateBookingToken($eventID) {

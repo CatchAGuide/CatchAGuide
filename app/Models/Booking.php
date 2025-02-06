@@ -34,13 +34,16 @@ class Booking extends Model
         'phone',
         'last_employee_id',
         'expires_at',
+        'is_guest',
         'created_at',
         'updated_at',
     ];
     
-    public function user(): BelongsTo
+    public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->is_guest
+            ? $this->belongsTo(UserGuest::class)
+            : $this->belongsTo(User::class);
     }
 
     /**
@@ -99,39 +102,18 @@ class Booking extends Model
     }
 
     public function getTotalExtraPrice(){
-   
         $prices = unserialize($this->extras);
 
-        // dd($prices);
         $total = 0;
         if($this->extras){
             $prices = unserialize($this->extras);
             foreach($prices as $price){
-                // dd($price);
             }
             
         }
-
-        // dd($total);
-
-        
-     
     }
 
     public function employee(): BelongsTo{
         return $this->belongsTo(Employee::class, 'last_employee_id');
     }
-
-    /*
-    public function sendBookingPendingMail()
-    {
-        Mail::send(new BookingPendingMail($this->guiding, $this->guiding->user, $this->user, $this));
-    }
-
-    public function sendBookingPendingMailGuest()
-    {
-        Mail::send(new BookingPendingMailGuest($this, $this->guiding, $this->guiding->user, $this->user));
-    }
-    */
-
 }

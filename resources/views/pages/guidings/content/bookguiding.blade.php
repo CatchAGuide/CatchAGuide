@@ -22,7 +22,7 @@
         <div class="tour-details-two__book-tours">
             <h3 class="tour-details-two__sidebar-title d-none d-md-block">@lang('message.bookaguide')</h3>
                 <div class="card-body">
-                    <form action="{{ route('checkout') }}" method="POST">
+                    <form action="{{ route('checkout') }}" method="POST" class="checkout-form">
                         @csrf
                         <div class="booking-form-container">
                             <div class="booking-select mb-md-3">
@@ -41,7 +41,6 @@
                             </div>
                             <input type="hidden" name="guiding_id" value="{{ $guiding->id }}">
                             <button type="submit" class="btn btn-orange w-100">@lang('message.Booking')</button>
-
                         </div>
                     </form>
                     <div class="mt-3">

@@ -5,6 +5,15 @@
 @section('header_title', translate($row_data->title))
 @section('header_sub_title', translate($row_data->sub_title))
 
+@section('share_tags')
+    <meta property="og:title" content="{{translate($row_data->title)}}" />
+    <meta property="og:description" content="{{translate($row_data->introduction ?? "")}}" />
+    
+    @if(isset($row_data->thumbnail_path) && file_exists(public_path(str_replace(asset(''), '', asset($row_data->thumbnail_path)))))
+        <meta property="og:image" content="{{asset($row_data->thumbnail_path)}}"/>
+    @endif
+@endsection
+
 @section('custom_style')
 <style>
     #destination{
@@ -156,6 +165,25 @@
 @endsection
 
 @section('content')
+    <div class="container">
+        {{-- <section class="page-header">
+            <div class="page-header__bottom">
+                <div class="container">
+                    <div class="page-header__bottom-inner">
+                        <ul class="thm-breadcrumb list-unstyled">
+                            <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                            <li><span>&#183;</span></li>
+                            <li><a href="{{ route('vacations.index') }}">{{ translate('Fishing Vacations')}}</a></li>
+                            <li><span>&#183;</span></li>
+                            <li class="active">
+                                {{ translate('Vacations in ' . $row_data->name) }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section> --}}
+    </div>
     <!--News One Start-->
     <div class="container" id="vacations-category">
         <div class="row">
@@ -164,7 +192,7 @@
                     <div class="page-main-intro-text mb-1">{!! translate(nl2br($row_data->introduction)) !!}</div>
                     <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('vacations.read_more')</a></p>
                 </div>
-                <h5 class="mb-2">{{ translate('Vacations in ' . translate($row_data->name)) }}</h5>
+                <h5 class="mb-2">{{ translate('Vacations in ' . $row_data->name) }}</h5>
                 <div class="row mb-5">
                     <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
                         <div class="d-grid gap-2 w-100">
@@ -306,7 +334,9 @@
                                         </div>
                                     </div>
                                     <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 p-md-3 mt-md-1">
-                                    <a href="{{ route('vacations.show', [$vacation->id, $vacation->slug]) }}">
+                                    <a href="{{ route('vacations.show', [$vacation->id, $vacation->slug]) }}" 
+                                       onclick="event.preventDefault(); 
+                                                document.getElementById('store-destination-{{ $vacation->id }}').submit();">
                                         <div class="guidings-item">
                                             <div class="guidings-item-title">
                                                 @if(!$agent->ismobile())
@@ -359,6 +389,13 @@
                                             </div>
                                         </div>  
                                     </a>
+                                    <form id="store-destination-{{ $vacation->id }}" 
+                                          action="{{ route('vacations.show', [$vacation->id, $vacation->slug]) }}" 
+                                          method="GET" style="display: none;">
+                                        @php
+                                            session(['vacation_destination_id' => $row_data->id]);
+                                        @endphp
+                                    </form>
                                 </div>
                                 </div>
                             </div>

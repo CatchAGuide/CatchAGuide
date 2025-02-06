@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Auth;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -19,23 +20,46 @@ class LoginAuthController extends Controller
      */
     public function login(Request $request)
     {
-        if(Auth::attempt($request->only(['email', 'password']))) {
+        $credentials = $request->only(['email', 'password']);
+        $remember = $request->filled('remember');
+
+        if(Auth::attempt($credentials, $remember)) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'redirect' => route('profile.index')
+                ]);
+            }
             return redirect()->intended(route('profile.index'));
+        }
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => false,
+                'errors' => [
+                    'email' => [__('auth.failed')]
+                ]
+            ], 422);
         }
 
         return $this->loginFailed()->withError('Invalid Username and Password');
     }
 
     /**
-     * @return RedirectResponse
+     * @return JsonResponse|RedirectResponse
      */
-    public function logout(): RedirectResponse
+    public function logout()
     {
         Auth::guard('employees')->logout();
         Auth::logout();
 
-        return redirect()->route('login'); // Login
+        if (request()->ajax()) {
+            return response()->json(['success' => true]);
+        }
+
+        return redirect()->route('login');
     }
+
 
     /**
      * @param Request $request
@@ -53,7 +77,7 @@ class LoginAuthController extends Controller
     /**
      * @return RedirectResponse
      */
-    public function loginFailed(): RedirectResponse
+    private function loginFailed(): RedirectResponse
     {
         return redirect()->back()->withInput();
     }

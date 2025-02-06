@@ -1,3 +1,5 @@
+@include('layouts.modal.loginModal')
+@include('layouts.modal.registerModal')
 <nav class="navbar-custom short-header long-header {{ request()->is('/') ? 'with-bg' : '' }} {{ request()->is('guidings*') ? 'no-search' : '' }}">
     <div class="container">
         <!-- Top Row -->
@@ -46,7 +48,7 @@
                                     <i class="fas fa-user me-2"></i> @lang('homepage.header-profile')
                                 </a>
                                 <div class="dropdown-divider"></div>
-                                <form method="POST" action="{{ route('admin.auth.logout') }}">
+                                <form method="POST" action="{{ route('admin.auth.logout') }}" class="logout-form">
                                     @csrf
                                     <button type="submit" class="dropdown-item">
                                         <i class="fas fa-sign-out-alt me-2"></i> @lang('homepage.header-logout')
@@ -55,10 +57,10 @@
                             </div>
                         </div>
                     @else
-                        <a href="{{ route('login') }}" class="nav-link login-link">
+                        <a href="#" class="nav-link login-link" data-bs-toggle="modal" data-bs-target="#loginModal">
                             @lang('homepage.header-login')
                         </a>
-                        <a href="{{ route('login') }}" class="btn btn-outline-light signup-btn">
+                        <a href="#" class="btn btn-outline-light signup-btn" data-bs-toggle="modal" data-bs-target="#registerModal">
                             @lang('homepage.header-signup')
                         </a>
                     @endauth
@@ -74,7 +76,7 @@
                                  alt="Profile">
                         </a>
                     @else
-                        <a href="{{ route('login') }}" class="text-white me-3">
+                        <a href="#" class="text-white me-3" data-bs-toggle="modal" data-bs-target="#loginModal">
                             <i class="far fa-user-circle" style="font-size: 24px;"></i>
                         </a>
                     @endauth
@@ -113,6 +115,7 @@
                 <div id="mobileherofilter" class="shadow-lg bg-white p-2 rounded">
                     <div class="row">
                         @if ($isVacation)
+                        <div class="vacation-header">
                             <div class="col-md-4 column-input my-2">
                                 <div class="d-flex align-items-center small myselect2">
                                     <i class="fa fa-map-marker-alt position-absolute ps-1"></i>
@@ -134,6 +137,10 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="">
+                            <button type="submit" class="form-control new-filter-btn mobile"><i class="icon-magnifying-glass"></i></button>
+                            </div>
+                        </div>
                         @else
                             <div class="col-md-4 column-input my-2">
                                 <div class="form-group">
@@ -287,6 +294,9 @@
     width: 95%;
     margin: auto;
 }
+    #mobileherofilter:has(.vacation-header) .new-filter-btn{
+        display: none;
+    }
      #mobileherofilter .column-input input{
         border-top:none !important;
         border-left:none !important;
@@ -337,7 +347,7 @@
     #mobileherofilter .new-filter-btn:hover{
         background-color:#313041;
     }
-.short-header.navbar-custom {
+.short-header.long-header.navbar-custom {
     background-color: #313041;
     padding: 16px 0 35px;
     position: relative;
@@ -483,23 +493,29 @@ input[type=number] {
     }
 }
 @media (max-width: 768px) {
-    #mobileherofilter .row .col-md-4{
-        margin: 0!important;
+    #mobileherofilter:has(.vacation-header) .new-filter-btn.mobile{
+        display: block;
     }
-    #mobileherofilter .column-input{
+    .vacation-header{
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    #mobileherofilter:has(.vacation-header) .column-input{
         width: calc(100% - 80px);
         padding-left: 0;
     }
-    #mobileherofilter .column-input i{
+    #mobileherofilter:has(.vacation-header) .column-input i{
         font-size: 24px;
+    }
+
+    #mobileherofilter .row .col-md-4{
+        margin: 0!important;
     }
     #mobileherofilter .column-button{
         width: auto;
         margin: 0 !important;
         padding: 0;
-    }
-    .new-filter-btn{
-        display: none;
     }
     .new-filter-btn.mobile{
         display: block;
@@ -1102,24 +1118,23 @@ input[type=number] {
                     
                     @auth
                         <div class="menu-divider"></div>
-                        <form method="POST" action="{{ route('admin.auth.logout') }}">
+                        <form method="POST" action="{{ route('admin.auth.logout') }}" class="logout-form">
                             @csrf
                             <button type="submit" class="menu-item text-danger">
                                 <i class="fas fa-sign-out-alt"></i>
                                 <span>@lang('homepage.header-logout')</span>
                             </button>
                         </form>
-                        @else
-
-                    <div class="menu-divider"></div>
-                    <a href="{{ route('login') }}"  type="submit" class="menu-item">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>@lang('homepage.header-signup')</span>
-                    </a>
-                    <a href="{{ route('login') }}" type="submit" class="menu-item">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>@lang('homepage.header-login')</span>
-                    </a>
+                    @else
+                        <div class="menu-divider"></div>
+                        <a href="#" class="menu-item" data-bs-toggle="modal" data-bs-target="#registerModal" onclick="closeMobileMenu()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>@lang('homepage.header-signup')</span>
+                        </a>
+                        <a href="#" class="menu-item" data-bs-toggle="modal" data-bs-target="#loginModal" onclick="closeMobileMenu()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>@lang('homepage.header-login')</span>
+                        </a>
                     @endauth
                 </div>
             </div>
@@ -1165,6 +1180,14 @@ function updateFormAction(selectElement, formId) {
     form.action = "{{ route('vacations.category', ['country' => 'all']) }}".replace('all', country);
 }
 
+function closeMobileMenu() {
+    // Close the mobile menu modal before opening login modal
+    const mobileMenuModal = bootstrap.Modal.getInstance(document.getElementById('mobileMenuModal'));
+    if (mobileMenuModal) {
+        mobileMenuModal.hide();
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const searchTrigger = document.getElementById('headerSearchTrigger');
     const searchModal = document.getElementById('searchModal');
@@ -1197,5 +1220,34 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
+
+    // Update logout form handling
+    document.querySelectorAll('.logout-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'  // This explicitly marks it as an AJAX request
+                },
+                body: JSON.stringify({
+                    _token: document.querySelector('meta[name="csrf-token"]').content
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    });
 });
 </script>

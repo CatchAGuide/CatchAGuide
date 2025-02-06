@@ -6,15 +6,14 @@
     @section('title',$guiding->title)
 @endif
 
-@section('description',translate($guiding->excerpt))
+@section('description',translate($guiding->desc_course_of_action ?? ""))
 
 @section('share_tags')
     <meta property="og:title" content="{{translate($guiding->title)}}" />
-    <meta property="og:description" content="{{translate($guiding->excerpt)}}" />
-    @if(!empty(app('guiding')->getImagesUrl($guiding)) && is_array(app('guiding')->getImagesUrl($guiding)) && count(app('guiding')->getImagesUrl($guiding)))
-    <meta property="og:image" content="{{app('guiding')->getImagesUrl($guiding)['image_0']}}"/>
+    <meta property="og:description" content="{{translate($guiding->desc_course_of_action ?? "")}}" />
+    @if(file_exists(public_path(str_replace(asset(''), '', asset($guiding->thumbnail_path)))))
+        <meta property="og:image" content="{{asset($guiding->thumbnail_path)}}"/>
     @endif
-
 @endsection
 
 @section('css_after')
@@ -103,6 +102,60 @@
 @endsection
 
 @section('content')
+
+    <div class="container">
+        {{-- <section class="page-header">
+            <div class="page-header__bottom">
+                <div class="container">
+                    <div class="page-header__bottom-inner">
+                        <ul class="thm-breadcrumb list-unstyled">
+                            <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                            <li><span>&#183;</span></li>
+                    
+                            @if(request()->has('from_destination'))
+                                @if(isset($destination))
+                                    @if($destination->type == 'country')
+                                        <li><a href="{{ route('destination.country', ['country' => $destination->slug]) }}">
+                                            {{ translate('Fishing Destinations in ')}} {{ $destination->name }}
+                                        </a></li>
+                    
+                                    @elseif($destination->type == 'region')
+                                        <li><a href="{{ route('destination.country', ['country' => $destination->country_slug]) }}">
+                                            {{ translate('Fishing Destinations in ')}} {{ $destination->country_name }}
+                                        </a></li>
+                                        <li><span>&#183;</span></li>
+                                        <li><a href="{{ route('destination.country', ['country' => $destination->country_slug, 'region' => $destination->slug]) }}">
+                                            {{ translate('Fishing Destinations in ')}} {{ $destination->name }}
+                                        </a></li>
+                    
+                                    @elseif($destination->type == 'city')
+                                        <li><a href="{{ route('destination.country', ['country' => $destination->country_slug]) }}">
+                                            {{ translate('Fishing Destinations in ')}} {{ $destination->country_name }}
+                                        </a></li>
+                                        <li><span>&#183;</span></li>
+                                        <li><a href="{{ route('destination.country', ['country' => $destination->country_slug, 'region' => $destination->region_slug]) }}">
+                                            {{ translate('Fishing Destinations in ')}} {{ $destination->region_name }}
+                                        </a></li>
+                                        <li><span>&#183;</span></li>
+                                        <li><a href="{{ route('destination.country', ['country' => $destination->country_slug, 'region' => $destination->region_slug, 'city' => $destination->slug]) }}">
+                                            {{ translate('Fishing Destinations in ')}} {{ $destination->name }}
+                                        </a></li>
+                                    @endif
+                                @else
+                                    <li><a href="{{ route('guidings.index') }}">{{ translate('Fishing Tours') }}</a></li>
+                                @endif
+                            @else
+                                <li><a href="{{ route('guidings.index') }}">{{ translate('Fishing Tours') }}</a></li>
+                            @endif
+                            <li><span>&#183;</span></li>
+                            <li class="active">{{ translate($guiding->title) }}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section> --}}
+
  <div id="guidings-page" class="container">
     <div class="title-container">
         <div class="title-wrapper">

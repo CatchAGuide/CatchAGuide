@@ -1,3 +1,6 @@
+@include('layouts.modal.loginModal')
+@include('layouts.modal.registerModal')
+
 <nav class="navbar-custom short-header {{ request()->is('/') ? 'with-bg' : '' }} {{ request()->is('guidings*') ? 'no-search' : '' }}">
     <div class="container">
         <!-- Top Row -->
@@ -30,7 +33,7 @@
                         </form>
                     </div>
                     
-                    <a href="{{ route('login') }}" class="nav-link become-guide-link">
+                    <a href="#" class="nav-link become-guide-link" data-bs-toggle="modal" data-bs-target="#registerModal">
                         @lang('homepage.header-become-guide')
                     </a>
                     @auth
@@ -46,7 +49,7 @@
                                     <i class="fas fa-user me-2"></i> @lang('homepage.header-profile')
                                 </a>
                                 <div class="dropdown-divider"></div>
-                                <form method="POST" action="{{ route('admin.auth.logout') }}">
+                                <form method="POST" action="{{ route('admin.auth.logout') }}" class="logout-form">
                                     @csrf
                                     <button type="submit" class="dropdown-item">
                                         <i class="fas fa-sign-out-alt me-2"></i> @lang('homepage.header-logout')
@@ -55,10 +58,10 @@
                             </div>
                         </div>
                     @else
-                        <a href="{{ route('login') }}" class="nav-link login-link">
+                        <a href="#" class="nav-link login-link" data-bs-toggle="modal" data-bs-target="#loginModal">
                             @lang('homepage.header-login')
                         </a>
-                        <a href="{{ route('login') }}" class="btn btn-outline-light signup-btn">
+                        <a href="#" class="btn btn-outline-light signup-btn" data-bs-toggle="modal" data-bs-target="#registerModal">
                             @lang('homepage.header-signup')
                         </a>
                     @endauth
@@ -74,7 +77,7 @@
                                  alt="Profile">
                         </a>
                     @else
-                        <a href="{{ route('login') }}" class="text-white me-3">
+                        <a href="#" class="text-white me-3" data-bs-toggle="modal" data-bs-target="#loginModal">
                             <i class="far fa-user-circle" style="font-size: 24px;"></i>
                         </a>
                     @endauth
@@ -388,27 +391,27 @@ input[type=number] {
     #mobileherofilter .row .col-md-4{
         margin: 0!important;
     }
-    #mobileherofilter .column-input{
+    .short-header #mobileherofilter .column-input{
         width: calc(100% - 80px);
         padding-left: 0;
     }
-    #mobileherofilter .column-input i{
+    .short-header #mobileherofilter .column-input i{
         font-size: 24px;
     }
-    #mobileherofilter .column-button{
+    .short-header #mobileherofilter .column-button{
         width: auto;
         margin: 0 !important;
         padding: 0;
     }
-    .new-filter-btn{
+    .short-header .new-filter-btn{
         display: none;
     }
-    .new-filter-btn.mobile{
+    .short-header .new-filter-btn.mobile{
         display: block;
         width: 80px;
         height: 100%;
     }
-    #mobileherofilter .new-filter-btn.mobile i{
+    .short-header #mobileherofilter .new-filter-btn.mobile i{
         color: #fff !important;
     }
 }
@@ -1060,26 +1063,24 @@ input[type=number] {
                     
                     @auth
                         <div class="menu-divider"></div>
-                        <form method="POST" action="{{ route('admin.auth.logout') }}">
+                        <form method="POST" action="{{ route('admin.auth.logout') }}" class="logout-form">
                             @csrf
                             <button type="submit" class="menu-item text-danger">
                                 <i class="fas fa-sign-out-alt"></i>
                                 <span>@lang('homepage.header-logout')</span>
                             </button>
                         </form>
-                        @else
-
+                    @else
                         <div class="menu-divider"></div>
-                        <a href="{{ route('login') }}"  type="submit" class="menu-item">
+                        <a href="#" class="menu-item" data-bs-toggle="modal" data-bs-target="#registerModal" onclick="closeMobileMenu()">
                             <i class="fas fa-sign-out-alt"></i>
                             <span>@lang('homepage.header-signup')</span>
                         </a>
-                        <div class="menu-divider"></div>
-                            <a href="{{ route('login') }}" type="submit" class="menu-item">
-                                <i class="fas fa-sign-out-alt"></i>
-                                <span>@lang('homepage.header-login')</span>
-                            </a>
-                        @endauth
+                        <a href="#" class="menu-item" data-bs-toggle="modal" data-bs-target="#loginModal" onclick="closeMobileMenu()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>@lang('homepage.header-login')</span>
+                        </a>
+                    @endauth
                 </div>
             </div>
         </div>
@@ -1157,5 +1158,41 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
+    
+    document.querySelectorAll('.logout-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'  // This explicitly marks it as an AJAX request
+                },
+                body: JSON.stringify({
+                    _token: document.querySelector('meta[name="csrf-token"]').content
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    });
 });
+
+function closeMobileMenu() {
+    // Close the mobile menu modal before opening login modal
+    const mobileMenuModal = bootstrap.Modal.getInstance(document.getElementById('mobileMenuModal'));
+    if (mobileMenuModal) {
+        mobileMenuModal.hide();
+    }
+}
 </script>

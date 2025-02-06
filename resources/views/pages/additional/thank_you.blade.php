@@ -1,106 +1,324 @@
 @extends('layouts.app')
 
-@section('title', __('message.thank'))
+@section('title', translate('Thank You'))
 
 @section('content')
-
-    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-
     <style>
-        html,body {
+        .thankyou-page {
             font-family: 'Raleway', sans-serif;
+            padding: 50px 0;
+            background: #f8f9fa;
+            min-height: 100vh;
         }
         .thankyou-page ._header {
-            background: var(--thm-primary);
-            padding: 100px 30px;
+            background: linear-gradient(135deg, var(--thm-primary) 0%, #2c3e50 100%);
+            padding: 40px 30px;
             text-align: center;
-            background: var(--thm-primary) url(https://codexcourier.com/images/main_page.jpg) center/cover no-repeat;
+            border-radius: 12px 12px 0 0;
+            position: relative;
+            overflow: hidden;
         }
-        .thankyou-page ._header .logo {
-            max-width: 200px;
-            margin: 0 auto 50px;
-        }
-        .thankyou-page ._header .logo img {
-            width: 100%;
+        .thankyou-page ._header:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('/images/pattern.png');
+            opacity: 0.1;
         }
         .thankyou-page ._header h1 {
-            font-weight: 800;
+            font-size: 2.5rem;
+            font-weight: 700;
             color: white;
             margin: 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            position: relative;
         }
         .thankyou-page ._body {
-            margin: -70px 0 30px;
+            margin: -20px 0 30px;
         }
-        .thankyou-page ._body ._box {
+        .thankyou-page ._box {
             margin: auto;
-            max-width: 80%;
-            padding: 50px;
+            max-width: 1200px;
+            padding: 40px;
             background: white;
-            border-radius: 3px;
-            box-shadow: 0 0 35px rgba(10, 10, 10,0.12);
-            -moz-box-shadow: 0 0 35px rgba(10, 10, 10,0.12);
-            -webkit-box-shadow: 0 0 35px rgba(10, 10, 10,0.12);
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
         }
-        .thankyou-page ._body ._box h2 {
-            font-size: 32px;
-            font-weight: 600;
+        .booking-status {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            border-left: 4px solid #4caf50;
+        }
+        .booking-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+        }
+        .booking-details .section {
+            width: calc(100% / 2 - 15px);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .booking-details h3 {
             color: var(--thm-primary);
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--thm-primary);
+            position: relative;
+        }
+        .booking-details h3:after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: var(--thm-secondary);
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+            flex-wrap: wrap;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+        .detail-value {
+            color: #34495e;
+            font-size: 1.1rem;
         }
         .thankyou-page ._footer {
             text-align: center;
-            padding: 50px 30px;
+            margin-top: 40px;
         }
-
-        .thankyou-page ._footer .btn {
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .btn {
             background: var(--thm-primary);
             color: white;
             border: 0;
-            font-size: 14px;
+            font-size: 1rem;
             font-weight: 600;
-            border-radius: 0;
-            letter-spacing: 0.8px;
-            padding: 20px 33px;
+            padding: 12px 30px;
+            border-radius: 8px;
             text-transform: uppercase;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: var(--thm-secondary);
+            color: white;
+        }
+        .btn-outline {
+            border: 2px solid var(--thm-primary);
+            color: var(--thm-primary);
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+        .btn-outline:hover {
+            background: var(--thm-primary);
+            color: white;
+        }
+        .btn-back {
+            background: #ffd7d4;
+            color: #e74c3c;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        .btn-back:hover {
+            background: #e74c3c;
+            color: white;
+        }
+        .redirect-timer {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 0.9rem;
+            position: relative;
+        }
+        .guide-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .guide-info img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .tour-info {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .payment-info {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #ffc107;
+        }
+        @media (max-width: 992px) {
+            .booking-details .section {
+                width: 100%;
+            }
+            
+        }
+        @media (max-width: 768px) {
+            .booking-details .section {
+                width: 100%;
+            }
+            
         }
     </style>
-    <!------ Include the above in your HEAD tag ---------->
 
     <div class="thankyou-page">
-        <div class="_header">
-            <div class="logo">
-                <img src="https://codexcourier.com/images/banner-logo.png" alt="">
+        <div class="container">
+            <div class="_header">
+                <h1>{{ translate('Thank you for your reservation!') }}</h1>
             </div>
-            <h1>
-                @if(app()->getLocale() == 'en')
-                    Thank you for your reservation!
-                @elseif(app()->getLocale() == 'de')
-                    Danke für Deine Reservierung!
-                @endif
-            </h1>
-        </div>
-        <div class="_body">
-            <div class="_box text-center">
-                <p class="fw-bold">
-                    @if(app()->getLocale() == 'en')
-                        Your booking request has been successfully received by the guide. You will be notified of the guide's response by email within the next 72 hours.
-                    @elseif(app()->getLocale() == 'de')
-                        Deine Buchungsanfrage ist erfolgreich beim Guide eingegangen. Du wirst innerhalb der nächsten 72 Stunden über die Antwort des Guides per Mail benachrichtigt.
+            <div class="_body">
+                <div class="_box">
+                    <div class="booking-status">
+                        <p class="fw-bold fs-5 mb-0">
+                            {{ translate('Your booking request has been successfully received by the guide. You will be notified of the guide\'s response by email within the next 72 hours.') }}
+                        </p>
+                    </div>
+
+                    @if(isset($booking))
+                    <div class="booking-details">
+                        <div class="section">
+                            <h3>{{ translate('Booking Information') }}</h3>
+                            <div class="detail-row">
+                                <span class="detail-label">{{ translate('Booking ID') }}</span>
+                                <span class="detail-value">#{{ $booking->id }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">{{ translate('Booking Status') }}</span>
+                                <span class="detail-value">
+                                    <span class="badge bg-warning">{{ translate('Pending Confirmation') }}</span>
+                                </span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">{{ translate('Tour Date') }}</span>
+                                <span class="detail-value">{{ \Carbon\Carbon::parse($booking->book_date)->format('d.m.Y') }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">{{ translate('Number of Participants') }}</span>
+                                <span class="detail-value">{{ $booking->count_of_users }}</span>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h3>{{ translate('Guide Information') }}</h3>
+                            <div class="guide-info">
+                                @if($booking->guiding->user->avatar)
+                                    <img src="{{ $booking->guiding->user->avatar }}" alt="Guide Photo">
+                                @endif
+                                <div>
+                                    <h4>{{ $booking->guiding->user->firstname }} {{ $booking->guiding->user->lastname }}</h4>
+                                    <p>{{ translate('Professional Fishing Guide') }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h3>{{ translate('Tour Details') }}</h3>
+                            <div class="detail-row">
+                                <span class="detail-label">{{ translate('Tour Name') }}</span>
+                                <span class="detail-value">{{ $booking->guiding->title }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">{{ translate('Duration') }}</span>
+                                <span class="detail-value">{{ $booking->guiding->duration }} {{ translate('hours') }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">{{ translate('Location') }}</span>
+                                <span class="detail-value">{{ $booking->guiding->location }}</span>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h3>{{ translate('Price Breakdown') }}</h3>
+                            <div class="detail-row">
+                                <span class="detail-label">{{ translate('Base Price') }}</span>
+                                <span class="detail-value">€{{ number_format($booking->price - $booking->total_extra_price, 2, ',', '.') }}</span>
+                            </div>
+                            @if($booking->extras)
+                            <div class="detail-row">
+                                <span class="detail-label">{{ translate('Extras') }}</span>
+                                <span class="detail-value">€{{ number_format($booking->total_extra_price, 2, ',', '.') }}</span>
+                            </div>
+                            @endif
+                            <div class="detail-row">
+                                <span class="detail-label">{{ translate('Total Price') }}</span>
+                                <span class="detail-value fw-bold">€{{ number_format($booking->price, 2, ',', '.') }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="payment-info mt-4">
+                        <h4 class="mb-3">{{ translate('Payment Information') }}</h4>
+                        <p>{{ translate('Payment will be handled directly with your guide after the booking is confirmed.') }}</p>
+                    </div>
                     @endif
-                </p>
-                <p class="text-muted">
-                    @if(app()->getLocale() == 'en')
-                        Contact us at any time if you have any questions about your booking or tour.
-                    @elseif(app()->getLocale() == 'de')
-                        Kontaktiere uns jederzeit, sollten Fragen zu Deiner Buchung oder Deiner Tour aufkommen.
-                    @endif
-                </p>
+
+                    <div class="text-center mt-4">
+                        <p class="text-muted">
+                            {{ translate('Contact us at any time if you have any questions about your booking or tour.') }}
+                        </p>
+                    </div>
+
+                    <div class="btn-group">
+                        <a href="{{ route('additional.contact') }}" class="btn btn-outline">
+                            {{ translate('Contact Us') }}
+                        </a>
+                        <a href="{{ route('guidings.index') }}" class="btn btn-back">
+                            {{ translate('Back to Guidings') }}
+                        </a>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="_footer">
-            <p> <a href="{{route('additional.contact')}}"style="color:var(--thm-primary) ">@lang('message.cont')</a> </p>
-            <a class="btn" href="{{route('welcome')}}">@lang('message.back')</a>
         </div>
     </div>
 @endsection

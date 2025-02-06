@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Session\TokenMismatchException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -36,6 +37,18 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             //
+        });
+
+        $this->renderable(function (TokenMismatchException $exception, $request) {
+            if ($request->is('admin/*')) {
+                // Handle admin routes
+                return redirect()->route('admin.auth.logins')
+                    ->with('error', 'Your session has expired. Please log in again.');
+            }
+            
+            // Handle frontend routes
+            return redirect()->route('login')
+                ->with('error', 'Your session has expired. Please log in again.');
         });
     }
 }

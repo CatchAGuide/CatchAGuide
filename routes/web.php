@@ -1,7 +1,7 @@
 <?php
-
 use App\Http\Controllers\Admin\AuthenticationController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\LoginAuthController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Admin\Blog\CategoriesController as AdminCategoriesController;
@@ -30,10 +30,6 @@ use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\GuideThreadController;
 use App\Http\Controllers\VacationsController;
-
-use App\Http\Livewire\MultiStepForm;
-use Livewire\Component;
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\PaymentsController as AdminPaymentsController;
 use App\Http\Controllers\Admin\FAQController as AdminFaqController;
@@ -68,7 +64,6 @@ Route::get('/reject/success',function(){
     return view('pages.additional.reject_success');
 })->name('booking.rejectsuccess');
 
-
 Route::get('/booking/status}',function(){
     return view('pages.accepted');
 })->name('status.accepted');
@@ -81,13 +76,14 @@ Route::get('/booking-request/thank-you',function(){
     return view('pages.additional.thank_you_request');
 })->name('request.thank-you');
 
+Route::get('thank-you/{booking}', [CheckoutController::class, 'thankYou'])->name('thank-you');
+
 Route::get('/all-countries',function(){
     return view('pages.countries.index');
 })->name('allcountries');
 
-#Auth::routes();
-
 Route::post('/upload/{guiding?}', [FileUploadController::class, 'upload'])->name('upload');
+
 Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(function () {
     Route::get('/', [App\Http\Controllers\ProfileController::class, 'index'])->name('index');
     Route::get('/settings', [App\Http\Controllers\ProfileController::class, 'settings'])->name('settings');
@@ -110,11 +106,9 @@ Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(functi
     Route::get('/guidebookings/accept/{booking}', [App\Http\Controllers\ProfileController::class, 'accept'])->name('guidebookings.accept');
     Route::get('/guidebookings/reject/{booking}', [App\Http\Controllers\ProfileController::class, 'reject'])->name('guidebookings.reject');
     
-
     Route::get('/newguiding', [App\Http\Controllers\ProfileController::class, 'newguiding'])->name('newguiding');
     Route::post('/newguiding', [GuidingsController::class, 'guidingsStore'])->name('newguiding.store');
     Route::post('/newguiding/save-draft', [GuidingsController::class, 'saveDraft'])->name('newguiding.save-draft');
-    // Route::post('/newguiding', [App\Http\Controllers\ProfileController::class, 'newguidingStore'])->name('newguiding.store');
 
     Route::get('/payments', [App\Http\Controllers\ProfileController::class, 'payments'])->name('payments');
     Route::get('/calendar', [App\Http\Controllers\ProfileController::class, 'calendar'])->name('calendar');
@@ -124,7 +118,6 @@ Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(functi
 
     Route::get('process-merchant-status', [App\Http\Controllers\ProfileController::class, 'processMerchantStatus'])->name('processmerchantstatus');
 });
-//Route::get('/more', [App\Http\Controllers\ProfileController::class, 'more'])->name('more');
 
 Route::post('/guide', [GuidesController::class, 'store'])->name('guide');
 
@@ -132,36 +125,44 @@ Route::get('/info',function(){
     return phpinfo();
 });
 
-Route::middleware(['check_domain:catchaguide.com'])->group(function () {
 
+if (app()->environment('production')) {
+    Route::middleware(['check_domain:catchaguide.de'])->group(function () {
+        Route::prefix('angelmagazin')->name('blogde.')->group(function () {
+            Route::resource('/categories', CategoriesController::class)->only(['show']);
+            Route::get('/', [BlogController::class, 'index'])->name('index');
+            Route::get('/{slug}', [ThreadsController::class, 'show'])->name('thread.show');
+        });
+    });
+    
+    Route::middleware(['check_domain:catchaguide.com'])->group(function () {
+        Route::prefix('fishing-magazine')->name('blog.')->group(function () {
+            Route::resource('/categories', CategoriesController::class)->only(['show']);
+            Route::get('/', [BlogController::class, 'index'])->name('index');
+            Route::get('/{slug}', [ThreadsController::class, 'show'])->name('thread.show');
+        });
+    });
+} else {
+    Route::prefix('angelmagazin')->name('blogde.')->group(function () {
+        Route::resource('/categories', CategoriesController::class)->only(['show']); 
+        Route::get('/', [BlogController::class, 'index'])->name('index');
+        Route::get('/{slug}', [ThreadsController::class, 'show'])->name('thread.show');
+    });
+    
     Route::prefix('fishing-magazine')->name('blog.')->group(function () {
         Route::resource('/categories', CategoriesController::class)->only(['show']);
         Route::get('/', [BlogController::class, 'index'])->name('index');
         Route::get('/{slug}', [ThreadsController::class, 'show'])->name('thread.show');
     });
-
-});
-
-Route::middleware(['check_domain:catchaguide.de'])->group(function () {
-    Route::prefix('angelmagazin')->name('blogde.')->group(function () {
-        Route::resource('/categories', CategoriesController::class)->only(['show']);
-        Route::get('/', [BlogController::class, 'index'])->name('index');
-        Route::get('/{slug}', [ThreadsController::class, 'show'])->name('thread.show');
-    });
- 
-});
-
-
+}
 
 Route::post('/search', [\App\Http\Controllers\SearchController::class, 'search'])->name('search');
-Route::prefix('guides')->name('guides.')->group(function () {
+Route::prefix('guides')->name('guides.')->group(function () {});
 
-});
+Route::get('/checkout', [CheckoutController::class, 'checkoutView'])->name('checkout.index');
+Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
 
 Route::middleware('auth:web')->group(function () {
-    Route::get('/checkout', [CheckoutController::class, 'checkoutView'])->name('checkout.index');
-    Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
-    Route::get('thank-you/{booking}', [CheckoutController::class, 'thankYou'])->name('thank-you');
     Route::get('/transaction', [CheckoutController::class, 'completeTransaction'])->name('transaction');
 
     Route::get('events', [\App\Http\Controllers\Api\EventsController::class, 'index']);
@@ -176,21 +177,13 @@ Route::middleware('auth:web')->group(function () {
     Route::get('deleteguiding/{id}', [GuidingsController::class, 'deleteguiding'])->name('deleteguiding');
     Route::get('delete-image/{guiding}/{img?}', [GuidingsController::class, 'deleteImage'])->name('deleteImage');
 
-
     Route::get('guidings/{guiding}/edit', [GuidingsController::class, 'edit'])->name('guidings.edit');
     Route::get('guidings/{guiding}/edit_newguiding', [GuidingsController::class, 'edit_newguiding'])->name('guidings.edit_newguiding');
     Route::post('guidings/{guiding}/update', [GuidingsController::class, 'update'])->name('guidings.update');
 });
 
-
-// Route::resource('guidings', GuidingsController::class);
-// Route::get('guidings/{slug?}', [GuidingsController::class, 'redirectToNewFormat']);
-// Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'show'])->name('guidings.show');
-
-
 Route::get('guidings', [GuidingsController::class, 'index'])->name('guidings.index');
 Route::get('guidings/{slug?}', [GuidingsController::class, 'redirectToNewFormat']);
-// Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'show'])->name('guidings.show');
 Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'newShow'])->name('guidings.show');
 Route::post('newguidings', [GuidingsController::class, 'guidingsStore'])->name('guidings.store');
 
@@ -208,9 +201,6 @@ Route::name('additional.')->group(function () {
     Route::view('/about-us', 'pages.additional.about-us')->name('about_us');
 });
 
-/*Route::prefix('destination')->name('desitination.')->group(function () {
-    Route::get('country', [DestinationCountryController::class, 'index'])->name('country');
-});*/
 Route::get('destination', [DestinationCountryController::class, 'index'])->name('destination');
 Route::get('destinationen', [DestinationCountryController::class, 'index'])->name('destination_de');
 Route::get('destination/{country}/{region?}/{city?}', [DestinationCountryController::class, 'country'])->name('destination.country');
@@ -234,12 +224,32 @@ Route::name('law.')->group(function() {
 Route::get('login', [LoginAuthController::class, 'index'])->name('login');//->middleware('guest:employees');
 Route::post('login', [LoginAuthController::class, 'login'])->name('login');//->middleware('guest:employees');
 Route::post('register', [RegisterController::class, 'register'])->name('register');//->middleware('guest:employees');
-Route::post('register', [RegisterController::class, 'register'])->name('register');//->middleware('guest:employees');
 Route::get('registration-verfication', [RegisterController::class, 'verfication'])->name('registration-verfication');//->middleware('guest:employees');
 Route::get('password/reset', [ForgotPasswordController::class, 'index'])->name('password.request');
 Route::post('password/reset', [ForgotPasswordController::class, 'reset'])->name('password.update');
 Route::get('password/reset/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
+Route::get('test', [\App\Http\Controllers\TestController::class, 'index']);
+
+Route::get('robots.txt', function () {
+    if (request()->getHost() == 'catchaguide.com') {
+        return response("User-agent: *\nDisallow: \nSitemap:https://catchaguide.com/NewENSitemap.xml", 200)
+        ->header('Content-Type', 'text/plain');
+    } else {
+        return response("User-agent: *\nDisallow: \nSitemap:https://catchaguide.de/de/catchaguideDE.xml", 200)
+        ->header('Content-Type', 'text/plain');
+    }
+});
+
+Route::name('category.')->group(function(){
+    Route::get('/{slug?}', [GuideThreadController::class, 'categoryIndex'])->name('thread');
+});
+
+Route::post('/change-password', [PasswordController::class, 'changePassword'])
+    ->name('password.change')
+    ->middleware('auth');
+
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::name('auth.')->group(function () {
         Route::get('logins', [AuthenticationController::class, 'index'])->name('logins');//->middleware('guest:employees');
@@ -273,7 +283,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/destroy/{faq}', [AdminFAQController::class,'destroy'])->name('destroy');
         });
 
-
         Route::resource('guidings', AdminGuidingsController::class);
         Route::get('guidings/changeguidingstatus/{id}', [AdminGuidingsController::class, 'changeguidingstatus'])->name('changeGuidingStatus');
         Route::resource('bookings', BookingsController::class);
@@ -288,9 +297,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('vacations/changeVacationStatus/{id}', [AdminVacationsController::class, 'changeVacationStatus'])->name('changeVacationStatus');
         Route::get('vacations/bookings', [AdminVacationsController::class, 'bookings'])->name('vacations.bookings');
         Route::get('vacations/bookings/{booking}', [AdminVacationsController::class, 'show'])->name('vacations.bookings.show');
+        Route::get('vacations/{id}/{slug}', [VacationsController::class, 'show'])->name('vacations.show');
 
         Route::prefix('settings')->name('settings.')->group(function () {
-            
             Route::get('/targets', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'targetIndex'])->name('targetindex');
             Route::post('/storetarget', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'storetarget'])->name('storetarget');
             Route::put('/updatetarget/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'updatetarget'])->name('updatetarget');
@@ -330,22 +339,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/storelevel', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'storelevel'])->name('storelevel');
             Route::put('/updatelevel/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'updatelevel'])->name('updatelevel');
             Route::get('/deletelevel/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'deletelevel'])->name('deletelevel');
-        
-
-
-            
-            // Route::get('/', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'index'])->name('index');
-            // Route::post('/storetarget', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'storetarget'])->name('storetarget');
-            // Route::post('/storewater', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'storewater'])->name('storewater');
-            // Route::post('/storemethod', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'storemethod'])->name('storemethod');
-
-            // Route::put('/updatetarget/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'updatetarget'])->name('updatetarget');
-            // Route::put('/updatewater/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'updatewater'])->name('updatewater');
-            // Route::put('/updatemethod/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'updatemethod'])->name('updatemethod');
-
-            // Route::get('/deletetarget/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'deletetarget'])->name('deletetarget');
-            // Route::get('/deletewater/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'deletewater'])->name('deletewater');
-            // Route::get('/deletemethod/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'deletemethod'])->name('deletemethod');
         });
 
         Route::get('/translation/create', [TranslationController::class,'create'])->name('translation.create');
@@ -371,24 +364,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::resource('city', AdminCategoryCityController::class);
         });
 
-
         Route::get('request-as-guide', [\App\Http\Controllers\GuideRequestsController::class, 'index'])->name('guide-requests.index');
     });
 });
-
-Route::get('test', [\App\Http\Controllers\TestController::class, 'index']);
-
-Route::get('robots.txt', function () {
-    if (request()->getHost() == 'catchaguide.com') {
-        return response("User-agent: *\nDisallow: \nSitemap:https://catchaguide.com/NewENSitemap.xml", 200)
-        ->header('Content-Type', 'text/plain');
-    } else {
-        return response("User-agent: *\nDisallow: \nSitemap:https://catchaguide.de/de/catchaguideDE.xml", 200)
-        ->header('Content-Type', 'text/plain');
-    }
-});
-
-Route::name('category.')->group(function(){
-    Route::get('/{slug?}', [GuideThreadController::class, 'categoryIndex'])->name('thread');
-});
-

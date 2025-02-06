@@ -435,8 +435,8 @@
     </div>
 </div>
 
-
 @include('layouts.includes.scripts')
+@include('layouts.partials.changePassword')
 <script>
     if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(function (position) {

@@ -1,6 +1,25 @@
 @extends('pages.profile.layouts.profile')
 @section('title', __('profile.profile'))
 @section('profile-content')
+
+    <div class="container">
+        {{-- <section class="page-header">
+            <div class="page-header__bottom">
+                <div class="container">
+                    <div class="page-header__bottom-inner">
+                        <ul class="thm-breadcrumb list-unstyled">
+                            <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                            <li><span>&#183;</span></li>
+                            <li class="active">
+                                {{ translate('Profile') }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section> --}}
+    </div>
+
     @if(!$agent->ismobile())
         <div class="profile-options row gx-5">
             <div class="col-md-3 profile-option-items">
