@@ -551,9 +551,67 @@
                             {{$totalPrice}}€
                             @lang('forms.total2') <strong>@lang('forms.total3')</strong>
                           </div>
-                          <button class="btn thm-btn rounded border mt-1 p-3" type="submit">@lang('message.reservation')</button>
-                          <button class="btn thm-btn btn-gray rounded border mt-1 p-3" type="button" wire:click="prev" >@lang('message.return')</button>
-                          <a class="btn thm-btn  btn-gray rounded border mt-1 p-3" href="{{route('guidings.index')}}" >@lang('message.booking-cancel')</a>
+                          
+                          @if($checkoutType === 'guest' && !$userData['createAccount'])
+                            <div class="col-12">
+                              <div class="form-group terms-acceptance-container">
+                                <div class="d-flex align-items-start">
+                                  <input type="checkbox" 
+                                         class="form-check-input mt-1 me-2 @error('userData.guestCheckTerms') is-invalid @enderror" 
+                                         id="guestCheckTerms" 
+                                         wire:model="userData.guestCheckTerms"
+                                         style="min-width: 16px;">
+
+                                  <label class="form-check-label" for="guestCheckTerms" style="font-size: 14px;">
+                                    <span class="text-danger me-1">*</span>
+                                    {{ translate('I hereby confirm that I have read and understood the') }}
+                                    <a href="{{ route('law.agb') }}" target="_blank" class="text-primary fw-bold">{{ translate('Terms and Conditions') }}</a>
+                                    {{ translate('and') }}
+                                    <a href="{{ route('law.data-protection') }}" target="_blank" class="text-primary fw-bold">{{ translate('Privacy Policy') }}</a>.
+                                    {{ translate('I agree to be bound by these terms for this booking.') }}
+                                  </label>
+                                </div>
+                                @error('userData.guestCheckTerms')
+                                  <div class="invalid-feedback">
+                                    {{ $message }}
+                                  </div>
+                                @enderror
+                              </div>
+                            </div>
+                          @endif
+
+                          <div class="booking-actions mt-4">
+                            @if($checkoutType === 'guest' && !$userData['createAccount'] && !$userData['guestCheckTerms'])
+                              <div class="alert alert-warning terms-reminder mb-3" role="alert">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                {{ translate('Please accept the Terms and Conditions to proceed with your booking.') }}
+                              </div>
+                            @endif
+
+                            <div class="d-grid gap-2">
+                              <button class="btn thm-btn booking-btn {{ ($checkoutType === 'guest' && !$userData['createAccount'] && !$userData['guestCheckTerms']) ? 'disabled-btn' : '' }}" 
+                                      type="submit" 
+                                      @if($checkoutType === 'guest' && !$userData['createAccount'] && !$userData['guestCheckTerms']) 
+                                        disabled 
+                                        data-bs-toggle="tooltip" 
+                                        data-bs-placement="top" 
+                                        title="{{ translate('Please accept the Terms and Conditions to enable booking') }}"
+                                      @endif>
+                                <i class="fas fa-check-circle me-2"></i>
+                                @lang('message.reservation')
+                              </button>
+
+                              <button class="btn thm-btn btn-gray booking-btn" type="button" wire:click="prev">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                @lang('message.return')
+                              </button>
+
+                              <a class="btn thm-btn btn-gray booking-btn" href="{{route('guidings.index')}}">
+                                <i class="fas fa-times me-2"></i>
+                                @lang('message.booking-cancel')
+                              </a>
+                            </div>
+                          </div>
                       </div>
                     </div>
                   </div>
@@ -680,6 +738,27 @@ document.addEventListener('livewire:next', function () {
           });
           }
       }
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize tooltips
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+  });
+
+  // Highlight terms checkbox when disabled button is clicked
+  document.querySelector('.disabled-btn')?.addEventListener('click', function(e) {
+    if (this.disabled) {
+      const termsContainer = document.querySelector('.terms-acceptance-container');
+      termsContainer.classList.add('highlight-terms');
+      setTimeout(() => {
+        termsContainer.classList.remove('highlight-terms');
+      }, 2000);
+    }
+  });
 });
 </script>
 
@@ -913,6 +992,119 @@ document.addEventListener('livewire:next', function () {
     .g-3 {
       --bs-gutter-y: 0.75rem;
       --bs-gutter-x: 0.75rem;
+    }
+  }
+
+  .terms-acceptance-container {
+    padding: 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .highlight-terms {
+    background-color: rgba(255, 193, 7, 0.1);
+    border: 1px solid #ffc107;
+    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.25);
+  }
+
+  .terms-reminder {
+    font-size: 0.9rem;
+    border-left: 4px solid #ffc107;
+  }
+
+  .disabled-btn {
+    cursor: not-allowed;
+  }
+
+  .disabled-btn:hover {
+    cursor: not-allowed;
+  }
+
+  /* Enhance checkbox visibility */
+  .form-check-input {
+    width: 1.2em;
+    height: 1.2em;
+    border: 2px solid #dee2e6;
+    transition: all 0.2s ease;
+  }
+
+  .form-check-input:checked {
+    background-color: var(--thm-primary);
+    border-color: var(--thm-primary);
+  }
+
+  /* Style links in terms */
+  .form-check-label a {
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .form-check-label a:hover {
+    text-decoration: underline;
+  }
+
+  /* Tooltip enhancement */
+  .tooltip .tooltip-inner {
+    background-color: #333;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .tooltip.bs-tooltip-top .tooltip-arrow::before {
+    border-top-color: #333;
+  }
+
+  .booking-actions {
+    margin-bottom: 2rem;
+  }
+
+  .booking-btn {
+    padding: 1rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .booking-btn i {
+    font-size: 1rem;
+  }
+
+  .btn-gray {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+  }
+
+  .btn-gray:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+    color: white;
+  }
+
+  .disabled-btn {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  .disabled-btn:hover {
+    cursor: not-allowed;
+  }
+
+  /* Responsive adjustments */
+  @media (min-width: 768px) {
+    .booking-btn {
+      font-size: 1rem;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .booking-btn {
+      font-size: 0.9rem;
+      padding: 0.75rem;
     }
   }
 </style>
