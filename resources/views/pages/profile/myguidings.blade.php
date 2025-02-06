@@ -153,7 +153,7 @@
 @section('profile-content')
 
 <div class="container">
-  <section class="page-header">
+  {{-- <section class="page-header">
       <div class="page-header__bottom">
           <div class="container">
               <div class="page-header__bottom-inner">
@@ -169,7 +169,7 @@
               </div>
           </div>
       </div>
-  </section>
+  </section> --}}
 </div>
 
 <div class="row">

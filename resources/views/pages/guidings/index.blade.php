@@ -284,7 +284,7 @@
 @endsection
 @section('content')
 <div class="container">
-    <section class="page-header">
+    {{-- <section class="page-header">
         <div class="page-header__bottom">
                 <div class="page-header__bottom-inner">
                     <ul class="thm-breadcrumb list-unstyled">
@@ -296,8 +296,8 @@
                     </ul>
                 </div>
             </div>
-        </section>
-    </div>
+        </div>
+    </section> --}}
 
     <!--Tours List Start-->
     <section class="tours-list">

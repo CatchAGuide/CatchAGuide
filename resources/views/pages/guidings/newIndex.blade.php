@@ -104,7 +104,7 @@
 @section('content')
 
     <div class="container">
-        <section class="page-header">
+        {{-- <section class="page-header">
             <div class="page-header__bottom">
                 <div class="container">
                     <div class="page-header__bottom-inner">
@@ -113,7 +113,6 @@
                             <li><span>&#183;</span></li>
                     
                             @if(request()->has('from_destination'))
-                                {{-- Coming from destination route --}}
                                 @if(isset($destination))
                                     @if($destination->type == 'country')
                                         <li><a href="{{ route('destination.country', ['country' => $destination->slug]) }}">
@@ -154,8 +153,8 @@
                     </div>
                 </div>
             </div>
-        </section>
-    </div>
+        </div>
+    </section> --}}
 
  <div id="guidings-page" class="container">
     <div class="title-container">

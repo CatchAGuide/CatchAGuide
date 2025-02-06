@@ -226,7 +226,7 @@
 
 @section('content')
     <div class="container" id="destination">
-        <section class="page-header">
+        {{-- <section class="page-header">
             <div class="page-header__bottom">
                 <div class="container">
                     <div class="page-header__bottom-inner">
@@ -258,7 +258,7 @@
                     </div>
                 </div>
             </div>
-        </section>
+        </section> --}}
 
         <div class="container">
             <div class="col-12">
