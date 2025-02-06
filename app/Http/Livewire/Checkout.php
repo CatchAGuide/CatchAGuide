@@ -72,6 +72,7 @@ class Checkout extends Component
         'phone' => '',
         'email' => '',
         'createAccount' => false,
+        'guestCheckTerms' => false,
     ];
 
     public $checkoutType = 'guest';
@@ -169,6 +170,7 @@ class Checkout extends Component
             'phone' => ($user->phone ?? ''),
             'email' => ($user->email ?? ''),
             'createAccount' => false,
+            'guestCheckTerms' => false,
         ];
 
         $this->selectedDate = null; // Ensure it starts as null
@@ -296,6 +298,17 @@ class Checkout extends Component
             }
 
             $this->validate($rules);
+        }
+        
+        if ($this->page === 2) {
+            if ($this->checkoutType === 'guest' && !$this->userData['createAccount']) {
+                $this->validate([
+                    'userData.guestCheckTerms' => 'required|accepted',
+                ], [
+                    'userData.guestCheckTerms.required' => 'You must accept the Terms and Conditions to proceed.',
+                    'userData.guestCheckTerms.accepted' => 'You must accept the Terms and Conditions to proceed.',
+                ]);
+            }
         }
     }
 
