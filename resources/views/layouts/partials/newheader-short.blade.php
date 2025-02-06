@@ -254,7 +254,7 @@
     background-color: #313041;
     padding: 16px 0 35px;
     position: relative;
-    margin-bottom: 60px;
+    margin-bottom: 30px;
 }
 
 .short-header .floating-search-container {
@@ -335,11 +335,12 @@ input[type=number] {
 /* Mobile Styles - with specific selectors */
 @media (max-width: 767px) {
     .short-header.navbar-custom {
-        padding: 16px 0 ;
+        padding: 16px 0 16px;
+        margin-bottom: 15px;
     }
     /* Categories container with hidden scrollbar */
     .short-header.navbar-custom .categories-mobile {
-        margin: 8px 20px !important;
+        margin: 8px 20px 0 !important;
         padding: 0 !important;
         display: flex !important;
         gap: 8px !important;
@@ -369,7 +370,7 @@ input[type=number] {
 
     /* Search bar fixes */
     .short-header.navbar-custom .search-summary {
-        margin: 0 !important;
+        margin: 8px 0 0 !important;
         padding: 12px !important;
         background: #fff;
         border-radius: 8px !important;
