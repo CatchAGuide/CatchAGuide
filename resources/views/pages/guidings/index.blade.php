@@ -9,8 +9,10 @@
 @section('css_after')
 <style>
     .container {
+        max-width: 1200px;
         margin: 0 auto;
         padding: 0 15px;
+        width: 100%;
     }
 
     .page-header {
@@ -28,21 +30,6 @@
         margin-top: -30px;
         z-index: 100;
     }
-
-    #filterCard {
-        /* position: sticky;
-        top: 20px; */
-    }
-
-    /*.carousel .carousel-control-next, 
-    .carousel .carousel-control-prev {
-        background: rgba(0,0,0,0.5);
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        top: 50%;
-        transform: translateY(-50%);
-    }*/
 
     .carousel.slide img {
         height: 300px;
@@ -73,63 +60,29 @@
         filter: none !important;
     }
 
-    /* .carousel .carousel-control-next, .carousel .carousel-control-prev {
-        top: 50%;
-        transform: translateY(-50%);
-    } */
-
     .carousel.slide img {
-        /* max-height: 265px; */
         object-fit: cover;
         background: black;
         height: 300px;
-        /* min-height: 160px; */
-        /* height:228px; */
     }
-
-    /* .carousel .carousel-control-next {
-        right: 0px;
-    }
-
-    .carousel .carousel-control-prev {
-        left: 0;
-    } */
 
     .carousel-item {
         min-height: 50px;
     }
-    /* .carousel .carousel-control-next, .carousel .carousel-control-prev {
-        padding: 3px;
-        width: 24px;
-    } */
 
     .carousel-item-next, .carousel-item-prev, .carousel-item.active {
         display: flex;
     }
-
-    /* .carousel-control-prev-icon,
-    .carousel-control-next-icon {
-        width: 10px;
-        height: 10px;
-    }
-
-    .carousel .carousel-control-next, .carousel .carousel-control-prev {
-        padding: 3px;
-        width: 24px;
-    } */
     .form-custom-input{
-    /* border: solid #e8604c 1px; */
     border: 1px solid #d4d5d6;
     border-radius: 5px;
     padding: 8px 10px;
     width:100%;
     }
     .form-control:focus{
-        /* border: solid #e8604c 1px !important; */
        box-shadow: none;
     }
     .form-custom-input:focus-visible{
-        /* border: solid #e8604c 1px !important; */
         border:0;
         outline:solid #e8604c 1px !important;
     }
@@ -232,10 +185,6 @@
     .new-bg{
         background:#313041;
     }
-    /* .container {
-        max-width:1600px;
-    } */
-
     #map-placeholder {
         position: relative;
         width:100%;
@@ -280,6 +229,53 @@
         padding-left: 15px;
         padding-right: 15px;
     }
+
+    /* Tours list section spacing */
+    .tours-list {
+        padding-top: 20px;
+        padding-bottom: 40px;
+    }
+
+    /* Main content layout */
+    .tours-list__right {
+        width: 100%;
+    }
+
+    /* Filter sidebar */
+    #filterCard {
+        position: sticky;
+        top: 20px;
+    }
+
+    /* Guiding list item container */
+    .guiding-list-item {
+        margin: 0 0 20px 0;
+    }
+
+    /* Remove unnecessary container nesting */
+    .tours-list .container-fluid {
+        padding: 0;
+    }
+
+    /* Adjust row margins */
+    .row {
+        margin-left: -15px;
+        margin-right: -15px;
+    }
+
+    /* Column padding adjustments */
+    .col-sm-12,
+    .col-lg-3,
+    .col-lg-9 {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    @media (min-width: 992px) {
+        .tours-list__inner {
+            padding-left: 15px;
+        }
+    }
 </style>
 
 @endsection
@@ -304,9 +300,8 @@
     </div>
 
     <!--Tours List Start-->
-    <section class="tours-list container" style="padding-top: 20px;">
-
-        <div class="container-fluid">
+    <section class="tours-list">
+        <div class="container">
             <div class="row">
                 <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
                     <div class="d-grid gap-2 w-100">
