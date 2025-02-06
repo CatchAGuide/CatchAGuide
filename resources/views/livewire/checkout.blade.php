@@ -5,7 +5,7 @@
         <div class="spinner-icon" style="background-image: url({{asset('/assets/images/fish.png')}})"></div>
       </div>
       <div class="message">
-        {{ translate('Please wait while processing...') }}
+        @lang('checkout.please_wait_while_processing')
       </div>
     </div>
   </div>
@@ -17,12 +17,12 @@
         <div class="card px-0 pt-5 pb-0 mt-3">
           <div class="text-center">
             <div class="my-2">
-              <h2><strong>{{ translate('Checkout') }}</strong></h2>
+              <h2><strong>@lang('checkout.checkout') </strong></h2>
             </div>
           </div>
           <ul id="progressbar">
-            <li class="active" id="account"><strong>{{ translate('Booking Information')}}</strong></li>
-            <li class="{{ $this->page === 2 ? 'active' : '' }}" id="personal"><strong>{{ translate('Reservation') }}</strong></li>
+            <li class="active" id="account"><strong>@lang('checkout.booking_information')</strong></li>
+            <li class="{{ $this->page === 2 ? 'active' : '' }}" id="personal"><strong>@lang('checkout.reservation')</strong></li>
           </ul>
         </div>
 
@@ -36,12 +36,12 @@
                       <div class="col-lg-6 my-3 p-0">
                         <div class="card shadow px-2 pb-3">
                           <div class="my-4">
-                            <span class="fw-bold">{{ translate('Date Selection') }}</span>
+                            <h5 class="fw-bold">@lang('checkout.date_selection')</h5>
                           </div>
                           @if(!$selectedDate)
                           <div class="alert alert-warning mb-3" role="alert">
                               <i class="fas fa-calendar-alt me-2"></i>
-                              {{ translate('Please select a date from the calendar to proceed') }}
+                              @lang('checkout.please_select_a_date_to_proceed')
                           </div>
                           @endif
                           @error('selectedDate')
@@ -56,30 +56,29 @@
                         </div>
                       </div>
                       
-                      <div class="col-lg-6 my-3">    
+                      <div class="col-lg-6 my-3 p-0 p-sm-3">    
                         <div class="card shadow p-3">
                           @if($this->page === 1 && !auth()->check())
                             <div class="checkout-options-container mb-4">
                               <div class="d-flex align-items-start">
-                                <i class="fas fa-user text-primary fs-4 me-3"></i>
+                                <i class="fas fa-user text-orange fs-4 me-3"></i>
                                 <span>
-                                  <a href="#" class="text-primary fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#loginModal" wire:click="$set('checkoutType', 'login')">{{ translate('Sign in') }}</a>
-                                  {{ translate('to book with your saved data, or') }}
-                                  <a href="#" class="text-primary fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#registerModal" wire:click="$set('checkoutType', 'register')">{{ translate('Sign up') }}</a>
-                                  {{ translate('to process your bookings on the go!') }}
+                                  <a href="#" class="text-orange fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#loginModal" wire:click="$set('checkoutType', 'login')">{{ translate('Sign in') }}</a>
+                                  @lang('checkout.to_book_with_your_saved_data_or')
+                                  <a href="#" class="text-orange fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#registerModal" wire:click="$set('checkoutType', 'register')">{{ translate('Sign up') }}</a>
+                                  @lang('checkout.to_process_your_bookings_on_the_go')
                                 </span>
                               </div>
                             </div>
                           @endif
   
                           <div class="mb-4">
-                            <h5 class="fw-bold">{{ translate('Fill in your details') }}</h5>
+                            <h5 class="fw-bold">@lang('checkout.fill_in_your_details')
                           </div>
                           <div class="alert alert-warning mb-3" role="alert">
                             <i class="fas fa-info-circle me-2"></i>
-                            {{ translate('Almost done! All you have to do is fill in the') }} 
+                            @lang('checkout.almost_done_required_fields')
                             <span class="text-danger">*</span> 
-                            {{ translate('required fields') }}
                           </div>
   
                           @if($errors->any())
@@ -95,10 +94,10 @@
                           <div class="row">
                             <div class="col-md-6">
                               <div class="form-group">
-                                <label>{{translate('Forename')}}<span class="text-danger">*</span></label>
+                                <label> @lang('checkout.first_name')<span class="text-danger">*</span></label>
                                 <input type="text" 
                                        class="form-control @error('userData.firstname') is-invalid @enderror" 
-                                       placeholder="{{translate('First Name')}}" 
+                                       placeholder="@lang('checkout.first_name')" 
                                        id="firstname" 
                                        wire:model="userData.firstname" 
                                        required>
@@ -112,10 +111,10 @@
   
                             <div class="col-md-6">
                               <div class="form-group">
-                                <label>{{translate('Surname')}}<span class="text-danger">*</span></label>
+                                <label>@lang('checkout.last_name')<span class="text-danger">*</span></label>
                                 <input type="text" 
                                        class="form-control @error('userData.lastname') is-invalid @enderror" 
-                                       placeholder="{{translate('Last Name')}}" 
+                                       placeholder="@lang('checkout.last_name')" 
                                        id="lastname" 
                                        wire:model="userData.lastname" 
                                        required>
@@ -129,13 +128,13 @@
   
                             <div class="col-12">
                               <div class="form-group">
-                                <label>{{translate('E-mail address')}}<span class="text-danger">*</span></label>
+                                <label>@lang('checkout.email_address')<span class="text-danger">*</span></label>
                                 <input type="email" 
                                        class="form-control @error('userData.email') is-invalid @enderror" 
                                        id="email" 
                                        wire:model="userData.email" 
                                        required>
-                                <small class="text-muted">{{translate('The confirmation email will be sent to this address')}}</small>
+                                <small class="text-muted">@lang('checkout.confirmation_email_sent_to_address')</small>
                                 @error('userData.email')
                                   <div class="invalid-feedback">
                                     {{ $message }}
@@ -145,13 +144,13 @@
                             </div>
                             
                             <div class="col-12">
-                              <h5 class="fw-bold">{{ translate('Your address') }}</h5>
+                              <h5 class="fw-bold">@lang('checkout.your_address')</h5>
                             </div>
                             <br>
   
                             <div class="col-12">
                               <div class="form-group">
-                                <label>{{translate('Address')}}<span class="text-danger">*</span></label>
+                                <label>@lang('checkout.address')<span class="text-danger">*</span></label>
                                 <input type="text" 
                                        class="form-control @error('userData.address') is-invalid @enderror" 
                                        id="address" 
@@ -167,7 +166,7 @@
   
                             <div class="col-6">
                               <div class="form-group">
-                                <label>{{translate('City')}}<span class="text-danger">*</span></label>
+                                <label>@lang('checkout.city')<span class="text-danger">*</span></label>
                                 <input type="text" 
                                        class="form-control @error('userData.city') is-invalid @enderror" 
                                        id="city" 
@@ -183,14 +182,14 @@
   
                             <div class="col-sm-6">
                               <div class="form-group">
-                                <label for="country">{{translate('Country / Region')}} <span class="text-danger">*</span></label>
+                                <label for="country">@lang('checkout.country_region') <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="country" wire:model="userData.country" required>
                               </div>
                             </div>
   
                             <div class="col-6">
                               <div class="form-group">
-                                <label>{{translate('Postal code')}} <span class="text-muted">(optional)</span></label>
+                                <label>@lang('checkout.postal_code_optional') </label>
                                 <input type="text" 
                                        class="form-control @error('userData.postal') is-invalid @enderror" 
                                        id="postal" 
@@ -273,10 +272,10 @@
                                            wire:model="userData.createAccount"
                                            style="min-width: 16px;">
                                     <label class="form-check-label" for="createAccount" style="font-size: 14px;">
-                                      {{ translate('Save my data and create an account. I accept the') }}
-                                      <a href="{{ route('law.agb') }}" target="_blank">{{ translate('Terms and Conditions') }}</a>
+                                    @lang('checkout.save_data_create_account')
+                                      <a href="{{ route('law.agb') }}" target="_blank">@lang('checkout.terms_and_conditions')</a>
                                       {{ translate('and') }}
-                                      <a href="{{ route('law.data-protection') }}" target="_blank">{{ translate('Privacy Policy') }}</a>
+                                      <a href="{{ route('law.data-protection') }}" target="_blank">@lang('checkout.privacy_policy')</a>
                                     </label>
                                   </div>
                                   @error('userData.createAccount')
@@ -322,29 +321,26 @@
                       @lang('forms.guidTitleMsg')
                     </div>
                     <div class="row d-flex justify-content-center checkout-container">
-                      <div class="col-lg-8 col-md-8 col-sm-12 my-2">
+                      <div class="col-lg-8 col-md-8 col-sm-12 my-2 px-0 px-sm-4">
                         <!-- Guiding Information Card -->
-                        <div class="card mb-4 shadow p-1">
-                          <div class="card-header bg-light">
-                            <h5 class="mb-0">{{$guiding->title}}</h5>
-                            <div class="d-flex align-items-center">
-                              <div>
-                                @if($guiding->user->profil_image)
-                                  <img class="rounded-circle" src="{{asset('images/'. $guiding->user->profil_image)}}" alt="" width="24" height="24">
-                                @else
-                                  <img class="rounded-circle" src="{{asset('images/placeholder_guide.jpg')}}" alt="" width="24" height="24">
-                                @endif
-                              </div>
-                              <div class="mx-2">
-                                <span>{{$guiding->user->firstname}}</span>
-                              </div>
-                            </div>
-                          </div>
-                          
+                        <div class="card mb-4 shadow p-1">                          
                           <div class="card-body">
                             <div class="guide-info mt-3">
                               <div class="mb-2">
                                 <h5><span class="bordered-heading">@lang('message.guiding-information')</span></h5>
+                              </div>
+                              <h6 class="my-1">{{$guiding->title}}</h6>
+                              <div class="d-flex align-items-center mb-2">
+                                <div>
+                                  @if($guiding->user->profil_image)
+                                    <img class="rounded-circle" src="{{asset('images/'. $guiding->user->profil_image)}}" alt="" width="24" height="24">
+                                  @else
+                                    <img class="rounded-circle" src="{{asset('images/placeholder_guide.jpg')}}" alt="" width="24" height="24">
+                                  @endif
+                                </div>
+                                <div class="mx-2">
+                                  <span>{{$guiding->user->firstname}}</span>
+                                </div>
                               </div>
                               <div class="p-3 bg-light rounded">
                                 @if($guiding->is_boat)
@@ -412,7 +408,7 @@
                                 @if($guiding->requirements)
                                 <div class="flex-column">
                                   <div class="my-2">
-                                    <span class="text-dark fw-bold">{{ translate('Requirements for taking part')}}:</span>
+                                    <span class="text-dark fw-bold">@lang('checkout.requirements_for_participation'):</span>
                                   </div>
                                   <div class="px-2 text-dark">
                                     @if($guiding->requirements)
@@ -431,41 +427,44 @@
 
                         <!-- Personal Information Card -->
                         <div class="card mb-4 shadow p-1">
-                          <div class="card-header bg-light">
+                          <!-- <div class="card-header bg-light">
                             <h5 class="mb-0">{{ translate('Personal Information') }}</h5>
-                          </div>
+                          </div> -->
                           <div class="card-body">
+                            <div class="mb-2"> 
+                              <h5><span class="bordered-heading">@lang('checkout.personal_information')</span></h5>
+                            </div>
                             <div class="row g-3">
                               <div class="col-md-6">
-                                <label class="form-label">{{ translate('First Name') }}</label>
+                                <span class="text-dark fw-bold">@lang('checkout.first_name')</span>
                                 <p class="form-control-static">{{ $userData['firstname'] }}</p>
                               </div>
                               <div class="col-md-6">
-                                <label class="form-label">{{ translate('Last Name') }}</label>
+                                <span class="text-dark fw-bold">@lang('checkout.last_name')</span>
                                 <p class="form-control-static">{{ $userData['lastname'] }}</p>
                               </div>
                               <div class="col-12">
-                                <label class="form-label">{{ translate('E-mail address') }}</label>
+                                <span class="text-dark fw-bold">@lang('checkout.email_address')</span>
                                 <p class="form-control-static">{{ $userData['email'] }}</p>
                               </div>
                               <div class="col-12">
-                                <label class="form-label">{{ translate('Address') }}</label>
+                                <span class="text-dark fw-bold">@lang('checkout.address')</span>
                                 <p class="form-control-static">{{ $userData['address'] }}</p>
                               </div>
                               <div class="col-md-4">
-                                <label class="form-label">{{ translate('Postal code') }}</label>
+                                <span class="text-dark fw-bold">{{ translate('Postal code') }}</span>
                                 <p class="form-control-static">{{ $userData['postal'] }}</p>
                               </div>
                               <div class="col-md-4">
-                                <label class="form-label">{{ translate('City') }}</label>
+                                <span class="text-dark fw-bold">@lang('checkout.city')</span>
                                 <p class="form-control-static">{{ $userData['city'] }}</p>
                               </div>
                               <div class="col-md-4">
-                                <label class="form-label">{{ translate('Country / Region') }}</label>
+                                <span class="text-dark fw-bold">@lang('checkout.country_region')</span>
                                 <p class="form-control-static">{{ $userData['country'] }}</p>
                               </div>
                               <div class="col-12">
-                                <label class="form-label">{{ translate('Phone Number') }}</label>
+                                <span class="text-dark fw-bold">{{ translate('Phone Number') }}</span>
                                 <p class="form-control-static">{{ $userData['phone'] }}</p>
                               </div>
                             </div>
@@ -474,19 +473,30 @@
                       </div>
                       <div class="col-lg-4 col-md-4 col-sm-12 my-2 card shadow p-2 booking-overview">
                           <div class="p-3 rounded d-flex flex-column">
-                            <div class="ml-3"><h5>@lang('message.booking-overview')</h5></div>
+                            <div class="mb-2"><h5><span class="bordered-heading">@lang('message.booking-overview')</span></h5></div>
                             <div class="my-2">
                               <div class="px-2 py-1 d-flex">
-                                <div class="col-8">@lang('message.total-guest'):</div>
+                                <div class="col-8">
+                                 <span class="text-dark fw-bold">
+                                   @lang('message.total-guest'):</div>
+                                 </span> 
                                 <div class="ml-auto">{{$persons}}</div>
                               </div>
                               <div class="px-2 py-1 d-flex">
-                                <div class="col-8">@lang('message.booking-date'):</div>
+                                <div class="col-8">
+                                <span class="text-dark fw-bold">
+                                  @lang('message.booking-date'):
+                                 </span> 
+                                </div>
                                 <div class="ml-auto">{{$formattedDate}}</div>
                               </div>
                               <div class="border-top px-4 mx-3"></div>
                               <div class="px-2 py-1 d-flex">
-                                <div class="col-8">@lang('message.guiding-price'):</div>
+                                <div class="col-8">
+                                <span class="text-dark fw-bold">
+                                  @lang('message.guiding-price'):
+                                 </span>   
+                              </div>
                                 <div class="ml-auto">€{{$guidingprice}}</div>
                               </div>@if(count($extras))
                               <div class="px-2 py-1 mb-2 bg-light">
@@ -535,13 +545,21 @@
 
                               @if($totalExtraPrice > 0)
                               <div class="px-2 py-1 d-flex">
-                                <div class="col-8">@lang('message.total-extras'):</span></div>
+                                <div class="col-8">
+                                <span class="text-dark fw-bold">
+                                  @lang('message.total-extras'):
+                                 </span>   
+                              </div>
                                 <div class="ml-auto">€{{$totalExtraPrice}}</div>
                               </div>
                               @endif
                               <div class="border-top px-4 mx-3"></div>
                               <div class="px-2 py-1 d-flex pt-3">
-                                <div class="col-8"><b>Total</b></div>
+                                <div class="col-8">
+                                <span class="text-dark fw-bold">
+                                  Total
+                                 </span>   
+                              </div>
                                 <div class="ml-auto"><b class="green">€{{$totalPrice}}</b></div>
                               </div>
                             </div>
@@ -564,11 +582,11 @@
 
                                   <label class="form-check-label" for="guestCheckTerms" style="font-size: 14px;">
                                     <span class="text-danger me-1">*</span>
-                                    {{ translate('I hereby confirm that I have read and understood the') }}
-                                    <a href="{{ route('law.agb') }}" target="_blank" class="text-primary fw-bold">{{ translate('Terms and Conditions') }}</a>
+                                    @lang('checkout.i_hereby_confirm')
+                                    <a href="{{ route('law.agb') }}" target="_blank" class="text-primary fw-bold">@lang('checkout.terms_and_conditions')</a>
                                     {{ translate('and') }}
-                                    <a href="{{ route('law.data-protection') }}" target="_blank" class="text-primary fw-bold">{{ translate('Privacy Policy') }}</a>.
-                                    {{ translate('I agree to be bound by these terms for this booking.') }}
+                                    <a href="{{ route('law.data-protection') }}" target="_blank" class="text-primary fw-bold">@lang('checkout.privacy_policy')</a>.
+                                    @lang('checkout.i_agree')
                                   </label>
                                 </div>
                                 @error('userData.guestCheckTerms')
@@ -584,7 +602,7 @@
                             @if($checkoutType === 'guest' && !$userData['createAccount'] && !$userData['guestCheckTerms'])
                               <div class="alert alert-warning terms-reminder mb-3" role="alert">
                                 <i class="fas fa-exclamation-circle me-2"></i>
-                                {{ translate('Please accept the Terms and Conditions to proceed with your booking.') }}
+                                @lang('checkout.please_accept')
                               </div>
                             @endif
 
@@ -779,7 +797,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   .litepicker .container__days .day-item.is-today.is-locked{
     color: #fff !important;
-    background: green !important;
+    background: var(--bs-blue) !important;
   }
 
   .litepicker .container__days .day-item.is-start-date.is-end-date{
@@ -828,8 +846,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   .litepicker .container__days .day-item:hover {
     color: var(--thm-primary);
-    -webkit-box-shadow: inset 0 0 0 1px var(--thm-primary);
-    box-shadow: inset 0 0 0 1px var(--thm-primary);
+    -webkit-box-shadow: inset 0 0 0 1px var(--thm-success);
+    box-shadow: inset 0 0 0 1px var(--thm-success);
   }
   .note-box {
     background-color: #e9f7f9;
@@ -889,7 +907,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   .checkout-options-container i {
-    color: #0d6efd;
     margin-top: 2px; /* Aligns icon with text */
   }
 
