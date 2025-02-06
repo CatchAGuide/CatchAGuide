@@ -68,10 +68,10 @@
                                 @if($hasPackages && $hasCustomOptions)
                                     <div class="booking-type-buttons">
                                         <button type="button" class="booking-type-btn active" data-type="package">
-                                            {{ translate('Komplettpaket') }}
+                                            @lang('vacations-booking.package')
                                         </button>
                                         <button type="button" class="booking-type-btn" data-type="custom">
-                                            {{ translate('Single Offer') }}
+                                            @lang('vacations-booking.single_offer')
                                         </button>
                                     </div>
                                     <input type="hidden" name="booking_type" value="package">
@@ -86,7 +86,7 @@
                         @if($hasPackages)
                             <div id="package-options" class="booking-options{{ $hasCustomOptions ? '-show' : '-show' }} mb-3">
                                 <div class="form-group">
-                                    <label>{{ translate('Select Package') }}</label>
+                                    <label>@lang('vacations-booking.select_package')</label>
                                     <select class="form-control" name="package_id">
                                         <option value="" selected>{{ translate('No package needed') }}</option>
                                         @foreach($vacation->packages as $packageIndex => $package)
@@ -101,7 +101,7 @@
                             <div id="custom-options" class="booking-options{{ $hasPackages ? '-hide' : '-show' }} mb-3">
                                 @if ($vacation->accommodations && count($vacation->accommodations) > 0)
                                     <div class="form-group mb-3">
-                                        <label>{{ translate('Accommodation') }}</label>
+                                        <label>@lang('vacations-booking.accommodations')</label>
                                         <select class="form-control" name="accommodation_id">
                                             <option value="" selected>{{ translate('No accommodation needed') }}</option>
                                             @foreach($vacation->accommodations as $accommodationIndex => $accommodation)
@@ -113,7 +113,7 @@
 
                                 @if ($vacation->boats && count($vacation->boats) > 0)
                                     <div class="form-group mb-3">
-                                        <label>{{ translate('Boat Rental') }}</label>
+                                        <label>@lang('vacations-booking.boat_rental')</label>
                                         <select class="form-control" name="boat_id">
                                             <option value="" selected>{{ translate('No boat needed') }}</option>
                                             @foreach($vacation->boats as $boatIndex => $boat)
@@ -127,7 +127,7 @@
 
                         @if ($vacation->guidings && count($vacation->guidings) > 0)
                             <div class="form-group mb-3">
-                                <label>{{ translate('Guiding') }}</label>
+                                <label>@lang('vacations-booking.guiding')</label>
                                 <select class="form-control" name="guiding_id">
                                     <option value="" selected>{{ translate('No guiding needed') }}</option>
                                     @foreach($vacation->guidings as $guidingIndex => $guiding)
@@ -140,13 +140,13 @@
                         <div class="mb-3">
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input" id="hasPets" name="has_pets">
-                                <label class="form-check-label" for="hasPets">{{ translate('Do you have pets?') }}</label>
+                                <label class="form-check-label" for="hasPets">@lang('vacations-booking.has_pets')</label>
                             </div>
                         </div>
                         
                         @if ($vacation->extras && count($vacation->extras) > 0)
                             <div class="form-group mb-3">
-                                <label>{{ translate('Extra offers') }}</label>
+                                <label>@lang('vacations-booking.extra_offers')</label>
                                 <div class="extra-offers-container">
                                     @foreach($vacation->extras as $extraIndex => $extra)
                                         <div class="extra-offer-item d-flex align-items-center mb-2">
@@ -180,7 +180,7 @@
 
                         <div class="total-price-container mb-4">
                             <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
-                                <h5 class="mb-0">{{ translate('Total Price') }}:</h5>
+                                <h5 class="mb-0">@lang('vacations-booking.total_price'):</h5>
                                 <h5 class="mb-0" id="total-price">€0.00</h5>
                             </div>
                         </div>
@@ -193,7 +193,7 @@
                                 disabled
                                 data-bs-placement="top" 
                                 data-bs-title="{{ translate('Please complete all required fields marked with *') }}">
-                            {{ translate('Proceed to booking') }}
+                            @lang('vacations-booking.proceed_booking')
                         </button>
                     </form>
                 </div>
