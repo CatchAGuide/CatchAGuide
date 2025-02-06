@@ -182,9 +182,8 @@
                                 </div>
                             </div>
                         @endif
-                        <div class="col-md-2 column-button my-2">
+                        <div class="col-md-2 col-12 column-button my-2">
                                     <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
-                                    <button type="submit" class="form-control new-filter-btn mobile"><i class="icon-magnifying-glass"></i></button>
                         </div>
                     </div>
                 </div> 
@@ -501,21 +500,24 @@ input[type=number] {
         align-items: center;
         gap: 4px;
     }
+    ##filterContainer:has(.vacation-header) .column-input{
+
+    }
     #mobileherofilter:has(.vacation-header) .column-input{
         width: calc(100% - 80px);
         padding-left: 0;
     }
-    #mobileherofilter:has(.vacation-header) .column-input i{
-        font-size: 24px;
+    #filterContainer:has(.vacation-header) #mobileherofilter .column-button{
+        display: none;
     }
 
     #mobileherofilter .row .col-md-4{
         margin: 0!important;
     }
     #mobileherofilter .column-button{
-        width: auto;
-        margin: 0 !important;
-        padding: 0;
+        width: 100%;
+        padding: 0 12px;
+        margin-top: 10px;
     }
     .new-filter-btn.mobile{
         display: block;

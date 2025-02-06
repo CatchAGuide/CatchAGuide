@@ -229,51 +229,31 @@
         padding-left: 15px;
         padding-right: 15px;
     }
+    .guiding-item-price {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
 
-    /* Tours list section spacing */
+    .guiding-item-price h5 {
+        margin: 0;
+        white-space: nowrap;
+        font-size: clamp(14px, 2vw, 18px);  /* Responsive font size between 14px and 18px */
+    }
+
+    .guiding-item-price span {
+        display: inline-block;
+        padding: 4px 8px;
+    }
+
     .tours-list {
-        padding-top: 20px;
-        padding-bottom: 40px;
+        position: relative;
+        padding: 30px 0;  /* Reduced default padding */
     }
 
-    /* Main content layout */
-    .tours-list__right {
-        width: 100%;
-    }
-
-    /* Filter sidebar */
-    #filterCard {
-        position: sticky;
-        top: 20px;
-    }
-
-    /* Guiding list item container */
-    .guiding-list-item {
-        margin: 0 0 20px 0;
-    }
-
-    /* Remove unnecessary container nesting */
-    .tours-list .container-fluid {
-        padding: 0;
-    }
-
-    /* Adjust row margins */
-    .row {
-        margin-left: -15px;
-        margin-right: -15px;
-    }
-
-    /* Column padding adjustments */
-    .col-sm-12,
-    .col-lg-3,
-    .col-lg-9 {
-        padding-left: 15px;
-        padding-right: 15px;
-    }
-
-    @media (min-width: 992px) {
-        .tours-list__inner {
-            padding-left: 15px;
+    @media only screen and (max-width: 767px) {
+        .tours-list {
+            padding: 15px 0;  /* Even smaller padding for mobile */
         }
     }
 </style>
@@ -283,7 +263,7 @@
 @include('layouts.schema.listings')
 @endsection
 @section('content')
-<div class="container">
+{{-- <div class="container"> --}}
     {{-- <section class="page-header">
         <div class="page-header__bottom">
                 <div class="page-header__bottom-inner">
@@ -942,7 +922,7 @@ function initializeSelect2() {
             $lng = isset($guidings[0]) ? $guidings[0]->lng : 10.451526;
         @endphp
 
-        const position =  { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }} , lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} }; 
+        const position =  { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }} , lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} ; 
         const { Map, InfoWindow } = await google.maps.importLibrary("maps");
         const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
 
