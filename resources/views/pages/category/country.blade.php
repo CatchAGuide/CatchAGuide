@@ -139,12 +139,7 @@
         border-left: 4px solid transparent;
         border-right: 4px solid transparent;
     }
-    /*.see-more {
-        display: inline-block;
-        color: blue;
-        cursor: pointer;
-        text-decoration: underline;
-    }*/
+    
     #fish_size_limit_table th:first-child, 
     #fish_size_limit_table td:first-child,
     #fish_time_limit_table th:first-child, 
@@ -230,9 +225,7 @@
 @endsection
 
 @section('content')
-    <!--News One Start-->
     <div class="container" id="destination">
-        
         <section class="page-header">
             <div class="page-header__bottom">
                 <div class="container">
