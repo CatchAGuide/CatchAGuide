@@ -318,12 +318,12 @@
         }
 
         .inclusion-item {
-            font-size: 11px;
-            padding: 1px 6px;
+            font-size: 13px; /* Larger font size for mobile */
+            padding: 3px 10px;
         }
         
         .guidings-included strong {
-            font-size: 13px;
+            font-size: 14px;
         }
     }
 
@@ -336,7 +336,6 @@
         margin-bottom: 5px;
     }
 
-
     .guidings-item-title span {
         display: block;
         font-size: 15px;
@@ -344,11 +343,13 @@
         max-width: 100%;
     }
 
-    /* Only apply truncation when text is longer than container */
-    .guidings-item-title span.truncate {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+    /* Only apply truncation on desktop */
+    @media (min-width: 768px) {
+        .guidings-item-title span.truncate {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
     }
 
     .guidings-item-title i {
@@ -357,6 +358,22 @@
         color: #666;
     }
 
+    .inclusion-item {
+        font-size: 12px;
+        white-space: nowrap;
+        padding: 2px 8px;
+        border-radius: 4px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .guiding-item-price h5 {
+        margin: 0;
+        white-space: nowrap;
+        font-size: clamp(14px, 2vw, 18px);  /* Responsive font size between 14px and 18px */
+    }
+
+    /* Mobile specific styles */
     @media (max-width: 767px) {
         .guidings-item-title h5 {
             font-size: 18px;
@@ -364,6 +381,19 @@
         
         .guidings-item-title span {
             font-size: 13px; /* Keeping font size readable on mobile */
+        }
+
+        .inclusion-item {
+            font-size: 13px; /* Larger font size for mobile */
+            padding: 3px 10px; /* Slightly larger padding for better touch targets */
+        }
+        
+        .guiding-item-price h5 {
+            font-size: 18px; /* Fixed size for better readability on mobile */
+        }
+        
+        .guidings-included strong {
+            font-size: 14px;
         }
     }
 </style>
@@ -624,7 +654,7 @@
                                                             <div class="guidings-item">
                                                                 <div class="guidings-item-title">
                                                                 <h5 class="fw-bolder text-truncate">{{ Str::limit(translate($guiding->title), 70) }}</h5>
-                                                                <span><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }}</span>                                      
+                                                                <span class="truncate"><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }}</span>                                      
                                                                 </div>
                                                                 @if ($guiding->user->average_rating())
                                                                 <div class="guidings-item-ratings">
@@ -1032,7 +1062,7 @@ function initializeSelect2() {
             $lng = isset($guidings[0]) ? $guidings[0]->lng : 10.451526;
         @endphp
 
-        const position =  { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }} , lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} }; 
+        const position =  { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }} , lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} ; 
         const { Map, InfoWindow } = await google.maps.importLibrary("maps");
         const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
 
