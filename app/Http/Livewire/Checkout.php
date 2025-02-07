@@ -321,8 +321,9 @@ class Checkout extends Component
             'extraQuantities.*' => ['required', 'numeric', 'max:' . $this->persons],
         ]);
 
+        Log::debug("Checkout started with parameters: " . json_encode($this->userData));
         $currentUser = auth()->user();
-        
+
         if ($currentUser) {
             $user = $currentUser;
             $isGuest = false;
@@ -438,6 +439,8 @@ class Checkout extends Component
             'phone' => $this->userData['phone'],
             'token' => $this->generateBookingToken($blockedEvent->id),
         ]);
+
+        Log::debug("User ID: " . $userId . " and Booking details: " . json_encode($this->guiding);
 
         if (!app()->environment('local')) {
             SendCheckoutEmail::dispatch($booking, $user, $this->guiding, $this->guiding->user);
