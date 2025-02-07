@@ -106,12 +106,9 @@
             </div>
 
             @php
-                $countries = \App\Models\Vacation::select('country')
-                    ->where('status', 1)
-                    ->distinct()
-                    ->pluck('country')
-                    ->sort();
+                $countries = \App\Models\Destination::where('type', 'vacations')->pluck('name');
             @endphp
+
 
             <!-- Mobile Search Summary -->
             @if(!$isVacation)

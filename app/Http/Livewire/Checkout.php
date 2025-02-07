@@ -405,12 +405,10 @@ class Checkout extends Component
                 $isGuest = true;
                 $userId = $user->id; // Set user_id to null for guest bookings
             }
-        }
-);
-
-        $blockedEvent = (new EventService())->createBlockedEvent($this->selectedTime, $this->selectedDate, $this->guiding);
-
-
+        } 
+ 
+        $blockedEvent = (new EventService())->createBlockedEvent($this->selectedTime, $this->selectedDate, $this->guiding); 
+ 
         $fee = (new HelperService())->calculateRates($this->guidingprice);
         $partnerFee = (new HelperService())->convertAmountToString($fee);
 

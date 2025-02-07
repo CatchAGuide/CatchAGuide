@@ -437,7 +437,7 @@ class GuidingsController extends Controller
             $guiding->region = $request->has('region') ? $request->input('region') : '';
             
             $galeryImages = [];
-            $imageList = json_decode($request->input('image_list'));
+            $imageList = json_decode($request->input('image_list')) ?? [];
 
             if ($request->input('is_update') == '1') {
                 // Get existing images from request
