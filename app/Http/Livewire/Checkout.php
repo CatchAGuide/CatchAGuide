@@ -365,7 +365,7 @@ class Checkout extends Component
                 if (!app()->environment('local')) {
                     Mail::to($user->email)->queue(new AutomaticRegistrationMail($user, $randomPassword));
                 }
-                
+                 
                 $isGuest = false;
                 $userId = $user->id;
             } else {
