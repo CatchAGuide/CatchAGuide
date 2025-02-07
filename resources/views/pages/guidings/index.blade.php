@@ -32,9 +32,10 @@
     }
 
     .carousel.slide img {
-        height: 300px;
+        height: 250px;
         object-fit: cover;
         width: 100%;
+        background: black;
     }
 
     .form-custom-input {
@@ -60,18 +61,15 @@
         filter: none !important;
     }
 
-    .carousel.slide img {
-        object-fit: cover;
-        background: black;
-        height: 300px;
-    }
-
     .carousel-item {
-        min-height: 50px;
+        aspect-ratio: 4/3;
+        background-color: #f8f9fa;
     }
 
     .carousel-item-next, .carousel-item-prev, .carousel-item.active {
         display: flex;
+        align-items: center;
+        justify-content: center;
     }
     .form-custom-input{
     border: 1px solid #d4d5d6;
@@ -254,6 +252,118 @@
     @media only screen and (max-width: 767px) {
         .tours-list {
             padding: 15px 0;  /* Even smaller padding for mobile */
+        }
+    }
+
+    .inclusions-price {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .guidings-inclusions-container {
+        flex: 1;
+        min-width: 0; /* Prevents flex item from overflowing */
+    }
+
+    .guidings-included {
+        font-size: 14px;
+    }
+
+    .guidings-included strong {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .inclusions-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        max-width: 100%;
+    }
+
+    .inclusion-item {
+        font-size: 12px;
+        white-space: nowrap;
+        padding: 2px 8px;
+        border-radius: 4px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .inclusion-item i {
+        font-size: 10px;
+        margin-right: 4px;
+        /* color: #E8604C; */
+    }
+
+    .guiding-item-price {
+        text-align: right;
+        min-width: fit-content;
+        padding-left: 10px;
+    }
+
+    @media (max-width: 767px) {
+        .inclusions-price {
+            flex-direction: column;
+        }
+        
+        .guiding-item-price {
+            width: 100%;
+            text-align: left;
+            padding-left: 0;
+            margin-top: 10px;
+        }
+
+        .inclusion-item {
+            font-size: 11px;
+            padding: 1px 6px;
+        }
+        
+        .guidings-included strong {
+            font-size: 13px;
+        }
+    }
+
+    .guidings-item-title {
+        margin-bottom: 10px;
+    }
+
+    .guidings-item-title h5 {
+        font-size: clamp(18px, 2vw, 22px);
+        margin-bottom: 5px;
+    }
+
+
+    .guidings-item-title span {
+        display: block;
+        font-size: 15px;
+        color: #666;
+        max-width: 100%;
+    }
+
+    /* Only apply truncation when text is longer than container */
+    .guidings-item-title span.truncate {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .guidings-item-title i {
+        font-size: 13px;
+        margin-right: 4px;
+        color: #666;
+    }
+
+    @media (max-width: 767px) {
+        .guidings-item-title h5 {
+            font-size: 18px;
+        }
+        
+        .guidings-item-title span {
+            font-size: 13px; /* Keeping font size readable on mobile */
         }
     }
 </style>
@@ -514,7 +624,7 @@
                                                             <div class="guidings-item">
                                                                 <div class="guidings-item-title">
                                                                 <h5 class="fw-bolder text-truncate">{{ Str::limit(translate($guiding->title), 70) }}</h5>
-                                                                <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }}</span>                                      
+                                                                <span><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }}</span>                                      
                                                                 </div>
                                                                 @if ($guiding->user->average_rating())
                                                                 <div class="guidings-item-ratings">
