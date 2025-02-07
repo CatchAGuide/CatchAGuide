@@ -226,8 +226,9 @@ class DestinationCountryController extends Controller
 
         $filterData = json_decode($row_data->filters, true);
 
-        $placeLat = $filterData['placeLat'];
-        $placeLng = $filterData['placeLng'];
+        // Set default values if $filterData is null
+        $placeLat = $filterData['placeLat'] ?? null;
+        $placeLng = $filterData['placeLng'] ?? null;
         $city = $filterData['city'] ?? null;
         $country = $filterData['country'] ?? null;
         $region = $filterData['region'] ?? null;

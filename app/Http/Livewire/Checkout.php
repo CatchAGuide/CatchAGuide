@@ -326,6 +326,7 @@ class Checkout extends Component
         if ($currentUser) {
             $user = $currentUser;
             $isGuest = false;
+            $userId = $user->id;
             
             // Update phone for registered user
             if (!$user->is_guide) {
@@ -366,6 +367,7 @@ class Checkout extends Component
                 }
                 
                 $isGuest = false;
+                $userId = $user->id;
             } else {
                 // Check if guest user already exists with this email
                 $user = UserGuest::where('email', $this->userData['email'])->first();
@@ -400,6 +402,7 @@ class Checkout extends Component
                 }
                 
                 $isGuest = true;
+                $userId = $user->id; // Set user_id to null for guest bookings
             }
         }
 
@@ -419,7 +422,7 @@ class Checkout extends Component
         }
 
         $booking = Booking::create([
-            'user_id' => $user->id,
+            'user_id' => $userId, // Use null for guests, actual user ID for registered users
             'is_guest' => $isGuest,
             'guiding_id' => $this->guiding->id,
             'blocked_event_id' => $blockedEvent->id,
@@ -431,7 +434,7 @@ class Checkout extends Component
             'cag_percent' => $fee,
             'status' => 'pending',
             'book_date' => $this->selectedDate,
-            'expires_at' => Carbon::now()->addHours(72),
+            'expires_at' => $expiresAt,
             'phone' => $this->userData['phone'],
             'token' => $this->generateBookingToken($blockedEvent->id),
         ]);
