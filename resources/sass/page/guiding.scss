@@ -558,6 +558,28 @@
       
     }
   }
+  .guiding-item-desc {
+    a{
+      gap: 16px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    // .inclusions-price{
+    //   margin: 0;
+    // }
+    .guidings-icon-container{
+      font-size: 16px;
+    }
+    .inclusions-list{
+      gap: 16px;
+      .inclusion-item{
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+    }
+  }
 }
 
 .guidings-gallery {
@@ -715,7 +737,8 @@ div#masonry-grid {
     a {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      height: 100%;
+      // gap: 8px;
     }
   }
 
@@ -766,7 +789,7 @@ div#masonry-grid {
   }
 
   .guidings-icon-container {
-    font-size: 18px;
+    font-size: 15px;
     display: flex;
     gap: 4px;
     width: calc(50% - 4px);
@@ -778,7 +801,7 @@ div#masonry-grid {
     align-items: flex-end;
     gap: 16px;
     justify-content: space-between;
-
+    margin-top: auto;
     .guiding-item-price {
       span {
         color: $primary-color;
@@ -790,9 +813,7 @@ div#masonry-grid {
     color: $font-color;
 
     .inclusions-list {
-
       display: flex;
-      gap: 8px;
     }
   }
 
@@ -1163,6 +1184,15 @@ div#masonry-grid {
 }
 
 @media screen and (max-width: 768px) {
+  
+   .guiding-item-desc{
+     a{
+      gap: 8px;
+     }
+     .guidings-item-title{
+       margin-bottom: 0;
+     }
+   } 
   .tours-list__right {
     .guidings-item {
       flex-direction: column;
@@ -1209,7 +1239,7 @@ div#masonry-grid {
     .guidings-included {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 4px;
     }
 
     .inclusions-list {

@@ -274,18 +274,15 @@
 
     .guidings-included strong {
         display: block;
-        margin-bottom: 5px;
     }
 
     .inclusions-list {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
         max-width: 100%;
     }
 
     .inclusion-item {
-        font-size: 12px;
         white-space: nowrap;
         padding: 2px 8px;
         border-radius: 4px;
@@ -314,7 +311,6 @@
             width: 100%;
             text-align: left;
             padding-left: 0;
-            margin-top: 10px;
         }
 
         .inclusion-item {
@@ -339,7 +335,7 @@
     .guidings-item-title span {
         display: block;
         font-size: 15px;
-        color: #666;
+        color: #444;
         max-width: 100%;
     }
 
@@ -359,7 +355,7 @@
     }
 
     .inclusion-item {
-        font-size: 12px;
+        font-size: 15px;
         white-space: nowrap;
         padding: 2px 8px;
         border-radius: 4px;
@@ -377,14 +373,15 @@
     @media (max-width: 767px) {
         .guidings-item-title h5 {
             font-size: 18px;
+            margin-bottom: 0
         }
         
         .guidings-item-title span {
-            font-size: 13px; /* Keeping font size readable on mobile */
+            font-size: 15px; /* Keeping font size readable on mobile */
         }
 
         .inclusion-item {
-            font-size: 13px; /* Larger font size for mobile */
+            font-size: 15px; /* Larger font size for mobile */
             padding: 3px 10px; /* Slightly larger padding for better touch targets */
         }
         
@@ -393,7 +390,7 @@
         }
         
         .guidings-included strong {
-            font-size: 14px;
+            font-size: 15px;
         }
     }
 </style>
@@ -649,7 +646,7 @@
                                                     </div>
                                             
                                                 </div>
-                                                <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 p-md-3 mt-md-1">
+                                                <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 px-md-3 pt-md-2">
                                                     <a href="{{ route('guidings.show', [$guiding->id, $guiding->slug])}}">
                                                             <div class="guidings-item">
                                                                 <div class="guidings-item-title">
