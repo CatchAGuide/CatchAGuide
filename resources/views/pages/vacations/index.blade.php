@@ -161,6 +161,12 @@
         border-radius: 0 !important;
         padding-left: 30px !important;
     }
+    
+    .guiding-item-price h5 {
+        margin: 0;
+        white-space: nowrap;
+        font-size: clamp(15px, 2vw, 19px);  /* Responsive font size between 14px and 18px */
+    }
 </style>
 @endsection
 
