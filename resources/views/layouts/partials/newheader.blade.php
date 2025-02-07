@@ -122,13 +122,12 @@
                                     <select class="form-control form-select border-0" name="country" onchange="updateFormAction(this, 'global-search1')">
                                         <option value="">{{translate('Select Country')}}</option>
                                         @php
-                                            $countries = \App\Models\Vacation::select('country')
-                                                ->where('status', 1)
-                                                ->distinct()
-                                                ->pluck('country')
-                                                ->sort();
+                                            $countries = \App\Models\Destination::where('type', 'vacations')->pluck('name');
                                         @endphp
                                         @foreach($countries as $country)
+
+
+
                                             <option value="{{ $country }}" 
                                                 {{ request()->country == $country ? 'selected' : '' }}>
                                                 {{ $country }}
