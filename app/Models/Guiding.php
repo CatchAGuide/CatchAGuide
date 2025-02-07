@@ -433,8 +433,7 @@ class Guiding extends Model
             return $price['person'] > 1 ? round($price['amount'] / $price['person']) : $price['amount'];
         }, $prices));
         
-        return min($singlePrice, $minPrice);
-        return 0;
+        return round(min($singlePrice, $minPrice), 2);
     }
 
     public function getBlockedEvents()

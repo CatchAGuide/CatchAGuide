@@ -161,6 +161,12 @@
         border-radius: 0 !important;
         padding-left: 30px !important;
     }
+    
+    .guiding-item-price h5 {
+        margin: 0;
+        white-space: nowrap;
+        font-size: clamp(15px, 2vw, 19px);  /* Responsive font size between 14px and 18px */
+    }
 </style>
 @endsection
 
@@ -868,8 +874,8 @@ function initializeSelect2() {
     //const { Map } = await google.maps.importLibrary("maps");
 
     @php
-        $lat = isset($vacations[0]) ? $vacations[0]->lat : 51.165691;
-        $lng = isset($vacations[0]) ? $vacations[0]->lng : 10.451526;
+        $lat = isset($vacations[0]) ? $vacations[0]->latitude : 51.165691;
+        $lng = isset($vacations[0]) ? $vacations[0]->longitude : 10.451526;
     @endphp
     const position = { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }} , lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} };
     const { Map, InfoWindow } = await google.maps.importLibrary("maps");
