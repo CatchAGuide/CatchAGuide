@@ -41,6 +41,14 @@ class Vacation extends Model
         return $this->hasMany(VacationExtra::class);
     }
 
+    /**
+     * Get the bookings for the vacation.
+     */
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(VacationBooking::class);
+    }
+
     public static function locationFilter(string $city = null, string $country = null, ?int $radius = null, $placeLat = null, $placeLng = null )
     {
         // Get standardized English names using the helper

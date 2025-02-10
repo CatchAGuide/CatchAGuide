@@ -69,11 +69,17 @@
                                                 </td>
                                                 <td>{{ $booking->transaction_id }}</td>
                                                 <td>
-                                                    <span class="@if($booking->status == 'rejected' || $booking->status == 'cancelled') text-danger @elseif($booking->status == 'accepted') text-success @else text-warning glow @endif">
+                                                    <span class="@if($booking->status == 'rejected' || $booking->status == 'cancelled') text-danger @elseif($booking->status == 'accepted') text-success @else {{ !$booking->is_guest ? "text-warning" : "" }} glow @endif">
                                                         {{ strtoupper($booking->status) }}
+                                                        @if($booking->is_guest)
+                                                            <br>
+                                                            <small class="text-muted">Guest Checkout</small>
+                                                        @endif
                                                     </span>
                                                     @if($booking->last_employee_id)
+
                                                         <br>
+
                                                         <span class="text-info">by {{ $booking->employee->name }}</span>
                                                     @endif
                                                 </td>
