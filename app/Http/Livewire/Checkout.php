@@ -440,7 +440,7 @@ class Checkout extends Component
             'token' => $this->generateBookingToken($blockedEvent->id),
         ]);
 
-        Log::debug("User ID: " . $userId . " and Booking details: " . json_encode($this->guiding);
+        Log::debug("User ID: " . $userId . " and Booking details: " . json_encode($this->guiding));
 
         if (!app()->environment('local')) {
             SendCheckoutEmail::dispatch($booking, $user, $this->guiding, $this->guiding->user);

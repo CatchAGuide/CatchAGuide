@@ -103,7 +103,6 @@
         document.getElementById('guestDropdown').innerText = text;
     }
 </script>
-@endstack
 @livewireScripts
 @yield('js_after')
 @stack('js_push')
@@ -234,4 +233,3 @@
         });
     });
 </script>
-@endstack

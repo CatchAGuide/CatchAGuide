@@ -3,65 +3,57 @@
         <div class="container">
             <div class="site-footer__top-inner" style="{{$agent->ismobile() ? 'padding: 20px' : ''}}">
                 <div class="row">
-                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <div class="col-xl-4 col-lg-6 col-md-6">
                         <div class="footer-widget__column footer-widget__about {{$agent->ismobile() ? 'text-center' : ''}}">
                             <div class="footer-widget__about-logo py-md-0 py-2 {{$agent->ismobile() ? 'text-center' : ''}}">
-                                <a href="{{ route('welcome') }}"><img width="300"
-                                        src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}"
-                                        alt="Logo"></a>
+                                <a href="{{ route('welcome') }}">
+                                    <img width="300" src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}" alt="Logo">
+                                </a>
                             </div>
-                            <p class="footer-widget__about-text  py-md-3 py-3">@lang('message.listHere')</p>
+                            <p class="footer-widget__about-text py-md-3 py-3">@lang('message.listHere')</p>
                             @if(!$agent->ismobile())
-                                <ul class="footer-widget__about-contact list-unstyled">
-                                    <li>
-                                        <div class="icon">
-                                            <i class="fas fa-phone-square-alt"></i>
-                                        </div>
-                                        <div class="text">
-                                            <a href="tel:+49{{env('CONTACT_NUM')}}">+49 (0) {{env('CONTACT_NUM')}}</a>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div class="icon">
-                                            <i class="fas fa-envelope"></i>
-                                        </div>
-                                        <div class="text">
-                                            <a href="mailto:info.catchaguide@gmail.com">info.catchaguide@gmail.com</a>
-                                        </div>
-                                    </li>
-                                </ul>
+                            <ul class="footer-widget__about-contact list-unstyled">
+                                <li>
+                                    <div class="icon"><i class="fas fa-phone-square-alt"></i></div>
+                                    <div class="text">
+                                        <a href="tel:+49{{env('CONTACT_NUM')}}">+49 (0) {{env('CONTACT_NUM')}}</a>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="icon"><i class="fas fa-envelope"></i></div>
+                                    <div class="text">
+                                        <a href="mailto:info.catchaguide@gmail.com">info.catchaguide@gmail.com</a>
+                                    </div>
+                                </li>
+                            </ul>
                             @endif
                         </div>
                     </div>
-                @if($agent->ismobile())
 
-                        <ul class="footer-widget__about-contact list-unstyled">
+                    @if($agent->ismobile())
+                    <div class="col-12">
+                        <ul class="footer-widget__about-contact list-unstyled text-center">
                             <li>
-                                <div class="icon">
-                                    <i class="fas fa-phone-square-alt"></i>
-                                </div>
+                                <div class="icon"><i class="fas fa-phone-square-alt"></i></div>
                                 <div class="text">
                                     <a href="tel:+49{{env('CONTACT_NUM')}}">+49 (0) {{env('CONTACT_NUM')}}</a>
                                 </div>
                             </li>
                             <li>
-                                <div class="icon">
-                                    <i class="fas fa-envelope"></i>
-                                </div>
+                                <div class="icon"><i class="fas fa-envelope"></i></div>
                                 <div class="text">
                                     <a href="mailto:info.catchaguide@gmail.com">info.catchaguide@gmail.com</a>
                                 </div>
                             </li>
                         </ul>
-
-                        <div class="col-xl-4 col-lg-6 col-md-6">
-
-                            @include('layouts.partials.newsletterform')
-
-                        </div>
+                    </div>
+                    <div class="col-12">
+                        @include('layouts.partials.newsletterform')
+                    </div>
                     @endif
+
                     <div class="col-xl-2 col-lg-6 col-md-6">
-                        <div class="footer-widget__column footer-widget__company clearfix {{$agent->ismobile() ? 'text-center' : ''}}">
+                        <div class="footer-widget__column footer-widget__company {{$agent->ismobile() ? 'text-center' : ''}}">
                             <h3 class="footer-widget__title">@lang('message.legal')</h3>
                             <ul class="footer-widget__company-list list-unstyled">
                                 <li><a href="{{route('law.imprint')}}">@lang('message.imprint')</a></li>
@@ -71,6 +63,7 @@
                             </ul>
                         </div>
                     </div>
+
                     <div class="col-xl-2 col-lg-6 col-md-6">
                         <div class="footer-widget__column footer-widget__explore {{$agent->ismobile() ? 'text-center' : ''}}">
                             <h3 class="footer-widget__title">@lang('message.miscellaneous')</h3>
@@ -82,15 +75,17 @@
                             </ul>
                         </div>
                     </div>
+
                     @if(!$agent->ismobile())
-                        <div class="col-xl-4 col-lg-6 col-md-6">
-                            @include('layouts.partials.newsletterform')
-                        </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6">
+                        @include('layouts.partials.newsletterform')
+                    </div>
                     @endif
                 </div>
             </div>
         </div>
     </div>
+
     <div class="site-footer__bottom">
         <div class="container">
             <div class="row">
@@ -100,16 +95,16 @@
                             <div class="footer-widget__social">
                                 <a href="https://www.facebook.com/CatchAGuide" target="_blank"><i class="fab fa-facebook"></i></a>
                                 <a href="https://wa.me/+49{{env('CONTACT_NUM')}}" target="_blank"><i class="fab fa-whatsapp"></i></a>
-                                <a href="https://www.instagram.com/catchaguide_official/" target="_blank"><i
-                                        class="fab fa-instagram"></i></a>
+                                <a href="https://www.instagram.com/catchaguide_official/" target="_blank"><i class="fab fa-instagram"></i></a>
                             </div>
                         </div>
                         <div class="site-footer__bottom-right">
                             <p>@ All Copyright {{ now()->year }}, <a href="#">{{ config('app.name') }}</a></p>
                         </div>
                         <div class="site-footer__bottom-left-arrow">
-                            <a href="#" data-target="html" class="scroll-to-target scroll-to-top"><span
-                                    class="icon-right-arrow"></span></a>
+                            <a href="#" data-target="html" class="scroll-to-target scroll-to-top">
+                                <span class="icon-right-arrow"></span>
+                            </a>
                         </div>
                     </div>
                 </div>

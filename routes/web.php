@@ -39,6 +39,7 @@ use App\Http\Controllers\Admin\Category\AdminCategoryCityController;
 use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThreadsController;
 use App\Http\Controllers\VacationBookingController;
 use App\Http\Controllers\Admin\Category\AdminCategoryVacationCountryController;
+use App\Http\Controllers\Admin\AdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -242,14 +243,10 @@ Route::get('robots.txt', function () {
     }
 });
 
-Route::name('category.')->group(function(){
-    Route::get('/{slug?}', [GuideThreadController::class, 'categoryIndex'])->name('thread');
-});
-
 Route::post('/change-password', [PasswordController::class, 'changePassword'])
     ->name('password.change')
     ->middleware('auth');
-
+    
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::name('auth.')->group(function () {
         Route::get('logins', [AuthenticationController::class, 'index'])->name('logins');//->middleware('guest:employees');
@@ -258,7 +255,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     Route::middleware('auth:employees')->group(function () {
-        Route::view('/', 'admin.pages.index')->name('index');
+        Route::get('/', [AdminController::class, 'index'])->name('index');
 
         Route::resource('customers', CustomersController::class);
         Route::get('customersdelete/{id}', [CustomersController::class, 'customersdelete'])->name('customersdelete');
@@ -366,4 +363,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('request-as-guide', [\App\Http\Controllers\GuideRequestsController::class, 'index'])->name('guide-requests.index');
     });
+});
+
+Route::name('category.')->group(function(){
+    Route::get('/{slug?}', [GuideThreadController::class, 'categoryIndex'])->name('thread');
 });

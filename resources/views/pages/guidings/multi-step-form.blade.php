@@ -182,7 +182,7 @@
                             <label for="other_boat_info" class="form-label">
                                 {{ __('newguidings.other_boat_info') }}
                             </label>
-                            <textarea class="form-control" id="other_boat_info" name="other_boat_info" rows="3"></textarea>
+                            <textarea class="form-control" id="other_boat_info" name="other_boat_info" rows="3">{{ $formData['other_boat_info'] ?? '' }}</textarea>
                         </div>
                         <div class="btn-group-toggle">
                             @foreach($guiding_boat_descriptions as $guiding_boat_description)
