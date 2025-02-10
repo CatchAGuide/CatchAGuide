@@ -840,10 +840,10 @@ class Guiding extends Model
 
         $recommendationsData = collect(json_decode($this->attributes['recommendations'], true));
 
-        return GuidingRecommendations::whereIn('id', collect($recommendationsData->pluck('id')))
+        return GuidingRecommendations::whereIn('id', array_keys($recommendationsData->all()))
             ->get()
             ->map(function ($recommendation) use ($recommendationsData) {
-                $data = $recommendationsData->firstWhere('id', $recommendation->id);
+                $data = $recommendationsData[$recommendation->id];
                 return [
                     'id' => $recommendation->id,
                     'value' => isset($data['value']) ? $data['value'] : $data,
@@ -860,15 +860,17 @@ class Guiding extends Model
         
         $boatInformationData = collect(json_decode($this->attributes['boat_information'], true));
         
-        return GuidingBoatDescription::whereIn('id', collect($boatInformationData)->pluck('id'))
+        return GuidingBoatDescription::whereIn('id', array_keys($boatInformationData->all()))
             ->get()
             ->map(function ($boatInformation) use ($boatInformationData) {
-                $data = collect($boatInformationData)->firstWhere('id', $boatInformation->id);
+                $data = $boatInformationData[$boatInformation->id];
                 return [
                     'id' => $boatInformation->id,
-                    'value' => $data['value'],
+                    'value' => isset($data['value']) ? $data['value'] : $data,
                     'name' => $boatInformation->name
                 ];
+
+
             });
     }
 

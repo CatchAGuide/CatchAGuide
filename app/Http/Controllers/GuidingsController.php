@@ -481,6 +481,7 @@ class GuidingsController extends Controller
             //step 2
             $guiding->is_boat = $request->has('type_of_fishing') ? ($request->input('type_of_fishing') == 'boat' ? 1 : 0) : 0;
             $guiding->fishing_from_id = (int) $request->has('type_of_fishing') ? ($request->input('type_of_fishing') == 'boat' ? 1 : 2) : 2;
+            $guiding->additional_information = $request->has('other_boat_info') ? $request->input('other_boat_info') : '';
             if ($guiding->is_boat) {
                 $guiding->boat_type = $request->has('type_of_boat') ? $request->input('type_of_boat') : '';
                 $guiding->boat_information = $this->saveDescriptions($request);
@@ -676,6 +677,7 @@ class GuidingsController extends Controller
         }
 
         return json_encode($descriptionData);
+
     }
 
     private function saveOtherInformation($request)
@@ -905,6 +907,7 @@ class GuidingsController extends Controller
             'booking_window' => $guiding->booking_window,
             'seasonal_trip' => $guiding->seasonal_trip,
             'months' => json_decode($guiding->months, true),
+            'other_boat_info' => $guiding->additional_information,
         ];
 
         $locale = Config::get('app.locale');
@@ -932,6 +935,7 @@ class GuidingsController extends Controller
                     'value' => $item->$nameField,
                     'id' => $item->id
                 ];
+
             });
         }
 
