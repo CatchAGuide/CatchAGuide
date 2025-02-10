@@ -55,9 +55,9 @@ class AdminController extends Controller
                 return [
                     'id' => $booking->id,
                     'customer' => $booking->is_guest ? 
-                        $booking->user->firstname . ' ' . $booking->user->lastname : 
-                        $booking->user->full_name,
-                    'tour' => $booking->guiding->title,
+                        $booking->user?->firstname . ' ' . $booking->user?->lastname : 
+                        $booking->user?->full_name,
+                    'tour' => $booking->guiding?->title,
                     'price' => $booking->price + ($booking->total_extra_price ?? 0),
                     'status' => $booking->status,
                     'status_color' => $this->getStatusColor($booking->status)
