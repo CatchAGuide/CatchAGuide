@@ -112,6 +112,12 @@ if (!function_exists('media_upload')) {
         
         $webp_path = $directory . '/' . $webpImageName;
 
+        // Ensure the directory exists in both storage and public
+        Storage::disk('public')->makeDirectory($directory);
+        if (!file_exists(public_path($directory))) {
+            mkdir(public_path($directory), 0755, true);
+        }
+
         // Check if file exists and delete it
         if (Storage::disk('public')->exists($webp_path)) {
             Storage::disk('public')->delete($webp_path);
