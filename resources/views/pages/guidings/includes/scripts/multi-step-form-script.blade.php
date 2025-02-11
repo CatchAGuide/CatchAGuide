@@ -243,7 +243,7 @@
 
             const extrasData = {!! json_encode(collect($formData['boat_extras'] ?? [])->pluck('name')->toArray()) !!};
             if (extrasTagify && extrasData) {
-                extrasTagify.addTags(extrasData);
+                extrasTagify.addTags(extrasData.filter(Boolean));
             }
 
             //target fish
@@ -259,7 +259,7 @@
 
             const targetFishData = {!! json_encode(collect($formData['target_fish'] ?? [])->pluck('name')->toArray()) !!};
             if (targetFishTagify && targetFishData) {
-                targetFishTagify.addTags(targetFishData);
+                targetFishTagify.addTags(targetFishData.filter(Boolean));
             }
             
             //methods
@@ -275,7 +275,7 @@
 
             const methodsData = {!! json_encode(collect($formData['methods'] ?? [])->pluck('name')->toArray()) !!};
             if (methodsTagify && methodsData) {
-                methodsTagify.addTags(methodsData);
+                methodsTagify.addTags(methodsData.filter(Boolean));
             }
 
             //water types
@@ -291,7 +291,7 @@
 
             const waterTypesData = {!! json_encode(collect($formData['water_types'] ?? [])->pluck('name')->toArray()) !!};
             if (waterTypesTagify && waterTypesData) {
-                waterTypesTagify.addTags(waterTypesData);
+                waterTypesTagify.addTags(waterTypesData.filter(Boolean));
             }
 
             //inclussions
@@ -307,7 +307,7 @@
             
             const inclusionsData = {!! json_encode(collect($formData['inclusions'] ?? [])->pluck('name')->toArray()) !!};
             if (inclusionsTagify && inclusionsData) {
-                inclusionsTagify.addTags(inclusionsData);
+                inclusionsTagify.addTags(inclusionsData.filter(Boolean));
             }
             
             const experinceLevelData = {!! json_encode($formData['experience_level'] ?? []) !!};
