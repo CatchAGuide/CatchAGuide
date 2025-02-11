@@ -684,16 +684,22 @@ class Guiding extends Model
             return [];
         }
 
-        return Method::whereIn('id', $methodIds)
-            ->select('id', 'name', 'name_en')
-            ->get()
-            ->map(function($method) {
-                return [
-                    'id' => $method->id,
-                    'name' => $method->name
-                ];
-            })
-            ->toArray();
+        return collect($methodIds)->map(function($item) {
+            if (is_numeric($item)) {
+                $method = Method::find($item);
+                if ($method) {
+                    return [
+                        'id' => $method->id,
+                        'name' => $method->name
+                    ];
+                }
+            }
+            
+            return [
+                'id' => null,
+                'name' => $item
+            ];
+        })->filter()->toArray();
     }
 
 
@@ -709,16 +715,22 @@ class Guiding extends Model
             return [];
         }
 
-        return Target::whereIn('id', $targetIds)
-            ->select('id', 'name', 'name_en')
-            ->get()
-            ->map(function($target) {
-                return [
-                    'id' => $target->id,
-                    'name' => $target->name
-                ];
-            })
-            ->toArray();
+        return collect($targetIds)->map(function($item) {
+            if (is_numeric($item)) {
+                $target = Target::find($item);
+                if ($target) {
+                    return [
+                        'id' => $target->id,
+                        'name' => $target->name
+                    ];
+                }
+            }
+            
+            return [
+                'id' => null,
+                'name' => $item
+            ];
+        })->filter()->toArray();
     }
 
     /**
@@ -732,17 +744,23 @@ class Guiding extends Model
         if (empty($inclusionIds)) {
             return [];
         }
-        
-        return Inclussion::whereIn('id', $inclusionIds)
-            ->select('id', 'name', 'name_en')
-            ->get()
-            ->map(function($inclusion) {
-                return [
-                    'id' => $inclusion->id,
-                    'name' => $inclusion->name
-                ];
-            })
-            ->toArray();
+
+        return collect($inclusionIds)->map(function($item) {
+            if (is_numeric($item)) {
+                $inclusion = Inclussion::find($item);
+                if ($inclusion) {
+                    return [
+                        'id' => $inclusion->id,
+                        'name' => $inclusion->name
+                    ];
+                }
+            }
+            
+            return [
+                'id' => null,
+                'name' => $item
+            ];
+        })->filter()->toArray();
     }
 
     /**
@@ -757,34 +775,48 @@ class Guiding extends Model
             return [];
         }
 
-        return Water::whereIn('id', $waterIds)
-            ->select('id', 'name', 'name_en')
-            ->get()
-            ->map(function($water) {
-                return [
-                    'id' => $water->id,
-                    'name' => $water->name
-                ];
-            })
-            ->toArray();
+        return collect($waterIds)->map(function($item) {
+            if (is_numeric($item)) {
+                $water = Water::find($item);
+                if ($water) {
+                    return [
+                        'id' => $water->id,
+                        'name' => $water->name
+                    ];
+                }
+            }
+            
+            return [
+                'id' => null,
+                'name' => $item
+            ];
+        })->filter()->toArray();
     }
 
     public function getBoatExtras(): array
     {
-        $boatExtras = json_decode($this->boat_extras, true);
-        if (!$boatExtras) {
+        $boatExtras = json_decode($this->boat_extras) ?? [];
+        
+        if (empty($boatExtras)) {
             return [];
         }
 
-        return BoatExtras::whereIn('id', $boatExtras)
-            ->get()
-            ->map(function($boatExtra) {
-                return [
-                    'id' => $boatExtra->id,
-                    'name' => $boatExtra->name
-                ];
-            })
-            ->toArray();
+        return collect($boatExtras)->map(function($item) {
+            if (is_numeric($item)) {
+                $extra = BoatExtras::find($item);
+                if ($extra) {
+                    return [
+                        'id' => $extra->id,
+                        'name' => $extra->name
+                    ];
+                }
+            }
+            
+            return [
+                'id' => null,
+                'name' => $item
+            ];
+        })->filter()->toArray();
     }
 
     /**
