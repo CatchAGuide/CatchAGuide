@@ -208,28 +208,30 @@ class GuidingsController extends Controller
         }
 
         if($request->has('target_fish')){
-            $requestFish = array_filter($request->target_fish);
-
-            if(count($requestFish)){
-                $title .= __('guidings.Target_Fish') . ' (';
-                $filter_title .= __('guidings.Target_Fish') . ' (';
-                $method_rows = Target::whereIn('id', $requestFish)->get();
-                $title_row = '';
-                foreach ($method_rows as $row) {
-                    $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
-                }
-                $title .= substr($title_row, 0, -2);
-                $title .= ') | ';
-                $filter_title .= substr($title_row, 0, -2);
-                $filter_title .= '), ';
-
-                $query->where(function($query) use ($requestFish) {
-                    foreach($requestFish as $fishId) {
-                        $query->orWhereJsonContains('target_fish', (int)$fishId);
-                    }
-                });
+            $targetFishData = collect(json_decode($request->input('target_fish')));
+            
+            // Map to array of IDs or values
+            $targetFish = $targetFishData->map(function($item) {
+                return $item->id ?? $item->value;
+            })->toArray();
+            
+            $title .= __('guidings.Target_Fish') . ' (';
+            $filter_title .= __('guidings.Target_Fish') . ' (';
+            $method_rows = Target::whereIn('id', $targetFish)->get();
+            $title_row = '';
+            foreach ($method_rows as $row) {
+                $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
             }
+            $title .= substr($title_row, 0, -2);
+            $title .= ') | ';
+            $filter_title .= substr($title_row, 0, -2);
+            $filter_title .= '), ';
 
+            $query->where(function($query) use ($targetFish) {
+                foreach($targetFish as $fishId) {
+                    $query->orWhereJsonContains('target_fish', (int)$fishId);
+                }
+            });
         }
 
         if($request->has('price_range')){
@@ -486,20 +488,34 @@ class GuidingsController extends Controller
                 $guiding->boat_type = $request->has('type_of_boat') ? $request->input('type_of_boat') : '';
                 $guiding->boat_information = $this->saveDescriptions($request);
 
-                $boatExtras = $request->has('boat_extras') ? collect(json_decode($request->input('boat_extras')))->pluck('id') : [];
+                $boatExtrasData = collect(json_decode($request->input('boat_extras')));
+                $boatExtras = $boatExtrasData->map(function($item) {
+                    return $item->id ?? $item->value;
+                })->toArray();
                 $guiding->boat_extras = json_encode($boatExtras);
             }
 
             //step 3
-            $targetFish = $request->has('target_fish') ? collect(json_decode($request->input('target_fish')))->pluck('id') : [];
-            $guiding->target_fish = json_encode($targetFish);
+            if ($request->has('target_fish')) {
+                $targetFishData = collect(json_decode($request->input('target_fish')));
+                $targetFish = $targetFishData->map(function($item) {
+                    return $item->id ?? $item->value;
+                })->toArray();
+                $guiding->target_fish = json_encode($targetFish);
+            }
             
-            $methods = $request->has('methods') ? collect(json_decode($request->input('methods')))->pluck('id') : [];
+            $methodsData = collect(json_decode($request->input('methods')));
+            $methods = $methodsData->map(function($item) {
+                return $item->id ?? $item->value;
+            })->toArray();
             $guiding->fishing_methods = json_encode($methods);
             
             $guiding->fishing_type_id = (int) $request->has('style_of_fishing') ? $request->input('style_of_fishing') : 3; 
             
-            $waterTypes = $request->has('water_types') ? collect(json_decode($request->input('water_types')))->pluck('id') : [];
+            $waterTypesData = collect(json_decode($request->input('water_types')));
+            $waterTypes = $waterTypesData->map(function($item) {
+                return $item->id ?? $item->value;
+            })->toArray();
             $guiding->water_types = json_encode($waterTypes);
 
             //step 4
@@ -553,8 +569,11 @@ class GuidingsController extends Controller
                 $guiding->prices = json_encode($pricePerPerson);
             }
             
-            $inclusions = $request->has('inclusions') ? collect(json_decode($request->input('inclusions')))->pluck('id') : [];
-            $guiding->inclusions = $inclusions;
+            $inclusionsData = collect(json_decode($request->input('inclusions')));
+            $inclusions = $inclusionsData->map(function($item) {
+                return $item->id ?? $item->value;
+            })->toArray();
+            $guiding->inclusions = json_encode($inclusions);
             
             $pricingExtras = [];
             $i = 1;
