@@ -52,5 +52,6 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'contact_us_message' => 'Haben Sie Fragen zu diesem Urlaub? Unser Team ist hier, um zu helfen!',
     'contact_us_button' => 'Kontaktformular',
     'book_vacations' => 'Urlaub buchen',
+    'facilities' => 'Ausstattung',
 
 ];  

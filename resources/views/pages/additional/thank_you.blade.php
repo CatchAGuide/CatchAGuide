@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', translate('Thank You'))
+@section('title', __('thank-you.thank_you'))
 
 @section('content')
     <style>
@@ -202,119 +202,117 @@
             .booking-details .section {
                 width: 100%;
             }
-            
         }
         @media (max-width: 768px) {
             .booking-details .section {
                 width: 100%;
             }
-            
         }
     </style>
 
     <div class="thankyou-page">
         <div class="container">
             <div class="_header">
-                <h1>{{ translate('Thank you for your reservation!') }}</h1>
+                <h1>@lang('thank-you.thank_you')</h1>
             </div>
             <div class="_body">
                 <div class="_box">
                     <div class="booking-status">
                         <p class="fw-bold fs-5 mb-0">
-                            {{ translate('Your booking request has been successfully received by the guide. You will be notified of the guide\'s response by email within the next 72 hours.') }}
+                            @lang('thank-you.booking_success_message')
                         </p>
                     </div>
 
                     @if(isset($booking))
                     <div class="booking-details">
                         <div class="section">
-                            <h3>{{ translate('Booking Information') }}</h3>
+                            <h3>@lang('thank-you.booking_information')</h3>
                             <div class="detail-row">
-                                <span class="detail-label">{{ translate('Booking ID') }}</span>
+                                <span class="detail-label">@lang('thank-you.booking_id')</span>
                                 <span class="detail-value">#{{ $booking->id }}</span>
                             </div>
                             <div class="detail-row">
-                                <span class="detail-label">{{ translate('Booking Status') }}</span>
+                                <span class="detail-label">@lang('thank-you.booking_status')</span>
                                 <span class="detail-value">
-                                    <span class="badge bg-warning">{{ translate('Pending Confirmation') }}</span>
+                                    <span class="badge bg-warning">@lang('thank-you.pending_confirmation')</span>
                                 </span>
                             </div>
                             <div class="detail-row">
-                                <span class="detail-label">{{ translate('Tour Date') }}</span>
+                                <span class="detail-label">@lang('thank-you.tour_date')</span>
                                 <span class="detail-value">{{ \Carbon\Carbon::parse($booking->book_date)->format('d.m.Y') }}</span>
                             </div>
                             <div class="detail-row">
-                                <span class="detail-label">{{ translate('Number of Participants') }}</span>
+                                <span class="detail-label">@lang('thank-you.number_of_participants')</span>
                                 <span class="detail-value">{{ $booking->count_of_users }}</span>
                             </div>
                         </div>
 
                         <div class="section">
-                            <h3>{{ translate('Guide Information') }}</h3>
+                            <h3>@lang('thank-you.guide_information')</h3>
                             <div class="guide-info">
                                 @if($booking->guiding->user->avatar)
                                     <img src="{{ $booking->guiding->user->avatar }}" alt="Guide Photo">
                                 @endif
                                 <div>
                                     <h4>{{ $booking->guiding->user->firstname }} {{ $booking->guiding->user->lastname }}</h4>
-                                    <p>{{ translate('Professional Fishing Guide') }}</p>
+                                    <p>@lang('thank-you.professional_fishing_guide')</p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="section">
-                            <h3>{{ translate('Tour Details') }}</h3>
+                            <h3>@lang('thank-you.tour_details')</h3>
                             <div class="detail-row">
-                                <span class="detail-label">{{ translate('Tour Name') }}</span>
+                                <span class="detail-label">@lang('thank-you.tour_name')</span>
                                 <span class="detail-value">{{ $booking->guiding->title }}</span>
                             </div>
                             <div class="detail-row">
-                                <span class="detail-label">{{ translate('Duration') }}</span>
-                                <span class="detail-value">{{ $booking->guiding->duration }} {{ translate('hours') }}</span>
+                                <span class="detail-label">@lang('thank-you.duration')</span>
+                                <span class="detail-value">{{ $booking->guiding->duration }} @lang('thank-you.hours')</span>
                             </div>
                             <div class="detail-row">
-                                <span class="detail-label">{{ translate('Location') }}</span>
+                                <span class="detail-label">@lang('thank-you.location')</span>
                                 <span class="detail-value">{{ $booking->guiding->location }}</span>
                             </div>
                         </div>
 
                         <div class="section">
-                            <h3>{{ translate('Price Breakdown') }}</h3>
+                            <h3>@lang('thank-you.price_breakdown')</h3>
                             <div class="detail-row">
-                                <span class="detail-label">{{ translate('Base Price') }}</span>
+                                <span class="detail-label">@lang('thank-you.base_price')</span>
                                 <span class="detail-value">€{{ number_format($booking->price - $booking->total_extra_price, 2, ',', '.') }}</span>
                             </div>
                             @if($booking->extras)
                             <div class="detail-row">
-                                <span class="detail-label">{{ translate('Extras') }}</span>
+                                <span class="detail-label">@lang('thank-you.extras')</span>
                                 <span class="detail-value">€{{ number_format($booking->total_extra_price, 2, ',', '.') }}</span>
                             </div>
                             @endif
                             <div class="detail-row">
-                                <span class="detail-label">{{ translate('Total Price') }}</span>
+                                <span class="detail-label">@lang('thank-you.total_price')</span>
                                 <span class="detail-value fw-bold">€{{ number_format($booking->price, 2, ',', '.') }}</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="payment-info mt-4">
-                        <h4 class="mb-3">{{ translate('Payment Information') }}</h4>
-                        <p>{{ translate('Payment will be handled directly with your guide after the booking is confirmed.') }}</p>
+                        <h4 class="mb-3">@lang('thank-you.payment_information')</h4>
+                        <p>@lang('thank-you.payment_message')</p>
                     </div>
                     @endif
 
                     <div class="text-center mt-4">
                         <p class="text-muted">
-                            {{ translate('Contact us at any time if you have any questions about your booking or tour.') }}
+                            @lang('thank-you.contact_message')
                         </p>
                     </div>
 
                     <div class="btn-group">
                         <a href="{{ route('additional.contact') }}" class="btn btn-outline">
-                            {{ translate('Contact Us') }}
+                            @lang('thank-you.contact_us')
                         </a>
                         <a href="{{ route('guidings.index') }}" class="btn btn-back">
-                            {{ translate('Back to Guidings') }}
+                            @lang('thank-you.back_to_guidings')
                         </a>
                     </div>
                 </div>
