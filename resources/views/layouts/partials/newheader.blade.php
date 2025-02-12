@@ -111,7 +111,7 @@
 
             <!-- Mobile Search Summary -->
             <div id="filterContainer" class="col-12 d-md-none mt-3">
-            <form class="search-form row gx-2 pe-0" id="global-search1" action="{{ $isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index') }}" method="get">                
+            <form class="search-form row gx-2 pe-0" id="global-search1" action="{{ $isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index') }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceMobile')">                
                 <div id="mobileherofilter" class="shadow-lg bg-white p-2 rounded">
                     <div class="row">
                         @if ($isVacation)
@@ -125,9 +125,6 @@
                                             $countries = \App\Models\Destination::where('type', 'vacations')->pluck('name');
                                         @endphp
                                         @foreach($countries as $country)
-
-
-
                                             <option value="{{ $country }}" 
                                                 {{ request()->country == $country ? 'selected' : '' }}>
                                                 {{ $country }}
@@ -215,7 +212,7 @@
     @if(request()->segment(1) != 'guidings')
     <div class="floating-search-container d-none d-md-block">
         <div class="container">
-            <form id="global-search" action="{{ $isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index') }}" method="get">
+            <form id="global-search" action="{{ $isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index') }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceDesktop')">
                 <div class="search-box">
                     <div class="search-row">
                         @if ($isVacation)
@@ -956,6 +953,35 @@ input[type=number] {
 .mobile-menu-items .menu-item i {
     transition: color 0.2s ease;
 }
+
+/* Add shake animation */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+/* Style the tooltip */
+.tooltip {
+    position: absolute;
+    z-index: 1070;
+}
+
+.tooltip .tooltip-inner {
+    background-color: #dc3545;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.tooltip .tooltip-arrow::before {
+    border-bottom-color: #dc3545;
+}
 </style>
 
 <!-- Search Modal for Mobile -->
@@ -967,7 +993,7 @@ input[type=number] {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="mobile-search" action="{{ $isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index') }}" method="get">
+                <form id="mobile-search" action="{{ $isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index') }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceMobile')">
                     @if ($isVacation)
                         <div class="mb-3">
                             <label class="form-label">{{translate('Country')}}</label>
@@ -1251,4 +1277,36 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+function validateSearch(event, inputId) {
+    const searchInput = document.getElementById(inputId);
+    if (!searchInput) return true;
+
+    const form = searchInput.closest('form');
+    const lat = form.querySelector('input[name="placeLat"]').value;
+    const lng = form.querySelector('input[name="placeLng"]').value;
+
+    if (!lat || !lng) {
+        // Create and show tooltip only when validation fails
+        const tooltip = new bootstrap.Tooltip(searchInput, {
+            title: "{{translate('Please select a location from the suggestions')}}",
+            placement: "bottom",
+            trigger: "manual"
+        });
+        
+        tooltip.show();
+        
+        // Hide tooltip after 3 seconds
+        setTimeout(() => tooltip.dispose(), 3000);
+
+        // Add shake animation to input
+        searchInput.classList.add('shake');
+        setTimeout(() => searchInput.classList.remove('shake'), 500);
+
+        event.preventDefault();
+        return false;
+    }
+
+    return true;
+}
 </script>

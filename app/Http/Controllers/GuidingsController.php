@@ -53,30 +53,6 @@ class GuidingsController extends Controller
             Session::put('random_seed', $randomSeed);
         }
 
-        // If coming from destination page, get the destination context
-        if ($request->has('from_destination')) {
-            $destination = Destination::where('id', $request->input('destination_id'))->first();
-            
-            dd($destination);
-            // Apply location-based filtering
-            if ($destination) {
-                switch ($destination->type) {
-                    case 'country':
-                        $query->where('country', $destination->name);
-                        break;
-                    case 'region':
-                        $query->where('region', $destination->name)
-                              ->where('country', $destination->country_name);
-                        break;
-                    case 'city':
-                        $query->where('city', $destination->name)
-                              ->where('region', $destination->region_name)
-                              ->where('country', $destination->country_name);
-                        break;
-                }
-            }
-        }
-
         $query = Guiding::select(['*', DB::raw('(
             WITH price_per_person AS (
                 SELECT 
@@ -102,6 +78,28 @@ class GuidingsController extends Controller
             SELECT COALESCE(lowest_pp, price) 
             FROM price_per_person
         ) AS lowest_price')])->where('status',1);
+
+        // If coming from destination page, get the destination context
+        if ($request->has('from_destination')) {
+            $destination = Destination::where('id', $request->input('destination_id'))->first();
+            
+            if ($destination) {
+                switch ($destination->type) {
+                    case 'country':
+                        $query->where('country', $destination->name);
+                        break;
+                    case 'region':
+                        $query->where('region', $destination->name)
+                              ->where('country', $destination->country_name);
+                        break;
+                    case 'city':
+                        $query->where('city', $destination->name)
+                              ->where('region', $destination->region_name)
+                              ->where('country', $destination->country_name);
+                        break;
+                }
+            }
+        }
 
         // Only apply random ordering if:
         // 1. There are no query parameters except page
@@ -277,18 +275,13 @@ class GuidingsController extends Controller
         $allGuidings = $query->with('boatType')->get();
         $otherguidings = array();
 
-        if($allGuidings->isEmpty()){
-
+        if($allGuidings->isEmpty() || count($allGuidings) <= 10){
             if($request->has('placeLat') && $request->has('placeLng') && !empty($request->get('placeLat')) && !empty($request->get('placeLng')) ){
                 $latitude = $request->get('placeLat');
                 $longitude = $request->get('placeLng');
-            
                 $otherguidings = $this->otherGuidingsBasedByLocation($latitude,$longitude);
-
             }else{
-
                 $otherguidings = $this->otherGuidings();
-
             }
         }
 

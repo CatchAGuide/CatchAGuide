@@ -495,38 +495,6 @@
                             <form id="filterContainer" action="{{route('guidings.index')}}" method="get" class="shadow-sm px-4 py-2">
                                 <div class="row">
                                     <div class="col-12">
-                                        <div class="form-group my-1">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend border-0 border-bottom ">
-                                                    <span class=" d-flex align-items-center px-2 h-100"><i class="fas fa-map-marker-alt"></i></span>
-                                                </div>
-                                                <input  id="searchPlace" name="place" type="text" value="{{ request()->get('place') ? request()->get('place') : null }} @if(empty(request()->get('place')) && !empty(request()->get('country'))) {{request()->get('country')}} @endif" class="form-control border-0 border-bottom rounded-0" placeholder="@lang('message.enter-location')"  autocomplete="on">
-                                            </div>
-                                          <input type="hidden" id="LocationLat" value="{{ request()->get('placeLat') ? request()->get('placeLat') : null }}" name="placeLat"/>
-                                          <input type="hidden" id="LocationLng" value="{{ request()->get('placeLng') ? request()->get('placeLng') : null }}" name="placeLng"/>
-                                          <input type="hidden" id="LocationCity" value="{{ request()->get('city') ? request()->get('city') : null }}" name="city"/>
-                                          <input type="hidden" id="LocationCountry" value="{{ request()->get('country') ? request()->get('country') : null }}" name="country"/>
-                                        </div>
-                                    </div>
-                                    {{-- <div class="col-12">
-                                        <div class="input-group my-1">
-                                            <div class="input-group-prepend border-0 border-bottom ">
-                                                <span class="d-flex align-items-center px-2 h-100">
-                                                    <i class="fa fa-compass"></i>
-                                                </span>
-                                            </div>
-                                            <select id="radius" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="radius">
-                                                <option selected disabled hidden>Radius</option>
-                                                <option value="" >@lang('message.choose')...</option>
-                                                <option value="50" {{ request()->has('radius') ? request()->get('radius') == 50 ? 'selected' : null : null }}>50 km</option>
-                                                <option value="100" {{ request()->get('radius') ? request()->get('radius') == 100 ? 'selected' : null : null }}>100 km</option>
-                                                <option value="150" {{ request()->get('radius') ? request()->get('radius') == 150 ? 'selected' : null : null }}>150 km</option>
-                                                <option value="250" {{ request()->get('radius') ? request()->get('radius') == 250 ? 'selected' : null : null }}>250 km</option>
-                                                <option value="500" {{ request()->get('radius') ? request()->get('radius') == 500 ? 'selected' : null : null }}>500 km</option>
-                                            </select>
-                                          </div>
-                                    </div> --}}
-                                    <div class="col-12">
                                         <div class="input-group my-1">
                                             <div class="input-group-prepend border-0 border-bottom ">
                                                 <span class="d-flex align-items-center px-2 h-100">
@@ -612,8 +580,8 @@
                     @endif
 
                     <!-- column-reverse-row-normal -->
-                    <div class="row">
                     @if(count($guidings))
+                    <div class="row">
                         <div class="col-lg-12 col-sm-12">
                             <div class="tours-list__right">
                                 <div class="tours-list__inner">
@@ -738,13 +706,149 @@
                                     </div>
                                     @endforeach
                                     {!! $guidings->links('vendor.pagination.default') !!}
-
                                 </div>
                             </div>
                         </div>
-                    @endif
-    
                     </div>
+                    @endif
+                    
+                    @if(count($otherguidings))
+                    
+                    <hr>
+                    <div class="my-0 section-title">
+                        <h2 class="h4 text-dark fw-bolder">{{translate('Additional Fishing Tour close to') }} {{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }}</h2> 
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col-lg-12 col-sm-12">
+                            <div class="tours-list__right">
+                                <div class="tours-list__inner">
+                                    @foreach($otherguidings as $otherguide)
+                                    <div class="row m-0 mb-2 guiding-list-item">
+                                        <div class="col-md-12">
+                                            <div class="row p-2 border shadow-sm bg-white rounded">
+                                                <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-0">
+                                                    <div id="carouselExampleControls-{{$otherguide->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
+                                                        <div class="carousel-inner">
+                                                            @if(count(get_galleries_image_link($otherguide)))
+                                                                @foreach(get_galleries_image_link($otherguide) as $index => $gallery_image_link)
+                                                                    <div class="carousel-item @if($index == 0) active @endif">
+                                                                        <img  class="d-block" src="{{asset($gallery_image_link)}}">
+                                                                    </div>
+                                                                @endforeach
+                                                            @endif
+                                                        </div>
+
+                                                        @if(count(get_galleries_image_link($otherguide)) > 1)
+                                                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls-{{$otherguide->id}}" data-bs-slide="prev">
+                                                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                                                <span class="visually-hidden">Previous</span>
+                                                            </button>
+                                                            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls-{{$otherguide->id}}" data-bs-slide="next">
+                                                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                                                <span class="visually-hidden">Next</span>
+                                                            </button>
+                                                        @endif
+                                                    </div>
+                                            
+                                                </div>
+                                                <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 px-md-3 pt-md-2">
+                                                    <a href="{{ route('guidings.show', [$otherguide->id, $otherguide->slug])}}">
+                                                        <div class="guidings-item">
+                                                            <div class="guidings-item-title">
+                                                            <h5 class="fw-bolder text-truncate">{{ Str::limit(translate($otherguide->title), 70) }}</h5>
+                                                            <span class="truncate"><i class="fas fa-map-marker-alt me-2"></i>{{ $otherguide->location }}</span>                                      
+                                                            </div>
+                                                            @if ($otherguide->user->average_rating())
+                                                            <div class="guidings-item-ratings">
+                                                            <div class="ratings-score">
+                                                                    <span class="text-warning">★</span>
+                                                                    <span>{{$otherguide->user->average_rating()}} </span>
+                                                                    /5 ({{ $otherguide->user->received_ratings->count() }} review/s)
+                                                                </div>
+                                                            </div>
+                                                            @endif
+                                                        </div>
+                                                        <div class="guidings-item-icon">
+                                                            <div class="guidings-icon-container"> 
+                                                                        <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
+                                                                    <div class="">
+                                                                        {{$otherguide->duration}} {{ $otherguide->duration_type == 'multi_day' ? __('guidings.days') : __('guidings.hours') }}
+                                                                    </div>
+                                                            </div>
+                                                            <div class="guidings-icon-container"> 
+                                                                    <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" />
+                                                                    <div class="">
+                                                                    {{ $otherguide->max_guests }} @if($otherguide->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
+                                                                    </div>
+                                                            </div>
+                                                            <div class="guidings-icon-container"> 
+                                                                        <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
+                                                                    <div class="">
+                                                                        <div class="tours-list__content__trait__text" >
+                                                                            @php
+                                                                            $otherguideTargets = collect($otherguide->getTargetFishNames())->pluck('name')->toArray();
+                                                                            @endphp
+                                                                            
+                                                                            @if(!empty($otherguideTargets))
+                                                                                {{ implode(', ', $otherguideTargets) }}
+                                                                            @endif
+                                                                        </div>
+                                                                    
+                                                                    </div>
+                                                            </div>
+                                                            <div class="guidings-icon-container">
+                                                                        <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
+                                                                    <div class="">
+                                                                        <div class="tours-list__content__trait__text" >
+                                                                        {{$otherguide->is_boat ? ($otherguide->boatType && $otherguide->boatType->name !== null ? $otherguide->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
+                                                                        </div>
+                                                                    
+                                                                    </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="inclusions-price">
+                                                            <div class="guidings-inclusions-container">
+                                                                @if(!empty($otherguide->getInclusionNames()))
+                                                                <div class="guidings-included">
+                                                                    <strong>@lang('guidings.Whats_Included')</strong>
+                                                                    <div class="inclusions-list">
+                                                                        @php
+                                                                            $inclussions = $otherguide->getInclusionNames();
+                                                                            $maxToShow = 3; // Maximum number of inclusions to display
+                                                                        @endphp
+
+                                                                        @foreach ($inclussions as $index => $inclussion)
+                                                                            @if ($index < $maxToShow)
+                                                                                <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclussion['name'] }}</span>
+                                                                            @endif
+                                                                        @endforeach
+
+                                                                        @if (count($inclussions) > $maxToShow)
+                                                                            <span class="inclusion-item">+{{ count($inclussions) - $maxToShow }} more</span>
+                                                                        @endif
+                                                                    </div>
+                                                                </div>
+                                                                @endif
+                                                            </div>
+                                                            <div class="guiding-item-price">
+                                                                <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$otherguide->getLowestPrice()}}€ p.P.</span></h5>
+                                                                <div class="d-none d-flex flex-column mt-4">
+                                                                </div>
+                                                            </div>
+                                                        </div>    
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                    {!! $guidings->links('vendor.pagination.default') !!}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
                 </div>
 
             </div>

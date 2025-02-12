@@ -103,7 +103,7 @@
 
 @section('content')
 
-    <div class="container">
+    {{-- <div class="container"> --}}
         {{-- <section class="page-header">
             <div class="page-header__bottom">
                 <div class="container">
@@ -1240,6 +1240,10 @@
 @section('js_after')
 
 <script>
+    
+let currentCount = 3; // Initial count of displayed items
+const totalItems = {{ $same_guiding->count() }};
+
 $(document).ready(function(){
     initMap();
     $(".ratings-slider").owlCarousel({
@@ -1272,15 +1276,18 @@ $(document).ready(function(){
     const items = document.querySelectorAll(".guiding-list-item");
     let isExpanded = false;
 
-    showMoreBtn.addEventListener("click", function () {
-        isExpanded = !isExpanded;
-        items.forEach((item, index) => {
-            // Show all items if expanded, otherwise show only the first two
-            item.classList.toggle("show", isExpanded || index < 2);
+    if (showMoreBtn) {
+        showMoreBtn.addEventListener("click", function () {
+            isExpanded = !isExpanded;
+            items.forEach((item, index) => {
+                // Show all items if expanded, otherwise show only the first two
+                item.classList.toggle("show", isExpanded || index < 2);
+            });
+            // Toggle button text
+            showMoreBtn.textContent = isExpanded ? "Show Less" : "Show More";
         });
-        // Toggle button text
-        showMoreBtn.textContent = isExpanded ? "Show Less" : "Show More";
-    });
+    }
+
     function initOwlCarousel() {
         const $toursList = $(".tours-list__inner");
 
@@ -1311,123 +1318,86 @@ $(document).ready(function(){
         }
     }
 });
-document.querySelectorAll(".description-item .text-wrapper").forEach((item) => {
-    const originalText = item.innerHTML.trim();
-    const words = originalText.split(/\s+/);
-    if (words.length > 30) {
-        const truncatedText = words.slice(0, 30).join(" ") + "... ";
-        item.innerHTML = truncatedText;
-        const toggle = document.createElement("small");
-        toggle.textContent = "See More";
-        toggle.style.cursor = "pointer";
-        toggle.classList.add("text-orange")
-        toggle.onclick = () => {
-            const isExpanded = toggle.textContent === "See Less";
-            item.innerHTML = isExpanded ? truncatedText : originalText + " ";
-            toggle.textContent = isExpanded ? "See More" : "See Less";
-            item.appendChild(toggle);
-        };
-        item.appendChild(toggle);
-    }
-});
 
+
+const moreText = document.querySelector(".js-trigger-more-text");
+let expanded = false;
+
+function moreOrLessFunction(e) {
+    if (!expanded) {
+        expanded = true;
+        moreText.classList.add('expand-text');
+        e.innerHTML = '{{translate("Weniger")}}';
+    } else {
+        expanded = false;
+        moreText.classList.remove('expand-text');
+        e.innerHTML = '{{translate("Mehr")}}';
+    }
+}
 
 document.addEventListener("DOMContentLoaded", function() {
-    document.querySelectorAll('.comment-content').forEach(content => {
-        const descriptionElement = content.querySelector('.description');
-        const seeMore = content.querySelector('.see-more');
-        const showLess = content.querySelector('.show-less');
-
-        if (descriptionElement && seeMore && showLess) {
-            const fullText = descriptionElement.innerText;
-            const words = fullText.split(" ");
-
-            if (words.length > 20) {
-                descriptionElement.innerText = words.slice(0, 20).join(" ") + "...";
-                seeMore.style.display = 'inline';
-                showLess.style.display = 'none';
-
-                const toggleText = (isExpanded) => {
-                    descriptionElement.innerText = isExpanded ? fullText : words.slice(0, 20).join(" ") + "...";
-                    seeMore.style.display = isExpanded ? 'none' : 'inline';
-                    showLess.style.display = isExpanded ? 'inline' : 'none';
+    // Add null checks for all querySelector operations
+    const descriptionItems = document.querySelectorAll(".description-item .text-wrapper");
+    if (descriptionItems) {
+        descriptionItems.forEach((item) => {
+            const originalText = item.innerHTML.trim();
+            const words = originalText.split(/\s+/);
+            if (words.length > 30) {
+                const truncatedText = words.slice(0, 30).join(" ") + "... ";
+                item.innerHTML = truncatedText;
+                const toggle = document.createElement("small");
+                toggle.textContent = "See More";
+                toggle.style.cursor = "pointer";
+                toggle.classList.add("text-orange")
+                toggle.onclick = () => {
+                    const isExpanded = toggle.textContent === "See Less";
+                    item.innerHTML = isExpanded ? truncatedText : originalText + " ";
+                    toggle.textContent = isExpanded ? "See More" : "See Less";
+                    item.appendChild(toggle);
                 };
-
-                seeMore.addEventListener('click', () => toggleText(true));
-                showLess.addEventListener('click', () => toggleText(false));
-            } else {
-                seeMore.style.display = 'none';
-                showLess.style.display = 'none';
+                item.appendChild(toggle);
             }
-        }
-    });
-});
-    function initMap() {
-        //var location = { lat: 41.40338, lng: 2.17403 }; // Example coordinates
-        var location = { lat: {{ $guiding->lat }}, lng: {{ $guiding->lng }} }; // Example coordinates
-        var map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 10,
-            center: location,
-            mapTypeControl: false,
-            streetViewControl: false,
-            mapId: '8f348c2f6c51f6f0'
-        });
-
-        // Create an AdvancedMarkerElement with the required Map ID
-        const marker = new google.maps.marker.AdvancedMarkerElement({
-            map,
-            position: location,
         });
     }
 
-    function initCheckNumberOfColumns() {
-        return window.innerWidth < 768 ? 1 : 2;
-    }
+    // Add null check for comment content elements
+    const commentContents = document.querySelectorAll('.comment-content');
+    if (commentContents) {
+        commentContents.forEach(content => {
+            const descriptionElement = content.querySelector('.description');
+            const seeMore = content.querySelector('.see-more');
+            const showLess = content.querySelector('.show-less');
 
-    document.addEventListener('DOMContentLoaded', function () {
-        const blockedEvents = JSON.parse('{!! json_encode($blocked_events) !!}');
+            if (descriptionElement && seeMore && showLess) {
+                const fullText = descriptionElement.innerText;
+                const words = fullText.split(" ");
 
-        let lockDays = [];
-        if (blockedEvents && typeof blockedEvents === 'object') {
-            lockDays = Object.values(blockedEvents).flatMap(event => {
-                const fromDate = new Date(event.from);
-                const dueDate = new Date(event.due);
+                if (words.length > 20) {
+                    descriptionElement.innerText = words.slice(0, 20).join(" ") + "...";
+                    seeMore.style.display = 'inline';
+                    showLess.style.display = 'none';
 
-                // Create an array of all dates in the range
-                const dates = [];
-                for (let d = fromDate; d <= dueDate; d.setDate(d.getDate() + 1)) {
-                    dates.push(new Date(d));
+                    const toggleText = (isExpanded) => {
+                        descriptionElement.innerText = isExpanded ? fullText : words.slice(0, 20).join(" ") + "...";
+                        seeMore.style.display = isExpanded ? 'none' : 'inline';
+                        showLess.style.display = isExpanded ? 'inline' : 'none';
+                    };
+
+                    seeMore.addEventListener('click', () => toggleText(true));
+                    showLess.addEventListener('click', () => toggleText(false));
+                } else {
+                    seeMore.style.display = 'none';
+                    showLess.style.display = 'none';
                 }
-                return dates;
-            });
-        }
-
-        const picker = new Litepicker({
-            element: document.getElementById('lite-datepicker'),
-            inlineMode: true,
-            singleDate: true,
-            numberOfColumns: initCheckNumberOfColumns(),
-            numberOfMonths: initCheckNumberOfColumns(),
-            minDate: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
-            lockDays: ['2024-11-24'],
-            lang: '{{app()->getLocale()}}',
-            setup: (picker) => {
-                window.addEventListener('resize', () => {
-                    picker.setOptions({
-                        numberOfColumns: initCheckNumberOfColumns(),
-                        numberOfMonths: initCheckNumberOfColumns()
-                    });
-                });
-            },
+            }
         });
-    });
+    }
     
-    let currentCount = 3; // Initial count of displayed items
-    const totalItems = {{ $same_guiding->count() }};
-    
-    document.getElementById('show-more').addEventListener('click', function() {
-        const container = document.getElementById('same-guidings-container');
-        
+    const showMoreBtn = document.getElementById('show-more');
+    if (showMoreBtn) {
+        showMoreBtn.addEventListener('click', function() {
+            const container = document.getElementById('same-guidings-container');
+            
         // Fetch the next set of items
         for (let i = currentCount; i < currentCount + 3 && i < totalItems; i++) {
             const guiding = @json($same_guiding); // Convert PHP variable to JavaScript
@@ -1453,8 +1423,68 @@ document.addEventListener("DOMContentLoaded", function() {
         // Hide the button if all items are displayed
         if (currentCount >= totalItems) {
             this.style.display = 'none';
-        }
+            }
+        });
+    }
+    
+    const blockedEvents = JSON.parse('{!! json_encode($blocked_events) !!}');
+
+    let lockDays = [];
+    if (blockedEvents && typeof blockedEvents === 'object') {
+        lockDays = Object.values(blockedEvents).flatMap(event => {
+            const fromDate = new Date(event.from);
+            const dueDate = new Date(event.due);
+
+            // Create an array of all dates in the range
+            const dates = [];
+            for (let d = fromDate; d <= dueDate; d.setDate(d.getDate() + 1)) {
+                dates.push(new Date(d));
+            }
+            return dates;
+        });
+    }
+
+    const picker = new Litepicker({
+        element: document.getElementById('lite-datepicker'),
+        inlineMode: true,
+        singleDate: true,
+        numberOfColumns: initCheckNumberOfColumns(),
+        numberOfMonths: initCheckNumberOfColumns(),
+        minDate: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
+        lockDays: ['2024-11-24'],
+        lang: '{{app()->getLocale()}}',
+        setup: (picker) => {
+            window.addEventListener('resize', () => {
+                picker.setOptions({
+                    numberOfColumns: initCheckNumberOfColumns(),
+                    numberOfMonths: initCheckNumberOfColumns()
+                });
+            });
+        },
     });
+});
+
+function initMap() {
+    //var location = { lat: 41.40338, lng: 2.17403 }; // Example coordinates
+    var location = { lat: {{ $guiding->lat }}, lng: {{ $guiding->lng }} }; // Example coordinates
+    var map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 10,
+        center: location,
+        mapTypeControl: false,
+        streetViewControl: false,
+        mapId: '8f348c2f6c51f6f0'
+    });
+
+    // Create an AdvancedMarkerElement with the required Map ID
+    const marker = new google.maps.marker.AdvancedMarkerElement({
+        map,
+        position: location,
+    });
+}
+
+function initCheckNumberOfColumns() {
+    return window.innerWidth < 768 ? 1 : 2;
+}
 </script>
 @endsection
 
