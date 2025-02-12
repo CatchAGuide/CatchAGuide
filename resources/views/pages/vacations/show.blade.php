@@ -179,45 +179,6 @@
             margin-bottom: 15px;
         }
 
-        /* Contact Card Styles */
-        .contact-card {
-            background: #fff;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            margin-left: auto;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .contact-card__title {
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .contact-card__content {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            justify-content: flex-start;
-            text-align: left;
-        }
-
-        .contact-card__content .contact-info {
-            display: flex;
-            align-items: center;
-        }
-
-        .contact-card__content .btn-outline-orange {
-            border-color: #fff;
-            color: #fff;
-        }
-
-        .contact-card__content .btn-outline-orange:hover {
-            background: #E85B40;
-            border-color: #E85B40;
-            color: white;
-        }
 
         @media screen and (max-width: 767px) {
             .contact-card {
@@ -760,9 +721,9 @@
 
             @if($agent->ismobile())
                 <div class="contact-card mb-4">
-                    <h5 class="contact-card__title">@lang('vacations.contact_us'){{ translate('Contact Us') }}</h5>
+                    <h5 class="contact-card__title">@lang('vacations.contact_us')</h5>
                     <div class="contact-card__content">
-                        <p class="">>@lang('vacations.contact_us_message')</p>
+                        <p class="">@lang('vacations.contact_us_message')</p>
                         <div class="">
                             <div class="contact-info">
                                 <i class="fas fa-phone-alt me-2"></i>
@@ -868,7 +829,7 @@
                                                             @endphp
                                                         @else
                                                             <div class="details-row">
-                                                                <h6 class="mb-1">{{ translate(ucwords(str_replace('_', ' ', $field))) }}:</h6>
+                                                                <h6 class="mb-1"> @lang('vacations.'.$field):</h6>
                                                                 <p class="mb-0">{{ translate($value) }}</p>
                                                             </div>
                                                         @endif

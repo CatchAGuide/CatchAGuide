@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'thank_you' => 'Thank you for your reservation!',
+    'booking_success_message' => 'Your booking request has been successfully received by the guide. You will be notified of the guide\'s response by email within the next 72 hours.',
+    'booking_information' => 'Booking Information',
+    'booking_id' => 'Booking ID',
+    'booking_status' => 'Booking Status',
+    'pending_confirmation' => 'Pending Confirmation',
+    'tour_date' => 'Tour Date',
+    'number_of_participants' => 'Number of Participants',
+    'guide_information' => 'Guide Information',
+    'professional_fishing_guide' => 'Professional Fishing Guide',
+    'tour_details' => 'Tour Details',
+    'tour_name' => 'Tour Name',
+    'duration' => 'Duration',
+    'location' => 'Location',
+    'price_breakdown' => 'Price Breakdown',
+    'base_price' => 'Base Price',
+    'extras' => 'Extras',
+    'total_price' => 'Total Price',
+    'payment_information' => 'Payment Information',
+    'payment_message' => 'Payment will be handled directly with your guide after the booking is confirmed.',
+    'contact_message' => 'Contact us at any time if you have any questions about your booking or tour.',
+    'contact_us' => 'Contact Us',
+    'back_to_guidings' => 'Back to Guidings',
+];
