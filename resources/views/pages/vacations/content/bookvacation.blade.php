@@ -1598,50 +1598,6 @@
         display: none !important;
     }
 
-    /* Add Contact Card styles */
-    .contact-card {
-        background-color: #313041;
-        border-radius: 8px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        border: 1px solid #eee;
-    }
-
-    .contact-card__title {
-        color: #fff;
-        margin-bottom: 1rem;
-        font-weight: 600;
-    }
-
-    .contact-card__content {
-        color: #fff;
-    }
-
-    .contact-info {
-        color: #fff;
-        font-weight: 500;
-        margin-bottom: 1rem;
-    }
-
-    .contact-info a {
-        color: inherit;
-    }
-
-    .contact-info:hover a, .contact-info:hover i {
-        color: #dc4d11;
-    }
-
-    .btn-outline-orange {
-        border-color: #E85B40 !important;
-        transition: all 0.3s ease;
-        background-color: #E85B40;
-    }
-
-    .btn-outline-orange:hover {
-        background-color: #fff;
-        color: #fff;
-    }
-
     @media (max-width: 767.98px) {        
         .contact-card__content > div {
             justify-content: center;
