@@ -208,30 +208,28 @@ class GuidingsController extends Controller
         }
 
         if($request->has('target_fish')){
-            $targetFishData = collect(json_decode($request->input('target_fish')));
             
-            // Map to array of IDs or values
-            $targetFish = $targetFishData->map(function($item) {
-                return $item->id ?? $item->value;
-            })->toArray();
-            
-            $title .= __('guidings.Target_Fish') . ' (';
-            $filter_title .= __('guidings.Target_Fish') . ' (';
-            $method_rows = Target::whereIn('id', $targetFish)->get();
-            $title_row = '';
-            foreach ($method_rows as $row) {
-                $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
-            }
-            $title .= substr($title_row, 0, -2);
-            $title .= ') | ';
-            $filter_title .= substr($title_row, 0, -2);
-            $filter_title .= '), ';
+            $requestFish = array_filter($request->target_fish);
 
-            $query->where(function($query) use ($targetFish) {
-                foreach($targetFish as $fishId) {
-                    $query->orWhereJsonContains('target_fish', (int)$fishId);
+            if(count($requestFish)){
+                $title .= __('guidings.Target_Fish') . ' (';
+                $filter_title .= __('guidings.Target_Fish') . ' (';
+                $method_rows = Target::whereIn('id', $requestFish)->get();
+                $title_row = '';
+                foreach ($method_rows as $row) {
+                    $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
                 }
-            });
+                $title .= substr($title_row, 0, -2);
+                $title .= ') | ';
+                $filter_title .= substr($title_row, 0, -2);
+                $filter_title .= '), ';
+
+                $query->where(function($query) use ($requestFish) {
+                    foreach($requestFish as $fishId) {
+                        $query->orWhereJsonContains('target_fish', (int)$fishId);
+                    }
+                });
+            }
         }
 
         if($request->has('price_range')){
