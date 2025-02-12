@@ -1280,13 +1280,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function validateSearch(event, inputId) {
     const searchInput = document.getElementById(inputId);
-    if (!searchInput) return true;
 
     const form = searchInput.closest('form');
     const lat = form.querySelector('input[name="placeLat"]').value;
     const lng = form.querySelector('input[name="placeLng"]').value;
 
-    if (!lat || !lng) {
+    if ( searchInput.value != "" && (!lat || !lng)) {
         // Create and show tooltip only when validation fails
         const tooltip = new bootstrap.Tooltip(searchInput, {
             title: "{{translate('Please select a location from the suggestions')}}",
