@@ -461,114 +461,8 @@
                             <a class="btn btn-primary" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)">@lang('destination.show_on_map')</a>
                         </div>
                     </div>
-                    <div class="card d-block d-none d-sm-block mb-1">
-                        <div class="card-header">
-                            @lang('message.sortby'):
-                        </div>
-                        <div class="card-body border-bottom">
-                            <form id="form-sortby-2" action="{{route('guidings.index')}}" method="get">
-                                <select class="form-select form-select-sm" name="sortby" id="sortby-2">
-                                    <option value="" disabled selected>@lang('message.choose')...</option>
-                                    <option value="newest" {{request()->get('sortby') ? request()->get('sortby') == 'newest' ? 'selected' : '' : '' }}>@lang('message.newest')</option>
-                                    <option value="price-asc" {{request()->get('sortby') ? request()->get('sortby') == 'price-asc' ? 'selected' : '' : '' }}>@lang('message.lowprice')</option>
-                                    <option value="short-duration" {{request()->get('sortby') ? request()->get('sortby') == 'short-duration' ? 'selected' : '' : '' }}>@lang('message.shortduration')</option>
-                                    <option value="long-duration" {{request()->get('sortby') ? request()->get('sortby') == 'long-duration' ? 'selected' : '' : '' }}>@lang('message.longduration')</option>
-                                </select>
-
-                                @foreach(request()->except('sortby') as $key => $value)
-                                    @if(is_array($value))
-                                        @foreach($value as $arrayValue)
-                                            <input type="hidden" name="{{ $key }}[]" value="{{ $arrayValue }}">
-                                        @endforeach
-                                    @else
-                                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                                    @endif
-                                @endforeach
-                            </form>
-                        </div>
-                    </div>
-                    <div class="card d-block d-none d-sm-block">
-                        <div class="card-header">
-                            @lang('destination.filter_by'):
-                        </div>
-                        <div class="card-body border-bottom">
-                            <form id="filterContainer" action="{{route('guidings.index')}}" method="get" class="shadow-sm px-4 py-2">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <div class="input-group my-1">
-                                            <div class="input-group-prepend border-0 border-bottom ">
-                                                <span class="d-flex align-items-center px-2 h-100">
-                                                    <i class="fas fa-user"></i>
-                                                </span>
-                                            </div>
-                                            <select id="num-guests" class="form-control form-select  border-0 border-bottom rounded-0 custom-select" name="num_guests">
-                                                <option value="" disabled selected hidden>@lang('message.number-of-guests')</option>
-                                                <option value="">@lang('message.choose')...</option>
-                                                <option value="1" {{ request()->get('num_guests') ? request()->get('num_guests') == 1 ? 'selected' : null : null }}>1</option>
-                                                <option value="2" {{ request()->get('num_guests') ? request()->get('num_guests') == 2 ? 'selected' : null : null }}>2</option>
-                                                <option value="3" {{ request()->get('num_guests') ? request()->get('num_guests') == 3 ? 'selected' : null : null }}>3</option>
-                                                <option value="4" {{ request()->get('num_guests') ? request()->get('num_guests') == 4 ? 'selected' : null : null }}>4</option>
-                                                <option value="5" {{ request()->get('num_guests') ? request()->get('num_guests') == 5 ? 'selected' : null : null }}>5</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                 
-                                    <div class="col-12">
-                                        <div class="form-group my-1 d-flex align-items-center border-bottom">
-                                            <div class="px-2 select2-icon">
-                                                <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
-                                            </div>
-                                           
-                                            <select class="form-control form-select border-0 rounded-0" id="target_fish" name="target_fish[]" style="width:100%">
-                                            </select>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="col-12">
-                                        <div class="form-group my-1 d-flex align-items-center border-bottom">
-                                            <div class="px-2 select2-icon">
-                                                <img src="{{asset('assets/images/icons/water-waves.png')}}" height="20" width="20" alt="" />
-                                            </div>
-                                            <select class="form-control form-select border-0  rounded-0" id="water" name="water[]" style="width:100%">
-                                    
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="form-group my-1 d-flex align-items-center border-bottom ">
-                                            <div class="px-2 select2-icon">
-                                                <img src="{{asset('assets/images/icons/fishing.png')}}" height="20" width="20" alt="" />
-                                            </div>
-                                            <select class="form-control form-select border-0 rounded-0" id="methods" name="methods[]" style="width:100%">
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-12 mb-2">
-                                        <div class="input-group my-1">
-                                            <div class="input-group-prepend border-0 border-bottom ">
-                                                <span class="d-flex align-items-center px-2 h-100">
-                                                    <i class="fa fa-euro-sign"></i>
-                                                </span>
-                                            </div>
-                                            <select id="price_range" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="price_range">
-                                                <option selected disabled hidden>Price per Person</option>
-                                                <option value="" >@lang('message.choose')...</option>
-                                                <option value="1-50" {{ request()->get('price_range') ? request()->get('price_range') == '1-200' ? 'selected' : null : null }}>1 - 50 p.P.</option>
-                                                <option value="51-100" {{ request()->get('price_range') ? request()->get('price_range') == '201-400' ? 'selected' : null : null }}>51 - 100 p.P.</option>
-                                                <option value="101-150" {{ request()->get('price_range') ? request()->get('price_range') == '401-600' ? 'selected' : null : null }}>101 - 150 p.P.</option>
-                                                <option value="151-200" {{ request()->get('price_range') ? request()->get('price_range') == '601-800' ? 'selected' : null : null }}>151 - 200 p.P.</option>
-                                                <option value="201-250" {{ request()->get('price_range') ? request()->get('price_range') == '801-1000' ? 'selected' : null : null }}>201 - 250 p.P.</option>
-                                                <option value="350" {{ request()->get('price_range') ? request()->get('price_range') == '1001' ? 'selected' : null : null }}>350 and more</option>
-                                            </select>
-                                          </div>
-                                    </div>
-                                    <div class="col-sm-12 col-lg-12 ps-md-0">
-                                        <button class="btn btn-sm theme-primary btn-theme-new w-100 h-100" >@lang('message.Search')</button>    
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                    
+                    @include('pages.guidings.includes.filters', ['formAction' => route('guidings.index')])
                 </div>
 
                 <div class="col-sm-12 col-lg-9">
@@ -584,7 +478,7 @@
                     <div class="row">
                         <div class="col-lg-12 col-sm-12">
                             <div class="tours-list__right">
-                                <div class="tours-list__inner">
+                                <div class="tours-list__inner" id="guidings-list">
                                     @foreach($guidings as $guiding)
                                     <div class="row m-0 mb-2 guiding-list-item">
                                         <div class="col-md-12">
@@ -843,7 +737,6 @@
                                         </div>
                                     </div>
                                     @endforeach
-                                    {!! $guidings->links('vendor.pagination.default') !!}
                                 </div>
                             </div>
                         </div>
@@ -970,23 +863,18 @@
                         </div>
                     </div>
                     <div class="col-12 mb-2">
-                        <div class="input-group my-1">
-                            <div class="input-group-prepend border-0 border-bottom ">
-                                <span class="d-flex align-items-center px-2 h-100">
-                                    <i class="fa fa-euro-sign"></i>
-                                </span>
+                        <div class="price-range-slider">
+                            <div class="price-display">
+                                <span>Price Range</span>
                             </div>
-                            <select id="price_rangeOffCanvass" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="price_range">
-                                <option selected disabled hidden>Price per Person</option>
-                                <option value="" >@lang('message.choose')...</option>
-                                <option value="1-50" {{ request()->get('price_range') ? request()->get('price_range') == '1-200' ? 'selected' : null : null }}>1 - 50 p.P.</option>
-                                <option value="51-100" {{ request()->get('price_range') ? request()->get('price_range') == '201-400' ? 'selected' : null : null }}>51 - 100 p.P.</option>
-                                <option value="101-150" {{ request()->get('price_range') ? request()->get('price_range') == '401-600' ? 'selected' : null : null }}>101 - 150 p.P.</option>
-                                <option value="151-200" {{ request()->get('price_range') ? request()->get('price_range') == '601-800' ? 'selected' : null : null }}>151 - 200 p.P.</option>
-                                <option value="201-250" {{ request()->get('price_range') ? request()->get('price_range') == '801-1000' ? 'selected' : null : null }}>201 - 250 p.P.</option>
-                                <option value="350" {{ request()->get('price_range') ? request()->get('price_range') == '1001' ? 'selected' : null : null }}>350 and more</option>
-                            </select>
-                          </div>
+                            <div id="price-slider"></div>
+                            <div class="price-labels">
+                                <span class="price-label" id="price-min">50€</span>
+                                <span class="price-label" id="price-max">350€+</span>
+                            </div>
+                            <input type="hidden" id="price_min" name="price_min" value="50">
+                            <input type="hidden" id="price_max" name="price_max" value="350">
+                        </div>
                     </div>
                     <div class="col-sm-12 col-lg-12 ps-md-0">
                         <button class="btn btn-sm theme-primary btn-theme-new w-100 h-100" >@lang('message.Search')</button>    
@@ -998,6 +886,7 @@
 @endsection
 
 @section('js_after')
+<script src="https://cdn.jsdelivr.net/npm/core-js-bundle@3.30.2/minified.js"></script>
 
 <script>
     $('#sortby, #sortby-2').on('change', function() {
@@ -1007,95 +896,93 @@
         const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
         window.location.href = newUrl;
     });
-</script>
-<script>
-// Get the toggle button and filter container elements
-var toggleBtn = document.getElementById('toggleFilterBtn');
-var filterContainer = document.getElementById('filterContainer');
 
-// Add click event listener to the toggle button
-toggleBtn.addEventListener('click', function() {
-    // Toggle the visibility of the filter container
-    filterContainer.classList.toggle('d-block');
-});
-$(function(){
-    $('#toggleFilterBtn').click(function(){
-        $('#filterCard').toggle();
+    // Get the toggle button and filter container elements
+    var toggleBtn = document.getElementById('toggleFilterBtn');
+    var filterContainer = document.getElementById('filterContainer');
+
+    // Add click event listener to the toggle button
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+            // Toggle the visibility of the filter container
+            filterContainer.classList.toggle('d-block');
+        });
+    }
+    $(function(){
+        $('#toggleFilterBtn').click(function(){
+            $('#filterCard').toggle();
+        });
     });
-});
-</script>
 
-<script>
     initializeSelect2();
 
-function initializeSelect2() {
-    var selectTarget = $('#target_fish, #target_fishOffCanvass');
-    var selectWater = $('#water, #waterOffCanvass');
-    var selectMethod = $('#methods, #methodsOffCanvass');
+    function initializeSelect2() {
+        var selectTarget = $('#target_fish, #target_fishOffCanvass');
+        var selectWater = $('#water, #waterOffCanvass');
+        var selectMethod = $('#methods, #methodsOffCanvass');
 
-    // Target Fish
-    selectTarget.append(new Option('@lang('message.choose')...', '', true, true));
-    @foreach($alltargets as $target)
-        var targetname = '{{$target->name}}';
-        @if(app()->getLocale() == 'en')
-            targetname = '{{$target->name_en}}';
+        // Target Fish
+        selectTarget.append(new Option('@lang('message.choose')...', '', true, true));
+        @foreach($alltargets as $target)
+            var targetname = '{{$target->name}}';
+            @if(app()->getLocale() == 'en')
+                targetname = '{{$target->name_en}}';
+            @endif
+            selectTarget.append(new Option(targetname, '{{ $target->id }}', false, false));
+        @endforeach
+
+        // Water Types
+        selectWater.append(new Option('@lang('message.choose')...', '', true, true));
+        @foreach($guiding_waters as $water)
+            var watername = '{{$water->name}}';
+            @if(app()->getLocale() == 'en')
+                watername = '{{$water->name_en}}';
+            @endif
+            selectWater.append(new Option(watername, '{{ $water->id }}', false, false));
+        @endforeach
+
+        // Fishing Methods
+        selectMethod.append(new Option('@lang('message.choose')...', '', true, true));
+        @foreach($guiding_methods as $method)
+            var methodname = '{{$method->name}}';
+            @if(app()->getLocale() == 'en')
+                methodname = '{{$method->name_en}}';
+            @endif
+            selectMethod.append(new Option(methodname, '{{ $method->id }}', false, false));
+        @endforeach
+
+        // Initialize Select2 and set values
+        $("#target_fish, #target_fishOffCanvass").select2({
+            multiple: true,
+            placeholder: '@lang('message.target-fish')',
+            width: 'resolve',
+        }).val(@json(request()->get('target_fish', [])))
+        .trigger('change');
+
+        $("#water, #waterOffCanvass").select2({
+            multiple: true,
+            placeholder: '@lang('message.body-type')',
+            width: 'resolve'
+        }).val(@json(request()->get('water', [])))
+        .trigger('change');
+
+        $("#methods, #methodsOffCanvass").select2({
+            multiple: true,
+            placeholder: '@lang('message.fishing-technique')',
+            width: 'resolve'
+        }).val(@json(request()->get('methods', [])))
+        .trigger('change');
+
+        // Set other form values if they exist
+        @if(request()->get('price_range'))
+            $('#price_range, #price_rangeOffCanvass').val('{{ request()->get('price_range') }}');
         @endif
-        selectTarget.append(new Option(targetname, '{{ $target->id }}', false, false));
-    @endforeach
 
-    // Water Types
-    selectWater.append(new Option('@lang('message.choose')...', '', true, true));
-    @foreach($guiding_waters as $water)
-        var watername = '{{$water->name}}';
-        @if(app()->getLocale() == 'en')
-            watername = '{{$water->name_en}}';
+        @if(request()->get('num_guests'))
+            $('#num-guests, #num-guestsOffCanvass').val('{{ request()->get('num_guests') }}');
         @endif
-        selectWater.append(new Option(watername, '{{ $water->id }}', false, false));
-    @endforeach
-
-    // Fishing Methods
-    selectMethod.append(new Option('@lang('message.choose')...', '', true, true));
-    @foreach($guiding_methods as $method)
-        var methodname = '{{$method->name}}';
-        @if(app()->getLocale() == 'en')
-            methodname = '{{$method->name_en}}';
-        @endif
-        selectMethod.append(new Option(methodname, '{{ $method->id }}', false, false));
-    @endforeach
-
-    // Initialize Select2 and set values
-    $("#target_fish, #target_fishOffCanvass").select2({
-        multiple: true,
-        placeholder: '@lang('message.target-fish')',
-        width: 'resolve',
-    }).val(@json(request()->get('target_fish', [])))
-      .trigger('change');
-
-    $("#water, #waterOffCanvass").select2({
-        multiple: true,
-        placeholder: '@lang('message.body-type')',
-        width: 'resolve'
-    }).val(@json(request()->get('water', [])))
-      .trigger('change');
-
-    $("#methods, #methodsOffCanvass").select2({
-        multiple: true,
-        placeholder: '@lang('message.fishing-technique')',
-        width: 'resolve'
-    }).val(@json(request()->get('methods', [])))
-      .trigger('change');
-
-    // Set other form values if they exist
-    @if(request()->get('price_range'))
-        $('#price_range, #price_rangeOffCanvass').val('{{ request()->get('price_range') }}');
-    @endif
-
-    @if(request()->get('num_guests'))
-        $('#num-guests, #num-guestsOffCanvass').val('{{ request()->get('num_guests') }}');
-    @endif
-}
+    }
 </script>
-
 
 <script type="module">
     import { MarkerClusterer } from "https://cdn.skypack.dev/@googlemaps/markerclusterer@2.3.1";
@@ -1205,13 +1092,15 @@ function initializeSelect2() {
     }
 
     window.addEventListener('load', function() {
-        var placeLatitude = '{{ request()->get('placeLat') }}'; // Replace with the actual value from the request
-        var placeLongitude = '{{ request()->get('placeLng') }}'; // Replace with the actual value from the request
+        var placeLatitude = '{{ request()->get('placeLat') }}';
+        var placeLongitude = '{{ request()->get('placeLng') }}';
 
         if (placeLatitude && placeLongitude) {
-            // The place latitude and longitude are present, so set the values in the form fields
-            document.getElementById('placeLat').value = placeLatitude;
-            document.getElementById('placeLng').value = placeLongitude;
+            // Update both LocationLat/Lng and LocationLat2/Lng2 elements
+            document.getElementById('LocationLat').value = placeLatitude;
+            document.getElementById('LocationLng').value = placeLongitude;
+            document.getElementById('LocationLat2').value = placeLatitude;
+            document.getElementById('LocationLng2').value = placeLongitude;
         } 
     });
 
@@ -1231,5 +1120,4 @@ function initializeSelect2() {
     }
 
 </script>
-<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 @endsection

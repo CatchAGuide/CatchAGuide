@@ -288,11 +288,33 @@ class GuidingsController extends Controller
         $guidings = $query->with('boatType')->paginate(20);
         $guidings->appends(request()->except('page'));
 
+        // Regular request - return full view
         $filter_title = substr($filter_title, 0, -2);
 
         $alltargets = Target::select('id', 'name', 'name_en')->get();
         $guiding_waters = Water::select('id', 'name', 'name_en')->get();
         $guiding_methods = Method::select('id', 'name', 'name_en')->get();
+
+        if ($request->ajax()) {
+            $view = view('pages.guidings.partials.guiding-list', [        // If this is an AJAX request, return partial view
+                'title' => $title,
+                'filter_title' => $filter_title,
+                'guidings' => $guidings,
+                'radius' => $radius,
+                'allGuidings' => $allGuidings,
+                'searchMessage' => $searchMessage,
+                'otherguidings' => $otherguidings,
+                'alltargets' => $alltargets,
+                'guiding_waters' => $guiding_waters,
+                'guiding_methods' => $guiding_methods,
+                'destination' => $destination,
+            ])->render();
+            
+            return response()->json([
+                'html' => $view,
+                'searchMessage' => $searchMessage
+            ]);
+        }
 
         return view('pages.guidings.index', [
             'title' => $title,
@@ -307,7 +329,6 @@ class GuidingsController extends Controller
             'guiding_methods' => $guiding_methods,
             'destination' => $destination,
         ]);
-        
     }
 
     public function newShow($id, $slug, Request $request)
