@@ -103,7 +103,7 @@
 
 @section('content')
 
-    <div class="container">
+    {{-- <div class="container"> --}}
         {{-- <section class="page-header">
             <div class="page-header__bottom">
                 <div class="container">

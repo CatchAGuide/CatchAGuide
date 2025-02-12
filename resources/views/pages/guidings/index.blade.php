@@ -495,38 +495,6 @@
                             <form id="filterContainer" action="{{route('guidings.index')}}" method="get" class="shadow-sm px-4 py-2">
                                 <div class="row">
                                     <div class="col-12">
-                                        <div class="form-group my-1">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend border-0 border-bottom ">
-                                                    <span class=" d-flex align-items-center px-2 h-100"><i class="fas fa-map-marker-alt"></i></span>
-                                                </div>
-                                                <input  id="searchPlace" name="place" type="text" value="{{ request()->get('place') ? request()->get('place') : null }} @if(empty(request()->get('place')) && !empty(request()->get('country'))) {{request()->get('country')}} @endif" class="form-control border-0 border-bottom rounded-0" placeholder="@lang('message.enter-location')"  autocomplete="on">
-                                            </div>
-                                          <input type="hidden" id="LocationLat" value="{{ request()->get('placeLat') ? request()->get('placeLat') : null }}" name="placeLat"/>
-                                          <input type="hidden" id="LocationLng" value="{{ request()->get('placeLng') ? request()->get('placeLng') : null }}" name="placeLng"/>
-                                          <input type="hidden" id="LocationCity" value="{{ request()->get('city') ? request()->get('city') : null }}" name="city"/>
-                                          <input type="hidden" id="LocationCountry" value="{{ request()->get('country') ? request()->get('country') : null }}" name="country"/>
-                                        </div>
-                                    </div>
-                                    {{-- <div class="col-12">
-                                        <div class="input-group my-1">
-                                            <div class="input-group-prepend border-0 border-bottom ">
-                                                <span class="d-flex align-items-center px-2 h-100">
-                                                    <i class="fa fa-compass"></i>
-                                                </span>
-                                            </div>
-                                            <select id="radius" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="radius">
-                                                <option selected disabled hidden>Radius</option>
-                                                <option value="" >@lang('message.choose')...</option>
-                                                <option value="50" {{ request()->has('radius') ? request()->get('radius') == 50 ? 'selected' : null : null }}>50 km</option>
-                                                <option value="100" {{ request()->get('radius') ? request()->get('radius') == 100 ? 'selected' : null : null }}>100 km</option>
-                                                <option value="150" {{ request()->get('radius') ? request()->get('radius') == 150 ? 'selected' : null : null }}>150 km</option>
-                                                <option value="250" {{ request()->get('radius') ? request()->get('radius') == 250 ? 'selected' : null : null }}>250 km</option>
-                                                <option value="500" {{ request()->get('radius') ? request()->get('radius') == 500 ? 'selected' : null : null }}>500 km</option>
-                                            </select>
-                                          </div>
-                                    </div> --}}
-                                    <div class="col-12">
                                         <div class="input-group my-1">
                                             <div class="input-group-prepend border-0 border-bottom ">
                                                 <span class="d-flex align-items-center px-2 h-100">

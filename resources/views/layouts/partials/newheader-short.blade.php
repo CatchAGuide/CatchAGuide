@@ -182,7 +182,7 @@
     <!-- Search Row - Floating (Desktop Only) -->
     <div class="floating-search-container d-none d-md-block">
         <div class="container">
-            <form id="global-search" action="{{$isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index')}}" method="get">
+            <form id="global-search" action="{{$isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index')}}" method="get" onsubmit="return validateSearch(event, 'searchPlaceShortDesktop')">
                 <div class="search-box">
                     <div class="search-row">
                         @if($isVacation)
@@ -204,7 +204,8 @@
                                     class="form-control" 
                                     name="place" 
                                     placeholder="@lang('homepage.searchbar-destination')"
-                                    value="{{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }}" autocomplete="on">
+                                    value="{{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }}" 
+                                    autocomplete="on">
                                 <input type="hidden" id="LocationLatShortDesktop" name="placeLat" value="{{ request()->placeLat }}"/>
                                 <input type="hidden" id="LocationLngShortDesktop" name="placeLng" value="{{ request()->placeLng }}"/>
                                 <input type="hidden" id="LocationCityShortDesktop" name="city" value="{{ request()->city }}"/>
@@ -896,6 +897,35 @@ input[type=number] {
 #mobileherofilter .new-filter-btn:hover {
     background-color: #313041;
 }
+
+/* Add shake animation */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+/* Style the tooltip */
+.tooltip {
+    position: absolute;
+    z-index: 1070;
+}
+
+.tooltip .tooltip-inner {
+    background-color: #dc3545;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.tooltip .tooltip-arrow::before {
+    border-bottom-color: #dc3545;
+}
 </style>
 
 <!-- Search Modal for Mobile -->
@@ -907,7 +937,7 @@ input[type=number] {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="mobile-search" action="{{$isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index')}}" method="get">
+                <form id="mobile-search" action="{{$isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index')}}" method="get" onsubmit="return validateSearch(event, 'searchPlace')">
                     @if($isVacation)
                         <div class="mb-3">
                             <label class="form-label">{{ translate('Country') }}</label>
@@ -933,7 +963,8 @@ input[type=number] {
                                     id="searchPlace"
                                     name="place" 
                                     placeholder="@lang('homepage.searchbar-destination')"
-                                    value="{{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }}" autocomplete="on">
+                                    value="{{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }}" 
+                                    autocomplete="on">
                                 <input type="hidden" id="LocationLat" name="placeLat" value="{{ request()->placeLat }}"/>
                                 <input type="hidden" id="LocationLng" name="placeLng" value="{{ request()->placeLng }}"/>
                                 <input type="hidden" id="LocationCity" name="city" value="{{ request()->city }}"/>
@@ -1184,6 +1215,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
 });
 
 function closeMobileMenu() {
@@ -1192,5 +1229,37 @@ function closeMobileMenu() {
     if (mobileMenuModal) {
         mobileMenuModal.hide();
     }
+}
+
+function validateSearch(event, inputId) {
+    const searchInput = document.getElementById(inputId);
+    if (!searchInput) return true;
+
+    const form = searchInput.closest('form');
+    const lat = form.querySelector('input[name="placeLat"]').value;
+    const lng = form.querySelector('input[name="placeLng"]').value;
+
+    if (!lat || !lng) {
+        // Create and show tooltip only when validation fails
+        const tooltip = new bootstrap.Tooltip(searchInput, {
+            title: "{{translate('Please select a location from the suggestions')}}",
+            placement: "bottom",
+            trigger: "manual"
+        });
+        
+        tooltip.show();
+        
+        // Hide tooltip after 3 seconds
+        setTimeout(() => tooltip.dispose(), 3000);
+
+        // Add shake animation to input
+        searchInput.classList.add('shake');
+        setTimeout(() => searchInput.classList.remove('shake'), 500);
+
+        event.preventDefault();
+        return false;
+    }
+
+    return true;
 }
 </script>
