@@ -137,7 +137,6 @@
 
         var visible_text = page_main_intro_text.substring(0, word_char_count_allowed);
         var hidden_text  = page_main_intro_text.substring(word_char_count_allowed);
-        console.log(visible_text);
         if (page_main_intro_count >= word_char_count_allowed) {
             console.log(1);
             $('.page-main-intro-text').html(visible_text + '<span class="more-ellipsis">' + ellipsis + '</span><span class="more-text" style="display:none;">' + hidden_text + '</span>');

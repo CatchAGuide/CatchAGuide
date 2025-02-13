@@ -1,6 +1,6 @@
 @foreach($vacations as $vacation)
-@if(!empty($vacation->lat) && !empty($vacation->lng))
-const location{{$vacation->id}} = { lat: {{$vacation->lat}}, lng: {{$vacation->lng}} };
+@if(!empty($vacation->latitude) && !empty($vacation->longitude))
+const location{{$vacation->id}} = { lat: {{$vacation->latitude}}, lng: {{$vacation->longitude}} };
 
 isDuplicateCoordinate = uniqueCoordinates.some(coordinate => {
     return coordinate.lat === location{{$vacation->id}}.lat && coordinate.lng === location{{$vacation->id}}.lng;
