@@ -6,6 +6,7 @@
 @section('header_title', ((ucwords(isset($place)) ? translate('Alle Guidings bei ') . $place : translate('Alle Guidings'))))
 @section('header_sub_title', '')
 
+@stack('guidingListingStyles')
 @section('css_after')
 <style>
     .container {
@@ -510,89 +511,87 @@
                                                 </div>
                                                 <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 px-md-3 pt-md-2">
                                                     <a href="{{ route('guidings.show', [$guiding->id, $guiding->slug])}}">
-                                                            <div class="guidings-item">
-                                                                <div class="guidings-item-title">
-                                                                <h5 class="fw-bolder text-truncate">{{ Str::limit(translate($guiding->title), 70) }}</h5>
-                                                                <span class="truncate"><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }}</span>                                      
+                                                        <div class="guidings-item">
+                                                            <div class="guidings-item-title">
+                                                            <h5 class="fw-bolder text-truncate">{{ Str::limit(translate($guiding->title), 70) }}</h5>
+                                                            <span class="truncate"><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }}</span>                                      
+                                                            </div>
+                                                            @if ($guiding->user->average_rating())
+                                                            <div class="guidings-item-ratings">
+                                                            <div class="ratings-score">
+                                                                    <span class="text-warning">★</span>
+                                                                    <span>{{$guiding->user->average_rating()}} </span>
+                                                                    /5 ({{ $guiding->user->received_ratings->count() }} review/s)
                                                                 </div>
-                                                                @if ($guiding->user->average_rating())
-                                                                <div class="guidings-item-ratings">
-                                                                <div class="ratings-score">
-                                                                        <span class="text-warning">★</span>
-                                                                        <span>{{$guiding->user->average_rating()}} </span>
-                                                                        /5 ({{ $guiding->user->received_ratings->count() }} review/s)
+                                                            </div>
+                                                            @endif
+                                                        </div>
+                                                        <div class="guidings-item-icon">
+                                                            <div class="guidings-icon-container"> 
+                                                                <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
+                                                                <div class="">
+                                                                    {{$guiding->duration}} {{ $guiding->duration_type == 'multi_day' ? __('guidings.days') : __('guidings.hours') }}
+                                                                </div>
+                                                            </div>
+                                                            <div class="guidings-icon-container"> 
+                                                                <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" />
+                                                                <div class="">
+                                                                {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
+                                                                </div>
+                                                            </div>
+                                                            <div class="guidings-icon-container"> 
+                                                                <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
+                                                                <div class="">
+                                                                    <div class="tours-list__content__trait__text" >
+                                                                        @php
+                                                                        $guidingTargets = collect($guiding->getTargetFishNames())->pluck('name')->toArray();
+                                                                        @endphp
+                                                                        
+                                                                        @if(!empty($guidingTargets))
+                                                                            {{ implode(', ', $guidingTargets) }}
+                                                                        @endif
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="guidings-icon-container">
+                                                                <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
+                                                                <div class="">
+                                                                    <div class="tours-list__content__trait__text" >
+                                                                        {{$guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="inclusions-price">
+                                                            <div class="guidings-inclusions-container">
+                                                                @if(!empty($guiding->getInclusionNames()))
+                                                                <div class="guidings-included">
+                                                                    <strong>@lang('guidings.Whats_Included')</strong>
+                                                                    <div class="inclusions-list">
+                                                                        @php
+                                                                            $inclussions = $guiding->getInclusionNames();
+                                                                            $maxToShow = 3; // Maximum number of inclusions to display
+                                                                        @endphp
+
+                                                                        @foreach ($inclussions as $index => $inclussion)
+                                                                            @if ($index < $maxToShow)
+                                                                                <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclussion['name'] }}</span>
+                                                                            @endif
+                                                                        @endforeach
+
+                                                                        @if (count($inclussions) > $maxToShow)
+                                                                            <span class="inclusion-item">+{{ count($inclussions) - $maxToShow }} more</span>
+                                                                        @endif
                                                                     </div>
                                                                 </div>
                                                                 @endif
                                                             </div>
-                                                            <div class="guidings-item-icon">
-                                                                <div class="guidings-icon-container"> 
-                                                                            <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
-                                                                        <div class="">
-                                                                            {{$guiding->duration}} {{ $guiding->duration_type == 'multi_day' ? __('guidings.days') : __('guidings.hours') }}
-                                                                        </div>
-                                                                </div>
-                                                                <div class="guidings-icon-container"> 
-                                                                        <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" />
-                                                                        <div class="">
-                                                                        {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
-                                                                        </div>
-                                                                </div>
-                                                                <div class="guidings-icon-container"> 
-                                                                            <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
-                                                                        <div class="">
-                                                                            <div class="tours-list__content__trait__text" >
-                                                                                @php
-                                                                                $guidingTargets = collect($guiding->getTargetFishNames())->pluck('name')->toArray();
-                                                                                @endphp
-                                                                                
-                                                                                @if(!empty($guidingTargets))
-                                                                                    {{ implode(', ', $guidingTargets) }}
-                                                                                @endif
-                                                                            </div>
-                                                                        
-                                                                        </div>
-                                                                </div>
-                                                                <div class="guidings-icon-container">
-                                                                            <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
-                                                                        <div class="">
-                                                                            <div class="tours-list__content__trait__text" >
-                                                                            {{$guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
-                                                                            </div>
-                                                                        
-                                                                        </div>
+                                                            <div class="guiding-item-price">
+                                                                <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$guiding->getLowestPrice()}}€ p.P.</span></h5>
+                                                                <div class="d-none d-flex flex-column mt-4">
                                                                 </div>
                                                             </div>
-                                                            <div class="inclusions-price">
-                                                                    <div class="guidings-inclusions-container">
-                                                                        @if(!empty($guiding->getInclusionNames()))
-                                                                        <div class="guidings-included">
-                                                                            <strong>@lang('guidings.Whats_Included')</strong>
-                                                                            <div class="inclusions-list">
-                                                                                @php
-                                                                                    $inclussions = $guiding->getInclusionNames();
-                                                                                    $maxToShow = 3; // Maximum number of inclusions to display
-                                                                                @endphp
-    
-                                                                                @foreach ($inclussions as $index => $inclussion)
-                                                                                    @if ($index < $maxToShow)
-                                                                                        <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclussion['name'] }}</span>
-                                                                                    @endif
-                                                                                @endforeach
-    
-                                                                                @if (count($inclussions) > $maxToShow)
-                                                                                    <span class="inclusion-item">+{{ count($inclussions) - $maxToShow }} more</span>
-                                                                                @endif
-                                                                            </div>
-                                                                        </div>
-                                                                        @endif
-                                                                    </div>
-                                                                    <div class="guiding-item-price">
-                                                                        <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$guiding->getLowestPrice()}}€ p.P.</span></h5>
-                                                                        <div class="d-none d-flex flex-column mt-4">
-                                                                        </div>
-                                                                    </div>
-                                                            </div>    
+                                                        </div>    
                                                     </a>
                                                 </div>
                                             </div>
@@ -795,24 +794,6 @@
                           <input type="hidden" id="LocationCountry2" value="{{ request()->get('country') ? request()->get('country') : null }}" name="country"/>
                         </div>
                     </div>
-                    {{-- <div class="col-12">
-                        <div class="input-group my-1">
-                            <div class="input-group-prepend border-0 border-bottom ">
-                                <span class="d-flex align-items-center px-2 h-100">
-                                    <i class="fa fa-compass"></i>
-                                </span>
-                            </div>
-                            <select id="radiusOffCanvass" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="radius">
-                                <option selected disabled hidden>Radius</option>
-                                <option>@lang('message.choose')...</option>
-                                <option value="50" {{ request()->get('radius') ? request()->get('radius') == 50 ? 'selected' : null : null }}>50 km</option>
-                                <option value="100" {{ request()->get('radius') ? request()->get('radius') == 100 ? 'selected' : null : null }}>100 km</option>
-                                <option value="150" {{ request()->get('radius') ? request()->get('radius') == 150 ? 'selected' : null : null }}>150 km</option>
-                                <option value="250" {{ request()->get('radius') ? request()->get('radius') == 250 ? 'selected' : null : null }}>250 km</option>
-                                <option value="500" {{ request()->get('radius') ? request()->get('radius') == 500 ? 'selected' : null : null }}>500 km</option>
-                            </select>
-                          </div>
-                    </div> --}}
                     <div class="col-12">
                         <div class="input-group my-1">
                             <div class="input-group-prepend border-0 border-bottom ">
@@ -885,9 +866,8 @@
     </div>
 @endsection
 
+@stack('guidingListingScripts')
 @section('js_after')
-<script src="https://cdn.jsdelivr.net/npm/core-js-bundle@3.30.2/minified.js"></script>
-
 <script>
     $('#sortby, #sortby-2').on('change', function() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -1120,4 +1100,7 @@
     }
 
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/core-js-bundle@3.30.2/minified.js"></script>
+
 @endsection

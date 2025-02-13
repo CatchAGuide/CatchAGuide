@@ -133,10 +133,10 @@ class GuidingsController extends Controller
                     $query->orderBy('created_at', 'desc');
                     break;
                 case 'price-asc':
-                    $query->orderBy(DB::raw('lowest_price'), 'asc');
+                    $query->orderBy('lowest_price', 'asc');
                     break;
                 case 'price-desc':
-                    $query->orderBy(DB::raw('lowest_price'), 'desc');
+                    $query->orderBy('lowest_price', 'desc');
                     break;
                 case 'long-duration':
                     $query->orderBy('duration', 'desc');
@@ -230,18 +230,15 @@ class GuidingsController extends Controller
             }
         }
 
-        if($request->has('price_range')){
-            $price_range = $request->get('price_range');
-            $price = explode('-', $price_range);
+        if($request->has('price_min') && $request->has('price_max')){
+            $min_price = $request->get('price_min');
+            $max_price = $request->get('price_max');
 
-            $title .= 'Price ' . $request->price_range . ' | ';
-            $filter_title .= 'Price ab ' . $request->price_range . ' p.P., ';
+            $title .= 'Price ' . $min_price . '€ - ' . $max_price . '€ | ';
+            $filter_title .= 'Price ' . $min_price . '€ - ' . $max_price . '€, ';
 
-            if (count($price) > 1) {
-                $query->havingRaw('lowest_price >= ? AND lowest_price <= ?', $price);
-            } else {
-                $query->havingRaw('lowest_price >= ?', $price);
-            }
+            // Use the lowest_price field we calculated in the main query
+            $query->havingRaw('lowest_price >= ? AND lowest_price <= ?', [$min_price, $max_price]);
         }
 
         $radius = null; // Radius in miles
@@ -272,7 +269,45 @@ class GuidingsController extends Controller
                   ->orderByRaw($orderByCase);
         }
 
-        $allGuidings = $query->with('boatType')->get();
+        // Get all guidings before pagination to extract available options
+        $allGuidings = $query->with(['target_fish', 'methods', 'water_types', 'boatType'])->get();
+        
+        // Extract unique target fish, methods and water types from current results
+        $availableTargetFish = collect();
+        $availableMethods = collect();
+        $availableWaterTypes = collect();
+        $targetFishCounts = [];
+        $methodCounts = [];
+        $waterTypeCounts = [];
+
+        foreach ($allGuidings as $guiding) {
+            // For target fish
+            $targetFish = json_decode($guiding->target_fish, true) ?? [];
+            $availableTargetFish = $availableTargetFish->concat($targetFish)->unique();
+            foreach ($targetFish as $fishId) {
+                $targetFishCounts[$fishId] = ($targetFishCounts[$fishId] ?? 0) + 1;
+            }
+            
+            // For methods
+            $methods = json_decode($guiding->fishing_methods, true) ?? [];
+            $availableMethods = $availableMethods->concat($methods)->unique();
+            foreach ($methods as $methodId) {
+                $methodCounts[$methodId] = ($methodCounts[$methodId] ?? 0) + 1;
+            }
+            
+            // For water types
+            $waterTypes = json_decode($guiding->water_types, true) ?? [];
+            $availableWaterTypes = $availableWaterTypes->concat($waterTypes)->unique();
+            foreach ($waterTypes as $waterId) {
+                $waterTypeCounts[$waterId] = ($waterTypeCounts[$waterId] ?? 0) + 1;
+            }
+        }
+
+        // Get the models for these IDs, only including items with counts > 0
+        $targetFishOptions = Target::whereIn('id', array_keys(array_filter($targetFishCounts)))->get();
+        $methodOptions = Method::whereIn('id', array_keys(array_filter($methodCounts)))->get();
+        $waterTypeOptions = Water::whereIn('id', array_keys(array_filter($waterTypeCounts)))->get();
+
         $otherguidings = array();
 
         if($allGuidings->isEmpty() || count($allGuidings) <= 10){
@@ -296,7 +331,7 @@ class GuidingsController extends Controller
         $guiding_methods = Method::select('id', 'name', 'name_en')->get();
 
         if ($request->ajax()) {
-            $view = view('pages.guidings.partials.guiding-list', [        // If this is an AJAX request, return partial view
+            $view = view('pages.guidings.partials.guiding-list', [
                 'title' => $title,
                 'filter_title' => $filter_title,
                 'guidings' => $guidings,
@@ -308,11 +343,22 @@ class GuidingsController extends Controller
                 'guiding_waters' => $guiding_waters,
                 'guiding_methods' => $guiding_methods,
                 'destination' => $destination,
+                'targetFishOptions' => $targetFishOptions,
+                'methodOptions' => $methodOptions,
+                'waterTypeOptions' => $waterTypeOptions,
+                'targetFishCounts' => $targetFishCounts,
+                'methodCounts' => $methodCounts,
+                'waterTypeCounts' => $waterTypeCounts,
             ])->render();
             
             return response()->json([
                 'html' => $view,
-                'searchMessage' => $searchMessage
+                'searchMessage' => $searchMessage,
+                'filterCounts' => [
+                    'targetFish' => array_filter($targetFishCounts), // Only return non-zero counts
+                    'methods' => array_filter($methodCounts),
+                    'waters' => array_filter($waterTypeCounts)
+                ]
             ]);
         }
 
@@ -328,6 +374,12 @@ class GuidingsController extends Controller
             'guiding_waters' => $guiding_waters,
             'guiding_methods' => $guiding_methods,
             'destination' => $destination,
+            'targetFishOptions' => $targetFishOptions,
+            'methodOptions' => $methodOptions,
+            'waterTypeOptions' => $waterTypeOptions,
+            'targetFishCounts' => $targetFishCounts,
+            'methodCounts' => $methodCounts,
+            'waterTypeCounts' => $waterTypeCounts,
         ]);
     }
 

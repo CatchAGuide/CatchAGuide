@@ -267,7 +267,6 @@ class VacationsController extends Controller
                 $othervacations = $this->otherVacations();
             }
         }
-
        
         $vacations = $query->paginate(6);
         $vacations->appends(request()->except('page'));

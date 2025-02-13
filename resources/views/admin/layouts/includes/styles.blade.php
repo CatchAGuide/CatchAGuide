@@ -44,3 +44,4 @@
 
 @stack('styles')
 @yield('css_after')
+@stack('css_after')

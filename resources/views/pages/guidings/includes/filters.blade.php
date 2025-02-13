@@ -32,78 +32,104 @@
     <div class="card-body border-bottom">
         <form id="filterContainer" action="{{ $formAction }}" method="get" class="shadow-sm px-4 py-2">
             <div class="row">
-                <div class="col-12">
-                    <div class="input-group my-1">
-                        <div class="input-group-prepend border-0 border-bottom ">
-                            <span class="d-flex align-items-center px-2 h-100">
-                                <i class="fas fa-user"></i>
-                            </span>
-                        </div>
-                        <select id="num-guests" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="num_guests">
-                            <option value="" disabled selected hidden>@lang('message.number-of-guests')</option>
-                            <option value="">@lang('message.choose')...</option>
-                            <option value="1" {{ request()->get('num_guests') == 1 ? 'selected' : '' }}>1</option>
-                            <option value="2" {{ request()->get('num_guests') == 2 ? 'selected' : '' }}>2</option>
-                            <option value="3" {{ request()->get('num_guests') == 3 ? 'selected' : '' }}>3</option>
-                            <option value="4" {{ request()->get('num_guests') == 4 ? 'selected' : '' }}>4</option>
-                            <option value="5" {{ request()->get('num_guests') == 5 ? 'selected' : '' }}>5</option>
-                        </select>
-                    </div>
-                </div>
-             
-                <div class="col-12">
-                    <div class="form-group my-1 d-flex align-items-center border-bottom">
-                        <div class="px-2 select2-icon">
-                            <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
-                        </div>
-                        <select class="form-control form-select border-0 rounded-0" id="target_fish" name="target_fish[]" style="width:100%">
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="col-12">
-                    <div class="form-group my-1 d-flex align-items-center border-bottom">
-                        <div class="px-2 select2-icon">
-                            <img src="{{asset('assets/images/icons/water-waves.png')}}" height="20" width="20" alt="" />
-                        </div>
-                        <select class="form-control form-select border-0 rounded-0" id="water" name="water[]" style="width:100%">
-                        </select>
-                    </div>
-                </div>
-
-                <div class="col-12">
-                    <div class="form-group my-1 d-flex align-items-center border-bottom">
-                        <div class="px-2 select2-icon">
-                            <img src="{{asset('assets/images/icons/fishing.png')}}" height="20" width="20" alt="" />
-                        </div>
-                        <select class="form-control form-select border-0 rounded-0" id="methods" name="methods[]" style="width:100%">
-                        </select>
-                    </div>
-                </div>
 
                 <div class="col-12 mb-2">
                     <div class="form-group my-1">
-                        <label class="mb-2">{{translate('Your budget')}}</label>
+                        <h5 class="mb-2">{{translate('Your budget')}}</h5>
                         <div class="price-range-slider">
                             <div id="price-slider-main"></div>
                             <div class="price-display mt-2">
-                                ₱ <span id="price-min-display">50</span> - ₱ <span id="price-max-display">2000+</span>
+                                £ <span id="price-min-display">50</span> - £ <span id="price-max-display">4,000</span>
                             </div>
                             <input type="hidden" name="price_min" id="price_min_main">
                             <input type="hidden" name="price_max" id="price_max_main">
                         </div>
                     </div>
                 </div>
+                <hr>
+            
+                {{-- Target Fish --}}
+                <div class="filter-section mb-3">
+                    <div class="form-group mb-3">
+                        <h5 class="mb-2">{{translate('Target Fish')}}</h5>
+                        <div class="checkbox-group">
+                            @foreach($alltargets as $target)
+                                @if(isset($targetFishCounts[$target->id]) && $targetFishCounts[$target->id] > 0)
+                                    <div class="form-check">
+                                        <input type="checkbox" 
+                                               class="form-check-input filter-checkbox" 
+                                               name="target_fish[]" 
+                                               id="fish_{{ $target->id }}" 
+                                               value="{{ $target->id }}"
+                                               {{ in_array($target->id, request()->get('target_fish', [])) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="fish_{{ $target->id }}">
+                                            {{ app()->getLocale() == 'en' ? $target->name_en : $target->name }}
+                                            <span class="count">({{ $targetFishCounts[$target->id] }})</span>
+                                        </label>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+                <hr>
 
-                <div class="col-sm-12 col-lg-12 ps-md-0">
-                    <button class="btn btn-sm theme-primary btn-theme-new w-100 h-100">@lang('message.Search')</button>    
+                {{-- Methods --}}
+                <div class="filter-section mb-3">
+                    <div class="form-group mb-3">
+                        <h5 class="mb-2">{{translate('Methods')}}</h5>
+                        <div class="checkbox-group">
+                            @foreach($guiding_methods as $method)
+                                @if(isset($methodCounts[$method->id]) && $methodCounts[$method->id] > 0)
+                                    <div class="form-check">
+                                        <input type="checkbox" 
+                                               class="form-check-input filter-checkbox" 
+                                               name="methods[]" 
+                                               id="method_{{ $method->id }}" 
+                                               value="{{ $method->id }}"
+                                               {{ in_array($method->id, request()->get('methods', [])) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="method_{{ $method->id }}">
+                                            {{ app()->getLocale() == 'en' ? $method->name_en : $method->name }}
+                                            <span class="count">({{ $methodCounts[$method->id] }})</span>
+                                        </label>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+                <hr>
+
+                {{-- Water Types --}}
+                <div class="filter-section mb-3">
+                    <div class="form-group mb-3">
+                        <h5 class="mb-2">{{translate('Water Types')}}</h5>
+                        <div class="checkbox-group">
+                            @foreach($guiding_waters as $water)
+                                @if(isset($waterTypeCounts[$water->id]) && $waterTypeCounts[$water->id] > 0)
+                                    <div class="form-check">
+                                        <input type="checkbox" 
+                                               class="form-check-input filter-checkbox" 
+                                               name="water[]" 
+                                               id="water_{{ $water->id }}" 
+                                               value="{{ $water->id }}"
+                                               {{ in_array($water->id, request()->get('water', [])) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="water_{{ $water->id }}">
+                                            {{ app()->getLocale() == 'en' ? $water->name_en : $water->name }}
+                                            <span class="count">({{ $waterTypeCounts[$water->id] }})</span>
+                                        </label>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
             </div>
         </form>
     </div>
 </div>
 
-@section('css_after')
+@push('guidingListingStyles')
     <style>
     .price-range-slider {
         padding: 10px 20px;
@@ -177,24 +203,111 @@
             box-shadow: none;
         }
     }
-    </style>
-@endsection
 
-@section('js_after')
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@14.6.3/distribute/nouislider.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/nouislider@14.6.3/distribute/nouislider.min.js"></script>
-    <script>
+    .filter-options .form-check {
+        margin-bottom: 0.5rem;
+    }
+
+    .filter-options .badge {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+        background-color: #f8f9fa !important;
+        color: #6c757d !important;
+        border: 1px solid #dee2e6;
+    }
+
+    .filter-options .form-check-label {
+        margin-right: 0.5rem;
+    }
+
+    .loading {
+        position: relative;
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .loading::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 2rem;
+        height: 2rem;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #E8604C;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        transform: translate(-50%, -50%);
+    }
+
+    @keyframes spin {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    .checkbox-group {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 8px;
+    }
+
+    .form-check {
+        margin-bottom: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .form-check:last-child {
+        margin-bottom: 0;
+    }
+
+    .form-check-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        cursor: pointer;
+    }
+
+    .count {
+        color: #666;
+        font-size: 0.9em;
+        margin-left: 8px;
+    }
+
+    .form-check-input:checked + .form-check-label {
+        color: #E8604C;
+    }
+
+    .text-muted.small {
+        padding: 8px;
+        text-align: center;
+    }
+    </style>
+    
+@endpush
+
+@push('guidingListingScripts')
+<script src="https://cdn.jsdelivr.net/npm/nouislider@14.6.3/distribute/nouislider.min.js"></script>
+<script>
     document.addEventListener('DOMContentLoaded', function() {
+        const filterForm = document.getElementById('filterContainer');
         // Initialize main price slider
         const priceSliderMain = document.getElementById('price-slider-main');
         if (priceSliderMain) {
+            // Get URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialMin = urlParams.get('price_min') || 50;
+            const initialMax = urlParams.get('price_max') || 4000;
+
             noUiSlider.create(priceSliderMain, {
-                start: [50, 2000],
+                start: [parseInt(initialMin), parseInt(initialMax)],
                 connect: true,
                 step: 50,
                 range: {
                     'min': 50,
-                    'max': 2000
+                    'max': 4000
                 },
                 format: {
                     to: function(value) {
@@ -219,88 +332,155 @@
                     priceMinDisplay.textContent = numberWithCommas(value);
                     hiddenMinMain.value = value;
                 } else {
-                    const displayValue = value >= 2000 ? '2,000+' : numberWithCommas(value);
-                    priceMaxDisplay.textContent = displayValue;
+                    priceMaxDisplay.textContent = numberWithCommas(value);
                     hiddenMaxMain.value = value;
                 }
             });
 
             // Only trigger filter update when mouse is released
-            priceSliderMain.noUiSlider.on('end', function(values) {
-                const min = values[0];
-                const max = values[1];
-                
-                // Update form and make AJAX request
-                const formData = new FormData(document.getElementById('filterContainer'));
-                formData.set('price_range', `${min}-${max}`);
-                
-                const queryString = new URLSearchParams(formData).toString();
-                const currentPath = window.location.pathname;
+            priceSliderMain.noUiSlider.on('end', updateResults);
+        }
 
-                fetch(`${currentPath}?${queryString}`, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Update the listings container
-                    const listingsContainer = document.querySelector('.tours-list__inner');
-                    if (listingsContainer) {
-                        listingsContainer.innerHTML = data.html;
-                        
-                        // Reinitialize any necessary JavaScript components
-                        reinitializeComponents();
-                    }
-                    
-                    // Update search message if it exists
-                    if (data.searchMessage) {
-                        const messageElement = document.querySelector('.alert.alert-info');
-                        if (messageElement) {
-                            messageElement.textContent = data.searchMessage;
-                        } else if (data.searchMessage.trim() !== '') {
-                            // Create new message element if it doesn't exist
-                            const newMessage = document.createElement('div');
-                            newMessage.className = 'alert alert-info mb-3';
-                            newMessage.role = 'alert';
-                            newMessage.textContent = data.searchMessage;
-                            listingsContainer.parentElement.insertBefore(newMessage, listingsContainer);
-                        }
-                    }
-                    
-                    // Update URL without page reload
-                    const newUrl = `${currentPath}?${queryString}`;
-                    window.history.pushState({ path: newUrl }, '', newUrl);
-                })
-                .catch(error => {
-                    console.error('Error updating results:', error);
-                });
+        // Add change event listener to all filter checkboxes
+        document.querySelectorAll('.filter-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                updateResults(); // Call the existing updateResults function
             });
+        });
 
-            // Set initial values if they exist in the URL
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('price_range')) {
-                const [min, max] = urlParams.get('price_range').split('-');
-                priceSliderMain.noUiSlider.set([min, max]);
+        function updateResults() {
+            const formData = new FormData(filterForm);
+            const queryString = new URLSearchParams(formData).toString();
+            const currentPath = window.location.pathname;
+
+            // Add loading state
+            const listingsContainer = document.querySelector('.tours-list__inner');
+            if (listingsContainer) {
+                listingsContainer.classList.add('loading');
+            }
+
+            fetch(`${currentPath}?${queryString}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (listingsContainer) {
+                    listingsContainer.innerHTML = data.html;
+                    listingsContainer.classList.remove('loading');
+                    reinitializeComponents();
+                }
+                
+                if (data.searchMessage) {
+                    updateSearchMessage(data.searchMessage, listingsContainer);
+                }
+                
+                // Update URL without page reload
+                const newUrl = `${currentPath}?${queryString}`;
+                window.history.pushState({ path: newUrl }, '', newUrl);
+
+                // Update the filter options based on available results
+                updateFilters(data);
+            })
+            .catch(error => {
+                console.error('Error updating results:', error);
+                if (listingsContainer) {
+                    listingsContainer.classList.remove('loading');
+                }
+            });
+        }
+
+        function updateSearchMessage(message, listingsContainer) {
+            const messageElement = document.querySelector('.alert.alert-info');
+            if (messageElement) {
+                messageElement.textContent = message;
+            } else if (message.trim() !== '') {
+                const newMessage = document.createElement('div');
+                newMessage.className = 'alert alert-info mb-3';
+                newMessage.role = 'alert';
+                newMessage.textContent = message;
+                listingsContainer.parentElement.insertBefore(newMessage, listingsContainer);
             }
         }
+
+        function updateFilters(data) {
+            function updateCheckboxGroup(name, counts) {
+                const checkboxes = document.querySelectorAll(`input[name="${name}[]"]`);
+                if (!checkboxes.length) {
+                    console.warn(`No checkboxes found for name: ${name}`);
+                    return;
+                }
+
+                const checkboxGroup = checkboxes[0].closest('.checkbox-group');
+                if (!checkboxGroup) {
+                    console.warn(`No checkbox group found for name: ${name}`);
+                    return;
+                }
+
+                const existingMsg = checkboxGroup.querySelector('.text-muted.small');
+                if (existingMsg) {
+                    existingMsg.remove();
+                }
+
+                let visibleCount = 0;
+                checkboxes.forEach(checkbox => {
+                    const checkboxContainer = checkbox.closest('.form-check');
+                    console.log(checkboxContainer);
+                    if (!checkboxContainer) return;
+
+                    const id = checkbox.value;
+                    const count = counts?.[id] || 0;
+                    
+                    // Keep checked items visible even if count is 0
+                    if (count === 0 && !checkbox.checked) {
+                        checkboxContainer.style.display = 'none';
+                    } else {
+                        checkboxContainer.style.display = '';
+                        visibleCount++;
+                        const countSpan = checkboxContainer.querySelector('.count');
+                        if (countSpan) {
+                            countSpan.textContent = `(${count})`;
+                        }
+                    }
+                });
+
+                // If no checkboxes are visible, show a message
+                if (visibleCount === 0) {
+                    const noResultsMsg = document.createElement('div');
+                    noResultsMsg.className = 'text-muted small';
+                    noResultsMsg.textContent = 'No options available';
+                    checkboxGroup.appendChild(noResultsMsg);
+                }
+            }
+
+            const filterCounts = data.filterCounts;
+            // Update all filter groups
+            if (filterCounts.targetFish) {
+                updateCheckboxGroup('target_fish', filterCounts.targetFish);
+            }
+            if (filterCounts.waters) {
+                updateCheckboxGroup('water', filterCounts.waters);
+            }
+            if (data.methodCounts) {
+                updateCheckboxGroup('methods', data.methodCounts);
+            }
+        }
+        
+        // Make updateFilters available globally
+        window.updateFilters = updateFilters;
     });
     
     function numberWithCommas(x) {
         return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
-    // Function to reinitialize components after AJAX update
     function reinitializeComponents() {
-        // Reinitialize carousels
         document.querySelectorAll('.carousel').forEach(carousel => {
             new bootstrap.Carousel(carousel, {
                 interval: false
             });
         });
-
-        // Reinitialize any other components that need it
-        // For example, tooltips, popovers, etc.
     }
-    </script>
-@endsection
+</script>
+@endpush
