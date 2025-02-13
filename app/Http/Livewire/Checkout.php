@@ -126,14 +126,19 @@ class Checkout extends Component
         $this->waters = $this->guiding->getWaterNames();
         $this->methods = $this->guiding->getFishingMethodNames();
         
-        $prices = json_decode($this->guiding->prices, true);
         $this->guidingprice = 0;
-        foreach ($prices as $price) {
-            if ($price['person'] == $this->persons) {
-                $this->guidingprice = $price['amount'];
-                break;
+        if($this->guiding->price_type == 'per_person'){
+            $prices = json_decode($this->guiding->prices, true);
+            foreach ($prices as $price) {
+                if ($price['person'] == $this->persons) {
+                    $this->guidingprice = $price['amount'];
+                    break;
+                }
             }
+        } else {
+            $this->guidingprice = ($this->guiding->price / $this->persons);
         }
+
         if ($this->guidingprice == 0 && !empty($prices)) {
             $lastPrice = end($prices);
             $this->guidingprice = $lastPrice['amount'] * $this->persons;
