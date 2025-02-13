@@ -426,7 +426,6 @@
                 let visibleCount = 0;
                 checkboxes.forEach(checkbox => {
                     const checkboxContainer = checkbox.closest('.form-check');
-                    console.log(checkboxContainer);
                     if (!checkboxContainer) return;
 
                     const id = checkbox.value;

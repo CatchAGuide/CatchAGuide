@@ -605,7 +605,7 @@
                     </div>
                     @endif
                     
-                    @if(count($otherguidings))
+                    @if(count($otherguidings) && ( request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != ""))
                     
                     <hr>
                     <div class="my-0 section-title">
