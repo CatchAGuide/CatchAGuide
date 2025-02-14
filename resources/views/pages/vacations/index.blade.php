@@ -326,7 +326,6 @@
                                                     @endforeach
                                                 @endif
                                             </div>
-
                                             @if(count(get_galleries_image_link($vacation, 1)) > 1)
                                                 <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls-{{$vacation->id}}" data-bs-slide="prev">
                                                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -359,15 +358,7 @@
                                                 <div class="d-none d-flex flex-column mt-4">
                                                 </div>
                                             </div>
-                                        </div>  
-                                            {{-- @if ($vacation->user->average_rating())
-                                            <div class="guidings-item-ratings">
-                                            <div class="ratings-score">
-                                                    <span class="text-warning">★</span>
-                                                    <span>{{$guiding->user->average_rating()}} </span>
-                                                </div>
-                                            </div>
-                                            @endif --}}
+                                        </div>
                                         </div>
                                         <div class="vacations-item-row">
                                             <div class="vacations-item-row-top">
