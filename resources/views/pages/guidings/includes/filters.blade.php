@@ -53,9 +53,9 @@
                     <div class="form-group mb-3">
                         <h5 class="mb-2">{{translate('Target Fish')}}</h5>
                         <div class="checkbox-group">
-                            @foreach($alltargets as $target)
+                            @foreach($alltargets as $index => $target)
                                 @if(isset($targetFishCounts[$target->id]) && $targetFishCounts[$target->id] > 0)
-                                    <div class="form-check">
+                                    <div class="form-check {{ $index >= 8 ? 'd-none extra-filter' : '' }}">
                                         <input type="checkbox" 
                                                class="form-check-input filter-checkbox" 
                                                name="target_fish[]" 
@@ -69,6 +69,7 @@
                                     </div>
                                 @endif
                             @endforeach
+                            <button type="button" class="btn btn-link see-more">See More</button>
                         </div>
                     </div>
                 </div>
@@ -79,9 +80,9 @@
                     <div class="form-group mb-3">
                         <h5 class="mb-2">{{translate('Methods')}}</h5>
                         <div class="checkbox-group">
-                            @foreach($guiding_methods as $method)
+                            @foreach($guiding_methods as $index => $method)
                                 @if(isset($methodCounts[$method->id]) && $methodCounts[$method->id] > 0)
-                                    <div class="form-check">
+                                    <div class="form-check {{ $index >= 8 ? 'd-none extra-filter' : '' }}">
                                         <input type="checkbox" 
                                                class="form-check-input filter-checkbox" 
                                                name="methods[]" 
@@ -95,6 +96,7 @@
                                     </div>
                                 @endif
                             @endforeach
+                            <button type="button" class="btn btn-link see-more">See More</button>
                         </div>
                     </div>
                 </div>
@@ -105,9 +107,9 @@
                     <div class="form-group mb-3">
                         <h5 class="mb-2">{{translate('Water Types')}}</h5>
                         <div class="checkbox-group">
-                            @foreach($guiding_waters as $water)
+                            @foreach($guiding_waters as $index => $water)
                                 @if(isset($waterTypeCounts[$water->id]) && $waterTypeCounts[$water->id] > 0)
-                                    <div class="form-check">
+                                    <div class="form-check {{ $index >= 8 ? 'd-none extra-filter' : '' }}">
                                         <input type="checkbox" 
                                                class="form-check-input filter-checkbox" 
                                                name="water[]" 
@@ -121,6 +123,7 @@
                                     </div>
                                 @endif
                             @endforeach
+                            <button type="button" class="btn btn-link see-more">See More</button>
                         </div>
                     </div>
                 </div>
@@ -366,6 +369,8 @@
             })
             .then(response => response.json())
             .then(data => {
+                window.filteredGuidings = data.guidings;
+
                 if (listingsContainer) {
                     listingsContainer.innerHTML = data.html;
                     listingsContainer.classList.remove('loading');
@@ -382,6 +387,11 @@
 
                 // Update the filter options based on available results
                 updateFilters(data);
+                console.log("test");
+                if (typeof updateMapMarkers === 'function') {
+                    console.log("test2");
+                    updateMapMarkers(data.guidings);
+                }
             })
             .catch(error => {
                 console.error('Error updating results:', error);
@@ -409,13 +419,13 @@
                 const checkboxes = document.querySelectorAll(`input[name="${name}[]"]`);
                 if (!checkboxes.length) {
                     console.warn(`No checkboxes found for name: ${name}`);
-                    return;
+                    // return;
                 }
 
                 const checkboxGroup = checkboxes[0].closest('.checkbox-group');
                 if (!checkboxGroup) {
                     console.warn(`No checkbox group found for name: ${name}`);
-                    return;
+                    // return;
                 }
 
                 const existingMsg = checkboxGroup.querySelector('.text-muted.small');
@@ -461,13 +471,23 @@
             if (filterCounts.waters) {
                 updateCheckboxGroup('water', filterCounts.waters);
             }
-            if (data.methodCounts) {
-                updateCheckboxGroup('methods', data.methodCounts);
+            if (filterCounts.methods) {
+                updateCheckboxGroup('methods', filterCounts.methods);
             }
         }
         
         // Make updateFilters available globally
         window.updateFilters = updateFilters;
+
+        document.querySelectorAll('.see-more').forEach(button => {
+            button.addEventListener('click', function() {
+                const checkboxGroup = this.closest('.checkbox-group');
+                checkboxGroup.querySelectorAll('.extra-filter').forEach(filter => {
+                    filter.classList.toggle('d-none');
+                });
+                this.textContent = this.textContent === 'See More' ? 'See Less' : 'See More';
+            });
+        });
     });
     
     function numberWithCommas(x) {

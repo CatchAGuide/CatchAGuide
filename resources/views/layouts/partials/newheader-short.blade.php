@@ -1221,6 +1221,30 @@ document.addEventListener('DOMContentLoaded', function() {
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)
     });
+
+    // Add input event listeners to place search inputs
+    ['searchPlace', 'searchPlaceShortDesktop'].forEach(inputId => {
+        const searchInput = document.getElementById(inputId);
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const form = this.closest('form');
+                const hiddenInputs = [
+                    form.querySelector('input[name="placeLat"]'),
+                    form.querySelector('input[name="placeLng"]'),
+                    form.querySelector('input[name="city"]'),
+                    form.querySelector('input[name="country"]'),
+                    form.querySelector('input[name="region"]')
+                ];
+
+                // Clear all hidden inputs if they have values
+                if (hiddenInputs.some(input => input && input.value)) {
+                    hiddenInputs.forEach(input => {
+                        if (input) input.value = '';
+                    });
+                }
+            });
+        }
+    });
 });
 
 function closeMobileMenu() {

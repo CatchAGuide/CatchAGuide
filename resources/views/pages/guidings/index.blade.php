@@ -756,7 +756,6 @@
         @include('pages.guidings.content.guidingModal')
     @endforeach
 
-
     <div class="modal show" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl" style="max-width: 100%; width: 96%; height:100%;">
             <div class="modal-content" style="height:90%;">
@@ -1029,7 +1028,6 @@
             $lat = isset($guidings[0]) ? $guidings[0]->lat : 51.165691;
             $lng = isset($guidings[0]) ? $guidings[0]->lng : 10.451526;
         @endphp
-
         const position =  { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }} , lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} }; 
         const { Map, InfoWindow } = await google.maps.importLibrary("maps");
         const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
@@ -1059,12 +1057,10 @@
         @endif
 
         function getRandomOffset() {
-        // Generate a random value between -0.00005 and 0.00005 (adjust the range as needed)
         return (Math.random() - 0.5) * 0.0080;
         }
 
         const markerCluster = new MarkerClusterer({ markers, map, mapStyle });
-        // Add click event listeners to individual markers inside the cluster
         google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
             map.setZoom(map.getZoom() + 2);
             map.setCenter(cluster.getCenter());
@@ -1097,6 +1093,10 @@
         var lng = position.coords.longitude;
         document.getElementById('placeLat').value = lat;
         document.getElementById('placeLng').value = lng;
+    }
+
+    function updateMapMarkers(guidings) {
+        console.log(window.filteredGuidings);
     }
 
 </script>

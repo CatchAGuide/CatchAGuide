@@ -119,7 +119,7 @@
     {!! $guidings->links('vendor.pagination.default') !!}
 @endif
 
-@if(count($otherguidings))
+@if(count($otherguidings) && ( request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != ""))
 <hr>
 <div class="my-0 section-title">
     <h2 class="h4 text-dark fw-bolder">{{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? translate('Additional Fishing Tour close to') . ' ' . request()->place : translate('Additional Fishing Tour') }}</h2> 

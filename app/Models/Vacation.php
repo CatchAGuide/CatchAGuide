@@ -13,8 +13,48 @@ use App\Traits\ModelImageTrait;
 class Vacation extends Model
 {
     use HasFactory, Geoly, ModelImageTrait;
-
-    protected $fillable = ['title', 'slug', 'location', 'city', 'country', 'latitude', 'longitude', 'region', 'gallery', 'best_travel_times', 'surroundings_description', 'target_fish', 'airport_distance', 'water_distance', 'shopping_distance', 'travel_included', 'travel_options', 'pets_allowed', 'smoking_allowed', 'disability_friendly', 'has_boat', 'has_guiding', 'accommodation_description', 'living_area', 'bedroom_count', 'bed_count', 'max_persons', 'min_rental_days', 'amenities', 'boat_description', 'equipment', 'basic_fishing_description', 'catering_info', 'package_price_per_person', 'accommodation_price', 'boat_rental_price', 'guiding_price', 'additional_services', 'included_services', 'status'];
+    protected $fillable = [
+        'title',
+        'slug', 
+        'location',
+        'city',
+        'country',
+        'latitude',
+        'longitude',
+        'region',
+        'gallery',
+        'best_travel_times',
+        'surroundings_description',
+        'target_fish',
+        'airport_distance',
+        'water_distance', 
+        'shopping_distance',
+        'travel_included',
+        'travel_options',
+        'pets_allowed',
+        'smoking_allowed',
+        'disability_friendly',
+        'has_boat',
+        'has_guiding',
+        'accommodation_description',
+        'living_area',
+        'bedroom_count',
+        'bed_count',
+        'max_persons',
+        'min_rental_days',
+        'amenities',
+        'boat_description',
+        'equipment',
+        'basic_fishing_description',
+        'catering_info',
+        'package_price_per_person',
+        'accommodation_price',
+        'boat_rental_price',
+        'guiding_price',
+        'additional_services',
+        'included_services',
+        'status'
+    ];
 
     public function accommodations(): HasMany
     {

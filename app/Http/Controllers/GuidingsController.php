@@ -171,7 +171,7 @@ class GuidingsController extends Controller
 
                 $query->where(function($query) use ($requestMethods) {
                     foreach($requestMethods as $methodId) {
-                        $query->orWhereJsonContains('fishing_methods', (int)$methodId);
+                        $query->whereJsonContains('fishing_methods', (int)$methodId);
                     }
                 });
             }
@@ -198,7 +198,7 @@ class GuidingsController extends Controller
 
                 $query->where(function($query) use ($requestWater) {
                     foreach($requestWater as $waterId) {
-                        $query->orWhereJsonContains('water_types', (int)$waterId);
+                        $query->whereJsonContains('water_types', (int)$waterId);
                     }
                 });
             }
@@ -206,7 +206,6 @@ class GuidingsController extends Controller
         }
 
         if($request->has('target_fish')){
-            
             $requestFish = array_filter($request->target_fish);
 
             if(count($requestFish)){
@@ -224,7 +223,7 @@ class GuidingsController extends Controller
 
                 $query->where(function($query) use ($requestFish) {
                     foreach($requestFish as $fishId) {
-                        $query->orWhereJsonContains('target_fish', (int)$fishId);
+                        $query->whereJsonContains('target_fish', (int)$fishId);
                     }
                 });
             }

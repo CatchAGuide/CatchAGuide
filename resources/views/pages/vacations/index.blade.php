@@ -526,8 +526,12 @@
     <!--News One End-->
 
     <div class="modal show" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl" style="width:90%!important; max-width: 100%; height:90%;">
-            <div class="modal-content" style="height:100%;">
+        <div class="modal-dialog modal-xl" style="max-width: 100%; width: 96%; height:100%;">
+            <div class="modal-content" style="height:90%;">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="mapModalLabel">Map</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
                 <div id="map" class="modal-body"></div>
             </div>
         </div>
@@ -690,7 +694,6 @@
         const { Map, InfoWindow } = await google.maps.importLibrary("maps");
         const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
     
-        //map = new google.maps.Map(document.getElementById("map"), {
         const map = new Map(document.getElementById("map"), {
             zoom: 5,
             center: position,
@@ -700,10 +703,8 @@
             streetViewControl: false,
         });
     
-        // The marker, positioned at Uluru
         const marker = new AdvancedMarkerElement({
             map: map,
-            position: position,
         });
     
         const markers = [];
@@ -714,20 +715,15 @@
         @if($allVacations->isEmpty())
             @include('pages.vacations.partials.maps',['vacations' => $othervacations])
         @else
-            console.log('allvacations');
             @include('pages.vacations.partials.maps',['vacations' => $allVacations])
         @endif
     
         function getRandomOffset() {
-          // Generate a random value between -0.00005 and 0.00005 (adjust the range as needed)
           return (Math.random() - 0.5) * 0.0080;
         }
     
         const markerCluster = new MarkerClusterer({ markers, map, mapStyle });
-        // Add click event listeners to individual markers inside the cluster
         google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
-            // You can control the zoom level here
-            // For example, zoom in by 2 levels when clicking on a cluster
             map.setZoom(map.getZoom() + 2);
             map.setCenter(cluster.getCenter());
         });
@@ -747,16 +743,12 @@
     window.addEventListener('load', initialize);
     
     window.addEventListener('load', function() {
-        var placeLatitude = '{{ request()->get('placeLat') }}'; // Replace with the actual value from the request
-        var placeLongitude = '{{ request()->get('placeLng') }}'; // Replace with the actual value from the request
+        var placeLatitude = '{{ request()->get('placeLat') }}';
+        var placeLongitude = '{{ request()->get('placeLng') }}';
     
         if (placeLatitude && placeLongitude) {
-            // The place latitude and longitude are present, so set the values in the form fields
             document.getElementById('placeLat').value = placeLatitude;
             document.getElementById('placeLng').value = placeLongitude;
-        } else {
-            // The place latitude and longitude are not present, so execute the geolocation function
-            // getLocation();
         }
     });
     
