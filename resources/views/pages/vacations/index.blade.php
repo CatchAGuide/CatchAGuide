@@ -526,8 +526,12 @@
     <!--News One End-->
 
     <div class="modal show" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl" style="width:90%!important; max-width: 100%; height:90%;">
-            <div class="modal-content" style="height:100%;">
+        <div class="modal-dialog modal-xl" style="max-width: 100%; width: 96%; height:100%;">
+            <div class="modal-content" style="height:90%;">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="mapModalLabel">Map</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
                 <div id="map" class="modal-body"></div>
             </div>
         </div>

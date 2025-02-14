@@ -687,7 +687,7 @@ class Guiding extends Model
         return collect($methodIds)->map(function($item) {
             if (is_numeric($item)) {
                 $method = Method::find($item);
-                if ($method) {
+                if ($method && $method->name) {
                     return [
                         'id' => $method->id,
                         'name' => $method->name
@@ -695,10 +695,13 @@ class Guiding extends Model
                 }
             }
             
-            return [
-                'id' => null,
-                'name' => $item
-            ];
+            if ($item) {
+                return [
+                    'id' => null,
+                    'name' => $item
+                ];
+            }
+            return null;
         })->filter()->toArray();
     }
 
@@ -718,7 +721,7 @@ class Guiding extends Model
         return collect($targetIds)->map(function($item) {
             if (is_numeric($item)) {
                 $target = Target::find($item);
-                if ($target) {
+                if ($target && $target->name) {
                     return [
                         'id' => $target->id,
                         'name' => $target->name
@@ -726,10 +729,13 @@ class Guiding extends Model
                 }
             }
             
-            return [
-                'id' => null,
-                'name' => $item
-            ];
+            if ($item) {
+                return [
+                    'id' => null,
+                    'name' => $item
+                ];
+            }
+            return null;
         })->filter()->toArray();
     }
 
@@ -748,7 +754,7 @@ class Guiding extends Model
         return collect($inclusionIds)->map(function($item) {
             if (is_numeric($item)) {
                 $inclusion = Inclussion::find($item);
-                if ($inclusion) {
+                if ($inclusion && $inclusion->name) {
                     return [
                         'id' => $inclusion->id,
                         'name' => $inclusion->name
@@ -756,10 +762,13 @@ class Guiding extends Model
                 }
             }
             
-            return [
-                'id' => null,
-                'name' => $item
-            ];
+            if ($item) {
+                return [
+                    'id' => null,
+                    'name' => $item
+                ];
+            }
+            return null;
         })->filter()->toArray();
     }
 
@@ -778,7 +787,7 @@ class Guiding extends Model
         return collect($waterIds)->map(function($item) {
             if (is_numeric($item)) {
                 $water = Water::find($item);
-                if ($water) {
+                if ($water && $water->name) {
                     return [
                         'id' => $water->id,
                         'name' => $water->name
@@ -786,10 +795,13 @@ class Guiding extends Model
                 }
             }
             
-            return [
-                'id' => null,
-                'name' => $item
-            ];
+            if ($item) {
+                return [
+                    'id' => null,
+                    'name' => $item
+                ];
+            }
+            return null;
         })->filter()->toArray();
     }
 
@@ -804,18 +816,22 @@ class Guiding extends Model
         return collect($boatExtras)->map(function($item) {
             if (is_numeric($item)) {
                 $extra = BoatExtras::find($item);
-                if ($extra) {
+                if ($extra && $extra->name) {
                     return [
                         'id' => $extra->id,
                         'name' => $extra->name
                     ];
                 }
+                return null;
             }
             
-            return [
-                'id' => null,
-                'name' => $item
-            ];
+            if ($item) {
+                return [
+                    'id' => null,
+                    'name' => $item
+                ];
+            }
+            return null;
         })->filter()->toArray();
     }
 
