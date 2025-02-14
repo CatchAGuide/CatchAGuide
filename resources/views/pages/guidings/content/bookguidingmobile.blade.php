@@ -51,14 +51,22 @@
     personSelect.addEventListener('change', function () {
         const selectedOption = this.options[this.selectedIndex];
         const personCount = selectedOption.value;
-        const price = selectedOption.getAttribute('data-price');
+        @if($guiding->price_type == 'per_person')
+            const price = selectedOption.getAttribute('data-price');
+        @else
+            const price = {{ $guiding->price }};
+        @endif
 
         if (price) {
             priceLabel.textContent = priceText;
             if (personCount === '1') {
                 priceDisplay.textContent = `${price}€`;
             } else {
-                priceDisplay.textContent = `${price}€ p.P.`;
+                @if($guiding->price_type == 'per_person')
+                    priceDisplay.textContent = `${price}€ p.P.`;
+                @else
+                    priceDisplay.textContent = `${Math.round(price / personCount)}€ p.P.`;
+                @endif
             }
             clearSelect.style.display = "block"; // Show the clear button
         }
