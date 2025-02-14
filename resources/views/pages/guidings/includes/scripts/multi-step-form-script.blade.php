@@ -413,12 +413,8 @@
                     
                     document.getElementById('duration_details').style.display = 'block';
                     if (durationType === 'multi_day') {
-                        document.getElementById('duration_days').style.display = 'block';
-                        document.getElementById('duration_hours').style.display = 'none';
                         document.getElementById('duration_days').value = durationCount;
                     } else {
-                        document.getElementById('duration_hours').style.display = 'block';
-                        document.getElementById('duration_days').style.display = 'none';
                         document.getElementById('duration_hours').value = durationCount;
                     }
                 }
@@ -1261,17 +1257,20 @@
 
         // Duration selection logic
         $('input[name="duration"]').change(function() {
-            var durationType = $(this).val();
-            $('#duration_details').show();
-            
-            if (durationType === 'half_day' || durationType === 'full_day') {
-                $('#hours_input').show();
-                $('#days_input').hide();
-            } else if (durationType === 'multi_day') {
-                $('#hours_input').hide();
-                $('#days_input').show();
+            const selectedDuration = $(this).val();
+            const durationDetails = $('#duration_details');
+            const hoursInput = $('#hours_input');
+            const daysInput = $('#days_input');
+
+            durationDetails.show(); // Show the duration details section
+
+            console.log(selectedDuration);
+            if (selectedDuration === 'multi_day') {
+                daysInput.show(); // Show days input for multi-day
+                hoursInput.hide(); // Hide hours input
             } else {
-                $('#duration_details').hide();
+                hoursInput.show(); // Show hours input for half/full day
+                daysInput.hide(); // Hide days input
             }
         });
         
