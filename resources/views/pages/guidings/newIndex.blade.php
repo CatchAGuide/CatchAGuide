@@ -563,13 +563,20 @@
     
                 </div>
     
-                    @php
-                        $boatInformation = $guiding->getBoatInformationAttribute();
-                    @endphp
+                @php
+                    $boatInformation = $guiding->getBoatInformationAttribute();
+                @endphp
                 <div class="tab-pane fade" id="boat" role="tabpanel" aria-labelledby="nav-boat-tab">
                     <div class="row card tab-card h-100 shadow m-0 p-2">
-                        <div class="col-md-12">
-                            @if(!empty(json_decode($boatInformation)))
+                        @if(!empty($guiding->additional_information))
+                            <div class="col-md-12">
+                                <strong class="subtitle-text">{{translate('Other boat information')}}</strong>
+                                <p>{{$guiding->additional_information}}</p>
+                            </div>
+                        @endif
+
+                        @if(!empty(json_decode($boatInformation)))
+                            <div class="col-md-12">
                                 <strong class="subtitle-text">{{translate('Boat')}}</strong>
                                 <!-- Boat Information as a Table -->
                                 <table class="table ">
@@ -582,8 +589,8 @@
                                         @endforeach
                                     </tbody>
                                 </table>
-                            @endif
-                        </div>
+                            </div>
+                        @endif
     
                         @if(!empty(json_decode( $guiding->boat_extras)))
                         <div class="col-md-6">
@@ -598,11 +605,11 @@
                             @endif
                         </div>
                         @endif
-                    </div>
     
-                    @if(empty($guiding->boat_type) && empty($guiding->boat_information) && empty($guiding->boat_extras))
-                        <p>{{ translate('No boat information specified') }}</p>
-                    @endif
+                        @if(empty(json_decode($boatInformation)) && empty(json_decode($guiding->boat_extras)) && ($guiding->additional_information == null || $guiding->additional_information == ''))
+                            <p>{{ translate('No boat information specified') }}</p>
+                        @endif
+                    </div>
                 </div>
     
     
