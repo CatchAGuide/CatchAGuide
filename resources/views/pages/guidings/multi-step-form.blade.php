@@ -531,7 +531,7 @@
                             <span class="input-group-text">{{ __('newguidings.number_of_hours') }}:</span>
                             <input type="number" id="duration_hours" name="duration_hours" class="form-control" value="{{ $formData['duration_hours'] ?? '' }}" min="1" max="24">
                         </div>
-                        <div id="days_input" class="input-group mt-2" style="display: none;">
+                        <div id="days_input" class="input-group mt-2">
                             <span class="input-group-text">{{ __('newguidings.number_of_days') }}:</span>
                             <input type="number" id="duration_days" name="duration_days" class="form-control" value="{{ $formData['duration_days'] ?? '' }}" min="2">
                         </div>
