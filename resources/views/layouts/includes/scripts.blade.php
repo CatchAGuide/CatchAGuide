@@ -199,21 +199,28 @@
                     document.getElementById(config.lat).value = place.geometry.location.lat();
                     document.getElementById(config.lng).value = place.geometry.location.lng();
 
-                    // Extract city and country from address components
+                    // Extract city, region and country from address components
                     const addressComponents = place.address_components;
-                    let city = '', country = '';
+                    let city = '', country = '', region = '';
                     
                     for (const component of addressComponents) {
-                        if (component.types.includes('locality')) {
+                        const types = component.types;
+                        if (types.includes('locality') || types.includes('sublocality') || types.includes('postal_town') || types.includes('"natural_feature"')) {
                             city = component.long_name;
                         }
-                        if (component.types.includes('country')) {
+                        if (types.includes('country')) {
                             country = component.long_name;
+                        }
+                        if (types.includes('administrative_area_level_1')) {
+                            region = component.long_name;
                         }
                     }
 
+                    console.log(place);
+
                     document.getElementById(config.city).value = city;
                     document.getElementById(config.country).value = country;
+                    document.getElementById(config.region).value = region;
                 });
             }
         });
