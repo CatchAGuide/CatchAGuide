@@ -268,7 +268,7 @@
                             </div>
                             <div class="detail-row">
                                 <span class="detail-label">@lang('thank-you.duration')</span>
-                                <span class="detail-value">{{ $booking->guiding->duration }} @lang('thank-you.hours')</span>
+                                <span class="detail-value">{{ $booking->guiding->duration }} {{ $booking->guiding->duration_type == 'multi_day' ? __('guidings.days') : __('guidings.hours') }}</span>
                             </div>
                             <div class="detail-row">
                                 <span class="detail-label">@lang('thank-you.location')</span>
