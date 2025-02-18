@@ -1138,4 +1138,56 @@
 
 <script src="https://cdn.jsdelivr.net/npm/core-js-bundle@3.30.2/minified.js"></script>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Move the event listener setup to a separate function so we can reuse it
+    function attachFilterRemoveListeners() {
+        document.querySelectorAll('.active-filters .btn-close').forEach(button => {
+            button.addEventListener('click', function() {
+                const filterType = this.dataset.filterType;
+                const filterId = this.dataset.filterId;
+                
+                // Find and uncheck the corresponding checkbox in the filter panel
+                const checkbox = document.querySelector(`#filterContainer input[name="${filterType}[]"][value="${filterId}"]`);
+                if (checkbox) {
+                    checkbox.checked = false;
+                    // Trigger the change event to update the results
+                    checkbox.dispatchEvent(new Event('change'));
+                }
+                
+                // Also find and uncheck the corresponding checkbox in the mobile filter panel
+                const mobileCheckbox = document.querySelector(`#filterContainerOffCanvass input[name="${filterType}[]"][value="${filterId}"]`);
+                if (mobileCheckbox) {
+                    mobileCheckbox.checked = false;
+                    // Trigger the change event to update the results
+                    mobileCheckbox.dispatchEvent(new Event('change'));
+                }
+                
+                // Remove the filter tag
+                this.closest('.badge').remove();
+            });
+        });
+    }
+
+    // Initial attachment of listeners
+    attachFilterRemoveListeners();
+
+    // Modify the existing reinitializeComponents function to include reattaching filter listeners
+    function reinitializeComponents() {
+        // Existing carousel initialization
+        document.querySelectorAll('.carousel').forEach(carousel => {
+            new bootstrap.Carousel(carousel, {
+                interval: false
+            });
+        });
+
+        // Reattach filter remove listeners
+        attachFilterRemoveListeners();
+    }
+
+    // Make reinitializeComponents available globally if needed
+    window.reinitializeComponents = reinitializeComponents;
+});
+</script>
+
 @endsection

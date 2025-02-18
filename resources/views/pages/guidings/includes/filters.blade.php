@@ -481,39 +481,75 @@
         });
 
         // Handle sort-by change
-        document.getElementById('sortby-2').addEventListener('change', function() {
-            const formData = new FormData(filterForm);
-            formData.set('sortby', this.value);
-            updateResults(formData);
-        });
-
-        // Handle active filter removal
-        document.querySelectorAll('.active-filters .btn-close').forEach(button => {
-            button.addEventListener('click', function() {
-                const filterType = this.dataset.filterType;
-                const filterId = this.dataset.filterId;
-                
-                // Find and uncheck the corresponding checkbox
-                const checkbox = document.querySelector(`input[name="${filterType}[]"][value="${filterId}"]`);
-                if (checkbox) {
-                    checkbox.checked = false;
+        const sortSelect = document.getElementById('sortby-2');
+        if (sortSelect) {
+            sortSelect.addEventListener('change', function() {
+                const form = this.closest('form');
+                if (form) {
+                    const formData = new FormData(form);
+                    updateResults(formData);
                 }
-                
-                updateResults();
+            });
+        }
+
+        function attachFilterRemoveListeners() {
+            document.querySelectorAll('.active-filters .btn-close').forEach(button => {
+                button.addEventListener('click', function() {
+                    const filterType = this.dataset.filterType;
+                    const filterId = this.dataset.filterId;
+                    
+                    // Find and uncheck the corresponding checkbox in both filter panels
+                    const checkbox = document.querySelector(`#filterContainer input[name="${filterType}[]"][value="${filterId}"]`);
+                    const mobileCheckbox = document.querySelector(`#filterContainerOffCanvass input[name="${filterType}[]"][value="${filterId}"]`);
+                    
+                    if (checkbox) {
+                        checkbox.checked = false;
+                        // Trigger form submission to update results
+                        const form = document.getElementById('filterContainer');
+                        if (form) {
+                            const formData = new FormData(form);
+                            updateResults(formData);
+                        }
+                    }
+                    
+                    if (mobileCheckbox) {
+                        mobileCheckbox.checked = false;
+                    }
+                    
+                    // Remove the filter tag
+                    this.closest('.badge').remove();
+                });
+            });
+        }
+
+        // Initial attachment of listeners
+        attachFilterRemoveListeners();
+
+        // Add change event listeners to all filter checkboxes
+        document.querySelectorAll('.filter-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const form = this.closest('form');
+                if (form) {
+                    const formData = new FormData(form);
+                    updateResults(formData);
+                }
             });
         });
+
+        function reinitializeComponents() {
+            document.querySelectorAll('.carousel').forEach(carousel => {
+                new bootstrap.Carousel(carousel, {
+                    interval: false
+                });
+            });
+            attachFilterRemoveListeners();
+        }
+
+        window.reinitializeComponents = reinitializeComponents;
     });
     
     function numberWithCommas(x) {
         return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
-
-    function reinitializeComponents() {
-        document.querySelectorAll('.carousel').forEach(carousel => {
-            new bootstrap.Carousel(carousel, {
-                interval: false
-            });
-        });
     }
 </script>
 @endpush

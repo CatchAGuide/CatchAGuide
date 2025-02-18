@@ -111,8 +111,29 @@ class GuidingsController extends Controller
             $query->orderByRaw("RAND($randomSeed)");
         } else {
             // Default ordering for all other cases
-            if (!$request->has('sortby')) {
-                $query->latest();
+            if ($request->has('sortby') && !empty($request->get('sortby'))) {
+                switch ($request->get('sortby')) {
+                    case 'newest':
+                        $query->orderBy('created_at', 'desc');
+                        break;
+                    case 'price-asc':
+                        $query->orderBy('lowest_price', 'asc');
+                        break;
+                    case 'price-desc':
+                        $query->orderBy('lowest_price', 'desc');
+                        break;
+                    case 'long-duration':
+                        $query->orderBy('duration', 'desc');
+                        break;
+                    case 'short-duration':
+                        $query->orderBy('duration', 'asc');
+                        break;
+                    default:
+                        // Keep default ordering if no valid sort option is provided
+                        if (!$hasOnlyPageParam) {
+                            $query->latest();
+                        }
+                }
             }
         }
 
@@ -124,32 +145,6 @@ class GuidingsController extends Controller
             $title .= __('guidings.Guest') . ' ' . $request->num_guests . ' | ';
             $filter_title .= __('guidings.Guest') . ' ' . $request->num_guests . ', ';
             $q = $query->where('max_guests','>=',$request->get('num_guests'));
-        }
-
-        // Apply sorting if specified
-        if($request->has('sortby') && !empty($request->get('sortby'))){
-            switch ($request->get('sortby')) {
-                case 'newest':
-                    $query->orderBy('created_at', 'desc');
-                    break;
-                case 'price-asc':
-                    $query->orderBy('lowest_price', 'asc');
-                    break;
-                case 'price-desc':
-                    $query->orderBy('lowest_price', 'desc');
-                    break;
-                case 'long-duration':
-                    $query->orderBy('duration', 'desc');
-                    break;
-                case 'short-duration':
-                    $query->orderBy('duration', 'asc');
-                    break;
-                default:
-                    // Keep default ordering if no valid sort option is provided
-                    if (!$hasOnlyPageParam) {
-                        $query->latest();
-                    }
-            }
         }
 
         if($request->has('methods') && !empty($request->get('methods'))){
@@ -349,9 +344,21 @@ class GuidingsController extends Controller
                 'methodCounts' => $methodCounts,
                 'waterTypeCounts' => $waterTypeCounts,
             ])->render();
+             // Add guiding data for map updates
+             $guidingsData = $guidings->map(function($guiding) {
+                return [
+                    'id' => $guiding->id,
+                    'slug' => $guiding->slug,
+                    'title' => $guiding->title,
+                    'location' => $guiding->location,
+                    'lat' => $guiding->lat,
+                    'lng' => $guiding->lng
+                ];
+            });
             
             return response()->json([
                 'html' => $view,
+                'guidings' => $guidingsData,
                 'searchMessage' => $searchMessage,
                 'ismobile' => request()->get('ismobile') ?? false,
                 'filterCounts' => [

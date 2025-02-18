@@ -10,6 +10,7 @@
                     <option value="" disabled selected>@lang('message.choose')...</option>
                     <option value="newest" {{request()->get('sortby') == 'newest' ? 'selected' : '' }}>@lang('message.newest')</option>
                     <option value="price-asc" {{request()->get('sortby') == 'price-asc' ? 'selected' : '' }}>@lang('message.lowprice')</option>
+                    {{-- <option value="price-desc" {{request()->get('sortby') == 'price-desc' ? 'selected' : '' }}>@lang('message.highprice')</option> --}}
                     <option value="short-duration" {{request()->get('sortby') == 'short-duration' ? 'selected' : '' }}>@lang('message.shortduration')</option>
                     <option value="long-duration" {{request()->get('sortby') == 'long-duration' ? 'selected' : '' }}>@lang('message.longduration')</option>
                 </select>
