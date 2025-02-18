@@ -401,13 +401,15 @@ class Guiding extends Model
 
     public function getGuidingPriceByPerson($person)
     {
-        $prices = json_decode($this->prices, true);
-        foreach($prices as $price){
-            if($price['person'] == $person){
-                return $price['amount'];
+        if ($this->price_type == 'per_person') {
+            $prices = json_decode($this->prices, true);
+            foreach($prices as $price){
+                if($price['person'] == $person){
+                    return $price['amount'];
+                }
             }
-
-            return $this->price;
+        } else {
+            return $this->price / $person;
         }
     }
 

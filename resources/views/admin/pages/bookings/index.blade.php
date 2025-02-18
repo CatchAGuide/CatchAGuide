@@ -30,17 +30,17 @@
                                     <thead>
                                     <tr>
                                         <th class="wd-20p border-bottom-0">ID</th>
-                                        <th class="wd-20p border-bottom-0">Kunde</th>
+                                        <th class="wd-20p border-bottom-0">Customer</th>
                                         <th class="wd-15p border-bottom-0">Phone #</th>
-                                        <th class="wd-15p border-bottom-0">Preis</th>
-                                        <th class="wd-15p border-bottom-0">Anteil Guide</th>
-                                        <th class="wd-15p border-bottom-0">Anteil CaG</th>
-                                        <th class="wd-15p border-bottom-0">Buchungsdatum</th>
-                                        <th class="wd-15p border-bottom-0">Transaktion</th>
+                                        <th class="wd-15p border-bottom-0">Price</th>
+                                        <th class="wd-15p border-bottom-0">Guide Share</th>
+                                        <th class="wd-15p border-bottom-0">CaG Share</th>
+                                        <th class="wd-15p border-bottom-0">Booking Date</th>
+                                        <th class="wd-15p border-bottom-0">Transaction</th>
                                         <th class="wd-15p border-bottom-0">Status</th>
                                         <th class="wd-15p border-bottom-0">Guide</th>
                                         <th class="wd-15p border-bottom-0">Guiding</th>
-                                        <th class="wd-15p border-bottom-0">Aktion</th>
+                                        <th class="wd-15p border-bottom-0">Action</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -49,11 +49,7 @@
                                                 <td>{{ $booking->id }}</td>
                                                 <td>
                                                     @if ($booking->user)
-                                                        @if($booking->is_guest)
-                                                            {{ $booking->user->firstname ?? 'Guest' }} {{ $booking->user->lastname ?? '' }}
-                                                        @else
-                                                            {{ $booking->user->full_name ?? 'No Name' }}
-                                                        @endif
+                                                        {{ $booking->user->firstname ?? 'Guest' }} {{ $booking->user->lastname ?? '' }}
                                                     @endif
                                                 </td>
                                                 <td>{{ $booking->phone }}</td>
