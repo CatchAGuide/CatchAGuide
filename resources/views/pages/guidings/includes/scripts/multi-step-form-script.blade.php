@@ -430,17 +430,37 @@
             }
 
             const extras = {!! json_encode($formData['pricing_extra'] ?? []) !!};
+            
             if (extras && extras.length > 0) {
+                // Clear existing extras first
+                $('#extras-container').empty();
+                
+                // Reset extraCount
+                extraCount = 0;
+                
                 extras.forEach((extra, index) => {
-                    if (index > 0) {
-                        $('#add-extra').click();
-                    }
-                    const nameInput = document.querySelector(`input[name="extra_name_${index + 1}"]`);
-                    const priceInput = document.querySelector(`input[name="extra_price_${index + 1}"]`);
-                    if (nameInput && priceInput) {
-                        nameInput.value = extra.name;
-                        priceInput.value = extra.price;
-                    }
+                    extraCount++;
+                    const newRow = `
+                        <div class="extra-row d-flex mb-2">
+                            <div class="input-group mt-2">
+                                <div class="dropdown extras-dropdown">
+                                    <span class="input-group-text d-none d-md-block">{{__('newguidings.additional_offer')}}</span>
+                                    <input type="text" id="customInput_${extraCount}" name="extra_name_${extraCount}" class="form-control dropdown-toggle extras" value="${extra.name}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" placeholder="{{__('newguidings.select_or_add_value')}}">
+                                    <div class="dropdown-menu w-100" id="suggestionsList_${extraCount}"></div>
+                                </div>
+                                <div class="price">
+                                    <span class="input-group-text d-none d-md-block">{{__('newguidings.price')}}</span>
+                                    <input type="number" class="form-control mr-2" name="extra_price_${extraCount}" value="${extra.price}" placeholder="{{__('newguidings.enter_price_per_person')}}">
+                                    <span class="input-group-text">€ {{ __('newguidings.per_person') }}</span>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-danger btn-sm remove-extra"><i class="fas fa-trash"></i></button>
+                        </div>
+                    `;
+                    $('#extras-container').append(newRow);
+                    
+                    // Initialize dropdown for this row
+                    initializeDropdown(`customInput_${extraCount}`, `suggestionsList_${extraCount}`);
                 });
             }
             
@@ -585,30 +605,41 @@
     });
 
     // Add extra pricing
-    
     window.extraCount = window.extraCount || 0;
     $('#add-extra').click(function() {
+        // Check if any empty extra rows exist
+        const emptyRows = Array.from(document.querySelectorAll('.extra-row')).filter(row => {
+            const input = row.querySelector('input[name^="extra_name_"]');
+            return input && !input.value.trim();
+        });
+
+        // If there are empty rows and we're in edit mode, don't add new row
+        const isEditMode = document.getElementById('is_update').value === '1';
+        if (isEditMode && emptyRows.length > 0) {
+            return;
+        }
+
         extraCount++;
         const newRow = `
             <div class="extra-row d-flex mb-2">
                 <div class="input-group mt-2">
-                <div class="dropdown extras-dropdown">
+                    <div class="dropdown extras-dropdown">
                         <span class="input-group-text d-none d-md-block">{{__('newguidings.additional_offer')}}</span>
-                        <input type="text" id="customInput_${extraCount}" name="extra_name_${extraCount}" class="form-control dropdown-toggle extras" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" placeholder="{{__('newguidings.select_or_add_value')}}">
+                        <input type="text" id="customInput_${extraCount}" name="extra_name_${extraCount}" class="form-control dropdown-toggle extras" value="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" placeholder="{{__('newguidings.select_or_add_value')}}">
                         <div class="dropdown-menu w-100" id="suggestionsList_${extraCount}"></div>
                     </div>
                     <div class="price">
-                    <span class="input-group-text d-none d-md-block">{{__('newguidings.price')}}</span>
-                    <input type="number" class="form-control mr-2" name="extra_price_${extraCount}" placeholder="{{__('newguidings.enter_price_per_person')}}">
-                    <span class="input-group-text">€ {{ __('newguidings.per_person') }}</span>
+                        <span class="input-group-text d-none d-md-block">{{__('newguidings.price')}}</span>
+                        <input type="number" class="form-control mr-2" name="extra_price_${extraCount}" value="" placeholder="{{__('newguidings.enter_price_per_person')}}">
+                        <span class="input-group-text">€ {{ __('newguidings.per_person') }}</span>
                     </div>
                 </div>
                 <button type="button" class="btn btn-danger btn-sm remove-extra"><i class="fas fa-trash"></i></button>
             </div>
         `;
         $('#extras-container').append(newRow);
-
-        // Initialize dropdown logic for the new input
+        
+        // Initialize dropdown for this row
         initializeDropdown(`customInput_${extraCount}`, `suggestionsList_${extraCount}`);
     });
 
@@ -689,81 +720,6 @@
         }
     }
 
-    // // Add this function to handle form submission
-    // function submitForm(form) {
-    //     const formData = new FormData(form);
-
-    //     try {
-    //         if (!imageManagerLoaded) {
-    //             console.error('ImageManager not initialized');
-    //             return;
-    //         }
-
-    //         const croppedImages = imageManagerLoaded.getCroppedImages();
-    //         formData.delete('title_image[]');
-
-    //         croppedImages.forEach((image, index) => {
-    //             if (image && image.dataUrl) {
-                    
-    //                 const blob = dataURItoBlob(image.dataUrl);
-    //                 formData.append(`title_image[]`, blob, `cropped_image_${index}.png`);
-    //             }
-    //         });
-
-    //         fetch(form.action, {
-    //             method: 'POST',
-    //             body: formData,
-    //             headers: {
-    //                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-    //                 'Accept': 'application/json'
-    //             }
-    //         })
-    //         .then(response => {
-    //             if (!response.ok) {
-    //                 return response.text().then(text => {
-    //                     try {
-    //                         return JSON.parse(text);
-    //                     } catch (e) {
-    //                         throw new Error(text);
-    //                     }
-    //                 });
-    //             }
-    //             return response.json();
-    //         })
-    //         .then(data => {
-    //             if (data.redirect_url) {
-    //                 window.location.href = data.redirect_url;
-    //             } else {
-    //                 displayValidationErrors(data.errors);
-    //             }
-    //         })
-    //         .catch(error => {
-    //             console.error('Error submitting form:', error);
-    //             if (error instanceof Error) {
-    //                 if (error.message.startsWith('<!DOCTYPE html>')) {
-    //                     console.error('Server returned an HTML error page. Check server logs for details.');
-    //                     alert('An unexpected error occurred. Please try again later.');
-    //                 } else {
-    //                     console.error(error.message);
-    //                     alert(error.message);
-    //                 }
-    //             } else if (typeof error === 'object' && error !== null) {
-    //                 displayValidationErrors(error.errors || {});
-    //             } else {
-    //                 alert('An unexpected error occurred. Please try again.');
-    //             }
-    //         })
-    //         .finally(() => {
-    //             const loadingScreen = document.getElementById('loadingScreen');
-    //             if (loadingScreen) {
-    //                 loadingScreen.style.display = 'none';
-    //             }
-    //         });
-    //     } catch (error) {
-    //         console.error('Error preparing form data:', error);
-    //         alert('An error occurred while preparing the form data. Please try again.');
-    //     }
-    // }
     function submitForm(form) {
         const formData = new FormData(form);
 
@@ -1264,7 +1220,6 @@
 
             durationDetails.show(); // Show the duration details section
 
-            console.log(selectedDuration);
             if (selectedDuration === 'multi_day') {
                 daysInput.show(); // Show days input for multi-day
                 hoursInput.hide(); // Hide hours input

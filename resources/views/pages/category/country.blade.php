@@ -1,9 +1,18 @@
 @extends('layouts.app-v2')
 
-@section('title', translate($row_data->name))
-@section('description', translate($row_data->title))
+@section('title', translate($row_data->title))
+@section('description', translate($row_data->introduction))
 @section('header_title', translate($row_data->title))
 @section('header_sub_title', translate($row_data->sub_title))
+
+@section('share_tags')
+    <meta property="og:title" content="{{translate($row_data->title)}}" />
+    <meta property="og:description" content="{{translate($row_data->introduction ?? "")}}" />
+    
+    @if(isset($row_data->thumbnail_path) && file_exists(public_path(str_replace(asset(''), '', asset($row_data->thumbnail_path)))))
+        <meta property="og:image" content="{{asset($row_data->thumbnail_path)}}"/>
+    @endif
+@endsection
 
 @section('custom_style')
 <style>
@@ -85,17 +94,22 @@
     }
 
     #map-placeholder {
-        width:100%;
+        width: 100%;
         height: 200px;
         background-image: url({{ url('') }}/assets/images/map-bg.png);
-        text-align: center;
-        padding-top: 40%;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
+
     #map-placeholder button {
-        position: absolute;
-        top: 44%;
-        left: 37%;
-    }     
+        position: static;
+        margin: 0;
+    }
+
     #offcanvasBottomSearch {
         height: 90%!important;
     }
