@@ -1,7 +1,7 @@
 @extends('layouts.app-v2')
 
-@section('title', translate($row_data->name))
-@section('description', translate($row_data->title))
+@section('title', translate($row_data->title))
+@section('description', translate($row_data->introduction))
 @section('header_title', translate($row_data->title))
 @section('header_sub_title', translate($row_data->sub_title))
 

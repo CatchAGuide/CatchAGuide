@@ -559,7 +559,7 @@ class Guiding extends Model
 
         if ($guidings->isNotEmpty()) {
             $returnData['ids'] = $guidings;
-            $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel1'));;
+            $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel1') . ': ' . count($guidings) . ' total');
             return $returnData;
         }
 
