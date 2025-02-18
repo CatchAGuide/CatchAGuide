@@ -353,6 +353,7 @@ class GuidingsController extends Controller
             return response()->json([
                 'html' => $view,
                 'searchMessage' => $searchMessage,
+                'ismobile' => request()->get('ismobile') ?? false,
                 'filterCounts' => [
                     'targetFish' => array_filter($targetFishCounts), // Only return non-zero counts
                     'methods' => array_filter($methodCounts),

@@ -993,7 +993,7 @@ input[type=number] {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="mobile-search" action="{{ $isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index') }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceMobile')">
+                <form id="mobile-search" action="{{ $isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index') }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceHeaderDesktop')">
                     @if ($isVacation)
                         <div class="mb-3">
                             <label class="form-label">{{translate('Country')}}</label>

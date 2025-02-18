@@ -1,4 +1,77 @@
 @if(count($guidings))
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        {{-- Sort By Dropdown --}}
+
+        @if($agent->ismobile() || request()->get('ismobile') == false)
+        <div class="d-flex align-items-center">
+            <span class="me-2">@lang('message.sortby'):</span>
+            <form action="{{route('guidings.index')}}" method="get" style="margin-bottom: 0;">
+                <select class="form-select form-select-sm" name="sortby" id="sortby-2" style="width: auto;">
+                    <option value="" disabled selected>@lang('message.choose')...</option>
+                    <option value="newest" {{request()->get('sortby') == 'newest' ? 'selected' : '' }}>@lang('message.newest')</option>
+                    <option value="price-asc" {{request()->get('sortby') == 'price-asc' ? 'selected' : '' }}>@lang('message.lowprice')</option>
+                    <option value="short-duration" {{request()->get('sortby') == 'short-duration' ? 'selected' : '' }}>@lang('message.shortduration')</option>
+                    <option value="long-duration" {{request()->get('sortby') == 'long-duration' ? 'selected' : '' }}>@lang('message.longduration')</option>
+                </select>
+                @foreach(request()->except('sortby') as $key => $value)
+                    @if(is_array($value))
+                        @foreach($value as $arrayValue)
+                            <input type="hidden" name="{{ $key }}[]" value="{{ $arrayValue }}">
+                        @endforeach
+                    @else
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endif
+                @endforeach
+            </form>
+        </div>
+        @endif
+
+        {{-- Active Filters --}}
+        <div class="active-filters d-flex flex-wrap gap-2">
+            @if(request()->has('target_fish'))
+                @foreach(request()->get('target_fish') as $fishId)
+                    @php
+                        $fish = $targetFishOptions->firstWhere('id', $fishId);
+                    @endphp
+                    @if($fish)
+                        <span class="badge bg-light text-dark border">
+                            {{ app()->getLocale() == 'en' ? $fish->name_en : $fish->name }}
+                            <button type="button" class="btn-close ms-2" data-filter-type="target_fish" data-filter-id="{{ $fishId }}"></button>
+                        </span>
+                    @endif
+                @endforeach
+            @endif
+
+            @if(request()->has('methods'))
+                @foreach(request()->get('methods') as $methodId)
+                    @php
+                        $method = $methodOptions->firstWhere('id', $methodId);
+                    @endphp
+                    @if($method)
+                        <span class="badge bg-light text-dark border">
+                            {{ app()->getLocale() == 'en' ? $method->name_en : $method->name }}
+                            <button type="button" class="btn-close ms-2" data-filter-type="methods" data-filter-id="{{ $methodId }}"></button>
+                        </span>
+                    @endif
+                @endforeach
+            @endif
+
+            @if(request()->has('water'))
+                @foreach(request()->get('water') as $waterId)
+                    @php
+                        $water = $waterTypeOptions->firstWhere('id', $waterId);
+                    @endphp
+                    @if($water)
+                        <span class="badge bg-light text-dark border">
+                            {{ app()->getLocale() == 'en' ? $water->name_en : $water->name }}
+                            <button type="button" class="btn-close ms-2" data-filter-type="water" data-filter-id="{{ $waterId }}"></button>
+                        </span>
+                    @endif
+                @endforeach
+            @endif
+        </div>
+    </div>
+
     @foreach($guidings as $guiding)
     <div class="row m-0 mb-2 guiding-list-item">
         <div class="col-md-12">

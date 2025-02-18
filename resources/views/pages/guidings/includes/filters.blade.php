@@ -1,38 +1,11 @@
-<div class="card d-block d-none d-sm-block mb-1">
-    <div class="card-header">
-        @lang('message.sortby'):
-    </div>
-    <div class="card-body border-bottom">
-        <form id="form-sortby-2" action="{{route('guidings.index')}}" method="get">
-            <select class="form-select form-select-sm" name="sortby" id="sortby-2">
-                <option value="" disabled selected>@lang('message.choose')...</option>
-                <option value="newest" {{request()->get('sortby') == 'newest' ? 'selected' : '' }}>@lang('message.newest')</option>
-                <option value="price-asc" {{request()->get('sortby') == 'price-asc' ? 'selected' : '' }}>@lang('message.lowprice')</option>
-                <option value="short-duration" {{request()->get('sortby') == 'short-duration' ? 'selected' : '' }}>@lang('message.shortduration')</option>
-                <option value="long-duration" {{request()->get('sortby') == 'long-duration' ? 'selected' : '' }}>@lang('message.longduration')</option>
-            </select>
-
-            @foreach(request()->except('sortby') as $key => $value)
-                @if(is_array($value))
-                    @foreach($value as $arrayValue)
-                        <input type="hidden" name="{{ $key }}[]" value="{{ $arrayValue }}">
-                    @endforeach
-                @else
-                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                @endif
-            @endforeach
-        </form>
-    </div>
-</div>
-
 <div class="card d-block d-none d-sm-block">
     <div class="card-header">
         @lang('destination.filter_by'):
     </div>
     <div class="card-body border-bottom">
         <form id="filterContainer" action="{{ $formAction }}" method="get" class="shadow-sm px-4 py-2">
+            <input type="hidden" name="ismobile" value="{{ $agent->ismobile() }}">
             <div class="row">
-
                 <div class="col-12 mb-2">
                     <div class="form-group my-1">
                         <h5 class="mb-2">{{translate('Your budget')}}</h5>
@@ -47,7 +20,7 @@
                     </div>
                 </div>
                 <hr>
-            
+
                 {{-- Target Fish --}}
                 <div class="filter-section mb-3">
                     <div class="form-group mb-3">
@@ -287,6 +260,23 @@
         padding: 8px;
         text-align: center;
     }
+
+    .active-filters .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5em 0.7em;
+        font-weight: normal;
+    }
+
+    .active-filters .btn-close {
+        padding: 0.25em;
+        font-size: 0.75em;
+        opacity: 0.5;
+    }
+
+    .active-filters .btn-close:hover {
+        opacity: 1;
+    }
     </style>
     
 @endpush
@@ -369,7 +359,8 @@
             })
             .then(response => response.json())
             .then(data => {
-                window.filteredGuidings = data.guidings;
+                // Store filtered guidings in window object
+                window.filteredGuidings = data.guidings || [];
 
                 if (listingsContainer) {
                     listingsContainer.innerHTML = data.html;
@@ -387,10 +378,10 @@
 
                 // Update the filter options based on available results
                 updateFilters(data);
-                console.log("test");
-                if (typeof updateMapMarkers === 'function') {
-                    console.log("test2");
-                    updateMapMarkers(data.guidings);
+
+                // Update map markers with new filtered guidings
+                if (typeof window.updateMapWithGuidings === 'function' && Array.isArray(data.guidings)) {
+                    window.updateMapWithGuidings(data.guidings);
                 }
             })
             .catch(error => {
@@ -486,6 +477,29 @@
                     filter.classList.toggle('d-none');
                 });
                 this.textContent = this.textContent === 'See More' ? 'See Less' : 'See More';
+            });
+        });
+
+        // Handle sort-by change
+        document.getElementById('sortby-2').addEventListener('change', function() {
+            const formData = new FormData(filterForm);
+            formData.set('sortby', this.value);
+            updateResults(formData);
+        });
+
+        // Handle active filter removal
+        document.querySelectorAll('.active-filters .btn-close').forEach(button => {
+            button.addEventListener('click', function() {
+                const filterType = this.dataset.filterType;
+                const filterId = this.dataset.filterId;
+                
+                // Find and uncheck the corresponding checkbox
+                const checkbox = document.querySelector(`input[name="${filterType}[]"][value="${filterId}"]`);
+                if (checkbox) {
+                    checkbox.checked = false;
+                }
+                
+                updateResults();
             });
         });
     });

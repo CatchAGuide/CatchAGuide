@@ -61,20 +61,9 @@
 
 @section('content')
     <!--Page Header Start-->
-    <!-- <section class="page-header">
-        <div class="page-header__top">
-            <div class="page-header-bg"
-                 style="background-image: url({{asset('assets/images/allguidings.jpg')}}); ">
-            </div>
-            <div class="page-header-bg-overly"></div>
-            <div class="container">
-                <div class="page-header__top-inner">
-                    <h2>@yield('title')</h2>
-                </div>
-            </div>
-        </div>
-        <div class="page-header__bottom">
-            <div class="container">
+    <div class="container">
+        <section class="page-header">
+            <div class="page-header__bottom">
                 <div class="page-header__bottom-inner">
                     <ul class="thm-breadcrumb list-unstyled">
 
@@ -88,15 +77,12 @@
                             <li><a href="{{route('profile.myguidings')}}">{{translate('Meine Guidings')}}</a></li>
                             <li><span>&#183;</span></li>
                         @endif
-
                         <li class="active">@yield('title')</li>
-
-
                     </ul>
                 </div>
             </div>
-        </div>
-    </section> -->
+        </section>
+    </div>
     <!--Page Header End-->
     <div class="container" style=" margin-bottom: 20px;">
         <div class="row mt-3">

@@ -116,9 +116,6 @@
     border-right: 4px solid transparent;
     }
 
-    #toggleFilterBtn{
-        display:none;
-    }
     .sort-row .form-select{
         width: auto;
     }
@@ -135,9 +132,6 @@
     }
 
     @media only screen and (min-width: 451px) and (max-width: 766px) {
-        #toggleFilterBtn{
-            display:block;
-        }
         #map-placeholder a.btn {
             top: 40%;
             left: 35%;
@@ -421,6 +415,7 @@
     <section class="tours-list">
         <div class="container">
             <div class="row">
+                <!-- Mobile Sorting -->
                 <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
                     <div class="d-grid gap-2 w-100">
                         <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
@@ -452,17 +447,17 @@
                                 @endif
                             </a>
                             <a class="btn border cag-btn-inverted" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)" style=" border-left: 2px solid #ccc!important; width:40%;"><i class="fa fa-map-marker-alt me-2"></i>@lang('destination.show_on_map')</a>
-
                         </div>
                     </div>
                 </div>
-                <div id="filterCard" class="col-sm-12 col-lg-3">
+
+                <!-- Desktop Filter -->
+                <div id="filterCard" class="col-sm-12 col-lg-3">        
                     <div class="card mb-2 d-none d-sm-block">
                         <div id="map-placeholder">
                             <a class="btn btn-primary" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)">@lang('destination.show_on_map')</a>
                         </div>
-                    </div>
-                    
+                    </div>            
                     @include('pages.guidings.includes.filters', ['formAction' => route('guidings.index')])
                 </div>
 
@@ -480,6 +475,77 @@
                         <div class="col-lg-12 col-sm-12">
                             <div class="tours-list__right">
                                 <div class="tours-list__inner" id="guidings-list">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        {{-- Sort By Dropdown --}}
+                                        @if(!$agent->ismobile())
+                                        <div class="d-flex align-items-center">
+                                            <span class="me-2">@lang('message.sortby'):</span>
+                                            <form action="{{route('guidings.index')}}" method="get" style="margin-bottom: 0;">
+                                                <select class="form-select form-select-sm" name="sortby" id="sortby-2" style="width: auto;">
+                                                    <option value="" disabled selected>@lang('message.choose')...</option>
+                                                    <option value="newest" {{request()->get('sortby') == 'newest' ? 'selected' : '' }}>@lang('message.newest')</option>
+                                                    <option value="price-asc" {{request()->get('sortby') == 'price-asc' ? 'selected' : '' }}>@lang('message.lowprice')</option>
+                                                    <option value="short-duration" {{request()->get('sortby') == 'short-duration' ? 'selected' : '' }}>@lang('message.shortduration')</option>
+                                                    <option value="long-duration" {{request()->get('sortby') == 'long-duration' ? 'selected' : '' }}>@lang('message.longduration')</option>
+                                                </select>
+                                                @foreach(request()->except('sortby') as $key => $value)
+                                                    @if(is_array($value))
+                                                        @foreach($value as $arrayValue)
+                                                            <input type="hidden" name="{{ $key }}[]" value="{{ $arrayValue }}">
+                                                        @endforeach
+                                                    @else
+                                                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                                    @endif
+                                                @endforeach
+                                            </form>
+                                        </div>
+                                        @endif
+
+                                        {{-- Active Filters --}}
+                                        <div class="active-filters d-flex flex-wrap gap-2">
+                                            @if(request()->has('target_fish'))
+                                                @foreach(request()->get('target_fish') as $fishId)
+                                                    @php
+                                                        $fish = $targetFishOptions->firstWhere('id', $fishId);
+                                                    @endphp
+                                                    @if($fish)
+                                                        <span class="badge bg-light text-dark border">
+                                                            {{ app()->getLocale() == 'en' ? $fish->name_en : $fish->name }}
+                                                            <button type="button" class="btn-close ms-2" data-filter-type="target_fish" data-filter-id="{{ $fishId }}"></button>
+                                                        </span>
+                                                    @endif
+                                                @endforeach
+                                            @endif
+
+                                            @if(request()->has('methods'))
+                                                @foreach(request()->get('methods') as $methodId)
+                                                    @php
+                                                        $method = $methodOptions->firstWhere('id', $methodId);
+                                                    @endphp
+                                                    @if($method)
+                                                        <span class="badge bg-light text-dark border">
+                                                            {{ app()->getLocale() == 'en' ? $method->name_en : $method->name }}
+                                                            <button type="button" class="btn-close ms-2" data-filter-type="methods" data-filter-id="{{ $methodId }}"></button>
+                                                        </span>
+                                                    @endif
+                                                @endforeach
+                                            @endif
+
+                                            @if(request()->has('water'))
+                                                @foreach(request()->get('water') as $waterId)
+                                                    @php
+                                                        $water = $waterTypeOptions->firstWhere('id', $waterId);
+                                                    @endphp
+                                                    @if($water)
+                                                        <span class="badge bg-light text-dark border">
+                                                            {{ app()->getLocale() == 'en' ? $water->name_en : $water->name }}
+                                                            <button type="button" class="btn-close ms-2" data-filter-type="water" data-filter-id="{{ $waterId }}"></button>
+                                                        </span>
+                                                    @endif
+                                                @endforeach
+                                            @endif
+                                        </div>
+                                    </div>
                                     @foreach($guidings as $guiding)
                                     <div class="row m-0 mb-2 guiding-list-item">
                                         <div class="col-md-12">
@@ -780,20 +846,6 @@
             <form id="filterContainerOffCanvass" action="{{route('guidings.index')}}" method="get" class="px-4 py-2">
                 <div class="row">
                     <div class="col-12">
-                        <div class="form-group my-1">
-                            <div class="input-group">
-                                <div class="input-group-prepend border-0 border-bottom ">
-                                    <span class=" d-flex align-items-center px-2 h-100"><i class="fas fa-map-marker-alt"></i></span>
-                                </div>
-                                <input id="searchPlace2" name="place" type="text" value="{{ request()->get('place') ? request()->get('place') : null }} @if(empty(request()->get('place')) && !empty(request()->get('country'))) {{request()->get('country')}} @endif" class="form-control border-0 border-bottom rounded-0" placeholder="@lang('message.enter-location')"  autocomplete="on">
-                            </div>
-                          <input type="hidden" id="LocationLat2" value="{{ request()->get('placeLat') ? request()->get('placeLat') : null }}" name="placeLat"/>
-                          <input type="hidden" id="LocationLng2" value="{{ request()->get('placeLng') ? request()->get('placeLng') : null }}" name="placeLng"/>
-                          <input type="hidden" id="LocationCity2" value="{{ request()->get('city') ? request()->get('city') : null }}" name="city"/>
-                          <input type="hidden" id="LocationCountry2" value="{{ request()->get('country') ? request()->get('country') : null }}" name="country"/>
-                        </div>
-                    </div>
-                    <div class="col-12">
                         <div class="input-group my-1">
                             <div class="input-group-prepend border-0 border-bottom ">
                                 <span class="d-flex align-items-center px-2 h-100">
@@ -874,23 +926,6 @@
         
         const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
         window.location.href = newUrl;
-    });
-
-    // Get the toggle button and filter container elements
-    var toggleBtn = document.getElementById('toggleFilterBtn');
-    var filterContainer = document.getElementById('filterContainer');
-
-    // Add click event listener to the toggle button
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', function() {
-            // Toggle the visibility of the filter container
-            filterContainer.classList.toggle('d-block');
-        });
-    }
-    $(function(){
-        $('#toggleFilterBtn').click(function(){
-            $('#filterCard').toggle();
-        });
     });
 
     initializeSelect2();
