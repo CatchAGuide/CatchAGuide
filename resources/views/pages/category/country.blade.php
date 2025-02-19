@@ -923,10 +923,11 @@ var toggleBtn = document.getElementById('toggleFilterBtn');
 var filterContainer = document.getElementById('filterContainer');
 
 // Add click event listener to the toggle button
-toggleBtn.addEventListener('click', function() {
-    // Toggle the visibility of the filter container
-    filterContainer.classList.toggle('d-block');
-});
+if (toggleBtn) {
+    toggleBtn.addEventListener('click', function() {
+        filterContainer.classList.toggle('d-block');
+    });
+}
 </script>
 
 <script>
@@ -1131,7 +1132,10 @@ $(document).ready(function() {
         $lat = isset($guidings[0]) ? $guidings[0]->lat : 51.165691;
         $lng = isset($guidings[0]) ? $guidings[0]->lng : 10.451526;
     @endphp
-    const position = { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }} , lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} ;
+    const position = { 
+        lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }},
+        lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} 
+    };
     const { Map, InfoWindow } = await google.maps.importLibrary("maps");
     const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
 
