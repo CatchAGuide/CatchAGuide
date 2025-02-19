@@ -68,7 +68,7 @@
                         <div class="footer-widget__column footer-widget__explore {{$agent->ismobile() ? 'text-center' : ''}}">
                             <h3 class="footer-widget__title">@lang('message.miscellaneous')</h3>
                             <ul class="list-unstyled footer-widget__explore-list">
-                                <li><a href="{{route('additional.about_us')}}">@lang('message.about-us')</a></li>
+                                <!-- <li><a href="{{route('additional.about_us')}}">@lang('message.about-us')</a></li> -->
                                 <li><a href="{{route('guidings.index')}}">@lang('message.Guiding')</a></li>
                                 <li><a href="{{route('profile.settings')}}">@lang('message.myaccount')</a></li>
                                 <li><a href="{{route('additional.contact')}}">@lang('message.contact')</a></li>
