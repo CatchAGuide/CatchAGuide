@@ -4,7 +4,7 @@
 @section('description',__('message.magazine_meta_description'))
 
 @section('header_title', __('message.Magazine'))
-@section('header_sub_title', '')
+@section('header_sub_title', __('message.Magazine_subtitle'))
 
 
 @section('content')

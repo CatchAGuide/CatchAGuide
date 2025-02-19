@@ -33,22 +33,17 @@
     <!--Contact Page Start-->
     <section class="contact-pages">
         <div class="container">
-                    <h1 class="h2">@lang('message.contact')</h1>
+                    <h1 class="h2 mt-5 mb-0">@lang('message.contact')</h1>
             <div class="row">
-                <div class="col-xl-4 col-lg-5">
+                <div class="col-12">
                     <div class="contact-page__left">
                         <div class="section-title text-left">
-                            <span class="section-title__tagline">@lang('contact.writeUs')!</span>
-                            <h2 class="section-title__title">@lang('contact.shareYourQuestion')</h2>
-                        </div>
-                        <div class="contact-page__social">
-                            <a href="#"><i class="fab fa-facebook"></i></a>
-                            <a href="tel:+49{{env('CONTACT_NUM')}}"><i class="fab fa-whatsapp"></i></a>
-                            <a href="https://www.instagram.com/catchaguide_official/"><i class="fab fa-instagram"></i></a>
+                            <!-- <span class="section-title__tagline">@lang('contact.writeUs')!</span> -->
+                            <h3 class="">@lang('contact.shareYourQuestion')</h3>
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-8 col-lg-7">
+                <div class="col-lg-6">
                     <div class="contact-page__right">
                         <div class="comment-form">
                             <form action="{{route('sendcontactmail')}}" method="POST">
@@ -71,8 +66,10 @@
                                         <div class="comment-form__input-box">
                                             <textarea name="description" placeholder="@lang('contact.feedback')"></textarea>
                                         </div>
-                                        {!! htmlFormSnippet() !!}
-                                        <button type="submit" class="thm-btn comment-form__btn">@lang('contact.btnSend')</button>
+                                        <div class="submit-container">
+                                            {!! htmlFormSnippet() !!}
+                                            <button type="submit" class="thm-btn comment-form__btn">@lang('contact.btnSend')</button>
+                                        </div>
                                     </div>
                                 </div>
                             </form>
@@ -80,54 +77,66 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-lg-6 mt-3 mt-lg-0">
+                    <div class="contact-page__social">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="tel:+49{{env('CONTACT_NUM')}}"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://www.instagram.com/catchaguide_official/"><i class="fab fa-instagram"></i></a>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <!--Information Single-->
+                            <div class="information__single">
+                                <div class="information__icon">
+                                    <span class="icon-place"></span>
+                                </div>
+                                <div class="information__text">
+                                    <p>Düsseldorf <br> NRW</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <!--Information Single-->
+                            <div class="information__single">
+                                <div class="information__icon">
+                                    <span class="icon-phone-call"></span>
+                                </div>
+                                <div class="information__text">
+                                    <h4>
+                                        <a href="tel:+49{{env('CONTACT_NUM')}}" class="information__number-1">+49 (0) {{env('CONTACT_NUM')}}</a>
+
+                                    </h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <!--Information Single-->
+                            <div class="information__single">
+                                <div class="information__icon">
+                                    <span class="icon-at"></span>
+                                </div>
+                                <div class="information__text">
+                                    <h4>
+                                        <a href="mailto:info.catchaguide@gmail.com" class="information__mail-2">info.catchaguide@gmail.com</a>
+                                    </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
     <!--Contact Page End-->
-
+    <section class="socials-container">
+        <div class="container">
+            
+        </div>
+    </section>
     <!--Information Start-->
     <section class="information">
         <div class="container">
-            <div class="row">
-                <div class="col-xl-3 col-lg-3">
-                    <!--Information Single-->
-                    <div class="information__single">
-                        <div class="information__icon">
-                            <span class="icon-place"></span>
-                        </div>
-                        <div class="information__text">
-                            <p>Düsseldorf <br> NRW</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-4 col-lg-4">
-                    <!--Information Single-->
-                    <div class="information__single">
-                        <div class="information__icon">
-                            <span class="icon-phone-call"></span>
-                        </div>
-                        <div class="information__text">
-                            <h4>
-                                <a href="tel:+49{{env('CONTACT_NUM')}}" class="information__number-1">+49 (0) {{env('CONTACT_NUM')}}</a>
-
-                            </h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-5 col-lg-5">
-                    <!--Information Single-->
-                    <div class="information__single">
-                        <div class="information__icon">
-                            <span class="icon-at"></span>
-                        </div>
-                        <div class="information__text">
-                            <h4>
-                                <a href="mailto:info.catchaguide@gmail.com" class="information__mail-2">info.catchaguide@gmail.com</a>
-                            </h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
+           
         </div>
     </section>
     <!--Information End-->
