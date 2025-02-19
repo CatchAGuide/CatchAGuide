@@ -45,6 +45,9 @@
                                     </thead>
                                     <tbody>
                                         @foreach($bookings as $booking)
+                                            @php
+                                                $price = $booking->guiding->price_type == 'per_boat' ? $booking->price * $booking->count_of_users : $booking->price;
+                                            @endphp
                                             <tr class="{{ $booking->is_guest ? 'bg-warning' : '' }}">
                                                 <td>{{ $booking->id }}</td>
                                                 <td>
@@ -53,8 +56,8 @@
                                                     @endif
                                                 </td>
                                                 <td>{{ $booking->phone }}</td>
-                                                <td>{{ two($booking->price) }} €</td>
-                                                <td>{{ two($booking->price - $booking->cag_percent) }} €</td>
+                                                <td>{{ two($price) }} €</td>
+                                                <td>{{ two($price - $booking->cag_percent) }} €</td>
                                                 <td>{{ two($booking->cag_percent) }} €</td>
                                                 <td>
                                                     @if($booking->blocked_event)
