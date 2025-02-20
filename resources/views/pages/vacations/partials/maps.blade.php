@@ -37,13 +37,9 @@
                 <div class="d-flex">
                     
                     @php
-                        if (file_exists(public_path($vacation->gallery[0]))) {
-                            $thumbnailPath = asset($vacation->gallery[0]);
-                        } else {
-                            $thumbnailPath = asset('images/placeholder_guide.jpg');
-                        }
+                        $gallery = get_galleries_image_link($vacation, 1);
                     @endphp
-                    <img src="{{$thumbnailPath}}" alt="{{translate($vacation->title)}}" style="width: 100%; height: 150px; object-fit: cover;">
+                    <img src="{{$gallery[0]}}" alt="{{translate($vacation->title)}}" style="width: 100%; height: 150px; object-fit: cover;">
                 </div>
                 <div class="p-2">
                     <a class="text-decoration-none" href="{{route('vacations.show',[$vacation->id,$vacation->slug])}}">

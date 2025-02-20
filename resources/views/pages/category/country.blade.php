@@ -715,8 +715,12 @@
     <!--News One End-->
 
     <div class="modal show" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl" style="width:90%!important; max-width: 100%; height:90%;">
-            <div class="modal-content" style="height:100%;">
+        <div class="modal-dialog modal-xl" style="max-width: 100%; width: 96%; height:100%;">
+            <div class="modal-content" style="height:90%;">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="mapModalLabel">Map</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
                 <div id="map" class="modal-body"></div>
             </div>
         </div>
@@ -812,48 +816,45 @@
     });
     
     $(document).ready(function(){
-    $('#carousel-regions').owlCarousel({
-        loop: false,
-        margin: 10,
-        nav: true,
-        navText: ['<', '>'],
-        autoplay: true,
-        responsive: {
-            0: {
-                items: 1
-            },
-            600: {
-                items: 2
-            },
-            1000: {
-                items: 4
+        $('#carousel-regions').owlCarousel({
+            loop: false,
+            margin: 10,
+            nav: true,
+            navText: ['<', '>'],
+            autoplay: true,
+            responsive: {
+                0: {
+                    items: 1
+                },
+                600: {
+                    items: 2
+                },
+                1000: {
+                    items: 4
+                }
             }
-        }
-    });
+        });
 
-    $('#carousel-cities').owlCarousel({
-        loop: false,            // Infinite looping
-        margin: 10,            // Space between items
-        nav: true,             // Show next/prev buttons
-        dots: true,            // Show pagination dots
-        autoplay: true,        // Enable auto-play
-        navText: ['<', '>'],
-        responsive: {
-            0: {
-                items: 1   // Show 1 item on small screens
-            },
-            600: {
-                items: 2   // Show 2 items on medium screens
-            },
-            1000: {
-                items: 4   // Show 4 items on large screens
+        $('#carousel-cities').owlCarousel({
+            loop: false,            // Infinite looping
+            margin: 10,            // Space between items
+            nav: true,             // Show next/prev buttons
+            dots: true,            // Show pagination dots
+            autoplay: true,        // Enable auto-play
+            navText: ['<', '>'],
+            responsive: {
+                0: {
+                    items: 1   // Show 1 item on small screens
+                },
+                600: {
+                    items: 2   // Show 2 items on medium screens
+                },
+                1000: {
+                    items: 4   // Show 4 items on large screens
+                }
             }
-        }
+        });
     });
-});
-
-
-
 
     let itemsCollapseCities = document.querySelectorAll('#carousel-cities .carousel-item');
     itemsCollapseCities.forEach((el) => {
@@ -1046,16 +1047,13 @@ $('.filter-form, #filterContainerOffCanvass').on('submit', function(e) {
                 params.append(key, value);
             }
         } else if (value) {
-            // Handle non-array parameters
             params.append(key, value);
         }
     }
 
-    // Redirect with clean parameters
     window.location.href = `${window.location.pathname}?${params.toString()}`;
 });
 
-// Initialize on document ready
 $(document).ready(function() {
     initializeSelect2();
 });
@@ -1066,9 +1064,7 @@ $(document).ready(function() {
     import { MarkerClusterer } from "https://cdn.skypack.dev/@googlemaps/markerclusterer@2.3.1";
      initializeMap();
 
-
      async function initializeMap() {
-
         var mapStyle = [
           {
             featureType: "poi",
@@ -1126,8 +1122,6 @@ $(document).ready(function() {
           },
         ];
 
-    //const { Map } = await google.maps.importLibrary("maps");
-
     @php
         $lat = isset($guidings[0]) ? $guidings[0]->lat : 51.165691;
         $lng = isset($guidings[0]) ? $guidings[0]->lng : 10.451526;
@@ -1139,7 +1133,6 @@ $(document).ready(function() {
     const { Map, InfoWindow } = await google.maps.importLibrary("maps");
     const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
 
-    //map = new google.maps.Map(document.getElementById("map"), {
     const map = new Map(document.getElementById("map"), {
         zoom: 5,
         center: position,
@@ -1149,13 +1142,10 @@ $(document).ready(function() {
         streetViewControl: false,
     });
 
-    // The marker, positioned at Uluru
     const marker = new AdvancedMarkerElement({
         map: map,
         position: position,
     });
-
-
 
     const markers = [];
     const infowindows = [];
@@ -1168,20 +1158,10 @@ $(document).ready(function() {
         @include('pages.guidings.partials.maps',['guidings' => $allGuidings])
     @endif
 
-
     function getRandomOffset() {
       // Generate a random value between -0.00005 and 0.00005 (adjust the range as needed)
       return (Math.random() - 0.5) * 0.0080;
     }
-
-
-    /* 
-    // Create the MarkerClusterer
-    const markerCluster = new MarkerClusterer(map, markers, {
-        imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m',
-        maxZoom: 12,
-    });
-    */
    
     const markerCluster = new MarkerClusterer({ markers, map, mapStyle });
     // Add click event listeners to individual markers inside the cluster
@@ -1193,8 +1173,6 @@ $(document).ready(function() {
     });
 
 }
-
-
 
 function initialize() {
     var input = document.getElementById('searchPlace');
@@ -1209,56 +1187,14 @@ function initialize() {
 window.addEventListener('load', initialize);
 
 window.addEventListener('load', function() {
-    var placeLatitude = '{{ request()->get('placeLat') }}'; // Replace with the actual value from the request
-    var placeLongitude = '{{ request()->get('placeLng') }}'; // Replace with the actual value from the request
+    var placeLatitude = '{{ request()->get('placeLat') }}';
+    var placeLongitude = '{{ request()->get('placeLng') }}';
 
     if (placeLatitude && placeLongitude) {
-        // The place latitude and longitude are present, so set the values in the form fields
         document.getElementById('placeLat').value = placeLatitude;
         document.getElementById('placeLng').value = placeLongitude;
-    } else {
-        // The place latitude and longitude are not present, so execute the geolocation function
-        // getLocation();
     }
-});
-
-function getLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showPosition);
-    } else {
-        console.log('Geolocation is not supported by this browser.');
-    }
-}
-
-function showPosition(position) {
-    var lat = position.coords.latitude;
-    var lng = position.coords.longitude;
-    document.getElementById('placeLat').value = lat;
-    document.getElementById('placeLng').value = lng;
-    
-    codeLatLng(lat, lng);
-}
-
-function codeLatLng(lat, lng) {
-    return null;
-    // var geocoder = new google.maps.Geocoder();
-    // var latlng = new google.maps.LatLng(lat, lng);
-    // geocoder.geocode({'latLng': latlng}, function (results, status) {
-    //     if (status === google.maps.GeocoderStatus.OK) {
-    //         if (results[0]) {
-    //             document.getElementById('searchPlace').value = results[0].formatted_address;
-    //         } else {
-    //             console.log('No results found');
-    //             return null;
-    //         }
-    //     } else {
-    //         console.log('Geocoder failed due to: ' + status);
-    //         return null;
-    //     }
-    // });
-}
-
-       
+});       
 </script>
 
 
