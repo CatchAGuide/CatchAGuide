@@ -35,6 +35,7 @@ use App\Models\ExtrasPrice;
 use App\Models\FishingType;
 use App\Models\BoatExtras;
 use App\Models\Destination;
+use App\Facades\Agent;
 
 class GuidingsController extends Controller
 {
@@ -324,6 +325,9 @@ class GuidingsController extends Controller
         $guiding_waters = Water::select('id', 'name', 'name_en')->get();
         $guiding_methods = Method::select('id', 'name', 'name_en')->get();
 
+        // Modify the mobile check to use the Agent facade
+        $isMobile = $request->get('ismobile') == 'true' || app('agent')->isMobile();
+
         if ($request->ajax()) {
             $view = view('pages.guidings.partials.guiding-list', [
                 'title' => $title,
@@ -343,6 +347,7 @@ class GuidingsController extends Controller
                 'targetFishCounts' => $targetFishCounts,
                 'methodCounts' => $methodCounts,
                 'waterTypeCounts' => $waterTypeCounts,
+                'isMobile' => $isMobile,
             ])->render();
              // Add guiding data for map updates
              $guidingsData = $guidings->map(function($guiding) {
@@ -360,7 +365,8 @@ class GuidingsController extends Controller
                 'html' => $view,
                 'guidings' => $guidingsData,
                 'searchMessage' => $searchMessage,
-                'ismobile' => request()->get('ismobile') ?? false,
+                'isMobile' => $isMobile,
+                'total' => $guidings->total(),
                 'filterCounts' => [
                     'targetFish' => array_filter($targetFishCounts), // Only return non-zero counts
                     'methods' => array_filter($methodCounts),
@@ -387,6 +393,7 @@ class GuidingsController extends Controller
             'targetFishCounts' => $targetFishCounts,
             'methodCounts' => $methodCounts,
             'waterTypeCounts' => $waterTypeCounts,
+            'isMobile' => $isMobile,
         ]);
     }
 

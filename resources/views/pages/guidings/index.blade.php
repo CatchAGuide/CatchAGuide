@@ -197,9 +197,6 @@
     #guidings-result {
         line-height: 14px;
     }
-    #offcanvasBottomSearch {
-        height: 90%!important;
-    }
     .pac-container {
         z-index: 2000;
     }
@@ -837,84 +834,7 @@
 
     <br>
 
-    <div class="offcanvas offcanvas-bottom" tabindex="-1" id="offcanvasBottomSearch" aria-labelledby="offcanvasBottomLabel">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasBottomLabel">Filter</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body small">
-            <form id="filterContainerOffCanvass" action="{{route('guidings.index')}}" method="get" class="px-4 py-2">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="input-group my-1">
-                            <div class="input-group-prepend border-0 border-bottom ">
-                                <span class="d-flex align-items-center px-2 h-100">
-                                    <i class="fas fa-user"></i>
-                                </span>
-                            </div>
-                            <select id="num-guestsOffCanvass" class="form-control form-select  border-0 border-bottom rounded-0 custom-select" name="num_guests">
-                                <option value="" disabled selected hidden>@lang('message.number-of-guests')</option>
-                                <option value="">@lang('message.choose')...</option>
-                                <option value="1" {{ request()->get('num_guests') ? request()->get('num_guests') == 1 ? 'selected' : null : null }}>1</option>
-                                <option value="2" {{ request()->get('num_guests') ? request()->get('num_guests') == 2 ? 'selected' : null : null }}>2</option>
-                                <option value="3" {{ request()->get('num_guests') ? request()->get('num_guests') == 3 ? 'selected' : null : null }}>3</option>
-                                <option value="4" {{ request()->get('num_guests') ? request()->get('num_guests') == 4 ? 'selected' : null : null }}>4</option>
-                                <option value="5" {{ request()->get('num_guests') ? request()->get('num_guests') == 5 ? 'selected' : null : null }}>5</option>
-                            </select>
-                        </div>
-                    </div>
-                 
-                    <div class="col-12">
-                        <div class="form-group my-1 d-flex align-items-center border-bottom">
-                            <div class="px-2 select2-icon">
-                                <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
-                            </div>
-                           
-                            <select class="form-control form-select border-0 rounded-0" id="target_fishOffCanvass" name="target_fish[]" style="width:100%">
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="col-12">
-                        <div class="form-group my-1 d-flex align-items-center border-bottom">
-                            <div class="px-2 select2-icon">
-                                <img src="{{asset('assets/images/icons/water-waves.png')}}" height="20" width="20" alt="" />
-                            </div>
-                            <select class="form-control form-select border-0  rounded-0" id="waterOffCanvass" name="water[]" style="width:100%">
-                    
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="form-group my-1 d-flex align-items-center border-bottom ">
-                            <div class="px-2 select2-icon">
-                                <img src="{{asset('assets/images/icons/fishing.png')}}" height="20" width="20" alt="" />
-                            </div>
-                            <select class="form-control form-select border-0 rounded-0" id="methodsOffCanvass" name="methods[]" style="width:100%">
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-12 mb-2">
-                        <div class="price-range-slider">
-                            <div class="price-display">
-                                <span>Price Range</span>
-                            </div>
-                            <div id="price-slider"></div>
-                            <div class="price-labels">
-                                <span class="price-label" id="price-min">50€</span>
-                                <span class="price-label" id="price-max">350€+</span>
-                            </div>
-                            <input type="hidden" id="price_min" name="price_min" value="50">
-                            <input type="hidden" id="price_max" name="price_max" value="350">
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-lg-12 ps-md-0">
-                        <button class="btn btn-sm theme-primary btn-theme-new w-100 h-100" >@lang('message.Search')</button>    
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
+    @include('pages.guidings.includes.filters-mobile', ['formAction' => route('guidings.index')])
 @endsection
 
 @stack('guidingListingScripts')
@@ -1140,31 +1060,42 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Move the event listener setup to a separate function so we can reuse it
     function attachFilterRemoveListeners() {
         document.querySelectorAll('.active-filters .btn-close').forEach(button => {
             button.addEventListener('click', function() {
                 const filterType = this.dataset.filterType;
                 const filterId = this.dataset.filterId;
                 
-                // Find and uncheck the corresponding checkbox in the filter panel
-                const checkbox = document.querySelector(`#filterContainer input[name="${filterType}[]"][value="${filterId}"]`);
-                if (checkbox) {
-                    checkbox.checked = false;
-                    // Trigger the change event to update the results
-                    checkbox.dispatchEvent(new Event('change'));
-                }
+                // Find and uncheck the corresponding checkbox in both desktop and mobile filter panels
+                const desktopCheckbox = document.querySelector(`#filterContainer input[name="${filterType}[]"][value="${filterId}"]`);
+                const mobileCheckbox = document.querySelector(`#filterContainerOffCanvas input[name="${filterType}[]"][value="${filterId}"]`);
                 
-                // Also find and uncheck the corresponding checkbox in the mobile filter panel
-                const mobileCheckbox = document.querySelector(`#filterContainerOffCanvass input[name="${filterType}[]"][value="${filterId}"]`);
+                // Uncheck both checkboxes if they exist
+                if (desktopCheckbox) {
+                    desktopCheckbox.checked = false;
+                }
                 if (mobileCheckbox) {
                     mobileCheckbox.checked = false;
-                    // Trigger the change event to update the results
-                    mobileCheckbox.dispatchEvent(new Event('change'));
+                }
+
+                // Get the form from the mobile filter panel
+                const mobileForm = document.getElementById('filterContainerOffCanvas');
+                if (mobileForm) {
+                    const formData = new FormData(mobileForm);
+                    // Call updateResults with the form data
+                    if (typeof window.updateResults === 'function') {
+                        window.updateResults(formData);
+                    }
                 }
                 
-                // Remove the filter tag
-                this.closest('.badge').remove();
+                // Remove all matching filter tags from both desktop and mobile views
+                document.querySelectorAll(`.active-filters .badge`).forEach(badge => {
+                    const badgeButton = badge.querySelector('.btn-close');
+                    if (badgeButton.dataset.filterType === filterType && 
+                        badgeButton.dataset.filterId === filterId) {
+                        badge.remove();
+                    }
+                });
             });
         });
     }
@@ -1172,21 +1103,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial attachment of listeners
     attachFilterRemoveListeners();
 
-    // Modify the existing reinitializeComponents function to include reattaching filter listeners
+    // Make sure reinitializeComponents includes reattaching filter listeners
     function reinitializeComponents() {
-        // Existing carousel initialization
         document.querySelectorAll('.carousel').forEach(carousel => {
             new bootstrap.Carousel(carousel, {
                 interval: false
             });
         });
-
+        
         // Reattach filter remove listeners
         attachFilterRemoveListeners();
     }
 
-    // Make reinitializeComponents available globally if needed
+    // Make functions available globally
     window.reinitializeComponents = reinitializeComponents;
+    window.attachFilterRemoveListeners = attachFilterRemoveListeners;
 });
 </script>
 

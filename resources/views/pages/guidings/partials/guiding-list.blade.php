@@ -1,8 +1,7 @@
 @if(count($guidings))
     <div class="d-flex justify-content-between align-items-center mb-3">
         {{-- Sort By Dropdown --}}
-
-        @if($agent->ismobile() || request()->get('ismobile') == false)
+        @if(!$agent->ismobile())
         <div class="d-flex align-items-center">
             <span class="me-2">@lang('message.sortby'):</span>
             <form action="{{route('guidings.index')}}" method="get" style="margin-bottom: 0;">
