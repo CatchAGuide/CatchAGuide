@@ -309,7 +309,7 @@ class GuidingsController extends Controller
             if($request->has('placeLat') && $request->has('placeLng') && !empty($request->get('placeLat')) && !empty($request->get('placeLng')) ){
                 $latitude = $request->get('placeLat');
                 $longitude = $request->get('placeLng');
-                $otherguidings = $this->otherGuidingsBasedByLocation($latitude,$longitude);
+                $otherguidings = $this->otherGuidingsBasedByLocation($latitude, $longitude, $allGuidings);
             }else{
                 $otherguidings = $this->otherGuidings();
             }
@@ -476,15 +476,36 @@ class GuidingsController extends Controller
         return $otherguidings;
     }
 
-    public function otherGuidingsBasedByLocation($latitude,$longitude){
-        $nearestlisting = Guiding::select(['guidings.*']) // Include necessary attributes here
-        ->selectRaw("(6371 * acos(cos(radians($latitude)) * cos(radians(lat)) * cos(radians(lng) - radians($longitude)) + sin(radians($latitude)) * sin(radians(lat)))) AS distance")
-        ->orderBy('distance')
-        ->where('status',1)
-        ->limit(10)
-        ->get();
+    public function otherGuidingsBasedByLocation($latitude, $longitude, $allGuidings)
+    {
+        // Get IDs of guidings that are already in allGuidings
+        $existingGuidingIds = $allGuidings->pluck('id')->toArray();
 
-        return $nearestlisting;
+        // Calculate distance using ST_Distance_Sphere and filter within 200km radius
+        $nearestListings = Guiding::select(['guidings.*'])
+            ->selectRaw("ST_Distance_Sphere(
+                point(lng, lat),
+                point(?, ?)
+            ) as distance", [
+                $longitude,
+                $latitude
+            ])
+            ->whereRaw("ST_Distance_Sphere(
+                point(lng, lat),
+                point(?, ?)
+            ) <= ?", [
+                $longitude,
+                $latitude,
+                200 * 1000 // 200km converted to meters
+            ])
+            ->whereNotIn('id', $existingGuidingIds) // Exclude existing guidings
+            ->where('status', 1)
+            ->orderByRaw('CASE WHEN distance IS NULL THEN 1 ELSE 0 END')
+            ->orderBy('distance') // Sort by nearest first
+            ->limit(10)
+            ->get();
+
+        return $nearestListings;
     }
     
     public function guidingsStore(StoreNewGuidingRequest $request)

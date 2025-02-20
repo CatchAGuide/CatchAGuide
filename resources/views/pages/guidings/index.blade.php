@@ -1008,7 +1008,14 @@
         @if($allGuidings->isEmpty())
             @include('pages.guidings.partials.maps',['guidings' => $otherguidings])
         @else
-            @include('pages.guidings.partials.maps',['guidings' => $allGuidings])
+            @php
+                // Merge main guidings with other guidings if they exist
+                $combinedGuidings = $allGuidings;
+                if (isset($otherguidings) && count($otherguidings) > 0) {
+                    $combinedGuidings = $allGuidings->concat($otherguidings);
+                }
+            @endphp
+            @include('pages.guidings.partials.maps',['guidings' => $combinedGuidings])
         @endif
 
         function getRandomOffset() {
