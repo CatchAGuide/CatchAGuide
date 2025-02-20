@@ -274,7 +274,7 @@ return [
 
 
     'Booking' => 'Jetzt reservieren',
-    'From' => 'Ab'
-    
+    'From' => 'Ab',
+    'Magazine_subtitle' => 'Aktuell, Unterhaltsam & Lehrreich - Beiträge rund ums Angeln'
 
 ];
