@@ -1,0 +1,40 @@
+
+section#cta{
+    .container{
+        background-image: url('/assets/images/world_map.svg');
+        background-repeat: no-repeat;
+        background-position: center;
+        padding: 20px;
+        height: 350px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-blend-mode: darken;
+        background-color: #00000094;
+    }
+    .cta-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        width: 100%;
+    }
+    .cta-left{
+        color: #fff;
+    }
+}
+@media (max-width:992px) {
+    section#cta{
+    .cta-row{
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+}
+@media (max-width:768px) {
+    section#cta{
+        .container{
+            height: 440px;
+        }
+    }
+}
