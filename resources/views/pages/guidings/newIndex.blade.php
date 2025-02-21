@@ -484,6 +484,9 @@
                                     </div>
                                 @endif
                             </div>
+                            @if(!empty(json_decode($guiding->pricing_extra)) && !empty( json_decode($guiding->inclusions)))
+                            <hr >
+                            @endif
                             <div class="col-6">
                             @if(!empty(json_decode($guiding->pricing_extra)))
                                     <div class="row">
@@ -743,6 +746,9 @@
                         </div>
                     @endif
                 </div>
+                @if(!empty(json_decode($guiding->pricing_extra)) && !empty( json_decode($guiding->inclusions)))
+                    <hr >
+                @endif
                 <div class="col-12">
                 @if(!empty(json_decode($guiding->pricing_extra)))
                     <div class="row">
