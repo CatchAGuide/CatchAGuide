@@ -100,6 +100,48 @@
                         </div>
                     </div>
                 </div>
+                <hr>
+                <div class="col-12 mb-2">
+                    <div class="form-group my-1">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="mb-0">{{translate('Duration')}}</h5>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="durationUnitSwitch">
+                                <label class="form-check-label" for="durationUnitSwitch">
+                                    <span id="durationUnitText" class="text-muted">Hours</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="duration-input d-flex justify-content-center align-items-center">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="decrementValue('duration')">-</button>
+                            <input type="number" 
+                                   class="form-control mx-2" 
+                                   name="duration" 
+                                   id="duration" 
+                                   min="1" 
+                                   value="{{ request()->get('duration', '') }}"
+                                   placeholder="Enter duration"
+                                   style="width: 100px;">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="incrementValue('duration')">+</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 mb-2">
+                    <div class="form-group my-1">
+                        <h5 class="mb-2">{{translate('Number of People')}}</h5>
+                        <div class="number-input d-flex justify-content-center align-items-center">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="decrementValue('people')">-</button>
+                            <input type="number" 
+                                   class="form-control mx-2" 
+                                   name="people" 
+                                   id="people" 
+                                   min="1" 
+                                   value="{{ request()->get('people', 1) }}"
+                                   style="width: 100px;">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="incrementValue('people')">+</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </form>
     </div>
@@ -227,6 +269,25 @@
         border: 1px solid #dee2e6;
         border-radius: 4px;
         padding: 8px;
+        position: relative;
+    }
+
+    .extra-filter {
+        display: none;
+    }
+
+    .extra-filter.show {
+        display: block !important; /* Override any inline styles */
+    }
+
+    .see-more {
+        position: sticky;
+        bottom: 0;
+        width: 100%;
+        background: white;
+        border-top: 1px solid #dee2e6;
+        margin-top: 8px;
+        padding-top: 8px;
     }
 
     .form-check {
@@ -277,62 +338,75 @@
     .active-filters .btn-close:hover {
         opacity: 1;
     }
+
+    .number-input,
+    .duration-input {
+        max-width: 200px;
+        margin: 0 auto;
+    }
+
+    .number-input input[type="number"],
+    .duration-input input[type="number"] {
+        text-align: center;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .number-input button,
+    .duration-input button {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .number-input input[type="number"]::-webkit-inner-spin-button,
+    .number-input input[type="number"]::-webkit-outer-spin-button,
+    .duration-input input[type="number"]::-webkit-inner-spin-button,
+    .duration-input input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .form-check-input:checked {
+        background-color: #E8604C;
+        border-color: #E8604C;
+    }
+
+    .form-switch .form-check-input {
+        width: 2.5em;
+    }
+
+    .form-check-label {
+        font-size: 0.9rem;
+    }
     </style>
     
 @endpush
 
 @push('guidingListingScripts')
 <script src="https://cdn.jsdelivr.net/npm/nouislider@14.6.3/distribute/nouislider.min.js"></script>
+<script src="{{ asset('js/filters-manager.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const filterForm = document.getElementById('filterContainer');
-        // Initialize main price slider
-        const priceSliderMain = document.getElementById('price-slider-main');
-        if (priceSliderMain) {
-            // Get URL parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            const initialMin = urlParams.get('price_min') || 50;
-            const initialMax = urlParams.get('price_max') || 4000;
 
-            noUiSlider.create(priceSliderMain, {
-                start: [parseInt(initialMin), parseInt(initialMax)],
-                connect: true,
-                step: 50,
-                range: {
-                    'min': 50,
-                    'max': 4000
-                },
-                format: {
-                    to: function(value) {
-                        return Math.round(value);
-                    },
-                    from: function(value) {
-                        return Number(value);
-                    }
-                }
-            });
-    
-            const priceMinDisplay = document.getElementById('price-min-display');
-            const priceMaxDisplay = document.getElementById('price-max-display');
-            const hiddenMinMain = document.getElementById('price_min_main');
-            const hiddenMaxMain = document.getElementById('price_max_main');
-    
-            // Update display values during sliding
-            priceSliderMain.noUiSlider.on('update', function(values, handle) {
-                const value = values[handle];
-    
-                if (handle === 0) {
-                    priceMinDisplay.textContent = numberWithCommas(value);
-                    hiddenMinMain.value = value;
-                } else {
-                    priceMaxDisplay.textContent = numberWithCommas(value);
-                    hiddenMaxMain.value = value;
-                }
-            });
+        // Initialize price slider
+        FilterManager.initPriceSlider(
+            'price-slider-main',
+            'price-min-display',
+            'price-max-display',
+            'price_min_main',
+            'price_max_main',
+            updateResults
+        );
 
-            // Only trigger filter update when mouse is released
-            priceSliderMain.noUiSlider.on('end', updateResults);
-        }
+        // Initialize duration switch
+        FilterManager.initDurationSwitch('durationUnitSwitch', 'durationUnitText', 'duration');
+
+        // Initialize see more buttons
+        FilterManager.initSeeMoreButtons();
 
         // Add change event listener to all filter checkboxes
         document.querySelectorAll('.filter-checkbox').forEach(checkbox => {
@@ -408,77 +482,59 @@
         function updateFilters(data) {
             function updateCheckboxGroup(name, counts) {
                 const checkboxes = document.querySelectorAll(`input[name="${name}[]"]`);
-                if (!checkboxes.length) {
-                    console.warn(`No checkboxes found for name: ${name}`);
-                    // return;
-                }
+                if (!checkboxes.length) return;
 
-                const checkboxGroup = checkboxes[0].closest('.checkbox-group');
+                // Try to find checkbox group through multiple possible parent selectors
+                let checkboxGroup = document.querySelector(`[data-filter-group="${name}"]`) || 
+                                  document.querySelector(`.${name}-group`) ||
+                                  checkboxes[0].closest('.checkbox-group');
+
+                // If still can't find the group, try to get the parent container
                 if (!checkboxGroup) {
-                    console.warn(`No checkbox group found for name: ${name}`);
-                    // return;
+                    console.warn(`Checkbox group not found for ${name}, using parent container`);
+                    checkboxGroup = checkboxes[0].closest('.form-group') || 
+                                  checkboxes[0].parentElement.closest('div');
                 }
 
-                const existingMsg = checkboxGroup.querySelector('.text-muted.small');
-                if (existingMsg) {
-                    existingMsg.remove();
+                if (!checkboxGroup) {
+                    console.error(`Could not find container for ${name}`);
+                    return;
                 }
 
-                let visibleCount = 0;
+                // Update each checkbox in the group
                 checkboxes.forEach(checkbox => {
-                    const checkboxContainer = checkbox.closest('.form-check');
-                    if (!checkboxContainer) return;
+                    const container = checkbox.closest('.form-check');
+                    if (!container) return;
 
                     const id = checkbox.value;
-                    const count = counts?.[id] || 0;
-                    
-                    // Keep checked items visible even if count is 0
-                    if (count === 0 && !checkbox.checked) {
-                        checkboxContainer.style.display = 'none';
+                    const count = counts[id] || 0;
+
+                    // Always show checked items
+                    if (checkbox.checked) {
+                        container.classList.remove('d-none');
                     } else {
-                        checkboxContainer.style.display = '';
-                        visibleCount++;
-                        const countSpan = checkboxContainer.querySelector('.count');
-                        if (countSpan) {
-                            countSpan.textContent = `(${count})`;
-                        }
+                        container.classList.toggle('d-none', count === 0);
+                    }
+
+                    // Update count display
+                    const countSpan = container.querySelector('.count');
+                    if (countSpan) {
+                        countSpan.textContent = `(${count})`;
                     }
                 });
-
-                // If no checkboxes are visible, show a message
-                if (visibleCount === 0) {
-                    const noResultsMsg = document.createElement('div');
-                    noResultsMsg.className = 'text-muted small';
-                    noResultsMsg.textContent = 'No options available';
-                    checkboxGroup.appendChild(noResultsMsg);
-                }
             }
 
-            const filterCounts = data.filterCounts;
+            // Ensure filterCounts exists and contains the expected data
+            const filterCounts = data.filterCounts || {};
+            
             // Update all filter groups
-            if (filterCounts.targetFish) {
-                updateCheckboxGroup('target_fish', filterCounts.targetFish);
-            }
-            if (filterCounts.waters) {
-                updateCheckboxGroup('water', filterCounts.waters);
-            }
-            if (filterCounts.methods) {
-                updateCheckboxGroup('methods', filterCounts.methods);
-            }
+            updateCheckboxGroup('target_fish', filterCounts.targetFish || {});
+            updateCheckboxGroup('water', filterCounts.waters || {});
+            updateCheckboxGroup('methods', filterCounts.methods || {});
         }
         
         // Make updateFilters available globally
         window.updateFilters = updateFilters;
-
-        document.querySelectorAll('.see-more').forEach(button => {
-            button.addEventListener('click', function() {
-                const checkboxGroup = this.closest('.checkbox-group');
-                checkboxGroup.querySelectorAll('.extra-filter').forEach(filter => {
-                    filter.classList.toggle('d-none');
-                });
-                this.textContent = this.textContent === 'See More' ? 'See Less' : 'See More';
-            });
-        });
 
         // Handle sort-by change
         const sortSelect = document.getElementById('sortby-2');
@@ -547,9 +603,5 @@
 
         window.reinitializeComponents = reinitializeComponents;
     });
-    
-    function numberWithCommas(x) {
-        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
 </script>
 @endpush

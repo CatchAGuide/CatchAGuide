@@ -96,6 +96,48 @@
                     <button type="button" class="btn btn-link see-more w-100 text-center">See More</button>
                 </div>
             </div>
+            
+            <hr>
+            <div class="filter-section mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0">{{translate('Duration')}}</h6>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="durationUnitSwitchMobile">
+                        <label class="form-check-label" for="durationUnitSwitchMobile">
+                            <span id="durationUnitTextMobile" class="text-muted">Hours</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="duration-input d-flex justify-content-center align-items-center px-3">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="decrementValue('duration_mobile')">-</button>
+                    <input type="number" 
+                           class="form-control mx-2" 
+                           name="duration" 
+                           id="duration_mobile" 
+                           min="1" 
+                           value="{{ request()->get('duration', 24) }}"
+                           placeholder="Enter duration"
+                           style="width: 100px;">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="incrementValue('duration_mobile')">+</button>
+                </div>
+            </div>
+            
+            {{-- Number of People Section --}}
+            <div class="filter-section mb-4">
+                <h6 class="mb-3">{{translate('Number of People')}}</h6>
+                <div class="number-input d-flex justify-content-center align-items-center px-3">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="decrementValue('people_mobile')">-</button>
+                    <input type="number" 
+                           class="form-control mx-2" 
+                           name="people" 
+                           id="people_mobile" 
+                           min="1" 
+                           value="{{ request()->get('people', 2) }}"
+                           style="width: 100px;">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="incrementValue('people_mobile')">+</button>
+                </div>
+            </div>
+            <hr>
         </form>
     </div>
 
@@ -181,17 +223,14 @@
     }
 
     .see-more {
-        padding: 0.5rem 0;
-        color: #0d6efd;
-        text-decoration: none;
-        border-top: 1px solid #dee2e6;
-        margin-top: 0.5rem;
         width: 100%;
         text-align: center;
+        padding: 0.5rem;
+        margin-top: 0.5rem;
+        border-top: 1px solid #dee2e6;
         background: none;
-        border-left: 0;
-        border-right: 0;
-        border-bottom: 0;
+        border: none;
+        color: #0d6efd;
         cursor: pointer;
     }
 
@@ -205,7 +244,7 @@
     }
 
     .extra-filter.show {
-        display: block;
+        display: block !important;
     }
 
     /* Price slider styles */
@@ -268,6 +307,49 @@
             animation: spin 1s linear infinite;
         }
     }
+
+    .number-input,
+    .duration-input {
+        max-width: 200px;
+        margin: 0 auto;
+    }
+
+    .number-input input[type="number"],
+    .duration-input input[type="number"] {
+        text-align: center;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .number-input button,
+    .duration-input button {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .number-input input[type="number"]::-webkit-inner-spin-button,
+    .number-input input[type="number"]::-webkit-outer-spin-button,
+    .duration-input input[type="number"]::-webkit-inner-spin-button,
+    .duration-input input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .form-check-input:checked {
+        background-color: #E8604C;
+        border-color: #E8604C;
+    }
+
+    .form-switch .form-check-input {
+        width: 2.5em;
+    }
+
+    .form-check-label {
+        font-size: 0.9rem;
+    }
 }
 
 @keyframes spin {
@@ -287,53 +369,19 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const filterForm = document.getElementById('filterContainerOffCanvas');
-        // Initialize main price slider
-        const priceSliderMain = document.getElementById('price-slider-mobile');
-        if (priceSliderMain) {
-            // Get URL parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            const initialMin = urlParams.get('price_min') || 50;
-            const initialMax = urlParams.get('price_max') || 4000;
 
-            noUiSlider.create(priceSliderMain, {
-                start: [parseInt(initialMin), parseInt(initialMax)],
-                connect: true,
-                step: 50,
-                range: {
-                    'min': 50,
-                    'max': 4000
-                },
-                format: {
-                    to: function(value) {
-                        return Math.round(value);
-                    },
-                    from: function(value) {
-                        return Number(value);
-                    }
-                }
-            });
-    
-            const priceMinDisplay = document.getElementById('price-min-display-mobile');
-            const priceMaxDisplay = document.getElementById('price-max-display-mobile');
-            const hiddenMinMain = document.getElementById('price_min_mobile');
-            const hiddenMaxMain = document.getElementById('price_max_mobile');
-    
-            // Update display values during sliding
-            priceSliderMain.noUiSlider.on('update', function(values, handle) {
-                const value = values[handle];
-    
-                if (handle === 0) {
-                    priceMinDisplay.textContent = numberWithCommas(value);
-                    hiddenMinMain.value = value;
-                } else {
-                    priceMaxDisplay.textContent = numberWithCommas(value);
-                    hiddenMaxMain.value = value;
-                }
-            });
+        // Initialize price slider
+        FilterManager.initPriceSlider(
+            'price-slider-mobile',
+            'price-min-display-mobile',
+            'price-max-display-mobile',
+            'price_min_mobile',
+            'price_max_mobile',
+            updateResults
+        );
 
-            // Only trigger filter update when mouse is released
-            priceSliderMain.noUiSlider.on('end', updateResults);
-        }
+        // Initialize duration switch
+        FilterManager.initDurationSwitch('durationUnitSwitchMobile', 'durationUnitTextMobile', 'duration_mobile');
 
         // Add change event listener to all filter checkboxes
         document.querySelectorAll('.mobile-filter-checkbox').forEach(checkbox => {
@@ -414,18 +462,23 @@
 
         function updateFilters(data) {
             function updateCheckboxGroup(name, counts) {
-                const checkboxes = document.querySelectorAll(`input[name="${name}[]"]`);
+                const checkboxes = document.querySelectorAll(`#filterContainerOffCanvas input[name="${name}[]"]`);
                 if (!checkboxes.length) {
                     console.warn(`No checkboxes found for name: ${name}`);
-                    // return;
+                    return;
                 }
 
-                const checkboxGroup = checkboxes[0].closest('.checkbox-group');
+                // Try to find checkbox group through multiple possible parent selectors
+                let checkboxGroup = document.querySelector(`#filterContainerOffCanvas [data-filter-group="${name}"]`) || 
+                                  document.querySelector(`#filterContainerOffCanvas .${name}-group`) ||
+                                  checkboxes[0].closest('.filter-section');
+
                 if (!checkboxGroup) {
-                    console.warn(`No checkbox group found for name: ${name}`);
-                    // return;
+                    console.error(`Could not find container for ${name}`);
+                    return;
                 }
 
+                // Remove any existing "no results" message
                 const existingMsg = checkboxGroup.querySelector('.text-muted.small');
                 if (existingMsg) {
                     existingMsg.remove();
@@ -438,21 +491,24 @@
 
                     const id = checkbox.value;
                     const count = counts?.[id] || 0;
-                    
-                    // Keep checked items visible even if count is 0
-                    if (count === 0 && !checkbox.checked) {
-                        checkboxContainer.style.display = 'none';
-                    } else {
-                        checkboxContainer.style.display = '';
+
+                    // Always show checked items
+                    if (checkbox.checked) {
+                        checkboxContainer.classList.remove('d-none');
                         visibleCount++;
-                        const countSpan = checkboxContainer.querySelector('.count');
-                        if (countSpan) {
-                            countSpan.textContent = `(${count})`;
-                        }
+                    } else {
+                        checkboxContainer.classList.toggle('d-none', count === 0);
+                        if (count > 0) visibleCount++;
+                    }
+
+                    // Update count display
+                    const countSpan = checkboxContainer.querySelector('.count');
+                    if (countSpan) {
+                        countSpan.textContent = `(${count})`;
                     }
                 });
 
-                // If no checkboxes are visible, show a message
+                // Show "no results" message if needed
                 if (visibleCount === 0) {
                     const noResultsMsg = document.createElement('div');
                     noResultsMsg.className = 'text-muted small';
@@ -461,87 +517,14 @@
                 }
             }
 
-            const filterCounts = data.filterCounts;
+            // Ensure filterCounts exists and contains the expected data
+            const filterCounts = data.filterCounts || {};
+            
             // Update all filter groups
-            if (filterCounts.targetFish) {
-                updateCheckboxGroup('target_fish', filterCounts.targetFish);
-            }
-            if (filterCounts.waters) {
-                updateCheckboxGroup('water', filterCounts.waters);
-            }
-            if (filterCounts.methods) {
-                updateCheckboxGroup('methods', filterCounts.methods);
-            }
+            updateCheckboxGroup('target_fish', filterCounts.targetFish || {});
+            updateCheckboxGroup('water', filterCounts.waters || {});
+            updateCheckboxGroup('methods', filterCounts.methods || {});
         }
-        
-        // Make updateFilters available globally
-        window.updateFilters = updateFilters;
-
-        document.querySelectorAll('.see-more').forEach(button => {
-            button.addEventListener('click', function() {
-                const checkboxGroup = this.closest('.checkbox-group');
-                checkboxGroup.querySelectorAll('.extra-filter').forEach(filter => {
-                    filter.classList.toggle('d-none');
-                });
-                this.textContent = this.textContent === 'See More' ? 'See Less' : 'See More';
-            });
-        });
-
-        // Handle sort-by change
-        const sortSelect = document.getElementById('sortby-2');
-        if (sortSelect) {
-            sortSelect.addEventListener('change', function() {
-                const form = this.closest('form');
-                if (form) {
-                    const formData = new FormData(form);
-                    updateResults(formData);
-                }
-            });
-        }
-
-        function attachFilterRemoveListeners() {
-            document.querySelectorAll('.active-filters .btn-close').forEach(button => {
-                button.addEventListener('click', function() {
-                    const filterType = this.dataset.filterType;
-                    const filterId = this.dataset.filterId;
-                    
-                    // Find and uncheck the corresponding checkbox in both filter panels
-                    const checkbox = document.querySelector(`#filterContainer input[name="${filterType}[]"][value="${filterId}"]`);
-                    const mobileCheckbox = document.querySelector(`#filterContainerOffCanvass input[name="${filterType}[]"][value="${filterId}"]`);
-                    
-                    if (checkbox) {
-                        checkbox.checked = false;
-                        // Trigger form submission to update results
-                        const form = document.getElementById('filterContainer');
-                        if (form) {
-                            const formData = new FormData(form);
-                            updateResults(formData);
-                        }
-                    }
-                    
-                    if (mobileCheckbox) {
-                        mobileCheckbox.checked = false;
-                    }
-                    
-                    // Remove the filter tag
-                    this.closest('.badge').remove();
-                });
-            });
-        }
-
-        // Initial attachment of listeners
-        attachFilterRemoveListeners();
-
-        // Add change event listeners to all filter checkboxes
-        document.querySelectorAll('.mobile-filter-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const form = this.closest('form');
-                if (form) {
-                    const formData = new FormData(form);
-                    updateResults(formData);
-                }
-            });
-        });
 
         function reinitializeComponents() {
             document.querySelectorAll('.carousel').forEach(carousel => {
@@ -553,10 +536,35 @@
         }
 
         window.reinitializeComponents = reinitializeComponents;
+
+        // Number input handlers for mobile
+        window.incrementValue = function(id) {
+            const input = document.getElementById(id);
+            const newValue = parseInt(input.value || 0) + 1;
+            input.value = newValue;
+            input.dispatchEvent(new Event('change'));
+        }
+
+        window.decrementValue = function(id) {
+            const input = document.getElementById(id);
+            const minValue = parseFloat(input.min || 1);
+            const currentValue = parseInt(input.value || 0);
+            if (currentValue > minValue) {
+                input.value = currentValue - 1;
+                input.dispatchEvent(new Event('change'));
+            }
+        }
+
+        // Add mobile inputs to the filter update logic
+        const durationMobile = document.getElementById('duration_mobile');
+        const peopleMobile = document.getElementById('people_mobile');
+        
+        if (durationMobile) {
+            durationMobile.addEventListener('change', updateResults);
+        }
+        if (peopleMobile) {
+            peopleMobile.addEventListener('change', updateResults);
+        }
     });
-    
-    function numberWithCommas(x) {
-        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
 </script>
 @endpush

@@ -392,21 +392,22 @@
 @include('layouts.schema.listings')
 @endsection
 @section('content')
-{{-- <div class="container"> --}}
-    {{-- <section class="page-header">
-        <div class="page-header__bottom">
-                <div class="page-header__bottom-inner">
-                    <ul class="thm-breadcrumb list-unstyled">
-                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                        <li><span>&#183;</span></li>
-                        <li class="active">
-                            {{ucwords( isset($place) ? translate('Alle Guidings bei ') . $place : translate('Alle Guidings'))}}
-                        </li>
-                    </ul>
+    <div class="container">
+        <section class="page-header">
+            <div class="page-header__bottom">
+                    <div class="page-header__bottom-inner">
+                        <ul class="thm-breadcrumb list-unstyled">
+                            <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                            <li><span>&#183;</span></li>
+                            <li class="active">
+                                {{ucwords( isset($place) ? translate('Alle Guidings bei ') . $place : translate('Alle Guidings'))}}
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section> --}}
+        </section>
+    </div>
 
     <!--Tours List Start-->
     <section class="tours-list">
@@ -805,12 +806,8 @@
                     </div>
                     @endif
                 </div>
-
             </div>
-
-     
         </div>
-
     </section>
     <!--Tours List End-->
 
@@ -1034,7 +1031,6 @@
         var placeLongitude = '{{ request()->get('placeLng') }}';
 
         if (placeLatitude && placeLongitude) {
-            // Update both LocationLat/Lng and LocationLat2/Lng2 elements
             document.getElementById('LocationLat').value = placeLatitude;
             document.getElementById('LocationLng').value = placeLongitude;
             document.getElementById('LocationLat2').value = placeLatitude;
@@ -1056,11 +1052,6 @@
         document.getElementById('placeLat').value = lat;
         document.getElementById('placeLng').value = lng;
     }
-
-    function updateMapMarkers(guidings) {
-        console.log(window.filteredGuidings);
-    }
-
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/core-js-bundle@3.30.2/minified.js"></script>
