@@ -443,10 +443,7 @@
                 // Update the filter options based on available results
                 FilterManager.updateFilters(data);
 
-                // Update map markers with new filtered guidings
-                if (typeof window.updateMapWithGuidings === 'function' && Array.isArray(data.guidings)) {
-                    window.updateMapWithGuidings(data.guidings);
-                }
+                window.updateMapWithGuidings(data.guidings);
             })
             .catch(error => {
                 console.error('Error updating results:', error);

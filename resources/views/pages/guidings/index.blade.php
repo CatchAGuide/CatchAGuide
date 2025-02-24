@@ -917,7 +917,14 @@
 
 <script type="module">
     import { MarkerClusterer } from "https://cdn.skypack.dev/@googlemaps/markerclusterer@2.3.1";
+    let map; // Make map variable accessible in wider scope
+    let markerCluster; // Make markerCluster accessible in wider scope
+    let isDuplicateCoordinate;
+    const markers = [];
+    const infowindows = [];
+    const uniqueCoordinates = [];
     initializeMap();
+
     async function initializeMap() {
         var mapStyle = [
           {
@@ -984,23 +991,17 @@
         const { Map, InfoWindow } = await google.maps.importLibrary("maps");
         const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
 
-        const map = new Map(document.getElementById("map"), {
-            zoom: 5,
-            center: position,
-            styles: mapStyle,
-            mapId: "DEMO_MAP_ID",
-            mapTypeControl: false,
-            streetViewControl: false,
-        });
-
-        const marker = new AdvancedMarkerElement({
-            map: map,
-        });
-
-        const markers = [];
-        const infowindows = [];
-        const uniqueCoordinates = [];
-        let isDuplicateCoordinate;  
+        // Initialize map only if it hasn't been initialized yet
+        if (!map) {
+            map = new Map(document.getElementById("map"), {
+                zoom: 5,
+                center: position,
+                styles: mapStyle,
+                mapId: "DEMO_MAP_ID",
+                mapTypeControl: false,
+                streetViewControl: false,
+            });
+        }
 
         @if($allGuidings->isEmpty())
             @include('pages.guidings.partials.maps',['guidings' => $otherguidings])
@@ -1016,15 +1017,94 @@
         @endif
 
         function getRandomOffset() {
-        return (Math.random() - 0.5) * 0.0080;
+            return (Math.random() - 0.5) * 0.0080;
         }
 
-        const markerCluster = new MarkerClusterer({ markers, map, mapStyle });
+        markerCluster = new MarkerClusterer({ markers, map, mapStyle });
         google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
             map.setZoom(map.getZoom() + 2);
             map.setCenter(cluster.getCenter());
         });
     }
+
+    window.updateMapWithGuidings = function(guidings) {
+        // Clear existing markers
+        markers.forEach(marker => marker.setMap(null));
+        
+        // Clear marker cluster
+        if (markerCluster) {
+            markerCluster.clearMarkers();
+        }
+
+        // Clear arrays but keep the map instance
+        markers.length = 0;
+        infowindows.forEach(infowindow => infowindow.close());
+        infowindows.length = 0;
+        uniqueCoordinates.length = 0;
+
+        // Add new markers for each guiding
+        guidings.forEach(guiding => {
+            if (guiding.lat && guiding.lng) {
+                const location = { lat: parseFloat(guiding.lat), lng: parseFloat(guiding.lng) };
+
+                const isDuplicateCoordinate = uniqueCoordinates.some(coordinate => {
+                    return coordinate.lat === location.lat && coordinate.lng === location.lng;
+                });
+
+                let marker;
+
+                if (isDuplicateCoordinate) {
+                    marker = new google.maps.marker.AdvancedMarkerElement({
+                        position: {
+                            lat: location.lat + ((Math.random() - 0.5) * 0.0080),
+                            lng: location.lng + ((Math.random() - 0.5) * 0.0080)
+                        },
+                        map: map
+                    });
+                } else {
+                    marker = new google.maps.marker.AdvancedMarkerElement({
+                        position: location,
+                        map: map
+                    });
+                    uniqueCoordinates.push(location);
+                }
+
+                markers.push(marker);
+
+                const infowindow = new google.maps.InfoWindow({
+                    content: `
+                        <div class="card p-0 border-0" style="width: 200px; overflow: hidden;">
+                            <div class="card-body border-0 p-0">
+                                <div class="d-flex">
+                                    <img src="${guiding.thumbnail || '/images/placeholder_guide.jpg'}" alt="${guiding.title}" style="width: 100%; height: 150px; object-fit: cover;">
+                                </div>
+                                <div class="p-2">
+                                    <a class="text-decoration-none" href="/guidings/${guiding.id}/${guiding.slug}">
+                                        <h5 class="card-title mb-1" style="font-size: 14px; font-weight: bold; color: #333;">${guiding.title}</h5>
+                                    </a>
+                                    <div class="text-muted small">${guiding.location}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `
+                });
+
+                infowindows.push(infowindow);
+
+                marker.addListener("click", () => {
+                    infowindows.forEach((iw) => {
+                        iw.close();
+                    });
+                    infowindow.open(map, marker);
+                });
+            }
+        });
+
+        // Update marker cluster with new markers
+        if (markerCluster) {
+            markerCluster.addMarkers(markers);
+        }
+    };
 
     window.addEventListener('load', function() {
         var placeLatitude = '{{ request()->get('placeLat') }}';
