@@ -102,9 +102,6 @@ class GuidingsController extends Controller
             }
         }
 
-        // Only apply random ordering if:
-        // 1. There are no query parameters except page
-        // 2. We're on page 1 or no page is specified
         $hasOnlyPageParam = count(array_diff(array_keys($request->all()), ['page'])) === 0;
         $isFirstPage = !$request->has('page') || $request->get('page') == 1;
 
@@ -140,12 +137,6 @@ class GuidingsController extends Controller
 
         if($request->has('page')){
             $title .= __('guidings.Page') . ' ' . $request->page . ' - ';
-        }
-
-        if($request->has('num_guests') && !empty($request->get('num_guests'))){
-            $title .= __('guidings.Guest') . ' ' . $request->num_guests . ' | ';
-            $filter_title .= __('guidings.Guest') . ' ' . $request->num_guests . ', ';
-            $q = $query->where('max_guests','>=',$request->get('num_guests'));
         }
 
         if($request->has('methods') && !empty($request->get('methods'))){
@@ -236,6 +227,14 @@ class GuidingsController extends Controller
             $query->havingRaw('lowest_price >= ? AND lowest_price <= ?', [$min_price, $max_price]);
         }
 
+        if ($request->has('duration_types') && !empty($request->get('duration_types'))) {
+            $query->whereIn('duration_type', $request->get('duration_types'));
+        }
+
+        if ($request->has('num_persons') && !empty($request->get('num_persons'))) {
+            $query->whereIn('max_guests', $request->get('num_persons'));
+        }
+
         $radius = null; // Radius in miles
         if($request->has('radius')){
 
@@ -267,13 +266,19 @@ class GuidingsController extends Controller
         // Get all guidings before pagination to extract available options
         $allGuidings = $query->with(['target_fish', 'methods', 'water_types', 'boatType'])->get();
         
-        // Extract unique target fish, methods and water types from current results
+        // Extract unique target fish, methods, water types and durations from current results
         $availableTargetFish = collect();
         $availableMethods = collect();
         $availableWaterTypes = collect();
+        $durationCounts = [
+            'multi_day' => 0,
+            'half_day' => 0,
+            'full_day' => 0
+        ];
         $targetFishCounts = [];
         $methodCounts = [];
         $waterTypeCounts = [];
+        $personCounts = [];
 
         foreach ($allGuidings as $guiding) {
             // For target fish
@@ -296,7 +301,17 @@ class GuidingsController extends Controller
             foreach ($waterTypes as $waterId) {
                 $waterTypeCounts[$waterId] = ($waterTypeCounts[$waterId] ?? 0) + 1;
             }
+
+            // Count durations
+            if (isset($guiding->duration_type)) {
+                $durationCounts[$guiding->duration_type] = ($durationCounts[$guiding->duration_type] ?? 0) + 1;
+            }
+
+            if (isset($guiding->max_guests)) {
+                $personCounts[$guiding->max_guests] = ($personCounts[$guiding->max_guests] ?? 0) + 1;
+            }
         }
+        ksort($personCounts); // Sort by number of persons
 
         // Get the models for these IDs, only including items with counts > 0
         $targetFishOptions = Target::whereIn('id', array_keys(array_filter($targetFishCounts)))->get();
@@ -347,6 +362,8 @@ class GuidingsController extends Controller
                 'targetFishCounts' => $targetFishCounts,
                 'methodCounts' => $methodCounts,
                 'waterTypeCounts' => $waterTypeCounts,
+                'durationCounts' => $durationCounts,
+                'personCounts' => $personCounts,
                 'isMobile' => $isMobile,
             ])->render();
              // Add guiding data for map updates
@@ -368,9 +385,11 @@ class GuidingsController extends Controller
                 'isMobile' => $isMobile,
                 'total' => $guidings->total(),
                 'filterCounts' => [
-                    'targetFish' => array_filter($targetFishCounts), // Only return non-zero counts
-                    'methods' => array_filter($methodCounts),
-                    'waters' => array_filter($waterTypeCounts)
+                    'targetFish' => $targetFishCounts,
+                    'methods' => $methodCounts,
+                    'waters' => $waterTypeCounts,
+                    'durations' => $durationCounts,
+                    'persons' => $personCounts
                 ]
             ]);
         }
@@ -393,6 +412,8 @@ class GuidingsController extends Controller
             'targetFishCounts' => $targetFishCounts,
             'methodCounts' => $methodCounts,
             'waterTypeCounts' => $waterTypeCounts,
+            'durationCounts' => $durationCounts,
+            'personCounts' => $personCounts,
             'isMobile' => $isMobile,
         ]);
     }

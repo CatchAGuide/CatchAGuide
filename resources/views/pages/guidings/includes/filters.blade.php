@@ -100,45 +100,58 @@
                         </div>
                     </div>
                 </div>
+
                 <hr>
-                <div class="col-12 mb-2">
-                    <div class="form-group my-1">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h5 class="mb-0">{{translate('Duration')}}</h5>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="durationUnitSwitch">
-                                <label class="form-check-label" for="durationUnitSwitch">
-                                    <span id="durationUnitText" class="text-muted">Hours</span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="duration-input d-flex justify-content-center align-items-center">
-                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="decrementValue('duration')">-</button>
-                            <input type="number" 
-                                   class="form-control mx-2" 
-                                   name="duration" 
-                                   id="duration" 
-                                   min="1" 
-                                   value="{{ request()->get('duration', '') }}"
-                                   placeholder="Enter duration"
-                                   style="width: 100px;">
-                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="incrementValue('duration')">+</button>
+                <div class="filter-section mb-3">
+                    <div class="form-group mb-3">
+                        <h5 class="mb-2">{{translate('Duration')}}</h5>
+                        <div class="checkbox-group">
+                            @php
+                                $durationLabels = [
+                                    'half_day' => translate('Half Day'),
+                                    'full_day' => translate('Full Day'),
+                                    'multi_day' => translate('Multi Day')
+                                ];
+                            @endphp
+                            @foreach($durationLabels as $durationType => $label)
+                                @if(isset($durationCounts[$durationType]) && $durationCounts[$durationType] > 0)
+                                    <div class="form-check">
+                                        <input type="checkbox" 
+                                               class="form-check-input filter-checkbox" 
+                                               name="duration_types[]" 
+                                               id="duration_{{ $durationType }}" 
+                                               value="{{ $durationType }}"
+                                               {{ in_array($durationType, request()->get('duration_types', [])) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="duration_{{ $durationType }}">
+                                            {{ $label }}
+                                            <span class="count">({{ $durationCounts[$durationType] }})</span>
+                                        </label>
+                                    </div>
+                                @endif
+                            @endforeach
                         </div>
                     </div>
                 </div>
-                <div class="col-12 mb-2">
-                    <div class="form-group my-1">
+                
+                <hr>
+                <div class="filter-section mb-3">
+                    <div class="form-group mb-3">
                         <h5 class="mb-2">{{translate('Number of People')}}</h5>
-                        <div class="number-input d-flex justify-content-center align-items-center">
-                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="decrementValue('people')">-</button>
-                            <input type="number" 
-                                   class="form-control mx-2" 
-                                   name="people" 
-                                   id="people" 
-                                   min="1" 
-                                   value="{{ request()->get('people', 1) }}"
-                                   style="width: 100px;">
-                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="incrementValue('people')">+</button>
+                        <div class="checkbox-group">
+                            @foreach($personCounts as $persons => $count)
+                                <div class="form-check">
+                                    <input type="checkbox" 
+                                           class="form-check-input filter-checkbox" 
+                                           name="num_persons[]" 
+                                           id="persons_{{ $persons }}" 
+                                           value="{{ $persons }}"
+                                           {{ in_array((string)$persons, request()->get('num_persons', [])) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="persons_{{ $persons }}">
+                                        {{ translate('Up to') }} {{ $persons }} {{ translate('person'.($persons > 1 ? 's' : '')) }}
+                                        <span class="count">({{ $count }})</span>
+                                    </label>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -403,7 +416,7 @@
         );
 
         // Initialize duration switch
-        FilterManager.initDurationSwitch('durationUnitSwitch', 'durationUnitText', 'duration');
+        // FilterManager.initDurationSwitch('durationUnitSwitch', 'durationUnitText', 'duration');
 
         // Initialize see more buttons
         FilterManager.initSeeMoreButtons();
@@ -451,7 +464,7 @@
                 window.history.pushState({ path: newUrl }, '', newUrl);
 
                 // Update the filter options based on available results
-                updateFilters(data);
+                FilterManager.updateFilters(data);
 
                 // Update map markers with new filtered guidings
                 if (typeof window.updateMapWithGuidings === 'function' && Array.isArray(data.guidings)) {
@@ -478,63 +491,6 @@
                 listingsContainer.parentElement.insertBefore(newMessage, listingsContainer);
             }
         }
-
-        function updateFilters(data) {
-            function updateCheckboxGroup(name, counts) {
-                const checkboxes = document.querySelectorAll(`input[name="${name}[]"]`);
-                if (!checkboxes.length) return;
-
-                // Try to find checkbox group through multiple possible parent selectors
-                let checkboxGroup = document.querySelector(`[data-filter-group="${name}"]`) || 
-                                  document.querySelector(`.${name}-group`) ||
-                                  checkboxes[0].closest('.checkbox-group');
-
-                // If still can't find the group, try to get the parent container
-                if (!checkboxGroup) {
-                    console.warn(`Checkbox group not found for ${name}, using parent container`);
-                    checkboxGroup = checkboxes[0].closest('.form-group') || 
-                                  checkboxes[0].parentElement.closest('div');
-                }
-
-                if (!checkboxGroup) {
-                    console.error(`Could not find container for ${name}`);
-                    return;
-                }
-
-                // Update each checkbox in the group
-                checkboxes.forEach(checkbox => {
-                    const container = checkbox.closest('.form-check');
-                    if (!container) return;
-
-                    const id = checkbox.value;
-                    const count = counts[id] || 0;
-
-                    // Always show checked items
-                    if (checkbox.checked) {
-                        container.classList.remove('d-none');
-                    } else {
-                        container.classList.toggle('d-none', count === 0);
-                    }
-
-                    // Update count display
-                    const countSpan = container.querySelector('.count');
-                    if (countSpan) {
-                        countSpan.textContent = `(${count})`;
-                    }
-                });
-            }
-
-            // Ensure filterCounts exists and contains the expected data
-            const filterCounts = data.filterCounts || {};
-            
-            // Update all filter groups
-            updateCheckboxGroup('target_fish', filterCounts.targetFish || {});
-            updateCheckboxGroup('water', filterCounts.waters || {});
-            updateCheckboxGroup('methods', filterCounts.methods || {});
-        }
-        
-        // Make updateFilters available globally
-        window.updateFilters = updateFilters;
 
         // Handle sort-by change
         const sortSelect = document.getElementById('sortby-2');

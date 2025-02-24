@@ -99,45 +99,54 @@
             
             <hr>
             <div class="filter-section mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h6 class="mb-0">{{translate('Duration')}}</h6>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="durationUnitSwitchMobile">
-                        <label class="form-check-label" for="durationUnitSwitchMobile">
-                            <span id="durationUnitTextMobile" class="text-muted">Hours</span>
-                        </label>
-                    </div>
-                </div>
-                <div class="duration-input d-flex justify-content-center align-items-center px-3">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="decrementValue('duration_mobile')">-</button>
-                    <input type="number" 
-                           class="form-control mx-2" 
-                           name="duration" 
-                           id="duration_mobile" 
-                           min="1" 
-                           value="{{ request()->get('duration', 24) }}"
-                           placeholder="Enter duration"
-                           style="width: 100px;">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="incrementValue('duration_mobile')">+</button>
+                <h6 class="mb-3">{{translate('Duration')}}</h6>
+                <div class="checkbox-group">
+                    @php
+                        $durationLabels = [
+                            'half_day' => translate('Half Day'),
+                            'full_day' => translate('Full Day'),
+                            'multi_day' => translate('Multi Day')
+                        ];
+                    @endphp
+                    @foreach($durationLabels as $durationType => $label)
+                        @if(isset($durationCounts[$durationType]) && $durationCounts[$durationType] > 0)
+                            <div class="form-check">
+                                <input type="checkbox" 
+                                       class="form-check-input mobile-filter-checkbox" 
+                                       name="duration_types[]" 
+                                       id="duration_mobile_{{ $durationType }}" 
+                                       value="{{ $durationType }}"
+                                       {{ in_array($durationType, request()->get('duration_types', [])) ? 'checked' : '' }}>
+                                <label class="form-check-label d-flex justify-content-between" for="duration_mobile_{{ $durationType }}">
+                                    {{ $label }}
+                                    <span class="count">({{ $durationCounts[$durationType] }})</span>
+                                </label>
+                            </div>
+                        @endif
+                    @endforeach
                 </div>
             </div>
-            
+
             {{-- Number of People Section --}}
             <div class="filter-section mb-4">
                 <h6 class="mb-3">{{translate('Number of People')}}</h6>
-                <div class="number-input d-flex justify-content-center align-items-center px-3">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="decrementValue('people_mobile')">-</button>
-                    <input type="number" 
-                           class="form-control mx-2" 
-                           name="people" 
-                           id="people_mobile" 
-                           min="1" 
-                           value="{{ request()->get('people', 2) }}"
-                           style="width: 100px;">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="incrementValue('people_mobile')">+</button>
+                <div class="checkbox-group">
+                    @foreach($personCounts as $persons => $count)
+                        <div class="form-check">
+                            <input type="checkbox" 
+                                   class="form-check-input mobile-filter-checkbox" 
+                                   name="num_persons[]" 
+                                   id="persons_mobile_{{ $persons }}" 
+                                   value="{{ $persons }}"
+                                   {{ in_array((string)$persons, request()->get('num_persons', [])) ? 'checked' : '' }}>
+                            <label class="form-check-label d-flex justify-content-between" for="persons_mobile_{{ $persons }}">
+                                {{ translate('Up to') }} {{ $persons }} {{ translate('person'.($persons > 1 ? 's' : '')) }}
+                                <span class="count">({{ $count }})</span>
+                            </label>
+                        </div>
+                    @endforeach
                 </div>
             </div>
-            <hr>
         </form>
     </div>
 
@@ -381,7 +390,7 @@
         );
 
         // Initialize duration switch
-        FilterManager.initDurationSwitch('durationUnitSwitchMobile', 'durationUnitTextMobile', 'duration_mobile');
+        // FilterManager.initDurationSwitch('durationUnitSwitchMobile', 'durationUnitTextMobile', 'duration_mobile');
 
         // Add change event listener to all filter checkboxes
         document.querySelectorAll('.mobile-filter-checkbox').forEach(checkbox => {
@@ -432,7 +441,7 @@
                 window.history.pushState({ path: newUrl }, '', newUrl);
 
                 // Update the filter options based on available results
-                updateFilters(data);
+                FilterManager.updateFilters(data);
 
                 // Update map markers with new filtered guidings
                 if (typeof window.updateMapWithGuidings === 'function' && Array.isArray(data.guidings)) {
@@ -458,72 +467,6 @@
                 newMessage.textContent = message;
                 listingsContainer.parentElement.insertBefore(newMessage, listingsContainer);
             }
-        }
-
-        function updateFilters(data) {
-            function updateCheckboxGroup(name, counts) {
-                const checkboxes = document.querySelectorAll(`#filterContainerOffCanvas input[name="${name}[]"]`);
-                if (!checkboxes.length) {
-                    console.warn(`No checkboxes found for name: ${name}`);
-                    return;
-                }
-
-                // Try to find checkbox group through multiple possible parent selectors
-                let checkboxGroup = document.querySelector(`#filterContainerOffCanvas [data-filter-group="${name}"]`) || 
-                                  document.querySelector(`#filterContainerOffCanvas .${name}-group`) ||
-                                  checkboxes[0].closest('.filter-section');
-
-                if (!checkboxGroup) {
-                    console.error(`Could not find container for ${name}`);
-                    return;
-                }
-
-                // Remove any existing "no results" message
-                const existingMsg = checkboxGroup.querySelector('.text-muted.small');
-                if (existingMsg) {
-                    existingMsg.remove();
-                }
-
-                let visibleCount = 0;
-                checkboxes.forEach(checkbox => {
-                    const checkboxContainer = checkbox.closest('.form-check');
-                    if (!checkboxContainer) return;
-
-                    const id = checkbox.value;
-                    const count = counts?.[id] || 0;
-
-                    // Always show checked items
-                    if (checkbox.checked) {
-                        checkboxContainer.classList.remove('d-none');
-                        visibleCount++;
-                    } else {
-                        checkboxContainer.classList.toggle('d-none', count === 0);
-                        if (count > 0) visibleCount++;
-                    }
-
-                    // Update count display
-                    const countSpan = checkboxContainer.querySelector('.count');
-                    if (countSpan) {
-                        countSpan.textContent = `(${count})`;
-                    }
-                });
-
-                // Show "no results" message if needed
-                if (visibleCount === 0) {
-                    const noResultsMsg = document.createElement('div');
-                    noResultsMsg.className = 'text-muted small';
-                    noResultsMsg.textContent = 'No options available';
-                    checkboxGroup.appendChild(noResultsMsg);
-                }
-            }
-
-            // Ensure filterCounts exists and contains the expected data
-            const filterCounts = data.filterCounts || {};
-            
-            // Update all filter groups
-            updateCheckboxGroup('target_fish', filterCounts.targetFish || {});
-            updateCheckboxGroup('water', filterCounts.waters || {});
-            updateCheckboxGroup('methods', filterCounts.methods || {});
         }
 
         function reinitializeComponents() {
