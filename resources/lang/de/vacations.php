@@ -5,9 +5,9 @@ return [
     'Radius' => 'Radius',
     'Show_on_map' => 'Auf Karte anzeigen',
 
-    'title' => 'Traumurlaub in ganz Europa',
-    'header_title' => 'Traumurlaub in ganz Europa',
-    'header_sub_title' => 'Entdecken Sie Ihren perfekten europäischen Urlaub',
+    'title' => 'Angelurlaub in Europa – Die besten Reiseziele für unvergessliche Angelerlebnisse',
+    'header_title' => 'Angelurlaub in Europa – Die besten Reiseziele für unvergessliche Angelerlebnisse',
+    'header_sub_title' => 'Individuelle Angelurlaube an den schönsten Gewässern Europas – Fange deine Traumfische in atemberaubender Natur!',
     'introduction' => 'Europa bietet Reisenden eine unglaubliche Vielfalt an Erlebnissen und Reisezielen. Ob Sie davon träumen, an mediterranen Stränden zu entspannen, historische Städte zu erkunden oder durch unberührte Wildnis zu wandern - wir haben den perfekten Urlaub für Sie.<br><br>
 Deutschland: Ein Land verzaubernder Wälder, märchenhafter Schlösser und lebendiger Städte. Von der Kulturmetropole Berlin bis zum romantischen Rheintal bietet Deutschland endlose Möglichkeiten für unvergessliche Erlebnisse. Weltklasse-Museen, historische Architektur und charmante Dörfer warten darauf, von Ihnen entdeckt zu werden.<br><br>
 Niederlande: Mit seinen malerischen Kanälen, bunten Tulpenfeldern und historischen Windmühlen ist die Niederlande ein Paradies für Fotografen. Die kosmopolitische Atmosphäre Amsterdams verbindet sich mit traditionellem niederländischem Charme in kleineren Städten zu unvergesslichen Urlaubserlebnissen.<br><br>

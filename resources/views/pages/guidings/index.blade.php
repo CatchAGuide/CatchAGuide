@@ -473,7 +473,7 @@
                         <div class="col-lg-12 col-sm-12">
                             <div class="tours-list__right">
                                 <div class="tours-list__inner" id="guidings-list">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="filter-sort-container">
                                         {{-- Sort By Dropdown --}}
                                         @if(!$agent->ismobile())
                                         <div class="d-flex align-items-center">
@@ -500,7 +500,7 @@
                                         @endif
 
                                         {{-- Active Filters --}}
-                                        <div class="active-filters d-flex flex-wrap gap-2">
+                                        <div class="active-filters">
                                             @if(request()->has('target_fish'))
                                                 @foreach(request()->get('target_fish') as $fishId)
                                                     @php
