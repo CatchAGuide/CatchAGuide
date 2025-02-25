@@ -7,9 +7,9 @@ return [
     'Radius' => 'Radius',
     'Show_on_map' => 'Show on map',
     
-    'title' => 'Dream Vacations Across Europe',
-    'header_title' => 'Dream Vacations Across Europe', 
-    'header_sub_title' => 'Discover Your Perfect European Getaway',
+    'title' => 'Fishing Holidays in Europe – Top Destinations for Unforgettable Fishing Adventures',
+    'header_title' => 'Fishing Holidays in Europe – Top Destinations for Unforgettable Fishing Adventures', 
+    'header_sub_title' => 'Individual fishing trips in Europe’s most stunning waters – Catch your dream fish in breathtaking nature!',
     'introduction' => 'Europe offers travelers an incredible diversity of experiences and destinations. Whether you dream of relaxing on Mediterranean beaches, exploring historic cities, or adventuring through pristine wilderness - we have the perfect vacation waiting for you.<br><br>
 Germany: A land of enchanting forests, fairy-tale castles, and vibrant cities. From the cultural hub of Berlin to the romantic Rhine Valley, Germany offers endless opportunities for memorable experiences. World-class museums, historic architecture, and charming villages await your discovery.<br><br>
 Netherlands: With its picturesque canals, colorful tulip fields, and historic windmills, the Netherlands is a photographer\'s paradise. The cosmopolitan atmosphere of Amsterdam combines with traditional Dutch charm in smaller towns to create unforgettable holiday experiences.<br><br>

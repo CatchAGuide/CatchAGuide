@@ -827,6 +827,19 @@ div#masonry-grid {
 .guidings-book-mobile {
   display: none;
 }
+.filter-sort-container{
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  .active-filters{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+}
 
 @media screen and (max-width: 1200px) {
   #guidings-page {
