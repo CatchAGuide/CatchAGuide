@@ -586,44 +586,52 @@
             });
         }
 
-        // Initialize see more buttons for mobile filters
+        // Initialize see more buttons for mobile
         function initSeeMoreButtons() {
-            document.querySelectorAll('.filter-section-mobile').forEach(section => {
-                const checkboxes = section.querySelectorAll('.form-check');
-                const maxInitialVisible = 7;
+            document.querySelectorAll('.filter-section .checkbox-group').forEach(section => {
+                // Get all checkboxes in this section
+                const allCheckboxes = section.querySelectorAll('.form-check');
                 
-                if (checkboxes.length > maxInitialVisible) {
-                    // Hide checkboxes beyond the initial visible count
-                    checkboxes.forEach((checkbox, index) => {
-                        if (index >= maxInitialVisible) {
-                            checkbox.classList.add('extra-filter');
-                            checkbox.style.display = 'none'; // Ensure they're hidden initially
+                // Show first 7 checkboxes by default (or all if less than 7)
+                allCheckboxes.forEach((checkbox, index) => {
+                    if (index < 7) {
+                        checkbox.classList.remove('d-none', 'extra-filter');
+                    } else {
+                        checkbox.classList.add('d-none', 'extra-filter');
+                    }
+                });
+                
+                // Remove any existing see more/less buttons
+                const existingButton = section.querySelector('.see-more');
+                if (existingButton) {
+                    existingButton.remove();
+                }
+                
+                // Only add the button if there are more than 7 checkboxes
+                if (allCheckboxes.length > 7) {
+                    const seeMoreBtn = document.createElement('button');
+                    seeMoreBtn.type = 'button';
+                    seeMoreBtn.className = 'btn btn-link see-more w-100 text-center';
+                    seeMoreBtn.textContent = 'See More';
+                    section.appendChild(seeMoreBtn);
+                    
+                    seeMoreBtn.addEventListener('click', function() {
+                        if (this.textContent === 'See More') {
+                            // Show all checkboxes
+                            allCheckboxes.forEach(checkbox => {
+                                checkbox.classList.remove('d-none');
+                            });
+                            this.textContent = 'See Less';
+                        } else {
+                            // Hide checkboxes beyond the first 7
+                            allCheckboxes.forEach((checkbox, index) => {
+                                if (index >= 7) {
+                                    checkbox.classList.add('d-none');
+                                }
+                            });
+                            this.textContent = 'See More';
                         }
                     });
-                    
-                    // Create and add the "See More" button
-                    let seeMoreBtn = section.querySelector('.see-more');
-                    if (!seeMoreBtn) {
-                        seeMoreBtn = document.createElement('button');
-                        seeMoreBtn.type = 'button';
-                        seeMoreBtn.className = 'see-more w-100 text-center py-2';
-                        seeMoreBtn.textContent = 'See More';
-                        seeMoreBtn.setAttribute('data-expanded', 'false');
-                        
-                        seeMoreBtn.addEventListener('click', function() {
-                            const isExpanded = this.getAttribute('data-expanded') === 'true';
-                            const extraFilters = section.querySelectorAll('.extra-filter');
-                            
-                            extraFilters.forEach(filter => {
-                                filter.style.display = isExpanded ? 'none' : 'block';
-                            });
-                            
-                            this.textContent = isExpanded ? 'See More' : 'See Less';
-                            this.setAttribute('data-expanded', isExpanded ? 'false' : 'true');
-                        });
-                        
-                        section.appendChild(seeMoreBtn);
-                    }
                 }
             });
         }
