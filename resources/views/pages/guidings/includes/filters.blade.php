@@ -12,7 +12,7 @@
                         <div class="price-range-slider">
                             <div id="price-slider-main"></div>
                             <div class="price-display mt-2">
-                                £ <span id="price-min-display">50</span> - £ <span id="price-max-display">4,000</span>
+                                € <span id="price-min-display">50</span> - € <span id="price-max-display">4,000</span>
                             </div>
                             <input type="hidden" name="price_min" id="price_min_main">
                             <input type="hidden" name="price_max" id="price_max_main">
@@ -26,23 +26,48 @@
                     <div class="form-group mb-3">
                         <h5 class="mb-2">{{translate('Target Fish')}}</h5>
                         <div class="checkbox-group">
-                            @foreach($alltargets as $index => $target)
-                                @if(isset($targetFishCounts[$target->id]) && $targetFishCounts[$target->id] > 0)
-                                    <div class="form-check {{ $index >= 8 ? 'd-none extra-filter' : '' }}">
-                                        <input type="checkbox" 
-                                               class="form-check-input filter-checkbox" 
-                                               name="target_fish[]" 
-                                               id="fish_{{ $target->id }}" 
-                                               value="{{ $target->id }}"
-                                               {{ in_array($target->id, request()->get('target_fish', [])) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="fish_{{ $target->id }}">
-                                            {{ app()->getLocale() == 'en' ? $target->name_en : $target->name }}
-                                            <span class="count">({{ $targetFishCounts[$target->id] }})</span>
-                                        </label>
-                                    </div>
-                                @endif
+                            @php
+                                $visibleCount = 0;
+                                $totalCount = count($alltargets);
+                                $maxInitialVisible = 7;
+                                $checkedItems = [];
+                                $uncheckedItems = [];
+                                
+                                // Separate checked and unchecked items
+                                foreach($alltargets as $target) {
+                                    if(in_array($target->id, request()->get('target_fish', []))) {
+                                        $checkedItems[] = $target;
+                                    } else {
+                                        $uncheckedItems[] = $target;
+                                    }
+                                }
+                                
+                                // Combine them with checked items first
+                                $sortedTargets = array_merge($checkedItems, $uncheckedItems);
+                            @endphp
+                            
+                            @foreach($sortedTargets as $index => $target)
+                                @php
+                                    $isChecked = in_array($target->id, request()->get('target_fish', []));
+                                    $shouldBeVisible = $visibleCount < $maxInitialVisible || $isChecked;
+                                    if($shouldBeVisible) $visibleCount++;
+                                @endphp
+                                <div class="form-check {{ (!$shouldBeVisible) ? 'd-none extra-filter' : '' }}">
+                                    <input type="checkbox" 
+                                           class="form-check-input filter-checkbox" 
+                                           name="target_fish[]" 
+                                           id="fish_{{ $target->id }}" 
+                                           value="{{ $target->id }}"
+                                           {{ $isChecked ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="fish_{{ $target->id }}">
+                                        {{ app()->getLocale() == 'en' ? $target->name_en : $target->name }}
+                                        <span class="count">({{ $targetFishCounts[$target->id] ?? 0 }})</span>
+                                    </label>
+                                </div>
                             @endforeach
-                            <button type="button" class="btn btn-link see-more">See More</button>
+                            @if($totalCount > $maxInitialVisible)
+                                <button type="button" class="btn btn-link see-more">See More</button>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -53,23 +78,48 @@
                     <div class="form-group mb-3">
                         <h5 class="mb-2">{{translate('Methods')}}</h5>
                         <div class="checkbox-group">
-                            @foreach($guiding_methods as $index => $method)
-                                @if(isset($methodCounts[$method->id]) && $methodCounts[$method->id] > 0)
-                                    <div class="form-check {{ $index >= 8 ? 'd-none extra-filter' : '' }}">
-                                        <input type="checkbox" 
-                                               class="form-check-input filter-checkbox" 
-                                               name="methods[]" 
-                                               id="method_{{ $method->id }}" 
-                                               value="{{ $method->id }}"
-                                               {{ in_array($method->id, request()->get('methods', [])) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="method_{{ $method->id }}">
-                                            {{ app()->getLocale() == 'en' ? $method->name_en : $method->name }}
-                                            <span class="count">({{ $methodCounts[$method->id] }})</span>
-                                        </label>
-                                    </div>
-                                @endif
+                            @php
+                                $visibleCount = 0;
+                                $totalCount = count($guiding_methods);
+                                $maxInitialVisible = 7;
+                                $checkedItems = [];
+                                $uncheckedItems = [];
+                                
+                                // Separate checked and unchecked items
+                                foreach($guiding_methods as $method) {
+                                    if(in_array($method->id, request()->get('methods', []))) {
+                                        $checkedItems[] = $method;
+                                    } else {
+                                        $uncheckedItems[] = $method;
+                                    }
+                                }
+                                
+                                // Combine them with checked items first
+                                $sortedMethods = array_merge($checkedItems, $uncheckedItems);
+                            @endphp
+                            
+                            @foreach($sortedMethods as $index => $method)
+                                @php
+                                    $isChecked = in_array($method->id, request()->get('methods', []));
+                                    $shouldBeVisible = $visibleCount < $maxInitialVisible || $isChecked;
+                                    if($shouldBeVisible) $visibleCount++;
+                                @endphp
+                                <div class="form-check {{ (!$shouldBeVisible) ? 'd-none extra-filter' : '' }}">
+                                    <input type="checkbox" 
+                                           class="form-check-input filter-checkbox" 
+                                           name="methods[]" 
+                                           id="method_{{ $method->id }}" 
+                                           value="{{ $method->id }}"
+                                           {{ $isChecked ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="method_{{ $method->id }}">
+                                        {{ app()->getLocale() == 'en' ? $method->name_en : $method->name }}
+                                        <span class="count">({{ $methodCounts[$method->id] ?? 0 }})</span>
+                                    </label>
+                                </div>
                             @endforeach
-                            <button type="button" class="btn btn-link see-more">See More</button>
+                            @if($totalCount > $maxInitialVisible)
+                                <button type="button" class="btn btn-link see-more">See More</button>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -80,23 +130,48 @@
                     <div class="form-group mb-3">
                         <h5 class="mb-2">{{translate('Water Types')}}</h5>
                         <div class="checkbox-group">
-                            @foreach($guiding_waters as $index => $water)
-                                @if(isset($waterTypeCounts[$water->id]) && $waterTypeCounts[$water->id] > 0)
-                                    <div class="form-check {{ $index >= 8 ? 'd-none extra-filter' : '' }}">
-                                        <input type="checkbox" 
-                                               class="form-check-input filter-checkbox" 
-                                               name="water[]" 
-                                               id="water_{{ $water->id }}" 
-                                               value="{{ $water->id }}"
-                                               {{ in_array($water->id, request()->get('water', [])) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="water_{{ $water->id }}">
-                                            {{ app()->getLocale() == 'en' ? $water->name_en : $water->name }}
-                                            <span class="count">({{ $waterTypeCounts[$water->id] }})</span>
-                                        </label>
-                                    </div>
-                                @endif
+                            @php
+                                $visibleCount = 0;
+                                $totalCount = count($guiding_waters);
+                                $maxInitialVisible = 7;
+                                $checkedItems = [];
+                                $uncheckedItems = [];
+                                
+                                // Separate checked and unchecked items
+                                foreach($guiding_waters as $water) {
+                                    if(in_array($water->id, request()->get('water', []))) {
+                                        $checkedItems[] = $water;
+                                    } else {
+                                        $uncheckedItems[] = $water;
+                                    }
+                                }
+                                
+                                // Combine them with checked items first
+                                $sortedWaters = array_merge($checkedItems, $uncheckedItems);
+                            @endphp
+                            
+                            @foreach($sortedWaters as $index => $water)
+                                @php
+                                    $isChecked = in_array($water->id, request()->get('water', []));
+                                    $shouldBeVisible = $visibleCount < $maxInitialVisible || $isChecked;
+                                    if($shouldBeVisible) $visibleCount++;
+                                @endphp
+                                <div class="form-check {{ (!$shouldBeVisible) ? 'd-none extra-filter' : '' }}">
+                                    <input type="checkbox" 
+                                           class="form-check-input filter-checkbox" 
+                                           name="water[]" 
+                                           id="water_{{ $water->id }}" 
+                                           value="{{ $water->id }}"
+                                           {{ $isChecked ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="water_{{ $water->id }}">
+                                        {{ app()->getLocale() == 'en' ? $water->name_en : $water->name }}
+                                        <span class="count">({{ $waterTypeCounts[$water->id] ?? 0 }})</span>
+                                    </label>
+                                </div>
                             @endforeach
-                            <button type="button" class="btn btn-link see-more">See More</button>
+                            @if($totalCount > $maxInitialVisible)
+                                <button type="button" class="btn btn-link see-more">See More</button>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -114,20 +189,18 @@
                                 ];
                             @endphp
                             @foreach($durationLabels as $durationType => $label)
-                                @if(isset($durationCounts[$durationType]) && $durationCounts[$durationType] > 0)
-                                    <div class="form-check">
-                                        <input type="checkbox" 
-                                               class="form-check-input filter-checkbox" 
-                                               name="duration_types[]" 
-                                               id="duration_{{ $durationType }}" 
-                                               value="{{ $durationType }}"
-                                               {{ in_array($durationType, request()->get('duration_types', [])) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="duration_{{ $durationType }}">
-                                            {{ $label }}
-                                            <span class="count">({{ $durationCounts[$durationType] }})</span>
-                                        </label>
-                                    </div>
-                                @endif
+                                <div class="form-check">
+                                    <input type="checkbox" 
+                                           class="form-check-input filter-checkbox" 
+                                           name="duration_types[]" 
+                                           id="duration_{{ $durationType }}" 
+                                           value="{{ $durationType }}"
+                                           {{ in_array($durationType, request()->get('duration_types', [])) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="duration_{{ $durationType }}">
+                                        {{ $label }}
+                                        <span class="count">({{ $durationCounts[$durationType] ?? 0 }})</span>
+                                    </label>
+                                </div>
                             @endforeach
                         </div>
                     </div>
@@ -415,9 +488,6 @@
             updateResults
         );
 
-        // Initialize duration switch
-        // FilterManager.initDurationSwitch('durationUnitSwitch', 'durationUnitText', 'duration');
-
         // Initialize see more buttons
         FilterManager.initSeeMoreButtons();
 
@@ -429,29 +499,36 @@
         });
 
         function updateResults() {
-            const formData = new FormData(filterForm);
-            const queryString = new URLSearchParams(formData).toString();
+            // Show loading overlay
+            FilterManager.showLoadingOverlay();
+            
             const currentPath = window.location.pathname;
-
-            // Add loading state
-            const listingsContainer = document.querySelector('.tours-list__inner');
-            if (listingsContainer) {
-                listingsContainer.classList.add('loading');
+            const form = document.getElementById('filterContainer');
+            const formData = new FormData(form);
+            
+            const queryString = new URLSearchParams();
+            
+            // Add each parameter to URLSearchParams properly
+            for (const [key, value] of formData.entries()) {
+                // Handle array parameters correctly
+                if (key.endsWith('[]')) {
+                    queryString.append(key, value);
+                } else {
+                    queryString.append(key, value);
+                }
             }
-
-            fetch(`${currentPath}?${queryString}`, {
+            
+            fetch(`${currentPath}?${queryString.toString()}`, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             })
             .then(response => response.json())
             .then(data => {
-                // Store filtered guidings in window object
-                window.filteredGuidings = data.guidings || [];
-
+                // Update the listings container with the new HTML
+                const listingsContainer = document.querySelector('#guidings-list');
                 if (listingsContainer) {
                     listingsContainer.innerHTML = data.html;
-                    listingsContainer.classList.remove('loading');
                     reinitializeComponents();
                 }
                 
@@ -460,101 +537,92 @@
                 }
                 
                 // Update URL without page reload
-                const newUrl = `${currentPath}?${queryString}`;
+                const newUrl = `${currentPath}?${queryString.toString()}`;
                 window.history.pushState({ path: newUrl }, '', newUrl);
-
+                
                 // Update the filter options based on available results
                 FilterManager.updateFilters(data);
-
-                window.updateMapWithGuidings(data.guidings);
+                
+                if (typeof window.updateMapWithGuidings === 'function') {
+                    window.updateMapWithGuidings(data.guidings);
+                }
+                
+                // Hide loading overlay
+                FilterManager.hideLoadingOverlay();
             })
             .catch(error => {
                 console.error('Error updating results:', error);
-                if (listingsContainer) {
-                    listingsContainer.classList.remove('loading');
-                }
+                // Hide loading overlay even on error
+                FilterManager.hideLoadingOverlay();
             });
         }
 
-        function updateSearchMessage(message, listingsContainer) {
-            const messageElement = document.querySelector('.alert.alert-info');
-            if (messageElement) {
-                messageElement.textContent = message;
-            } else if (message.trim() !== '') {
-                const newMessage = document.createElement('div');
-                newMessage.className = 'alert alert-info mb-3';
-                newMessage.role = 'alert';
-                newMessage.textContent = message;
-                listingsContainer.parentElement.insertBefore(newMessage, listingsContainer);
+        function updateSearchMessage(message, container) {
+            let searchMessageElement = document.querySelector('.alert.alert-info');
+            
+            if (!message && searchMessageElement) {
+                searchMessageElement.remove();
+                return;
             }
+            
+            if (!message) return;
+            
+            if (!searchMessageElement) {
+                searchMessageElement = document.createElement('div');
+                searchMessageElement.className = 'alert alert-info mb-3';
+                searchMessageElement.setAttribute('role', 'alert');
+                
+                // Insert before the listings container
+                const parent = container.parentNode;
+                parent.insertBefore(searchMessageElement, container);
+            }
+            
+            searchMessageElement.textContent = message;
         }
 
-        // Handle sort-by change
-        const sortSelect = document.getElementById('sortby-2');
-        if (sortSelect) {
-            sortSelect.addEventListener('change', function() {
-                const form = this.closest('form');
-                if (form) {
-                    const formData = new FormData(form);
-                    updateResults(formData);
+        // Handle active filter removal
+        document.addEventListener('click', function(e) {
+            if (e.target.matches('[data-filter-type]') || e.target.closest('[data-filter-type]')) {
+                const button = e.target.matches('[data-filter-type]') ? e.target : e.target.closest('[data-filter-type]');
+                const filterType = button.dataset.filterType;
+                const filterId = button.dataset.filterId;
+                
+                // Find and uncheck the corresponding checkbox
+                const checkbox = document.querySelector(`input[name="${filterType}[]"][value="${filterId}"]`);
+                if (checkbox) {
+                    checkbox.checked = false;
+                    updateResults();
                 }
-            });
-        }
+            }
+        });
 
-        function attachFilterRemoveListeners() {
-            document.querySelectorAll('.active-filters .btn-close').forEach(button => {
+        // Initialize components that need to be reinitialized after AJAX updates
+        function reinitializeComponents() {
+            // Re-attach event listeners to filter removal buttons
+            document.querySelectorAll('[data-filter-type]').forEach(button => {
                 button.addEventListener('click', function() {
                     const filterType = this.dataset.filterType;
                     const filterId = this.dataset.filterId;
                     
-                    // Find and uncheck the corresponding checkbox in both filter panels
-                    const checkbox = document.querySelector(`#filterContainer input[name="${filterType}[]"][value="${filterId}"]`);
-                    const mobileCheckbox = document.querySelector(`#filterContainerOffCanvass input[name="${filterType}[]"][value="${filterId}"]`);
-                    
+                    // Find and uncheck the corresponding checkbox
+                    const checkbox = document.querySelector(`input[name="${filterType}[]"][value="${filterId}"]`);
                     if (checkbox) {
                         checkbox.checked = false;
-                        // Trigger form submission to update results
-                        const form = document.getElementById('filterContainer');
-                        if (form) {
-                            const formData = new FormData(form);
-                            updateResults(formData);
-                        }
+                        updateResults();
                     }
-                    
-                    if (mobileCheckbox) {
-                        mobileCheckbox.checked = false;
-                    }
-                    
-                    // Remove the filter tag
-                    this.closest('.badge').remove();
                 });
             });
-        }
-
-        // Initial attachment of listeners
-        attachFilterRemoveListeners();
-
-        // Add change event listeners to all filter checkboxes
-        document.querySelectorAll('.filter-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const form = this.closest('form');
-                if (form) {
-                    const formData = new FormData(form);
-                    updateResults(formData);
-                }
-            });
-        });
-
-        function reinitializeComponents() {
+            
+            // Re-initialize carousels
             document.querySelectorAll('.carousel').forEach(carousel => {
                 new bootstrap.Carousel(carousel, {
                     interval: false
                 });
             });
-            attachFilterRemoveListeners();
         }
 
-        window.reinitializeComponents = reinitializeComponents;
+        // Initialize components on page load
+        reinitializeComponents();
     });
 </script>
 @endpush

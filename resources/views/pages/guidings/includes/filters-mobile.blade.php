@@ -16,7 +16,7 @@
                 <div class="price-range-slider px-3">
                     <div id="price-slider-mobile"></div>
                     <div class="price-display mt-2">
-                        £ <span id="price-min-display-mobile">50</span> - £ <span id="price-max-display-mobile">4,000</span>
+                        € <span id="price-min-display-mobile">50</span> - € <span id="price-max-display-mobile">4,000</span>
                     </div>
                     <input type="hidden" name="price_min" id="price_min_mobile">
                     <input type="hidden" name="price_max" id="price_max_mobile">
@@ -28,23 +28,48 @@
             <div class="filter-section mb-4">
                 <h6 class="mb-3">Target Fish</h6>
                 <div class="checkbox-group">
-                    @foreach($alltargets as $index => $target)
-                        @if(isset($targetFishCounts[$target->id]) && $targetFishCounts[$target->id] > 0)
-                            <div class="form-check {{ $index >= 8 ? 'd-none extra-filter' : '' }}">
-                                <input type="checkbox" 
-                                       class="form-check-input mobile-filter-checkbox" 
-                                       name="target_fish[]" 
-                                       id="fish_mobile_{{ $target->id }}" 
-                                       value="{{ $target->id }}"
-                                       {{ in_array($target->id, request()->get('target_fish', [])) ? 'checked' : '' }}>
-                                <label class="form-check-label d-flex justify-content-between" for="fish_mobile_{{ $target->id }}">
-                                    {{ app()->getLocale() == 'en' ? $target->name_en : $target->name }}
-                                    <span class="count">({{ $targetFishCounts[$target->id] }})</span>
-                                </label>
-                            </div>
-                        @endif
+                    @php
+                        $visibleCount = 0;
+                        $totalCount = count($alltargets);
+                        $maxInitialVisible = 7;
+                        $checkedItems = [];
+                        $uncheckedItems = [];
+                        
+                        // Separate checked and unchecked items
+                        foreach($alltargets as $target) {
+                            if(in_array($target->id, request()->get('target_fish', []))) {
+                                $checkedItems[] = $target;
+                            } else {
+                                $uncheckedItems[] = $target;
+                            }
+                        }
+                        
+                        // Combine them with checked items first
+                        $sortedTargets = array_merge($checkedItems, $uncheckedItems);
+                    @endphp
+                    
+                    @foreach($sortedTargets as $index => $target)
+                        @php
+                            $isChecked = in_array($target->id, request()->get('target_fish', []));
+                            $shouldBeVisible = $visibleCount < $maxInitialVisible || $isChecked;
+                            if($shouldBeVisible) $visibleCount++;
+                        @endphp
+                        <div class="form-check {{ (!$shouldBeVisible) ? 'd-none extra-filter' : '' }}">
+                            <input type="checkbox" 
+                                   class="form-check-input mobile-filter-checkbox" 
+                                   name="target_fish[]" 
+                                   id="fish_mobile_{{ $target->id }}" 
+                                   value="{{ $target->id }}"
+                                   {{ $isChecked ? 'checked' : '' }}>
+                            <label class="form-check-label d-flex justify-content-between" for="fish_mobile_{{ $target->id }}">
+                                {{ app()->getLocale() == 'en' ? $target->name_en : $target->name }}
+                                <span class="count">({{ $targetFishCounts[$target->id] ?? 0 }})</span>
+                            </label>
+                        </div>
                     @endforeach
-                    <button type="button" class="btn btn-link see-more w-100 text-center">See More</button>
+                    @if($totalCount > $maxInitialVisible)
+                        <button type="button" class="btn btn-link see-more w-100 text-center">See More</button>
+                    @endif
                 </div>
             </div>
             <hr>
@@ -53,23 +78,48 @@
             <div class="filter-section mb-4">
                 <h6 class="mb-3">Methods</h6>
                 <div class="checkbox-group">
-                    @foreach($guiding_methods as $index => $method)
-                        @if(isset($methodCounts[$method->id]) && $methodCounts[$method->id] > 0)
-                            <div class="form-check {{ $index >= 8 ? 'd-none extra-filter' : '' }}">
-                                <input type="checkbox" 
-                                       class="form-check-input mobile-filter-checkbox" 
-                                       name="methods[]" 
-                                       id="method_mobile_{{ $method->id }}" 
-                                       value="{{ $method->id }}"
-                                       {{ in_array($method->id, request()->get('methods', [])) ? 'checked' : '' }}>
-                                <label class="form-check-label d-flex justify-content-between" for="method_mobile_{{ $method->id }}">
-                                    {{ app()->getLocale() == 'en' ? $method->name_en : $method->name }}
-                                    <span class="count">({{ $methodCounts[$method->id] }})</span>
-                                </label>
-                            </div>
-                        @endif
+                    @php
+                        $visibleCount = 0;
+                        $totalCount = count($guiding_methods);
+                        $maxInitialVisible = 7;
+                        $checkedItems = [];
+                        $uncheckedItems = [];
+                        
+                        // Separate checked and unchecked items
+                        foreach($guiding_methods as $method) {
+                            if(in_array($method->id, request()->get('methods', []))) {
+                                $checkedItems[] = $method;
+                            } else {
+                                $uncheckedItems[] = $method;
+                            }
+                        }
+                        
+                        // Combine them with checked items first
+                        $sortedMethods = array_merge($checkedItems, $uncheckedItems);
+                    @endphp
+                    
+                    @foreach($sortedMethods as $index => $method)
+                        @php
+                            $isChecked = in_array($method->id, request()->get('methods', []));
+                            $shouldBeVisible = $visibleCount < $maxInitialVisible || $isChecked;
+                            if($shouldBeVisible) $visibleCount++;
+                        @endphp
+                        <div class="form-check {{ (!$shouldBeVisible) ? 'd-none extra-filter' : '' }}">
+                            <input type="checkbox" 
+                                   class="form-check-input mobile-filter-checkbox" 
+                                   name="methods[]" 
+                                   id="method_mobile_{{ $method->id }}" 
+                                   value="{{ $method->id }}"
+                                   {{ $isChecked ? 'checked' : '' }}>
+                            <label class="form-check-label d-flex justify-content-between" for="method_mobile_{{ $method->id }}">
+                                {{ app()->getLocale() == 'en' ? $method->name_en : $method->name }}
+                                <span class="count">({{ $methodCounts[$method->id] ?? 0 }})</span>
+                            </label>
+                        </div>
                     @endforeach
-                    <button type="button" class="btn btn-link see-more w-100 text-center">See More</button>
+                    @if($totalCount > $maxInitialVisible)
+                        <button type="button" class="btn btn-link see-more w-100 text-center">See More</button>
+                    @endif
                 </div>
             </div>
 
@@ -77,23 +127,48 @@
             <div class="filter-section mb-4">
                 <h6 class="mb-3">Water Types</h6>
                 <div class="checkbox-group">
-                    @foreach($guiding_waters as $index => $water)
-                        @if(isset($waterTypeCounts[$water->id]) && $waterTypeCounts[$water->id] > 0)
-                            <div class="form-check {{ $index >= 8 ? 'd-none extra-filter' : '' }}">
-                                <input type="checkbox" 
-                                       class="form-check-input mobile-filter-checkbox" 
-                                       name="water[]" 
-                                       id="water_mobile_{{ $water->id }}" 
-                                       value="{{ $water->id }}"
-                                       {{ in_array($water->id, request()->get('water', [])) ? 'checked' : '' }}>
-                                <label class="form-check-label d-flex justify-content-between" for="water_mobile_{{ $water->id }}">
-                                    {{ app()->getLocale() == 'en' ? $water->name_en : $water->name }}
-                                    <span class="count">({{ $waterTypeCounts[$water->id] }})</span>
-                                </label>
-                            </div>
-                        @endif
+                    @php
+                        $visibleCount = 0;
+                        $totalCount = count($guiding_waters);
+                        $maxInitialVisible = 7;
+                        $checkedItems = [];
+                        $uncheckedItems = [];
+                        
+                        // Separate checked and unchecked items
+                        foreach($guiding_waters as $water) {
+                            if(in_array($water->id, request()->get('water', []))) {
+                                $checkedItems[] = $water;
+                            } else {
+                                $uncheckedItems[] = $water;
+                            }
+                        }
+                        
+                        // Combine them with checked items first
+                        $sortedWaters = array_merge($checkedItems, $uncheckedItems);
+                    @endphp
+                    
+                    @foreach($sortedWaters as $index => $water)
+                        @php
+                            $isChecked = in_array($water->id, request()->get('water', []));
+                            $shouldBeVisible = $visibleCount < $maxInitialVisible || $isChecked;
+                            if($shouldBeVisible) $visibleCount++;
+                        @endphp
+                        <div class="form-check {{ (!$shouldBeVisible) ? 'd-none extra-filter' : '' }}">
+                            <input type="checkbox" 
+                                   class="form-check-input mobile-filter-checkbox" 
+                                   name="water[]" 
+                                   id="water_mobile_{{ $water->id }}" 
+                                   value="{{ $water->id }}"
+                                   {{ $isChecked ? 'checked' : '' }}>
+                            <label class="form-check-label d-flex justify-content-between" for="water_mobile_{{ $water->id }}">
+                                {{ app()->getLocale() == 'en' ? $water->name_en : $water->name }}
+                                <span class="count">({{ $waterTypeCounts[$water->id] ?? 0 }})</span>
+                            </label>
+                        </div>
                     @endforeach
-                    <button type="button" class="btn btn-link see-more w-100 text-center">See More</button>
+                    @if($totalCount > $maxInitialVisible)
+                        <button type="button" class="btn btn-link see-more w-100 text-center">See More</button>
+                    @endif
                 </div>
             </div>
             
@@ -109,20 +184,18 @@
                         ];
                     @endphp
                     @foreach($durationLabels as $durationType => $label)
-                        @if(isset($durationCounts[$durationType]) && $durationCounts[$durationType] > 0)
-                            <div class="form-check">
-                                <input type="checkbox" 
-                                       class="form-check-input mobile-filter-checkbox" 
-                                       name="duration_types[]" 
-                                       id="duration_mobile_{{ $durationType }}" 
-                                       value="{{ $durationType }}"
-                                       {{ in_array($durationType, request()->get('duration_types', [])) ? 'checked' : '' }}>
-                                <label class="form-check-label d-flex justify-content-between" for="duration_mobile_{{ $durationType }}">
-                                    {{ $label }}
-                                    <span class="count">({{ $durationCounts[$durationType] }})</span>
-                                </label>
-                            </div>
-                        @endif
+                        <div class="form-check">
+                            <input type="checkbox" 
+                                   class="form-check-input mobile-filter-checkbox" 
+                                   name="duration_types[]" 
+                                   id="duration_mobile_{{ $durationType }}" 
+                                   value="{{ $durationType }}"
+                                   {{ in_array($durationType, request()->get('duration_types', [])) ? 'checked' : '' }}>
+                            <label class="form-check-label d-flex justify-content-between" for="duration_mobile_{{ $durationType }}">
+                                {{ $label }}
+                                <span class="count">({{ $durationCounts[$durationType] ?? 0 }})</span>
+                            </label>
+                        </div>
                     @endforeach
                 </div>
             </div>
@@ -370,6 +443,26 @@
 .offcanvas-bottom.show {
     transform: none !important;
 }
+
+/* Loading overlay styles */
+#filter-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.7);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.3s ease;
+}
+
+.tours-list__inner.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
 </style>
 @endpush
 
@@ -389,8 +482,8 @@
             updateResults
         );
 
-        // Initialize duration switch
-        // FilterManager.initDurationSwitch('durationUnitSwitchMobile', 'durationUnitTextMobile', 'duration_mobile');
+        // Initialize see more buttons for mobile
+        initSeeMoreButtons();
 
         // Add change event listener to all filter checkboxes
         document.querySelectorAll('.mobile-filter-checkbox').forEach(checkbox => {
@@ -400,17 +493,26 @@
         });
 
         function updateResults() {
-            const formData = new FormData(filterForm);
-            const queryString = new URLSearchParams(formData).toString();
+            // Show loading overlay
+            FilterManager.showLoadingOverlay();
+            
             const currentPath = window.location.pathname;
-
-            // Add loading state
-            const listingsContainer = document.querySelector('.tours-list__inner');
-            if (listingsContainer) {
-                listingsContainer.classList.add('loading');
+            const form = document.getElementById('filterContainerOffCanvas');
+            const formData = new FormData(form);
+            
+            const queryString = new URLSearchParams();
+            
+            // Add each parameter to URLSearchParams properly
+            for (const [key, value] of formData.entries()) {
+                // Handle array parameters correctly
+                if (key.endsWith('[]')) {
+                    queryString.append(key, value);
+                } else {
+                    queryString.append(key, value);
+                }
             }
-
-            fetch(`${currentPath}?${queryString}`, {
+            
+            fetch(`${currentPath}?${queryString.toString()}`, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
@@ -423,71 +525,137 @@
                     mobileResultsCount.textContent = data.total;
                 }
 
-                // Store filtered guidings in window object
-                window.filteredGuidings = data.guidings || [];
-
+                // Update the listings container with the new HTML
+                const listingsContainer = document.querySelector('#guidings-list');
                 if (listingsContainer) {
                     listingsContainer.innerHTML = data.html;
-                    listingsContainer.classList.remove('loading');
-                    reinitializeComponents();
+                    
+                    // Re-initialize components
+                    document.querySelectorAll('.carousel').forEach(carousel => {
+                        new bootstrap.Carousel(carousel, {
+                            interval: false
+                        });
+                    });
                 }
                 
                 if (data.searchMessage) {
-                    updateSearchMessage(data.searchMessage, listingsContainer);
+                    let searchMessageElement = document.querySelector('.alert.alert-info');
+                    
+                    if (!data.searchMessage && searchMessageElement) {
+                        searchMessageElement.remove();
+                        return;
+                    }
+                    
+                    if (!data.searchMessage) return;
+                    
+                    if (!searchMessageElement) {
+                        searchMessageElement = document.createElement('div');
+                        searchMessageElement.className = 'alert alert-info mb-3';
+                        searchMessageElement.setAttribute('role', 'alert');
+                        
+                        // Insert before the listings container
+                        const parent = listingsContainer.parentNode;
+                        parent.insertBefore(searchMessageElement, listingsContainer);
+                    }
+                    
+                    searchMessageElement.textContent = data.searchMessage;
                 }
                 
                 // Update URL without page reload
-                const newUrl = `${currentPath}?${queryString}`;
+                const newUrl = `${currentPath}?${queryString.toString()}`;
                 window.history.pushState({ path: newUrl }, '', newUrl);
-
+                
                 // Update the filter options based on available results
                 FilterManager.updateFilters(data);
-
-                window.updateMapWithGuidings(data.guidings);
+                
+                // Update map if it exists
+                if (typeof window.updateMapWithGuidings === 'function') {
+                    window.updateMapWithGuidings(data.guidings);
+                }
+                
+                // Hide loading overlay
+                FilterManager.hideLoadingOverlay();
+                
+                // Reinitialize see more buttons after filter update
+                setTimeout(initSeeMoreButtons, 100);
             })
             .catch(error => {
                 console.error('Error updating results:', error);
-                if (listingsContainer) {
-                    listingsContainer.classList.remove('loading');
+                // Hide loading overlay even on error
+                FilterManager.hideLoadingOverlay();
+            });
+        }
+
+        // Initialize see more buttons for mobile filters
+        function initSeeMoreButtons() {
+            document.querySelectorAll('.filter-section-mobile').forEach(section => {
+                const checkboxes = section.querySelectorAll('.form-check');
+                const maxInitialVisible = 7;
+                
+                if (checkboxes.length > maxInitialVisible) {
+                    // Hide checkboxes beyond the initial visible count
+                    checkboxes.forEach((checkbox, index) => {
+                        if (index >= maxInitialVisible) {
+                            checkbox.classList.add('extra-filter');
+                            checkbox.style.display = 'none'; // Ensure they're hidden initially
+                        }
+                    });
+                    
+                    // Create and add the "See More" button
+                    let seeMoreBtn = section.querySelector('.see-more');
+                    if (!seeMoreBtn) {
+                        seeMoreBtn = document.createElement('button');
+                        seeMoreBtn.type = 'button';
+                        seeMoreBtn.className = 'see-more w-100 text-center py-2';
+                        seeMoreBtn.textContent = 'See More';
+                        seeMoreBtn.setAttribute('data-expanded', 'false');
+                        
+                        seeMoreBtn.addEventListener('click', function() {
+                            const isExpanded = this.getAttribute('data-expanded') === 'true';
+                            const extraFilters = section.querySelectorAll('.extra-filter');
+                            
+                            extraFilters.forEach(filter => {
+                                filter.style.display = isExpanded ? 'none' : 'block';
+                            });
+                            
+                            this.textContent = isExpanded ? 'See More' : 'See Less';
+                            this.setAttribute('data-expanded', isExpanded ? 'false' : 'true');
+                        });
+                        
+                        section.appendChild(seeMoreBtn);
+                    }
                 }
             });
         }
 
-        function updateSearchMessage(message, listingsContainer) {
-            const messageElement = document.querySelector('.alert.alert-info');
-            if (messageElement) {
-                messageElement.textContent = message;
-            } else if (message.trim() !== '') {
-                const newMessage = document.createElement('div');
-                newMessage.className = 'alert alert-info mb-3';
-                newMessage.role = 'alert';
-                newMessage.textContent = message;
-                listingsContainer.parentElement.insertBefore(newMessage, listingsContainer);
+        // Handle increment/decrement buttons for number inputs
+        function setupNumberInputButtons() {
+            document.querySelectorAll('.increment-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    incrementValue(this.closest('.number-input').querySelector('input'));
+                });
+            });
+
+            document.querySelectorAll('.decrement-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    decrementValue(this.closest('.number-input').querySelector('input'));
+                });
+            });
+        }
+
+        setupNumberInputButtons();
+
+        function incrementValue(input) {
+            const maxValue = parseInt(input.getAttribute('max') || 100);
+            const currentValue = parseInt(input.value || 0);
+            if (currentValue < maxValue) {
+                input.value = currentValue + 1;
+                input.dispatchEvent(new Event('change'));
             }
         }
 
-        function reinitializeComponents() {
-            document.querySelectorAll('.carousel').forEach(carousel => {
-                new bootstrap.Carousel(carousel, {
-                    interval: false
-                });
-            });
-            attachFilterRemoveListeners();
-        }
-
-        window.reinitializeComponents = reinitializeComponents;
-
-        // Number input handlers for mobile
-        window.incrementValue = function(id) {
-            const input = document.getElementById(id);
-            const newValue = parseInt(input.value || 0) + 1;
-            input.value = newValue;
-            input.dispatchEvent(new Event('change'));
-        }
-
-        window.decrementValue = function(id) {
-            const input = document.getElementById(id);
-            const minValue = parseFloat(input.min || 1);
+        function decrementValue(input) {
+            const minValue = parseInt(input.getAttribute('min') || 0);
             const currentValue = parseInt(input.value || 0);
             if (currentValue > minValue) {
                 input.value = currentValue - 1;
@@ -505,6 +673,26 @@
         if (peopleMobile) {
             peopleMobile.addEventListener('change', updateResults);
         }
+
+        // Add clear filters functionality
+        document.getElementById('clearAllFiltersMobile').addEventListener('click', function() {
+            // Clear all checkboxes
+            document.querySelectorAll('.mobile-filter-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+
+            // Reset price slider to default values
+            if (window.priceSliderMobile) {
+                window.priceSliderMobile.set([50, 4000]);
+                document.getElementById('price-min-display-mobile').textContent = '50';
+                document.getElementById('price-max-display-mobile').textContent = '4,000';
+                document.getElementById('price_min_mobile').value = '50';
+                document.getElementById('price_max_mobile').value = '4000';
+            }
+
+            // Trigger update to refresh results
+            updateResults();
+        });
     });
 </script>
 @endpush
