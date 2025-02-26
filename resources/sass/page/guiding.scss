@@ -1,9 +1,55 @@
 @import "../settings/variables";
 #filterCard{
-  form#filterContainer{
+  form#filterContainer, #filterContainerOffCanvas{
     height: auto;
+    .btn-link{
+      color: $primary-color;
+      &:focus{
+        box-shadow: none;
+      }
+    }
+    .form-check-input[type=checkbox]{
+      &:focus{
+        box-shadow: none;
+        border-color: $primary-color;
+      }
+      &:focus{
+        background-color: $primary-color;
+        border-color: $primary-color;
+      }
+    }
   }
 }
+#filterContainerOffCanvas{
+    height: auto;
+    .btn-link{
+      color: $primary-color;
+      &:focus{
+        box-shadow: none;
+      }
+    }
+    .form-check{
+      font-size: 1.2rem;
+    }
+    .form-check-input[type=checkbox]{
+      &:focus{
+        box-shadow: none;
+        border-color: $primary-color;
+      }
+      &:focus{
+        background-color: $primary-color;
+        border-color: $primary-color;
+      }
+    }
+  }
+  #offcanvasBottomSearch{
+    .offcanvas-footer.border-top{
+      .btn-primary{
+        background-color: $primary-color;
+        border-color: $primary-color;
+      }
+    }
+  }
 .small-text {
   font-size: 12px;
 }
@@ -840,7 +886,6 @@ div#masonry-grid {
     align-items: center;
   }
 }
-
 @media screen and (max-width: 1200px) {
   #guidings-page {
     .important-info {
