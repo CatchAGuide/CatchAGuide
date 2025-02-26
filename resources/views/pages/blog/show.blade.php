@@ -27,9 +27,9 @@
                 <div class="page-header__bottom-inner">
                     <ul class="thm-breadcrumb list-unstyled">
                         <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                        <li><span>&#183;</span></li>
+                        <li><span><i class="fas fa-solid fa-chevron-right"></i><span></li>
                         <li><a href="{{ route($blogPrefix.'.index') }}">@lang('message.Magazine')</a></li>
-                        <li><span>&#183;</span></li>
+                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                         <li class="active">{{ $thread->title }}</li>
                     </ul>
                 </div>
@@ -42,15 +42,15 @@
             <div class="row">
                 <div class="col-xl-8 col-lg-7">
                     <div class="news-details__left">
-                        <div class="news-details__img">
+                        <!-- <div class="news-details__img">
                             <img src="{{ $thread->getThumbnailPath() }}" alt="">
                             <div class="news-one__date">
                                 <p>{{ $thread->created_at->format('d') }} <br>
                                     <span>{{ $thread->created_at->shortMonthName }}</span></p>
                             </div>
-                        </div>
+                        </div> -->
                         <div class="news-details__content">
-                            <h1 class="news-details__title">{{ $thread->title }}</h1>
+                            <!-- <h1 class="news-details__title">{{ $thread->title }}</h1> -->
                             <p class="news-details__text-1">{!! $thread->body !!}</p>
                         </div>
                     </div>

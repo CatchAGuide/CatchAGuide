@@ -279,6 +279,6 @@ return [
 
 
     'Booking' => 'Reserve now',
-    'From' => 'From'
-
+    'From' => 'From',
+    'Magazine_subtitle' => 'Up to date, entertaining & informative - Allround fishing articles'
 ];

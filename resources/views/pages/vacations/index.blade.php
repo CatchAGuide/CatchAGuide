@@ -165,7 +165,6 @@
     .guiding-item-price h5 {
         margin: 0;
         white-space: nowrap;
-        font-size: clamp(15px, 2vw, 19px);  /* Responsive font size between 14px and 18px */
     }
 </style>
 @endsection
@@ -348,9 +347,9 @@
                                                 <h5 class="fw-bolder text-truncate">{{translate($vacation->title)}}</h5>
                                                 @endif
                                                 @if($agent->ismobile())
-                                                    <h5 class="fw-bolder text-truncate">{{ \Str::limit(translate($vacation->title), 45) }}</h5>
+                                                    <h5 class="fw-bolder text-truncate">{{ \Str::limit(translate($vacation->title), 65) }}</h5>
                                                 @endif
-                                                <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ $vacation->location }} </span>                                      
+                                                <span class=""><i class="fas fa-map-marker-alt me-2"></i>{{ $vacation->location }} </span>                                      
                                             </div>
                                             <div class="inclusions-price">
                                             <div class="guiding-item-price">

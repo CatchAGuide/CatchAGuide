@@ -1364,43 +1364,28 @@
     </div>
 </section>
 
-<section class="py-1 my-5 banner">
-    <div class="container my-5">
-        <div class="row">
-            <div class="col-xl-12 col-lg-12 col-sm-12" >
-                <div class="p-4 position-relative">
-                    <div class="video-one-bg jarallax"
-                         style="background-image:black"></div>
-                    <div class="container">
-                        <div class="row align-items-center">
-                            <div class="col-xl-9 col-lg-9 col-sm-9">
-                                <div class="row align-items-center">
-                                    <div class="text-white col-md-12">
-                                        <div class="video-one__left">
-                                            <h3 class="text-white h1 fw-bolder">@lang('homepage.guide-title')</h3>
-                                            <span class="my-2">@lang('homepage.guide-message')</span>
-                                            <div class="mb-2 d-flex flex-column">
-                                                <span>- @lang('homepage.guide-list-1')</span>
-                                                <span>- @lang('homepage.guide-list-2')</span>
-                                                <span>- @lang('homepage.guide-list-3')</span>
-                                            </div>
-                    
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-xl-3 col-lg-3 col-sm-3">
-                                <a href="{{route('login')}}" class="about-one__btn thm-btn">@lang('homepage.guide-button')</a>
-                            </div>
-                        </div>
+<section id="cta" class="py-1 my-5 banner">
+    <div class="container">
+        <div class="cta-row ">
+            <div class="cta-left">
+                <div class="video-one__left">
+                    <h3 class="text-white h1 fw-bolder">@lang('homepage.guide-title')</h3>
+                    <span class="my-2">@lang('homepage.guide-message')</span>
+                    <div class="my-2 ms-lg-0 ms-2 d-flex flex-column">
+                        <span><i class="fas fa-check-circle"></i> @lang('homepage.guide-list-1')</span>
+                        <span><i class="fas fa-check-circle"></i> @lang('homepage.guide-list-2')</span>
+                        <span><i class="fas fa-check-circle"></i> @lang('homepage.guide-list-3')</span>
                     </div>
+                    
                 </div>
-                
+            </div>
+            <div class="cta-right">
+                <a href="{{route('login')}}" class="about-one__btn thm-btn">@lang('homepage.guide-button')</a>
+
             </div>
         </div>
     </div>
 </section>
-
 <section class="py-1 my-5 popular-trips">
     <div class="container p-3 mt-0 popular-tours">
         <div class="my-2 section-title">

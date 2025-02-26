@@ -1,0 +1,14 @@
+.news-details{
+    padding-top: 32px;
+}
+
+@media (max-width: 992px) {
+    .news-details{
+        .news-details__content{
+            img{
+                width: 100%;
+                object-fit: contain;
+            }
+        }
+    }
+}

@@ -138,6 +138,9 @@
         .details-row{
             display: flex;
             gap: 8px;
+            p{
+              word-wrap: break-word;
+            }
         }
     }
     #guidings-tabs,
