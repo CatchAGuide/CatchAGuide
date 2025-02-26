@@ -439,21 +439,11 @@
                             <div class="btn-group border rounded-start cag-btn-inverted" role="group" style=" width:30%;">
                                 <button type="button" class="btn dropdown-toggle text-white" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-arrow-down-arrow-up me-1"></i>@lang('message.sortby')</button>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=newest">@lang('message.newest')</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=price-asc">@lang('message.lowprice')</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=short-duration">@lang('message.shortduration')</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=long-duration">@lang('message.longduration')</a></li>
+                                    <li><a class="dropdown-item mobile-sort-option" href="javascript:void(0)" data-sort="newest">@lang('message.newest')</a></li>
+                                    <li><a class="dropdown-item mobile-sort-option" href="javascript:void(0)" data-sort="price-asc">@lang('message.lowprice')</a></li>
+                                    <li><a class="dropdown-item mobile-sort-option" href="javascript:void(0)" data-sort="short-duration">@lang('message.shortduration')</a></li>
+                                    <li><a class="dropdown-item mobile-sort-option" href="javascript:void(0)" data-sort="long-duration">@lang('message.longduration')</a></li>
                                 </ul>
-
-                                @foreach(request()->except('sortby') as $key => $value)
-                                    @if(is_array($value))
-                                        @foreach($value as $arrayValue)
-                                            <input type="hidden" name="{{ $key }}[]" value="{{ $arrayValue }}">
-                                        @endforeach
-                                    @else
-                                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                                    @endif
-                                @endforeach
                             </div>
                             <a class="btn border-start cag-btn-inverted" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottomSearch" aria-controls="offcanvasBottomSearch" href="javascript:void(0)" style="border-left: 1px solid #ccc!important; z-index: 2; width:30%;">
                                 <i class="fa fa-filter me-1"></i>@lang('message.filter') 
@@ -932,6 +922,22 @@
             $('#num-guests, #num-guestsOffCanvass').val('{{ request()->get('num_guests') }}');
         @endif
     }
+
+    // Handle mobile sorting
+    document.querySelectorAll('.mobile-sort-option').forEach(option => {
+        option.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Get current URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Set the sort parameter
+            urlParams.set('sortby', this.dataset.sort);
+            
+            // Redirect to the new URL with all parameters
+            window.location.href = `${window.location.pathname}?${urlParams.toString()}`;
+        });
+    });
 </script>
 
 <script type="module">
