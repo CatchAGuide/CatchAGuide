@@ -232,7 +232,9 @@ class GuidingsController extends Controller
         }
 
         if ($request->has('num_persons') && !empty($request->get('num_persons'))) {
-            $query->whereIn('max_guests', $request->get('num_persons'));
+            // Change from exact match to "at least" logic
+            $minPersons = min($request->get('num_persons'));
+            $query->where('max_guests', '>=', $minPersons);
         }
 
         $radius = null; // Radius in miles
@@ -307,8 +309,12 @@ class GuidingsController extends Controller
                 $durationCounts[$guiding->duration_type] = ($durationCounts[$guiding->duration_type] ?? 0) + 1;
             }
 
+            // Count persons - this is the key change
             if (isset($guiding->max_guests)) {
-                $personCounts[$guiding->max_guests] = ($personCounts[$guiding->max_guests] ?? 0) + 1;
+                // Count all guidings that support at least this number of persons
+                for ($i = 1; $i <= min(8, $guiding->max_guests); $i++) {
+                    $personCounts[$i] = ($personCounts[$i] ?? 0) + 1;
+                }
             }
         }
         ksort($personCounts); // Sort by number of persons
