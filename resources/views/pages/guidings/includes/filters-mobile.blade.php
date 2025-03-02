@@ -470,10 +470,8 @@
 <script src="https://cdn.jsdelivr.net/npm/nouislider@14.6.3/distribute/nouislider.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const filterForm = document.getElementById('filterContainerOffCanvas');
-
-        // Initialize price slider
-        FilterManager.initPriceSlider(
+        // Initialize price slider for mobile
+        window.priceSliderMobile = FilterManager.initPriceSlider(
             'price-slider-mobile',
             'price-min-display-mobile',
             'price-max-display-mobile',
@@ -483,7 +481,7 @@
         );
 
         // Initialize see more buttons for mobile
-        initSeeMoreButtons();
+        FilterManager.initSeeMoreButtons();
 
         // Add change event listener to all filter checkboxes
         document.querySelectorAll('.mobile-filter-checkbox').forEach(checkbox => {
@@ -576,8 +574,8 @@
                 // Hide loading overlay
                 FilterManager.hideLoadingOverlay();
                 
-                // Reinitialize see more buttons after filter update
-                setTimeout(initSeeMoreButtons, 100);
+                // Sync desktop and mobile filters
+                syncFilters();
             })
             .catch(error => {
                 console.error('Error updating results:', error);
@@ -586,100 +584,24 @@
             });
         }
 
-        // Initialize see more buttons for mobile
-        function initSeeMoreButtons() {
-            document.querySelectorAll('.filter-section .checkbox-group').forEach(section => {
-                // Get all checkboxes in this section
-                const allCheckboxes = section.querySelectorAll('.form-check');
+        // New function to sync desktop and mobile filters
+        function syncFilters() {
+            // Sync checkboxes between mobile and desktop
+            document.querySelectorAll('.mobile-filter-checkbox').forEach(mobileCheckbox => {
+                const name = mobileCheckbox.name;
+                const value = mobileCheckbox.value;
+                const desktopCheckbox = document.querySelector(`#filterContainer input[name="${name}"][value="${value}"]`);
                 
-                // Show first 7 checkboxes by default (or all if less than 7)
-                allCheckboxes.forEach((checkbox, index) => {
-                    if (index < 7) {
-                        checkbox.classList.remove('d-none', 'extra-filter');
-                    } else {
-                        checkbox.classList.add('d-none', 'extra-filter');
-                    }
-                });
-                
-                // Remove any existing see more/less buttons
-                const existingButton = section.querySelector('.see-more');
-                if (existingButton) {
-                    existingButton.remove();
-                }
-                
-                // Only add the button if there are more than 7 checkboxes
-                if (allCheckboxes.length > 7) {
-                    const seeMoreBtn = document.createElement('button');
-                    seeMoreBtn.type = 'button';
-                    seeMoreBtn.className = 'btn btn-link see-more w-100 text-center';
-                    seeMoreBtn.textContent = 'See More';
-                    section.appendChild(seeMoreBtn);
-                    
-                    seeMoreBtn.addEventListener('click', function() {
-                        if (this.textContent === 'See More') {
-                            // Show all checkboxes
-                            allCheckboxes.forEach(checkbox => {
-                                checkbox.classList.remove('d-none');
-                            });
-                            this.textContent = 'See Less';
-                        } else {
-                            // Hide checkboxes beyond the first 7
-                            allCheckboxes.forEach((checkbox, index) => {
-                                if (index >= 7) {
-                                    checkbox.classList.add('d-none');
-                                }
-                            });
-                            this.textContent = 'See More';
-                        }
-                    });
+                if (desktopCheckbox) {
+                    desktopCheckbox.checked = mobileCheckbox.checked;
                 }
             });
-        }
-
-        // Handle increment/decrement buttons for number inputs
-        function setupNumberInputButtons() {
-            document.querySelectorAll('.increment-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    incrementValue(this.closest('.number-input').querySelector('input'));
-                });
-            });
-
-            document.querySelectorAll('.decrement-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    decrementValue(this.closest('.number-input').querySelector('input'));
-                });
-            });
-        }
-
-        setupNumberInputButtons();
-
-        function incrementValue(input) {
-            const maxValue = parseInt(input.getAttribute('max') || 100);
-            const currentValue = parseInt(input.value || 0);
-            if (currentValue < maxValue) {
-                input.value = currentValue + 1;
-                input.dispatchEvent(new Event('change'));
+            
+            // Sync price sliders
+            if (window.priceSliderMobile && window.priceSliderMain) {
+                const mobileValues = window.priceSliderMobile.get();
+                window.priceSliderMain.set(mobileValues);
             }
-        }
-
-        function decrementValue(input) {
-            const minValue = parseInt(input.getAttribute('min') || 0);
-            const currentValue = parseInt(input.value || 0);
-            if (currentValue > minValue) {
-                input.value = currentValue - 1;
-                input.dispatchEvent(new Event('change'));
-            }
-        }
-
-        // Add mobile inputs to the filter update logic
-        const durationMobile = document.getElementById('duration_mobile');
-        const peopleMobile = document.getElementById('people_mobile');
-        
-        if (durationMobile) {
-            durationMobile.addEventListener('change', updateResults);
-        }
-        if (peopleMobile) {
-            peopleMobile.addEventListener('change', updateResults);
         }
 
         // Add clear filters functionality

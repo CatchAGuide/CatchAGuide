@@ -820,11 +820,6 @@
     </section>
     <!--Tours List End-->
 
-    <!-- Modal -->
-    @foreach($guidings as $guiding)
-        @include('pages.guidings.content.guidingModal')
-    @endforeach
-
     <div class="modal show" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl" style="max-width: 100%; width: 96%; height:100%;">
             <div class="modal-content" style="height:90%;">
