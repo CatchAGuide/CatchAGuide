@@ -1,4 +1,4 @@
-@extends('layouts.app-v2')
+@extends('layouts.app')
 
 @section('title', translate($thread->title))
 @section('description', translate($thread->excerpt))
@@ -37,7 +37,7 @@
         </div>
     </section>
     <!--News One Start-->
-    <section class="news-details">
+    <section class="news-details cx">
         <div class="container">
             <div class="row">
                 <div class="col-xl-8 col-lg-7">

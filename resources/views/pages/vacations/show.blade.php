@@ -829,7 +829,7 @@
                                                             @endphp
                                                         @else
                                                             <div class="details-row">
-                                                                <h6 class="mb-1"> @lang('vacations.'.$field):</h6>
+                                                                <h6 class="mb-1">{{ translate(ucwords(str_replace('_',  ' ', $field))) }}:</h6>
                                                                 <p class="mb-0">{{ translate($value) }}</p>
                                                             </div>
                                                         @endif
