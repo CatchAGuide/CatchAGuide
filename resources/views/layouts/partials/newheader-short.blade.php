@@ -86,7 +86,11 @@
                     </a>
                 </div>
             </div>
-            
+            @if (request()->is('fishing-magazine/*') || request()->is('angelmagazin/*'))
+            <div class="header-contents container">
+                <h1 class="h2 mt-3 mb-0 text-white">@yield('header_title')</h1>
+            </div>
+            @endif
             <!-- Categories Row - Mobile -->
             <div class="col-12 d-md-none mt-2">
                 <div class="d-flex categories-mobile">
