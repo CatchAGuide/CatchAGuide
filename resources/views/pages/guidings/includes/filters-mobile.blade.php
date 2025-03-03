@@ -481,7 +481,7 @@
         );
 
         // Initialize see more buttons for mobile
-        FilterManager.initSeeMoreButtons();
+        // FilterManager.initSeeMoreButtons();
 
         // Add change event listener to all filter checkboxes
         document.querySelectorAll('.mobile-filter-checkbox').forEach(checkbox => {
