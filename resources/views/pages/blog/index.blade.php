@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-v2')
 
 @section('title', __('message.magazine_meta_title'))
 @section('description',__('message.magazine_meta_description'))
