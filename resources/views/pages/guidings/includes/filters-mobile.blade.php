@@ -480,9 +480,6 @@
             updateResults
         );
 
-        // Initialize see more buttons for mobile
-        // FilterManager.initSeeMoreButtons();
-
         // Add change event listener to all filter checkboxes
         document.querySelectorAll('.mobile-filter-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', function() {
@@ -573,35 +570,13 @@
                 
                 // Hide loading overlay
                 FilterManager.hideLoadingOverlay();
-                
-                // Sync desktop and mobile filters
-                syncFilters();
+            
             })
             .catch(error => {
                 console.error('Error updating results:', error);
                 // Hide loading overlay even on error
                 FilterManager.hideLoadingOverlay();
             });
-        }
-
-        // New function to sync desktop and mobile filters
-        function syncFilters() {
-            // Sync checkboxes between mobile and desktop
-            document.querySelectorAll('.mobile-filter-checkbox').forEach(mobileCheckbox => {
-                const name = mobileCheckbox.name;
-                const value = mobileCheckbox.value;
-                const desktopCheckbox = document.querySelector(`#filterContainer input[name="${name}"][value="${value}"]`);
-                
-                if (desktopCheckbox) {
-                    desktopCheckbox.checked = mobileCheckbox.checked;
-                }
-            });
-            
-            // Sync price sliders
-            if (window.priceSliderMobile && window.priceSliderMain) {
-                const mobileValues = window.priceSliderMobile.get();
-                window.priceSliderMain.set(mobileValues);
-            }
         }
 
         // Add clear filters functionality

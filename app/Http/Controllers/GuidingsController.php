@@ -281,7 +281,6 @@ class GuidingsController extends Controller
         $methodCounts = [];
         $waterTypeCounts = [];
         $personCounts = [];
-
         foreach ($allGuidings as $guiding) {
             // For target fish
             $targetFish = json_decode($guiding->target_fish, true) ?? [];
@@ -308,8 +307,6 @@ class GuidingsController extends Controller
             if (isset($guiding->duration_type)) {
                 $durationCounts[$guiding->duration_type] = ($durationCounts[$guiding->duration_type] ?? 0) + 1;
             }
-
-            // Count persons - this is the key change
             if (isset($guiding->max_guests)) {
                 // Count all guidings that support at least this number of persons
                 for ($i = 1; $i <= min(8, $guiding->max_guests); $i++) {
@@ -317,6 +314,20 @@ class GuidingsController extends Controller
                 }
             }
         }
+        // if () {
+            
+        //     $allGuidingsForPersons = Guiding::where('status', 1)->get();
+        //     $personCounts = [];
+
+        //     foreach ($allGuidingsForPersons as $guiding) {
+        //         if (isset($guiding->max_guests)) {
+        //             for ($i = 1; $i <= min(8, $guiding->max_guests); $i++) {
+        //                 $personCounts[$i] = ($personCounts[$i] ?? 0) + 1;
+        //             }
+        //         }
+        //     }
+        // }
+
         ksort($personCounts); // Sort by number of persons
 
         // Get the models for these IDs, only including items with counts > 0
@@ -400,7 +411,7 @@ class GuidingsController extends Controller
             ]);
         }
 
-        return view('pages.guidings.index', [
+        return view('pages.guidings.index', [            
             'title' => $title,
             'filter_title' => $filter_title,
             'guidings' => $guidings,
@@ -421,6 +432,14 @@ class GuidingsController extends Controller
             'durationCounts' => $durationCounts,
             'personCounts' => $personCounts,
             'isMobile' => $isMobile,
+            'total' => $guidings->total(),
+            'filterCounts' => [
+                'targetFish' => $targetFishCounts,
+                'methods' => $methodCounts,
+                'waters' => $waterTypeCounts,
+                'durations' => $durationCounts,
+                'persons' => $personCounts
+            ]
         ]);
     }
 

@@ -551,6 +551,33 @@
                                                     @endif
                                                 @endforeach
                                             @endif
+                                            
+
+                                            {{-- Duration Type Filters --}}
+                                            @if(request()->has('duration_types'))
+                                                @foreach(request()->get('duration_types') as $durationType)
+                                                    <span class="badge bg-light text-dark border">
+                                                        @if($durationType == 'half_day')
+                                                            @lang('guidings.half_day')
+                                                        @elseif($durationType == 'full_day')
+                                                            @lang('guidings.full_day')
+                                                        @elseif($durationType == 'multi_day')
+                                                            @lang('guidings.multi_day')
+                                                        @endif
+                                                        <button type="button" class="btn-close ms-2" data-filter-type="duration_types" data-filter-id="{{ $durationType }}"></button>
+                                                    </span>
+                                                @endforeach
+                                            @endif
+
+                                            {{-- Number of Persons Filter --}}
+                                            @if(request()->has('num_persons'))
+                                                @foreach(request()->get('num_persons') as $numPersons)
+                                                    <span class="badge bg-light text-dark border">
+                                                        {{ $numPersons }} {{ $numPersons == 1 ? __('message.person') : __('message.persons') }}
+                                                        <button type="button" class="btn-close ms-2" data-filter-type="num_persons" data-filter-id="{{ $numPersons }}"></button>
+                                                    </span>
+                                                @endforeach
+                                            @endif
                                         </div>
                                     </div>
                                     @foreach($guidings as $guiding)
@@ -1029,7 +1056,15 @@
             @php
                 // Merge main guidings with other guidings if they exist
                 $combinedGuidings = $allGuidings;
-                if (isset($otherguidings) && count($otherguidings) > 0) {
+                
+                // Only append otherguidings if there are no active checkbox filters
+                $hasActiveFilters = request()->has('target_fish') || 
+                                   request()->has('water') || 
+                                   request()->has('methods') || 
+                                   request()->has('duration_types') || 
+                                   request()->has('num_persons');
+                                   
+                if (isset($otherguidings) && count($otherguidings) > 0 && !$hasActiveFilters) {
                     $combinedGuidings = $allGuidings->concat($otherguidings);
                 }
             @endphp
