@@ -44,6 +44,7 @@
                                 
                                 // Combine them with checked items first
                                 $sortedTargets = array_merge($checkedItems, $uncheckedItems);
+
                             @endphp
                             
                             @foreach($sortedTargets as $index => $target)
@@ -189,7 +190,7 @@
                                 ];
                             @endphp
                             @foreach($durationLabels as $durationType => $label)
-                                <div class="form-check">
+                                <div class="form-check {{ $durationCounts[$durationType] > 0 ? '' : 'd-none' }}">
                                     <input type="checkbox" 
                                            class="form-check-input filter-checkbox" 
                                            name="duration_types[]" 
@@ -210,7 +211,7 @@
                 <div class="filter-section mb-3">
                     <div class="form-group mb-3">
                         <h5 class="mb-2">{{translate('Number of People')}}</h5>
-                        <div class="checkbox-group">
+                        <div class="checkbox-group" id="person-checkbox-group">
                             @foreach($personCounts as $persons => $count)
                                 <div class="form-check">
                                     <input type="checkbox" 
