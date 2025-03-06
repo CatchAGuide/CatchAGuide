@@ -164,92 +164,73 @@ class VacationsController extends Controller
             Session::put('random_seed', $randomSeed);
         }
 
-        $query = Vacation::where('status',1)->where('country',$country);
+        $query = Vacation::where('status', 1)->where('country', $country);
 
-        if (empty($request->all())) {
-            $query->orderByRaw("RAND($randomSeed)");
-        }
-
+        // Build title based on filters
         if($request->has('page')){
             $title .= __('vacations.Page') . ' ' . $request->page . ' - ';
         }
 
         if($request->has('num_guests') && !empty($request->get('num_guests'))){
             $title .= __('vacations.Guest') . ' ' . $request->num_guests . ' | ';
-            // $q = $query->where('max_guests','>=',$request->get('num_guests'));
         }
+            
+        $hasOnlyPageParam = count(array_diff(array_keys($request->all()), ['page'])) === 0;
 
-        if($request->has('sortby') && !empty($request->get('sortby'))){
+        // Apply consistent ordering based on sort parameter or default to ID
+        if ($request->has('sortby') && !empty($request->get('sortby'))) {
+            // Apply sorting based on user selection
             switch ($request->get('sortby')) {
                 case 'newest':
                     $query->orderBy('created_at', 'desc');
                     break;
-
                 case 'price-asc':
-                    // $query->orderBy(DB::raw('lowest_price'), 'asc');
+                    $query->orderBy('id', 'asc');
                     break;
-
                 case 'price-desc':
-                    // $query->orderBy(DB::raw('lowest_price'), 'desc');
+                    $query->orderBy('id', 'desc');
                     break;
-
                 case 'long-duration':
-                    // $query->orderBy('duration', 'desc');
+                    $query->orderBy('id', 'desc');
                     break;
-
                 case 'short-duration':
-                    // $query->orderBy('duration', 'asc');
+                    $query->orderBy('id', 'asc');
                     break;
-
                 default:
-                    if (empty($request->all())) {
-                        $query->orderByRaw("RAND($randomSeed)");
-                    }
+                    $query->orderBy('id', 'asc');
             }
+        } else if ($hasOnlyPageParam) {
+            // Use random ordering for first page with no filters
+            $query->orderByRaw("RAND($randomSeed)");
+        } else {
+            // Default ordering by ID to ensure consistent pagination
+            $query->orderBy('id', 'asc');
         }
 
         $filterData = json_decode($row_data->filters, true);
 
         $searchMessage = '';
-        $placeLat = $filterData['placeLat'];
-        $placeLng = $filterData['placeLng'];
+        $placeLat = $filterData['placeLat'] ?? null;
+        $placeLng = $filterData['placeLng'] ?? null;
 
         $title .= __('vacations.Country') . ' ' . $country . ' | ';
         if(!empty($placeLat) && !empty($placeLng) && !empty($request->get('place'))){
-
             $title .= __('vacations.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
             $vacationFilter = Vacation::locationFilter($request->get('city'), $request->get('country'), $request->get('region') ?? null, $placeLat, $placeLng);
             $searchMessage = $vacationFilter['message'];
             
             // Add a subquery to order by the position in the filtered IDs array
-            $orderByCase = 'CASE vacations.id ';
-            foreach($vacationFilter['ids'] as $position => $id) {
-                $orderByCase .= "WHEN $id THEN $position ";
+            if (!empty($vacationFilter['ids'])) {
+                $orderByCase = 'CASE vacations.id ';
+                foreach($vacationFilter['ids'] as $position => $id) {
+                    $orderByCase .= "WHEN $id THEN $position ";
+                }
+                $orderByCase .= 'ELSE ' . count($vacationFilter['ids']) . ' END';
+                
+                $query->whereIn('vacations.id', $vacationFilter['ids'])
+                      ->orderByRaw($orderByCase);
             }
-            $orderByCase .= 'ELSE ' . count($vacationFilter['ids']) . ' END';
-            
-            $query->whereIn('vacations.id', $vacationFilter['ids'])
-                  ->orderByRaw($orderByCase);
         }
-
-        // if($request->has('price_range') && !empty($request->get('price_range'))){
-        //     $price_range = explode('-', $request->get('price_range'));
-            
-        //     if(count($price_range) == 2) {
-        //         $min_price = $price_range[0];
-        //         $max_price = $price_range[1];
-        //         $title .= __('guidings.Price') . ' ' . $min_price . '€ - ' . $max_price . '€ | ';
-                
-        //         $query->having(DB::raw('lowest_price'), '>=', $min_price)
-        //               ->having(DB::raw('lowest_price'), '<=', $max_price);
-        //     } elseif(count($price_range) == 1) {
-        //         // Handle single value (350 and more)
-        //         $min_price = $price_range[0];
-        //         $title .= __('guidings.Price') . ' ' . $min_price . '€+ | ';
-                
-        //         $query->having(DB::raw('lowest_price'), '>=', $min_price);
-        //     }
-        // }
 
         $vacations_total = $query->count();
         $allVacations = $query->get();
@@ -257,7 +238,6 @@ class VacationsController extends Controller
         $othervacations = array();
 
         if($allVacations->isEmpty()){
-
             if($request->has('placeLat') && $request->has('placeLng') && !empty($request->get('placeLat')) && !empty($request->get('placeLng')) ){
                 $latitude = $request->get('placeLat');
                 $longitude = $request->get('placeLng');
@@ -268,8 +248,11 @@ class VacationsController extends Controller
             }
         }
        
-        $vacations = $query->paginate(6);
-        $vacations->appends(request()->except('page'));
+        // Use select distinct on id to ensure no duplicates
+        $query->select('vacations.*')->distinct('id');
+        
+        // Apply pagination - use a smaller number like 5 for testing
+        $vacations = $query->paginate(6)->appends(request()->except('page'));
 
         $data = compact('row_data', 'faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit', 'vacations', 'allVacations', 'othervacations', 'title', 'vacations_total');
 

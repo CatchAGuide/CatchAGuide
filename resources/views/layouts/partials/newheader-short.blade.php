@@ -135,26 +135,17 @@
                 <div id="filterContainer" class="col-12 d-md-none mt-3">
                     <form class="search-form row gx-2 pe-0" id="global-search1" action="{{ $isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index') }}" method="get">                
                         <div id="mobileherofilter" class="shadow-lg bg-white p-2 rounded">
-                            <div class="row">
-                                <div class="col-md-4 column-input my-2">
-                                    <div class="d-flex align-items-center small myselect2">
-                                        <i class="fas fa-map-marker-alt position-absolute ps-1"></i>
-                                        <select class="form-control form-select border-0" name="country" onchange="updateFormAction(this, 'global-search1')">
-                                            <option value="">{{translate('Select Country')}}</option>
-                                            @foreach($countries as $country)
-                                                <option value="{{ $country }}" 
-                                                    {{ request()->country == $country ? 'selected' : '' }}>
-                                                    {{ $country }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-2 column-button my-2">
-                                    <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
-                                    <button type="submit" class="form-control new-filter-btn mobile"><i class="icon-magnifying-glass"></i></button>
-                                </div>
+                            <div class="d-flex align-items-center small myselect2">
+                                <i class="fas fa-map-marker-alt position-absolute ps-1"></i>
+                                <select class="form-control form-select border-0" name="country" onchange="updateFormAction(this, 'global-search1')">
+                                    <option value="">{{translate('Select Country')}}</option>
+                                    @foreach($countries as $country)
+                                        <option value="{{ $country }}" 
+                                            {{ request()->country == $country ? 'selected' : '' }}>
+                                            {{ $country }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                     </form>
@@ -1008,6 +999,7 @@ input[type=number] {
                                 </select>
                             </div>
                         </div>
+
                         <button type="submit" class="btn btn-primary w-100">Search</button>
                     @endif
                 </form>
@@ -1152,12 +1144,11 @@ input[type=number] {
 function updateFormAction(selectElement, formId) {
     const form = document.getElementById(formId);
     const selectedCountry = selectElement.value;
-    
-    // Use 'all' as default if no country is selected
-    if (selectedCountry) {
+
+    if(selectedCountry){
         form.action = "{{ route('vacations.category', ['country' => 'all']) }}".replace('all', selectedCountry);
-    } else {
-        form.action = "{{ route('vacations.index') }}";
+    }else{
+        form.action = "{{ route('guidings.index') }}";
     }
     
     form.submit();
