@@ -217,7 +217,7 @@
                         <div class="checkbox-group" id="person-checkbox-group">
                             @foreach($personCounts as $persons => $count)
                                 <div class="form-check">
-                                    <input type="radio" 
+                                    <input type="checkbox" 
                                            class="form-check-input filter-checkbox" 
                                            name="num_persons" 
                                            id="persons_{{ $persons }}" 
@@ -508,6 +508,9 @@
 
         // Initialize see more buttons
         FilterManager.initSeeMoreButtons();
+        
+        // Initialize person checkboxes to behave like radio buttons
+        FilterManager.initPersonCheckboxes();
 
         // Add change event listener to all filter checkboxes
         document.querySelectorAll('.filter-checkbox').forEach(checkbox => {

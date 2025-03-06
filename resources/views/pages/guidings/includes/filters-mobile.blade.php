@@ -204,23 +204,25 @@
             </div>
 
             {{-- Number of People Section --}}
-            <div class="filter-section mb-4">
-                <h6 class="mb-3">{{translate('Number of People')}}</h6>
-                <div class="checkbox-group">
-                    @foreach($personCounts as $persons => $count)
-                        <div class="form-check">
-                            <input type="checkbox" 
-                                   class="form-check-input mobile-filter-checkbox person-checkbox-mobile" 
-                                   name="num_persons" 
-                                   id="persons_mobile_{{ $persons }}" 
-                                   value="{{ $persons }}"
-                                   {{ request()->get('num_persons') == (string)$persons ? 'checked' : '' }}>
-                            <label class="form-check-label d-flex justify-content-between" for="persons_mobile_{{ $persons }}">
-                                {{ translate('Up to') }} {{ $persons }} {{ translate('person'.($persons > 1 ? 's' : '')) }}
-                                <span class="count">({{ $count }})</span>
-                            </label>
-                        </div>
-                    @endforeach
+            <div class="filter-section mb-3">
+                <div class="form-group mb-3">
+                    <h5 class="mb-2">{{translate('Number of People')}}</h5>
+                    <div class="checkbox-group" id="mobile-person-checkbox-group">
+                        @foreach($personCounts as $persons => $count)
+                            <div class="form-check">
+                                <input type="checkbox" 
+                                       class="form-check-input mobile-filter-checkbox" 
+                                       name="num_persons" 
+                                       id="mobile_persons_{{ $persons }}" 
+                                       value="{{ $persons }}"
+                                       {{ request()->get('num_persons') == (string)$persons ? 'checked' : '' }}>
+                                <label class="form-check-label" for="mobile_persons_{{ $persons }}">
+                                    {{ translate('Up to') }} {{ $persons }} {{ translate('person'.($persons > 1 ? 's' : '')) }}
+                                    <span class="count">({{ $count }})</span>
+                                </label>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </form>
