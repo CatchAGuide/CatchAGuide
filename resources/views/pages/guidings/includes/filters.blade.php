@@ -10,6 +10,9 @@
                     <div class="form-group my-1">
                         <h5 class="mb-2">{{translate('Your budget')}}</h5>
                         <div class="price-range-slider">
+                            <div class="chart-container mb-2">
+                                <canvas id="price-histogram"></canvas>
+                            </div>
                             <div id="price-slider-main"></div>
                             <div class="price-display mt-2">
                                 € <span id="price-min-display">50</span> - € <span id="price-max-display">4,000</span>
@@ -468,25 +471,33 @@
     .form-check-label {
         font-size: 0.9rem;
     }
+
+    .chart-container {
+        width: 100%;
+        height: 80px;
+        margin-bottom: 10px;
+    }
     </style>
     
 @endpush
 
 @push('guidingListingScripts')
 <script src="https://cdn.jsdelivr.net/npm/nouislider@14.6.3/distribute/nouislider.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{{ asset('js/filters-manager.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const filterForm = document.getElementById('filterContainer');
 
-        // Initialize price slider
+        // Initialize price slider with histogram
         FilterManager.initPriceSlider(
             'price-slider-main',
             'price-min-display',
             'price-max-display',
             'price_min_main',
             'price_max_main',
-            updateResults
+            updateResults,
+            'price-histogram'  // Add histogram canvas ID
         );
 
         // Initialize see more buttons

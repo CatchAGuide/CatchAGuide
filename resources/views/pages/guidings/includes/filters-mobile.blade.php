@@ -14,6 +14,9 @@
             <div class="filter-section mb-4">
                 <h6 class="mb-3">{{translate('Your budget')}}</h6>
                 <div class="price-range-slider px-3">
+                    <div class="chart-container mb-2">
+                        <canvas id="price-histogram-mobile"></canvas>
+                    </div>
                     <div id="price-slider-mobile"></div>
                     <div class="price-display mt-2">
                         € <span id="price-min-display-mobile">50</span> - € <span id="price-max-display-mobile">4,000</span>
@@ -467,17 +470,17 @@
 @endpush
 
 @push('guidingListingScripts')
-<script src="https://cdn.jsdelivr.net/npm/nouislider@14.6.3/distribute/nouislider.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize price slider for mobile
+        // Initialize price slider for mobile with histogram
         window.priceSliderMobile = FilterManager.initPriceSlider(
             'price-slider-mobile',
             'price-min-display-mobile',
             'price-max-display-mobile',
             'price_min_mobile',
             'price_max_mobile',
-            updateResults
+            updateResults,
+            'price-histogram-mobile'  // Add histogram canvas ID
         );
 
         // Add change event listener to all filter checkboxes
