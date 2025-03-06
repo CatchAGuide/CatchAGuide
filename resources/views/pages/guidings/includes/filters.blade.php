@@ -217,12 +217,12 @@
                         <div class="checkbox-group" id="person-checkbox-group">
                             @foreach($personCounts as $persons => $count)
                                 <div class="form-check">
-                                    <input type="checkbox" 
+                                    <input type="radio" 
                                            class="form-check-input filter-checkbox" 
-                                           name="num_persons[]" 
+                                           name="num_persons" 
                                            id="persons_{{ $persons }}" 
                                            value="{{ $persons }}"
-                                           {{ in_array((string)$persons, request()->get('num_persons', [])) ? 'checked' : '' }}>
+                                           {{ request()->get('num_persons') == (string)$persons ? 'checked' : '' }}>
                                     <label class="form-check-label" for="persons_{{ $persons }}">
                                         {{ translate('Up to') }} {{ $persons }} {{ translate('person'.($persons > 1 ? 's' : '')) }}
                                         <span class="count">({{ $count }})</span>

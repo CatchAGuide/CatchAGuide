@@ -115,8 +115,8 @@
                 <div id="mobileherofilter" class="shadow-lg bg-white p-2 rounded">
                     <div class="row">
                         @if ($isVacation)
-                        <div class="vacation-header">
-                            <div class="col-md-4 column-input my-2">
+                        {{-- <div class="vacation-header"> --}}
+                            {{-- <div class="col-md-4 column-input my-2"> --}}
                                 <div class="d-flex align-items-center small myselect2">
                                     <i class="fa fa-map-marker-alt position-absolute ps-1"></i>
                                     <select class="form-control form-select border-0" name="country" onchange="updateFormAction(this, 'global-search1')">
@@ -132,11 +132,11 @@
                                         @endforeach
                                     </select>
                                 </div>
-                            </div>
+                            {{-- </div>
                             <div class="">
                             <button type="submit" class="form-control new-filter-btn mobile"><i class="icon-magnifying-glass"></i></button>
-                            </div>
-                        </div>
+                            </div> --}}
+                        {{-- </div> --}}
                         @else
                             <div class="col-md-4 column-input my-2">
                                 <div class="form-group">
@@ -177,10 +177,10 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="col-md-2 col-12 column-button my-2">
+                                        <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
+                            </div>
                         @endif
-                        <div class="col-md-2 col-12 column-button my-2">
-                                    <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
-                        </div>
                     </div>
                 </div> 
             </form>
@@ -266,10 +266,10 @@
                                     @endforeach
                                 </select>
                             </div>
+                            <div class="my-1 px-0">
+                                <button type="submit" class="search-button">@lang('homepage.searchbar-search')</button>
+                            </div>
                         @endif
-                        <div class="my-1 px-0">
-                            <button type="submit" class="search-button">@lang('homepage.searchbar-search')</button>
-                        </div>
                     </div>
                 </div>
             </form>
@@ -496,7 +496,7 @@ input[type=number] {
         align-items: center;
         gap: 4px;
     }
-    ##filterContainer:has(.vacation-header) .column-input{
+    #filterContainer:has(.vacation-header) .column-input{
 
     }
     #mobileherofilter:has(.vacation-header) .column-input{
@@ -1202,9 +1202,15 @@ function updateFormAction(selectElement, formId) {
     const form = document.getElementById(formId);
     const selectedCountry = selectElement.value;
     
-    // Use 'all' as default if no country is selected
-    const country = selectedCountry || 'all';
-    form.action = "{{ route('vacations.category', ['country' => 'all']) }}".replace('all', country);
+    // Use the selected country for the form action if one is selected
+    if (selectedCountry) {
+        form.action = "{{ route('vacations.category', ['country' => 'all']) }}".replace('all', selectedCountry);
+    } else {
+        form.action = "{{ route('vacations.index') }}";
+    }
+    
+    // Submit the form immediately after changing the action
+    form.submit();
 }
 
 function closeMobileMenu() {

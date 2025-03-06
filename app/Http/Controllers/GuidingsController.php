@@ -231,9 +231,12 @@ class GuidingsController extends Controller
             $query->whereIn('duration_type', $request->get('duration_types'));
         }
 
-        if ($request->has('num_persons') && !empty($request->get('num_persons'))) {
-            // Change from exact match to "at least" logic
-            $minPersons = min($request->get('num_persons'));
+        if($request->has('num_persons')){
+            $title .= __('guidings.Number of People') . ' ' . $request->get('num_persons') . ' | ';
+            $filter_title .= __('guidings.Number of People') . ' ' . $request->get('num_persons') . ', ';
+            
+            // For single selection, we just need to check if the guiding supports at least this many people
+            $minPersons = $request->get('num_persons');
             $query->where('max_guests', '>=', $minPersons);
         }
 
@@ -359,6 +362,11 @@ class GuidingsController extends Controller
 
         // Modify the mobile check to use the Agent facade
         $isMobile = $request->get('ismobile') == 'true' || app('agent')->isMobile();
+
+        // Make sure personCounts is always an array
+        if (empty($personCounts)) {
+            $personCounts = [];
+        }
 
         if ($request->ajax()) {
             $view = view('pages.guidings.partials.guiding-list', [

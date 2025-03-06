@@ -210,11 +210,11 @@
                     @foreach($personCounts as $persons => $count)
                         <div class="form-check">
                             <input type="checkbox" 
-                                   class="form-check-input mobile-filter-checkbox" 
-                                   name="num_persons[]" 
+                                   class="form-check-input mobile-filter-checkbox person-checkbox-mobile" 
+                                   name="num_persons" 
                                    id="persons_mobile_{{ $persons }}" 
                                    value="{{ $persons }}"
-                                   {{ in_array((string)$persons, request()->get('num_persons', [])) ? 'checked' : '' }}>
+                                   {{ request()->get('num_persons') == (string)$persons ? 'checked' : '' }}>
                             <label class="form-check-label d-flex justify-content-between" for="persons_mobile_{{ $persons }}">
                                 {{ translate('Up to') }} {{ $persons }} {{ translate('person'.($persons > 1 ? 's' : '')) }}
                                 <span class="count">({{ $count }})</span>
@@ -585,10 +585,15 @@
         // Add clear filters functionality
         document.getElementById('clearAllFiltersMobile').addEventListener('click', function() {
             // Clear all checkboxes
-            document.querySelectorAll('.mobile-filter-checkbox').forEach(checkbox => {
+            document.querySelectorAll('.mobile-filter-checkbox[type="checkbox"]').forEach(checkbox => {
                 checkbox.checked = false;
             });
-
+            
+            // Clear all radio buttons
+            document.querySelectorAll('.mobile-filter-checkbox[type="radio"]').forEach(radio => {
+                radio.checked = false;
+            });
+            
             // Reset price slider to default values
             if (window.priceSliderMobile) {
                 window.priceSliderMobile.set([50, 4000]);
@@ -597,7 +602,7 @@
                 document.getElementById('price_min_mobile').value = '50';
                 document.getElementById('price_max_mobile').value = '4000';
             }
-
+            
             // Trigger update to refresh results
             updateResults();
         });

@@ -240,10 +240,10 @@
                                     @endforeach
                                 </select>
                             </div>
+                            <div class="my-1 px-0">
+                                <button type="submit" class="search-button">@lang('homepage.searchbar-search')</button>
+                            </div>
                         @endif
-                        <div class="my-1 px-0">
-                            <button type="submit" class="search-button">@lang('homepage.searchbar-search')</button>
-                        </div>
                     </div>
                 </div>
             </form>
@@ -1008,9 +1008,8 @@ input[type=number] {
                                 </select>
                             </div>
                         </div>
+                        <button type="submit" class="btn btn-primary w-100">Search</button>
                     @endif
-
-                    <button type="submit" class="btn btn-primary w-100">Search</button>
                 </form>
             </div>
         </div>
@@ -1155,8 +1154,13 @@ function updateFormAction(selectElement, formId) {
     const selectedCountry = selectElement.value;
     
     // Use 'all' as default if no country is selected
-    const country = selectedCountry || 'all';
-    form.action = "{{ route('vacations.category', ['country' => 'all']) }}".replace('all', country);
+    if (selectedCountry) {
+        form.action = "{{ route('vacations.category', ['country' => 'all']) }}".replace('all', selectedCountry);
+    } else {
+        form.action = "{{ route('vacations.index') }}";
+    }
+    
+    form.submit();
 }
 
 document.addEventListener('DOMContentLoaded', function() {

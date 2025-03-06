@@ -571,12 +571,13 @@
 
                                             {{-- Number of Persons Filter --}}
                                             @if(request()->has('num_persons'))
-                                                @foreach(request()->get('num_persons') as $numPersons)
-                                                    <span class="badge bg-light text-dark border">
-                                                        {{ $numPersons }} {{ $numPersons == 1 ? __('message.person') : __('message.persons') }}
-                                                        <button type="button" class="btn-close ms-2" data-filter-type="num_persons" data-filter-id="{{ $numPersons }}"></button>
-                                                    </span>
-                                                @endforeach
+                                                @php
+                                                    $numPersons = request()->get('num_persons');
+                                                @endphp
+                                                <span class="badge bg-light text-dark border">
+                                                    {{ $numPersons }} {{ $numPersons == 1 ? __('message.person') : __('message.persons') }}
+                                                    <button type="button" class="btn-close ms-2" data-filter-type="num_persons" data-filter-id="{{ $numPersons }}"></button>
+                                                </span>
                                             @endif
                                         </div>
                                     </div>
