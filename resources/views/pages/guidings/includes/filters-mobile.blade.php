@@ -471,6 +471,9 @@
 
 @push('guidingListingScripts')
 <script>
+    // Pass the price histogram data to JavaScript (if not already passed in filters.blade.php)
+    window.priceHistogramData = window.priceHistogramData || {!! json_encode($priceHistogramData) !!};
+    
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize price slider for mobile with histogram
         window.priceSliderMobile = FilterManager.initPriceSlider(

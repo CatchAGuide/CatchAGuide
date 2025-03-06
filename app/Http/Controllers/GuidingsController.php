@@ -368,6 +368,9 @@ class GuidingsController extends Controller
             $personCounts = [];
         }
 
+        // Generate price histogram data
+        $priceHistogramData = $this->generatePriceHistogramData();
+
         if ($request->ajax()) {
             $view = view('pages.guidings.partials.guiding-list', [
                 'title' => $title,
@@ -390,6 +393,7 @@ class GuidingsController extends Controller
                 'durationCounts' => $durationCounts,
                 'personCounts' => $personCounts,
                 'isMobile' => $isMobile,
+                'priceHistogramData' => $priceHistogramData,
             ])->render();
              // Add guiding data for map updates
              $guidingsData = $guidings->map(function($guiding) {
@@ -447,7 +451,8 @@ class GuidingsController extends Controller
                 'waters' => $waterTypeCounts,
                 'durations' => $durationCounts,
                 'persons' => $personCounts
-            ]
+            ],
+            'priceHistogramData' => $priceHistogramData,
         ]);
     }
 
@@ -1240,5 +1245,73 @@ class GuidingsController extends Controller
         Mail::to($request->email)->queue(new SearchRequestUserMail($guideRequest));
 
         return redirect()->back()->with('message', "Email Has been Sent");
+    }
+
+    /**
+     * Generate price histogram data for the price range filter
+     * 
+     * @return array
+     */
+    private function generatePriceHistogramData()
+    {
+        // Define price ranges in €50 increments from €50 to €4000
+        $ranges = [];
+        $min = 50;
+        $max = 4000;
+        $step = 50;
+        
+        for ($i = $min; $i < $max; $i += $step) {
+            $rangeEnd = min($i + $step, $max);
+            $ranges[] = [
+                'min' => $i,
+                'max' => $rangeEnd,
+                'range' => "€{$i}-€{$rangeEnd}",
+                'count' => 0
+            ];
+        }
+        
+        // Get all guiding prices
+        $guidingPrices = Guiding::where('status', 1)
+            ->select(DB::raw('(
+                WITH price_per_person AS (
+                    SELECT 
+                        CASE 
+                            WHEN JSON_VALID(prices) THEN (
+                                SELECT MIN(
+                                    CASE 
+                                        WHEN person > 1 THEN CAST(amount AS DECIMAL(10,2)) / person
+                                        ELSE CAST(amount AS DECIMAL(10,2))
+                                    END
+                                )
+                                FROM JSON_TABLE(
+                                    prices,
+                                    "$[*]" COLUMNS(
+                                        person INT PATH "$.person",
+                                        amount DECIMAL(10,2) PATH "$.amount"
+                                    )
+                                ) as price_data
+                            )
+                            ELSE price
+                        END as lowest_pp
+                )
+                SELECT COALESCE(lowest_pp, price) 
+                FROM price_per_person
+            ) AS price'))
+            ->pluck('price')
+            ->toArray();
+        
+        // Count guidings in each price range
+        foreach ($guidingPrices as $price) {
+            if ($price < $min || $price > $max) continue;
+            
+            foreach ($ranges as &$range) {
+                if ($price >= $range['min'] && $price < $range['max']) {
+                    $range['count']++;
+                    break;
+                }
+            }
+        }
+        
+        return $ranges;
     }
 }

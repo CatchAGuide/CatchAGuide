@@ -484,6 +484,12 @@
 @push('guidingListingScripts')
 <script src="https://cdn.jsdelivr.net/npm/nouislider@14.6.3/distribute/nouislider.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Pass the price histogram data to JavaScript
+    window.priceHistogramData = {!! json_encode($priceHistogramData) !!};
+</script>
+
 <script src="{{ asset('js/filters-manager.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
