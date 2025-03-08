@@ -96,14 +96,14 @@
 
 </style>
 @endsection
-@section('title', 'Guiding #' . $guiding->id . ' editieren')
+@section('title', 'Guiding #' . $formData['id'] . ' editieren')
 
 @section('content')
 <div class="container shadow-lg p-4 my-5">
-    @livewire('admin-edit-guiding',['guiding' => $guiding])
+    @include('pages.guidings.multi-step-form')
+    {{-- @livewire('admin-edit-guiding',['guiding' => $guiding]) --}}
 </div>
 @endsection
 
 @section('js_after')
-
 @endsection
