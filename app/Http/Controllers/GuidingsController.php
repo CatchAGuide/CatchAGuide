@@ -269,7 +269,7 @@ class GuidingsController extends Controller
         }
 
         // Get all guidings before pagination to extract available options
-        $allGuidings = $query->with(['target_fish', 'methods', 'water_types', 'boatType'])->get();
+        $allGuidings = $query->with(['target_fish', 'methods', 'water_types', 'boatType'])->where('status',1)->get();
         
         // Extract unique target fish, methods, water types and durations from current results
         $availableTargetFish = collect();
@@ -337,7 +337,7 @@ class GuidingsController extends Controller
             }
         }
 
-        $guidings = $query->with('boatType')->paginate(20);
+        $guidings = $query->with('boatType')->where('status',1)->paginate(20);
         $guidings->appends(request()->except('page'));
 
         // Regular request - return full view

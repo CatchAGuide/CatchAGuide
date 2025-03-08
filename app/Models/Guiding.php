@@ -579,7 +579,7 @@ class Guiding extends Model
 
         // Try radius search
         $searchRadius = $radius ?? 200;
-        $guidings = self::select('id')
+        $guidingsRadius = self::select('id')
             ->selectRaw("ST_Distance_Sphere(
                 point(lng, lat),
                 point(?, ?)
@@ -600,8 +600,8 @@ class Guiding extends Model
             ->orderBy('distance')  // Sort by distance ascending
             ->pluck('id');
 
-        if ($guidings->isNotEmpty()) {
-            $returnData['ids'] = $guidings;
+        if ($guidingsRadius->isNotEmpty()) {
+            $returnData['ids'] = $guidingsRadius;
             $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel2'));
             return $returnData;
         }
