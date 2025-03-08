@@ -619,20 +619,8 @@
 
         // Initialize components that need to be reinitialized after AJAX updates
         function reinitializeComponents() {
-            // Re-attach event listeners to filter removal buttons
-            document.querySelectorAll('[data-filter-type]').forEach(button => {
-                button.addEventListener('click', function() {
-                    const filterType = this.dataset.filterType;
-                    const filterId = this.dataset.filterId;
-                    
-                    // Find and uncheck the corresponding checkbox
-                    const checkbox = document.querySelector(`input[name="${filterType}[]"][value="${filterId}"]`);
-                    if (checkbox) {
-                        checkbox.checked = false;
-                        updateResults();
-                    }
-                });
-            });
+            // Re-attach event listeners to filter removal buttons using FilterManager
+            FilterManager.attachFilterRemoveListeners();
             
             // Re-initialize carousels
             document.querySelectorAll('.carousel').forEach(carousel => {

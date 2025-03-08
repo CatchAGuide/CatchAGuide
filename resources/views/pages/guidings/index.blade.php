@@ -1208,6 +1208,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (desktopCheckbox) {
                     desktopCheckbox.checked = false;
                 }
+                
                 if (mobileCheckbox) {
                     mobileCheckbox.checked = false;
                 }

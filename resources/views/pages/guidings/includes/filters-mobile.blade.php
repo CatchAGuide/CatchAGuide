@@ -533,12 +533,8 @@
                 if (listingsContainer) {
                     listingsContainer.innerHTML = data.html;
                     
-                    // Re-initialize components
-                    document.querySelectorAll('.carousel').forEach(carousel => {
-                        new bootstrap.Carousel(carousel, {
-                            interval: false
-                        });
-                    });
+                    // Reinitialize components after updating HTML
+                    reinitializeComponents();
                 }
                 
                 if (data.searchMessage) {
@@ -584,6 +580,19 @@
                 console.error('Error updating results:', error);
                 // Hide loading overlay even on error
                 FilterManager.hideLoadingOverlay();
+            });
+        }
+
+        // Add this function to reinitialize components
+        function reinitializeComponents() {
+            // Re-attach event listeners to filter removal buttons
+            FilterManager.attachFilterRemoveListeners();
+            
+            // Re-initialize carousels
+            document.querySelectorAll('.carousel').forEach(carousel => {
+                new bootstrap.Carousel(carousel, {
+                    interval: false
+                });
             });
         }
 
