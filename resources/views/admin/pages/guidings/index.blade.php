@@ -25,7 +25,7 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-header">
-                            <button class="btn btn-primary"><i class="fa fa-plus"></i> Guiding</button>
+                            <a href="{{ route('admin.guidings.create') }}" class="btn btn-primary"><i class="fa fa-plus"></i> Guiding</a>
                         </div>
                         <div class="card-body table-responsive">
                             <table id="guiding-datatable" class="table">

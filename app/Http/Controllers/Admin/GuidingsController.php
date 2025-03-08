@@ -40,7 +40,37 @@ class GuidingsController extends Controller
      */
     public function create()
     {
-        return view('admin.pages.guidings.create');
+        $pageTitle = __('profile.creategiud');
+        $locale = Config::get('app.locale');
+        $nameField = $locale == 'en' ? 'name_en' : 'name';
+
+        $modelClasses = [
+            'targets' => Target::class,
+            'methods' => Method::class,
+            'waters' => Water::class, 
+            'inclusions' => Inclussion::class,
+            'boat_extras' => BoatExtras::class,
+            'extras_prices' => ExtrasPrice::class,
+            'guiding_boat_types' => GuidingBoatType::class,
+            'guiding_boat_descriptions' => GuidingBoatDescription::class,
+            'guiding_additional_infos' => GuidingAdditionalInformation::class,
+            'guiding_requirements' => GuidingRequirements::class,
+            'guiding_recommendations' => GuidingRecommendations::class
+        ];
+
+        $collections = [];
+        foreach ($modelClasses as $key => $modelClass) {
+            $collections[$key] = $modelClass::all()
+            ->map(function($item) use ($nameField) {
+                return [
+                    'value' => $item->$nameField,
+                    'id' => $item->id
+                ];
+            });
+        }
+        
+        return view('admin.pages.guidings.create', array_merge($collections, ['pageTitle' => $pageTitle, 'target_redirect' => route('admin.guidings.index')]));
+        // return view('admin.pages.guidings.create');
     }
 
     /**
@@ -174,7 +204,7 @@ class GuidingsController extends Controller
         $pageTitle = __('profile.editguiding');
 
         return view('admin.pages.guidings.edit', array_merge(
-            ['formData' => $formData, 'pageTitle' => $pageTitle],
+            ['formData' => $formData, 'pageTitle' => $pageTitle, 'target_redirect' => route('admin.guidings.index')],
             $collections
         ));
     }

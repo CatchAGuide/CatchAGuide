@@ -45,6 +45,7 @@
                 </div>
             @endif
 
+            <input type="hidden" name="target_redirect" id="target_redirect" value="{{ $target_redirect ?? 'profile.myguidings' }}">
             <input type="hidden" name="is_update" id="is_update" value="{{ $formData['is_update'] ?? 0 }}">
             <input type="hidden" name="guiding_id" id="guiding_id" value="{{ $formData['id'] ?? 0 }}">
             <input type="hidden" name="thumbnail_path" id="thumbnail_path" value="{{ $formData['thumbnail_path'] ?? '' }}">

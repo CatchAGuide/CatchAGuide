@@ -317,19 +317,6 @@ class GuidingsController extends Controller
                 }
             }
         }
-        // if () {
-            
-        //     $allGuidingsForPersons = Guiding::where('status', 1)->get();
-        //     $personCounts = [];
-
-        //     foreach ($allGuidingsForPersons as $guiding) {
-        //         if (isset($guiding->max_guests)) {
-        //             for ($i = 1; $i <= min(8, $guiding->max_guests); $i++) {
-        //                 $personCounts[$i] = ($personCounts[$i] ?? 0) + 1;
-        //             }
-        //         }
-        //     }
-        // }
 
         ksort($personCounts); // Sort by number of persons
 
@@ -811,7 +798,7 @@ class GuidingsController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => $isDraft ? 'Draft saved successfully!' : 'Guiding created successfully!',
-                'redirect_url' => route('profile.myguidings'),
+                'redirect_url' => $request->input('target_redirect') ?? route('profile.myguidings'),
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -975,11 +962,6 @@ class GuidingsController extends Controller
         ->limit(4)
         ->get();
 
-        // $otherGuidings = Guiding::where('id', '!=', $guiding->id)
-        //     ->where('status', 1)
-        //     ->limit(3)
-        //     ->get();
-
         return view('pages.guidings.show', [
             'guiding' => $guiding,
             'ratings' => $ratings,
@@ -990,7 +972,6 @@ class GuidingsController extends Controller
 
     public function redirectToNewFormat($slug)
     {
-
         $guiding = Guiding::where('slug',$slug)->first();
 
         if(!$guiding){
@@ -998,14 +979,11 @@ class GuidingsController extends Controller
         }
 
         return redirect(route('guidings.show',[$guiding->id, $slug]), 301);
-
-     
     }
 
 
     public function edit(Guiding $guiding)
-    {           
-    
+    {      
         $targets = Target::all();
         $methods = Method::all();
         $waters = Water::all();
@@ -1208,8 +1186,6 @@ class GuidingsController extends Controller
     public function bookingrequest(){
         return view('pages.guidings.search-request');
     }
-
-    
 
     public function bookingRequestStore(Request $request){
         $guideRequest = new GuidingRequest;

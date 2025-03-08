@@ -91,7 +91,8 @@
 
 @section('content')
 <div class="container shadow-lg p-4 my-5">
-    @livewire('admin-create-guiding')
+    @include('pages.guidings.multi-step-form')
+    {{-- @livewire('admin-create-guiding') --}}
 </div>
 @endsection
 
