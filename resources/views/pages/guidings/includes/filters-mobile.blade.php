@@ -475,6 +475,7 @@
 <script>
     // Pass the price histogram data to JavaScript (if not already passed in filters.blade.php)
     window.priceHistogramData = window.priceHistogramData || {!! json_encode($priceHistogramData) !!};
+    window.maxPrice = window.maxPrice || {!! json_encode($maxPrice) !!};
     
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize price slider for mobile with histogram
@@ -610,11 +611,11 @@
             
             // Reset price slider to default values
             if (window.priceSliderMobile) {
-                window.priceSliderMobile.set([50, 4000]);
+                window.priceSliderMobile.set([50, window.maxPrice]);
                 document.getElementById('price-min-display-mobile').textContent = '50';
-                document.getElementById('price-max-display-mobile').textContent = '4,000';
+                document.getElementById('price-max-display-mobile').textContent = window.maxPrice;
                 document.getElementById('price_min_mobile').value = '50';
-                document.getElementById('price_max_mobile').value = '4000';
+                document.getElementById('price_max_mobile').value = window.maxPrice;
             }
             
             // Trigger update to refresh results

@@ -488,6 +488,7 @@
 <script>
     // Pass the price histogram data to JavaScript
     window.priceHistogramData = {!! json_encode($priceHistogramData) !!};
+    window.maxPrice = {!! json_encode($maxPrice) !!};
 </script>
 
 <script src="{{ asset('js/filters-manager.js') }}"></script>

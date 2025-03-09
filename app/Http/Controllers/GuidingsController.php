@@ -284,6 +284,25 @@ class GuidingsController extends Controller
         $methodCounts = [];
         $waterTypeCounts = [];
         $personCounts = [];
+
+        // Define price ranges in €50 increments from €50 to €4000
+        $priceRanges = [];
+        $minPrice = 50;
+        $maxPrice = 4000;
+        $step = 50;
+
+        for ($i = $minPrice; $i < $maxPrice; $i += $step) {
+            $rangeEnd = min($i + $step, $maxPrice);
+            $priceRanges[] = [
+                'min' => $i,
+                'max' => $rangeEnd,
+                'range' => "€{$i}-€{$rangeEnd}",
+                'count' => 0
+            ];
+        }
+
+        // Reset maxPrice to calculate from actual data
+        $maxPrice = 0;
         foreach ($allGuidings as $guiding) {
             // For target fish
             $targetFish = json_decode($guiding->target_fish, true) ?? [];
@@ -316,7 +335,40 @@ class GuidingsController extends Controller
                     $personCounts[$i] = ($personCounts[$i] ?? 0) + 1;
                 }
             }
+
+            // Get the lowest price and update price histogram
+            $price = $guiding->getLowestPrice();
+            if ($price > $maxPrice) {
+                $maxPrice = $price;
+            }
+            
+            // Count guidings in each price range
+            if ($price >= $minPrice && $price <= $maxPrice) {
+                foreach ($priceRanges as &$range) {
+                    if ($price >= $range['min'] && $price < $range['max']) {
+                        $range['count']++;
+                        break;
+                    }
+                }
+            }
         }
+
+        // Sort price ranges by min value (they should already be sorted, but just to be sure)
+        usort($priceRanges, function($a, $b) {
+            return $a['min'] <=> $b['min'];
+        });
+        
+        // Remove trailing ranges with zero counts
+        $lastNonZeroIndex = count($priceRanges) - 1;
+        for ($i = count($priceRanges) - 1; $i >= 0; $i--) {
+            if ($priceRanges[$i]['count'] > 0) {
+                $lastNonZeroIndex = $i;
+                break;
+            }
+        }
+        
+        // Keep only ranges up to the last non-zero count
+        $priceRanges = array_slice($priceRanges, 0, $lastNonZeroIndex + 1);
 
         ksort($personCounts); // Sort by number of persons
 
@@ -355,8 +407,18 @@ class GuidingsController extends Controller
             $personCounts = [];
         }
 
-        // Generate price histogram data
-        $priceHistogramData = $this->generatePriceHistogramData();
+        // Generate price histogram data for JavaScript
+        $priceHistogramData = array_map(function($range) {
+            return [
+                'min' => $range['min'],
+                'max' => $range['max'],
+                'count' => $range['count']
+            ];
+        }, $priceRanges);
+
+        // Round up maxPrice to nearest step value for better UI
+        $maxPrice = ceil($maxPrice / $step) * $step;
+        if ($maxPrice < 50) $maxPrice = 4000; // Fallback if no prices found
 
         if ($request->ajax()) {
             $view = view('pages.guidings.partials.guiding-list', [
@@ -381,6 +443,7 @@ class GuidingsController extends Controller
                 'personCounts' => $personCounts,
                 'isMobile' => $isMobile,
                 'priceHistogramData' => $priceHistogramData,
+                'maxPrice' => $maxPrice,
             ])->render();
              // Add guiding data for map updates
              $guidingsData = $guidings->map(function($guiding) {
@@ -406,7 +469,9 @@ class GuidingsController extends Controller
                     'waters' => $waterTypeCounts,
                     'durations' => $durationCounts,
                     'persons' => $personCounts
-                ]
+                ],
+                'priceHistogramData' => $priceHistogramData,
+                'maxPrice' => $maxPrice,
             ]);
         }
 
@@ -440,6 +505,7 @@ class GuidingsController extends Controller
                 'persons' => $personCounts
             ],
             'priceHistogramData' => $priceHistogramData,
+            'maxPrice' => $maxPrice,
         ]);
     }
 
@@ -1221,73 +1287,5 @@ class GuidingsController extends Controller
         Mail::to($request->email)->queue(new SearchRequestUserMail($guideRequest));
 
         return redirect()->back()->with('message', "Email Has been Sent");
-    }
-
-    /**
-     * Generate price histogram data for the price range filter
-     * 
-     * @return array
-     */
-    private function generatePriceHistogramData()
-    {
-        // Define price ranges in €50 increments from €50 to €4000
-        $ranges = [];
-        $min = 50;
-        $max = 4000;
-        $step = 50;
-        
-        for ($i = $min; $i < $max; $i += $step) {
-            $rangeEnd = min($i + $step, $max);
-            $ranges[] = [
-                'min' => $i,
-                'max' => $rangeEnd,
-                'range' => "€{$i}-€{$rangeEnd}",
-                'count' => 0
-            ];
-        }
-        
-        // Get all guiding prices
-        $guidingPrices = Guiding::where('status', 1)
-            ->select(DB::raw('(
-                WITH price_per_person AS (
-                    SELECT 
-                        CASE 
-                            WHEN JSON_VALID(prices) THEN (
-                                SELECT MIN(
-                                    CASE 
-                                        WHEN person > 1 THEN CAST(amount AS DECIMAL(10,2)) / person
-                                        ELSE CAST(amount AS DECIMAL(10,2))
-                                    END
-                                )
-                                FROM JSON_TABLE(
-                                    prices,
-                                    "$[*]" COLUMNS(
-                                        person INT PATH "$.person",
-                                        amount DECIMAL(10,2) PATH "$.amount"
-                                    )
-                                ) as price_data
-                            )
-                            ELSE price
-                        END as lowest_pp
-                )
-                SELECT COALESCE(lowest_pp, price) 
-                FROM price_per_person
-            ) AS price'))
-            ->pluck('price')
-            ->toArray();
-        
-        // Count guidings in each price range
-        foreach ($guidingPrices as $price) {
-            if ($price < $min || $price > $max) continue;
-            
-            foreach ($ranges as &$range) {
-                if ($price >= $range['min'] && $price < $range['max']) {
-                    $range['count']++;
-                    break;
-                }
-            }
-        }
-        
-        return $ranges;
     }
 }
