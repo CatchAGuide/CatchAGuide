@@ -566,6 +566,43 @@
                 const filterType = button.dataset.filterType;
                 const filterId = button.dataset.filterId;
                 
+                // Handle price range filter removal
+                if (filterType === 'price_range') {
+                    const defaultMin = 50;
+                    const defaultMax = 4000;
+                    
+                    // Reset main slider if it exists
+                    if (FilterManager.sliders['price-slider-main']) {
+                        FilterManager.sliders['price-slider-main'].set([defaultMin, defaultMax]);
+                        const mainMinDisplay = document.getElementById('price-min-display');
+                        const mainMaxDisplay = document.getElementById('price-max-display');
+                        const mainMinInput = document.getElementById('price_min_main');
+                        const mainMaxInput = document.getElementById('price_max_main');
+                        
+                        if (mainMinDisplay) mainMinDisplay.textContent = defaultMin;
+                        if (mainMaxDisplay) mainMaxDisplay.textContent = defaultMax.toLocaleString();
+                        if (mainMinInput) mainMinInput.value = defaultMin;
+                        if (mainMaxInput) mainMaxInput.value = defaultMax;
+                    }
+
+                    // Reset mobile slider if it exists
+                    if (FilterManager.sliders['price-slider-mobile']) {
+                        FilterManager.sliders['price-slider-mobile'].set([defaultMin, defaultMax]);
+                        const mobileMinDisplay = document.getElementById('price-min-display-mobile');
+                        const mobileMaxDisplay = document.getElementById('price-max-display-mobile');
+                        const mobileMinInput = document.getElementById('price_min_mobile');
+                        const mobileMaxInput = document.getElementById('price_max_mobile');
+                        
+                        if (mobileMinDisplay) mobileMinDisplay.textContent = defaultMin;
+                        if (mobileMaxDisplay) mobileMaxDisplay.textContent = defaultMax.toLocaleString();
+                        if (mobileMinInput) mobileMinInput.value = defaultMin;
+                        if (mobileMaxInput) mobileMaxInput.value = defaultMax;
+                    }
+                    
+                    updateResults();
+                    return;
+                }
+                
                 // Find and uncheck the corresponding checkbox
                 const checkbox = document.querySelector(`input[name="${filterType}[]"][value="${filterId}"]`);
                 if (checkbox) {

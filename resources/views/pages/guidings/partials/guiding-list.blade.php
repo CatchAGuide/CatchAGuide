@@ -96,6 +96,26 @@
                     <button type="button" class="btn-close ms-2" data-filter-type="num_persons" data-filter-id="{{ $numPersons }}"></button>
                 </span>
             @endif
+
+            {{-- Price Range Filter --}}
+            @php
+                $priceMin = request()->get('price_min');
+                $priceMax = request()->get('price_max');
+                $showPriceMin = isset($priceMin) && $priceMin != 50;
+                $showPriceMax = isset($priceMax) && $priceMax != 4000;
+            @endphp
+            @if($showPriceMin || $showPriceMax)
+                <span class="badge bg-light text-dark border">
+                    @if($showPriceMin && $showPriceMax)
+                        €{{ $priceMin }} - €{{ $priceMax }}
+                    @elseif($showPriceMin)
+                        Price from €{{ $priceMin }}
+                    @elseif($showPriceMax)
+                        Price up to €{{ $priceMax }}
+                    @endif
+                    <button type="button" class="btn-close ms-2" data-filter-type="price_range" data-filter-id="price_range"></button>
+                </span>
+            @endif
         </div>
     </div>
 
