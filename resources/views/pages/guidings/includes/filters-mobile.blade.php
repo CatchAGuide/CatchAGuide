@@ -188,7 +188,7 @@
 
     {{-- Sticky Bottom Button --}}
     <div class="offcanvas-footer border-top">
-        <button type="submit" class="btn btn-primary w-100 py-3" form="filterContainerOffCanvas">
+        <button type="submit" class="btn btn-primary w-100 py-3" form="filterContainerOffCanvas" id="mobileShowResultsBtn">
             Show <span id="mobileResultsCount">{{ $guidings->total() }}</span> results
         </button>
     </div>
@@ -454,7 +454,8 @@
             });
         });
 
-        function updateResults() {
+        // Modified updateResults function to handle filter removal
+        function updateResults(isFilterRemoval = false) {
             // Show loading overlay
             FilterManager.showLoadingOverlay();
             
@@ -571,14 +572,17 @@
             if (window.priceSliderMobile) {
                 window.priceSliderMobile.set([50, window.maxPrice]);
                 document.getElementById('price-min-display-mobile').textContent = '50';
-                document.getElementById('price-max-display-mobile').textContent = window.maxPrice;
+                document.getElementById('price-max-display-mobile').textContent = 4000;
                 document.getElementById('price_min_mobile').value = '50';
-                document.getElementById('price_max_mobile').value = window.maxPrice;
+                document.getElementById('price_max_mobile').value = 4000;
             }
             
             // Trigger update to refresh results
-            updateResults();
+            updateResults(true); // Pass true to indicate filter removal
         });
+
+        // Make updateResults function available globally
+        window.updateResults = updateResults;
     });
 </script>
 @endpush
