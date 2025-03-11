@@ -33,9 +33,15 @@
                                 $visibleCount = 0;
                                 $totalCount = count($alltargets);
                                 $maxInitialVisible = 7;
+                                $locale = app()->getLocale();
+                                
+                                // Sort targets alphabetically by name
+                                $sortedTargets = $alltargets->sortBy(function($target) use ($locale) {
+                                    return $locale == 'en' ? $target->name_en : $target->name;
+                                });
                             @endphp
                             
-                            @foreach($alltargets as $index => $target)
+                            @foreach($sortedTargets as $index => $target)
                                 @php
                                     $isChecked = in_array($target->id, request()->get('target_fish', []));
                                     $shouldBeVisible = $visibleCount < $maxInitialVisible || $isChecked;
@@ -71,9 +77,14 @@
                                 $visibleCount = 0;
                                 $totalCount = count($guiding_methods);
                                 $maxInitialVisible = 7;
+                                
+                                // Sort methods alphabetically by name
+                                $sortedMethods = $guiding_methods->sortBy(function($method) use ($locale) {
+                                    return $locale == 'en' ? $method->name_en : $method->name;
+                                });
                             @endphp
                             
-                            @foreach($guiding_methods as $index => $method)
+                            @foreach($sortedMethods as $index => $method)
                                 @php
                                     $isChecked = in_array($method->id, request()->get('methods', []));
                                     $shouldBeVisible = $visibleCount < $maxInitialVisible || $isChecked;
@@ -109,9 +120,14 @@
                                 $visibleCount = 0;
                                 $totalCount = count($guiding_waters);
                                 $maxInitialVisible = 7;
+                                
+                                // Sort water types alphabetically by name
+                                $sortedWaters = $guiding_waters->sortBy(function($water) use ($locale) {
+                                    return $locale == 'en' ? $water->name_en : $water->name;
+                                });
                             @endphp
                             
-                            @foreach($guiding_waters as $index => $water)
+                            @foreach($sortedWaters as $index => $water)
                                 @php
                                     $isChecked = in_array($water->id, request()->get('water', []));
                                     $shouldBeVisible = $visibleCount < $maxInitialVisible || $isChecked;
@@ -536,12 +552,13 @@
                 // Update URL without page reload
                 const newUrl = `${currentPath}?${queryString.toString()}`;
                 window.history.pushState({ path: newUrl }, '', newUrl);
-                
-                // Update the filter options based on available results
+
+
                 FilterManager.updateFilters(data);
                 
+                // Update the filter options based on available results
                 if (typeof window.updateMapWithGuidings === 'function') {
-                    window.updateMapWithGuidings(data.guidings);
+                    window.updateMapWithGuidings(data.allGuidings);
                 }
             
                 // Hide loading overlay

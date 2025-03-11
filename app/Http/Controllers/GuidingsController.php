@@ -395,9 +395,9 @@ class GuidingsController extends Controller
         // Regular request - return full view
         $filter_title = substr($filter_title, 0, -2);
 
-        $alltargets = Target::select('id', 'name', 'name_en')->get();
-        $guiding_waters = Water::select('id', 'name', 'name_en')->get();
-        $guiding_methods = Method::select('id', 'name', 'name_en')->get();
+        $alltargets = Target::select('id', 'name', 'name_en')->orderBy('name')->get();
+        $guiding_waters = Water::select('id', 'name', 'name_en')->orderBy('name')->get();
+        $guiding_methods = Method::select('id', 'name', 'name_en')->orderBy('name')->get();
 
         // Modify the mobile check to use the Agent facade
         $isMobile = $request->get('ismobile') == 'true' || app('agent')->isMobile();

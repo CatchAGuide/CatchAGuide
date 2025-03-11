@@ -33,11 +33,16 @@
                 <div class="checkbox-group">
                     @php
                         $visibleCount = 0;
-                        $totalCount = count($alltargets);
+                        $totalCountTargets = count($alltargets);
                         $maxInitialVisible = 7;
+                        $locale = app()->getLocale();
+                        
+                        $sortedTargets = $alltargets->sortBy(function($target) use ($locale) {
+                            return $locale == 'en' ? $target->name_en : $target->name;
+                        });
                     @endphp
                     
-                    @foreach($alltargets as $index => $target)
+                    @foreach($sortedTargets as $index => $target)
                         @php
                             $isChecked = in_array($target->id, request()->get('target_fish', []));
                             $shouldBeVisible = $visibleCount < $maxInitialVisible || $isChecked;
@@ -56,7 +61,7 @@
                             </label>
                         </div>
                     @endforeach
-                    @if($totalCount > $maxInitialVisible)
+                    @if($totalCountTargets > $maxInitialVisible)
                         <button type="button" class="btn btn-link see-more w-100 text-center">See More</button>
                     @endif
                 </div>
@@ -68,12 +73,13 @@
                 <h6 class="mb-3">Methods</h6>
                 <div class="checkbox-group">
                     @php
-                        $visibleCount = 0;
-                        $totalCount = count($guiding_methods);
-                        $maxInitialVisible = 7;
+                        $totalCountGuidings = count($guiding_methods);
+                        $sortedMethods = $guiding_methods->sortBy(function($method) use ($locale) {
+                            return $locale == 'en' ? $method->name_en : $method->name;
+                        });
                     @endphp
                     
-                    @foreach($guiding_methods as $index => $method)
+                    @foreach($sortedMethods as $index => $method)
                         @php
                             $isChecked = in_array($method->id, request()->get('methods', []));
                             $shouldBeVisible = $visibleCount < $maxInitialVisible || $isChecked;
@@ -92,7 +98,7 @@
                             </label>
                         </div>
                     @endforeach
-                    @if($totalCount > $maxInitialVisible)
+                    @if($totalCountGuidings > $maxInitialVisible)
                         <button type="button" class="btn btn-link see-more w-100 text-center">See More</button>
                     @endif
                 </div>
@@ -103,12 +109,14 @@
                 <h6 class="mb-3">Water Types</h6>
                 <div class="checkbox-group">
                     @php
-                        $visibleCount = 0;
-                        $totalCount = count($guiding_waters);
-                        $maxInitialVisible = 7;
+                        $totalCountWaters = count($guiding_waters);
+                        
+                        $sortedWaters = $guiding_waters->sortBy(function($water) use ($locale) {
+                            return $locale == 'en' ? $water->name_en : $water->name;
+                        });
                     @endphp
                     
-                    @foreach($guiding_waters as $index => $water)
+                    @foreach($sortedWaters as $index => $water)
                         @php
                             $isChecked = in_array($water->id, request()->get('water', []));
                             $shouldBeVisible = $visibleCount < $maxInitialVisible || $isChecked;
@@ -127,7 +135,7 @@
                             </label>
                         </div>
                     @endforeach
-                    @if($totalCount > $maxInitialVisible)
+                    @if($totalCountWaters > $maxInitialVisible)
                         <button type="button" class="btn btn-link see-more w-100 text-center">See More</button>
                     @endif
                 </div>
@@ -174,7 +182,7 @@
                                        id="mobile_persons_{{ $persons }}" 
                                        value="{{ $persons }}"
                                        {{ request()->get('num_persons') == (string)$persons ? 'checked' : '' }}>
-                                <label class="form-check-label" for="mobile_persons_{{ $persons }}">
+                                <label class="form-check-label d-flex justify-content-between" for="mobile_persons_{{ $persons }}">
                                     {{ translate('Up to') }} {{ $persons }} {{ translate('person'.($persons > 1 ? 's' : '')) }}
                                     <span class="count">({{ $count }})</span>
                                 </label>
@@ -546,7 +554,7 @@
                 
                 // Update map if it exists
                 if (typeof window.updateMapWithGuidings === 'function') {
-                    window.updateMapWithGuidings(data.guidings);
+                    window.updateMapWithGuidings(data.allGuidings);
                 }
                 
                 // Hide loading overlay
