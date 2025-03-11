@@ -107,7 +107,7 @@
             @if($showPriceMin || $showPriceMax)
                 <span class="badge bg-light text-dark border">
                     @if($showPriceMin && $showPriceMax)
-                        €{{ $priceMin }} - €{{ $priceMax }}
+                        Price €{{ $priceMin }} - €{{ $priceMax }}
                     @elseif($showPriceMin)
                         Price from €{{ $priceMin }}
                     @elseif($showPriceMax)
