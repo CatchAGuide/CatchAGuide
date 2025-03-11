@@ -35,23 +35,9 @@
                         $visibleCount = 0;
                         $totalCount = count($alltargets);
                         $maxInitialVisible = 7;
-                        $checkedItems = [];
-                        $uncheckedItems = [];
-                        
-                        // Separate checked and unchecked items
-                        foreach($alltargets as $target) {
-                            if(in_array($target->id, request()->get('target_fish', []))) {
-                                $checkedItems[] = $target;
-                            } else {
-                                $uncheckedItems[] = $target;
-                            }
-                        }
-                        
-                        // Combine them with checked items first
-                        $sortedTargets = array_merge($checkedItems, $uncheckedItems);
                     @endphp
                     
-                    @foreach($sortedTargets as $index => $target)
+                    @foreach($alltargets as $index => $target)
                         @php
                             $isChecked = in_array($target->id, request()->get('target_fish', []));
                             $shouldBeVisible = $visibleCount < $maxInitialVisible || $isChecked;
@@ -85,23 +71,9 @@
                         $visibleCount = 0;
                         $totalCount = count($guiding_methods);
                         $maxInitialVisible = 7;
-                        $checkedItems = [];
-                        $uncheckedItems = [];
-                        
-                        // Separate checked and unchecked items
-                        foreach($guiding_methods as $method) {
-                            if(in_array($method->id, request()->get('methods', []))) {
-                                $checkedItems[] = $method;
-                            } else {
-                                $uncheckedItems[] = $method;
-                            }
-                        }
-                        
-                        // Combine them with checked items first
-                        $sortedMethods = array_merge($checkedItems, $uncheckedItems);
                     @endphp
                     
-                    @foreach($sortedMethods as $index => $method)
+                    @foreach($guiding_methods as $index => $method)
                         @php
                             $isChecked = in_array($method->id, request()->get('methods', []));
                             $shouldBeVisible = $visibleCount < $maxInitialVisible || $isChecked;
@@ -134,23 +106,9 @@
                         $visibleCount = 0;
                         $totalCount = count($guiding_waters);
                         $maxInitialVisible = 7;
-                        $checkedItems = [];
-                        $uncheckedItems = [];
-                        
-                        // Separate checked and unchecked items
-                        foreach($guiding_waters as $water) {
-                            if(in_array($water->id, request()->get('water', []))) {
-                                $checkedItems[] = $water;
-                            } else {
-                                $uncheckedItems[] = $water;
-                            }
-                        }
-                        
-                        // Combine them with checked items first
-                        $sortedWaters = array_merge($checkedItems, $uncheckedItems);
                     @endphp
                     
-                    @foreach($sortedWaters as $index => $water)
+                    @foreach($guiding_waters as $index => $water)
                         @php
                             $isChecked = in_array($water->id, request()->get('water', []));
                             $shouldBeVisible = $visibleCount < $maxInitialVisible || $isChecked;
