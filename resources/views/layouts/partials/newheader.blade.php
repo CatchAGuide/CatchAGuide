@@ -143,11 +143,11 @@
                                     <div class="d-flex align-items-center small">
                                         <i class="fa fa-search fa-fw text-muted position-absolute ps-2"></i>
                                         <input  id="searchPlaceMobile" name="place" type="text" class="form-control rounded-0" placeholder="@lang('homepage.searchbar-destination')" autocomplete="on">
-                                        <input type="hidden" id="LocationCityMobile" name="city"/>
-                                        <input type="hidden" id="LocationCountryMobile" name="country"/>
-                                        <input type="hidden" id="LocationRegionMobile" name="region"/>
-                                        <input type="hidden" id="LocationLatMobile" name="placeLat"/>
-                                        <input type="hidden" id="LocationLngMobile" name="placeLng"/>
+                                        <input type="hidden" id="LocationCityMobile" name="city" value="{{ request()->city }}"/>
+                                        <input type="hidden" id="LocationCountryMobile" name="country" value="{{ request()->country }}"/>
+                                        <input type="hidden" id="LocationRegionMobile" name="region" value="{{ request()->region }}"/>
+                                        <input type="hidden" id="LocationLatMobile" name="placeLat" value="{{ request()->placeLat }}"/>
+                                        <input type="hidden" id="LocationLngMobile" name="placeLng" value="{{ request()->placeLng }}"/>
                                     </div>
                                 </div>
                             </div>

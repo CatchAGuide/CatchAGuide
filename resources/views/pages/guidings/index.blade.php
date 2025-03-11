@@ -471,8 +471,8 @@
                 <div class="col-sm-12 col-lg-9">
                     <!-- Add search message display -->
                     @if(!empty($searchMessage))
-                        <div class="alert alert-info mb-3" role="alert">
-                            {{ $searchMessage }}
+                        <div class="alert alert-info mb-3" role="alert" id="search-message-title">
+                            {{ str_replace('$countReplace', count($allGuidings), $searchMessage) }}
                         </div>
                     @endif
 
@@ -1182,18 +1182,6 @@
         }
     };
 
-    window.addEventListener('load', function() {
-        var placeLatitude = '{{ request()->get('placeLat') }}';
-        var placeLongitude = '{{ request()->get('placeLng') }}';
-
-        if (placeLatitude && placeLongitude) {
-            document.getElementById('LocationLat').value = placeLatitude;
-            document.getElementById('LocationLng').value = placeLongitude;
-            document.getElementById('LocationLat2').value = placeLatitude;
-            document.getElementById('LocationLng2').value = placeLongitude;
-        } 
-    });
-
     function getLocation() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(showPosition);
@@ -1214,6 +1202,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+
     function attachFilterRemoveListeners() {
         document.querySelectorAll('.active-filters .btn-close').forEach(button => {
             button.addEventListener('click', function() {

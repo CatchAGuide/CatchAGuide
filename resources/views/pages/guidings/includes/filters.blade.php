@@ -485,9 +485,20 @@
             const form = document.getElementById('filterContainer');
             const formData = new FormData(form);
             
+            // Get existing URL parameters that aren't in the form
+            const currentUrlParams = new URLSearchParams(window.location.search);
             const queryString = new URLSearchParams();
             
-            // Add each parameter to URLSearchParams properly
+            // First, preserve any existing URL parameters that aren't in the form
+            for (const [key, value] of currentUrlParams.entries()) {
+                // Skip parameters that will be set by the form
+                const formElement = form.elements[key] || form.elements[key + '[]'];
+                if (!formElement) {
+                    queryString.append(key, value);
+                }
+            }
+            
+            // Add each form parameter to URLSearchParams properly
             for (const [key, value] of formData.entries()) {
                 // Handle array parameters correctly
                 if (key.endsWith('[]')) {
@@ -496,7 +507,7 @@
                     queryString.append(key, value);
                 }
             }
-            
+
             fetch(`${currentPath}?${queryString.toString()}`, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
@@ -515,6 +526,13 @@
                     updateSearchMessage(data.searchMessage, listingsContainer);
                 }
                 
+                const searchMessageTitle = document.getElementById('search-message-title');
+                if (searchMessageTitle) {
+                    const locationText = searchMessageTitle.textContent.split(/\d+/)[0].trim().replace('$countReplace total', '');
+                    searchMessageTitle.textContent = `${locationText} ${data.total} total`;
+                }
+
+                window.totalCount = data.total;
                 // Update URL without page reload
                 const newUrl = `${currentPath}?${queryString.toString()}`;
                 window.history.pushState({ path: newUrl }, '', newUrl);
@@ -537,6 +555,8 @@
         }
 
         function updateSearchMessage(message, container) {
+            
+                
             let searchMessageElement = document.querySelector('.alert.alert-info');
             
             if (!message && searchMessageElement) {
