@@ -3,8 +3,21 @@
 @section('title', 'FAQ')
 
 @section('content')
+<div class="container">
+        <section class="page-header">
+            <div class="page-header__bottom breadcrumb-container guiding">
+                <div class="page-header__bottom-inner">
+                    <ul class="thm-breadcrumb list-unstyled">
+                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                        <li class="active">@yield('title')</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
     <!--Page Header Start-->
-    <section class="page-header">
+    <!-- <section class="page-header">
         <div class="page-header__top">
             <div class="page-header-bg-magazin" style="background-image: url({{asset('assets/images/faq.jpg')}}); "></div>
             <div class="page-header-bg-overly-magazin"></div>
@@ -25,7 +38,7 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> -->
     <!--Page Header End-->
     <div class="container my-3">
         <div class="accordion" id="accordionExample">

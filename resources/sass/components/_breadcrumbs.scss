@@ -1,0 +1,25 @@
+.page-header{
+    .breadcrumb-container{
+        position: relative;
+        display: block;
+        border-bottom: 1px solid #ebe6de;
+        padding: 24px 0 11px;
+        &.guiding{
+            padding: 16px 0 11px;
+            margin-bottom: 16px;
+        }
+    }
+}
+@media (max-width: 768px){
+    .page-header{
+        .breadcrumb-container{
+            margin-top: 48px;
+            &.guiding{
+                padding: 16px 0 11px;
+                margin-bottom: 16px;
+                margin-top: 0px;
+            }
+        }
+    }
+    
+}

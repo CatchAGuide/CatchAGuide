@@ -66,6 +66,19 @@
 @endsection
 @section('content')
 <div class="container">
+        <section class="page-header">
+            <div class="page-header__bottom breadcrumb-container guiding">
+                <div class="page-header__bottom-inner">
+                    <ul class="thm-breadcrumb list-unstyled">
+                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                        <li class="active">@lang('destination.title')</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
+<div class="container">
     <section class="toptargetfish">
         <div class="container my-4">
             <div id="page-main-intro" class="section-title my-2">

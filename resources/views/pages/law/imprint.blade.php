@@ -4,30 +4,19 @@
 
 @section('content')
     <!--Page Header Start-->
-    <!-- <section class="page-header">
-        <div class="page-header__top">
-            <div class="page-header-bg"
-                 style="background-image: url({{asset('assets/images/Coverbild_News_Blog_1.2.jpg')}})">
-            </div>
-            <div class="page-header-bg-overly"></div>
-            <div class="container">
-                <div class="page-header__top-inner">
-                    <h1 class="h2">@lang('message.imprint')</h1>
-                </div>
-            </div>
-        </div>
-        <div class="page-header__bottom">
-            <div class="container">
+    <div class="container">
+        <section class="page-header">
+            <div class="page-header__bottom breadcrumb-container guiding">
                 <div class="page-header__bottom-inner">
                     <ul class="thm-breadcrumb list-unstyled">
                         <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                        <li><span>&#183;</span></li>
+                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                         <li class="active">@lang('message.imprint')</li>
                     </ul>
                 </div>
             </div>
-        </div>
-    </section> -->
+        </section>
+    </div>
     <!--Page Header End-->
 
     <!--About Page Start-->
