@@ -344,6 +344,17 @@
                 <hr>
                 
                 <div class="form-group">
+                    <label for="desc_departure_time" class="form-label fw-bold fs-5">
+                        {{ __('newguidings.departure_time') }}
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                           title="{{ __('newguidings.tooltip_departure_time') }}"></i>
+                    </label>
+                    <textarea name="desc_departure_time" id="desc_departure_time" class="form-control" placeholder="{{ __('newguidings.let_guests_know_about_departure_details') }}">{{ $formData['desc_departure_time'] ?? '' }}</textarea>
+                </div>
+
+                <hr>
+                
+                <div class="form-group">
                     <label for="desc_meeting_point" class="form-label fw-bold fs-5">
                         {{ __('newguidings.meeting_point') }}
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
@@ -578,7 +589,7 @@
                         </label>
                         <div class="d-flex flex-column flex-md-row align-items-md-center">
                             <div class="form-check form-switch me-md-3 mb-2 mb-md-0">
-                                <input class="form-check-input" type="checkbox" id="min_guests_switch" name="has_min_guests" {{ $formData['min_guests'] && ( $formData['min_guests'] > 0 || $formData['min_guests'] != null ) ? 'checked' : '' }}>
+                                <input class="form-check-input" type="checkbox" id="min_guests_switch" name="has_min_guests" {{ isset($formData['min_guests']) && $formData['min_guests'] > 0 ? 'checked' : '' }}>
                                 <label class="form-check-label" for="min_guests_switch">{{ __('newguidings.enable_min_guests') }}</label>
                             </div>
                             <div id="min_guests_input_container" style="display: none; flex: 1;">

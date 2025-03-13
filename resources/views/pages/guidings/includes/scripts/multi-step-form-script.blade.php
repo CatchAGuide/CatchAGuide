@@ -28,6 +28,7 @@
         desc_meeting_point: { field: 'Meeting Point', step: 5 },
         desc_tour_unique: { field: 'Tour Unique', step: 5 },
         desc_starting_time: { field: 'Starting Time', step: 5 },
+        desc_departure_time: { field: 'Departure Time', step: 5 },
         tour_type: { field: 'Tour Type', step: 7 },
         duration: { field: 'Duration', step: 7 },
         no_guest: { field: 'Number of Guests', step: 7 },
@@ -992,6 +993,11 @@
                 }
                 if (!document.getElementById('desc_starting_time').value.trim()) {
                     errors.push('Starting time description is required.');
+                    isValid = false;
+                }
+                // Validate departure time
+                if (!document.getElementById('desc_departure_time').value.trim()) {
+                    errors.push('Departure time is required.');
                     isValid = false;
                 }
                 if (!document.getElementById('desc_meeting_point').value.trim()) {
