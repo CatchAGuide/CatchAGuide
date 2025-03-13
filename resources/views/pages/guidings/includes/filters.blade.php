@@ -14,8 +14,13 @@
                                 <canvas id="price-histogram"></canvas>
                             </div>
                             <div id="price-slider-main"></div>
-                            <div class="price-display mt-2">
-                                € <span id="price-min-display">50</span> - € <span id="price-max-display">4,000</span>
+                            <div class="price-display mt-2 d-flex justify-content-between">
+                                <div class="price-label">
+                                    € <span id="price-min-display">50</span>
+                                </div>
+                                <div class="price-label">
+                                    € <span id="price-max-display">4,000</span>
+                                </div>
                             </div>
                             <input type="hidden" name="price_min" id="price_min_main">
                             <input type="hidden" name="price_max" id="price_max_main">
@@ -218,9 +223,16 @@
     }
 
     .price-display {
+        display: flex;
+        justify-content: space-between;
         font-size: 14px;
         color: #333;
         margin-bottom: 10px;
+    }
+
+    .price-label {
+        font-size: 14px;
+        color: #666;
     }
 
     .noUi-connect {
@@ -254,11 +266,6 @@
         display: flex;
         justify-content: space-between;
         margin-top: 10px;
-    }
-
-    .price-label {
-        font-size: 14px;
-        color: #666;
     }
 
     @media (max-width: 767px) {

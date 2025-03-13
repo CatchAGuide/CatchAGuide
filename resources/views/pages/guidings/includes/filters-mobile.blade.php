@@ -18,8 +18,13 @@
                         <canvas id="price-histogram-mobile"></canvas>
                     </div>
                     <div id="price-slider-mobile"></div>
-                    <div class="price-display mt-2">
-                        € <span id="price-min-display-mobile">50</span> - € <span id="price-max-display-mobile">4,000</span>
+                    <div class="price-display mt-2 d-flex justify-content-between">
+                        <div class="price-label">
+                            € <span id="price-min-display-mobile">50</span>
+                        </div>
+                        <div class="price-label">
+                            € <span id="price-max-display-mobile">4,000</span>
+                        </div>
                     </div>
                     <input type="hidden" name="price_min" id="price_min_mobile">
                     <input type="hidden" name="price_max" id="price_max_mobile">
@@ -310,10 +315,16 @@
     }
 
     .price-display {
-        text-align: center;
-        margin-top: 1rem;
-        font-weight: 500;
-        color: #212529;
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .price-label {
+        font-size: 14px;
+        color: #666;
     }
 
     .noUi-connect {

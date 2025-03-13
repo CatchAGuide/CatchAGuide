@@ -404,6 +404,17 @@
         opacity: 0.5;
         pointer-events: none;
     }
+    .slider-label {
+    position: absolute;
+    top: -25px; /* Adjust as needed */
+    transform: translateX(-50%);
+    background-color: white;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+    color: black;
+    white-space: nowrap;
+}
 </style>
 
 @endsection
