@@ -159,6 +159,7 @@ class GuidingsController extends Controller
             'duration' => $guiding->duration,
             'duration_type' => $guiding->duration_type,
             'no_guest' => $guiding->max_guests,
+            'min_guests' => $guiding->min_guests,
             'price_type' => $guiding->price_type,
             'price' => $guiding->price,
             'prices' => json_decode($guiding->prices, true),

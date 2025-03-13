@@ -735,6 +735,7 @@ class GuidingsController extends Controller
             $guiding->desc_meeting_point = $request->has('desc_meeting_point') ? $request->input('desc_meeting_point') : '';
             $guiding->meeting_point = $request->has('meeting_point') ? $request->input('desc_meeting_point') : '';
             $guiding->desc_starting_time = $request->has('desc_starting_time') ? $request->input('desc_starting_time') : '';
+            $guiding->desc_departure_time = $request->has('desc_departure_time') ? $request->input('desc_departure_time') : '';
             $guiding->desc_tour_unique = $request->has('desc_tour_unique') ? $request->input('desc_tour_unique') : '';
             $guiding->description = $request->has('desc_course_of_action') ? $request->input('desc_course_of_action') : $this->generateLongDescription($request);
 
@@ -1113,6 +1114,7 @@ class GuidingsController extends Controller
             'long_description' => $guiding->description,
             'desc_course_of_action' => $guiding->desc_course_of_action,
             'desc_starting_time' => $guiding->desc_starting_time,
+            'desc_departure_time' => $guiding->desc_departure_time,
             'desc_meeting_point' => $guiding->desc_meeting_point,
             'desc_tour_unique' => $guiding->desc_tour_unique,
             
