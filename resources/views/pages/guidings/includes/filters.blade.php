@@ -564,7 +564,7 @@
                 FilterManager.updateFilters(data);
                 
                 // Update the filter options based on available results
-                if (typeof window.updateMapWithGuidings === 'function') {
+                if (typeof window.updateMapWithGuidings === 'function' && data.allGuidings.length > 0) {
                     window.updateMapWithGuidings(data.allGuidings);
                 }
             

@@ -460,6 +460,7 @@ class GuidingsController extends Controller
             return response()->json([
                 'html' => $view,
                 'guidings' => $guidingsData,
+                'allGuidings' => $allGuidings,
                 'searchMessage' => $searchMessage,
                 'isMobile' => $isMobile,
                 'total' => $guidings->total(),
