@@ -190,11 +190,34 @@
 
 @section('content')
 <div class="container">
+        <section class="page-header">
+            <div class="page-header__bottom breadcrumb-container guiding">
+                <div class="page-header__bottom-inner">
+                    <ul class="thm-breadcrumb list-unstyled">
+                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                        <li><a href="{{ route('vacations.index') }}">{{ translate('Fishing Vacations')}}</a></li>
+                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                        @if($destination && $destination->type)
+                            <li><a href="{{ route('destination.country', [
+                                'country' => $destination->type == 'country' || $destination->type == 'vacations' ? $destination->slug : $destination->slug,
+                                'region' => $destination->type == 'region' ? $destination->slug : null,
+                                'city' => $destination->type == 'city' ? $destination->slug : null
+                            ]) }}">{{ translate('Vacations in') }} {{ $destination->name }}</a></li>
+                             <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                        @endif
+                        <li class="active">{{ translate($vacation->title) }}</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
+<!-- <div class="container">
     <section class="page-header">
         <div class="page-header__bottom">
             <div class="container">
                 <div class="page-header__bottom-inner">
-                    {{-- <ul class="thm-breadcrumb list-unstyled">
+                    <ul class="thm-breadcrumb list-unstyled">
                         <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                         <li><span>&#183;</span></li>
                         <li><a href="{{ route('vacations.index') }}">{{ translate('Fishing Vacations')}}</a></li>
@@ -210,12 +233,12 @@
                         <li class="active">
                             {{ translate($vacation->title) }}
                         </li>
-                    </ul> --}}
+                    </ul>
                 </div>
             </div>
         </div>
     </section>
-</div>
+</div> -->
 
  <div id="guidings-page" class="container vacations-single">
     <div class="title-container">

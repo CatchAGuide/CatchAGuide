@@ -3,14 +3,26 @@
 @section('title', __('data-protection.dataProt'))
 
 @section('content')
-
+<div class="container">
+        <section class="page-header">
+            <div class="page-header__bottom breadcrumb-container guiding">
+                <div class="page-header__bottom-inner">
+                    <ul class="thm-breadcrumb list-unstyled">
+                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                        <li class="active">@lang('message.data-protection')</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
     <!--About Page Start-->
-    <main class="main">
+    <main class="main" style="word-wrap: break-word;">
         <div class="page-content">
             <div class="container">
                 <div class="row">
                     <div class="col-md-12">
-                        <h1 class="text-center">@lang('data-protection.dataProt')</h1>
+                        <h1 class="text-center mb-4">@lang('data-protection.dataProt')</h1>
                         <h2>1. @lang('data-protection.privacyatglance')</h2>
                         <h3>@lang('data-protection.generalInformation')</h3> 
                         <p>@lang('data-protection.generalInformationMsg')</p>

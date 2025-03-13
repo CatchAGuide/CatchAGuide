@@ -102,7 +102,23 @@
 @endsection
 
 @section('content')
-
+<div class="container">
+        <section class="page-header">
+            <div class="page-header__bottom breadcrumb-container guiding">
+                <div class="page-header__bottom-inner">
+                    <ul class="thm-breadcrumb list-unstyled">
+                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                        <li><a href="{{ route('guidings.index') }}">@lang('message.Guiding')</a></li>
+                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                        <li class="active">
+                            {{translate($guiding->title)}}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
     {{-- <div class="container"> --}}
         {{-- <section class="page-header">
             <div class="page-header__bottom">

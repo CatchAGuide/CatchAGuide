@@ -66,6 +66,19 @@
 @section('content')
 
 <div class="container">
+<div class="container">
+        <section class="page-header">
+            <div class="page-header__bottom breadcrumb-container">
+                <div class="page-header__bottom-inner">
+                    <ul class="thm-breadcrumb list-unstyled">
+                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                        <li class="active">{{ translate('Fishing Vacations')}}</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
     {{-- <section class="page-header">
         <div class="page-header__bottom">
             <div class="container">

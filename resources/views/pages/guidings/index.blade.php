@@ -18,7 +18,6 @@
 
     .page-header {
         /*margin-top: -60px;*/
-        background: #f8f9fa;
     }
 
     .page-header-bg-overly,
@@ -424,16 +423,15 @@
 @section('content')
     <div class="container">
         <section class="page-header">
-            <div class="page-header__bottom">
-                    <div class="page-header__bottom-inner">
-                        <ul class="thm-breadcrumb list-unstyled">
-                            <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                            <li><span>&#183;</span></li>
-                            <li class="active">
-                                {{ucwords( isset($place) ? translate('Alle Guidings bei ') . $place : translate('Alle Guidings'))}}
-                            </li>
-                        </ul>
-                    </div>
+            <div class="page-header__bottom breadcrumb-container">
+                <div class="page-header__bottom-inner">
+                    <ul class="thm-breadcrumb list-unstyled">
+                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                        <li class="active">
+                            {{ucwords( isset($place) ? translate('Alle Guidings bei ') . $place : translate('Alle Guidings'))}}
+                        </li>
+                    </ul>
                 </div>
             </div>
         </section>
