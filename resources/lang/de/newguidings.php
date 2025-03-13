@@ -269,4 +269,7 @@ return [
 
     'min_guests_required' => 'Mindestanzahl der Gäste erforderlich',
     'enable_min_guests' => 'Mindestanzahl der Gäste aktivieren',
+    'departure_time' => 'Abfahrtszeit',
+    'let_guests_know_about_departure_details' => 'Lass deine Gäste wissen, wann du abfahren wirst...',
+    'tooltip_departure_time' => 'Gib deinen Gästen Informationen, wann du abfahren wirst...',
 ];
