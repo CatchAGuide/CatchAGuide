@@ -268,4 +268,7 @@ return [
     'select_or_add_value' => 'Select or add value',
     'min_guests_required' => 'Minimum number of guests required',
     'enable_min_guests' => 'Enable minimum number of guests',
+    'departure_time' => 'Departure time',
+    'let_guests_know_about_departure_details' => 'Let your guests know about departure details...',
+    'tooltip_departure_time' => 'Let your guests know about departure details...',
 ];
