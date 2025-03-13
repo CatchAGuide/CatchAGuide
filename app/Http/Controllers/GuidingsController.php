@@ -769,6 +769,13 @@ class GuidingsController extends Controller
                         }
                     }
                     $guiding->price = 0;
+                    
+                    $has_min_guests = $request->has('has_min_guests') ? 1 : 0;
+                    if ($has_min_guests) {
+                        $guiding->min_guests = (int) $request->input('min_guests');
+                    } else {
+                        $guiding->min_guests = null;
+                    }
                 } else {
                     for ($i = 1; $i <= $request->input('no_guest'); $i++) {
                         $pricePerPerson[] = [
@@ -1119,6 +1126,7 @@ class GuidingsController extends Controller
             'duration' => $guiding->duration,
             'duration_type' => $guiding->duration_type,
             'no_guest' => $guiding->max_guests,
+            'min_guests' => $guiding->min_guests,
             'price_type' => $guiding->price_type,
             'price' => $guiding->price,
             'prices' => json_decode($guiding->prices, true),

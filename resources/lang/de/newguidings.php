@@ -266,4 +266,7 @@ return [
     'additional_offer' => 'Zusätzliche Angebote',
     'enter_price_per_person' => 'Preis pro Person eingeben',
     'select_or_add_value' => 'Wert auswählen oder hinzufügen',
+
+    'min_guests_required' => 'Mindestanzahl der Gäste erforderlich',
+    'enable_min_guests' => 'Mindestanzahl der Gäste aktivieren',
 ];

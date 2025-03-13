@@ -266,4 +266,6 @@ return [
     'additional_offer' => 'Additional Offer',
     'enter_price_per_person' => 'Enter price per person',
     'select_or_add_value' => 'Select or add value',
+    'min_guests_required' => 'Minimum number of guests required',
+    'enable_min_guests' => 'Enable minimum number of guests',
 ];
