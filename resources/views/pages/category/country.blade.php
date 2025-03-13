@@ -240,6 +240,39 @@
 
 @section('content')
     <div class="container" id="destination">
+    <div class="container">
+        <section class="page-header">
+            <div class="page-header__bottom breadcrumb-container guiding">
+                <div class="page-header__bottom-inner">
+                    <ul class="thm-breadcrumb list-unstyled">
+                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                        @if($row_data->type == 'country')
+                                <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
+                            
+                            @elseif($row_data->type == 'region')
+                                <li><a href="{{ route('destination.country', ['country' => $row_data->country_slug]) }}">
+                                    {{ translate('Fishing Destinations in ')}} {{ $row_data->country_name }}
+                                </a></li>
+                                <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>  
+                                <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
+                            
+                            @elseif($row_data->type == 'city')
+                                <li><a href="{{ route('destination.country', ['country' => $row_data->country_slug]) }}">
+                                    {{ translate('Fishing Destinations in ')}} {{ $row_data->country_name }}
+                                </a></li>
+                                <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                                <li><a href="{{ route('destination.country', ['country' => $row_data->country_slug, 'region' => $row_data->region_slug]) }}">
+                                    {{ translate('Fishing Destinations in ')}} {{ $row_data->region_name }}
+                                </a></li>
+                                <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                                <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
+                            @endif
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
         {{-- <section class="page-header">
             <div class="page-header__bottom">
                 <div class="container">

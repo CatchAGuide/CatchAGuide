@@ -115,8 +115,8 @@
                 <div id="mobileherofilter" class="shadow-lg bg-white p-2 rounded">
                     <div class="row">
                         @if ($isVacation)
-                        <div class="vacation-header">
-                            <div class="col-md-4 column-input my-2">
+                        {{-- <div class="vacation-header"> --}}
+                            {{-- <div class="col-md-4 column-input my-2"> --}}
                                 <div class="d-flex align-items-center small myselect2">
                                     <i class="fa fa-map-marker-alt position-absolute ps-1"></i>
                                     <select class="form-control form-select border-0" name="country" onchange="updateFormAction(this, 'global-search1')">
@@ -132,22 +132,22 @@
                                         @endforeach
                                     </select>
                                 </div>
-                            </div>
+                            {{-- </div>
                             <div class="">
                             <button type="submit" class="form-control new-filter-btn mobile"><i class="icon-magnifying-glass"></i></button>
-                            </div>
-                        </div>
+                            </div> --}}
+                        {{-- </div> --}}
                         @else
                             <div class="col-md-4 column-input my-2">
                                 <div class="form-group">
                                     <div class="d-flex align-items-center small">
                                         <i class="fa fa-search fa-fw text-muted position-absolute ps-2"></i>
                                         <input  id="searchPlaceMobile" name="place" type="text" class="form-control rounded-0" placeholder="@lang('homepage.searchbar-destination')" autocomplete="on">
-                                        <input type="hidden" id="LocationCityMobile" name="city"/>
-                                        <input type="hidden" id="LocationCountryMobile" name="country"/>
-                                        <input type="hidden" id="LocationRegionMobile" name="region"/>
-                                        <input type="hidden" id="LocationLatMobile" name="placeLat"/>
-                                        <input type="hidden" id="LocationLngMobile" name="placeLng"/>
+                                        <input type="hidden" id="LocationCityMobile" name="city" value="{{ request()->city }}"/>
+                                        <input type="hidden" id="LocationCountryMobile" name="country" value="{{ request()->country }}"/>
+                                        <input type="hidden" id="LocationRegionMobile" name="region" value="{{ request()->region }}"/>
+                                        <input type="hidden" id="LocationLatMobile" name="placeLat" value="{{ request()->placeLat }}"/>
+                                        <input type="hidden" id="LocationLngMobile" name="placeLng" value="{{ request()->placeLng }}"/>
                                     </div>
                                 </div>
                             </div>
@@ -177,10 +177,10 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="col-md-2 col-12 column-button my-2">
+                                        <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
+                            </div>
                         @endif
-                        <div class="col-md-2 col-12 column-button my-2">
-                                    <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
-                        </div>
                     </div>
                 </div> 
             </form>
@@ -266,10 +266,10 @@
                                     @endforeach
                                 </select>
                             </div>
+                            <div class="my-1 px-0">
+                                <button type="submit" class="search-button">@lang('homepage.searchbar-search')</button>
+                            </div>
                         @endif
-                        <div class="my-1 px-0">
-                            <button type="submit" class="search-button">@lang('homepage.searchbar-search')</button>
-                        </div>
                     </div>
                 </div>
             </form>
@@ -496,7 +496,7 @@ input[type=number] {
         align-items: center;
         gap: 4px;
     }
-    ##filterContainer:has(.vacation-header) .column-input{
+    #filterContainer:has(.vacation-header) .column-input{
 
     }
     #mobileherofilter:has(.vacation-header) .column-input{
@@ -1202,9 +1202,15 @@ function updateFormAction(selectElement, formId) {
     const form = document.getElementById(formId);
     const selectedCountry = selectElement.value;
     
-    // Use 'all' as default if no country is selected
-    const country = selectedCountry || 'all';
-    form.action = "{{ route('vacations.category', ['country' => 'all']) }}".replace('all', country);
+    // Use the selected country for the form action if one is selected
+    if (selectedCountry) {
+        form.action = "{{ route('vacations.category', ['country' => 'all']) }}".replace('all', selectedCountry);
+    } else {
+        form.action = "{{ route('vacations.index') }}";
+    }
+    
+    // Submit the form immediately after changing the action
+    form.submit();
 }
 
 function closeMobileMenu() {
@@ -1304,13 +1310,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function validateSearch(event, inputId) {
     const searchInput = document.getElementById(inputId);
-    if (!searchInput) return true;
 
     const form = searchInput.closest('form');
     const lat = form.querySelector('input[name="placeLat"]').value;
     const lng = form.querySelector('input[name="placeLng"]').value;
 
-    if (!lat || !lng) {
+    if ( searchInput.value != "" && (!lat || !lng)) {
         // Create and show tooltip only when validation fails
         const tooltip = new bootstrap.Tooltip(searchInput, {
             title: "{{translate('Please select a location from the suggestions')}}",

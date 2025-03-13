@@ -170,6 +170,21 @@
 @endsection
 
 @section('content')
+<div class="container">
+        <section class="page-header">
+            <div class="page-header__bottom breadcrumb-container guiding">
+                <div class="page-header__bottom-inner">
+                    <ul class="thm-breadcrumb list-unstyled">
+                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                        <li><a href="{{ route('vacations.index') }}">{{ translate('Fishing Vacations')}}</a></li>
+                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                        <li class="active">{{ translate('Vacations in ' . $row_data->name) }}</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
     <div class="container">
         {{-- <section class="page-header">
             <div class="page-header__bottom">
@@ -621,6 +636,152 @@
 @endsection
 
 @section('js_after')
+
+<script type="module">
+    import { MarkerClusterer } from "https://cdn.skypack.dev/@googlemaps/markerclusterer@2.3.1";
+         initializeMap();
+    
+         async function initializeMap() {
+    
+            var mapStyle = [
+                {
+                featureType: "poi",
+                elementType: "labels",
+                stylers: [
+                    {
+                    visibility: "off",
+                    },
+                ],
+                },
+                {
+                featureType: "transit",
+                elementType: "labels",
+                stylers: [
+                    {
+                    visibility: "off",
+                    },
+                ],
+                },
+                {
+                featureType: "road",
+                elementType: "labels.icon",
+                stylers: [
+                    {
+                    visibility: "off",
+                    },
+                ],
+                },
+                {
+                featureType: "road",
+                elementType: "labels.text",
+                stylers: [
+                    {
+                    visibility: "on",
+                    },
+                ],
+                },
+                {
+                featureType: "road",
+                elementType: "labels.text.fill",
+                stylers: [
+                    {
+                    visibility: "on",
+                    },
+                ],
+                },
+                {
+                featureType: "administrative.locality",
+                elementType: "labels",
+                stylers: [
+                    {
+                    visibility: "on",
+                    },
+                ],
+            },
+        ];
+    
+        @php
+            $lat = isset($vacations[0]) ? $vacations[0]->latitude : 51.165691;
+            $lng = isset($vacations[0]) ? $vacations[0]->longitude : 10.451526;
+        @endphp
+        const position = { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }} , lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} };
+        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
+        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
+    
+        const map = new Map(document.getElementById("map"), {
+            zoom: 5,
+            center: position,
+            styles: mapStyle,
+            mapId: "DEMO_MAP_ID",
+            mapTypeControl: false,
+            streetViewControl: false,
+        });
+    
+        const marker = new AdvancedMarkerElement({
+            map: map,
+        });
+    
+        const markers = [];
+        const infowindows = [];
+        const uniqueCoordinates = [];
+        let isDuplicateCoordinate;  
+    
+        @if($allVacations->isEmpty())
+            @include('pages.vacations.partials.maps',['vacations' => $othervacations])
+        @else
+            @include('pages.vacations.partials.maps',['vacations' => $allVacations])
+        @endif
+    
+        function getRandomOffset() {
+          return (Math.random() - 0.5) * 0.0080;
+        }
+    
+        const markerCluster = new MarkerClusterer({ markers, map, mapStyle });
+        google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
+            map.setZoom(map.getZoom() + 2);
+            map.setCenter(cluster.getCenter());
+        });
+    
+    }
+    
+    function initialize() {
+        var input = document.getElementById('searchPlace');
+        var autocomplete = new google.maps.places.Autocomplete(input);
+        google.maps.event.addListener(autocomplete, 'place_changed', function () {
+            var place = autocomplete.getPlace();
+            document.getElementById('placeLat').value = place.geometry.location.lat();
+            document.getElementById('placeLng').value = place.geometry.location.lng();
+        });
+    }
+    
+    window.addEventListener('load', initialize);
+    
+    window.addEventListener('load', function() {
+        var placeLatitude = '{{ request()->get('placeLat') }}';
+        var placeLongitude = '{{ request()->get('placeLng') }}';
+    
+        if (placeLatitude && placeLongitude) {
+            document.getElementById('placeLat').value = placeLatitude;
+            document.getElementById('placeLng').value = placeLongitude;
+        }
+    });
+    
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+            console.log('Geolocation is not supported by this browser.');
+        }
+    }
+    
+    function showPosition(position) {
+        var lat = position.coords.latitude;
+        var lng = position.coords.longitude;
+        document.getElementById('placeLat').value = lat;
+        document.getElementById('placeLng').value = lng;
+    } 
+</script>
+
 <script>
     $('#sortby').on('change',function(){
         $('#form-sortby').submit();
@@ -680,324 +841,106 @@
         });
     });
 
-</script>
-<script>
-// Get the toggle button and filter container elements
-var toggleBtn = document.getElementById('toggleFilterBtn');
-var filterContainer = document.getElementById('filterContainer');
+    // Get the toggle button and filter container elements
+    var toggleBtn = document.getElementById('toggleFilterBtn');
+    var filterContainer = document.getElementById('filterContainer');
 
-// Add click event listener to the toggle button
-toggleBtn.addEventListener('click', function() {
-    // Toggle the visibility of the filter container
-    filterContainer.classList.toggle('d-block');
-});
-</script>
+    // Add click event listener to the toggle button
+    if(toggleBtn){
+        toggleBtn.addEventListener('click', function() {
+            // Toggle the visibility of the filter container
+            filterContainer.classList.toggle('d-block');
+        });
+    }
 
-<script>
     initializeSelect2();
 
-function initializeSelect2() {
+    function initializeSelect2() {
+        var selectTarget = $('#target_fish, #target_fishOffCanvass');
+        var selectWater = $('#water, #waterOffCanvass');
+        var selectMethod = $('#methods, #methodsOffCanvass');
 
-    var selectTarget = $('#target_fish, #target_fishOffCanvass');
-    var selectWater = $('#water, #waterOffCanvass');
-    var selectMethod = $('#methods, #methodsOffCanvass');
-
-    selectTarget.select2({
-        multiple: true,
-        placeholder: '@lang('message.target-fish')',
-        width: 'resolve', // need to override the changed default
-    });
-  
-    @if(request()->get('price_range'))
-        $('#price_range, #price_rangeOffCanvass').val('{{ request()->get('price_range') }}');
-    @endif
-
-    @foreach($alltargets as $target)
-    var targetname = '{{$target->name}}';
-
-    @if(app()->getLocale() == 'en')
-    targetname = '{{$target->name_en}}'
-    @endif
-
-    var targetOption = new Option(targetname, '{{ $target->id }}');
-
-    selectTarget.append(targetOption);
-
-    @if(request()->get('target_fish'))
-        @if(in_array($target->id, request()->get('target_fish')))
-        $(targetOption).prop('selected', true);
-        @endif
-    @endif
-
-
-    @endforeach
-  
-    // Trigger change event to update Select2 display
-    selectTarget.trigger('change');
-
-
-    selectWater.select2({
-        multiple: true,
-        placeholder: '@lang('message.body-type')',
-        width: 'resolve' // need to override the changed default
-    });
-
-    @foreach($allwaters as $water)
-        var watername = '{{$water->name}}';
-
-        @if(app()->getLocale() == 'en')
-        watername = '{{$water->name_en}}'
-        @endif
-
-        var waterOption = new Option(watername, '{{ $water->id }}');
-        selectWater.append(waterOption);
-
-        @if(request()->get('water'))
-            @if(in_array($water->id, request()->get('water')))
-            $(waterOption).prop('selected', true);
-        @endif
-    @endif
-
-
-    @endforeach
-  
-    // Trigger change event to update Select2 display
-    selectWater.trigger('change');
-
-
-
-    selectMethod.select2({
-        multiple: true,
-        placeholder: '@lang('message.fishing-technique')',
-        width: 'resolve' // need to override the changed default
-    });
-
-    @foreach($allmethods as $method)
-    var methodname = '{{$method->name}}';
-
-    @if(app()->getLocale() == 'en')
-    methodname = '{{$method->name_en}}'
-    @endif
-
-    var methodOption = new Option(methodname, '{{ $method->id }}');
-    selectMethod.append(methodOption);
-
-    @if(request()->get('methods'))
-        @if(in_array($method->id, request()->get('methods')))
-        $(methodOption).prop('selected', true);
-        @endif
-    @endif
-
-
-    @endforeach
-  
-    // Trigger change event to update Select2 display
-    selectMethod.trigger('change');
-
-}
-
-
-
-</script>
-
-
-<script type="module">
-    import { MarkerClusterer } from "https://cdn.skypack.dev/@googlemaps/markerclusterer@2.3.1";
-     initializeMap();
-
-
-     async function initializeMap() {
-
-        var mapStyle = [
-          {
-            featureType: "poi",
-            elementType: "labels",
-            stylers: [
-              {
-                visibility: "off",
-              },
-            ],
-          },
-          {
-            featureType: "transit",
-            elementType: "labels",
-            stylers: [
-              {
-                visibility: "off",
-              },
-            ],
-          },
-          {
-            featureType: "road",
-            elementType: "labels.icon",
-            stylers: [
-              {
-                visibility: "off",
-              },
-            ],
-          },
-          {
-            featureType: "road",
-            elementType: "labels.text",
-            stylers: [
-              {
-                visibility: "on",
-              },
-            ],
-          },
-          {
-            featureType: "road",
-            elementType: "labels.text.fill",
-            stylers: [
-              {
-                visibility: "on",
-              },
-            ],
-          },
-          {
-            featureType: "administrative.locality",
-            elementType: "labels",
-            stylers: [
-              {
-                visibility: "on",
-              },
-            ],
-          },
-        ];
-
-    //const { Map } = await google.maps.importLibrary("maps");
-
-    @php
-        $lat = isset($vacations[0]) ? $vacations[0]->latitude : 51.165691;
-        $lng = isset($vacations[0]) ? $vacations[0]->longitude : 10.451526;
-    @endphp
-    const position = { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }} , lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} };
-    const { Map, InfoWindow } = await google.maps.importLibrary("maps");
-    const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
-
-    //map = new google.maps.Map(document.getElementById("map"), {
-    const map = new Map(document.getElementById("map"), {
-        zoom: 5,
-        center: position,
-        styles: mapStyle,
-        mapId: "DEMO_MAP_ID",
-        mapTypeControl: false,
-        streetViewControl: false,
-    });
-
-    // The marker, positioned at Uluru
-    const marker = new AdvancedMarkerElement({
-        map: map,
-        position: position,
-    });
-
-
-
-    const markers = [];
-    const infowindows = [];
-    const uniqueCoordinates = [];
-    let isDuplicateCoordinate;  
-
-    @if($allVacations->isEmpty())
-        @include('pages.vacations.partials.maps',['vacations' => $othervacations])
-    @else
-        @include('pages.vacations.partials.maps',['vacations' => $allVacations])
-    @endif
-
-
-    function getRandomOffset() {
-      // Generate a random value between -0.00005 and 0.00005 (adjust the range as needed)
-      return (Math.random() - 0.5) * 0.0080;
-    }
-
-
-    /* 
-    // Create the MarkerClusterer
-    const markerCluster = new MarkerClusterer(map, markers, {
-        imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m',
-        maxZoom: 12,
-    });
-    */
-   
-    const markerCluster = new MarkerClusterer({ markers, map, mapStyle });
-    // Add click event listeners to individual markers inside the cluster
-    google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
-        // You can control the zoom level here
-        // For example, zoom in by 2 levels when clicking on a cluster
-        map.setZoom(map.getZoom() + 2);
-        map.setCenter(cluster.getCenter());
-    });
-
-}
-
-
-
-function initialize() {
-    var input = document.getElementById('searchPlace');
-    var autocomplete = new google.maps.places.Autocomplete(input);
-    google.maps.event.addListener(autocomplete, 'place_changed', function () {
-        var place = autocomplete.getPlace();
-        document.getElementById('placeLat').value = place.geometry.location.lat();
-        document.getElementById('placeLng').value = place.geometry.location.lng();
-    });
-}
-
-window.addEventListener('load', initialize);
-
-window.addEventListener('load', function() {
-    var placeLatitude = '{{ request()->get('placeLat') }}'; // Replace with the actual value from the request
-    var placeLongitude = '{{ request()->get('placeLng') }}'; // Replace with the actual value from the request
-
-    if (placeLatitude && placeLongitude) {
-        // The place latitude and longitude are present, so set the values in the form fields
-        document.getElementById('placeLat').value = placeLatitude;
-        document.getElementById('placeLng').value = placeLongitude;
-    } else {
-        // The place latitude and longitude are not present, so execute the geolocation function
-        // getLocation();
-    }
-});
-
-function getLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showPosition);
-    } else {
-        console.log('Geolocation is not supported by this browser.');
-    }
-}
-
-function showPosition(position) {
-    var lat = position.coords.latitude;
-    var lng = position.coords.longitude;
-    document.getElementById('placeLat').value = lat;
-    document.getElementById('placeLng').value = lng;
+        selectTarget.select2({
+            multiple: true,
+            placeholder: '@lang('message.target-fish')',
+            width: 'resolve', // need to override the changed default
+        });
     
-    codeLatLng(lat, lng);
-}
+        @if(request()->get('price_range'))
+            $('#price_range, #price_rangeOffCanvass').val('{{ request()->get('price_range') }}');
+        @endif
 
-function codeLatLng(lat, lng) {
-    return null;
-    // var geocoder = new google.maps.Geocoder();
-    // var latlng = new google.maps.LatLng(lat, lng);
-    // geocoder.geocode({'latLng': latlng}, function (results, status) {
-    //     if (status === google.maps.GeocoderStatus.OK) {
-    //         if (results[0]) {
-    //             document.getElementById('searchPlace').value = results[0].formatted_address;
-    //         } else {
-    //             console.log('No results found');
-    //             return null;
-    //         }
-    //     } else {
-    //         console.log('Geocoder failed due to: ' + status);
-    //         return null;
-    //     }
-    // });
-}
+        @foreach($alltargets as $target)
+            var targetname = '{{$target->name}}';
 
-       
+            @if(app()->getLocale() == 'en')
+                targetname = '{{$target->name_en}}'
+            @endif
+
+            var targetOption = new Option(targetname, '{{ $target->id }}');
+
+            selectTarget.append(targetOption);
+
+            @if(request()->get('target_fish'))
+                @if(in_array($target->id, request()->get('target_fish')))
+                $(targetOption).prop('selected', true);
+                @endif
+            @endif
+        @endforeach
+    
+        selectTarget.trigger('change');
+
+
+        selectWater.select2({
+            multiple: true,
+            placeholder: '@lang('message.body-type')',
+            width: 'resolve' // need to override the changed default
+        });
+
+        @foreach($allwaters as $water)
+            var watername = '{{$water->name}}';
+
+            @if(app()->getLocale() == 'en')
+                watername = '{{$water->name_en}}'
+                @endif
+
+                var waterOption = new Option(watername, '{{ $water->id }}');
+                selectWater.append(waterOption);
+
+                @if(request()->get('water'))
+                    @if(in_array($water->id, request()->get('water')))
+                    $(waterOption).prop('selected', true);
+                @endif
+            @endif
+        @endforeach
+    
+        selectWater.trigger('change');
+
+        selectMethod.select2({
+            multiple: true,
+            placeholder: '@lang('message.fishing-technique')',
+            width: 'resolve' // need to override the changed default
+        });
+
+        @foreach($allmethods as $method)
+            var methodname = '{{$method->name}}';
+
+            @if(app()->getLocale() == 'en')
+            methodname = '{{$method->name_en}}'
+            @endif
+
+            var methodOption = new Option(methodname, '{{ $method->id }}');
+            selectMethod.append(methodOption);
+
+            @if(request()->get('methods'))
+                @if(in_array($method->id, request()->get('methods')))
+                $(methodOption).prop('selected', true);
+                @endif
+            @endif
+        @endforeach
+    
+        // Trigger change event to update Select2 display
+        selectMethod.trigger('change');
+    }
 </script>
-
-
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
-
 @endsection

@@ -113,17 +113,30 @@
                 $countries = \App\Models\Destination::where('type', 'vacations')->pluck('name');
             @endphp
 
+            @php
+                $activeFilters = collect(request()->except(['price_min', 'price_max', 'isMobile']))
+                                ->filter(function($value) {
+                                    return !is_null($value) && $value !== '';
+                                });
+            @endphp
 
             <!-- Mobile Search Summary -->
             @if(!$isVacation)
                 <div class="col-12 d-md-none mt-2">
                     <div class="search-summary" role="button" id="headerSearchTrigger">
                         <i class="fas fa-search me-2"></i>
-                        @if(request()->has('place'))
-                            <span>{{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }} · 
+                        @if($activeFilters->isNotEmpty())
+                            <span>
+                                {{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }} · 
                                 {{ request()->num_guests ?? '0' }} guests
                                 @if(request()->has('target_fish'))
                                     · {{ count((array)request()->target_fish) }} fish
+                                @endif
+                                @php
+                                    $additionalFilters = $activeFilters->except(['place', 'placeLat', 'placeLng', 'city', 'country', 'region', 'num_guests', 'target_fish[]',  'price_min', 'price_max', 'ismobile'])->count();
+                                @endphp
+                                @if($additionalFilters > 0)
+                                    · {{ $additionalFilters }} more filter{{ $additionalFilters > 1 ? 's' : '' }}
                                 @endif
                             </span>
                         @else
@@ -135,26 +148,17 @@
                 <div id="filterContainer" class="col-12 d-md-none mt-3">
                     <form class="search-form row gx-2 pe-0" id="global-search1" action="{{ $isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index') }}" method="get">                
                         <div id="mobileherofilter" class="shadow-lg bg-white p-2 rounded">
-                            <div class="row">
-                                <div class="col-md-4 column-input my-2">
-                                    <div class="d-flex align-items-center small myselect2">
-                                        <i class="fas fa-map-marker-alt position-absolute ps-1"></i>
-                                        <select class="form-control form-select border-0" name="country" onchange="updateFormAction(this, 'global-search1')">
-                                            <option value="">{{translate('Select Country')}}</option>
-                                            @foreach($countries as $country)
-                                                <option value="{{ $country }}" 
-                                                    {{ request()->country == $country ? 'selected' : '' }}>
-                                                    {{ $country }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-2 column-button my-2">
-                                    <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
-                                    <button type="submit" class="form-control new-filter-btn mobile"><i class="icon-magnifying-glass"></i></button>
-                                </div>
+                            <div class="d-flex align-items-center small myselect2">
+                                <i class="fas fa-map-marker-alt position-absolute ps-1"></i>
+                                <select class="form-control form-select border-0" name="country" onchange="updateFormAction(this, 'global-search1')">
+                                    <option value="">{{translate('Select Country')}}</option>
+                                    @foreach($countries as $country)
+                                        <option value="{{ $country }}" 
+                                            {{ request()->country == $country ? 'selected' : '' }}>
+                                            {{ $country }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                     </form>
@@ -240,10 +244,10 @@
                                     @endforeach
                                 </select>
                             </div>
+                            <div class="my-1 px-0">
+                                <button type="submit" class="search-button">@lang('homepage.searchbar-search')</button>
+                            </div>
                         @endif
-                        <div class="my-1 px-0">
-                            <button type="submit" class="search-button">@lang('homepage.searchbar-search')</button>
-                        </div>
                     </div>
                 </div>
             </form>
@@ -1008,9 +1012,9 @@ input[type=number] {
                                 </select>
                             </div>
                         </div>
-                    @endif
 
-                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                        <button type="submit" class="btn btn-primary w-100">Search</button>
+                    @endif
                 </form>
             </div>
         </div>
@@ -1153,10 +1157,14 @@ input[type=number] {
 function updateFormAction(selectElement, formId) {
     const form = document.getElementById(formId);
     const selectedCountry = selectElement.value;
+
+    if(selectedCountry){
+        form.action = "{{ route('vacations.category', ['country' => 'all']) }}".replace('all', selectedCountry);
+    }else{
+        form.action = "{{ route('guidings.index') }}";
+    }
     
-    // Use 'all' as default if no country is selected
-    const country = selectedCountry || 'all';
-    form.action = "{{ route('vacations.category', ['country' => 'all']) }}".replace('all', country);
+    form.submit();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -1261,13 +1269,12 @@ function closeMobileMenu() {
 
 function validateSearch(event, inputId) {
     const searchInput = document.getElementById(inputId);
-    if (!searchInput) return true;
 
     const form = searchInput.closest('form');
     const lat = form.querySelector('input[name="placeLat"]').value;
     const lng = form.querySelector('input[name="placeLng"]').value;
 
-    if (!lat || !lng) {
+    if ( searchInput.value != "" && (!lat || !lng)) {
         // Create and show tooltip only when validation fails
         const tooltip = new bootstrap.Tooltip(searchInput, {
             title: "{{translate('Please select a location from the suggestions')}}",

@@ -426,6 +426,20 @@
                 if (priceTypeRadio) {
                     priceTypeRadio.checked = true;
                     priceTypeRadio.dispatchEvent(new Event('change')); // Trigger change event
+                    
+                    // Show min guests container if per_person is selected
+                    if (priceType === 'per_person') {
+                        document.getElementById('min_guests_container').style.display = 'block';
+                        
+                        // Set min guests switch and value if editing
+                        const hasMinGuests = {{ isset($formData['has_min_guests']) ? ($formData['has_min_guests'] ? 'true' : 'false') : 'false' }};
+                        const minGuestsSwitch = document.getElementById('min_guests_switch');
+                        if (minGuestsSwitch && hasMinGuests) {
+                            minGuestsSwitch.checked = true;
+                            document.getElementById('min_guests_input_container').style.display = 'block';
+                            document.getElementById('min_guests').required = true;
+                        }
+                    }
                 }
             }
 
@@ -551,11 +565,14 @@
         }
     }
 
-    // Dynamic price fields
+    // Modify the price type change handler to show/hide min guests option
     $('input[name="price_type"]').change(function() {
         var priceType = $(this).val();
         var container = $('#dynamic-price-fields-container');
         container.empty();
+
+        // Show min guests option only for per_person pricing
+        $('#min_guests_container').toggle(priceType === 'per_person');
 
         if (priceType === 'per_person') {
             var guestCount = parseInt($('#no_guest').val()) || 1;
@@ -1022,6 +1039,23 @@
                     isValid = false;
                 }
                 
+                // Add validation for min guests
+                const minGuestsSwitch = document.getElementById('min_guests_switch');
+                if (minGuestsSwitch && minGuestsSwitch.checked) {
+                    const minGuests = document.getElementById('min_guests').value;
+                    if (!minGuests || minGuests < 1) {
+                        errors.push('Minimum number of guests is required and must be at least 1.');
+                        isValid = false;
+                    }
+                    
+                    // Validate that min guests is less than max guests
+                    const maxGuests = parseInt(document.getElementById('no_guest').value);
+                    if (parseInt(minGuests) > maxGuests) {
+                        errors.push('Minimum number of guests cannot be greater than maximum number of guests.');
+                        isValid = false;
+                    }
+                }
+                
                 // if (!document.getElementById('inclusions').value.trim()) {
                 //     errors.push('Included in the price are required.');
                 //     isValid = false;
@@ -1262,6 +1296,17 @@
                 }
             });
         });
+
+        // Min guests switch functionality
+        const minGuestsSwitch = document.getElementById('min_guests_switch');
+        const minGuestsContainer = document.getElementById('min_guests_input_container');
+        
+        if (minGuestsSwitch) {
+            minGuestsSwitch.addEventListener('change', function() {
+                minGuestsContainer.style.display = this.checked ? 'block' : 'none';
+                document.getElementById('min_guests').required = this.checked;
+            });
+        }
     });
 
     // Update the form's submit event listener

@@ -6,6 +6,7 @@
 @section('header_title', ((ucwords(isset($place)) ? translate('Alle Guidings bei ') . $place : translate('Alle Guidings'))))
 @section('header_sub_title', '')
 
+@stack('guidingListingStyles')
 @section('css_after')
 <style>
     .container {
@@ -17,7 +18,6 @@
 
     .page-header {
         /*margin-top: -60px;*/
-        background: #f8f9fa;
     }
 
     .page-header-bg-overly,
@@ -195,9 +195,6 @@
     }
     #guidings-result {
         line-height: 14px;
-    }
-    #offcanvasBottomSearch {
-        height: 90%!important;
     }
     .pac-container {
         z-index: 2000;
@@ -387,6 +384,36 @@
             font-size: 15px;
         }
     }
+
+    #filter-loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.7);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: opacity 0.3s ease;
+    }
+    
+    .listings-container.loading {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+    .slider-label {
+    position: absolute;
+    top: -25px; /* Adjust as needed */
+    transform: translateX(-50%);
+    background-color: white;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+    color: black;
+    white-space: nowrap;
+}
 </style>
 
 @endsection
@@ -394,21 +421,21 @@
 @include('layouts.schema.listings')
 @endsection
 @section('content')
-{{-- <div class="container"> --}}
-    {{-- <section class="page-header">
-        <div class="page-header__bottom">
+    <div class="container">
+        <section class="page-header">
+            <div class="page-header__bottom breadcrumb-container">
                 <div class="page-header__bottom-inner">
                     <ul class="thm-breadcrumb list-unstyled">
                         <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                        <li><span>&#183;</span></li>
+                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                         <li class="active">
                             {{ucwords( isset($place) ? translate('Alle Guidings bei ') . $place : translate('Alle Guidings'))}}
                         </li>
                     </ul>
                 </div>
             </div>
-        </div>
-    </section> --}}
+        </section>
+    </div>
 
     <!--Tours List Start-->
     <section class="tours-list">
@@ -421,29 +448,15 @@
                             <div class="btn-group border rounded-start cag-btn-inverted" role="group" style=" width:30%;">
                                 <button type="button" class="btn dropdown-toggle text-white" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-arrow-down-arrow-up me-1"></i>@lang('message.sortby')</button>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=newest">@lang('message.newest')</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=price-asc">@lang('message.lowprice')</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=short-duration">@lang('message.shortduration')</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('guidings.index') }}?sortby=long-duration">@lang('message.longduration')</a></li>
+                                    <li><a class="dropdown-item mobile-sort-option" href="javascript:void(0)" data-sort="newest">@lang('message.newest')</a></li>
+                                    <li><a class="dropdown-item mobile-sort-option" href="javascript:void(0)" data-sort="price-asc">@lang('message.lowprice')</a></li>
+                                    <li><a class="dropdown-item mobile-sort-option" href="javascript:void(0)" data-sort="short-duration">@lang('message.shortduration')</a></li>
+                                    <li><a class="dropdown-item mobile-sort-option" href="javascript:void(0)" data-sort="long-duration">@lang('message.longduration')</a></li>
                                 </ul>
-
-                                @foreach(request()->except('sortby') as $key => $value)
-                                    @if(is_array($value))
-                                        @foreach($value as $arrayValue)
-                                            <input type="hidden" name="{{ $key }}[]" value="{{ $arrayValue }}">
-                                        @endforeach
-                                    @else
-                                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                                    @endif
-                                @endforeach
                             </div>
                             <a class="btn border-start cag-btn-inverted" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottomSearch" aria-controls="offcanvasBottomSearch" href="javascript:void(0)" style="border-left: 1px solid #ccc!important; z-index: 2; width:30%;">
-                                <i class="fa fa-filter me-1"></i>@lang('message.filter') 
-                                @if($guidings->count() > 0)
-                                    @if(request()->has('radius') || request()->has('num_guests') || request()->has('target_fish') || request()->has('water') || request()->has('fishing_type') || request()->has('price_range'))
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="guiding-filter-counter"></span>
-                                    @endif
-                                @endif
+                                <i class="fa fa-filter me-1"></i>@lang('message.filter')
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="active-filter-counter"></span>
                             </a>
                             <a class="btn border cag-btn-inverted" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)" style=" border-left: 2px solid #ccc!important; width:40%;"><i class="fa fa-map-marker-alt me-2"></i>@lang('destination.show_on_map')</a>
                         </div>
@@ -456,122 +469,15 @@
                         <div id="map-placeholder">
                             <a class="btn btn-primary" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)">@lang('destination.show_on_map')</a>
                         </div>
-                    </div>
-                    <div class="card d-block d-none d-sm-block mb-1">
-                        <div class="card-header">
-                            @lang('message.sortby'):
-                        </div>
-                        <div class="card-body border-bottom">
-                            <form id="form-sortby-2" action="{{route('guidings.index')}}" method="get">
-                                <select class="form-select form-select-sm" name="sortby" id="sortby-2">
-                                    <option value="" disabled selected>@lang('message.choose')...</option>
-                                    <option value="newest" {{request()->get('sortby') ? request()->get('sortby') == 'newest' ? 'selected' : '' : '' }}>@lang('message.newest')</option>
-                                    <option value="price-asc" {{request()->get('sortby') ? request()->get('sortby') == 'price-asc' ? 'selected' : '' : '' }}>@lang('message.lowprice')</option>
-                                    <option value="short-duration" {{request()->get('sortby') ? request()->get('sortby') == 'short-duration' ? 'selected' : '' : '' }}>@lang('message.shortduration')</option>
-                                    <option value="long-duration" {{request()->get('sortby') ? request()->get('sortby') == 'long-duration' ? 'selected' : '' : '' }}>@lang('message.longduration')</option>
-                                </select>
-
-                                @foreach(request()->except('sortby') as $key => $value)
-                                    @if(is_array($value))
-                                        @foreach($value as $arrayValue)
-                                            <input type="hidden" name="{{ $key }}[]" value="{{ $arrayValue }}">
-                                        @endforeach
-                                    @else
-                                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                                    @endif
-                                @endforeach
-                            </form>
-                        </div>
-                    </div>
-                    <div class="card d-block d-none d-sm-block">
-                        <div class="card-header">
-                            @lang('destination.filter_by'):
-                        </div>
-                        <div class="card-body border-bottom">
-                            <form id="filterContainer" action="{{route('guidings.index')}}" method="get" class="shadow-sm px-4 py-2">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <div class="input-group my-1">
-                                            <div class="input-group-prepend border-0 border-bottom ">
-                                                <span class="d-flex align-items-center px-2 h-100">
-                                                    <i class="fas fa-user"></i>
-                                                </span>
-                                            </div>
-                                            <select id="num-guests" class="form-control form-select  border-0 border-bottom rounded-0 custom-select" name="num_guests">
-                                                <option value="" disabled selected hidden>@lang('message.number-of-guests')</option>
-                                                <option value="">@lang('message.choose')...</option>
-                                                <option value="1" {{ request()->get('num_guests') ? request()->get('num_guests') == 1 ? 'selected' : null : null }}>1</option>
-                                                <option value="2" {{ request()->get('num_guests') ? request()->get('num_guests') == 2 ? 'selected' : null : null }}>2</option>
-                                                <option value="3" {{ request()->get('num_guests') ? request()->get('num_guests') == 3 ? 'selected' : null : null }}>3</option>
-                                                <option value="4" {{ request()->get('num_guests') ? request()->get('num_guests') == 4 ? 'selected' : null : null }}>4</option>
-                                                <option value="5" {{ request()->get('num_guests') ? request()->get('num_guests') == 5 ? 'selected' : null : null }}>5</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                 
-                                    <div class="col-12">
-                                        <div class="form-group my-1 d-flex align-items-center border-bottom">
-                                            <div class="px-2 select2-icon">
-                                                <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
-                                            </div>
-                                           
-                                            <select class="form-control form-select border-0 rounded-0" id="target_fish" name="target_fish[]" style="width:100%">
-                                            </select>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="col-12">
-                                        <div class="form-group my-1 d-flex align-items-center border-bottom">
-                                            <div class="px-2 select2-icon">
-                                                <img src="{{asset('assets/images/icons/water-waves.png')}}" height="20" width="20" alt="" />
-                                            </div>
-                                            <select class="form-control form-select border-0  rounded-0" id="water" name="water[]" style="width:100%">
-                                    
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="form-group my-1 d-flex align-items-center border-bottom ">
-                                            <div class="px-2 select2-icon">
-                                                <img src="{{asset('assets/images/icons/fishing.png')}}" height="20" width="20" alt="" />
-                                            </div>
-                                            <select class="form-control form-select border-0 rounded-0" id="methods" name="methods[]" style="width:100%">
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-12 mb-2">
-                                        <div class="input-group my-1">
-                                            <div class="input-group-prepend border-0 border-bottom ">
-                                                <span class="d-flex align-items-center px-2 h-100">
-                                                    <i class="fa fa-euro-sign"></i>
-                                                </span>
-                                            </div>
-                                            <select id="price_range" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="price_range">
-                                                <option selected disabled hidden>Price per Person</option>
-                                                <option value="" >@lang('message.choose')...</option>
-                                                <option value="1-50" {{ request()->get('price_range') ? request()->get('price_range') == '1-200' ? 'selected' : null : null }}>1 - 50 p.P.</option>
-                                                <option value="51-100" {{ request()->get('price_range') ? request()->get('price_range') == '201-400' ? 'selected' : null : null }}>51 - 100 p.P.</option>
-                                                <option value="101-150" {{ request()->get('price_range') ? request()->get('price_range') == '401-600' ? 'selected' : null : null }}>101 - 150 p.P.</option>
-                                                <option value="151-200" {{ request()->get('price_range') ? request()->get('price_range') == '601-800' ? 'selected' : null : null }}>151 - 200 p.P.</option>
-                                                <option value="201-250" {{ request()->get('price_range') ? request()->get('price_range') == '801-1000' ? 'selected' : null : null }}>201 - 250 p.P.</option>
-                                                <option value="350" {{ request()->get('price_range') ? request()->get('price_range') == '1001' ? 'selected' : null : null }}>350 and more</option>
-                                            </select>
-                                          </div>
-                                    </div>
-                                    <div class="col-sm-12 col-lg-12 ps-md-0">
-                                        <button class="btn btn-sm theme-primary btn-theme-new w-100 h-100" >@lang('message.Search')</button>    
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                    </div>            
+                    @include('pages.guidings.includes.filters', ['formAction' => route('guidings.index')])
                 </div>
 
                 <div class="col-sm-12 col-lg-9">
                     <!-- Add search message display -->
                     @if(!empty($searchMessage))
-                        <div class="alert alert-info mb-3" role="alert">
-                            {{ $searchMessage }}
+                        <div class="alert alert-info mb-3" role="alert" id="search-message-title">
+                            {{ str_replace('$countReplace', count($allGuidings), $searchMessage) }}
                         </div>
                     @endif
 
@@ -580,7 +486,126 @@
                     <div class="row">
                         <div class="col-lg-12 col-sm-12">
                             <div class="tours-list__right">
-                                <div class="tours-list__inner">
+                                <div class="tours-list__inner" id="guidings-list">
+                                    <div class="filter-sort-container">
+                                        {{-- Sort By Dropdown --}}
+                                        @if(!$agent->ismobile())
+                                        <div class="d-flex align-items-center">
+                                            <span class="me-2">@lang('message.sortby'):</span>
+                                            <form action="{{route('guidings.index')}}" method="get" style="margin-bottom: 0;">
+                                                <select class="form-select form-select-sm" name="sortby" id="sortby-2" style="width: auto;">
+                                                    <option value="" disabled selected>@lang('message.choose')...</option>
+                                                    <option value="newest" {{request()->get('sortby') == 'newest' ? 'selected' : '' }}>@lang('message.newest')</option>
+                                                    <option value="price-asc" {{request()->get('sortby') == 'price-asc' ? 'selected' : '' }}>@lang('message.lowprice')</option>
+                                                    <option value="short-duration" {{request()->get('sortby') == 'short-duration' ? 'selected' : '' }}>@lang('message.shortduration')</option>
+                                                    <option value="long-duration" {{request()->get('sortby') == 'long-duration' ? 'selected' : '' }}>@lang('message.longduration')</option>
+                                                </select>
+                                                @foreach(request()->except('sortby') as $key => $value)
+                                                    @if(is_array($value))
+                                                        @foreach($value as $arrayValue)
+                                                            <input type="hidden" name="{{ $key }}[]" value="{{ $arrayValue }}">
+                                                        @endforeach
+                                                    @else
+                                                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                                    @endif
+                                                @endforeach
+                                            </form>
+                                        </div>
+                                        @endif
+
+                                        {{-- Active Filters --}}
+                                        <div class="active-filters">
+                                            @if(request()->has('target_fish'))
+                                                @foreach(request()->get('target_fish') as $fishId)
+                                                    @php
+                                                        $fish = $targetFishOptions->firstWhere('id', $fishId);
+                                                    @endphp
+                                                    @if($fish)
+                                                        <span class="badge bg-light text-dark border">
+                                                            {{ app()->getLocale() == 'en' ? $fish->name_en : $fish->name }}
+                                                            <button type="button" class="btn-close ms-2" data-filter-type="target_fish" data-filter-id="{{ $fishId }}"></button>
+                                                        </span>
+                                                    @endif
+                                                @endforeach
+                                            @endif
+
+                                            @if(request()->has('methods'))
+                                                @foreach(request()->get('methods') as $methodId)
+                                                    @php
+                                                        $method = $methodOptions->firstWhere('id', $methodId);
+                                                    @endphp
+                                                    @if($method)
+                                                        <span class="badge bg-light text-dark border">
+                                                            {{ app()->getLocale() == 'en' ? $method->name_en : $method->name }}
+                                                            <button type="button" class="btn-close ms-2" data-filter-type="methods" data-filter-id="{{ $methodId }}"></button>
+                                                        </span>
+                                                    @endif
+                                                @endforeach
+                                            @endif
+
+                                            @if(request()->has('water'))
+                                                @foreach(request()->get('water') as $waterId)
+                                                    @php
+                                                        $water = $waterTypeOptions->firstWhere('id', $waterId);
+                                                    @endphp
+                                                    @if($water)
+                                                        <span class="badge bg-light text-dark border">
+                                                            {{ app()->getLocale() == 'en' ? $water->name_en : $water->name }}
+                                                            <button type="button" class="btn-close ms-2" data-filter-type="water" data-filter-id="{{ $waterId }}"></button>
+                                                        </span>
+                                                    @endif
+                                                @endforeach
+                                            @endif
+                                            
+
+                                            {{-- Duration Type Filters --}}
+                                            @if(request()->has('duration_types'))
+                                                @foreach(request()->get('duration_types') as $durationType)
+                                                    <span class="badge bg-light text-dark border">
+                                                        @if($durationType == 'half_day')
+                                                            @lang('guidings.half_day')
+                                                        @elseif($durationType == 'full_day')
+                                                            @lang('guidings.full_day')
+                                                        @elseif($durationType == 'multi_day')
+                                                            @lang('guidings.multi_day')
+                                                        @endif
+                                                        <button type="button" class="btn-close ms-2" data-filter-type="duration_types" data-filter-id="{{ $durationType }}"></button>
+                                                    </span>
+                                                @endforeach
+                                            @endif
+
+                                            {{-- Number of Persons Filter --}}
+                                            @if(request()->has('num_persons'))
+                                                @php
+                                                    $numPersons = request()->get('num_persons');
+                                                @endphp
+                                                <span class="badge bg-light text-dark border">
+                                                    {{ $numPersons }} {{ $numPersons == 1 ? __('message.person') : __('message.persons') }}
+                                                    <button type="button" class="btn-close ms-2" data-filter-type="num_persons" data-filter-id="{{ $numPersons }}"></button>
+                                                </span>
+                                            @endif
+
+                                            {{-- Price Range Filter --}}
+                                            @php
+                                                $priceMin = request()->get('price_min');
+                                                $priceMax = request()->get('price_max');
+                                                $showPriceMin = isset($priceMin) && $priceMin != 50;
+                                                $showPriceMax = isset($priceMax) && $priceMax != 4000;
+                                            @endphp
+                                            @if($showPriceMin || $showPriceMax)
+                                                <span class="badge bg-light text-dark border">
+                                                    @if($showPriceMin && $showPriceMax)
+                                                        Price €{{ $priceMin }} - €{{ $priceMax }}
+                                                    @elseif($showPriceMin)
+                                                        Price from €{{ $priceMin }}
+                                                    @elseif($showPriceMax)
+                                                        Price up to €{{ $priceMax }}
+                                                    @endif
+                                                    <button type="button" class="btn-close ms-2" data-filter-type="price_range" data-filter-id="price_range"></button>
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
                                     @foreach($guidings as $guiding)
                                     <div class="row m-0 mb-2 guiding-list-item">
                                         <div class="col-md-12">
@@ -612,89 +637,87 @@
                                                 </div>
                                                 <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 px-md-3 pt-md-2">
                                                     <a href="{{ route('guidings.show', [$guiding->id, $guiding->slug])}}">
-                                                            <div class="guidings-item">
-                                                                <div class="guidings-item-title">
-                                                                <h5 class="fw-bolder text-truncate">{{ Str::limit(translate($guiding->title), 70) }}</h5>
-                                                                <span class="truncate"><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }}</span>                                      
+                                                        <div class="guidings-item">
+                                                            <div class="guidings-item-title">
+                                                            <h5 class="fw-bolder text-truncate">{{ Str::limit(translate($guiding->title), 70) }}</h5>
+                                                            <span class="truncate"><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }}</span>                                      
+                                                            </div>
+                                                            @if ($guiding->user->average_rating())
+                                                            <div class="guidings-item-ratings">
+                                                            <div class="ratings-score">
+                                                                    <span class="text-warning">★</span>
+                                                                    <span>{{$guiding->user->average_rating()}} </span>
+                                                                    /5 ({{ $guiding->user->received_ratings->count() }} review/s)
                                                                 </div>
-                                                                @if ($guiding->user->average_rating())
-                                                                <div class="guidings-item-ratings">
-                                                                <div class="ratings-score">
-                                                                        <span class="text-warning">★</span>
-                                                                        <span>{{$guiding->user->average_rating()}} </span>
-                                                                        /5 ({{ $guiding->user->received_ratings->count() }} review/s)
+                                                            </div>
+                                                            @endif
+                                                        </div>
+                                                        <div class="guidings-item-icon">
+                                                            <div class="guidings-icon-container"> 
+                                                                <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
+                                                                <div class="">
+                                                                    {{$guiding->duration}} {{ $guiding->duration_type == 'multi_day' ? __('guidings.days') : __('guidings.hours') }}
+                                                                </div>
+                                                            </div>
+                                                            <div class="guidings-icon-container"> 
+                                                                <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" />
+                                                                <div class="">
+                                                                {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
+                                                                </div>
+                                                            </div>
+                                                            <div class="guidings-icon-container"> 
+                                                                <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
+                                                                <div class="">
+                                                                    <div class="tours-list__content__trait__text" >
+                                                                        @php
+                                                                        $guidingTargets = collect($guiding->getTargetFishNames())->pluck('name')->toArray();
+                                                                        @endphp
+                                                                        
+                                                                        @if(!empty($guidingTargets))
+                                                                            {{ implode(', ', $guidingTargets) }}
+                                                                        @endif
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="guidings-icon-container">
+                                                                <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
+                                                                <div class="">
+                                                                    <div class="tours-list__content__trait__text" >
+                                                                        {{$guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="inclusions-price">
+                                                            <div class="guidings-inclusions-container">
+                                                                @if(!empty($guiding->getInclusionNames()))
+                                                                <div class="guidings-included">
+                                                                    <strong>@lang('guidings.Whats_Included')</strong>
+                                                                    <div class="inclusions-list">
+                                                                        @php
+                                                                            $inclussions = $guiding->getInclusionNames();
+                                                                            $maxToShow = 3; // Maximum number of inclusions to display
+                                                                        @endphp
+
+                                                                        @foreach ($inclussions as $index => $inclussion)
+                                                                            @if ($index < $maxToShow)
+                                                                                <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclussion['name'] }}</span>
+                                                                            @endif
+                                                                        @endforeach
+
+                                                                        @if (count($inclussions) > $maxToShow)
+                                                                            <span class="inclusion-item">+{{ count($inclussions) - $maxToShow }} more</span>
+                                                                        @endif
                                                                     </div>
                                                                 </div>
                                                                 @endif
                                                             </div>
-                                                            <div class="guidings-item-icon">
-                                                                <div class="guidings-icon-container"> 
-                                                                            <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
-                                                                        <div class="">
-                                                                            {{$guiding->duration}} {{ $guiding->duration_type == 'multi_day' ? __('guidings.days') : __('guidings.hours') }}
-                                                                        </div>
-                                                                </div>
-                                                                <div class="guidings-icon-container"> 
-                                                                        <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" />
-                                                                        <div class="">
-                                                                        {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
-                                                                        </div>
-                                                                </div>
-                                                                <div class="guidings-icon-container"> 
-                                                                            <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
-                                                                        <div class="">
-                                                                            <div class="tours-list__content__trait__text" >
-                                                                                @php
-                                                                                $guidingTargets = collect($guiding->getTargetFishNames())->pluck('name')->toArray();
-                                                                                @endphp
-                                                                                
-                                                                                @if(!empty($guidingTargets))
-                                                                                    {{ implode(', ', $guidingTargets) }}
-                                                                                @endif
-                                                                            </div>
-                                                                        
-                                                                        </div>
-                                                                </div>
-                                                                <div class="guidings-icon-container">
-                                                                            <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
-                                                                        <div class="">
-                                                                            <div class="tours-list__content__trait__text" >
-                                                                            {{$guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
-                                                                            </div>
-                                                                        
-                                                                        </div>
+                                                            <div class="guiding-item-price">
+                                                                <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$guiding->getLowestPrice()}}€ p.P.</span></h5>
+                                                                <div class="d-none d-flex flex-column mt-4">
                                                                 </div>
                                                             </div>
-                                                            <div class="inclusions-price">
-                                                                    <div class="guidings-inclusions-container">
-                                                                        @if(!empty($guiding->getInclusionNames()))
-                                                                        <div class="guidings-included">
-                                                                            <strong>@lang('guidings.Whats_Included')</strong>
-                                                                            <div class="inclusions-list">
-                                                                                @php
-                                                                                    $inclussions = $guiding->getInclusionNames();
-                                                                                    $maxToShow = 3; // Maximum number of inclusions to display
-                                                                                @endphp
-    
-                                                                                @foreach ($inclussions as $index => $inclussion)
-                                                                                    @if ($index < $maxToShow)
-                                                                                        <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclussion['name'] }}</span>
-                                                                                    @endif
-                                                                                @endforeach
-    
-                                                                                @if (count($inclussions) > $maxToShow)
-                                                                                    <span class="inclusion-item">+{{ count($inclussions) - $maxToShow }} more</span>
-                                                                                @endif
-                                                                            </div>
-                                                                        </div>
-                                                                        @endif
-                                                                    </div>
-                                                                    <div class="guiding-item-price">
-                                                                        <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$guiding->getLowestPrice()}}€ p.P.</span></h5>
-                                                                        <div class="d-none d-flex flex-column mt-4">
-                                                                        </div>
-                                                                    </div>
-                                                            </div>    
+                                                        </div>    
                                                     </a>
                                                 </div>
                                             </div>
@@ -839,27 +862,16 @@
                                         </div>
                                     </div>
                                     @endforeach
-                                    {!! $guidings->links('vendor.pagination.default') !!}
                                 </div>
                             </div>
                         </div>
                     </div>
                     @endif
                 </div>
-
             </div>
-
-     
         </div>
-
     </section>
     <!--Tours List End-->
-
-    <!-- Modal -->
-    @foreach($guidings as $guiding)
-        @include('pages.guidings.content.guidingModal')
-    @endforeach
-
 
     <div class="modal show" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl" style="max-width: 100%; width: 96%; height:100%;">
@@ -876,125 +888,11 @@
 
     <br>
 
-    <div class="offcanvas offcanvas-bottom" tabindex="-1" id="offcanvasBottomSearch" aria-labelledby="offcanvasBottomLabel">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasBottomLabel">Filter</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body small">
-            <form id="filterContainerOffCanvass" action="{{route('guidings.index')}}" method="get" class="px-4 py-2">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="form-group my-1">
-                            <div class="input-group">
-                                <div class="input-group-prepend border-0 border-bottom ">
-                                    <span class=" d-flex align-items-center px-2 h-100"><i class="fas fa-map-marker-alt"></i></span>
-                                </div>
-                                <input id="searchPlace2" name="place" type="text" value="{{ request()->get('place') ? request()->get('place') : null }} @if(empty(request()->get('place')) && !empty(request()->get('country'))) {{request()->get('country')}} @endif" class="form-control border-0 border-bottom rounded-0" placeholder="@lang('message.enter-location')"  autocomplete="on">
-                            </div>
-                          <input type="hidden" id="LocationLat2" value="{{ request()->get('placeLat') ? request()->get('placeLat') : null }}" name="placeLat"/>
-                          <input type="hidden" id="LocationLng2" value="{{ request()->get('placeLng') ? request()->get('placeLng') : null }}" name="placeLng"/>
-                          <input type="hidden" id="LocationCity2" value="{{ request()->get('city') ? request()->get('city') : null }}" name="city"/>
-                          <input type="hidden" id="LocationCountry2" value="{{ request()->get('country') ? request()->get('country') : null }}" name="country"/>
-                        </div>
-                    </div>
-                    {{-- <div class="col-12">
-                        <div class="input-group my-1">
-                            <div class="input-group-prepend border-0 border-bottom ">
-                                <span class="d-flex align-items-center px-2 h-100">
-                                    <i class="fa fa-compass"></i>
-                                </span>
-                            </div>
-                            <select id="radiusOffCanvass" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="radius">
-                                <option selected disabled hidden>Radius</option>
-                                <option>@lang('message.choose')...</option>
-                                <option value="50" {{ request()->get('radius') ? request()->get('radius') == 50 ? 'selected' : null : null }}>50 km</option>
-                                <option value="100" {{ request()->get('radius') ? request()->get('radius') == 100 ? 'selected' : null : null }}>100 km</option>
-                                <option value="150" {{ request()->get('radius') ? request()->get('radius') == 150 ? 'selected' : null : null }}>150 km</option>
-                                <option value="250" {{ request()->get('radius') ? request()->get('radius') == 250 ? 'selected' : null : null }}>250 km</option>
-                                <option value="500" {{ request()->get('radius') ? request()->get('radius') == 500 ? 'selected' : null : null }}>500 km</option>
-                            </select>
-                          </div>
-                    </div> --}}
-                    <div class="col-12">
-                        <div class="input-group my-1">
-                            <div class="input-group-prepend border-0 border-bottom ">
-                                <span class="d-flex align-items-center px-2 h-100">
-                                    <i class="fas fa-user"></i>
-                                </span>
-                            </div>
-                            <select id="num-guestsOffCanvass" class="form-control form-select  border-0 border-bottom rounded-0 custom-select" name="num_guests">
-                                <option value="" disabled selected hidden>@lang('message.number-of-guests')</option>
-                                <option value="">@lang('message.choose')...</option>
-                                <option value="1" {{ request()->get('num_guests') ? request()->get('num_guests') == 1 ? 'selected' : null : null }}>1</option>
-                                <option value="2" {{ request()->get('num_guests') ? request()->get('num_guests') == 2 ? 'selected' : null : null }}>2</option>
-                                <option value="3" {{ request()->get('num_guests') ? request()->get('num_guests') == 3 ? 'selected' : null : null }}>3</option>
-                                <option value="4" {{ request()->get('num_guests') ? request()->get('num_guests') == 4 ? 'selected' : null : null }}>4</option>
-                                <option value="5" {{ request()->get('num_guests') ? request()->get('num_guests') == 5 ? 'selected' : null : null }}>5</option>
-                            </select>
-                        </div>
-                    </div>
-                 
-                    <div class="col-12">
-                        <div class="form-group my-1 d-flex align-items-center border-bottom">
-                            <div class="px-2 select2-icon">
-                                <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
-                            </div>
-                           
-                            <select class="form-control form-select border-0 rounded-0" id="target_fishOffCanvass" name="target_fish[]" style="width:100%">
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="col-12">
-                        <div class="form-group my-1 d-flex align-items-center border-bottom">
-                            <div class="px-2 select2-icon">
-                                <img src="{{asset('assets/images/icons/water-waves.png')}}" height="20" width="20" alt="" />
-                            </div>
-                            <select class="form-control form-select border-0  rounded-0" id="waterOffCanvass" name="water[]" style="width:100%">
-                    
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="form-group my-1 d-flex align-items-center border-bottom ">
-                            <div class="px-2 select2-icon">
-                                <img src="{{asset('assets/images/icons/fishing.png')}}" height="20" width="20" alt="" />
-                            </div>
-                            <select class="form-control form-select border-0 rounded-0" id="methodsOffCanvass" name="methods[]" style="width:100%">
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-12 mb-2">
-                        <div class="input-group my-1">
-                            <div class="input-group-prepend border-0 border-bottom ">
-                                <span class="d-flex align-items-center px-2 h-100">
-                                    <i class="fa fa-euro-sign"></i>
-                                </span>
-                            </div>
-                            <select id="price_rangeOffCanvass" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="price_range">
-                                <option selected disabled hidden>Price per Person</option>
-                                <option value="" >@lang('message.choose')...</option>
-                                <option value="1-50" {{ request()->get('price_range') ? request()->get('price_range') == '1-200' ? 'selected' : null : null }}>1 - 50 p.P.</option>
-                                <option value="51-100" {{ request()->get('price_range') ? request()->get('price_range') == '201-400' ? 'selected' : null : null }}>51 - 100 p.P.</option>
-                                <option value="101-150" {{ request()->get('price_range') ? request()->get('price_range') == '401-600' ? 'selected' : null : null }}>101 - 150 p.P.</option>
-                                <option value="151-200" {{ request()->get('price_range') ? request()->get('price_range') == '601-800' ? 'selected' : null : null }}>151 - 200 p.P.</option>
-                                <option value="201-250" {{ request()->get('price_range') ? request()->get('price_range') == '801-1000' ? 'selected' : null : null }}>201 - 250 p.P.</option>
-                                <option value="350" {{ request()->get('price_range') ? request()->get('price_range') == '1001' ? 'selected' : null : null }}>350 and more</option>
-                            </select>
-                          </div>
-                    </div>
-                    <div class="col-sm-12 col-lg-12 ps-md-0">
-                        <button class="btn btn-sm theme-primary btn-theme-new w-100 h-100" >@lang('message.Search')</button>    
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
+    @include('pages.guidings.includes.filters-mobile', ['formAction' => route('guidings.index')])
 @endsection
 
+@stack('guidingListingScripts')
 @section('js_after')
-
 <script>
     $('#sortby, #sortby-2').on('change', function() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -1003,99 +901,103 @@
         const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
         window.location.href = newUrl;
     });
-</script>
-<script>
-// Get the toggle button and filter container elements
-var toggleBtn = document.getElementById('toggleFilterBtn');
-var filterContainer = document.getElementById('filterContainer');
 
-// Add click event listener to the toggle button
-toggleBtn.addEventListener('click', function() {
-    // Toggle the visibility of the filter container
-    filterContainer.classList.toggle('d-block');
-});
-$(function(){
-    $('#toggleFilterBtn').click(function(){
-        $('#filterCard').toggle();
-    });
-});
-</script>
-
-<script>
     initializeSelect2();
 
-function initializeSelect2() {
-    var selectTarget = $('#target_fish, #target_fishOffCanvass');
-    var selectWater = $('#water, #waterOffCanvass');
-    var selectMethod = $('#methods, #methodsOffCanvass');
+    function initializeSelect2() {
+        var selectTarget = $('#target_fish, #target_fishOffCanvass');
+        var selectWater = $('#water, #waterOffCanvass');
+        var selectMethod = $('#methods, #methodsOffCanvass');
 
-    // Target Fish
-    selectTarget.append(new Option('@lang('message.choose')...', '', true, true));
-    @foreach($alltargets as $target)
-        var targetname = '{{$target->name}}';
-        @if(app()->getLocale() == 'en')
-            targetname = '{{$target->name_en}}';
+        // Target Fish
+        selectTarget.append(new Option('@lang('message.choose')...', '', true, true));
+        @foreach($alltargets as $target)
+            var targetname = '{{$target->name}}';
+            @if(app()->getLocale() == 'en')
+                targetname = '{{$target->name_en}}';
+            @endif
+            selectTarget.append(new Option(targetname, '{{ $target->id }}', false, false));
+        @endforeach
+
+        // Water Types
+        selectWater.append(new Option('@lang('message.choose')...', '', true, true));
+        @foreach($guiding_waters as $water)
+            var watername = '{{$water->name}}';
+            @if(app()->getLocale() == 'en')
+                watername = '{{$water->name_en}}';
+            @endif
+            selectWater.append(new Option(watername, '{{ $water->id }}', false, false));
+        @endforeach
+
+        // Fishing Methods
+        selectMethod.append(new Option('@lang('message.choose')...', '', true, true));
+        @foreach($guiding_methods as $method)
+            var methodname = '{{$method->name}}';
+            @if(app()->getLocale() == 'en')
+                methodname = '{{$method->name_en}}';
+            @endif
+            selectMethod.append(new Option(methodname, '{{ $method->id }}', false, false));
+        @endforeach
+
+        // Initialize Select2 and set values
+        $("#target_fish, #target_fishOffCanvass").select2({
+            multiple: true,
+            placeholder: '@lang('message.target-fish')',
+            width: 'resolve',
+        }).val(@json(request()->get('target_fish', [])))
+        .trigger('change');
+
+        $("#water, #waterOffCanvass").select2({
+            multiple: true,
+            placeholder: '@lang('message.body-type')',
+            width: 'resolve'
+        }).val(@json(request()->get('water', [])))
+        .trigger('change');
+
+        $("#methods, #methodsOffCanvass").select2({
+            multiple: true,
+            placeholder: '@lang('message.fishing-technique')',
+            width: 'resolve'
+        }).val(@json(request()->get('methods', [])))
+        .trigger('change');
+
+        // Set other form values if they exist
+        @if(request()->get('price_range'))
+            $('#price_range, #price_rangeOffCanvass').val('{{ request()->get('price_range') }}');
         @endif
-        selectTarget.append(new Option(targetname, '{{ $target->id }}', false, false));
-    @endforeach
 
-    // Water Types
-    selectWater.append(new Option('@lang('message.choose')...', '', true, true));
-    @foreach($guiding_waters as $water)
-        var watername = '{{$water->name}}';
-        @if(app()->getLocale() == 'en')
-            watername = '{{$water->name_en}}';
+        @if(request()->get('num_guests'))
+            $('#num-guests, #num-guestsOffCanvass').val('{{ request()->get('num_guests') }}');
         @endif
-        selectWater.append(new Option(watername, '{{ $water->id }}', false, false));
-    @endforeach
+    }
 
-    // Fishing Methods
-    selectMethod.append(new Option('@lang('message.choose')...', '', true, true));
-    @foreach($guiding_methods as $method)
-        var methodname = '{{$method->name}}';
-        @if(app()->getLocale() == 'en')
-            methodname = '{{$method->name_en}}';
-        @endif
-        selectMethod.append(new Option(methodname, '{{ $method->id }}', false, false));
-    @endforeach
-
-    // Initialize Select2 and set values
-    $("#target_fish, #target_fishOffCanvass").select2({
-        multiple: true,
-        placeholder: '@lang('message.target-fish')',
-        width: 'resolve',
-    }).val(@json(request()->get('target_fish', [])))
-      .trigger('change');
-
-    $("#water, #waterOffCanvass").select2({
-        multiple: true,
-        placeholder: '@lang('message.body-type')',
-        width: 'resolve'
-    }).val(@json(request()->get('water', [])))
-      .trigger('change');
-
-    $("#methods, #methodsOffCanvass").select2({
-        multiple: true,
-        placeholder: '@lang('message.fishing-technique')',
-        width: 'resolve'
-    }).val(@json(request()->get('methods', [])))
-      .trigger('change');
-
-    // Set other form values if they exist
-    @if(request()->get('price_range'))
-        $('#price_range, #price_rangeOffCanvass').val('{{ request()->get('price_range') }}');
-    @endif
-
-    @if(request()->get('num_guests'))
-        $('#num-guests, #num-guestsOffCanvass').val('{{ request()->get('num_guests') }}');
-    @endif
-}
+    // Handle mobile sorting
+    document.querySelectorAll('.mobile-sort-option').forEach(option => {
+        option.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Get current URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Set the sort parameter
+            urlParams.set('sortby', this.dataset.sort);
+            
+            // Redirect to the new URL with all parameters
+            window.location.href = `${window.location.pathname}?${urlParams.toString()}`;
+        });
+    });
 </script>
-
 
 <script type="module">
     import { MarkerClusterer } from "https://cdn.skypack.dev/@googlemaps/markerclusterer@2.3.1";
+    let map; // Make map variable accessible in wider scope
+    let markerCluster; // Make markerCluster accessible in wider scope
+    let isDuplicateCoordinate;
+    const markers = [];
+    const infowindows = [];
+    const uniqueCoordinates = [];
     initializeMap();
+
     async function initializeMap() {
         var mapStyle = [
           {
@@ -1158,58 +1060,132 @@ function initializeSelect2() {
             $lat = isset($guidings[0]) ? $guidings[0]->lat : 51.165691;
             $lng = isset($guidings[0]) ? $guidings[0]->lng : 10.451526;
         @endphp
-
         const position =  { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }} , lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} }; 
         const { Map, InfoWindow } = await google.maps.importLibrary("maps");
         const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
 
-        const map = new Map(document.getElementById("map"), {
-            zoom: 5,
-            center: position,
-            styles: mapStyle,
-            mapId: "DEMO_MAP_ID",
-            mapTypeControl: false,
-            streetViewControl: false,
-        });
-
-        const marker = new AdvancedMarkerElement({
-            map: map,
-        });
-
-        const markers = [];
-        const infowindows = [];
-        const uniqueCoordinates = [];
-        let isDuplicateCoordinate;  
+        // Initialize map only if it hasn't been initialized yet
+        if (!map) {
+            map = new Map(document.getElementById("map"), {
+                zoom: 5,
+                center: position,
+                styles: mapStyle,
+                mapId: "DEMO_MAP_ID",
+                mapTypeControl: false,
+                streetViewControl: false,
+            });
+        }
 
         @if($allGuidings->isEmpty())
             @include('pages.guidings.partials.maps',['guidings' => $otherguidings])
         @else
-            @include('pages.guidings.partials.maps',['guidings' => $allGuidings])
+            @php
+                // Merge main guidings with other guidings if they exist
+                $combinedGuidings = $allGuidings;
+                
+                // Only append otherguidings if there are no active checkbox filters
+                $hasActiveFilters = request()->has('target_fish') || 
+                                   request()->has('water') || 
+                                   request()->has('methods') || 
+                                   request()->has('duration_types') || 
+                                   request()->has('num_persons');
+                                   
+                if (isset($otherguidings) && count($otherguidings) > 0 && !$hasActiveFilters) {
+                    $combinedGuidings = $allGuidings->concat($otherguidings);
+                }
+            @endphp
+            @include('pages.guidings.partials.maps',['guidings' => $combinedGuidings])
         @endif
 
         function getRandomOffset() {
-        // Generate a random value between -0.00005 and 0.00005 (adjust the range as needed)
-        return (Math.random() - 0.5) * 0.0080;
+            return (Math.random() - 0.5) * 0.0080;
         }
 
-        const markerCluster = new MarkerClusterer({ markers, map, mapStyle });
-        // Add click event listeners to individual markers inside the cluster
+        markerCluster = new MarkerClusterer({ markers, map, mapStyle });
         google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
             map.setZoom(map.getZoom() + 2);
             map.setCenter(cluster.getCenter());
         });
     }
 
-    window.addEventListener('load', function() {
-        var placeLatitude = '{{ request()->get('placeLat') }}'; // Replace with the actual value from the request
-        var placeLongitude = '{{ request()->get('placeLng') }}'; // Replace with the actual value from the request
+    window.updateMapWithGuidings = function(guidings) {
+        // Clear existing markers
+        markers.forEach(marker => marker.setMap(null));
+        
+        // Clear marker cluster
+        if (markerCluster) {
+            markerCluster.clearMarkers();
+        }
 
-        if (placeLatitude && placeLongitude) {
-            // The place latitude and longitude are present, so set the values in the form fields
-            document.getElementById('placeLat').value = placeLatitude;
-            document.getElementById('placeLng').value = placeLongitude;
-        } 
-    });
+        // Clear arrays but keep the map instance
+        markers.length = 0;
+        infowindows.forEach(infowindow => infowindow.close());
+        infowindows.length = 0;
+        uniqueCoordinates.length = 0;
+
+        // Add new markers for each guiding
+        guidings.forEach(guiding => {
+            if (guiding.lat && guiding.lng) {
+                const location = { lat: parseFloat(guiding.lat), lng: parseFloat(guiding.lng) };
+
+                const isDuplicateCoordinate = uniqueCoordinates.some(coordinate => {
+                    return coordinate.lat === location.lat && coordinate.lng === location.lng;
+                });
+
+                let marker;
+
+                if (isDuplicateCoordinate) {
+                    marker = new google.maps.marker.AdvancedMarkerElement({
+                        position: {
+                            lat: location.lat + ((Math.random() - 0.5) * 0.0080),
+                            lng: location.lng + ((Math.random() - 0.5) * 0.0080)
+                        },
+                        map: map
+                    });
+                } else {
+                    marker = new google.maps.marker.AdvancedMarkerElement({
+                        position: location,
+                        map: map
+                    });
+                    uniqueCoordinates.push(location);
+                }
+
+                markers.push(marker);
+
+                const infowindow = new google.maps.InfoWindow({
+                    content: `
+                        <div class="card p-0 border-0" style="width: 200px; overflow: hidden;">
+                            <div class="card-body border-0 p-0">
+                                <div class="d-flex">
+                                    <img src="${guiding.thumbnail || '/images/placeholder_guide.jpg'}" alt="${guiding.title}" style="width: 100%; height: 150px; object-fit: cover;">
+                                </div>
+                                <div class="p-2">
+                                    <a class="text-decoration-none" href="/guidings/${guiding.id}/${guiding.slug}">
+                                        <h5 class="card-title mb-1" style="font-size: 14px; font-weight: bold; color: #333;">${guiding.title}</h5>
+                                    </a>
+                                    <div class="text-muted small">${guiding.location}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `
+                });
+
+                infowindows.push(infowindow);
+
+                marker.addListener("click", () => {
+                    infowindows.forEach((iw) => {
+                        iw.close();
+                    });
+                    infowindow.open(map, marker);
+                });
+            }
+        });
+
+        // Update marker cluster with new markers
+        if (markerCluster) {
+            markerCluster.addMarkers(markers);
+        }
+    };
 
     function getLocation() {
         if (navigator.geolocation) {
@@ -1225,7 +1201,111 @@ function initializeSelect2() {
         document.getElementById('placeLat').value = lat;
         document.getElementById('placeLng').value = lng;
     }
-
 </script>
-<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/core-js-bundle@3.30.2/minified.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    function attachFilterRemoveListeners() {
+        document.querySelectorAll('.active-filters .btn-close').forEach(button => {
+            button.addEventListener('click', function() {
+                const filterType = this.dataset.filterType;
+                const filterId = this.dataset.filterId;
+                
+                // Find and uncheck the corresponding checkbox in both desktop and mobile filter panels
+                const desktopCheckbox = document.querySelector(`#filterContainer input[name="${filterType}[]"][value="${filterId}"]`);
+                const mobileCheckbox = document.querySelector(`#filterContainerOffCanvas input[name="${filterType}[]"][value="${filterId}"]`);
+                
+                // Uncheck both checkboxes if they exist
+                if (desktopCheckbox) {
+                    desktopCheckbox.checked = false;
+                }
+                
+                if (mobileCheckbox) {
+                    mobileCheckbox.checked = false;
+                }
+
+                // Get the form from the mobile filter panel
+                const mobileForm = document.getElementById('filterContainerOffCanvas');
+                if (mobileForm) {
+                    const formData = new FormData(mobileForm);
+                    // Call updateResults with the form data
+                    if (typeof window.updateResults === 'function') {
+                        window.updateResults(formData);
+                    }
+                }
+                
+                // Remove all matching filter tags from both desktop and mobile views
+                document.querySelectorAll(`.active-filters .badge`).forEach(badge => {
+                    const badgeButton = badge.querySelector('.btn-close');
+                    if (badgeButton.dataset.filterType === filterType && 
+                        badgeButton.dataset.filterId === filterId) {
+                        badge.remove();
+                    }
+                });
+            });
+        });
+    }
+
+    // Initial attachment of listeners
+    attachFilterRemoveListeners();
+
+    // Make sure reinitializeComponents includes reattaching filter listeners
+    function reinitializeComponents() {
+        document.querySelectorAll('.carousel').forEach(carousel => {
+            new bootstrap.Carousel(carousel, {
+                interval: false
+            });
+        });
+        
+        // Reattach filter remove listeners
+        attachFilterRemoveListeners();
+    }
+
+    // Make functions available globally
+    window.reinitializeComponents = reinitializeComponents;
+    window.attachFilterRemoveListeners = attachFilterRemoveListeners;
+});
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        updateActiveFilterCounter();
+
+        function updateActiveFilterCounter() {
+            const urlParams = new URLSearchParams(window.location.search);
+            let activeFilterCount = 0;
+
+            // List of filter parameters to check
+            const filterParams = ['target_fish[]', 'methods[]', 'water[]', 'duration_types[]', 'num_persons'];
+
+            filterParams.forEach(param => {
+                if (urlParams.has(param)) {
+                    const values = urlParams.getAll(param);
+                    if (values.length > 0) {
+                        activeFilterCount += values.length;
+                    }
+                }
+            });
+
+            // Check price range separately
+            const priceMin = urlParams.get('price_min');
+            const priceMax = urlParams.get('price_max');
+            if (priceMin && priceMin !== '50') activeFilterCount++;
+            if (priceMax && priceMax !== '4000') activeFilterCount++;
+
+            // Update the counter
+            const filterCounter = document.getElementById('active-filter-counter');
+            if (activeFilterCount > 0) {
+                filterCounter.textContent = activeFilterCount;
+                filterCounter.style.display = 'inline-block';
+            } else {
+                filterCounter.style.display = 'none';
+            }
+        }
+    });
+</script>
+
 @endsection

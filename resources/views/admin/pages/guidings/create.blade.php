@@ -90,8 +90,24 @@
 @endsection
 
 @section('content')
-<div class="container shadow-lg p-4 my-5">
-    @livewire('admin-create-guiding')
+<div class="side-app">
+    <div class="main-container container-fluid">
+      <div class="page-header">
+          <h1 class="page-title">Create Guiding</h1>
+          <div>
+              <ol class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="#">Administration</a></li>
+                  <li class="breadcrumb-item"><a href="{{ url()->previous() }}">All Guidings</a></li>
+                  <li class="breadcrumb-item active" aria-current="page">Create Guiding</li>
+              </ol>
+          </div>
+      </div>
+
+      <div class="container shadow-lg p-4 my-5">
+        @include('pages.guidings.multi-step-form')
+        {{-- @livewire('admin-edit-guiding',['guiding' => $guiding]) --}}
+      </div>
+    </div>
 </div>
 @endsection
 

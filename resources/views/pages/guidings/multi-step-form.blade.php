@@ -45,6 +45,7 @@
                 </div>
             @endif
 
+            <input type="hidden" name="target_redirect" id="target_redirect" value="{{ $target_redirect ?? route('profile.myguidings') }}">
             <input type="hidden" name="is_update" id="is_update" value="{{ $formData['is_update'] ?? 0 }}">
             <input type="hidden" name="guiding_id" id="guiding_id" value="{{ $formData['id'] ?? 0 }}">
             <input type="hidden" name="thumbnail_path" id="thumbnail_path" value="{{ $formData['thumbnail_path'] ?? '' }}">
@@ -567,6 +568,23 @@
                         <label for="per_boat_checkbox" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">
                             {{ __('newguidings.per_boat') }}
                         </label>
+                    </div>
+                    
+                    <div id="min_guests_container" style="display: none; margin-top: 15px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+                        <label for="min_guests_switch" class="form-label fw-bold">
+                            {{ __('newguidings.min_guests_required') }}
+                            <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                               title="{{ __('newguidings.tooltip_min_number_of_guests') }}"></i>
+                        </label>
+                        <div class="d-flex flex-column flex-md-row align-items-md-center">
+                            <div class="form-check form-switch me-md-3 mb-2 mb-md-0">
+                                <input class="form-check-input" type="checkbox" id="min_guests_switch" name="has_min_guests" {{ $formData['min_guests'] && ( $formData['min_guests'] > 0 || $formData['min_guests'] != null ) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="min_guests_switch">{{ __('newguidings.enable_min_guests') }}</label>
+                            </div>
+                            <div id="min_guests_input_container" style="display: none; flex: 1;">
+                                <input type="number" class="form-control" id="min_guests" name="min_guests" value="{{ $formData['min_guests'] ?? '' }}" placeholder="1" min="1">
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="form-group" id="dynamic-price-fields-container"></div>
