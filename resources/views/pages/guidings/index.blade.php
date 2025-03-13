@@ -457,12 +457,8 @@
                                 </ul>
                             </div>
                             <a class="btn border-start cag-btn-inverted" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottomSearch" aria-controls="offcanvasBottomSearch" href="javascript:void(0)" style="border-left: 1px solid #ccc!important; z-index: 2; width:30%;">
-                                <i class="fa fa-filter me-1"></i>@lang('message.filter') 
-                                @if($guidings->count() > 0)
-                                    @if(request()->has('radius') || request()->has('num_guests') || request()->has('target_fish') || request()->has('water') || request()->has('fishing_type') || request()->has('price_range'))
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="guiding-filter-counter"></span>
-                                    @endif
-                                @endif
+                                <i class="fa fa-filter me-1"></i>@lang('message.filter')
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="active-filter-counter"></span>
                             </a>
                             <a class="btn border cag-btn-inverted" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)" style=" border-left: 2px solid #ccc!important; width:40%;"><i class="fa fa-map-marker-alt me-2"></i>@lang('destination.show_on_map')</a>
                         </div>
@@ -1274,6 +1270,44 @@ document.addEventListener('DOMContentLoaded', function() {
     window.reinitializeComponents = reinitializeComponents;
     window.attachFilterRemoveListeners = attachFilterRemoveListeners;
 });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        updateActiveFilterCounter();
+
+        function updateActiveFilterCounter() {
+            const urlParams = new URLSearchParams(window.location.search);
+            let activeFilterCount = 0;
+
+            // List of filter parameters to check
+            const filterParams = ['target_fish[]', 'methods[]', 'water[]', 'duration_types[]', 'num_persons'];
+
+            filterParams.forEach(param => {
+                if (urlParams.has(param)) {
+                    const values = urlParams.getAll(param);
+                    if (values.length > 0) {
+                        activeFilterCount += values.length;
+                    }
+                }
+            });
+
+            // Check price range separately
+            const priceMin = urlParams.get('price_min');
+            const priceMax = urlParams.get('price_max');
+            if (priceMin && priceMin !== '50') activeFilterCount++;
+            if (priceMax && priceMax !== '4000') activeFilterCount++;
+
+            // Update the counter
+            const filterCounter = document.getElementById('active-filter-counter');
+            if (activeFilterCount > 0) {
+                filterCounter.textContent = activeFilterCount;
+                filterCounter.style.display = 'inline-block';
+            } else {
+                filterCounter.style.display = 'none';
+            }
+        }
+    });
 </script>
 
 @endsection
