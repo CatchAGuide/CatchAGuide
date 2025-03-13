@@ -615,6 +615,10 @@
             
             // Trigger update to refresh results
             updateResults(true); // Pass true to indicate filter removal
+            
+            if (typeof updateActiveFilterCounter === 'function') {
+                updateActiveFilterCounter();
+            }
         });
 
         // Make updateResults function available globally
