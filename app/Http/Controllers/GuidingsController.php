@@ -120,7 +120,7 @@ class GuidingsController extends Controller
                 FROM guidings
                 WHERE status = 1
             ');
-            
+
             $overallMaxPrice = ceil(($maxPriceResult[0]->max_price ?? 5000) / 50) * 50;
             
             // Define price ranges
@@ -333,8 +333,6 @@ class GuidingsController extends Controller
 
                 // Use the lowest_price field we calculated in the main query
                 $filteredQuery->havingRaw('lowest_price >= ? AND lowest_price <= ?', [$min_price, $max_price]);
-
-                Log::info('Price filter applied: ' . $min_price . '€ - ' . $max_price . '€');
             }
         }
 
