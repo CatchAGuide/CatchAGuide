@@ -36,6 +36,7 @@ use App\Models\FishingType;
 use App\Models\BoatExtras;
 use App\Models\Destination;
 use App\Facades\Agent;
+use Illuminate\Support\Facades\Cache;
 
 class GuidingsController extends Controller
 {
@@ -54,7 +55,8 @@ class GuidingsController extends Controller
             Session::put('random_seed', $randomSeed);
         }
 
-        $query = Guiding::select(['*', DB::raw('(
+        // Base query for all active guidings with lowest price calculation
+        $baseQuery = Guiding::select(['*', DB::raw('(
             WITH price_per_person AS (
                 SELECT 
                     CASE 
@@ -78,8 +80,110 @@ class GuidingsController extends Controller
             )
             SELECT COALESCE(lowest_pp, price) 
             FROM price_per_person
-        ) AS lowest_price')])->where('status',1);
-
+        ) AS lowest_price')])
+        ->where('status', 1);
+        
+        // 1. Get price ranges from all active guidings (for price filter)
+        // This is done once and cached
+        $cacheKey = 'guiding_price_ranges';
+        $cacheDuration = 60 * 24; // Cache for 24 hours
+        
+        if (Cache::has($cacheKey)) {
+            $priceRangeData = Cache::get($cacheKey);
+            $priceRanges = $priceRangeData['ranges'];
+            $overallMaxPrice = $priceRangeData['maxPrice'];
+        } else {
+            // Get max price from all active guidings - use the raw query instead of max()
+            $maxPriceResult = DB::select('
+                SELECT MAX(
+                    CASE 
+                        WHEN JSON_VALID(prices) THEN (
+                            SELECT MIN(
+                                CASE 
+                                    WHEN person > 1 THEN CAST(amount AS DECIMAL(10,2)) / person
+                                    ELSE CAST(amount AS DECIMAL(10,2))
+                                END
+                            )
+                            FROM JSON_TABLE(
+                                prices,
+                                "$[*]" COLUMNS(
+                                    person INT PATH "$.person",
+                                    amount DECIMAL(10,2) PATH "$.amount"
+                                )
+                            ) as price_data
+                        )
+                        ELSE price
+                    END
+                ) as max_price
+                FROM guidings
+                WHERE status = 1
+            ');
+            
+            $overallMaxPrice = ceil(($maxPriceResult[0]->max_price ?? 500) / 50) * 50;
+            
+            // Define price ranges
+            $priceRanges = [];
+            $minPrice = 50;
+            $step = 50;
+            
+            for ($i = $minPrice; $i <= $overallMaxPrice; $i += $step) {
+                $rangeEnd = min($i + $step, $overallMaxPrice);
+                $priceRanges[] = [
+                    'min' => $i,
+                    'max' => $rangeEnd,
+                    'range' => "€{$i}-€{$rangeEnd}",
+                    'count' => 0
+                ];
+            }
+            
+            // Count guidings in each price range using a raw query
+            $priceResults = DB::select('
+                SELECT 
+                    id,
+                    CASE 
+                        WHEN JSON_VALID(prices) THEN (
+                            SELECT MIN(
+                                CASE 
+                                    WHEN person > 1 THEN CAST(amount AS DECIMAL(10,2)) / person
+                                    ELSE CAST(amount AS DECIMAL(10,2))
+                                END
+                            )
+                            FROM JSON_TABLE(
+                                prices,
+                                "$[*]" COLUMNS(
+                                    person INT PATH "$.person",
+                                    amount DECIMAL(10,2) PATH "$.amount"
+                                )
+                            ) as price_data
+                        )
+                        ELSE price
+                    END as lowest_price
+                FROM guidings
+                WHERE status = 1
+            ');
+            
+            foreach ($priceResults as $guiding) {
+                $price = $guiding->lowest_price;
+                if ($price >= $minPrice && $price <= $overallMaxPrice) {
+                    foreach ($priceRanges as &$range) {
+                        if ($price >= $range['min'] && $price < $range['max']) {
+                            $range['count']++;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // Cache the results
+            Cache::put($cacheKey, [
+                'ranges' => $priceRanges,
+                'maxPrice' => $overallMaxPrice
+            ], $cacheDuration);
+        }
+        
+        // 2. Apply filters to the query
+        $filteredQuery = clone $baseQuery;
+        
         // If coming from destination page, get the destination context
         if ($request->has('from_destination')) {
             $destination = Destination::where('id', $request->input('destination_id'))->first();
@@ -87,14 +191,14 @@ class GuidingsController extends Controller
             if ($destination) {
                 switch ($destination->type) {
                     case 'country':
-                        $query->where('country', $destination->name);
+                        $filteredQuery->where('country', $destination->name);
                         break;
                     case 'region':
-                        $query->where('region', $destination->name)
+                        $filteredQuery->where('region', $destination->name)
                               ->where('country', $destination->country_name);
                         break;
                     case 'city':
-                        $query->where('city', $destination->name)
+                        $filteredQuery->where('city', $destination->name)
                               ->where('region', $destination->region_name)
                               ->where('country', $destination->country_name);
                         break;
@@ -102,45 +206,47 @@ class GuidingsController extends Controller
             }
         }
 
+        // Apply sorting
         $hasOnlyPageParam = count(array_diff(array_keys($request->all()), ['page'])) === 0;
         $isFirstPage = !$request->has('page') || $request->get('page') == 1;
 
         if ($hasOnlyPageParam && $isFirstPage) {
-            $query->orderByRaw("RAND($randomSeed)");
+            $filteredQuery->orderByRaw("RAND($randomSeed)");
         } else {
             // Default ordering for all other cases
             if ($request->has('sortby') && !empty($request->get('sortby'))) {
                 switch ($request->get('sortby')) {
                     case 'newest':
-                        $query->orderBy('created_at', 'desc');
+                        $filteredQuery->orderBy('created_at', 'desc');
                         break;
                     case 'price-asc':
-                        $query->orderBy('lowest_price', 'asc');
+                        $filteredQuery->orderBy('lowest_price', 'asc');
                         break;
                     case 'price-desc':
-                        $query->orderBy('lowest_price', 'desc');
+                        $filteredQuery->orderBy('lowest_price', 'desc');
                         break;
                     case 'long-duration':
-                        $query->orderBy('duration', 'desc');
+                        $filteredQuery->orderBy('duration', 'desc');
                         break;
                     case 'short-duration':
-                        $query->orderBy('duration', 'asc');
+                        $filteredQuery->orderBy('duration', 'asc');
                         break;
                     default:
                         // Keep default ordering if no valid sort option is provided
                         if (!$hasOnlyPageParam) {
-                            $query->latest();
+                            $filteredQuery->latest();
                         }
                 }
             }
         }
 
+        // Apply title and filter title
         if($request->has('page')){
             $title .= __('guidings.Page') . ' ' . $request->page . ' - ';
         }
 
+        // Apply method filters
         if($request->has('methods') && !empty($request->get('methods'))){
-   
             $requestMethods = array_filter($request->get('methods'));
 
             if(count($requestMethods)){
@@ -156,21 +262,19 @@ class GuidingsController extends Controller
                 $filter_title .= substr($title_row, 0, -2);
                 $filter_title .= '), ';
 
-                $query->where(function($query) use ($requestMethods) {
+                $filteredQuery->where(function($query) use ($requestMethods) {
                     foreach($requestMethods as $methodId) {
                         $query->whereJsonContains('fishing_methods', (int)$methodId);
                     }
                 });
             }
-            
         }
 
+        // Apply water filters
         if($request->has('water') && !empty($request->get('water'))){
-
             $requestWater = array_filter($request->get('water'));
 
             if(count($requestWater)){
-
                 $title .= __('guidings.Water') . ' (';
                 $filter_title .= __('guidings.Water') . ' (';
                 $method_rows = Water::whereIn('id', $request->water)->get();
@@ -183,15 +287,15 @@ class GuidingsController extends Controller
                 $filter_title .= substr($title_row, 0, -2);
                 $filter_title .= '), ';
 
-                $query->where(function($query) use ($requestWater) {
+                $filteredQuery->where(function($query) use ($requestWater) {
                     foreach($requestWater as $waterId) {
                         $query->whereJsonContains('water_types', (int)$waterId);
                     }
                 });
             }
-          
         }
 
+        // Apply target fish filters
         if($request->has('target_fish')){
             $requestFish = array_filter($request->target_fish);
 
@@ -208,7 +312,7 @@ class GuidingsController extends Controller
                 $filter_title .= substr($title_row, 0, -2);
                 $filter_title .= '), ';
 
-                $query->where(function($query) use ($requestFish) {
+                $filteredQuery->where(function($query) use ($requestFish) {
                     foreach($requestFish as $fishId) {
                         $query->whereJsonContains('target_fish', (int)$fishId);
                     }
@@ -216,6 +320,7 @@ class GuidingsController extends Controller
             }
         }
 
+        // Apply price filters
         if($request->has('price_min') && $request->has('price_max')){
             $min_price = $request->get('price_min');
             $max_price = $request->get('price_max');
@@ -224,30 +329,33 @@ class GuidingsController extends Controller
             $filter_title .= 'Price ' . $min_price . '€ - ' . $max_price . '€, ';
 
             // Use the lowest_price field we calculated in the main query
-            $query->havingRaw('lowest_price >= ? AND lowest_price <= ?', [$min_price, $max_price]);
+            $filteredQuery->havingRaw('lowest_price >= ? AND lowest_price <= ?', [$min_price, $max_price]);
         }
 
+        // Apply duration filters
         if ($request->has('duration_types') && !empty($request->get('duration_types'))) {
-            $query->whereIn('duration_type', $request->get('duration_types'));
+            $filteredQuery->whereIn('duration_type', $request->get('duration_types'));
         }
 
+        // Apply person filters
         if($request->has('num_persons')){
             $title .= __('guidings.Number of People') . ' ' . $request->get('num_persons') . ' | ';
             $filter_title .= __('guidings.Number of People') . ' ' . $request->get('num_persons') . ', ';
             
             // For single selection, we just need to check if the guiding supports at least this many people
             $minPersons = $request->get('num_persons');
-            $query->where('max_guests', '>=', $minPersons);
+            $filteredQuery->where('max_guests', '>=', $minPersons);
         }
 
+        // Apply radius filters
         $radius = null; // Radius in miles
         if($request->has('radius')){
-
             $title .= __('guidings.Radius') . ' ' . $request->radius . 'km | ';
             $filter_title .= __('guidings.Radius') . ' ' . $request->radius . 'km, ';
             $radius = $request->get('radius');
         }
 
+        // Apply location filters
         $placeLat = $request->get('placeLat');
         $placeLng = $request->get('placeLng');
 
@@ -264,14 +372,14 @@ class GuidingsController extends Controller
             }
             $orderByCase .= 'ELSE ' . count($guidingFilter['ids']) . ' END';
             
-            $query->whereIn('guidings.id', $guidingFilter['ids'])
+            $filteredQuery->whereIn('guidings.id', $guidingFilter['ids'])
                   ->orderByRaw($orderByCase);
         }
 
-        // Get all guidings before pagination to extract available options
-        $allGuidings = $query->with(['target_fish', 'methods', 'water_types', 'boatType'])->where('status',1)->get();
+        // 3. Get all filtered guidings (for counts and filter options)
+        $allGuidings = $filteredQuery->with(['target_fish', 'methods', 'water_types', 'boatType'])->get();
         
-        // Extract unique target fish, methods, water types and durations from current results
+        // 4. Extract available filter options from filtered results
         $availableTargetFish = collect();
         $availableMethods = collect();
         $availableWaterTypes = collect();
@@ -285,24 +393,6 @@ class GuidingsController extends Controller
         $waterTypeCounts = [];
         $personCounts = [];
 
-        // Define price ranges in €50 increments from €50 to €4000
-        $priceRanges = [];
-        $minPrice = 50;
-        $maxPrice = 4000;
-        $step = 50;
-
-        for ($i = $minPrice; $i < $maxPrice; $i += $step) {
-            $rangeEnd = min($i + $step, $maxPrice);
-            $priceRanges[] = [
-                'min' => $i,
-                'max' => $rangeEnd,
-                'range' => "€{$i}-€{$rangeEnd}",
-                'count' => 0
-            ];
-        }
-
-        // Reset maxPrice to calculate from actual data
-        $maxPrice = 0;
         foreach ($allGuidings as $guiding) {
             // For target fish
             $targetFish = json_decode($guiding->target_fish, true) ?? [];
@@ -329,80 +419,52 @@ class GuidingsController extends Controller
             if (isset($guiding->duration_type)) {
                 $durationCounts[$guiding->duration_type] = ($durationCounts[$guiding->duration_type] ?? 0) + 1;
             }
+            
+            // Count persons
             if (isset($guiding->max_guests)) {
                 // Count all guidings that support at least this number of persons
                 for ($i = 1; $i <= min(8, $guiding->max_guests); $i++) {
                     $personCounts[$i] = ($personCounts[$i] ?? 0) + 1;
                 }
             }
-
-            // Get the lowest price and update price histogram
-            $price = $guiding->getLowestPrice();
-            if ($price > $maxPrice) {
-                $maxPrice = $price;
-            }
-            
-            // Count guidings in each price range
-            if ($price >= $minPrice && $price <= $maxPrice) {
-                foreach ($priceRanges as &$range) {
-                    if ($price >= $range['min'] && $price < $range['max']) {
-                        $range['count']++;
-                        break;
-                    }
-                }
-            }
         }
 
-        // Sort price ranges by min value (they should already be sorted, but just to be sure)
-        usort($priceRanges, function($a, $b) {
-            return $a['min'] <=> $b['min'];
-        });
-        
-        // Remove trailing ranges with zero counts
-        $lastNonZeroIndex = count($priceRanges) - 1;
-        for ($i = count($priceRanges) - 1; $i >= 0; $i--) {
-            if ($priceRanges[$i]['count'] > 0) {
-                $lastNonZeroIndex = $i;
-                break;
-            }
-        }
-        
-        // Keep only ranges up to the last non-zero count
-        $priceRanges = array_slice($priceRanges, 0, $lastNonZeroIndex + 1);
-
-        ksort($personCounts); // Sort by number of persons
+        // Sort person counts
+        ksort($personCounts);
 
         // Get the models for these IDs, only including items with counts > 0
         $targetFishOptions = Target::whereIn('id', array_keys(array_filter($targetFishCounts)))->get();
         $methodOptions = Method::whereIn('id', array_keys(array_filter($methodCounts)))->get();
         $waterTypeOptions = Water::whereIn('id', array_keys(array_filter($waterTypeCounts)))->get();
 
-        $otherguidings = array();
-
+        // 5. Get other guidings if needed
+        $otherguidings = [];
         if($allGuidings->isEmpty() || count($allGuidings) <= 10){
             if($request->has('placeLat') && $request->has('placeLng') && !empty($request->get('placeLat')) && !empty($request->get('placeLng')) ){
                 $latitude = $request->get('placeLat');
                 $longitude = $request->get('placeLng');
                 $otherguidings = $this->otherGuidingsBasedByLocation($latitude, $longitude, $allGuidings);
-            }else{
+            } else {
                 $otherguidings = $this->otherGuidings();
             }
         }
 
-        $guidings = $query->with('boatType')->where('status',1)->paginate(20);
+        // 6. Get paginated results
+        $guidings = $filteredQuery->with('boatType')->paginate(20);
         $guidings->appends(request()->except('page'));
 
-        // Regular request - return full view
+        // Finalize filter title
         $filter_title = substr($filter_title, 0, -2);
 
+        // Get all options for filters
         $alltargets = Target::select('id', 'name', 'name_en')->orderBy('name')->get();
         $guiding_waters = Water::select('id', 'name', 'name_en')->orderBy('name')->get();
         $guiding_methods = Method::select('id', 'name', 'name_en')->orderBy('name')->get();
 
-        // Modify the mobile check to use the Agent facade
+        // Check if mobile
         $isMobile = $request->get('ismobile') == 'true' || app('agent')->isMobile();
 
-        // Make sure personCounts is always an array
+        // Ensure personCounts is always an array
         if (empty($personCounts)) {
             $personCounts = [];
         }
@@ -416,10 +478,7 @@ class GuidingsController extends Controller
             ];
         }, $priceRanges);
 
-        // Round up maxPrice to nearest step value for better UI
-        $maxPrice = ceil($maxPrice / $step) * $step;
-        if ($maxPrice < 50) $maxPrice = 4000; // Fallback if no prices found
-
+        // Handle AJAX requests
         if ($request->ajax()) {
             $view = view('pages.guidings.partials.guiding-list', [
                 'title' => $title,
@@ -443,10 +502,12 @@ class GuidingsController extends Controller
                 'personCounts' => $personCounts,
                 'isMobile' => $isMobile,
                 'priceHistogramData' => $priceHistogramData,
-                'maxPrice' => $maxPrice,
+                'maxPrice' => $overallMaxPrice,
+                'overallMaxPrice' => $overallMaxPrice,
             ])->render();
-             // Add guiding data for map updates
-             $guidingsData = $guidings->map(function($guiding) {
+            
+            // Add guiding data for map updates
+            $guidingsData = $guidings->map(function($guiding) {
                 return [
                     'id' => $guiding->id,
                     'slug' => $guiding->slug,
@@ -472,10 +533,12 @@ class GuidingsController extends Controller
                     'persons' => $personCounts
                 ],
                 'priceHistogramData' => $priceHistogramData,
-                'maxPrice' => $maxPrice,
+                'maxPrice' => $overallMaxPrice,
+                'overallMaxPrice' => $overallMaxPrice,
             ]);
         }
 
+        // Return full view for non-AJAX requests
         return view('pages.guidings.index', [            
             'title' => $title,
             'filter_title' => $filter_title,
@@ -506,7 +569,8 @@ class GuidingsController extends Controller
                 'persons' => $personCounts
             ],
             'priceHistogramData' => $priceHistogramData,
-            'maxPrice' => $maxPrice,
+            'maxPrice' => $overallMaxPrice,
+            'overallMaxPrice' => $overallMaxPrice,
         ]);
     }
 
