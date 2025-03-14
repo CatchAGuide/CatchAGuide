@@ -14,14 +14,6 @@
                                 <canvas id="price-histogram"></canvas>
                             </div>
                             <div id="price-slider-main"></div>
-                            <div class="price-display mt-2 d-flex justify-content-between">
-                                <div class="price-label">
-                                    € <span id="price-min-display">50</span>
-                                </div>
-                                <div class="price-label">
-                                    € <span id="price-max-display">4,000</span>
-                                </div>
-                            </div>
                             <input type="hidden" name="price_min" id="price_min_main">
                             <input type="hidden" name="price_max" id="price_max_main">
                         </div>
@@ -468,7 +460,7 @@
 <script>
     // Pass the price histogram data to JavaScript
     window.priceHistogramData = {!! json_encode($priceHistogramData) !!};
-    window.maxPrice = {!! json_encode($maxPrice) !!};
+    window.maxPrice = {!! json_encode($overallMaxPrice) !!};
 </script>
 
 <script src="{{ asset('js/filters-manager.js') }}"></script>
@@ -613,7 +605,7 @@
                 // Handle price range filter removal
                 if (filterType === 'price_range') {
                     const defaultMin = 50;
-                    const defaultMax = 4000;
+                    const defaultMax = window.maxPrice > 4000 ? window.maxPrice : 4000;
                     
                     // Reset main slider if it exists
                     if (FilterManager.sliders['price-slider-main']) {
