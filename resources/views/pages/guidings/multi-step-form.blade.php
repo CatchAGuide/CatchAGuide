@@ -355,6 +355,17 @@
                 <hr>
                 
                 <div class="form-group">
+                    <label for="desc_departure_time" class="form-label fw-bold fs-5">
+                        {{ __('newguidings.departure_time') }}
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                           title="{{ __('newguidings.tooltip_departure_time') }}"></i>
+                    </label>
+                    <textarea name="desc_departure_time" id="desc_departure_time" class="form-control" placeholder="{{ __('newguidings.let_guests_know_about_departure_details') }}">{{ $formData['desc_departure_time'] ?? '' }}</textarea>
+                </div>
+
+                <hr>
+                
+                <div class="form-group">
                     <label for="desc_meeting_point" class="form-label fw-bold fs-5">
                         {{ __('newguidings.meeting_point') }}
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
