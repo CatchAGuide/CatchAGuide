@@ -87,6 +87,8 @@ class GuidingsController extends Controller
         // This is done once and cached
         $cacheKey = 'guiding_price_ranges';
         $cacheDuration = 60 * 24; // Cache for 24 hours
+        $minPrice = 50;
+        $overallMaxPrice = 5000;
         
         if (Cache::has($cacheKey)) {
             $priceRangeData = Cache::get($cacheKey);
@@ -119,7 +121,7 @@ class GuidingsController extends Controller
                 WHERE status = 1
             ');
             
-            $overallMaxPrice = ceil(($maxPriceResult[0]->max_price ?? 500) / 50) * 50;
+            $overallMaxPrice = ceil(($maxPriceResult[0]->max_price ?? 5000) / 50) * 50;
             
             // Define price ranges
             $priceRanges = [];
@@ -322,14 +324,18 @@ class GuidingsController extends Controller
 
         // Apply price filters
         if($request->has('price_min') && $request->has('price_max')){
-            $min_price = $request->get('price_min');
-            $max_price = $request->get('price_max');
+            if ($minPrice != $request->get('price_min') || $overallMaxPrice != $request->get('price_max')){
+                $min_price = $request->get('price_min');
+                $max_price = $request->get('price_max');
 
-            $title .= 'Price ' . $min_price . '€ - ' . $max_price . '€ | ';
-            $filter_title .= 'Price ' . $min_price . '€ - ' . $max_price . '€, ';
+                $title .= 'Price ' . $min_price . '€ - ' . $max_price . '€ | ';
+                $filter_title .= 'Price ' . $min_price . '€ - ' . $max_price . '€, ';
 
-            // Use the lowest_price field we calculated in the main query
-            $filteredQuery->havingRaw('lowest_price >= ? AND lowest_price <= ?', [$min_price, $max_price]);
+                // Use the lowest_price field we calculated in the main query
+                $filteredQuery->havingRaw('lowest_price >= ? AND lowest_price <= ?', [$min_price, $max_price]);
+
+                Log::info('Price filter applied: ' . $min_price . '€ - ' . $max_price . '€');
+            }
         }
 
         // Apply duration filters

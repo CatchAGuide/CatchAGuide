@@ -599,8 +599,8 @@
             // Reset price slider to default values
             if (window.priceSliderMobile) { 
                 window.priceSliderMobile.set([50, window.maxPrice > 4000 ? window.maxPrice : 4000]);
-                document.getElementById('price-min-display-mobile').textContent = '50';
-                document.getElementById('price-max-display-mobile').textContent = window.maxPrice > 4000 ? window.maxPrice : 4000;
+                // document.getElementById('price-min-display-mobile').textContent = '50';
+                // document.getElementById('price-max-display-mobile').textContent = window.maxPrice > 4000 ? window.maxPrice : 4000;
                 document.getElementById('price_min_mobile').value = '50';
                 document.getElementById('price_max_mobile').value = window.maxPrice > 4000 ? window.maxPrice : 4000;
             }
