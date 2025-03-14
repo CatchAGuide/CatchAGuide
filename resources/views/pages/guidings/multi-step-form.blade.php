@@ -343,14 +343,14 @@
 
                 <hr>
                 
-                <div class="form-group">
+                {{-- <div class="form-group">
                     <label for="desc_departure_time" class="form-label fw-bold fs-5">
                         {{ __('newguidings.departure_time') }}
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="{{ __('newguidings.tooltip_departure_time') }}"></i>
                     </label>
                     <textarea name="desc_departure_time" id="desc_departure_time" class="form-control" placeholder="{{ __('newguidings.let_guests_know_about_departure_details') }}">{{ $formData['desc_departure_time'] ?? '' }}</textarea>
-                </div>
+                </div> --}}
 
                 <hr>
                 
@@ -581,7 +581,7 @@
                         </label>
                     </div>
                     
-                    <div id="min_guests_container" style="display: none; margin-top: 15px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+                    {{-- <div id="min_guests_container" style="display: none; margin-top: 15px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
                         <label for="min_guests_switch" class="form-label fw-bold">
                             {{ __('newguidings.min_guests_required') }}
                             <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
@@ -596,7 +596,7 @@
                                 <input type="number" class="form-control" id="min_guests" name="min_guests" value="{{ $formData['min_guests'] ?? '' }}" placeholder="1" min="1">
                             </div>
                         </div>
-                    </div>
+                    </div> --}}
                     
                     <div class="form-group" id="dynamic-price-fields-container"></div>
                 </div>

@@ -28,7 +28,7 @@
         desc_meeting_point: { field: 'Meeting Point', step: 5 },
         desc_tour_unique: { field: 'Tour Unique', step: 5 },
         desc_starting_time: { field: 'Starting Time', step: 5 },
-        desc_departure_time: { field: 'Departure Time', step: 5 },
+        // desc_departure_time: { field: 'Departure Time', step: 5 },
         tour_type: { field: 'Tour Type', step: 7 },
         duration: { field: 'Duration', step: 7 },
         no_guest: { field: 'Number of Guests', step: 7 },
@@ -430,16 +430,16 @@
                     
                     // Show min guests container if per_person is selected
                     if (priceType === 'per_person') {
-                        document.getElementById('min_guests_container').style.display = 'block';
+                        // document.getElementById('min_guests_container').style.display = 'block';
                         
-                        // Set min guests switch and value if editing
-                        const hasMinGuests = {{ isset($formData['has_min_guests']) ? ($formData['has_min_guests'] ? 'true' : 'false') : 'false' }};
-                        const minGuestsSwitch = document.getElementById('min_guests_switch');
-                        if (minGuestsSwitch && hasMinGuests) {
-                            minGuestsSwitch.checked = true;
-                            document.getElementById('min_guests_input_container').style.display = 'block';
-                            document.getElementById('min_guests').required = true;
-                        }
+                        // // Set min guests switch and value if editing
+                        // const hasMinGuests = {{ isset($formData['has_min_guests']) ? ($formData['has_min_guests'] ? 'true' : 'false') : 'false' }};
+                        // const minGuestsSwitch = document.getElementById('min_guests_switch');
+                        // if (minGuestsSwitch && hasMinGuests) {
+                        //     minGuestsSwitch.checked = true;
+                        //     document.getElementById('min_guests_input_container').style.display = 'block';
+                        //     document.getElementById('min_guests').required = true;
+                        // }
                     }
                 }
             }
@@ -573,7 +573,7 @@
         container.empty();
 
         // Show min guests option only for per_person pricing
-        $('#min_guests_container').toggle(priceType === 'per_person');
+        // $('#min_guests_container').toggle(priceType === 'per_person');
 
         if (priceType === 'per_person') {
             var guestCount = parseInt($('#no_guest').val()) || 1;
@@ -996,10 +996,10 @@
                     isValid = false;
                 }
                 // Validate departure time
-                if (!document.getElementById('desc_departure_time').value.trim()) {
-                    errors.push('Departure time is required.');
-                    isValid = false;
-                }
+                // if (!document.getElementById('desc_departure_time').value.trim()) {
+                //     errors.push('Departure time is required.');
+                //     isValid = false;
+                // }
                 if (!document.getElementById('desc_meeting_point').value.trim()) {
                     errors.push('Meeting point description is required.');
                     isValid = false;
@@ -1046,21 +1046,21 @@
                 }
                 
                 // Add validation for min guests
-                const minGuestsSwitch = document.getElementById('min_guests_switch');
-                if (minGuestsSwitch && minGuestsSwitch.checked) {
-                    const minGuests = document.getElementById('min_guests').value;
-                    if (!minGuests || minGuests < 1) {
-                        errors.push('Minimum number of guests is required and must be at least 1.');
-                        isValid = false;
-                    }
+                // const minGuestsSwitch = document.getElementById('min_guests_switch');
+                // if (minGuestsSwitch && minGuestsSwitch.checked) {
+                //     const minGuests = document.getElementById('min_guests').value;
+                //     if (!minGuests || minGuests < 1) {
+                //         errors.push('Minimum number of guests is required and must be at least 1.');
+                //         isValid = false;
+                //     }
                     
-                    // Validate that min guests is less than max guests
-                    const maxGuests = parseInt(document.getElementById('no_guest').value);
-                    if (parseInt(minGuests) > maxGuests) {
-                        errors.push('Minimum number of guests cannot be greater than maximum number of guests.');
-                        isValid = false;
-                    }
-                }
+                //     // Validate that min guests is less than max guests
+                //     const maxGuests = parseInt(document.getElementById('no_guest').value);
+                //     if (parseInt(minGuests) > maxGuests) {
+                //         errors.push('Minimum number of guests cannot be greater than maximum number of guests.');
+                //         isValid = false;
+                //     }
+                // }
                 
                 // if (!document.getElementById('inclusions').value.trim()) {
                 //     errors.push('Included in the price are required.');
@@ -1304,15 +1304,15 @@
         });
 
         // Min guests switch functionality
-        const minGuestsSwitch = document.getElementById('min_guests_switch');
-        const minGuestsContainer = document.getElementById('min_guests_input_container');
+        // const minGuestsSwitch = document.getElementById('min_guests_switch');
+        // const minGuestsContainer = document.getElementById('min_guests_input_container');
         
-        if (minGuestsSwitch) {
-            minGuestsSwitch.addEventListener('change', function() {
-                minGuestsContainer.style.display = this.checked ? 'block' : 'none';
-                document.getElementById('min_guests').required = this.checked;
-            });
-        }
+        // if (minGuestsSwitch) {
+        //     minGuestsSwitch.addEventListener('change', function() {
+        //         minGuestsContainer.style.display = this.checked ? 'block' : 'none';
+        //         document.getElementById('min_guests').required = this.checked;
+        //     });
+        // }
     });
 
     // Update the form's submit event listener
