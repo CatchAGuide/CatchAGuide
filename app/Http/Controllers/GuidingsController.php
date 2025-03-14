@@ -735,7 +735,7 @@ class GuidingsController extends Controller
             $guiding->desc_meeting_point = $request->has('desc_meeting_point') ? $request->input('desc_meeting_point') : '';
             $guiding->meeting_point = $request->has('meeting_point') ? $request->input('desc_meeting_point') : '';
             $guiding->desc_starting_time = $request->has('desc_starting_time') ? $request->input('desc_starting_time') : '';
-            $guiding->desc_departure_time = $request->has('desc_departure_time') ? $request->input('desc_departure_time') : '';
+            // $guiding->desc_departure_time = $request->has('desc_departure_time') ? $request->input('desc_departure_time') : '';
             $guiding->desc_tour_unique = $request->has('desc_tour_unique') ? $request->input('desc_tour_unique') : '';
             $guiding->description = $request->has('desc_course_of_action') ? $request->input('desc_course_of_action') : $this->generateLongDescription($request);
 
@@ -771,12 +771,12 @@ class GuidingsController extends Controller
                     }
                     $guiding->price = 0;
                     
-                    $has_min_guests = $request->has('has_min_guests') ? 1 : 0;
-                    if ($has_min_guests) {
-                        $guiding->min_guests = (int) $request->input('min_guests');
-                    } else {
-                        $guiding->min_guests = null;
-                    }
+                    // $has_min_guests = $request->has('has_min_guests') ? 1 : 0;
+                    // if ($has_min_guests) {
+                    //     $guiding->min_guests = (int) $request->input('min_guests');
+                    // } else {
+                    //     $guiding->min_guests = null;
+                    // }
                 } else {
                     for ($i = 1; $i <= $request->input('no_guest'); $i++) {
                         $pricePerPerson[] = [
@@ -1114,7 +1114,7 @@ class GuidingsController extends Controller
             'long_description' => $guiding->description,
             'desc_course_of_action' => $guiding->desc_course_of_action,
             'desc_starting_time' => $guiding->desc_starting_time,
-            'desc_departure_time' => $guiding->desc_departure_time,
+            // 'desc_departure_time' => $guiding->desc_departure_time,
             'desc_meeting_point' => $guiding->desc_meeting_point,
             'desc_tour_unique' => $guiding->desc_tour_unique,
             
@@ -1128,7 +1128,7 @@ class GuidingsController extends Controller
             'duration' => $guiding->duration,
             'duration_type' => $guiding->duration_type,
             'no_guest' => $guiding->max_guests,
-            'min_guests' => $guiding->min_guests,
+            // 'min_guests' => $guiding->min_guests,
             'price_type' => $guiding->price_type,
             'price' => $guiding->price,
             'prices' => json_decode($guiding->prices, true),
