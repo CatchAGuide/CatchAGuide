@@ -85,16 +85,16 @@ class GuidingsController extends Controller
         
         // 1. Get price ranges from all active guidings (for price filter)
         // This is done once and cached
-        $cacheKey = 'guiding_price_ranges';
+        // $cacheKey = 'guiding_price_ranges';
         $cacheDuration = 60 * 24; // Cache for 24 hours
         $minPrice = 50;
         $overallMaxPrice = 5000;
         
-        if (Cache::has($cacheKey)) {
-            $priceRangeData = Cache::get($cacheKey);
-            $priceRanges = $priceRangeData['ranges'];
-            $overallMaxPrice = $priceRangeData['maxPrice'];
-        } else {
+        // if (Cache::has($cacheKey)) {
+        //     $priceRangeData = Cache::get($cacheKey);
+        //     $priceRanges = $priceRangeData['ranges'];
+        //     $overallMaxPrice = $priceRangeData['maxPrice'];
+        // } else {
             // Get max price from all active guidings - use the raw query instead of max()
             $maxPriceResult = DB::select('
                 SELECT MAX(
@@ -177,11 +177,11 @@ class GuidingsController extends Controller
             }
             
             // Cache the results
-            Cache::put($cacheKey, [
-                'ranges' => $priceRanges,
-                'maxPrice' => $overallMaxPrice
-            ], $cacheDuration);
-        }
+            // Cache::put($cacheKey, [
+            //     'ranges' => $priceRanges,
+            //     'maxPrice' => $overallMaxPrice
+            // ], $cacheDuration);
+        // }
         
         // 2. Apply filters to the query
         $filteredQuery = clone $baseQuery;
