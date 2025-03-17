@@ -6,13 +6,13 @@
         <form id="filterContainer" action="{{ $formAction }}" method="get" class="shadow-sm px-4 py-2">
             <input type="hidden" name="ismobile" value="{{ $agent->ismobile() }}">
             <div class="row">
-                <div class="col-12 mb-2">
+                <div class="col-12 mb-4">
                     <div class="form-group my-1">
                         <h5 class="mb-2">{{translate('Your budget')}}</h5>
                         <div class="price-range-slider">
-                            <div class="chart-container mb-2">
+                            {{-- <div class="chart-container mb-2">
                                 <canvas id="price-histogram"></canvas>
-                            </div>
+                            </div> --}}
                             <div id="price-slider-main"></div>
                             <input type="hidden" name="price_min" id="price_min_main">
                             <input type="hidden" name="price_max" id="price_max_main">
@@ -459,7 +459,6 @@
 
 <script>
     // Pass the price histogram data to JavaScript
-    window.priceHistogramData = {!! json_encode($priceHistogramData) !!};
     window.maxPrice = {!! json_encode($overallMaxPrice) !!};
 </script>
 
@@ -605,7 +604,7 @@
                 // Handle price range filter removal
                 if (filterType === 'price_range') {
                     const defaultMin = 50;
-                    const defaultMax = window.maxPrice > 4000 ? window.maxPrice : 4000;
+                    const defaultMax = window.maxPrice > 1000 ? window.maxPrice : 1000;
                     
                     // Reset main slider if it exists
                     if (FilterManager.sliders['price-slider-main']) {

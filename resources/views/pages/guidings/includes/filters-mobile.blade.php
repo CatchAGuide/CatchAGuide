@@ -14,9 +14,9 @@
             <div class="filter-section mb-4">
                 <h6 class="mb-3">{{translate('Your budget')}}</h6>
                 <div class="price-range-slider px-3">
-                    <div class="chart-container mb-2">
+                    {{-- <div class="chart-container mb-2">
                         <canvas id="price-histogram-mobile"></canvas>
-                    </div>
+                    </div> --}}
                     <div id="price-slider-mobile"></div>
                     <input type="hidden" name="price_min" id="price_min_mobile">
                     <input type="hidden" name="price_max" id="price_max_mobile">
@@ -443,7 +443,6 @@
 @push('guidingListingScripts')
 <script>
     // Pass the price histogram data to JavaScript (if not already passed in filters.blade.php)
-    window.priceHistogramData = window.priceHistogramData || {!! json_encode($priceHistogramData) !!};
     window.maxPrice = window.maxPrice || {!! json_encode($overallMaxPrice) !!};
     
     document.addEventListener('DOMContentLoaded', function() {
@@ -598,11 +597,11 @@
             
             // Reset price slider to default values
             if (window.priceSliderMobile) { 
-                window.priceSliderMobile.set([50, window.maxPrice > 4000 ? window.maxPrice : 4000]);
+                window.priceSliderMobile.set([50, window.maxPrice > 1000 ? window.maxPrice : 1000]);
                 // document.getElementById('price-min-display-mobile').textContent = '50';
                 // document.getElementById('price-max-display-mobile').textContent = window.maxPrice > 4000 ? window.maxPrice : 4000;
                 document.getElementById('price_min_mobile').value = '50';
-                document.getElementById('price_max_mobile').value = window.maxPrice > 4000 ? window.maxPrice : 4000;
+                document.getElementById('price_max_mobile').value = window.maxPrice > 1000 ? window.maxPrice : 1000;
             }
             
             // Trigger update to refresh results
