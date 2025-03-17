@@ -590,12 +590,12 @@
                                                 $priceMin = request()->get('price_min');
                                                 $priceMax = request()->get('price_max');
                                                 $showPriceMin = isset($priceMin) && $priceMin != 50;
-                                                $showPriceMax = isset($priceMax) && $priceMax != $overallMaxPrice;
+                                                $showPriceMax = isset($priceMax) && $priceMax != 1000;
                                             @endphp
                                             @if($showPriceMin || $showPriceMax)
                                                 <span class="badge bg-light text-dark border">
                                                     @if($showPriceMin && $showPriceMax)
-                                                        Price €{{ $priceMin }} - €{{ $priceMax }}
+                                                        Price from €{{ $priceMin }} to €{{ $priceMax }}
                                                     @elseif($showPriceMin)
                                                         Price from €{{ $priceMin }}
                                                     @elseif($showPriceMax)
