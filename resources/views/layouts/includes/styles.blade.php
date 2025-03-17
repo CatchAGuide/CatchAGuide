@@ -197,6 +197,21 @@
         background-color: #313041;
 
         }
+        .search-form {
+            background-color: none!important;
+            border-radius: none!important;
+            box-shadow: none!important;
+            position: inherit !important;
+            bottom: 0; /* Position the search bar at the bottom of the banner */
+            left: 0;
+            transform: none;
+            width: 88%;
+            max-width: 1200px;
+            z-index: 3;
+            margin: 0 auto;
+            padding: 0!important;
+            transform: none !important;
+        }
     }
 
     @media screen and (min-width: 768px) and (max-width: 1023px) {

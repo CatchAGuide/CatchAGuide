@@ -63,19 +63,18 @@
     <!--Page Header Start-->
     <div class="container">
         <section class="page-header">
-            <div class="page-header__bottom">
+            <div class="page-header__bottom breadcrumb-container">
                 <div class="page-header__bottom-inner">
                     <ul class="thm-breadcrumb list-unstyled">
-
-                        <li><a href="{{route('welcome')}}">Home</a></li>
-                        <li><span>&#183;</span></li>
+                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                         @unless(Request::routeIs('profile.index'))
                             <li><a href="{{route('profile.index')}}">@lang('profile.profile')</a></li>
-                            <li><span>&#183;</span></li>
+                            <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                         @endunless
                         @if(Request::routeIs('guidings.edit'))
                             <li><a href="{{route('profile.myguidings')}}">{{translate('Meine Guidings')}}</a></li>
-                            <li><span>&#183;</span></li>
+                            <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                         @endif
                         <li class="active">@yield('title')</li>
                     </ul>
