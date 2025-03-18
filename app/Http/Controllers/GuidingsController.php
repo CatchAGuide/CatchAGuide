@@ -323,7 +323,7 @@ class GuidingsController extends Controller
         }
 
         // Apply price filters
-        if($request->has('price_min') && $request->has('price_max')){
+        if(($request->has('price_min') && $request->get('price_min') !== "") && ($request->has('price_max') && $request->get('price_max') !== "")){
             // if ($minPrice != $request->get('price_min') || $overallMaxPrice != $request->get('price_max')){
                 $min_price = $request->get('price_min');
                 $max_price = $request->get('price_max');
@@ -803,7 +803,7 @@ class GuidingsController extends Controller
             $guiding->desc_meeting_point = $request->has('desc_meeting_point') ? $request->input('desc_meeting_point') : '';
             $guiding->meeting_point = $request->has('meeting_point') ? $request->input('desc_meeting_point') : '';
             $guiding->desc_starting_time = $request->has('desc_starting_time') ? $request->input('desc_starting_time') : '';
-            // $guiding->desc_departure_time = $request->has('desc_departure_time') ? $request->input('desc_departure_time') : '';
+            $guiding->desc_departure_time = $request->has('desc_departure_time') ? json_encode($request->input('desc_departure_time')) : json_encode([]);
             $guiding->desc_tour_unique = $request->has('desc_tour_unique') ? $request->input('desc_tour_unique') : '';
             $guiding->description = $request->has('desc_course_of_action') ? $request->input('desc_course_of_action') : $this->generateLongDescription($request);
 
@@ -839,12 +839,12 @@ class GuidingsController extends Controller
                     }
                     $guiding->price = 0;
                     
-                    // $has_min_guests = $request->has('has_min_guests') ? 1 : 0;
-                    // if ($has_min_guests) {
-                    //     $guiding->min_guests = (int) $request->input('min_guests');
-                    // } else {
-                    //     $guiding->min_guests = null;
-                    // }
+                    $has_min_guests = $request->has('has_min_guests') ? 1 : 0;
+                    if ($has_min_guests) {
+                        $guiding->min_guests = (int) $request->input('min_guests');
+                    } else {
+                        $guiding->min_guests = null;
+                    }
                 } else {
                     for ($i = 1; $i <= $request->input('no_guest'); $i++) {
                         $pricePerPerson[] = [
@@ -933,6 +933,13 @@ class GuidingsController extends Controller
                         ]);
                     }
                 }
+            }
+
+            $guiding->weekday_availability = $request->input('weekday_availability', 'all_week');
+            if ($request->input('weekday_availability') === 'all_week') {
+                $guiding->weekdays = json_encode(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']);
+            } else {
+                $guiding->weekdays = $request->has('weekdays') ? json_encode($request->input('weekdays')) : json_encode([]);
             }
 
             $guiding->save();
@@ -1182,7 +1189,7 @@ class GuidingsController extends Controller
             'long_description' => $guiding->description,
             'desc_course_of_action' => $guiding->desc_course_of_action,
             'desc_starting_time' => $guiding->desc_starting_time,
-            // 'desc_departure_time' => $guiding->desc_departure_time,
+            'desc_departure_time' => json_decode($guiding->desc_departure_time, true),
             'desc_meeting_point' => $guiding->desc_meeting_point,
             'desc_tour_unique' => $guiding->desc_tour_unique,
             
@@ -1196,7 +1203,7 @@ class GuidingsController extends Controller
             'duration' => $guiding->duration,
             'duration_type' => $guiding->duration_type,
             'no_guest' => $guiding->max_guests,
-            // 'min_guests' => $guiding->min_guests,
+            'min_guests' => $guiding->min_guests,
             'price_type' => $guiding->price_type,
             'price' => $guiding->price,
             'prices' => json_decode($guiding->prices, true),
@@ -1208,6 +1215,8 @@ class GuidingsController extends Controller
             'seasonal_trip' => $guiding->seasonal_trip,
             'months' => json_decode($guiding->months, true),
             'other_boat_info' => $guiding->additional_information,
+            'weekday_availability' => $guiding->weekday_availability,
+            'weekdays' => json_decode($guiding->weekdays, true),
         ];
 
         $locale = Config::get('app.locale');

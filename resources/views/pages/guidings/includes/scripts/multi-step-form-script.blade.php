@@ -432,14 +432,31 @@
                     if (priceType === 'per_person') {
                         document.getElementById('min_guests_container').style.display = 'block';
                         
-                        // Set min guests switch and value if editing
-                        const hasMinGuests = {{ isset($formData['has_min_guests']) ? ($formData['has_min_guests'] ? 'true' : 'false') : 'false' }};
+                        // Handle min_guests and min_price
+                        const hasMinGuests = {!! isset($formData['min_guests']) && $formData['min_guests'] > 0 ? 'true' : 'false' !!};
                         const minGuestsSwitch = document.getElementById('min_guests_switch');
-                        if (minGuestsSwitch && hasMinGuests) {
+                        const minGuestsInput = document.getElementById('min_guests');
+                        
+                        if (hasMinGuests && minGuestsSwitch) {
                             minGuestsSwitch.checked = true;
                             document.getElementById('min_guests_input_container').style.display = 'block';
-                            document.getElementById('min_guests').required = true;
+                            
+                            if (minGuestsInput) {
+                                minGuestsInput.value = {{ $formData['min_guests'] ?? 1 }};
+                            }
                         }
+                    }
+                    
+                    // Set min_price if available
+                    const minPrice = {{ $formData['min_price'] ?? 0 }};
+                    if (minPrice > 0) {
+                        // Find the price input field and set its value
+                        setTimeout(() => {
+                            const priceInput = document.querySelector('input[name="price"]');
+                            if (priceInput) {
+                                priceInput.value = minPrice;
+                            }
+                        }, 100); // Small delay to ensure dynamic fields are created
                     }
                 }
             }
@@ -509,6 +526,43 @@
                         });
                     }
                 }
+            }
+
+
+            const timeOfDayData = {!! json_encode($formData['desc_departure_time'] ?? []) !!};
+            if (timeOfDayData && timeOfDayData.length > 0) {
+                timeOfDayData.forEach(timeOfDay => {
+                    const checkbox = document.querySelector(`input[name="desc_departure_time[]"][value="${timeOfDay}"]`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        checkbox.dispatchEvent(new Event('change'));
+                    }
+                });
+            }
+
+            const weekdayAvailabilityData = '{{ $formData['weekday_availability'] ?? '' }}';
+            if (weekdayAvailabilityData) {
+                const weekdayRadio = document.querySelector(`input[name="weekday_availability"][value="${weekdayAvailabilityData}"]`);
+                if (weekdayRadio) {
+                    weekdayRadio.checked = true;
+                    weekdayRadio.dispatchEvent(new Event('change'));
+                    
+                    // Show weekday selection if certain_days is selected
+                    if (weekdayAvailabilityData === 'certain_days') {
+                        document.getElementById('weekday_selection').style.display = 'block';
+                    }
+                }
+            }
+
+            const weekdaysData = {!! json_encode($formData['weekdays'] ?? []) !!};
+            if (weekdaysData && weekdaysData.length > 0) {
+                weekdaysData.forEach(weekday => {
+                    const checkbox = document.querySelector(`input[name="weekdays[]"][value="${weekday}"]`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        checkbox.dispatchEvent(new Event('change'));
+                    }
+                });
             }
         }
     }
@@ -996,10 +1050,11 @@
                     isValid = false;
                 }
                 // Validate departure time
-                if (!document.getElementById('desc_departure_time').value.trim()) {
-                    errors.push('Departure time is required.');
+                if (!document.querySelector('input[name="desc_departure_time[]"]:checked')) {
+                    errors.push('Please select at least one departure time.');
                     isValid = false;
                 }
+                
                 if (!document.getElementById('desc_meeting_point').value.trim()) {
                     errors.push('Meeting point description is required.');
                     isValid = false;
@@ -1313,6 +1368,11 @@
                 document.getElementById('min_guests').required = this.checked;
             });
         }
+
+        // Show/hide weekday selection based on weekday availability selection
+        $('input[name="weekday_availability"]').change(function() {
+            $('#weekday_selection').toggle($(this).val() === 'certain_days');
+        });
     });
 
     // Update the form's submit event listener

@@ -271,4 +271,39 @@ return [
     'departure_time' => 'Departure time',
     'let_guests_know_about_departure_details' => 'Let your guests know about departure details...',
     'tooltip_departure_time' => 'Let your guests know about departure details...',
+
+    'morning' => 'Morning',
+    'noon' => 'Noon',
+    'evening' => 'Evening',
+    'night' => 'Night',
+    
+    'tooltip_min_number_of_guests' => 'Enter the minimum number of guests required for your fishing tour.',
+    'weekday_availability' => 'Weekday Availability',
+    'tooltip_weekday_availability' => 'Select the days of the week when your fishing tour is available.',
+    'available_all_week' => 'Available all week',
+    'available_certain_days' => 'Available on certain weekdays only',
+    'select_available_weekdays' => 'Select available days...',
+    'monday' => 'Monday',
+    'tuesday' => 'Tuesday',
+    'wednesday' => 'Wednesday',
+    'thursday' => 'Thursday',
+    'friday' => 'Friday',
+    'saturday' => 'Saturday',
+    'sunday' => 'Sunday',
+
+    'pricing_info_text' => '
+        <p>
+            The total price corresponds to the final booking price for the tour and must
+            include taxes, fees, and any applicable surcharges. Extras that can be added
+            for an additional charge are excluded from this.
+        </p>
+        <p>
+            Please note that a commission will be charged on the total booking price
+            after the tour has taken place. The commission is calculated as follows:
+        </p>
+        <ul>
+            <li>10% of the total price for bookings up to €350</li>
+            <li>7.5% of the total price for bookings between €350 and €1,500</li>
+            <li>3% of the total price for bookings over €1,500</li>
+        </ul>',
 ];

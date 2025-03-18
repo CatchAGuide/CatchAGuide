@@ -430,12 +430,21 @@
                     @endif
                     <div class="row description-item-row">
                         <!-- Starting Time -->
-                        @if ($guiding->desc_starting_time)
+                        @if ($guiding->desc_starting_time || $guiding->desc_departure_time)
                         <div class="description-item col-12 col-md-6">
                             <div class="header-container">
                                 <span> @lang('guidings.Starting_Time')</span>
                             </div>
+                            @if($guiding->desc_departure_time)
+                            <div class="time-boxes mb-2 d-flex">
+                                @foreach(json_decode($guiding->desc_departure_time) as $time)
+                                <small class="badge border border-secondary text-secondary me-1">{{ strtoupper($time) }}</small>
+                                @endforeach
+                            </div>
+                            @endif
+                            @if($guiding->desc_starting_time)
                             <p>{!! translate($guiding->desc_starting_time) !!}</p>
+                            @endif
                         </div>
                         @endif
                         <!-- Meeting Point -->
