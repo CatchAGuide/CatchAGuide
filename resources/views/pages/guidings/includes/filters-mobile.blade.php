@@ -488,6 +488,14 @@
             
             // Add each form parameter to URLSearchParams properly
             for (const [key, value] of formData.entries()) {
+                // Skip default price values or empty values
+                if ((key === 'price_min' && (value === '' || parseInt(value) === 50)) || 
+                    (key === 'price_max' && (value === '' || parseInt(value) === 1000)) ||
+                    (key === 'price_min_mobile' && (value === '' || parseInt(value) === 50)) || 
+                    (key === 'price_max_mobile' && (value === '' || parseInt(value) === 1000))) {
+                    continue;
+                }
+                
                 // Handle array parameters correctly
                 if (key.endsWith('[]')) {
                     queryString.append(key, value);
@@ -598,8 +606,6 @@
             // Reset price slider to default values
             if (window.priceSliderMobile) { 
                 window.priceSliderMobile.set([50, window.maxPrice > 1000 ? window.maxPrice : 1000]);
-                // document.getElementById('price-min-display-mobile').textContent = '50';
-                // document.getElementById('price-max-display-mobile').textContent = window.maxPrice > 4000 ? window.maxPrice : 4000;
                 document.getElementById('price_min_mobile').value = '50';
                 document.getElementById('price_max_mobile').value = window.maxPrice > 1000 ? window.maxPrice : 1000;
             }

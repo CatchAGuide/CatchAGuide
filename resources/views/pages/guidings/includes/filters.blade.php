@@ -514,6 +514,11 @@
             
             // Add each form parameter to URLSearchParams properly
             for (const [key, value] of formData.entries()) {
+                // Skip empty price values or default values
+                if ((key === 'price_min' && (value === '' || parseInt(value) === 50)) || 
+                    (key === 'price_max' && (value === '' || parseInt(value) === 1000))) {
+                    continue;
+                }
                 // Handle array parameters correctly
                 if (key.endsWith('[]')) {
                     queryString.append(key, value);
