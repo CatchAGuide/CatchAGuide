@@ -309,4 +309,6 @@ return [
             <li>7,5% des Gesamtpreises bei einer Buchung 350 € und 1.500€</li>
             <li>3% des Gesamtpreises bei einer Buchung über 1.500€</li>
         </ul>',
+
+    'pricing_extra_info_text' => 'Du kannst die Extras deiner Buchung im Reservierungsprozess hinzufügen'
 ];

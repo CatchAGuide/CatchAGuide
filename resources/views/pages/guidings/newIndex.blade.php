@@ -513,9 +513,13 @@
                             <hr >
                             @endif
                             <div class="col-6">
-                            @if(!empty(json_decode($guiding->pricing_extra)))
+                                @if(!empty(json_decode($guiding->pricing_extra)))
                                     <div class="row">
                                         <strong class="mb-2 subtitle-text">@lang('guidings.Additional_Extra')</strong>
+                                        <div class="alert alert-secondary p-2 mb-3 d-flex align-items-center">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            <small>{{ __('newguidings.pricing_extra_info_text') }}</small>
+                                        </div>
                                         @foreach (json_decode($guiding->pricing_extra) as $pricing_extras)
                                             <div class="mb-2">
                                                 <strong>{{translate($pricing_extras->name)}}:</strong> 
@@ -778,9 +782,13 @@
                 @if(!empty(json_decode($guiding->pricing_extra)))
                     <div class="row">
                         <strong class="mb-2 subtitle-text">@lang('guidings.Additional_Extra')</strong>
+                        <div class="alert alert-info p-2 mb-3 d-flex align-items-center">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <small>{{ translate('These extras can be added during booking') }}</small>
+                        </div>
                         @foreach (json_decode($guiding->pricing_extra) as $pricing_extras)
                             <div class="mb-2">
-                                <span>{{translate($pricing_extras->name)}}</span> 
+                                <strong>{{translate($pricing_extras->name)}}:</strong> 
                                 <span>{{$pricing_extras->price}}€ p.P</span>
                             </div>
                         @endforeach

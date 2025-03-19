@@ -5,6 +5,8 @@ return [
     'Radius' => 'Radius',
     'Show_on_map' => 'Auf Karte anzeigen',
 
+    'book_vacation_reserve' => 'Reservieren',
+
     'title' => 'Angelurlaub in Europa – Die besten Reiseziele für unvergessliche Angelerlebnisse',
     'header_title' => 'Angelurlaub in Europa – Die besten Reiseziele für unvergessliche Angelerlebnisse',
     'header_sub_title' => 'Individuelle Angelurlaube an den schönsten Gewässern Europas – Fange deine Traumfische in atemberaubender Natur!',

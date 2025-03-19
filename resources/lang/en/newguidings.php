@@ -306,4 +306,6 @@ return [
             <li>7.5% of the total price for bookings between €350 and €1,500</li>
             <li>3% of the total price for bookings over €1,500</li>
         </ul>',
+
+    'pricing_extra_info_text' => 'You can add the extras to your booking during the reservation process'
 ];
