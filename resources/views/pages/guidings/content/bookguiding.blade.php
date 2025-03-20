@@ -7,7 +7,7 @@
                     @csrf
                     <div class="d-flex align-items-center justify-content-between mb-3">
                         @if($guiding->price_type == 'per_person')
-                            <h4 class="mb-0 total-price">0€</h4>
+                            <h4 class="mb-0"><small class="from-text">{{ translate('from') }}</small> <span class="total-price">0€</span></h4>
                         @else
                             <h4 class="mb-0">{{ $guiding->price }}€ <span class="fs-6 fw-normal text-muted">{{ translate('per guiding') }}</span></h4>
                         @endif
@@ -34,7 +34,7 @@
                         <div class="price-breakdown">
                             <div class="d-flex justify-content-between mb-2 text-center">
                                 <span class="price-item w-100 text-center">
-                                    <span class="base-price"></span>  {{ strtolower(translate('per person for a tour of')) }} <span class="person-count"></span> {{ strtolower(translate('people')) }}
+                                    <span class="base-price"></span>  {{ strtolower(translate('per person for a tour of')) }} <span class="person-count"></span> {{ strtolower(translate('people')) }}{{ translate('. You wont be charged yet.')}}
                                 </span>
                                 <span class="total-price fw-bold"></span>
                             </div>
@@ -78,37 +78,25 @@ document.addEventListener('DOMContentLoaded', function() {
     const personCount = document.querySelector('.person-count');
     const totalPrice = document.querySelector('.total-price');
     const grandTotal = document.querySelector('.grand-total');
+    const fromText = document.querySelector('.from-text');
     
-    // Set default selection for per_person price type
+    // Set default price display for per_person price type
     @if($guiding->price_type == 'per_person')
-        // Select the first option (lowest number of people)
+        // Get the first price option (lowest price)
         if (personSelect.options.length > 1) {
-            personSelect.selectedIndex = 1; // Index 1 because index 0 is the disabled "People" option
+            const firstOption = personSelect.options[1]; // Index 1 because index 0 is the disabled "People" option
+            const firstPrice = firstOption.getAttribute('data-price');
             
-            // Manually calculate and display the price
-            const selectedOption = personSelect.options[personSelect.selectedIndex];
-            const price = selectedOption.getAttribute('data-price');
-            const persons = selectedOption.value;
-            const serviceFee = {{ $guiding->service_fee ?? 0 }};
-            
-            if (price && persons) {
-                priceCalculation.style.display = 'block';
+            // Update the total price display without changing the select
+            if (firstPrice) {
+                totalPrice.textContent = firstPrice + '€';
                 
-                const perPersonPrice = Math.round(price / persons);
+                // Show price calculation with default values
+                priceCalculation.style.display = 'block';
+                const persons = firstOption.value;
+                const perPersonPrice = Math.round(firstPrice / persons);
                 basePrice.textContent = perPersonPrice + '€';
                 personCount.textContent = persons;
-                const subtotal = price;
-                
-                totalPrice.textContent = subtotal + '€';
-                if (grandTotal) {
-                    grandTotal.textContent = (parseInt(subtotal) + parseInt(serviceFee)) + '€';
-                }
-                
-                // Also update the main total price display if it exists
-                const mainTotalPrice = document.querySelector('h4.total-price');
-                if (mainTotalPrice) {
-                    mainTotalPrice.textContent = subtotal + '€';
-                }
             }
         }
     @endif
@@ -121,6 +109,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (price && persons) {
             priceCalculation.style.display = 'block';
+            
+            // Hide the "From" text when a selection is made
+            if (fromText) {
+                fromText.style.display = 'none';
+            }
             
             @if($guiding->price_type == 'per_person')
                 const perPersonPrice = Math.round(price / persons);
@@ -136,12 +129,6 @@ document.addEventListener('DOMContentLoaded', function() {
             totalPrice.textContent = subtotal + '€';
             if (grandTotal) {
                 grandTotal.textContent = (parseInt(subtotal) + parseInt(serviceFee)) + '€';
-            }
-            
-            // Update the main total price display if it exists
-            const mainTotalPrice = document.querySelector('h4.total-price');
-            if (mainTotalPrice) {
-                mainTotalPrice.textContent = subtotal + '€';
             }
         } else {
             priceCalculation.style.display = 'none';
