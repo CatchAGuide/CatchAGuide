@@ -41,6 +41,7 @@ use App\Http\Controllers\VacationBookingController;
 use App\Http\Controllers\Admin\Category\AdminCategoryVacationCountryController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\Category\AdminCategoryTargetFishController;
+use App\Http\Controllers\CategoryTargetFishController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -205,6 +206,9 @@ Route::name('additional.')->group(function () {
 Route::get('destination', [DestinationCountryController::class, 'index'])->name('destination');
 Route::get('destinationen', [DestinationCountryController::class, 'index'])->name('destination_de');
 Route::get('destination/{country}/{region?}/{city?}', [DestinationCountryController::class, 'country'])->name('destination.country');
+
+Route::get('category/target-fish/', [CategoryTargetFishController::class, 'index'])->name('target-fish.index');
+Route::get('category/target-fish/{slug}', [CategoryTargetFishController::class, 'targets'])->name('target-fish.targets');
 
 Route::post('sendcontact', [\App\Http\Controllers\ZoisController::class, 'sendcontact'])->name('sendcontactmail');
 Route::post('sendnewsletter', [\App\Http\Controllers\ZoisController::class, 'sendnewsletter'])->name('sendnewsletter');

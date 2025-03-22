@@ -1445,8 +1445,15 @@
                 <div>
                     <h2 class="h4 text-dark fw-bolder">@lang('homepage.targetfish-title')</h2>
                 </div>
+                <div>
+                    @if(app()->getLocale() == 'de')
+                        <a href="{{ route('target-fish.index') }}" class="color-primary fw-light">Alle Zielfische ansehen</a>
+                    @else
+                        <a href="{{ route('target-fish.index') }}" class="color-primary fw-light">See all target fish</a>
+                    @endif
+                </div>
             </div>
-          
+            
             <p class="fw-light">@lang('homepage.targetfish-message')</p>
         </div>
         @if($agent->ismobile())
