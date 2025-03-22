@@ -7,9 +7,9 @@ use App\Models\Faq;
 use Illuminate\Support\Facades\Log;
 
 if (! function_exists('translate')) {
-    function translate($string)
+    function translate($string, $language = '')
     {
-        $currentLocale = app()->getLocale();
+        $currentLocale = ($language !== '' || $language !== null) ? $language : app()->getLocale();
         $cacheKey = 'translation_'.$currentLocale.'_'.$string;
 
         $translation = Cache::rememberForever($cacheKey, function () use ($string, $currentLocale) {

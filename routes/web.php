@@ -40,7 +40,7 @@ use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThrea
 use App\Http\Controllers\VacationBookingController;
 use App\Http\Controllers\Admin\Category\AdminCategoryVacationCountryController;
 use App\Http\Controllers\Admin\AdminController;
-
+use App\Http\Controllers\Admin\Category\AdminCategoryTargetFishController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -359,6 +359,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::resource('vacation-country', AdminCategoryVacationCountryController::class);
             Route::resource('region', AdminCategoryRegionController::class);
             Route::resource('city', AdminCategoryCityController::class);
+            Route::resource('target-fish', AdminCategoryTargetFishController::class);
+            Route::post('target-fish/toggle-favorite', [AdminCategoryTargetFishController::class, 'toggleFavorite'])->name('target-fish.toggle-favorite');
+            Route::get('target-fish/{id}/language-data', [AdminCategoryTargetFishController::class, 'getLanguageData'])->name('target-fish.language-data');
         });
 
         Route::get('request-as-guide', [\App\Http\Controllers\GuideRequestsController::class, 'index'])->name('guide-requests.index');
