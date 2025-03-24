@@ -6,7 +6,7 @@ use App\Models\Guiding;
 use App\Models\Target;
 use App\Models\Thread;
 use App\Models\Booking;
-
+use App\Models\CategoryPage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -19,6 +19,7 @@ class WelcomeController extends Controller
 
     public function index()
     {
+        $language = app()->getLocale();
         // if (Cache::has('homepage_data_' . app()->getLocale())) {
         //     // If cached, retrieve the data from the cache for the current locale
         //     $data = Cache::get('homepage_data_' . app()->getLocale());
@@ -41,7 +42,9 @@ class WelcomeController extends Controller
         //     Cache::put('homepage_data_' . app()->getLocale(), $data, 3600);
         // }
         // return view('pages.index', $data);
-        return view('pages.newhome-latest');
+        $CategoryPage = CategoryPage::orderBy('name', 'asc')->whereType('Targets')->whereIsFavorite(1)->get();
+
+        return view('pages.newhome-latest', compact('CategoryPage'));
     }
     
     public function getUserLocation(Request $request)

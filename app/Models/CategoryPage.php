@@ -35,13 +35,6 @@ class CategoryPage extends Model
                     ->get();
     }
 
-    public function source()
-    {
-        $type = $this->type;
-        $modelClass = 'App\\Models\\' . ucfirst(str_replace('-', '', $type));
-        return $this->belongsTo($modelClass, 'source_id');
-    }
-
     public function getThumbnailPath()
     {
         if (empty($this->thumbnail_path)) {
@@ -51,5 +44,27 @@ class CategoryPage extends Model
         $thumbnail_path = \Str::replace('public', 'storage', $this->thumbnail_path);
 
         return '/' . $thumbnail_path;
+    }
+
+    public function getSourceAttribute()
+    {
+        if (empty($this->type)) {
+            return null;
+        }
+        
+        // Map types to model classes
+        $typeToModel = [
+            'Targets' => Target::class,
+            // Add other mappings as needed
+        ];
+        
+        $modelClass = $typeToModel[$this->type] ?? null;
+        
+        if (!$modelClass) {
+            return null;
+        }
+        
+        // Manually fetch the related model
+        return $modelClass::find($this->source_id);
     }
 }

@@ -28,7 +28,21 @@ class AdminCategoryTargetFishController extends Controller
 
     public function index()
     {
-        $rows = Target::paginate(25);
+        $rows = Target::with(['categoryPage' => function($query) {
+                $query->where('type', 'Targets')
+                    ->with(['language' => function($q) {
+                        $q->select('source_id', 'language')
+                          ->orderBy('language');
+                    }]);
+            }])
+            ->paginate(25);
+
+        $rows->getCollection()->transform(function($target) {
+            $target->languages = $target->categoryPage 
+                ? $target->categoryPage->language->pluck('language')->sort()->values()->toArray()
+                : [];
+            return $target;
+        });
         $data = compact('rows');
         return view('admin.pages.category.target-fish', $data);
     }
@@ -205,15 +219,16 @@ class AdminCategoryTargetFishController extends Controller
             $target = Target::findOrFail($request->id);
             
             if ($target->categoryPage) {
-                $target->categoryPage->update([
-                    'is_favorite' => $request->status
-                ]);
+                $categoryPage = $target->categoryPage;
+                $categoryPage->is_favorite = (int)$request->status;
+                $categoryPage->save();
             } else {
-                CategoryPage::create([
-                    'name' => $target->name,
-                    'is_favorite' => $request->status,
-                    'type' => 'Targets'
-                ]);
+                $categoryPage = new CategoryPage();
+                $categoryPage->name = $target->name;
+                $categoryPage->is_favorite = (int)$request->status; 
+                $categoryPage->type = 'Targets';
+                $categoryPage->target_id = $target->id;
+                $categoryPage->save();
             }
             
             return response()->json(['success' => true]);

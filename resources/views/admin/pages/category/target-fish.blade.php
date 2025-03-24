@@ -35,8 +35,7 @@
                                 <thead>
                                 <tr>
                                     <th width="10%" class="border-bottom-0 text-center">Language</th>
-                                    <th width="30%" class="border-bottom-0">EN Name</th>
-                                    <th width="30%" class="border-bottom-0">DE Names</th>
+                                    <th width="30%" class="border-bottom-0">Name</th>
                                     <th width="15%" class="border-bottom-0">Aktionen</th>
                                 </tr>
                                 </thead>
@@ -44,22 +43,23 @@
                                     @foreach($rows as $row)
                                         <tr>
                                             <td class="text-center">
-                                                @if($row->language == 'de')
-                                                <label><i class="fi fi-de"></i></label> 
-                                                @elseif($row->language == 'en')
-                                                <label><i class="fi fi-gb"></i></label>
-                                                @else
-                                                <label><i class="fi fi-de"></i></label>
+                                                @if($row->categoryPage && $row->categoryPage->language)
+                                                    @foreach($row->categoryPage->language as $language)
+                                                        @if($language->language == 'de')
+                                                            <label><i class="fi fi-de"></i></label> 
+                                                        @elseif($language->language == 'en')
+                                                            <label><i class="fi fi-gb"></i></label>
+                                                        @endif
+                                                    @endforeach
                                                 @endif
                                             </td>
-                                            <td>{{ $row->name_en }}</td>
                                             <td>{{ $row->name }}</td>
                                             <td>
                                                 <a href="{{ route('admin.category.target-fish.edit', $row->id) }}" class="btn btn-sm btn-secondary"><i class="fa fa-edit"></i></a>
-                                                @if($row->categoryPage && $row->categoryPage->is_favorite)
+                                                @if($row->categoryPage && $row->categoryPage->is_favorite == 1)
                                                     <button class="btn btn-sm btn-warning toggle-favorite" data-id="{{ $row->id }}" data-status="1"><i class="fa fa-star text-white"></i></button>
                                                 @elseif($row->categoryPage)
-                                                    <button class="btn btn-sm btn-warning toggle-favorite" data-id="{{ $row->id }}" data-status="0"><i class="fa fa-star"></i></button>
+                                                    <button class="btn btn-sm btn-light toggle-favorite" data-id="{{ $row->id }}" data-status="0"><i class="fa fa-star"></i></button>
                                                 @endif
                                             </td>
                                         </tr>
@@ -98,8 +98,10 @@
                 success: function(response) {
                     if (response.success) {
                         if (newStatus === 1) {
+                            button.removeClass('btn-light').addClass('btn-warning');
                             button.html('<i class="fa fa-star text-white"></i>');
                         } else {
+                            button.removeClass('btn-warning').addClass('btn-light');
                             button.html('<i class="fa fa-star"></i>');
                         }
                         button.data('status', newStatus);

@@ -22,4 +22,17 @@ class Language extends Model
     {
         return $this->belongsTo(CategoryPage::class, 'source_id', 'id');
     }
+    
+    public function language($languageCode = null)
+    {
+        // If no language code is provided, return the current language
+        if (!$languageCode) {
+            return $this;
+        }
+        
+        // Otherwise, find the language record with the same source_id and the specified language code
+        return self::where('source_id', $this->source_id)
+                  ->where('language', $languageCode)
+                  ->first();
+    }
 }

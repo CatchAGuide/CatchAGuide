@@ -13,7 +13,7 @@ class CategoryTargetFishController extends Controller
     public function index()
     {
         $language = app()->getLocale();
-        $data = CategoryPage::where('type', 'Targets')
+        $allData = CategoryPage::where('type', 'Targets')
             ->get()
             ->map(function($item) use ($language) {
                 $item->language = $item->language($language);
@@ -22,12 +22,20 @@ class CategoryTargetFishController extends Controller
             ->filter(function($item) {
                 return $item->language !== null;
             });
+
+        $favories = $allData->filter(function($item) {
+            return $item->is_favorite === true || $item->is_favorite === 1;
+        });
+
+        $allTargets = $allData->filter(function($item) {
+            return $item->is_favorite === false || $item->is_favorite === 0;
+        });
         
         $introduction = __('vacations.introduction');
-        $title = translate('Target Fish');
+        $title = __('vacations.title');
         $route = 'target-fish.targets';
 
-        $data = compact('data', 'introduction', 'title', 'route');
+        $data = compact('favories', 'allTargets', 'introduction', 'title', 'route');
         return view('pages.category.category-index', $data);
     }
 
@@ -104,7 +112,7 @@ class CategoryTargetFishController extends Controller
         $allGuidings = $query->with(['target_fish', 'methods', 'water_types', 'boatType'])->get();
 
         // Apply pagination - use a smaller number like 5 for testing
-        $guides = $query->paginate(6)->appends(request()->except('page'));
+        $guides = $query->paginate(10)->appends(request()->except('page'));
 
         $data = compact('row_data', 'guides', 'title', 'category_total', 'allGuidings');
 
