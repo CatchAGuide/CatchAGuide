@@ -119,58 +119,6 @@
             </div>
         </section>
     </div>
-    {{-- <div class="container"> --}}
-        {{-- <section class="page-header">
-            <div class="page-header__bottom">
-                <div class="container">
-                    <div class="page-header__bottom-inner">
-                        <ul class="thm-breadcrumb list-unstyled">
-                            <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                            <li><span>&#183;</span></li>
-                    
-                            @if(request()->has('from_destination'))
-                                @if(isset($destination))
-                                    @if($destination->type == 'country')
-                                        <li><a href="{{ route('destination.country', ['country' => $destination->slug]) }}">
-                                            {{ translate('Fishing Destinations in ')}} {{ $destination->name }}
-                                        </a></li>
-                    
-                                    @elseif($destination->type == 'region')
-                                        <li><a href="{{ route('destination.country', ['country' => $destination->country_slug]) }}">
-                                            {{ translate('Fishing Destinations in ')}} {{ $destination->country_name }}
-                                        </a></li>
-                                        <li><span>&#183;</span></li>
-                                        <li><a href="{{ route('destination.country', ['country' => $destination->country_slug, 'region' => $destination->slug]) }}">
-                                            {{ translate('Fishing Destinations in ')}} {{ $destination->name }}
-                                        </a></li>
-                    
-                                    @elseif($destination->type == 'city')
-                                        <li><a href="{{ route('destination.country', ['country' => $destination->country_slug]) }}">
-                                            {{ translate('Fishing Destinations in ')}} {{ $destination->country_name }}
-                                        </a></li>
-                                        <li><span>&#183;</span></li>
-                                        <li><a href="{{ route('destination.country', ['country' => $destination->country_slug, 'region' => $destination->region_slug]) }}">
-                                            {{ translate('Fishing Destinations in ')}} {{ $destination->region_name }}
-                                        </a></li>
-                                        <li><span>&#183;</span></li>
-                                        <li><a href="{{ route('destination.country', ['country' => $destination->country_slug, 'region' => $destination->region_slug, 'city' => $destination->slug]) }}">
-                                            {{ translate('Fishing Destinations in ')}} {{ $destination->name }}
-                                        </a></li>
-                                    @endif
-                                @else
-                                    <li><a href="{{ route('guidings.index') }}">{{ translate('Fishing Tours') }}</a></li>
-                                @endif
-                            @else
-                                <li><a href="{{ route('guidings.index') }}">{{ translate('Fishing Tours') }}</a></li>
-                            @endif
-                            <li><span>&#183;</span></li>
-                            <li class="active">{{ translate($guiding->title) }}</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section> --}}
 
  <div id="guidings-page" class="container">
     <div class="title-container">
