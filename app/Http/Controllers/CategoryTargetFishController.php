@@ -13,7 +13,7 @@ class CategoryTargetFishController extends Controller
     public function index()
     {
         $language = app()->getLocale();
-        $allData = CategoryPage::where('type', 'Targets')
+        $allTargets = CategoryPage::where('type', 'Targets')
             ->get()
             ->map(function($item) use ($language) {
                 $item->language = $item->language($language);
@@ -23,16 +23,12 @@ class CategoryTargetFishController extends Controller
                 return $item->language !== null;
             });
 
-        $favories = $allData->filter(function($item) {
+        $favories = $allTargets->filter(function($item) {
             return $item->is_favorite === true || $item->is_favorite === 1;
         });
-
-        $allTargets = $allData->filter(function($item) {
-            return $item->is_favorite === false || $item->is_favorite === 0;
-        });
         
-        $introduction = __('vacations.introduction');
-        $title = __('vacations.title');
+        $introduction = __('category.introduction');
+        $title = __('category.title');
         $route = 'target-fish.targets';
 
         $data = compact('favories', 'allTargets', 'introduction', 'title', 'route');

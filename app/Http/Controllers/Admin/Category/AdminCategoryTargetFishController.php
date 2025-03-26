@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin\Category;
 
 use App\Http\Controllers\Controller;
-use App\Models\Destination;
+use App\Models\Faq;
 use App\Models\Target;
 use App\Models\Language;
 use App\Models\CategoryPage;
@@ -59,16 +59,12 @@ class AdminCategoryTargetFishController extends Controller
         try {
             DB::beginTransaction();
             $data = $request->only(['languageSwitch', 'name', 'title', 'sub_title', 'introduction', 'faq_title']);
-            $data['type'] = 'Targets';
             $data['name'] = $request->name;
-            $data['slug'] = $this->slug_format($request->name);
-            $webp_path = null;
 
-            if($request->has('thumbnailImage')) {
+            if($request->has('thumbnailImage') && ($request->thumbnailImage != null && $request->thumbnailImage != '')) {
                 $webp_path = $this->upload_thumbnail($request->thumbnailImage);
+                $data['thumbnail_path'] = $webp_path;
             }
-
-            $data['thumbnail_path'] = $webp_path;
 
             $categoryPage = CategoryPage::where('source_id', $id)->first();
             $isCreate = false;
@@ -77,7 +73,9 @@ class AdminCategoryTargetFishController extends Controller
                 $categoryPage->update($data);
                 Language::where('source_id', $categoryPage->id)->where('language', $request->languageSwitch)->delete();
             } else {
+                $data['type'] = 'Targets';
                 $data['source_id'] = $id;
+                $data['slug'] = $this->slug_format($request->name);
                 $categoryPage = CategoryPage::create($data);
                 $isCreate = true;
             }
@@ -90,9 +88,22 @@ class AdminCategoryTargetFishController extends Controller
                     'sub_title' => $request->sub_title ?? '',
                     'introduction' => $request->introduction ?? '',
                     'content' => $request->content ?? '',
-                    'faq_title' => $request->faq_title ?? ''
+                    'faq_title' => $request->faq_title ?? '',
+                    'faq' => $request->faq ?? []
                 ]
             );
+            
+            if ($request->has('faq')) {
+                Faq::where('page', 'Targets')->where('source_id', $categoryPage->id)->delete();
+                foreach ($request->faq as $key => $value) {
+                    $valueSave['page'] = 'Targets';
+                    $valueSave['language'] = $request->languageSwitch;
+                    $valueSave['question'] = $value['question'];
+                    $valueSave['answer'] = $value['answer'];
+                    $valueSave['source_id'] = $categoryPage->id;
+                    Faq::create($valueSave);
+                }
+            }
 
             if($isCreate){
                 $this->translate($language);
@@ -114,7 +125,7 @@ class AdminCategoryTargetFishController extends Controller
 
     public function edit($id)
     {
-        $targets = Target::with('categoryPage')->find($id);
+        $targets = Target::with('categoryPage', 'categoryPage.faq')->find($id);
 
         if (is_null($targets)) {
             return redirect()->back();
@@ -133,6 +144,7 @@ class AdminCategoryTargetFishController extends Controller
         $introduction = '';
         $content = '';
         $faq_title = '';
+        $faq = [];
         
         if ($row) {
             $languageData = $row->language($language);
@@ -142,11 +154,12 @@ class AdminCategoryTargetFishController extends Controller
                 $introduction = $languageData->introduction ?? '';
                 $content = $languageData->content ?? '';
                 $faq_title = $languageData->faq_title ?? '';
+                $faq = $row->faq($language);
             }
         }
         $allowed_fields = false;
 
-        $data = compact('form', 'route', 'method', 'language', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'content', 'faq_title', 'allowed_fields');
+        $data = compact('form', 'route', 'method', 'language', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'content', 'faq_title', 'allowed_fields', 'faq');
 
         return view('admin.pages.category.dynamic-form', $data);
     }
@@ -209,6 +222,17 @@ class AdminCategoryTargetFishController extends Controller
                         'faq_title' => $faq_title
                     ]);
                 }
+                
+                if ($data->faq) {
+                    foreach ($data->faq as $key => $value) {
+                        $valueData['language'] = $language;
+                        $valueData['page'] = 'Targets';
+                        $valueData['source_id'] = $data->source_id;
+                        $valueData['question'] = translate($value['question'], $language);
+                        $valueData['answer'] = translate($value['answer'], $language);
+                        Faq::create($valueData);
+                    }
+                }
             }
         }
     }
@@ -239,7 +263,7 @@ class AdminCategoryTargetFishController extends Controller
 
     public function getLanguageData($id)
     {
-        $targets = Target::with('categoryPage', 'categoryPage.language')->find($id);
+        $targets = Target::with('categoryPage', 'categoryPage.language', 'categoryPage.faq')->find($id);
 
         if (is_null($targets)) {
             return response()->json(['error' => 'Target not found'], 404);
@@ -262,6 +286,7 @@ class AdminCategoryTargetFishController extends Controller
                 $introduction = $languageData->introduction ?? '';
                 $content = $languageData->content ?? '';
                 $faq_title = $languageData->faq_title ?? '';
+                $faq = $row->faq($language) ?? [];
             }
         }
         
@@ -270,7 +295,8 @@ class AdminCategoryTargetFishController extends Controller
             'sub_title' => $sub_title,
             'introduction' => $introduction,
             'content' => $content,
-            'faq_title' => $faq_title
+            'faq_title' => $faq_title,
+            'faq' => $faq
         ]);
     }
 }

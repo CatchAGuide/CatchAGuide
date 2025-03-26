@@ -1,12 +1,12 @@
 @extends('layouts.app-v2')
 
 @section('title', $title)
-@section('header_title', __('vacations.header_title'))
-@section('header_sub_title', __('vacations.header_sub_title'))
+@section('header_title', __('category.title'))
+@section('header_sub_title', __('category.sub_title'))
 
 @section('share_tags')
-    <meta property="og:title" content="{{__('vacations.title')}}" />
-    <meta property="og:description" content="{{__('vacations.header_title')}}" />
+    <meta property="og:title" content="{{__('category.title')}}" />
+    <meta property="og:description" content="{{__('category.introduction')}}" />
 @endsection
 
 @section('custom_style')
@@ -331,27 +331,29 @@
 
                 @if($allTargets->count() > 0)
                     <hr>
-                    @foreach($allTargets as $targets)
-                        <h5 class="mb-2">All Targets</h5>
-                        <div class="col-md-4 my-1">
-                            <div class="trending-card">
-                                <a href="{{ route($route, ['slug' => $targets->slug]) }}"> 
-                                    <div class="trending-card-wrapper">
-                                        <img alt="{{$targets->language->title}}" class="trending-card-background" src="{{asset($targets->thumbnail_path ?? 'images/placeholder_guide.jpg')}}">
+                    <h5 class="mb-2">All Targets</h5>
+                    <div class="row">
+                        @foreach($allTargets as $targets)
+                            <div class="col-md-4 my-1">
+                                <div class="trending-card">
+                                    <a href="{{ route($route, ['slug' => $targets->slug]) }}"> 
+                                        <div class="trending-card-wrapper">
+                                            <img alt="{{$targets->language->title}}" class="trending-card-background" src="{{asset($targets->thumbnail_path ?? 'images/placeholder_guide.jpg')}}">
 
-                                        <div class="trending-card-wrapper-content">
-                                            <div class="overlay-wrapper"></div>
-                                            <div class="trending-card-main">
-                                                <div class="trending-text-wrapper">
-                                                    <h4 class="trending-title">{{$targets->language->title}}</h4>
+                                            <div class="trending-card-wrapper-content">
+                                                <div class="overlay-wrapper"></div>
+                                                <div class="trending-card-main">
+                                                    <div class="trending-text-wrapper">
+                                                        <h4 class="trending-title">{{$targets->language->title}}</h4>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </a>
+                                    </a>
+                                </div>
                             </div>
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div>
 
                     <br><br>
                 @endif

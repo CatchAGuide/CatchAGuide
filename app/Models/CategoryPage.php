@@ -35,6 +35,17 @@ class CategoryPage extends Model
                     ->get();
     }
 
+    public function faq($languageCode = null)
+    {
+        $relation = $this->hasMany(Faq::class, 'source_id', 'id');
+        
+        if ($languageCode) {
+            return $relation->where('language', $languageCode)->get();
+        }
+        
+        return $relation;
+    }   
+
     public function getThumbnailPath()
     {
         if (empty($this->thumbnail_path)) {
