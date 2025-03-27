@@ -74,4 +74,11 @@ return [
     'rating_error' => 'Bitte geben Sie alle Bewertungen ein.',
     'rating_thank_you' => 'Vielen Dank für Ihre Bewertung!',
     'rating_close' => 'Schließen',
+
+    'Real_experiences' => 'Echte Erlebnisse von echten Restaurantgästen',
+    'Real_experiences_description' => 'Gesamtwertungen und Bewertungen können nur von Gästen abgegeben werden, die über TheFork reserviert haben.',
+    'How_are_overall_ratings_calculated' => 'Wie werden Gesamtwertungen berechnet?',
+    'Overall' => 'Gesamt',
+    'Guide' => 'Guide',
+    'Region_Water' => 'Region & Wasser',
 ];  

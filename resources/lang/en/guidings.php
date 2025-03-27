@@ -74,4 +74,11 @@ return [
     'rating_error' => 'Please provide all ratings before submitting.',
     'rating_thank_you' => 'Thank you for your rating!',
     'rating_close' => 'Close',
+
+    'Real_experiences' => 'Real experiences from real restaurant guests',
+    'Real_experiences_description' => 'Overall ratings and reviews can only be submitted by guests who have booked through TheFork.',
+    'How_are_overall_ratings_calculated' => 'How are overall ratings calculated?',
+    'Overall' => 'Overall',
+    'Guide' => 'Guide',
+    'Region_Water' => 'Region & Water',
 ];  
