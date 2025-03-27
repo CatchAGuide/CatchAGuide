@@ -4,7 +4,7 @@
     <div class="container py-4">
         <div class="rating-wrapper">
             <div class="rating-header">
-                <h3>{{ __('guidings.rating_title') }} {{ $user->full_name }}</h3>
+                <h3>{{ __('guidings.rating_title') }} {{ $booking->guiding->user->firstname }}</h3>
                 <p class="text-muted">{{ __('guidings.rating_subtitle') }}</p>
             </div>
 
@@ -22,20 +22,6 @@
                     @else
                         {{ __('guidings.rating_error') }}
                     @endif
-                </div>
-
-                <!-- Comment Section -->
-                <div class="review-section">
-                    <label class="form-label">
-                        {{ __('guidings.rating_comment') }}
-                        <small class="text-muted">{{ __('guidings.rating_comment_help') }}</small>
-                    </label>
-                    <textarea 
-                        name="comment" 
-                        class="form-control" 
-                        rows="4"
-                        placeholder="{{ __('guidings.rating_comment_placeholder') }}"
-                    ></textarea>
                 </div>
 
                 <!-- Ratings Section -->
@@ -67,6 +53,20 @@
                             <input name="rating_region" class="rating" data-min="0" data-max="10" data-step="1" data-show-clear="false" data-show-caption="false">
                         </div>
                     </div>
+                </div>
+
+                <!-- Comment Section -->
+                <div class="review-section">
+                    <label class="form-label">
+                        {{ __('guidings.rating_comment') }}
+                        <small class="text-muted">{{ __('guidings.rating_comment_help') }}</small>
+                    </label>
+                    <textarea 
+                        name="comment" 
+                        class="form-control" 
+                        rows="4"
+                        placeholder="{{ __('guidings.rating_comment_placeholder') }}"
+                    ></textarea>
                 </div>
 
                 <div class="form-actions">

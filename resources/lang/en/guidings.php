@@ -91,5 +91,7 @@ return [
     'Sufficient' => 'Sufficient',
     'Poor' => 'Poor',
     'Insufficient' => 'Insufficient',
+    'Very_Poor' => 'Bad',
+    'Bad' => 'Very Bad',
     'Not_Rated' => 'Not Rated',
 ];  
