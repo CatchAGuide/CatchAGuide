@@ -1000,10 +1000,10 @@
 
  <!-- Description Section -->
  <div class="">
- <h2 class="mb-3">@lang('guidings.Availability')</h2>
-                    <div id="lite-datepicker" wire:ignore></div>
-            </div>
-        </div>
+    <h2 class="mb-3">@lang('guidings.Availability')</h2>
+    <div id="lite-datepicker" wire:ignore></div>
+</div>
+
     
         <!-- Right Column -->
         <div id="book-now" class="guidings-book">

@@ -3,10 +3,10 @@
 @section('title', 'Booking Form Reject')
 
 @section('content')
-
-
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
 
     <style>
         html,body {
@@ -35,20 +35,233 @@
         }
         .thankyou-page ._body ._box {
             margin: auto;
-            max-width: 80%;
-            padding: 50px;
+            padding: 40px;
             background: white;
-            border-radius: 3px;
-            box-shadow: 0 0 35px rgba(10, 10, 10,0.12);
-            -moz-box-shadow: 0 0 35px rgba(10, 10, 10,0.12);
-            -webkit-box-shadow: 0 0 35px rgba(10, 10, 10,0.12);
+            border-radius: 8px;
+            box-shadow: 0 0 35px rgba(10, 10, 10, 0.12);
         }
         .thankyou-page ._body ._box h2 {
             font-size: 32px;
             font-weight: 600;
             color: var(--thm-primary);
         }
-    
+        
+        /* Improved layout styles */
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--thm-primary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(var(--thm-primary-rgb), 0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 2rem;
+        }
+        
+        .form-control {
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            padding: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--thm-primary);
+            box-shadow: 0 0 0 0.2rem rgba(var(--thm-primary-rgb), 0.1);
+        }
+        
+        .char-counter {
+            font-size: 0.85rem;
+            color: #777;
+            margin-top: 0.5rem;
+            text-align: right;
+        }
+        
+        .char-counter.invalid {
+            color: #dc3545;
+        }
+        
+        .thm-btn {
+            padding: 10px 24px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .thm-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .validation-message {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+        
+        .validation-message.show {
+            display: block;
+        }
+        
+        /* Notification styles */
+        .notification {
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .notification.show {
+            display: block;
+        }
+        
+        .notification-warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+        }
+        
+        .notification-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .notification-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Calendar styles */
+        #lite-datepicker {
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+        }
+        
+        .litepicker {
+            font-family: 'Raleway', sans-serif;
+            font-size: 0.95rem;
+            margin: 0 auto;
+        }
+        
+        .litepicker-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+        
+        .litepicker .container__days .day-item {
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        
+        .litepicker .container__days .day-item:hover {
+            background-color: rgba(var(--thm-primary-rgb), 0.1);
+        }
+        
+        .litepicker .container__days .day-item.is-locked {
+            text-decoration: line-through;
+            background-color: #f8f8f8;
+        }
+        
+        .litepicker .container__days .day-item.is-today {
+            color: var(--thm-primary);
+            font-weight: bold;
+        }
+        
+        .litepicker .container__days .day-item.is-in-range,
+        .litepicker .container__days .day-item.is-start-date,
+        .litepicker .container__days .day-item.is-end-date {
+            background-color: var(--thm-primary);
+            color: white;
+        }
+        
+        .calendar-container {
+            margin-bottom: 30px;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        
+        .calendar-title {
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: var(--thm-primary);
+            font-size: 1.1rem;
+        }
+        
+        /* Selected dates styles */
+        .selected-dates-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .selected-dates-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .selected-dates-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .date-tag {
+            display: inline-flex;
+            align-items: center;
+            background-color: rgba(var(--thm-primary-rgb), 0.1);
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 14px;
+            color: var(--thm-primary);
+            border: 1px solid rgba(var(--thm-primary-rgb), 0.2);
+        }
+        
+        .date-tag .date-text {
+            margin-right: 8px;
+        }
+        
+        .date-tag .remove-date {
+            margin-left: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: rgba(var(--thm-primary-rgb), 0.1);
+            transition: all 0.2s ease;
+        }
+        
+        .date-tag .remove-date:hover {
+            background-color: rgba(var(--thm-primary-rgb), 0.3);
+        }
+        
+        /* Hidden input to store selected dates */
+        #selected-dates-input {
+            display: none;
+        }
     </style>
     <!------ Include the above in your HEAD tag ---------->
 
@@ -57,27 +270,314 @@
        
             <div class="_body mt-5 py-5">
                 <div class="_box">
-                    <p>
-                        <h4>@lang('message.booking-reject-header')</h4>
-                    </p>
-                    <form action="{{route('booking.rejection',$booking)}}" method="POST">
+                    <h4 class="mb-4">@lang('message.booking-reject-header')</h4>
+                    
+                    <!-- Notification area -->
+                    <div id="notification" class="notification notification-warning">
+                        <span id="notification-message"></span>
+                    </div>
+                    
+                    <form id="rejection-form" action="{{route('booking.rejection',$booking)}}" method="POST">
                         @csrf
+                        
+                        <!-- Calendar section -->
                         <div class="form-group">
-                            <div class="mt-4 mb-3">
-                                <p>@lang('message.booking-reject-message')</p>
-                                <textarea class="form-control" name="reason" id="" rows="3" required></textarea>
+                            <p class="section-title">@lang('guidings.available_dates')</p>
+                            <div class="calendar-container">
+                                <div id="lite-datepicker"></div>
+                                
+                                <!-- Selected dates container -->
+                                <div class="selected-dates-container">
+                                    <p class="selected-dates-title">@lang('guidings.Alternative_Dates')</p>
+                                    <div class="selected-dates-tags" id="selected-dates-tags">
+                                        <!-- Tags will be added here dynamically -->
+                                    </div>
+                                    <!-- Hidden input to store selected dates -->
+                                    <input type="hidden" name="alternative_dates" id="selected-dates-input">
+                                    <div id="date-validation-message" class="validation-message">
+                                        @lang('guidings.Select_At_Least_One_Date')
+                                    </div>
+                                </div>
                             </div>
-                          <div>
-                            <button type="submit" class="thm-btn py-2 my-2">@lang('message.booking-submit')</button>
-                          </div>
                         </div>
-                      
+                        
+                        <div class="form-group">
+                            <p class="section-title">@lang('message.booking-reject-message')</p>
+                            <textarea class="form-control" name="reason" id="rejection-reason" rows="4" placeholder="@lang('guidings.Rejection_Reason_Placeholder')"></textarea>
+                            <div class="char-counter" id="char-counter">
+                                <div id="reason-validation-message" class="validation-message">
+                                    @lang('guidings.Min_Characters_Message') 
+                                </div>0/50 @lang('guidings.Characters')</div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" id="submit-btn" class="thm-btn py-2 my-2" disabled>@lang('message.booking-submit')</button>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Get blocked events from the booking
+    const blockedEvents = @json($blocked_events ?? []);
+    
+    let lockDays = [];
+    if (blockedEvents && Array.isArray(blockedEvents)) {
+        lockDays = blockedEvents.flatMap(event => {
+            // Make sure event.from and event.due exist before creating Date objects
+            if (event && event.from && event.due) {
+                const fromDate = new Date(event.from);
+                const dueDate = new Date(event.due);
 
+                // Create an array of all dates in the range
+                const dates = [];
+                for (let d = new Date(fromDate); d <= dueDate; d.setDate(d.getDate() + 1)) {
+                    dates.push(new Date(d));
+                }
+                return dates;
+            }
+            return [];
+        });
+    }
+
+    // Array to store selected dates
+    let selectedDates = [];
+    
+    // Function to show notification
+    function showNotification(message, type = 'warning') {
+        const notification = document.getElementById('notification');
+        const notificationMessage = document.getElementById('notification-message');
+        
+        // Remove all existing classes
+        notification.className = 'notification';
+        
+        // Add appropriate class based on type
+        notification.classList.add(`notification-${type}`);
+        notification.classList.add('show');
+        
+        // Set message
+        notificationMessage.textContent = message;
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 5000);
+    }
+
+    // Function to format date in a more descriptive way
+    function formatDateDescriptive(dateString) {
+        try {
+            // Force the date to be interpreted as local time by adding a time component
+            const localDate = dateString + 'T12:00:00';
+            
+            // Create a date object that won't be affected by timezone conversion
+            const date = new Date(localDate);
+            
+            // Check if the date is valid
+            if (isNaN(date.getTime())) {
+                throw new Error('Invalid date');
+            }
+            
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone // Use browser's timezone
+            };
+            
+            return date.toLocaleDateString('{{app()->getLocale()}}', options);
+        } catch (error) {
+            console.error("Error formatting date:", error, dateString);
+            return dateString; // Fallback to original string if there's an error
+        }
+    }
+
+    // Function to update the selected dates display and hidden input
+    function updateSelectedDates() {
+        const tagsContainer = document.getElementById('selected-dates-tags');
+        const hiddenInput = document.getElementById('selected-dates-input');
+        
+        if (!tagsContainer || !hiddenInput) {
+            console.error("Could not find tags container or hidden input");
+            return;
+        }
+        
+        // Clear current tags
+        tagsContainer.innerHTML = '';
+        
+        // Add new tags for each selected date
+        selectedDates.forEach(date => {
+            const tag = document.createElement('div');
+            tag.className = 'date-tag';
+            tag.innerHTML = `
+                <span class="date-text">${formatDateDescriptive(date)}</span>
+                <span class="remove-date" data-date="${date}">&times;</span>
+            `;
+            tagsContainer.appendChild(tag);
+            
+            // Add click event to remove button
+            tag.querySelector('.remove-date').addEventListener('click', function() {
+                const dateToRemove = this.getAttribute('data-date');
+                selectedDates = selectedDates.filter(d => d !== dateToRemove);
+                updateSelectedDates();
+                validateForm();
+            });
+        });
+        
+        // Update hidden input value
+        hiddenInput.value = JSON.stringify(selectedDates);
+        
+        // Show/hide validation message
+        const validationMessage = document.getElementById('date-validation-message');
+        if (selectedDates.length === 0) {
+            validationMessage.classList.add('show');
+        } else {
+            validationMessage.classList.remove('show');
+        }
+    }
+
+    // Function to validate the form
+    function validateForm() {
+        const submitBtn = document.getElementById('submit-btn');
+        const reasonTextarea = document.getElementById('rejection-reason');
+        const reasonValidation = document.getElementById('reason-validation-message');
+        const dateValidation = document.getElementById('date-validation-message');
+        
+        const hasSelectedDates = selectedDates.length > 0;
+        const hasEnoughChars = reasonTextarea.value.length >= 50;
+        
+        // Update validation messages
+        if (hasEnoughChars) {
+            if (reasonValidation) reasonValidation.classList.remove('show');
+        } else {
+            if (reasonValidation) reasonValidation.classList.add('show');
+        }
+        
+        if (hasSelectedDates) {
+            if (dateValidation) dateValidation.classList.remove('show');
+        } else {
+            if (dateValidation) dateValidation.classList.add('show');
+        }
+        
+        // Enable/disable submit button
+        // if (submitBtn) submitBtn.disabled = !(hasSelectedDates && hasEnoughChars);
+    }
+
+    // Character counter for textarea
+    const reasonTextarea = document.getElementById('rejection-reason');
+    const charCounter = document.getElementById('char-counter');
+    
+    reasonTextarea.addEventListener('input', function() {
+        const charCount = this.value.length;
+        charCounter.textContent = `${charCount}/50 characters`;
+        
+        if (charCount < 50) {
+            charCounter.classList.add('invalid');
+        } else {
+            charCounter.classList.remove('invalid');
+        }
+        
+        validateForm();
+    });
+
+    function initCheckNumberOfColumns() {
+        return window.innerWidth < 768 ? 1 : 2;
+    }
+
+    // Check if the lite-datepicker element exists
+    const datepickerElement = document.getElementById('lite-datepicker');
+    if (!datepickerElement) {
+        console.error("Could not find lite-datepicker element");
+        return;
+    }
+    
+    // Create a dummy input element for Litepicker
+    const hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.id = 'litepicker-hidden-input';
+    datepickerElement.appendChild(hiddenInput);
+    
+    // Initialize Litepicker
+    try {
+        const picker = new Litepicker({
+            element: hiddenInput,
+            inlineMode: true,
+            parentEl: datepickerElement,
+            singleMode: true,
+            numberOfColumns: initCheckNumberOfColumns(),
+            numberOfMonths: initCheckNumberOfColumns(),
+            minDate: new Date(new Date().getTime() + 24 * 60 * 60 * 1000), // Tomorrow
+            lockDays: lockDays,
+            lang: '{{app()->getLocale()}}',
+            setup: (picker) => {
+                window.addEventListener('resize', () => {
+                    picker.setOptions({
+                        numberOfColumns: initCheckNumberOfColumns(),
+                        numberOfMonths: initCheckNumberOfColumns()
+                    });
+                });
+            },
+            onSelect: function(date) {
+                if (date) {
+                    const formattedDate = date.format('YYYY-MM-DD');
+                    
+                    console.log(formattedDate);
+                    // Check if date is already selected
+                    if (!selectedDates.includes(formattedDate)) {
+                        // Limit to 3 alternative dates
+                        if (selectedDates.length < 3) {
+                            selectedDates.push(formattedDate);
+                            updateSelectedDates();
+                            validateForm();
+                        } else {
+                            // Show notification instead of alert
+                            showNotification("{{__('guidings.Max_Three_Dates')}}", 'warning');
+                        }
+                    }
+                    
+                    // Clear the selection to allow selecting the same date again if removed
+                    picker.clearSelection();
+                }
+            }
+        });
+
+        // Initialize the selected dates display
+        updateSelectedDates();
+        
+        // Add a manual click handler to the calendar days as a fallback
+        datepickerElement.addEventListener('click', function(e) {
+            if (e.target.classList.contains('day-item') && !e.target.classList.contains('is-locked')) {
+                const clickedDate = e.target.getAttribute('data-time');
+                if (clickedDate) {
+                    const date = new Date(parseInt(clickedDate));
+                    const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+                    
+                    // Check if date is already selected
+                    if (!selectedDates.includes(formattedDate)) {
+                        // Limit to 3 alternative dates
+                        if (selectedDates.length < 3) {
+                            selectedDates.push(formattedDate);
+                            updateSelectedDates();
+                            validateForm();
+                        } else {
+                            // Show notification instead of alert
+                            showNotification("{{__('guidings.Max_Three_Dates')}}", 'warning');
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Initial form validation
+        validateForm();
+    } catch (error) {
+        console.error("Error initializing calendar:", error);
+    }
+});
+</script>
 
 @endsection

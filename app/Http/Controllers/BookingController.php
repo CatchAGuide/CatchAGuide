@@ -62,16 +62,17 @@ class BookingController extends Controller
             if($booking->guiding->user->language == 'en'){
                 \App::setLocale('en');
             }    
+
             return view('pages.additional.mail_redirection.status',[
              'booking' => $booking,
              'action' => 'reject',
             ]);
-         }
- 
+        }
 
-
+        $blockedevent = $booking->guiding->getBlockedEvents();
         return view('pages.additional.rejected',[
             'booking' => $booking,
+            'blocked_events' => $blockedevent
         ]);
         
 
