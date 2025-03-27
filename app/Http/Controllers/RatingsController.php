@@ -13,7 +13,7 @@ class RatingsController extends Controller
 {
     public function show($token)
     {
-        $booking = Booking::where('token', $token)->firstOrFail();
+        $booking = Booking::where('token', $token)->where('status', 'accepted')->firstOrFail();
         $user = User::find($booking->user_id);
 
         if($booking->is_reviewed){

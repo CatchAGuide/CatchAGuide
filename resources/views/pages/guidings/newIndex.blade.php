@@ -1154,11 +1154,11 @@
             </div>
             <div class="ratings-slider owl-carousel">
                 @foreach($reviews as $review)
-                    <div class="ratings-item">
+                <div class="ratings-item">
                         <div class="ratings-comment">
                             <div class="ratings-comment-top">
                                 <div class="user-info">
-                                    <p class="user">{{$review->user->firstname }}</p>
+                                    <p class="user">{{$review->user->firstname}}</p>
                                     <p class="date">{{ ($review->created_at != null) ? Carbon\Carbon::parse($review->created_at)->format('F j, Y') : "-" }}</p>
                                 </div>
                                 <p>

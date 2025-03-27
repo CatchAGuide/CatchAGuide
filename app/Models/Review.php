@@ -32,7 +32,9 @@ class Review extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->booking->is_guest
+            ? $this->belongsTo(UserGuest::class)
+            : $this->belongsTo(User::class);
     }
 
     public function guide()
