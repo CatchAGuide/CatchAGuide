@@ -346,7 +346,7 @@
     background-color: #313041;
     padding: 16px 0 35px;
     position: relative;
-    margin-bottom: 60px;
+    margin-bottom: 30px;
 }
 
 .short-header .floating-search-container {

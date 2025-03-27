@@ -40,7 +40,7 @@ return [
     'responsibleBody' => 'Note on the responsible body',
     'responsibleBodyMsg1' => 'The responsible body for data processing on this website is:',
     'responsibleBodyMsg2' => 'Catch a Guide',
-    'responsibleBodyMsg3' => 'Phone: [+49 15752996580]',
+    'responsibleBodyMsg3' => 'Phone: [+49 (0) 15155495574]',
     'responsibleBodyMsg4' => 'Email: info.catchaguide@gmail.com',
     'responsibleBodyMsg5' => 'The responsible body is the natural or legal person who, alone or together with others, decides on the purposes and means of processing personal data (e.g. names, e-mail addresses, etc.).',
     'storageDuration' => 'storage duration',
