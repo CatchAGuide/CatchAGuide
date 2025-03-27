@@ -128,3 +128,19 @@ if (!function_exists('targets')) {
         return new \App\Helpers\TargetHelper();
     }
 }
+
+if (!function_exists('getRatingLabel')) {
+    function getRatingLabel($score)
+    {
+        if ($score >= 9) return 'Ausgezeichnet';
+        if ($score >= 8) return 'Sehr Gut';
+        if ($score >= 7) return 'Gut';
+        if ($score >= 6) return 'Befriedigend';
+        if ($score >= 5) return 'Ausreichend';
+        if ($score >= 4) return 'Mangelhaft';
+        if ($score >= 3) return 'Ungenügend';
+        if ($score >= 2) return 'Sehr Schlecht';
+        if ($score >= 1) return 'Schlecht';
+        return 'Nicht bewertet';
+    }
+}

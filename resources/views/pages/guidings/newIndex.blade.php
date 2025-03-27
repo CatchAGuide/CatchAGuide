@@ -73,16 +73,6 @@
             overflow: hidden;
         }
 
-        /* .guidings-gallery .left-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        } */
-
         .guidings-gallery .right-images img {
             width: 100%;
             height: 100%;
@@ -104,9 +94,10 @@
 
         .score {
             font-size: 3.5rem;
-            font-weight: bold;
+            font-weight: 700;
             color: #006B5B;
             line-height: 1;
+            margin-bottom: 0.25rem;
         }
 
         .rating-label {
@@ -115,9 +106,8 @@
         }
 
         .rating-categories {
-            min-width: 280px;
             width: 100%;
-            max-width: 400px;
+            max-width: 600px;
         }
 
         .category-label {
@@ -142,13 +132,13 @@
         }
 
         .rating-info {
-            max-width: 600px;
+            /* max-width: 800px; */
             margin: 0 auto;
         }
 
         @media (max-width: 767px) {
             .rating-categories {
-                min-width: 100%;
+                width: 100%;
                 padding: 0 1rem;
             }
             
@@ -160,6 +150,32 @@
                 text-align: center !important;
                 margin-bottom: 2rem;
             }
+        }
+
+        .score-wrapper {
+            width: 110px;
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+            font-weight: 400;
+        }
+
+        .rating-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background-color: rgba(0, 107, 91, 0.1);
+            color: #006B5B;
+            border-radius: 4px;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .rating-count {
+            font-size: 0.875rem;
+            color: #6c757d;
         }
 
     </style>
@@ -210,11 +226,11 @@
                         </div>
                     </div>
                 </div>
-                @if ($average_rating)
+                @if ($average_overall_score)
                 <div class="col-auto pe-0 me-1">
                   
                     <p class="mb-1">
-                        <span class="text-warning">★</span> {{$average_rating}}/5 ({{$ratings->count()}} reviews)
+                        <span class="text-warning">★</span> {{$average_overall_score}}/10 ({{$reviews_count}} reviews)
                     </p>
                 </div>
                 @endif
@@ -1002,43 +1018,6 @@
         <!-- Google Map will be rendered here -->
     </div>
 
-    <!-- Rating Summary -->
-    <div class="guidings-rating mb-5">
-    @if(round($average_rating) > 0)
-        <div class="ratings-head">
-            <h3>{{ translate('Bewertungen') }}</h3>
-            <div class="ratings-score-ave">
-                <div class="ratings-card">
-                    <span class="text-warning">★</span> {{$average_rating}}/5 ({{ $guiding->user->received_ratings->count() }} reviews)
-                </div>
-            </div>
-        </div>
-        <div class="ratings-slider owl-carousel">
-            @foreach($guiding->user->received_ratings as $received_rating)
-                <div class="ratings-item">
-                    <div class="ratings-comment">
-                        <div class="ratings-comment-top">
-                            <div class="user-info">
-                                <p class="user">{{$received_rating->user->firstname }}</p>
-                                <p class="date">{{ ($received_rating->created_at != null) ? Carbon\Carbon::parse($received_rating->created_at)->format('F j, Y') : "-" }}</p>
-                            </div>
-                            <p>
-                                <span class="text-warning">★</span> {{ floor($received_rating->rating)}}/5
-                            </p>
-                        </div>
-                        <div class="comment-content">
-                            <p class="description">{{ translate($received_rating->description) }}</p>
-                            <small class="see-more text-orange">{{ translate('See More') }}</small>
-                            <small class="show-less text-orange">{{ translate('Show Less') }}</small>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    @endif
-</div>
-
-
     <div class="mb-5">
         <div class="tour-details-two__about">
             <div class="row">
@@ -1108,66 +1087,96 @@
             </div>
         </div>
     </div>
-    <div class="mb-5">
-        <div class="tour-details-two__about">
-            <div class="row">
-                <div class="rating-overview text-center bg-light p-4 rounded">
-                    <div class="d-flex align-items-start justify-content-center gap-5 flex-wrap">
-                        <!-- Left side - Score and title -->
-                        <div class="rating-left text-start">
-                            <h2 class="score mb-0">9.4</h2>
-                            <div class="text-muted small">von 10</div>
-                            <div class="rating-label text-success mt-2">Ausgezeichnet</div>
-                            <div class="text-muted small">163 Bewertungen</div>
-                        </div>
 
-                        <!-- Right side - Rating categories -->
-                        <div class="rating-categories">
-                            <div class="category d-flex align-items-center mb-3">
-                                <span class="category-label me-4">Ambiente</span>
-                                <div class="d-flex align-items-center flex-grow-1 gap-2">
-                                    <div class="progress flex-grow-1">
-                                        <div class="progress-bar" style="width: 93%"></div>
-                                    </div>
-                                    <span class="rating-value">9.3</span>
+    <div class="guidings-rating mb-5">
+        @if($reviews_count > 0)
+            <div class="ratings-head">
+                <div class="row">
+                    <div class="rating-overview text-center bg-light p-4 rounded">
+                        <div class="d-flex align-items-start justify-content-center gap-5 flex-wrap">
+                            <!-- Left side - Score and ratings -->
+                            <div class="rating-left text-start d-flex align-items-center gap-3">
+                                <div class="score-wrapper">
+                                    <div class="score">{{ number_format($average_grandtotal_score, 1) }}</div>
+                                    <div class="score-label">von 10</div>
+                                </div>
+                                <div class="rating-info text-center">
+                                    <div class="rating-badge">{{ getRatingLabel($average_grandtotal_score) }}</div>
+                                    <div class="rating-count">{{ $reviews_count }} Bewertungen</div>
                                 </div>
                             </div>
-                            <div class="category d-flex align-items-center mb-3">
-                                <span class="category-label me-4">Essen</span>
-                                <div class="d-flex align-items-center flex-grow-1 gap-2">
-                                    <div class="progress flex-grow-1">
-                                        <div class="progress-bar" style="width: 94%"></div>
-                                    </div>
-                                    <span class="rating-value">9.4</span>
-                                </div>
-                            </div>
-                            <div class="category d-flex align-items-center">
-                                <span class="category-label me-4">Service</span>
-                                <div class="d-flex align-items-center flex-grow-1 gap-2">
-                                    <div class="progress flex-grow-1">
-                                        <div class="progress-bar" style="width: 96%"></div>
-                                    </div>
-                                    <span class="rating-value">9.6</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Bottom info section -->
-                    <div class="rating-info mt-4 text-center">
-                        <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
-                            <i class="fas fa-check-circle text-success"></i>
-                            <p class="mb-0">Echte Erlebnisse von echten Restaurantgästen</p>
+                            <!-- Right side - Rating categories -->
+                            <div class="rating-categories">
+                                <div class="category d-flex align-items-center mb-3">
+                                    <span class="category-label me-4">@lang('guidings.Overall')</span>
+                                    <div class="d-flex align-items-center flex-grow-1 gap-2">
+                                        <div class="progress flex-grow-1">
+                                            <div class="progress-bar" style="width: {{ ($average_overall_score/10)*100 }}%"></div>
+                                        </div>
+                                        <span class="rating-value">{{ number_format($average_overall_score, 1) }}</span>
+                                    </div>
+                                </div>
+                                <div class="category d-flex align-items-center mb-3">
+                                    <span class="category-label me-4">@lang('guidings.Guide')</span>
+                                    <div class="d-flex align-items-center flex-grow-1 gap-2">
+                                        <div class="progress flex-grow-1">
+                                            <div class="progress-bar" style="width: {{ ($average_guide_score/10)*100 }}%"></div>
+                                        </div>
+                                        <span class="rating-value">{{ number_format($average_guide_score, 1) }}</span>
+                                    </div>
+                                </div>
+                                <div class="category d-flex align-items-center">
+                                    <span class="category-label me-4">@lang('guidings.Region_Water')</span>
+                                    <div class="d-flex align-items-center flex-grow-1 gap-2">
+                                        <div class="progress flex-grow-1">
+                                            <div class="progress-bar" style="width: {{ ($average_region_water_score/10)*100 }}%"></div>
+                                        </div>
+                                        <span class="rating-value">{{ number_format($average_region_water_score, 1) }}</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <p class="text-muted mb-2">
-                            Gesamtwertungen und Bewertungen können nur von Gästen abgegeben werden, die über TheFork reserviert haben.
-                        </p>
-                        <a href="#" class="text-decoration-none">Wie werden Gesamtwertungen berechnet?</a>
+    
+                        <!-- Bottom info section -->
+                        <div class="rating-info mt-4 text-center">
+                            <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+                                <i class="fas fa-check-circle text-success"></i>
+                                <p class="mb-0">@lang('guidings.Real_experiences')</p>
+                            </div>
+                            <p class="text-muted mb-2">
+                                @lang('guidings.Real_experiences_description')
+                            </p>
+                            <a href="#" class="text-decoration-none">@lang('guidings.How_are_overall_ratings_calculated')</a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+            <div class="ratings-slider owl-carousel">
+                @foreach($reviews as $review)
+                    <div class="ratings-item">
+                        <div class="ratings-comment">
+                            <div class="ratings-comment-top">
+                                <div class="user-info">
+                                    <p class="user">{{$review->user->firstname }}</p>
+                                    <p class="date">{{ ($review->created_at != null) ? Carbon\Carbon::parse($review->created_at)->format('F j, Y') : "-" }}</p>
+                                </div>
+                                <p>
+                                    <span class="text-warning">★</span> {{ number_format($review->grandtotal_score, 1) }}/10
+                                </p>
+                            </div>
+                            <div class="comment-content">
+                                <p class="description">{{ translate($review->comment) }}</p>
+                                <small class="see-more text-orange">{{ translate('See More') }}</small>
+                                <small class="show-less text-orange">{{ translate('Show Less') }}</small>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
     </div>
+
     @if($same_guiding && count($same_guiding ) > 0)
     <section class="tour-details-two mb-5 p-0">
         <div class="container">
