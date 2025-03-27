@@ -9,8 +9,10 @@ class StoreRatingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'rating' => ['required'],
-            'description' => ['nullable']
+            'rating_overall' => ['required'],
+            'rating_guide' => ['required'],
+            'rating_region' => ['required'],
+            'comment' => ['nullable']
         ];
     }
 
