@@ -62,6 +62,7 @@
 @section('content')
     <!--Page Header Start-->
     <div class="container">
+        @if(!Request::routeIs('ratings.show'))
         <section class="page-header">
             <div class="page-header__bottom breadcrumb-container">
                 <div class="page-header__bottom-inner">
@@ -81,6 +82,7 @@
                 </div>
             </div>
         </section>
+        @endif
     </div>
     <!--Page Header End-->
     <div class="container" style=" margin-bottom: 20px;">

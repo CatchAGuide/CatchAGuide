@@ -214,9 +214,10 @@ Route::post('sendcontact', [\App\Http\Controllers\ZoisController::class, 'sendco
 Route::post('sendnewsletter', [\App\Http\Controllers\ZoisController::class, 'sendnewsletter'])->name('sendnewsletter');
 
 Route::name('ratings.')->prefix('ratings')->group(function () {
-    Route::get('/{booking}', [RatingsController::class, 'show'])->name('show');
-    Route::post('/store/{bookingid}', [RatingsController::class, 'store'])->name('store');
-    Route::get('/review/{id}',[RatingsController::class, 'review'])->name('review');
+    Route::get('/notified', [RatingsController::class, 'notified'])->name('notified');
+    Route::get('/review/{id}', [RatingsController::class, 'review'])->name('review');
+    Route::get('/{token}', [RatingsController::class, 'show'])->name('show');
+    Route::post('/{token}', [RatingsController::class, 'store'])->name('store');
 });
 
 Route::name('law.')->group(function() {
