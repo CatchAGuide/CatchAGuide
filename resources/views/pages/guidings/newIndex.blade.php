@@ -230,7 +230,7 @@
                 <div class="col-auto pe-0 me-1">
                   
                     <p class="mb-1">
-                        <span class="text-warning">★</span> {{$average_overall_score}}/10 ({{$reviews_count}} reviews)
+                        <span class="text-warning">★</span> {{number_format($average_overall_score, 1)}}/10 ({{$reviews_count}} reviews)
                     </p>
                 </div>
                 @endif

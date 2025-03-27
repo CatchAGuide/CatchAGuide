@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreGuidingRequest;
 use App\Http\Requests\StoreNewGuidingRequest;
-use App\Models\FishType;
 use App\Models\Gallery;
 use App\Models\Guiding;
 use App\Models\Target;
@@ -12,16 +11,12 @@ use App\Models\Method;
 use App\Models\Water;
 use App\Models\GuidingRequest;
 use App\Models\Inclussion;
-use App\Models\GuidingExtra;
-use App\Models\GuidingPrice;
-use App\Models\GuidingTargetFish;
 use App\Models\GuidingBoatType;
 use App\Models\GuidingBoatDescription;
 use App\Models\GuidingAdditionalInformation;
 use App\Models\GuidingRequirements;
 use App\Models\GuidingRecommendations;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Auth;
@@ -32,11 +27,9 @@ use App\Mail\SearchRequestUserMail;
 use Illuminate\Support\Facades\Log;
 use App\Models\BlockedEvent;
 use App\Models\ExtrasPrice;
-use App\Models\FishingType;
 use App\Models\BoatExtras;
 use App\Models\Destination;
-use App\Facades\Agent;
-use Illuminate\Support\Facades\Cache;
+use App\Models\Review;
 
 class GuidingsController extends Controller
 {
@@ -606,7 +599,8 @@ class GuidingsController extends Controller
         $fishingType = $guiding->fishing_type_id;
 
         // Get reviews instead of ratings
-        $reviews = $guiding->reviews;
+        // $reviews = $guiding->reviews;
+        $reviews = Review::where('guide_id', $guiding->user_id)->get();
         $reviews_count = $reviews->count();
 
         // Calculate average scores
