@@ -627,10 +627,10 @@
                     </div>
                     @endif
                 </div>
-                @if($row_data->faq_title != '' && $faq->count() > 0)
-                <h2 class="mb-3 mt-5">{{ translate($row_data->faq_title) }}</h2>
+                @if($row_data->language->faq_title != '' && $row_data->faq->count() > 0)
+                <h2 class="mb-3 mt-5">{{ translate($row_data->language->faq_title) }}</h2>
                     <div class="accordion mb-5" id="faq">
-                        @foreach($faq as $row)
+                        @foreach($row_data->faq as $row)
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ $row->id }}" aria-expanded="true" aria-controls="faq{{ $row->id }}">{{ translate($row->question) }}</button>

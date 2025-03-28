@@ -38,12 +38,14 @@ class CategoryTargetFishController extends Controller
     public function targets($slug, Request $request)
     {
         $language = app()->getLocale();
-        $row_data = CategoryPage::whereSlug($slug)->whereType('Targets')->with('language')->first();
-        $row_data->language = $row_data->language($language);
+        $row_data = CategoryPage::whereSlug($slug)->whereType('Targets')->with('language', 'faq')->first();
 
-        if (is_null($row_data)) {
+        if (!$row_data) {
             abort(404);
         }
+
+        $row_data->language = $row_data->language($language);
+        $row_data->faq = $row_data->faq($language);
 
         $title = 'Target Fish';
 
