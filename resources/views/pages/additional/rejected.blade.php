@@ -464,7 +464,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         
         // Enable/disable submit button
-        // if (submitBtn) submitBtn.disabled = !(hasSelectedDates && hasEnoughChars);
+        if (submitBtn) submitBtn.disabled = !(hasSelectedDates && hasEnoughChars);
     }
 
     // Character counter for textarea
@@ -521,28 +521,6 @@ document.addEventListener("DOMContentLoaded", function() {
                     });
                 });
             },
-            onSelect: function(date) {
-                if (date) {
-                    const formattedDate = date.format('YYYY-MM-DD');
-                    
-                    console.log(formattedDate);
-                    // Check if date is already selected
-                    if (!selectedDates.includes(formattedDate)) {
-                        // Limit to 3 alternative dates
-                        if (selectedDates.length < 3) {
-                            selectedDates.push(formattedDate);
-                            updateSelectedDates();
-                            validateForm();
-                        } else {
-                            // Show notification instead of alert
-                            showNotification("{{__('guidings.Max_Three_Dates')}}", 'warning');
-                        }
-                    }
-                    
-                    // Clear the selection to allow selecting the same date again if removed
-                    picker.clearSelection();
-                }
-            }
         });
 
         // Initialize the selected dates display
@@ -553,8 +531,15 @@ document.addEventListener("DOMContentLoaded", function() {
             if (e.target.classList.contains('day-item') && !e.target.classList.contains('is-locked')) {
                 const clickedDate = e.target.getAttribute('data-time');
                 if (clickedDate) {
-                    const date = new Date(parseInt(clickedDate));
-                    const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+                    // Create date from timestamp and adjust for timezone issues
+                    const timestamp = parseInt(clickedDate);
+                    const date = new Date(timestamp);
+                    
+                    // Format the date directly without using toISOString to avoid timezone issues
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const formattedDate = `${year}-${month}-${day}`;
                     
                     // Check if date is already selected
                     if (!selectedDates.includes(formattedDate)) {

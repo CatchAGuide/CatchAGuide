@@ -8,6 +8,7 @@ use App\Models\Booking;
 use App\Models\BlockedEvent;
 
 use App\Events\BookingStatusChanged;
+use App\Models\UserInformation;
 
 class BookingController extends Controller
 {
@@ -74,23 +75,43 @@ class BookingController extends Controller
             'booking' => $booking,
             'blocked_events' => $blockedevent
         ]);
-        
-
     }
 
     public function rejectProcess(Booking $booking,RejectionRequest $request){
 
-
-        $booking->update([
-            'status' => 'rejected',
-            'additional_information' => $request->reason,
-        ]);
-
+        $booking->status = 'rejected';
+        $booking->additional_information = $request->reason;
+        
+        $alternativeDates = json_decode($request->alternative_dates);
+        if (is_array($alternativeDates)) {
+            usort($alternativeDates, function($a, $b) {
+                return strtotime($a) - strtotime($b);
+            });
+            $booking->alternative_dates = json_encode($alternativeDates);
+        } else {
+            $booking->alternative_dates = $request->alternative_dates;
+        }
+        
+        $booking->save();
      
         event(new BookingStatusChanged($booking, 'rejected'));
 
-
         return redirect()->route('booking.rejectsuccess');
+    }
 
+    public function reschedule($token){
+        $booking = Booking::where('token',$token)->first();
+        $selectedDate = request()->get('date');
+        
+        if(!$booking && !$selectedDate){
+            abort(404);
+        }
+
+        return view('pages.checkout.reschedule',[
+            'booking' => $booking,
+            'guiding' => $booking->guiding,
+            'user' => $booking->user,
+            'selectedDate' => $selectedDate
+        ]);
     }
 }

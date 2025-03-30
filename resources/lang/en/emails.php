@@ -69,9 +69,10 @@ return [
     'guest_booking_request_accepted_text_5' => 'Thank you for using our platform. We wish you a fantastic fishing experience and hope you enjoy the adventure ahead!',
     'guest_booking_request_accepte_text_6' => 'Best regards,',
     'guest_booking_request_accepted_text_7' => 'The Catch A Guide Team',
+
     'guest_booking_request_cancelled_title' => 'Update on Your Catch a Guide Booking Request!',
-    'guest_booking_request_cancelled_text_1' => 'We\'re writing to inform you that [Guide Name] has declined your booking request for [Date] at [Location]. We understand this can be disappointing, and we apologize for any inconvenience.',
-    'guest_booking_request_cancelled_text_2' => 'Here is the message provided by [Guide Name]:',
+    'guest_booking_request_cancelled_text_1' => 'We\'re writing to inform you that <b>[Guide Name]</b> has declined your booking request for <b>[Date]</b> at <b>[Location]</b>. We understand this can be disappointing, and we apologize for any inconvenience.',
+    'guest_booking_request_cancelled_text_2' => 'Here is the message provided by',
     'guest_booking_request_cancelled_text_3' => '"[Guide\'s Cancellation Message - This is the text the guide entered when declining the booking.]"',
     'guest_booking_request_cancelled_text_4' => 'However, [Guide Name] has provided some alternative dates that might work for you:',
     'guest_booking_request_cancelled_text_5' => 'If any of these dates are suitable, please reply to this email, and we\'ll process the booking for you.',
@@ -79,6 +80,7 @@ return [
     'guest_booking_request_cancelled_text_7' => 'We appreciate your understanding and hope to help you find the perfect fishing experience soon.',
     'guest_booking_request_cancelled_text_8' => 'Tight lines,',
     'guest_booking_request_cancelled_text_9' => 'The Catch A Guide Team',
+
     'guest_booking_request_reminder_title' => 'Your Fishing Adventure with Catch a Guide is 3 Days Away!',
     'guest_booking_request_reminder_text_1' => 'Just a friendly reminder that your fishing tour with [Guide Name] at [Location] is scheduled for [Date] at [Time]!',
     'guest_booking_request_reminder_text_2' => 'We\'re sure you\'re getting excited to hit the water. To ensure you\'re fully prepared, here are a few things to keep in mind:',

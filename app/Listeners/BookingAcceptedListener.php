@@ -20,8 +20,6 @@ class BookingAcceptedListener  implements ShouldQueue
 
     public function handle(BookingStatusChanged $event)
     {   
-   
-        
         if ($event->status === 'accepted') {
             if($event->booking->user->language == 'en'){
                 \App::setLocale('en');

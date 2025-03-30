@@ -71,7 +71,7 @@ return [
     'guest_booking_request_accepted_text_7' => 'Das Catch a Guide Team',
     'guest_booking_request_cancelled_title' => 'Update zu Deiner Catch a Guide Buchungsanfrage!',
     'guest_booking_request_cancelled_text_1' => 'Wir möchten Dich informieren, dass [Guide Name] Deine Buchungsanfrage für den [Date] am [Location] abgelehnt hat. Wir verstehen, dass dies enttäuschend sein kann, und entschuldigen uns für eventuelle Unannehmlichkeiten.',
-    'guest_booking_request_cancelled_text_2' => 'Hier ist die Nachricht von [Guide Name]:',
+    'guest_booking_request_cancelled_text_2' => 'Hier ist die Nachricht von:',
     'guest_booking_request_cancelled_text_3' => ' "Guide\'s Cancellation Message - Dies ist der Text, den der Guide bei der Ablehnung der Buchung eingegeben hat."',
     'guest_booking_request_cancelled_text_4' => ' Jedoch hat [Guide Name] einige alternative Termine angeboten, die für Dich passen könnten:',
     'guest_booking_request_cancelled_text_5' => 'Wenn einer dieser Termine für Dich geeignet ist, antworte bitte auf diese E-Mail, und wir werden die Buchung für Dich weiter bearbeiten.',

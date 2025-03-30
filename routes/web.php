@@ -61,6 +61,8 @@ Route::post('/language/switch', [App\Http\Controllers\LanguageController::class,
 Route::get('/booking-accept/{token}',[BookingController::class,'accept'])->name('booking.accept');
 Route::get('/booking-reject/{token}',[BookingController::class,'reject'])->name('booking.reject');
 Route::post('/update/reject/{booking}',[BookingController::class,'rejectProcess'])->name('booking.rejection');
+Route::get('/booking/reschedule/{token}',[BookingController::class,'reschedule'])->name('booking.reschedule');
+Route::post('/booking/reschedule/store',[BookingController::class,'rescheduleStore'])->name('booking.reschedule.store');
 
 Route::get('/reject/success',function(){
     return view('pages.additional.reject_success');
