@@ -146,10 +146,6 @@ class User extends Authenticatable
         return $return;
     }
 
-    public function reviews(){
-        return $this->hasMany(Review::class,'guide_id','id');
-    }
-
     /**
      * @return HasMany
      */

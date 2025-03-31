@@ -70,11 +70,6 @@ class Booking extends Model
         return $this->belongsTo(Rating::class);
     }
 
-    public function review(): BelongsTo
-    {
-        return $this->belongsTo(Review::class);
-    }
-
     public function isBookingOver()
     {
         if($this->blocked_event){

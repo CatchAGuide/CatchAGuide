@@ -6,19 +6,15 @@ use App\Http\Requests\StoreRatingRequest;
 use App\Models\Booking;
 use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\Guide\RatingConfirmation;
 
 class RatingsController extends Controller
 {
-    public function show($token)
+    public function show(Booking $booking)
     {
-        $booking = Booking::where('token', $token)->firstOrFail();
+        #if (! request()->hasValidSignature() || $booking->rating_id !== null) {
+        #    abort(401);
+        #}
         $user = User::find($booking->user_id);
-
-        if($booking->is_reviewed){
-            return redirect()->route('ratings.notified')->with('message', 'Thank you for your rating!');
-        }
 
         return view('pages.rating.show', [
             'booking' => $booking,
@@ -26,40 +22,18 @@ class RatingsController extends Controller
         ]);
     }
 
-    public function store(StoreRatingRequest $request, $token)
+    public function store(StoreRatingRequest $request, $bookingid)
     {
-        $booking = Booking::where('token', $token)->with('guiding', 'guiding.user')->firstOrFail();
+        $booking = Booking::find($bookingid);
         $data = $request->validated();
-        
-        $dataSave = [
-            'overall_score' => $data['rating_overall'],
-            'guide_score' => $data['rating_guide'],
-            'region_water_score' => $data['rating_region'],
-            'comment' => $data['comment'],
-            'user_id' => $booking->user->id,
-            'guide_id' => $booking->guiding->user->id,
-            'booking_id' => $booking->id,
-            'guiding_id' => $booking->guiding->id
-        ];
+        $data['user_id'] = auth()->id();
+        $data['booking_id'] = $booking->id;
+        $data['guide_id'] = $booking->guiding->user->id;
+        $data['created_at'] = Carbon::now();
+        $data['updated_at'] = Carbon::now();
 
-        $rating = $booking->review()->create($dataSave);
+        $booking->rating()->create($data);
 
-        if ($rating) {
-            $booking->is_reviewed = true;
-            $booking->save();
-            Mail::to($rating->guide->email)->send(new RatingConfirmation($rating));
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => __('guidings.rating_thank_you')
-        ]);
-    }
-
-    public function notified()
-    {
-        return view('pages.rating.notified', [
-            'message' => 'Thank you for your rating!'
-        ]);
+        return redirect()->route('welcome')->with('message', 'Die Bewertung wurde erfolgreich abgegeben!');
     }
 }

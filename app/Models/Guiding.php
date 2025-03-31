@@ -417,10 +417,6 @@ class Guiding extends Model
         return $this->hasMany(Rating::class,'guide_id','id');
     }
 
-    public function reviews(){
-        return $this->hasMany(Review::class,'guiding_id','id');
-    }
-
     public function boatType(){
         return $this->hasOne(GuidingBoatType::class,'id','boat_type');
     }

@@ -98,70 +98,6 @@
             aspect-ratio: 3/2;
         }
 
-        .rating-overview {
-            background-color: #FAF9F8;
-        }
-
-        .score {
-            font-size: 3.5rem;
-            font-weight: bold;
-            color: #006B5B;
-            line-height: 1;
-        }
-
-        .rating-label {
-            color: #006B5B;
-            font-weight: 500;
-        }
-
-        .rating-categories {
-            min-width: 280px;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .category-label {
-            min-width: 80px;
-            color: #6c757d;
-        }
-
-        .progress {
-            background-color: #E9ECEF;
-            border-radius: 4px;
-            height: 8px;
-        }
-
-        .progress-bar {
-            background-color: #006B5B;
-            border-radius: 4px;
-        }
-
-        .rating-value {
-            min-width: 32px;
-            font-weight: 500;
-        }
-
-        .rating-info {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        @media (max-width: 767px) {
-            .rating-categories {
-                min-width: 100%;
-                padding: 0 1rem;
-            }
-            
-            .rating-info {
-                padding: 0 1rem;
-            }
-            
-            .rating-left {
-                text-align: center !important;
-                margin-bottom: 2rem;
-            }
-        }
-
     </style>
 @endsection
 
@@ -1104,66 +1040,6 @@
                     </div>
 
 
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="mb-5">
-        <div class="tour-details-two__about">
-            <div class="row">
-                <div class="rating-overview text-center bg-light p-4 rounded">
-                    <div class="d-flex align-items-start justify-content-center gap-5 flex-wrap">
-                        <!-- Left side - Score and title -->
-                        <div class="rating-left text-start">
-                            <h2 class="score mb-0">9.4</h2>
-                            <div class="text-muted small">von 10</div>
-                            <div class="rating-label text-success mt-2">Ausgezeichnet</div>
-                            <div class="text-muted small">163 Bewertungen</div>
-                        </div>
-
-                        <!-- Right side - Rating categories -->
-                        <div class="rating-categories">
-                            <div class="category d-flex align-items-center mb-3">
-                                <span class="category-label me-4">Ambiente</span>
-                                <div class="d-flex align-items-center flex-grow-1 gap-2">
-                                    <div class="progress flex-grow-1">
-                                        <div class="progress-bar" style="width: 93%"></div>
-                                    </div>
-                                    <span class="rating-value">9.3</span>
-                                </div>
-                            </div>
-                            <div class="category d-flex align-items-center mb-3">
-                                <span class="category-label me-4">Essen</span>
-                                <div class="d-flex align-items-center flex-grow-1 gap-2">
-                                    <div class="progress flex-grow-1">
-                                        <div class="progress-bar" style="width: 94%"></div>
-                                    </div>
-                                    <span class="rating-value">9.4</span>
-                                </div>
-                            </div>
-                            <div class="category d-flex align-items-center">
-                                <span class="category-label me-4">Service</span>
-                                <div class="d-flex align-items-center flex-grow-1 gap-2">
-                                    <div class="progress flex-grow-1">
-                                        <div class="progress-bar" style="width: 96%"></div>
-                                    </div>
-                                    <span class="rating-value">9.6</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Bottom info section -->
-                    <div class="rating-info mt-4 text-center">
-                        <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
-                            <i class="fas fa-check-circle text-success"></i>
-                            <p class="mb-0">Echte Erlebnisse von echten Restaurantgästen</p>
-                        </div>
-                        <p class="text-muted mb-2">
-                            Gesamtwertungen und Bewertungen können nur von Gästen abgegeben werden, die über TheFork reserviert haben.
-                        </p>
-                        <a href="#" class="text-decoration-none">Wie werden Gesamtwertungen berechnet?</a>
-                    </div>
                 </div>
             </div>
         </div>
