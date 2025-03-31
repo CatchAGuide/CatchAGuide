@@ -99,7 +99,7 @@ return [
     'Alternative_Dates' => 'Alternative Dates',
     'Select_At_Least_One_Date' => 'Please select at least one alternative date.',
     'Rejection_Reason_Placeholder' => 'Please provide a detailed reason for declining this booking...',
-    'Characters' => 'characters',
+    'Characters' => 'min characters',
     'Min_Characters_Message' => 'Please enter at least 50 characters.',
     'Max_Three_Dates' => 'You can select up to 3 alternative dates.',
 ];  

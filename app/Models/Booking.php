@@ -37,6 +37,9 @@ class Booking extends Model
         'is_guest',
         'created_at',
         'updated_at',
+        'alternative_dates',
+        'has_parent',
+        'is_reviewed',
     ];
     
     public function user()

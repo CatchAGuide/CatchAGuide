@@ -99,7 +99,7 @@ return [
     'Alternative_Dates' => 'Alternative Termine',
     'Select_At_Least_One_Date' => 'Bitte wählen Sie mindestens einen alternativen Termin aus.',
     'Rejection_Reason_Placeholder' => 'Bitte geben Sie einen detaillierten Grund für die Ablehnung dieser Buchung an...',
-    'Characters' => 'Zeichen',
+    'Characters' => 'min Zeichen',
     'Min_Characters_Message' => 'Bitte geben Sie mindestens 50 Zeichen ein.',
     'Max_Three_Dates' => 'Sie können bis zu 3 alternative Termine auswählen.',
 ];  

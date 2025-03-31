@@ -275,6 +275,9 @@ return [
 
     'Booking' => 'Jetzt reservieren',
     'From' => 'Ab',
-    'Magazine_subtitle' => 'Aktuell, Unterhaltsam & Lehrreich - Beiträge rund ums Angeln'
+    'Magazine_subtitle' => 'Aktuell, Unterhaltsam & Lehrreich - Beiträge rund ums Angeln',
+
+    //booking reject
+    'booking-reject-additional-comment' => 'Zusätzliche Kommentare',
 
 ];

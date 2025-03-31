@@ -262,6 +262,14 @@
         #selected-dates-input {
             display: none;
         }
+        
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
     </style>
     <!------ Include the above in your HEAD tag ---------->
 
@@ -283,12 +291,14 @@
                         <!-- Calendar section -->
                         <div class="form-group">
                             <p class="section-title">@lang('guidings.available_dates')</p>
-                            <div class="calendar-container">
-                                <div id="lite-datepicker"></div>
-                                
+                            <div class="info-box mb-4">
+                                <p class="mb-0">@lang('message.booking-reject-message')</p>
+                            </div>
+
+                            <div class="calendar-container">    
                                 <!-- Selected dates container -->
                                 <div class="selected-dates-container">
-                                    <p class="selected-dates-title">@lang('guidings.Alternative_Dates')</p>
+                                    {{-- <p class="selected-dates-title">@lang('guidings.Alternative_Dates')</p> --}}
                                     <div class="selected-dates-tags" id="selected-dates-tags">
                                         <!-- Tags will be added here dynamically -->
                                     </div>
@@ -298,11 +308,16 @@
                                         @lang('guidings.Select_At_Least_One_Date')
                                     </div>
                                 </div>
+                                <div id="lite-datepicker"></div>
                             </div>
                         </div>
                         
                         <div class="form-group">
-                            <p class="section-title">@lang('message.booking-reject-message')</p>
+                            <p class="section-title">@lang('message.booking-reject-additional-comment')</p>
+                            
+                            <div class="info-box mb-4">
+                                <p class="mb-0">@lang('message.booking-reject-message')</p>
+                            </div>
                             <textarea class="form-control" name="reason" id="rejection-reason" rows="4" placeholder="@lang('guidings.Rejection_Reason_Placeholder')"></textarea>
                             <div class="char-counter" id="char-counter">
                                 <div id="reason-validation-message" class="validation-message">
@@ -473,7 +488,7 @@ document.addEventListener("DOMContentLoaded", function() {
     
     reasonTextarea.addEventListener('input', function() {
         const charCount = this.value.length;
-        charCounter.textContent = `${charCount}/50 characters`;
+        charCounter.textContent = `${charCount}/50 @lang('guidings.Characters')`;
         
         if (charCount < 50) {
             charCounter.classList.add('invalid');

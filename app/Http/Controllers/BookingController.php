@@ -114,4 +114,142 @@ class BookingController extends Controller
             'selectedDate' => $selectedDate
         ]);
     }
+
+    public function rescheduleStore(Request $request)
+    {
+        // Validate the request data
+        $request->validate([
+            'booking_id' => 'required|exists:bookings,id',
+            'selectedDate' => 'required|date',
+            'count_of_users' => 'required|integer|min:1',
+            'terms_accepted' => 'required|accepted',
+            'total_price' => 'required|numeric',
+        ]);
+
+        // Get the original booking
+        $originalBooking = Booking::findOrFail($request->booking_id);
+        $guiding = $originalBooking->guiding;
+        $user = $originalBooking->user;
+
+        // Create a blocked event for the new date
+        $eventService = new \App\Services\EventService();
+        $blockedEvent = $eventService->createBlockedEvent('00:00', $request->selectedDate, $guiding);
+
+        // Calculate the fee
+        $helperService = new \App\Services\HelperService();
+        $fee = $helperService->calculateRates($request->total_price);
+        
+        // Set expiration time based on date difference
+        $expiresAt = \Carbon\Carbon::now()->addHours(24); // Default expiration time (24 hours)
+        $dateDifference = \Carbon\Carbon::parse($request->selectedDate)->diffInDays(\Carbon\Carbon::now());
+        if ($dateDifference > 3) {
+            // If the selected date is more than 3 days from now, add 72 hours to the expiration time
+            $expiresAt = \Carbon\Carbon::now()->addHours(72);
+        }
+
+        // Process extras
+        $extraData = null;
+        if ($request->has('extras')) {
+            $extraData = $this->processExtras($request->extras, $guiding);
+        }
+
+        // Create a new booking
+        $newBooking = Booking::create([
+            'user_id' => $originalBooking->user_id,
+            'is_guest' => $originalBooking->is_guest,
+            'guiding_id' => $guiding->id,
+            'blocked_event_id' => $blockedEvent->id,
+            'is_paid' => false,
+            'extras' => $extraData,
+            'total_extra_price' => $this->calculateTotalExtraPrice($extraData),
+            'count_of_users' => $request->count_of_users,
+            'price' => $request->total_price,
+            'cag_percent' => $fee,
+            'status' => 'pending',
+            'book_date' => $request->selectedDate,
+            'expires_at' => $expiresAt,
+            'phone' => $originalBooking->phone,
+            'token' => $this->generateBookingToken($blockedEvent->id),
+            'has_parent' => $originalBooking->id, // Link to the original booking
+        ]);
+
+        // Send notification emails
+        if (!app()->environment('local')) {
+            $this->sendRescheduleEmails($newBooking, $originalBooking);
+        }
+
+        // Return success response for AJAX
+        return response()->json([
+            'success' => true,
+            'message' => 'Your booking has been successfully rescheduled.',
+            'booking_id' => $newBooking->id
+        ]);
+    }
+
+    /**
+     * Process extras from the request
+     */
+    private function processExtras($requestExtras, $guiding)
+    {
+        $guidingExtras = json_decode($guiding->pricing_extra, true) ?? [];
+        $extraData = [];
+
+        foreach ($requestExtras as $index => $extra) {
+            if (isset($extra['selected']) && $extra['selected'] === 'on') {
+                $quantity = isset($extra['quantity']) ? intval($extra['quantity']) : 1;
+                $price = isset($guidingExtras[$index]['price']) ? floatval($guidingExtras[$index]['price']) : 0;
+                $name = isset($guidingExtras[$index]['name']) ? $guidingExtras[$index]['name'] : '';
+                
+                $extraData[] = [
+                    'extra_id' => $index,
+                    'extra_name' => $name,
+                    'extra_price' => $price,
+                    'extra_quantity' => $quantity,
+                    'extra_total_price' => $price * $quantity,
+                ];
+            }
+        }
+
+        return !empty($extraData) ? serialize($extraData) : null;
+    }
+
+    /**
+     * Calculate total extra price from serialized extras data
+     */
+    private function calculateTotalExtraPrice($serializedExtras)
+    {
+        if (!$serializedExtras) {
+            return 0;
+        }
+
+        $extras = unserialize($serializedExtras);
+        $total = 0;
+
+        foreach ($extras as $extra) {
+            $total += $extra['extra_total_price'];
+        }
+
+        return $total;
+    }
+
+    /**
+     * Generate a unique booking token
+     */
+    private function generateBookingToken($eventID) 
+    {
+        $timestamp = time();
+        $combinedString = $eventID . '-' . $timestamp;
+
+        // Generate a hash of the combined string
+        return hash('sha256', $combinedString);
+    }
+
+    /**
+     * Send reschedule notification emails
+     */
+    private function sendRescheduleEmails($newBooking, $originalBooking)
+    {
+        // Create a new job to send emails
+        \App\Jobs\SendRescheduleEmail::dispatch($newBooking, $originalBooking);
+    }
 }

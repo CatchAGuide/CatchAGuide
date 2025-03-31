@@ -280,5 +280,9 @@ return [
 
     'Booking' => 'Reserve now',
     'From' => 'From',
-    'Magazine_subtitle' => 'Up to date, entertaining & informative - Allround fishing articles'
+    'Magazine_subtitle' => 'Up to date, entertaining & informative - Allround fishing articles',
+
+    //booking reject
+    'booking-reject-additional-comment' => 'Additional Comment',
+
 ];

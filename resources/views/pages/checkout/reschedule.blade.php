@@ -332,54 +332,56 @@
                     
                     <!-- Personal Information -->
                     <div class="info-section">
-                        <h3>Personal Information</h3>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="first_name" class="form-label required-field">First Name</label>
-                                <input type="text" class="form-control" id="first_name" name="first_name" value="{{ $user->firstname }}" readonly>
+                        <h3>{{ translate('Personal Information') }}</h3>
+                        
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="fw-bold d-block">{{ translate('First Name') }}</label>
+                                <div>{{ $user->firstname }}</div>
+                                <input type="hidden" name="first_name" value="{{ $user->firstname }}">
                             </div>
-                            <div class="col-md-6">
-                                <label for="last_name" class="form-label required-field">Last Name</label>
-                                <input type="text" class="form-control" id="last_name" name="last_name" value="{{ $user->lastname }}" readonly>
+                            <div class="col-6">
+                                <label class="fw-bold d-block">{{ translate('Last Name') }}</label>
+                                <div>{{ $user->lastname }}</div>
+                                <input type="hidden" name="last_name" value="{{ $user->lastname }}">
                             </div>
                         </div>
                         
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <label for="email" class="form-label required-field">E-mail address</label>
-                                <input type="email" class="form-control" id="email" name="email" value="{{ $user->email }}" readonly>
-                                <small class="text-muted">The confirmation email will be sent to this address</small>
+                        <div class="mt-3">
+                            <label class="fw-bold d-block">{{ translate('E-mail Address') }}</label>
+                            <div>{{ $user->email }}</div>
+                            <input type="hidden" name="email" value="{{ $user->email }}">
+                        </div>
+                        
+                        <div class="mt-3">
+                            <label class="fw-bold d-block">{{ translate('Address') }}</label>
+                            <div>{{ $user->information->address }}</div>
+                            <input type="hidden" name="address" value="{{ $user->information->address }}">
+                        </div>
+                        
+                        <div class="row g-3 mt-1">
+                            <div class="col-6">
+                                <label class="fw-bold d-block">{{ translate('City') }}</label>
+                                <div>{{ $user->information->city }}</div>
+                                <input type="hidden" name="city" value="{{ $user->information->city }}">
+                            </div>
+                            <div class="col-6">
+                                <label class="fw-bold d-block">{{ translate('Country / Region') }}</label>
+                                <div>{{ $user->information->country }}</div>
+                                <input type="hidden" name="country" value="{{ $user->information->country }}">
                             </div>
                         </div>
                         
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <label for="address" class="form-label required-field">Address</label>
-                                <input type="text" class="form-control" id="address" name="address" value="{{ $user->information->address }}" readonly>
+                        <div class="row g-3 mt-1">
+                            <div class="col-6">
+                                <label class="fw-bold d-block">{{ translate('Postal code') }}</label>
+                                <div>{{ $user->information->postal }}</div>
+                                <input type="hidden" name="postal_code" value="{{ $user->information->postal }}">
                             </div>
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="city" class="form-label required-field">City</label>
-                                <input type="text" class="form-control" id="city" name="city" value="{{ $user->information->city }}" readonly>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="country" class="form-label required-field">Country / Region</label>
-                                <input type="text" class="form-control" id="country" name="country" value="{{ $user->information->country }}" readonly>
-                            </div>
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="postal_code" class="form-label">Postal code (optional)</label>
-                                <input type="text" class="form-control" id="postal_code" name="postal_code" value="{{ $user->information->postal  }}" readonly>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="phone" class="form-label required-field">Phone Number</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="phone" name="phone" value="{{ $user->information->phone }}" readonly>
-                                </div>
+                            <div class="col-6">
+                                <label class="fw-bold d-block">{{ translate('Phone Number') }}</label>
+                                <div>{{ $user->information->phone }}</div>
+                                <input type="hidden" name="phone" value="{{ $user->information->phone }}">
                             </div>
                         </div>
                     </div>
@@ -443,6 +445,20 @@
                                 <h5 class="bordered-heading mb-3">Available Extras</h5>
                                 <div class="extras-container">
                                     @foreach($extras as $index => $extra)
+                                    @php
+                                        // Check if this extra was previously selected in the booking
+                                        $bookingExtras = is_array($booking->extras) ? $booking->extras : unserialize($booking->extras) ?? [];
+                                        $isSelected = false;
+                                        $quantity = 1;
+                                        
+                                        foreach($bookingExtras as $bookingExtra) {
+                                            if(isset($bookingExtra['extra_name']) && $bookingExtra['extra_name'] == $extra['name']) {
+                                                $isSelected = true;
+                                                $quantity = $bookingExtra['extra_quantity'] ?? 1;
+                                                break;
+                                            }
+                                        }
+                                    @endphp
                                     <div class="extra-container">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div class="form-check">
@@ -450,13 +466,14 @@
                                                        id="extra_{{$index}}" 
                                                        name="extras[{{$index}}][selected]" 
                                                        data-name="{{$extra['name']}}" 
-                                                       data-price="{{$extra['price']}}">
+                                                       data-price="{{$extra['price']}}"
+                                                       {{ $isSelected ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="extra_{{$index}}">
                                                     {{$extra['name']}} - <span class="fw-bold">€{{number_format($extra['price'], 2)}}</span>
                                                 </label>
                                             </div>
                                         </div>
-                                        <div class="quantity-container" id="quantity_container_{{$index}}">
+                                        <div class="quantity-container" id="quantity_container_{{$index}}" style="{{ $isSelected ? 'display: block;' : 'display: none;' }}">
                                             <div class="d-flex align-items-center">
                                                 <div class="row w-100 align-items-center">
                                                     <div class="col-sm-4 col-5">
@@ -466,7 +483,7 @@
                                                         <input type="number" class="form-control quantity-input" 
                                                                id="quantity_{{$index}}" 
                                                                name="extras[{{$index}}][quantity]" 
-                                                               min="1" value="1">
+                                                               min="1" value="{{ $quantity }}">
                                                     </div>
                                                 </div>
                                             </div>
@@ -832,6 +849,9 @@
             errorModal.hide();
             submitButton.click();
         });
+        
+        // Initialize total price with pre-selected extras
+        updateTotalPrice();
     });
 </script>
 @endsection
