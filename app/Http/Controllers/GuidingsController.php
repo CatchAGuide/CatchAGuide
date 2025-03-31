@@ -605,16 +605,10 @@ class GuidingsController extends Controller
         $fishingFrom = $guiding->fishing_from_id;
         $fishingType = $guiding->fishing_type_id;
 
-        // Get reviews instead of ratings
-        $reviews = $guiding->reviews;
-        $reviews_count = $reviews->count();
-
-        // Calculate average scores
-        $average_overall_score = $reviews_count > 0 ? $reviews->avg('overall_score') : 0;
-        $average_guide_score = $reviews_count > 0 ? $reviews->avg('guide_score') : 0;
-        $average_region_water_score = $reviews_count > 0 ? $reviews->avg('region_water_score') : 0;
-        $average_grandtotal_score = $reviews_count > 0 ? $reviews->avg('grandtotal_score') : 0;
-
+        $ratings = $guiding->user->received_ratings;
+        $ratingCount = $ratings->count();
+        $averageRating = $ratingCount > 0 ? $ratings->avg('rating') : 0;
+        
         $otherGuidings = Guiding::where('status', 1)
             ->where('id', '!=', $guiding->id)
             ->where(function($query) use ($guiding, $targetFish, $fishingFrom, $fishingType) {
@@ -649,13 +643,9 @@ class GuidingsController extends Controller
         return view('pages.guidings.newIndex', [
             'guiding' => $guiding,
             'same_guiding' => $sameGuidings,
-            'reviews' => $reviews,
-            'reviews_count' => $reviews_count,
-            'average_overall_score' => $average_overall_score,
-            'average_guide_score' => $average_guide_score,
-            'average_region_water_score' => $average_region_water_score,
-            'average_grandtotal_score' => $average_grandtotal_score,
+            'ratings' => $ratings,
             'other_guidings' => $otherGuidings,
+            'average_rating' => $averageRating,
             'destination' => $destination,
             'blocked_events' => $guiding->getBlockedEvents(),
         ]);
