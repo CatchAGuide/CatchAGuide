@@ -13,11 +13,8 @@ class Rating extends Model
     protected $fillable = [
         'description',
         'rating',
-        'rating_guide',
-        'rating_region',
         'user_id',
-        'guide_id',
-        'booking_id'
+        'guide_id'
     ];
 
     /**
