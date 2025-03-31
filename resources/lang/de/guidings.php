@@ -81,15 +81,4 @@ return [
     'Overall' => 'Gesamt',
     'Guide' => 'Guide',
     'Region_Water' => 'Region & Wasser',
-    'Reviews' => 'Bewertungen',
-    'over_10' => 'von 10',
-
-    'Excellent' => 'Ausgezeichnet',
-    'Very_Good' => 'Sehr Gut',
-    'Good' => 'Gut',
-    'Satisfactory' => 'Befriedigend',
-    'Sufficient' => 'Ausreichend',
-    'Poor' => 'Mangelhaft',
-    'Insufficient' => 'Ungenügend',
-    'Not_Rated' => 'Nicht bewertet',
 ];  

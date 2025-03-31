@@ -1098,11 +1098,11 @@
                             <div class="rating-left text-start d-flex align-items-center gap-3">
                                 <div class="score-wrapper">
                                     <div class="score">{{ number_format($average_grandtotal_score, 1) }}</div>
-                                    <div class="score-label">@lang('guidings.over_10')</div>
+                                    <div class="score-label">von 10</div>
                                 </div>
                                 <div class="rating-info text-center">
                                     <div class="rating-badge">{{ getRatingLabel($average_grandtotal_score) }}</div>
-                                    <div class="rating-count">{{ $reviews_count }} @lang('guidings.Reviews')</div>
+                                    <div class="rating-count">{{ $reviews_count }} Bewertungen</div>
                                 </div>
                             </div>
 

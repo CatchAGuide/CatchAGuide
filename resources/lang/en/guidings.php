@@ -81,15 +81,4 @@ return [
     'Overall' => 'Overall',
     'Guide' => 'Guide',
     'Region_Water' => 'Region & Water',
-    'Reviews' => 'Reviews',
-    'over_10' => 'over 10',
-
-    'Excellent' => 'Excellent',
-    'Very_Good' => 'Very Good',
-    'Good' => 'Good',
-    'Satisfactory' => 'Satisfactory',
-    'Sufficient' => 'Sufficient',
-    'Poor' => 'Poor',
-    'Insufficient' => 'Insufficient',
-    'Not_Rated' => 'Not Rated',
 ];  

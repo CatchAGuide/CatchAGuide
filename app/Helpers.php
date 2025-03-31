@@ -132,15 +132,15 @@ if (!function_exists('targets')) {
 if (!function_exists('getRatingLabel')) {
     function getRatingLabel($score)
     {
-        if ($score >= 9) return __('guidings.Excellent');
-        if ($score >= 8) return __('guidings.Very_Good');
-        if ($score >= 7) return __('guidings.Good');
-        if ($score >= 6) return __('guidings.Satisfactory');
-        if ($score >= 5) return __('guidings.Sufficient');
-        if ($score >= 4) return __('guidings.Poor');
-        if ($score >= 3) return __('guidings.Insufficient');
-        if ($score >= 2) return __('guidings.Very_Poor');
-        if ($score >= 1) return __('guidings.Bad');
-        return __('guidings.Not_Rated');
+        if ($score >= 9) return 'Ausgezeichnet';
+        if ($score >= 8) return 'Sehr Gut';
+        if ($score >= 7) return 'Gut';
+        if ($score >= 6) return 'Befriedigend';
+        if ($score >= 5) return 'Ausreichend';
+        if ($score >= 4) return 'Mangelhaft';
+        if ($score >= 3) return 'Ungenügend';
+        if ($score >= 2) return 'Sehr Schlecht';
+        if ($score >= 1) return 'Schlecht';
+        return 'Nicht bewertet';
     }
 }
