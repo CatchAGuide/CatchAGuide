@@ -42,7 +42,7 @@ return [
     'responsibleBody' => 'Hinweis zur verantwortlichen Stelle',
     'responsibleBodyMsg1' => 'Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:',
     'responsibleBodyMsg2' => 'Catch a Guide',
-    'responsibleBodyMsg3' => 'Telefon: [+49 (0) 15155495574]',
+    'responsibleBodyMsg3' => 'Telefon: [+49 15752996580]',
     'responsibleBodyMsg4' => 'Email: info.catchaguide@gmail.com',
     'responsibleBodyMsg5' => 'Verantwortliche Stelle ist die natürliche oder juristische Person, die allein oder gemeinsam mit anderen über die Zwecke und Mittel der Verarbeitung von personenbezogenen Daten (z. B. Namen, E-Mail-Adressen o. Ä.) entscheidet.',
     'storageDuration' => 'Speicherdauer',
