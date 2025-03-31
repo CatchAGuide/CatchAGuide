@@ -67,7 +67,7 @@
 @section('content')
 <div class="container">
         <section class="page-header">
-            <div class="breadcrumb-container destination">
+            <div class="page-header__bottom breadcrumb-container guiding">
                 <div class="page-header__bottom-inner">
                     <ul class="thm-breadcrumb list-unstyled">
                         <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>

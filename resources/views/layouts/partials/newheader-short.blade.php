@@ -524,7 +524,7 @@ input[type=number] {
 
 .categories-row {
     margin-top: 16px !important;
-    margin-bottom: 45px !important;
+    margin-bottom: 32px !important;
     position: relative;
     z-index: 1;
 }
