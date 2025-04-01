@@ -1,14 +1,14 @@
 @extends('pages.profile.layouts.profile')
 
 @section('profile-content')
-<div class="container">
+<div class="container my-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card">
-                <div class="card-body text-center">
-                    <h2>{{ session('message') ?: __('Thank you for your rating!') }}</h2>
-                    <p>{{ __('Your feedback helps other anglers make better decisions.') }}</p>
-                    <a href="{{ route('welcome') }}" class="btn btn-primary">
+            <div class="card shadow">
+                <div class="card-body text-center p-5">
+                    <h2>{{ session('message') ?: __('Thank you for your feedback!') }}</h2>
+                    <p>{{ __('Your review has been submitted successfully. Reviews can only be submitted once.') }}</p>
+                    <a href="{{ route('welcome') }}" class="btn btn-orange">
                         {{ __('Return to Homepage') }}
                     </a>
                 </div>
