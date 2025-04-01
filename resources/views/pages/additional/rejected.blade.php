@@ -292,7 +292,7 @@
                         <div class="form-group">
                             <p class="section-title">@lang('guidings.available_dates')</p>
                             <div class="info-box mb-4">
-                                <p class="mb-0">@lang('message.booking-reject-message')</p>
+                                <p class="mb-0">@lang('message.booking-reject-message-available-dates')</p>
                             </div>
 
                             <div class="calendar-container">    
@@ -339,9 +339,10 @@ document.addEventListener("DOMContentLoaded", function() {
     // Get blocked events from the booking
     const blockedEvents = @json($blocked_events ?? []);
     
+    console.log(blockedEvents);
     let lockDays = [];
-    if (blockedEvents && Array.isArray(blockedEvents)) {
-        lockDays = blockedEvents.flatMap(event => {
+    if (blockedEvents && typeof blockedEvents === 'object') {
+        lockDays = Object.values(blockedEvents).flatMap(event => {
             // Make sure event.from and event.due exist before creating Date objects
             if (event && event.from && event.due) {
                 const fromDate = new Date(event.from);

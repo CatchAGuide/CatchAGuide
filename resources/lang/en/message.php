@@ -258,7 +258,9 @@ return [
     //booking form reject
     'booking-reject-header' => 'Do you really want to decline the booking request?',
     'booking-reject-reason' => 'Reason for rejection',
-    'booking-reject-message' => "Please give your guest a reason for the cancellation. In the best case, give 1-3 alternative dates for a new guiding, so that your guest can book you as soon as you are available again.",
+    'booking-reject-message' => "Please leave a personal message if you need to decline the booking request. Make sure that this comment field contains at least 50 characters.
+Important note: If you provide personal contact details such as your email address or phone number, we will consider the request as mediated, as we cannot verify whether or not the booking will actually take place.",
+    'booking-reject-message-available-dates' => 'Please select at least one and a maximum of five alternative dates on which your guest can rebook. We want to ensure that the guest has the opportunity to find a new date for a fishing tour with you.',
     'booking-submit' => 'Decline',
 
     //booking success rejected

@@ -8,7 +8,10 @@ use App\Models\Booking;
 use App\Models\BlockedEvent;
 
 use App\Events\BookingStatusChanged;
-use App\Models\UserInformation;
+use App\Jobs\SendCheckoutEmail;
+use App\Services\EventService;
+use App\Services\HelperService;
+use Carbon\Carbon;
 
 class BookingController extends Controller
 {
@@ -132,19 +135,19 @@ class BookingController extends Controller
         $user = $originalBooking->user;
 
         // Create a blocked event for the new date
-        $eventService = new \App\Services\EventService();
+        $eventService = new EventService();
         $blockedEvent = $eventService->createBlockedEvent('00:00', $request->selectedDate, $guiding);
 
         // Calculate the fee
-        $helperService = new \App\Services\HelperService();
+        $helperService = new HelperService();
         $fee = $helperService->calculateRates($request->total_price);
         
         // Set expiration time based on date difference
-        $expiresAt = \Carbon\Carbon::now()->addHours(24); // Default expiration time (24 hours)
-        $dateDifference = \Carbon\Carbon::parse($request->selectedDate)->diffInDays(\Carbon\Carbon::now());
+        $expiresAt = Carbon::now()->addHours(24); // Default expiration time (24 hours)
+        $dateDifference = Carbon::parse($request->selectedDate)->diffInDays(Carbon::now());
         if ($dateDifference > 3) {
             // If the selected date is more than 3 days from now, add 72 hours to the expiration time
-            $expiresAt = \Carbon\Carbon::now()->addHours(72);
+            $expiresAt = Carbon::now()->addHours(72);
         }
 
         // Process extras
@@ -170,12 +173,12 @@ class BookingController extends Controller
             'expires_at' => $expiresAt,
             'phone' => $originalBooking->phone,
             'token' => $this->generateBookingToken($blockedEvent->id),
-            'has_parent' => $originalBooking->id, // Link to the original booking
+            'parent_id' => $originalBooking->id, // Link to the original booking
         ]);
 
         // Send notification emails
         if (!app()->environment('local')) {
-            $this->sendRescheduleEmails($newBooking, $originalBooking);
+            SendCheckoutEmail::dispatch($newBooking, $user, $guiding, $guiding->user);
         }
 
         // Return success response for AJAX
@@ -232,24 +235,11 @@ class BookingController extends Controller
         return $total;
     }
 
-    /**
-     * Generate a unique booking token
-     */
     private function generateBookingToken($eventID) 
     {
         $timestamp = time();
         $combinedString = $eventID . '-' . $timestamp;
 
-        // Generate a hash of the combined string
         return hash('sha256', $combinedString);
-    }
-
-    /**
-     * Send reschedule notification emails
-     */
-    private function sendRescheduleEmails($newBooking, $originalBooking)
-    {
-        // Create a new job to send emails
-        \App\Jobs\SendRescheduleEmail::dispatch($newBooking, $originalBooking);
     }
 }
