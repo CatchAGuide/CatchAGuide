@@ -101,5 +101,5 @@ return [
     'Rejection_Reason_Placeholder' => 'Please provide a detailed reason for declining this booking...',
     'Characters' => 'min characters',
     'Min_Characters_Message' => 'Please enter at least 50 characters.',
-    'Max_Three_Dates' => 'You can select up to 3 alternative dates.',
+    'Max_Three_Dates' => 'You can select up to 5 alternative dates.',
 ];  

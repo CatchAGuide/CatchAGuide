@@ -270,6 +270,22 @@
             margin-bottom: 20px;
         }
         
+        .litepicker .container__days .day-item.is-selected {
+            background-color: rgba(var(--thm-primary-rgb), 0.7);
+            color: white;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .litepicker .container__days .day-item.is-selected::after {
+            content: '✓';
+            position: absolute;
+            top: -5px;
+            right: -2px;
+            font-size: 10px;
+            color: white;
+        }
+        
     </style>
     <!------ Include the above in your HEAD tag ---------->
 
@@ -440,6 +456,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 const dateToRemove = this.getAttribute('data-date');
                 selectedDates = selectedDates.filter(d => d !== dateToRemove);
                 updateSelectedDates();
+                highlightSelectedDates();
                 validateForm();
             });
         });
@@ -453,6 +470,40 @@ document.addEventListener("DOMContentLoaded", function() {
             validationMessage.classList.add('show');
         } else {
             validationMessage.classList.remove('show');
+        }
+    }
+
+    // Function to highlight selected dates in the calendar
+    function highlightSelectedDates() {
+        // First ensure we have the latest calendar days (in case of month navigation)
+        const dayItems = document.querySelectorAll('.day-item');
+        
+        // Remove existing highlights first
+        dayItems.forEach(el => {
+            if (el.classList.contains('is-selected')) {
+                el.classList.remove('is-selected');
+            }
+        });
+        
+        // Add highlight to selected dates
+        if (selectedDates.length > 0) {
+            selectedDates.forEach(dateStr => {
+                try {
+                    const date = new Date(dateStr + 'T12:00:00');
+                    
+                    dayItems.forEach(dayEl => {
+                        const dayTimestamp = parseInt(dayEl.getAttribute('data-time'));
+                        if (dayTimestamp) {
+                            const dayDate = new Date(dayTimestamp);
+                            if (dayDate.toDateString() === date.toDateString()) {
+                                dayEl.classList.add('is-selected');
+                            }
+                        }
+                    });
+                } catch (e) {
+                    console.error("Error highlighting date:", e);
+                }
+            });
         }
     }
 
@@ -537,6 +588,10 @@ document.addEventListener("DOMContentLoaded", function() {
                     });
                 });
             },
+            onRender: (ui) => {
+                // Add this to highlight selected dates after calendar renders
+                setTimeout(highlightSelectedDates, 100);
+            }
         });
 
         // Initialize the selected dates display
@@ -544,6 +599,7 @@ document.addEventListener("DOMContentLoaded", function() {
         
         // Add a manual click handler to the calendar days as a fallback
         datepickerElement.addEventListener('click', function(e) {
+            // Only process clicks on day items
             if (e.target.classList.contains('day-item') && !e.target.classList.contains('is-locked')) {
                 const clickedDate = e.target.getAttribute('data-time');
                 if (clickedDate) {
@@ -559,19 +615,44 @@ document.addEventListener("DOMContentLoaded", function() {
                     
                     // Check if date is already selected
                     if (!selectedDates.includes(formattedDate)) {
-                        // Limit to 3 alternative dates
-                        if (selectedDates.length < 3) {
+                        // Limit to 5 alternative dates
+                        if (selectedDates.length < 5) {
                             selectedDates.push(formattedDate);
                             updateSelectedDates();
+                            highlightSelectedDates();
                             validateForm();
                         } else {
                             // Show notification instead of alert
                             showNotification("{{__('guidings.Max_Three_Dates')}}", 'warning');
                         }
+                    } else {
+                        // If date is already selected, remove it
+                        selectedDates = selectedDates.filter(d => d !== formattedDate);
+                        updateSelectedDates();
+                        highlightSelectedDates();
+                        validateForm();
                     }
                 }
             }
+            // Don't do anything for clicks outside day items
         });
+        
+        // Add event listeners to ensure highlights persist
+        document.addEventListener('click', function(e) {
+            // Use setTimeout to ensure this runs after any other click handlers
+            setTimeout(highlightSelectedDates, 10);
+        });
+        
+        // Also ensure highlights are maintained when the calendar is redrawn
+        if (picker) {
+            picker.on('render', () => {
+                setTimeout(highlightSelectedDates, 100);
+            });
+            
+            picker.on('change:month', () => {
+                setTimeout(highlightSelectedDates, 100);
+            });
+        }
         
         // Initial form validation
         validateForm();

@@ -190,8 +190,6 @@ class Checkout extends Component
             $this->selectedExtras[$index] = (bool)$value;
         }
         
-        \Log::info("Extra {$index} selected state changed to: " . ($this->selectedExtras[$index] ? 'true' : 'false'));
-        
         $this->calculateTotalPrice();
     }
 
@@ -207,17 +205,13 @@ class Checkout extends Component
         $totalExtraPrice = 0;
         $extraData = [];
 
-        foreach ($this->extras as $index => $extra) {
-            \Log::info("Processing extra {$index}: Selected=" . var_export($this->selectedExtras[$index], true));
-            
+        foreach ($this->extras as $index => $extra) {            
             if (!empty($this->selectedExtras[$index])) {
                 $quantity = $this->extraQuantities[$index] ?? 1;
                 $price = floatval($extra['price']);
                 $subtotal = $price * intval($quantity);
                 
                 $totalExtraPrice += $subtotal;
-                
-                \Log::info("Adding extra {$index}: Price={$price}, Quantity={$quantity}, Subtotal={$subtotal}");
                 
                 $extraData[] = [
                     'extra_id' => $index,
@@ -232,8 +226,6 @@ class Checkout extends Component
         $this->extraData = !empty($extraData) ? serialize($extraData) : null;
         $this->totalExtraPrice = $totalExtraPrice;
         $this->totalPrice = $this->totalExtraPrice + $this->guidingprice;
-        
-        \Log::info("Final calculation: Extra Price={$this->totalExtraPrice}, Total Price={$this->totalPrice}");
     }
 
     public function next()
@@ -326,7 +318,6 @@ class Checkout extends Component
             'extraQuantities.*' => ['required', 'numeric', 'max:' . $this->persons],
         ]);
 
-        Log::debug("Checkout started with parameters: " . json_encode($this->userData));
         $currentUser = auth()->user();
 
         if ($currentUser) {
@@ -442,6 +433,7 @@ class Checkout extends Component
             'book_date' => $this->selectedDate,
             'expires_at' => $expiresAt,
             'phone' => $this->userData['phone'],
+            'email' => $this->userData['email'],
             'token' => $this->generateBookingToken($blockedEvent->id),
         ]);
 

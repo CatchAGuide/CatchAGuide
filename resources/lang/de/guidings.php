@@ -101,5 +101,5 @@ return [
     'Rejection_Reason_Placeholder' => 'Bitte geben Sie einen detaillierten Grund für die Ablehnung dieser Buchung an...',
     'Characters' => 'min Zeichen',
     'Min_Characters_Message' => 'Bitte geben Sie mindestens 50 Zeichen ein.',
-    'Max_Three_Dates' => 'Sie können bis zu 3 alternative Termine auswählen.',
+    'Max_Three_Dates' => 'Sie können bis zu 5 alternative Termine auswählen.',
 ];  

@@ -349,8 +349,8 @@
                         
                         <div class="mt-3">
                             <label class="fw-bold d-block">{{ translate('E-mail Address') }}</label>
-                            <div>{{ $user->email }}</div>
-                            <input type="hidden" name="email" value="{{ $user->email }}">
+                            <div>{{ $booking->email }}</div>
+                            <input type="hidden" name="email" value="{{ $booking->email }}">
                         </div>
                         
                         <div class="mt-3">
@@ -380,8 +380,8 @@
                             </div>
                             <div class="col-6">
                                 <label class="fw-bold d-block">{{ translate('Phone Number') }}</label>
-                                <div>{{ $user->information->phone }}</div>
-                                <input type="hidden" name="phone" value="{{ $user->information->phone }}">
+                                <div>{{ $booking->phone }}</div>
+                                <input type="hidden" name="phone" value="{{ $booking->phone }}">
                             </div>
                         </div>
                     </div>
@@ -447,7 +447,10 @@
                                     @foreach($extras as $index => $extra)
                                     @php
                                         // Check if this extra was previously selected in the booking
-                                        $bookingExtras = is_array($booking->extras) ? $booking->extras : unserialize($booking->extras) ?? [];
+                                        $bookingExtras = [];
+                                        if ($booking->extras !== null) {
+                                            $bookingExtras = is_array($booking->extras) ? $booking->extras : unserialize($booking->extras) ?? [];
+                                        }
                                         $isSelected = false;
                                         $quantity = 1;
                                         

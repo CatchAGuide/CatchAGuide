@@ -151,67 +151,71 @@
                 <td>
 
                     @switch($booking->status)
-                    @case('accepted')
-                    <a href="{{route('profile.showbooking', $booking->id)}}">
-                        <button class="btn thm-btn btn-sm" style="background-color: lightblue;">
-                            Details
-                        </button>
-                    </a>
-                    @break
-                    @case('pending')
-                    <span class="text-muted">@lang('profile.bwm-notavailable')</span>
-                    @break
-                    @case('cancelled')
-                        <span class="text-muted">@lang('profile.bwm-notavailable')</span>
-                    @break
-                    @case('rejected')
-                    <span class="text-muted">@lang('profile.bwm-notavailable')</span>
-                    @break
-                    @case('storniert')
-                    <span class="text-muted">@lang('profile.bwm-notavailable')</span>
-                    @break
-                    @default
-                    <a href="{{route('profile.showbooking', $booking->id)}}">
-                        <button class="btn thm-btn btn-sm" style="background-color: lightblue;">
-                            Details
-                        </button>
-                    </a>
+                        @case('accepted')
+                            <a href="{{route('profile.showbooking', $booking->id)}}">
+                                <button class="btn thm-btn btn-sm" style="background-color: lightblue;">
+                                    Details
+                                </button>
+                            </a>
+                            @break
+                        @case('pending')
+                            @if($booking->parent_id !== null)
+                                <small class="text-info text-wrap">@lang('profile.bwm-rescheduled') {{ $booking->parent_id }}</small>
+                            @else
+                                <span class="text-muted">@lang('profile.bwm-notavailable')</span>
+                            @endif
+                            @break
+                        @case('cancelled')
+                            <span class="text-muted">@lang('profile.bwm-notavailable')</span>
+                            @break
+                        @case('rejected')
+                            <span class="text-muted">@lang('profile.bwm-notavailable')</span>
+                            @break
+                        @case('storniert')
+                            <span class="text-muted">@lang('profile.bwm-notavailable')</span>
+                            @break
+                        @default
+                            <a href="{{route('profile.showbooking', $booking->id)}}">
+                                <button class="btn thm-btn btn-sm" style="background-color: lightblue;">
+                                    Details
+                                </button>
+                            </a>
                     @endswitch
 
                 </td>
                 <td>
                     @switch($booking->status)
-                    @case('accepted')
-                    <button type="button" class="btn thm-btn btn-sm" data-bs-toggle="modal" data-bs-target="#emailmodal{{$index}}" style="background-color:rgb(54, 109, 182)">
-                        E-Mail
-                      </button>
-                        @if($booking->guiding->user->phone)
+                        @case('accepted')
+                            <button type="button" class="btn thm-btn btn-sm" data-bs-toggle="modal" data-bs-target="#emailmodal{{$index}}" style="background-color:rgb(54, 109, 182)">
+                                E-Mail
+                            </button>
+                                @if($booking->guiding->user->phone)
+                                        <button type="button" class="btn thm-btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#phonemodal{{$index}}">
+                                            @lang('profile.tele')
+                                        </button>
+                                @endif
+                            @break
+                        @case('pending')
+                            <span class="text-muted">@lang('profile.bwm-notavailable')</span>
+                            @break
+                        @case('cancelled')
+                            <span class="text-muted">@lang('profile.bwm-notavailable')</span>
+                            @break
+                        @case('rejected')
+                            <span class="text-muted">@lang('profile.bwm-notavailable')</span>
+                            @break
+                        @case('storniert')
+                            <span class="text-muted">@lang('profile.bwm-notavailable')</span>
+                            @break
+                        @default
+                            <button type="button" class="btn thm-btn btn-sm" data-bs-toggle="modal" data-bs-target="#emailmodal{{$index}}" style="background-color:rgb(54, 109, 182)">
+                                E-Mail
+                            </button>
+                            @if($booking->guiding->user->phone)
                                 <button type="button" class="btn thm-btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#phonemodal{{$index}}">
                                     @lang('profile.tele')
                                 </button>
-                        @endif
-                    @break
-                    @case('pending')
-                    <span class="text-muted">@lang('profile.bwm-notavailable')</span>
-                    @break
-                    @case('cancelled')
-                        <span class="text-muted">@lang('profile.bwm-notavailable')</span>
-                    @break
-                    @case('rejected')
-                    <span class="text-muted">@lang('profile.bwm-notavailable')</span>
-                    @break
-                    @case('storniert')
-                    <span class="text-muted">@lang('profile.bwm-notavailable')</span>
-                    @break
-                    @default
-                    <button type="button" class="btn thm-btn btn-sm" data-bs-toggle="modal" data-bs-target="#emailmodal{{$index}}" style="background-color:rgb(54, 109, 182)">
-                        E-Mail
-                      </button>
-                    @if($booking->guiding->user->phone)
-                            <button type="button" class="btn thm-btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#phonemodal{{$index}}">
-                                @lang('profile.tele')
-                            </button>
-                    @endif
+                            @endif
                     @endswitch
                 </td>
                 <td>

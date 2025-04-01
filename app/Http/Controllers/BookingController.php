@@ -172,6 +172,7 @@ class BookingController extends Controller
             'book_date' => $request->selectedDate,
             'expires_at' => $expiresAt,
             'phone' => $originalBooking->phone,
+            'email' => $originalBooking->email,
             'token' => $this->generateBookingToken($blockedEvent->id),
             'parent_id' => $originalBooking->id, // Link to the original booking
         ]);
@@ -181,11 +182,18 @@ class BookingController extends Controller
             SendCheckoutEmail::dispatch($newBooking, $user, $guiding, $guiding->user);
         }
 
-        // Return success response for AJAX
+        if ($newBooking) {
+            // Return success response for AJAX
+            return response()->json([
+                'success' => true,
+                'message' => 'Your booking has been successfully rescheduled.',
+                'booking_id' => $newBooking->id
+            ]);
+        }
+
         return response()->json([
-            'success' => true,
-            'message' => 'Your booking has been successfully rescheduled.',
-            'booking_id' => $newBooking->id
+            'success' => false,
+            'message' => 'Failed to reschedule booking.'
         ]);
     }
 
