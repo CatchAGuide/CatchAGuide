@@ -2,7 +2,7 @@
 
 @section('profile-content')
     <div class="container py-4">
-        <div class="rating-wrapper">
+        <div class="rating-wrapper shadow-lg">
             <div class="rating-header">
                 <h3>{{ __('guidings.rating_title') }} {{ $booking->guiding->user->firstname }}</h3>
                 <p class="text-muted">{{ __('guidings.rating_subtitle') }}</p>
@@ -26,10 +26,10 @@
 
                 <!-- Ratings Section -->
                 <div class="ratings-container">
-                    <label class="form-label">{{ __('guidings.rating_scores') }}</label>
+                    <h4 class="form-label">{{ __('guidings.rating_scores') }}</h4>
                     
                     <div class="rating-boxes">
-                        <div class="rating-box">
+                        <div class="rating-box shadow">
                             <div class="rating-box-header">
                                 <span class="rating-title">{{ __('guidings.rating_overall') }}</span>
                                 <span class="rating-score">0/10</span>
@@ -37,7 +37,7 @@
                             <input name="rating_overall" class="rating" data-min="0" data-max="10" data-step="1" data-show-clear="false" data-show-caption="false">
                         </div>
                         
-                        <div class="rating-box">
+                        <div class="rating-box shadow">
                             <div class="rating-box-header">
                                 <span class="rating-title">{{ __('guidings.rating_guide') }}</span>
                                 <span class="rating-score">0/10</span>
@@ -45,7 +45,7 @@
                             <input name="rating_guide" class="rating" data-min="0" data-max="10" data-step="1" data-show-clear="false" data-show-caption="false">
                         </div>
                         
-                        <div class="rating-box">
+                        <div class="rating-box shadow">
                             <div class="rating-box-header">
                                 <span class="rating-title">{{ __('guidings.rating_region') }}</span>
                                 <span class="rating-score">0/10</span>
@@ -57,10 +57,10 @@
 
                 <!-- Comment Section -->
                 <div class="review-section">
-                    <label class="form-label">
+                    <h4 class="form-label">
                         {{ __('guidings.rating_comment') }}
-                        <small class="text-muted">{{ __('guidings.rating_comment_help') }}</small>
-                    </label>
+                    </h4>
+                    <small class="text-muted">{{ __('guidings.rating_comment_help') }}</small>
                     <textarea 
                         name="comment" 
                         class="form-control" 
@@ -70,7 +70,7 @@
                 </div>
 
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-orange">
                         {{ __('guidings.rating_submit') }}
                     </button>
                 </div>
@@ -95,7 +95,7 @@
                     <h4 class="modal-title mb-3" id="thankYouModalLabel">{{ __('guidings.rating_thank_you_title') }}</h4>
                     <p class="text-muted mb-4">{{ __('guidings.rating_thank_you_message') }}</p>
                     
-                    <button type="button" class="btn btn-primary px-4 py-2" data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-orange px-4 py-2" data-bs-dismiss="modal">
                         {{ __('guidings.rating_close') }}
                     </button>
                 </div>
@@ -280,6 +280,8 @@
         .btn-close {
             opacity: 0.5;
             transition: opacity 0.2s;
+            right: 16px;
+            top: 16px;
         }
 
         .btn-close:hover {

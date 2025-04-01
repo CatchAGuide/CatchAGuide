@@ -62,7 +62,7 @@
 @section('content')
     <!--Page Header Start-->
     <div class="container">
-        @if(!Request::routeIs('ratings.show'))
+    @if(!Request::routeIs('ratings.show') && !Request::routeIs('ratings.notified') && !Request::routeIs('ratings.review'))
         <section class="page-header">
             <div class="page-header__bottom breadcrumb-container">
                 <div class="page-header__bottom-inner">
