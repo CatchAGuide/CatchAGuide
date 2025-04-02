@@ -355,28 +355,28 @@
                         
                         <div class="mt-3">
                             <label class="fw-bold d-block">{{ translate('Address') }}</label>
-                            <div>{{ $user->information->address }}</div>
-                            <input type="hidden" name="address" value="{{ $user->information->address }}">
+                            <div>{{ $user->information && $user->information->address ? $user->information->address : '' }}</div>
+                            <input type="hidden" name="address" value="{{ $user->information && $user->information->address ? $user->information->address : '' }}">
                         </div>
                         
                         <div class="row g-3 mt-1">
                             <div class="col-6">
                                 <label class="fw-bold d-block">{{ translate('City') }}</label>
-                                <div>{{ $user->information->city }}</div>
-                                <input type="hidden" name="city" value="{{ $user->information->city }}">
+                                <div>{{ $user->information && $user->information->city ? $user->information->city : '' }}</div>
+                                <input type="hidden" name="city" value="{{ $user->information && $user->information->city ? $user->information->city : '' }}">
                             </div>
                             <div class="col-6">
                                 <label class="fw-bold d-block">{{ translate('Country / Region') }}</label>
-                                <div>{{ $user->information->country }}</div>
-                                <input type="hidden" name="country" value="{{ $user->information->country }}">
+                                <div>{{ $user->information && $user->information->country ? $user->information->country : '' }}</div>
+                                <input type="hidden" name="country" value="{{ $user->information && $user->information->country ? $user->information->country : '' }}">
                             </div>
                         </div>
                         
                         <div class="row g-3 mt-1">
                             <div class="col-6">
                                 <label class="fw-bold d-block">{{ translate('Postal code') }}</label>
-                                <div>{{ $user->information->postal }}</div>
-                                <input type="hidden" name="postal_code" value="{{ $user->information->postal }}">
+                                <div>{{ $user->information && $user->information->postal ? $user->information->postal : '' }}</div>
+                                <input type="hidden" name="postal_code" value="{{ $user->information && $user->information->postal ? $user->information->postal : '' }}">
                             </div>
                             <div class="col-6">
                                 <label class="fw-bold d-block">{{ translate('Phone Number') }}</label>
