@@ -1,72 +1,69 @@
 <!DOCTYPE html>
 <html>
-<body style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
+<body style="font-family: 'Morrison', sans-serif; margin: 0; padding: 0;">
 
-<div style="width: 100%; max-width: 600px; margin: 0 auto; background-color: white; box-shadow: 0 4px 6px 3px rgba(0, 0, 0, 0.1);">
-    <div style="text-align: center; padding: 20px;">
-        <a href="https://catchaguide.com/" target="_blank">
-            <img style="max-width: 150px; padding-top: 10px;" src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_JPEG.jpg" alt="Catchaguide Logo">
+<div class="container" style="width: 100%; max-width: 600px; margin: 0 auto; background-color: white; box-shadow: 0 4px 6px 3px rgba(0, 0, 0, 0.1);">
+    <div class="header" style="text-align: center; padding: 20px;">
+        <a href="{{route('welcome')}}" target="_blank">
+            <img class="logo" src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_JPEG.jpg" alt="Catchaguide Logo" style="max-width: 150px; padding-top: 10px;">
         </a>
-        <h2 style="margin: 0;">@lang('emails.guest_booking_request_cancelled_title')</h2>
+        <h2 class="header-title" style="font-family: 'Morrison', sans-serif;">@lang('emails.guest_booking_request_cancelled_title')</h2>
     </div>
-    <div style="padding-bottom:0px;">
-        <div style="padding: 20px;">
-            <p style="font-size:16px;">Hi {{ $booking->guideName }},</p>
-            <p style="font-size:14px;">{!! $booking->textNote !!}</p>
-            <div style="margin-top: 2rem;">
-                <p style="font-size:14px;">@lang('emails.guest_booking_request_cancelled_text_2') {{ $booking->guideName }}:</p>
-                <p style="font-size:14px;"><i><b>{{ $booking->additional_information }}</b></i></p>
-            </div>
-            <div style="margin-top: 2rem;">
-                <p style="font-size:14px;">{{ $booking->alternativeText }}</p>
-                <ul>
-                    @foreach ($booking->alternativeDates as $date)
-                    <li>
-                        <a href="{{ route('booking.reschedule', ['token' => $booking->token]) }}?date={{ $date }}" style="font-size:14px; color:#e8604c; text-decoration:underline; cursor:pointer;">{{ date('F j, Y', strtotime($date)) }}</a>
-                    </li>
-                    @endforeach
-                </ul>
-                <p style="font-size:14px;">
-                    @lang('emails.guest_booking_request_cancelled_text_5')
-                </p>
-            </div>
-            <div style="margin-top:20px; text-align: center;">
-                <p style="font-size:14px;">
-                    @lang('emails.guest_booking_request_cancelled_text_6')
-                </p>
-                <a style="background-color: #e8604c; padding:10px 20px; color:#fff; border:0; text-decoration: none; margin-top:30px; display: inline-block;" href="{{ route('additional.contact') }}">Contact us</a>
-            </div>
-            <div style="margin-top:3rem;">
-                <p style="font-size:14px;">
-                    @lang('emails.guest_booking_request_cancelled_text_7')
-                </p>
-                <p style="margin-top: 2rem; margin-bottom: .5rem; font-size:14px;">
-                    @lang('emails.guest_booking_request_cancelled_text_8')
-                </p>
-                <p style="margin-top: .5rem; font-size:14px;">
-                    @lang('emails.guest_booking_request_cancelled_text_9')
-                </p>
-            </div>
+    <div class="content" style="padding-bottom: 0px;">
+        <div class="content-header" style="padding: 20px;">
+            <p style="font-size: 16px; font-family: 'Morrison', sans-serif;">@lang('emails.dear') {{$user->firstname}},</p>
+            <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
+            {!! $booking->textNote !!}
+            </p>
+            <p style="font-size: 14px; font-family: 'Morrison', sans-serif;"><strong>
+            @lang('emails.guest_booking_request_cancelled_text_2')
+            </strong>
+            </p>
+            <p style="font-size:14px;">@lang('emails.guest_booking_request_cancelled_text_2') {{ $booking->guideName }}:</p>
+            <p style="font-size:14px;"><i><b>{{ $booking->additional_information }}</b></i></p>
+            <ul>
+                @foreach($booking->alternativeDates as $date)
+                <li>
+                    <a style="font-size: 14px; font-family: 'Morrison', sans-serif;" href="{{ route('booking.reschedule', ['token' => $booking->token]) }}?date={{ $date }}" style="font-size:14px; color:#e8604c; text-decoration:underline; cursor:pointer;">{{ date('F j, Y', strtotime($date)) }}</a>
+                </li>
+                @endforeach
+            </ul>
+            <p style="font-size: 14px; font-family: 'Morrison', sans-serif;"> @lang('emails.guest_booking_request_cancelled_text_5')</p>
+        </div>
+        <div style="padding: 0 20px;">
+            <p style="font-size: 14px; font-family: 'Morrison', sans-serif;"> @lang('emails.guest_booking_request_cancelled_text_6')</p>
+        </div>
+        <div style="text-align: center; margin: 2rem 0;">
+            <a style="background-color: #e8604c; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px; font-family: 'Morrison', sans-serif;" href="{{route('additional.contact')}}">Contact us</a>
         </div>
     </div>
+    <div style="padding: 0 20px;">
+        <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
+        @lang('emails.guest_booking_request_cancelled_text_7')
+        </p>
+        <p style="margin-top: 2rem; margin-bottom: .5rem; font-size: 14px; font-family: 'Morrison', sans-serif;">
+        @lang('emails.best_regards')
+        </p>
+        <p style="margin-top: .5rem; font-size: 14px; font-family: 'Morrison', sans-serif;"> @lang('emails.catchaguide_team')</p>
+    </div>
 
-    <div style="text-align: center; padding: 20px; color: #fff; background-color: #313041; margin-top: 2rem;">
+    <div class="footer" style="text-align: center; padding: 20px; color: #fff; background-color: #313041; margin-top: 2rem;">
         <table width="100%">
             <tr>
                 <td style="padding: 10px; text-align: left; width: 50%;">
-                    <img style="max-width: 100px;" src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_PNG.png" width="100px" alt="Catchaguide Logo">
-                    <p>
-                        <a href="tel:+49 (0) {{ env('CONTACT_NUMBER') }}" style="color:#fff; font-size: 14px;">+49 (0) {{ env('CONTACT_NUMBER') }}</a>
+                    <img class="logo" src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_PNG.png" width="100px" alt="Catchaguide Logo">
+                    <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
+                        <a href="tel:+49 (0) {{env('CONTACT_NUM')}}" style="color: #fff; font-size: 14px;">+49 (0) {{env('CONTACT_NUM')}}</a>
                     </p>
-                    <p>
-                        <a href="mailto:{{ env('CEO_EMAIL') }}" style="color:#fff; font-size: 14px;">{{ env('CEO_EMAIL') }}</a>
+                    <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
+                        <a href="mailto:{{env('CEO_EMAIL')}}" style="color: #fff; font-size: 14px;">{{env('CEO_EMAIL')}}</a>
                     </p>
                 </td>
                 <td style="padding: 10px;">
-                    <a style="color: #fff;" href="{{ route('additional.contact') }}" target="_blank">
-                        <p style="font-size:14px;">Contact us</p></a>
-                    <p style="margin: .5rem 0; font-size:14px;">Follow us</p>
-                    <div>
+                    <a style="color: #fff;" href="{{route('additional.contact')}}" target="_blank">
+                        <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">Contact us</p></a>
+                    <p style="margin: .5rem 0; font-size: 14px; font-family: 'Morrison', sans-serif;">Follow us</p>
+                    <div class="social-icons" style="font-family: 'Morrison', sans-serif;">
                         <a href="https://www.facebook.com/CatchAGuide" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 512 512" fill="#fff"><path d="M512 256C512 114.6 397.4 0 256 0S0 114.6 0 256C0 376 82.7 476.8 194.2 504.5V334.2H141.4V256h52.8V222.3c0-87.1 39.4-127.5 125-127.5c16.2 0 44.2 3.2 55.7 6.4V172c-6-.6-16.5-1-29.6-1c-42 0-58.2 15.9-58.2 57.2V256h83.6l-14.4 78.2H287V510.1C413.8 494.8 512 386.9 512 256h0z"/></svg>
                         </a>
@@ -82,7 +79,7 @@
         </table> 
         <hr>
         <div style="text-align: center;">
-            <p style="font-size:14px;">© Catchaguide 2025</p>
+            <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">© Catchaguide {{date('Y')}}</p>
         </div>       
     </div>
 </div>

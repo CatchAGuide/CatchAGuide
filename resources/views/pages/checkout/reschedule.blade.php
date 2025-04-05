@@ -445,53 +445,53 @@
                                 <h5 class="bordered-heading mb-3">Available Extras</h5>
                                 <div class="extras-container">
                                     @foreach($extras as $index => $extra)
-                                    @php
-                                        // Check if this extra was previously selected in the booking
-                                        $bookingExtras = [];
-                                        if ($booking->extras !== null) {
-                                            $bookingExtras = is_array($booking->extras) ? $booking->extras : unserialize($booking->extras) ?? [];
-                                        }
-                                        $isSelected = false;
-                                        $quantity = 1;
-                                        
-                                        foreach($bookingExtras as $bookingExtra) {
-                                            if(isset($bookingExtra['extra_name']) && $bookingExtra['extra_name'] == $extra['name']) {
-                                                $isSelected = true;
-                                                $quantity = $bookingExtra['extra_quantity'] ?? 1;
-                                                break;
+                                        @php
+                                            // Check if this extra was previously selected in the booking
+                                            $bookingExtras = [];
+                                            if ($booking->extras !== null) {
+                                                $bookingExtras = is_array($booking->extras) ? $booking->extras : unserialize($booking->extras) ?? [];
                                             }
-                                        }
-                                    @endphp
-                                    <div class="extra-container">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div class="form-check">
-                                                <input type="checkbox" class="form-check-input extra-checkbox" 
-                                                       id="extra_{{$index}}" 
-                                                       name="extras[{{$index}}][selected]" 
-                                                       data-name="{{$extra['name']}}" 
-                                                       data-price="{{$extra['price']}}"
-                                                       {{ $isSelected ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="extra_{{$index}}">
-                                                    {{$extra['name']}} - <span class="fw-bold">€{{number_format($extra['price'], 2)}}</span>
-                                                </label>
+                                            $isSelected = false;
+                                            $quantity = 1;
+                                            
+                                            foreach($bookingExtras as $bookingExtra) {
+                                                if(isset($bookingExtra['extra_name']) && $bookingExtra['extra_name'] == $extra['name']) {
+                                                    $isSelected = true;
+                                                    $quantity = $bookingExtra['extra_quantity'] ?? 1;
+                                                    break;
+                                                }
+                                            }
+                                        @endphp
+                                        <div class="extra-container">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input extra-checkbox" 
+                                                        id="extra_{{$index}}" 
+                                                        name="extras[{{$index}}][selected]" 
+                                                        data-name="{{$extra['name']}}" 
+                                                        data-price="{{$extra['price']}}"
+                                                        {{ $isSelected ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="extra_{{$index}}">
+                                                        {{$extra['name']}} - <span class="fw-bold">€{{number_format($extra['price'], 2)}}</span>
+                                                    </label>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="quantity-container" id="quantity_container_{{$index}}" style="{{ $isSelected ? 'display: block;' : 'display: none;' }}">
-                                            <div class="d-flex align-items-center">
-                                                <div class="row w-100 align-items-center">
-                                                    <div class="col-sm-4 col-5">
-                                                        <label for="quantity_{{$index}}" class="mb-0">Quantity:</label>
-                                                    </div>
-                                                    <div class="col-sm-8 col-7">
-                                                        <input type="number" class="form-control quantity-input" 
-                                                               id="quantity_{{$index}}" 
-                                                               name="extras[{{$index}}][quantity]" 
-                                                               min="1" value="{{ $quantity }}">
+                                            <div class="quantity-container" id="quantity_container_{{$index}}" style="{{ $isSelected ? 'display: block;' : 'display: none;' }}">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="row w-100 align-items-center">
+                                                        <div class="col-sm-4 col-5">
+                                                            <label for="quantity_{{$index}}" class="mb-0">Quantity:</label>
+                                                        </div>
+                                                        <div class="col-sm-8 col-7">
+                                                            <input type="number" class="form-control quantity-input" 
+                                                                id="quantity_{{$index}}" 
+                                                                name="extras[{{$index}}][quantity]" 
+                                                                min="1" value="{{ $quantity }}">
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
                                     @endforeach
                                 </div>
                             </div>
