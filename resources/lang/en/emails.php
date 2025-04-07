@@ -70,7 +70,6 @@ return [
     'guest_booking_request_text_4' => 'We understand you\'re eager to get out on the water! In the meantime, feel free to browse our blog for fishing tips and tricks.',
     'guest_booking_request_text_5' => 'If you have any questions or need assistance before you hear back from [Guide Name], please don\'t hesitate to contact us:',
     'guest_booking_request_text_6' => 'We appreciate your patience and look forward to connecting you with your guide soon!',
-    'guest_booking_request_text_7' => 'Tight lines,',
     
     'guest_booking_request_accepted_title' => 'Booking Confirmation – Your Fishing Tour Details',
     'guest_booking_request_accepted_text_1' => 'Your guide has accepted your booking request! Below, you’ll find all the details for your fishing tour. Please reach out to your guide as soon as possible to organize the tour and finalize the payment.',
@@ -87,7 +86,6 @@ return [
     'guest_booking_request_cancelled_text_5' => 'If any of these dates are suitable, please reply to this email, and we\'ll process the booking for you.',
     'guest_booking_request_cancelled_text_6' => 'We understand you might have questions or would like to discuss other options. Please don\'t hesitate to contact us.',
     'guest_booking_request_cancelled_text_7' => 'We appreciate your understanding and hope to help you find the perfect fishing experience soon.',
-    'guest_booking_request_cancelled_text_8' => 'Tight lines,',
 
     'guest_booking_request_reminder_title' => 'Your Fishing Adventure with Catch a Guide is 3 Days Away!',
     'guest_booking_request_reminder_text_1' => 'Just a friendly reminder that your fishing tour with [Guide Name] at [Location] is scheduled for [Date] at [Time]!',
@@ -97,7 +95,6 @@ return [
     'guest_booking_request_reminder_text_5' => 'Review Tour Details: Revisit the tour details on your booking confirmation to ensure you have all the necessary information.',
     'guest_booking_request_reminder_text_6' => 'We\'re confident you\'ll have an unforgettable experience with [Guide Name].',
     'guest_booking_request_reminder_text_7' => 'If you have any questions or need further assistance, please don\'t hesitate to contact us:',
-    'guest_booking_request_reminder_text_8' => 'Tigth lines,',
     
     'guest_tour_review_title' => 'Share Your Fishing Adventure! Review Your Guide on Catch a Guide',
     'guest_tour_review_text_1' => 'We hope you had an incredible fishing experience with [Guide Name] on your recent tour at [Location]! Your feedback is invaluable to us and helps other anglers find the perfect guide. We\'ve made it super easy for you to share your thoughts',
@@ -105,7 +102,6 @@ return [
     'guest_tour_review_text_3' => 'Or, if you\'d like to provide more details about your trip, please click the button below to submit a detailed review with comments:',
     'guest_tour_review_text_4' => 'We appreciate you taking the time to share your experience! Your insights help us maintain the highest standards for our guides and ensure that every angler has a memorable adventure.',
     'guest_tour_review_text_5' => 'Thank you for choosing Catch a Guide. We hope to see you on the water again soon!',
-    'guest_tour_review_text_6' => 'Tight lines,',
     
     'new_user_account_confirm_title' => 'Confirm Your Email Address to Complete Registration',
     'new_user_account_confirm_text_1' => 'Thank you for registering with Catch A Guide! We\'re excited to have you on board',
@@ -120,7 +116,6 @@ return [
     'guest_booking_request_expired_text_3' => 'If you have any further questions or would like assistance, please feel free to contact us anytime. Our team will be happy to assist you. ',
     'guest_booking_request_expired_text_4' => 'Additionally, you can explore alternative fishing tours and make a new booking by visiting our website: ',
     'guest_booking_request_expired_text_5' => 'Thank you for using our platform, and we hope to help you plan your next fishing adventure soon!',
-    'guest_booking_request_expired_text_6' => 'Tight lines,',
     
     'user_account_activate_title' => 'Activate Your Account to Manage Your Fishing Tour Booking',
     'user_account_activate_text_1' => 'Thank you for booking a fishing tour with Catch A Guide! To enhance your experience and manage your booking, we\'ve prepared an account for you. By activating your account, you’ll gain access to:',

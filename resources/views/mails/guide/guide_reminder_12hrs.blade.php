@@ -1,99 +1,56 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>New Booking Request</title>
-    <link href="https://fonts.cdnfonts.com/css/morrison" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Morrison', sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-    
-        .header {
-            text-align: center;
-            padding: 20px;
-        }
-       
-       
-        .btn-theme{
-            background-color: #e8604c;
-            padding:10px 20px;
-            color:#fff !important;
-            border:0;
-            text-decoration: none;
-            margin-top:30px;
-        }
+<body style="font-family: 'Morrison', sans-serif; margin: 0; padding: 0;">
 
-      
-        p{
-            font-size:14px;
-        }
-        
-       
-        
-      
-        .order-details{
-            border:1px solid rgb(132, 132, 132);
-            padding:10px;
-            border-radius: 12px;
-        }
-    
-    </style>
-</head>
-<body style=" font-family: 'Morrison', sans-serif;margin: 0;padding: 0;">
-
-<div class="container" style=" width: 100%;max-width: 600px;margin: 0 auto;background-color: white;box-shadow: 0 4px 6px 3px rgba(0, 0, 0, 0.1);">
-    <div class="header" style="text-align: center;padding: 20px;">
+<div style="width: 100%; max-width: 600px; margin: 0 auto; background-color: white; box-shadow: 0 4px 6px 3px rgba(0, 0, 0, 0.1);">
+    <div style="text-align: center; padding: 20px;">
         <a href="https://catchaguide.com/" target="_blank">
-            <img class="logo" src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_JPEG.jpg" alt="Catchaguide Logo" style="max-width: 150px;padding-top: 10px;">
+            <img src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_JPEG.jpg" alt="Catchaguide Logo" style="max-width: 150px; padding-top: 10px;">
         </a>
-         <h2 class="header-title">Erinnerung: Buchungsanfrage offen – 12 Stunden Zeit zur Antwort</h2>
+         <h2>@lang('emails.guide_reminder_to_respond_12hrs_title')</h2>
     </div>
-    <div class="content" style="padding-bottom:0px;">
-        <div class="content-header" style="padding: 20px;">
-            <p style="font-size:16px;">Lieber <strong>Guide Name</strong>,</p>
-            <p>Dies ist eine freundliche Erinnerung, dass Du noch eine offene Buchungsanfrage für eine Angeltour hast, die Deine Antwort benötigt. Du hast noch 12 Stunden Zeit, die Anfrage zu bestätigen oder abzulehnen, bevor sie abläuft.</p>
+    <div style="padding-bottom: 0px;">
+        <div style="padding: 20px;">
+            <p style="font-size: 16px;">@lang('emails.dear') <strong>{{$guide->firstname}}</strong>,</p>
+            <p style="font-size: 14px;">@lang('emails.guide_reminder_to_respond_12hrs_text_1')</p>
 
-            <div style="margin-top:2rem;">
-                <p>Bitte stelle sicher, dass Du die Anfrage überprüfst und so schnell wie möglich antwortest, um die Buchung zu sichern. Wenn Du Unterstützung benötigst, kannst Du uns jederzeit kontaktieren.</p>
-                <div style="text-align:center;margin-top:2rem;">
-                    <a class="btn-theme" style="background-color: #e8604c;padding:10px 20px;color:#fff !important;border:0;text-decoration: none;margin-top:30px;" href="https://catchaguide.com/contact">Contact Us</a>
+            <div style="margin-top: 2rem;">
+                <p style="font-size: 14px;">@lang('emails.guide_reminder_to_respond_12hrs_text_2')</p>
+                <div style="text-align: center; margin-top: 2rem;">
+                    <a style="background-color: #e8604c; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px; display: inline-block;" href="{{route('additional.contact')}}">Contact Us</a>
                 </div>
             </div>
         </div>
     </div>
-    <div style="margin-top:2rem; padding: 0 20px;">
-        <p>
-            Danke, dass Du Teil unserer Plattform bist. Wir freuen uns auf Deine schnelle Antwort.
+    <div style="margin-top: 2rem; padding: 0 20px;">
+        <p style="font-size: 14px;">
+            @lang('emails.guide_reminder_to_respond_12hrs_text_3')
         </p>
-        <p style="margin-top: 2rem; margin-bottom: .5rem;">
-            Mit freundlichen Grüßen,
+        <p style="margin-top: 2rem; margin-bottom: .5rem; font-size: 14px;">
+            @lang('emails.best_regards')
         </p>
-        <p style="margin-top: .5rem;">Das Catch a Guide Team</p>
+        <p style="margin-top: .5rem; font-size: 14px;">@lang('emails.catchaguide_team')</p>
     </div>
 
 
-    <div class="footer" style="text-align: center; padding: 20px; color: #fff; background-color: #313041; margin-top: 2rem;">
+    <div style="text-align: center; padding: 20px; color: #fff; background-color: #313041; margin-top: 2rem;">
         <table width="100%">
             <tr>
-                <td style="padding: 10px;text-align: left;width: 50%;">
-                    <img class="logo" src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_PNG.png" width="100px" alt="Catchaguide Logo">
+                <td style="padding: 10px; text-align: left; width: 50%;">
+                    <img src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_PNG.png" width="100px" alt="Catchaguide Logo">
                     <p>
-                        <a href="tel:+49 (0) 15155495574" style="color:#fff; font-size: 14px;">+49 (0) 15155495574</a>
-
+                        <a href="tel:+49 (0) {{env('CONTACT_NUM')}}" style="color: #fff; font-size: 14px;">+49 (0) {{env('CONTACT_NUM')}}</a>
                     </p>
                     <p>
-                        <a href="mailto:info.catchaguide@gmail.com" style="color:#fff; font-size: 14px;">info.catchaguide@gmail.com</a>
+                        <a href="mailto:{{env('CEO_EMAIL')}}" style="color: #fff; font-size: 14px;">{{env('CEO_EMAIL')}}</a>
                     </p>
                 </td>
                 <td style="padding: 10px;">
-                    <a style="color: #fff;" href="https://catchaguide.com/contact" target="_blank">
-                        <p>Contact us</p></a>
-                    <p style="margin: .5rem 0">Follow us</p>
-                    <div class="social-icons">
-                        <a  href="https://www.facebook.com/CatchAGuide" target="_blank">
+                    <a style="color: #fff;" href="{{route('additional.contact')}}" target="_blank">
+                        <p style="font-size: 14px;">Contact us</p></a>
+                    <p style="margin: .5rem 0; font-size: 14px;">Follow us</p>
+                    <div>
+                        <a href="https://www.facebook.com/CatchAGuide" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 512 512" fill="#fff"><path d="M512 256C512 114.6 397.4 0 256 0S0 114.6 0 256C0 376 82.7 476.8 194.2 504.5V334.2H141.4V256h52.8V222.3c0-87.1 39.4-127.5 125-127.5c16.2 0 44.2 3.2 55.7 6.4V172c-6-.6-16.5-1-29.6-1c-42 0-58.2 15.9-58.2 57.2V256h83.6l-14.4 78.2H287V510.1C413.8 494.8 512 386.9 512 256h0z"/></svg>
                         </a>
                         <a style="padding-left: .5rem;" href="https://wa.me/+4915155495574" target="_blank">
@@ -108,7 +65,7 @@
         </table> 
         <hr>
         <div style="text-align: center;">
-            <p>© Catchaguide 2025</p>
+            <p style="font-size: 14px;">© Catchaguide {{date('Y')}}</p>
         </div>       
     </div>
 </div>

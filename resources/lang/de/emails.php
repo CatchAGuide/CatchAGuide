@@ -132,5 +132,13 @@ return [
     'user_account_activate_text_10' => '2. Setze Dein persönliches Passwort, um die Kontoerstellung abzuschließen',
     'user_account_activate_text_11' => 'Sobald Dein Konto aktiviert ist, kannst Du Deine Buchung verwalten und mehr von dem entdecken, was wir anbieten. Falls Du Unterstützung benötigst, kannst Du uns jederzeit kontaktieren.',
     'user_account_activate_text_12' => 'Willkommen bei Catch A Guide, wir freuen uns darauf, Dir bei Deinem Angelabenteuer zu helfen!',
-    
+
+    'guest_tour_reminder_title' => 'Dein Angelausflug mit Catch a Guide ist in 3 Tagen!',
+    'guest_tour_reminder_text_1' => 'Dies ist eine freundliche Erinnerung, dass Deine Angeltour mit [Guide Name] am [Location] für den [Date] um [Time] geplant ist! Wir sind sicher, dass Du dich auf das Wasser freust. Um sicherzustellen, dass Du bestens vorbereitet bist, hier einige Dinge, die Du beachten solltest:',
+    'guest_tour_reminder_text_2' => '<strong>Überprüfe das Wetter:</strong> Sieh Dir die Wettervorhersage für [Location] an und kleide Dich entsprechend.',
+    'guest_tour_reminder_text_3' => '<strong>Bring Essentials mit:</strong> Vergiss nicht notwendige Angellizenzen, Sonnencreme, Hüte, Sonnenbrillen und persönliche Dinge.',
+    'guest_tour_reminder_text_4' => '<strong>Überprüfe die Tourdetails:</strong> Überprüfe die Tourdetails in Deiner Buchungsbestätigung, um sicherzustellen, dass Du alle notwendigen Informationen hast.',
+    'guest_tour_reminder_text_5' => 'Wir sind sicher, dass Du eine unvergessliche Erfahrung mit [Guide Name] haben wirst.',
+    'guest_tour_reminder_text_6' => 'Wenn Du Fragen hast oder weitere Unterstützung benötigst, zögere nicht, uns zu kontaktieren:',
+    'guest_tour_reminder_text_7' => 'Wir wünschen Dir eine fantastische Angeltour!',
 ];
