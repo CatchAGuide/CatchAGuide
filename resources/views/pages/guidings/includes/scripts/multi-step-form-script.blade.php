@@ -929,17 +929,24 @@
 
         const errorList = document.createElement('ul'); // Create a new list for errors
 
-        for (const field in errors) {
-            const errorMessage = errors[field][0]; 
-            const fieldInfo = errorMapping[field]; 
-            
+        if (!errors || Object.keys(errors).length === 0) {
+            // Show default error message if errors is undefined or empty
             const listItem = document.createElement('li');
-            if (fieldInfo) {
-                listItem.textContent = `${fieldInfo.field} (Step ${fieldInfo.step}): ${errorMessage}`;
-            } else {
-                listItem.textContent = errorMessage; 
-            }
+            listItem.textContent = 'An unexpected error occurred. Please try again. | If Error persists, contact support.';
             errorList.appendChild(listItem);
+        } else {
+            for (const field in errors) {
+                const errorMessage = errors[field][0]; 
+                const fieldInfo = errorMapping[field]; 
+                
+                const listItem = document.createElement('li');
+                if (fieldInfo) {
+                    listItem.textContent = `${fieldInfo.field} (Step ${fieldInfo.step}): ${errorMessage}`;
+                } else {
+                    listItem.textContent = errorMessage; 
+                }
+                errorList.appendChild(listItem);
+            }
         }
 
         errorContainer.appendChild(errorList);
