@@ -36,6 +36,10 @@
                                     <div class="mt-1 small text-muted">
                                         {{ translate('You wont be charged yet.') }}
                                     </div>
+                                    
+                                    @if($guiding->min_guests)
+                                        <small class="mt-1 small text-muted"> * {{ translate('Minimun of ' . $guiding->min_guests . " guest/s is required for this trip" ) }}</small>
+                                    @endif
                                 </div>
                             </div>
                         </div>

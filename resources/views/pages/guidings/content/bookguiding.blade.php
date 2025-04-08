@@ -41,6 +41,10 @@
                         </div>
                     </div>
                     
+                    @if($guiding->min_guests)
+                        <small> * {{ translate('Minimun of ' . $guiding->min_guests . " guest/s is required for this trip" ) }}</small>
+                    @endif
+                    
                     <div class="booking-form-container">
                         <input type="hidden" name="guiding_id" value="{{ $guiding->id }}">
                         <button type="submit" class="btn btn-orange w-100 py-3 mb-3">{{ translate('Reserve now') }}</button>
