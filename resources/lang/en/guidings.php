@@ -75,8 +75,8 @@ return [
     'rating_thank_you' => 'Thank you for your rating!',
     'rating_close' => 'Close',
 
-    'Real_experiences' => 'Real experiences from real restaurant guests',
-    'Real_experiences_description' => 'Overall ratings and reviews can only be submitted by guests who have booked through TheFork.',
+    'Real_experiences' => 'Real reviews from real guests',
+    'Real_experiences_description' => 'Overall ratings and reviews can only be submitted by guests who have booked this fishing tour through Catch A Guide and participated in the tour',
     'How_are_overall_ratings_calculated' => 'How are overall ratings calculated?',
     'Overall' => 'Overall',
     'Guide' => 'Guide',

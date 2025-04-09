@@ -75,8 +75,8 @@ return [
     'rating_thank_you' => 'Vielen Dank für Ihre Bewertung!',
     'rating_close' => 'Schließen',
 
-    'Real_experiences' => 'Echte Erlebnisse von echten Restaurantgästen',
-    'Real_experiences_description' => 'Gesamtwertungen und Bewertungen können nur von Gästen abgegeben werden, die über TheFork reserviert haben.',
+    'Real_experiences' => 'Echte Erlebnisse von echten Gästen',
+    'Real_experiences_description' => 'Gesamtwertungen und Bewertungen können nur von Gästen abgegeben werden, die diese Angeltour über Catch A Guide reserviert und an der Tour teilgenommen haben.',
     'How_are_overall_ratings_calculated' => 'Wie werden Gesamtwertungen berechnet?',
     'Overall' => 'Gesamt',
     'Guide' => 'Guide',
