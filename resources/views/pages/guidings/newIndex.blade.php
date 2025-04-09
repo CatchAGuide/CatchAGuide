@@ -88,96 +88,6 @@
             aspect-ratio: 3/2;
         }
 
-        .rating-overview {
-            background-color: #FAF9F8;
-        }
-
-        .score {
-            font-size: 3.5rem;
-            font-weight: 700;
-            color: #006B5B;
-            line-height: 1;
-            margin-bottom: 0.25rem;
-        }
-
-        .rating-label {
-            color: #006B5B;
-            font-weight: 500;
-        }
-
-        .rating-categories {
-            width: 100%;
-            max-width: 600px;
-        }
-
-        .category-label {
-            min-width: 80px;
-            color: #6c757d;
-        }
-
-        .progress {
-            background-color: #E9ECEF;
-            border-radius: 4px;
-            height: 8px;
-        }
-
-        .progress-bar {
-            background-color: #006B5B;
-            border-radius: 4px;
-        }
-
-        .rating-value {
-            min-width: 32px;
-            font-weight: 500;
-        }
-
-        .rating-info {
-            /* max-width: 800px; */
-            margin: 0 auto;
-        }
-
-        @media (max-width: 767px) {
-            .rating-categories {
-                width: 100%;
-                padding: 0 1rem;
-            }
-            
-            .rating-info {
-                padding: 0 1rem;
-            }
-            
-            .rating-left {
-                text-align: center !important;
-                margin-bottom: 2rem;
-            }
-        }
-
-        .score-wrapper {
-            width: 110px;
-            text-align: center;
-        }
-
-        .score-label {
-            font-size: 0.875rem;
-            color: #6c757d;
-            font-weight: 400;
-        }
-
-        .rating-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            background-color: rgba(0, 107, 91, 0.1);
-            color: #006B5B;
-            border-radius: 4px;
-            font-weight: 500;
-            margin-bottom: 0.25rem;
-        }
-
-        .rating-count {
-            font-size: 0.875rem;
-            color: #6c757d;
-        }
-
     </style>
 @endsection
 
@@ -1097,63 +1007,59 @@
     <div class="guidings-rating mb-5">
         @if($reviews_count > 0)
             <div class="ratings-head">
-                <div class="row">
-                    <div class="rating-overview text-center bg-light p-4 rounded">
-                        <div class="d-flex align-items-start justify-content-center gap-5 flex-wrap">
-                            <!-- Left side - Score and ratings -->
-                            <div class="rating-left text-start d-flex align-items-center gap-3">
-                                <div class="score-wrapper">
-                                    <div class="score">{{ number_format($average_grandtotal_score, 1) }}</div>
-                                    <div class="score-label">@lang('guidings.over_10')</div>
-                                </div>
-                                <div class="rating-info text-center">
-                                    <div class="rating-badge">{{ getRatingLabel($average_grandtotal_score) }}</div>
-                                    <div class="rating-count">{{ $reviews_count }} @lang('guidings.Reviews')</div>
-                                </div>
+                <div class="rating-overview text-center shadow-sm">
+                    <div class="ratings-wrapper">
+                        <!-- Left side - Score and ratings -->
+                        <div class="rating-left">
+                            <div class="score-wrapper">
+                                <div class="score">{{ number_format($average_grandtotal_score, 1) }}</div>
+                                <div class="score-label">@lang('guidings.over_10')</div>
                             </div>
-
-                            <!-- Right side - Rating categories -->
-                            <div class="rating-categories">
-                                <div class="category d-flex align-items-center mb-3">
-                                    <span class="category-label me-4">@lang('guidings.Overall')</span>
-                                    <div class="d-flex align-items-center flex-grow-1 gap-2">
-                                        <div class="progress flex-grow-1">
-                                            <div class="progress-bar" style="width: {{ ($average_overall_score/10)*100 }}%"></div>
-                                        </div>
-                                        <span class="rating-value">{{ number_format($average_overall_score, 1) }}</span>
-                                    </div>
-                                </div>
-                                <div class="category d-flex align-items-center mb-3">
-                                    <span class="category-label me-4">@lang('guidings.Guide')</span>
-                                    <div class="d-flex align-items-center flex-grow-1 gap-2">
-                                        <div class="progress flex-grow-1">
-                                            <div class="progress-bar" style="width: {{ ($average_guide_score/10)*100 }}%"></div>
-                                        </div>
-                                        <span class="rating-value">{{ number_format($average_guide_score, 1) }}</span>
-                                    </div>
-                                </div>
-                                <div class="category d-flex align-items-center">
-                                    <span class="category-label me-4">@lang('guidings.Region_Water')</span>
-                                    <div class="d-flex align-items-center flex-grow-1 gap-2">
-                                        <div class="progress flex-grow-1">
-                                            <div class="progress-bar" style="width: {{ ($average_region_water_score/10)*100 }}%"></div>
-                                        </div>
-                                        <span class="rating-value">{{ number_format($average_region_water_score, 1) }}</span>
-                                    </div>
-                                </div>
+                            <div class="rating-info text-center">
+                                <div class="rating-badge">{{ getRatingLabel($average_grandtotal_score) }}</div>
+                                <div class="rating-count">{{ $reviews_count }} @lang('guidings.Reviews')</div>
                             </div>
                         </div>
-    
-                        <!-- Bottom info section -->
-                        <div class="rating-info mt-4 text-center">
-                            <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
-                                <i class="fas fa-check-circle text-success"></i>
-                                <p class="mb-0">@lang('guidings.Real_experiences')</p>
+
+                        <!-- Right side - Rating categories -->
+                        <div class="rating-categories">
+                            <div class="category d-flex align-items-center mb-3">
+                                <span class="category-label me-4">@lang('guidings.Overall')</span>
+                                <div class="d-flex align-items-center flex-grow-1 gap-2">
+                                    <div class="progress flex-grow-1">
+                                        <div class="progress-bar" style="width: {{ ($average_overall_score/10)*100 }}%"></div>
+                                    </div>
+                                    <span class="rating-value">{{ number_format($average_overall_score, 1) }}</span>
+                                </div>
                             </div>
-                            <p class="text-muted mb-2">
-                                @lang('guidings.Real_experiences_description')
-                            </p>
-                            <a href="#" class="text-decoration-none">@lang('guidings.How_are_overall_ratings_calculated')</a>
+                            <div class="category d-flex align-items-center mb-3">
+                                <span class="category-label me-4">@lang('guidings.Guide')</span>
+                                <div class="d-flex align-items-center flex-grow-1 gap-2">
+                                    <div class="progress flex-grow-1">
+                                        <div class="progress-bar" style="width: {{ ($average_guide_score/10)*100 }}%"></div>
+                                    </div>
+                                    <span class="rating-value">{{ number_format($average_guide_score, 1) }}</span>
+                                </div>
+                            </div>
+                            <div class="category d-flex align-items-center">
+                                <span class="category-label me-4">@lang('guidings.Region_Water')</span>
+                                <div class="d-flex align-items-center flex-grow-1 gap-2">
+                                    <div class="progress flex-grow-1">
+                                        <div class="progress-bar" style="width: {{ ($average_region_water_score/10)*100 }}%"></div>
+                                    </div>
+                                    <span class="rating-value">{{ number_format($average_region_water_score, 1) }}</span>
+                                </div>
+                            </div>
+                             <!-- Bottom info section -->
+                    <div class="rating-info mt-4 text-center">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="fas fa-check-circle text-success"></i>
+                            <strong class="mb-0">@lang('guidings.Real_experiences')</strong>
+                        </div>
+                        <p class="text-muted mb-2">
+                            @lang('guidings.Real_experiences_description')
+                        </p>
+                    </div>
                         </div>
                     </div>
                 </div>
