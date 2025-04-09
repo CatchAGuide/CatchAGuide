@@ -748,8 +748,77 @@
     font-size: 0.875rem;
     color: #313041;
 }
+.ave-reviews-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  .ratings-score{
+    background-color: #313041;
+    color: #fff;
+    font-weight: bold;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    border-radius: 8px 8px 0 8px;
+    font-size: 12px;
+    .rating-value{
+      color: #fff;
+      min-width: unset;
+      font-size: 14px;
+    }
+    .rating-label{
+      color: #fff;
+      
+    }
+  }
 }
-
+}
+#guidings-list {
+  .no-reviews{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    text-align: right;
+    span{
+      font-size: 14px;
+      width: 100%;
+    }
+  }
+  .ave-reviews-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    justify-content: flex-end;
+    width: 100%;
+    font-size: 14px;
+    flex-direction: column;
+    .ratings-score{
+      background-color: #313041;
+      color: #fff;
+      font-weight: bold;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      border-radius: 8px 8px 0 8px;
+      font-size: 12px;
+      .rating-value{
+        color: #fff;
+        min-width: unset;
+        font-size: 13px;
+      }
+      .rating-label{
+        color: #fff;
+        
+      }
+    }
+  }
+}
 .guidings-gallery {
   min-height: 400px;
   gap: 16px;

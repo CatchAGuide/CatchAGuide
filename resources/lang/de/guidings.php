@@ -83,6 +83,7 @@ return [
     'Region_Water' => 'Region & Wasser',
     'Reviews' => 'Bewertungen',
     'over_10' => 'von 10',
+    'no_reviews' => 'Noch keine Bewertungen',
 
     'Excellent' => 'Ausgezeichnet',
     'Very_Good' => 'Sehr Gut',
