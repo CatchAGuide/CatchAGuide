@@ -1,3 +1,4 @@
+
 <div class="col-md-12 tour-details-two__sticky sticky-lg-top {{$agent->ismobile() ? 'text-center' : ''}}">
     <div class="tour-details-two__sidebar">
         <div class="tour-details-two__book-tours card shadow-sm" id="booking-tour">
@@ -7,21 +8,21 @@
                     @csrf
                     <div class="d-flex align-items-center justify-content-between mb-3">
                         @if($guiding->price_type == 'per_person')
-                            <h4 class="mb-0"><small class="from-text">{{ translate('from') }}</small> <span class="total-price">0€</span></h4>
+                            <h4 class="mb-0"><small class="from-text">{{ __('booking.from') }}</small> <span class="total-price">0€</span></h4>
                         @else
-                            <h4 class="mb-0">{{ $guiding->price }}€ <span class="fs-6 fw-normal text-muted">{{ translate('per guiding') }}</span></h4>
+                            <h4 class="mb-0">{{ $guiding->price }}€ <span class="fs-6 fw-normal text-muted">{{ __('booking.per_guiding') }}</span></h4>
                         @endif
                         
                         <div class="booking-select" style="min-width: 150px;">
                             <select class="form-select border-0" aria-label="Personenanzahl" name="person" required id="personSelect">
-                                <option selected disabled>{{ translate('People') }}</option>
+                                <option selected disabled>{{ __('booking.people') }}</option>
                                 @if($guiding->price_type == 'per_person')
                                     @foreach(json_decode($guiding->prices) as $price)
-                                        <option value="{{ $price->person }}" data-price="{{ $price->amount }}">{{ $price->person }} {{ $price->person == 1 ? 'Person' : 'Personen' }}</option>
+                                        <option value="{{ $price->person }}" data-price="{{ $price->amount }}">{{ $price->person }} {{ $price->person == 1 ? __('booking.person') : __('booking.people') }}</option>
                                     @endforeach
                                 @else
                                     @for($i = 1; $i <= $guiding->max_guests; $i++)
-                                        <option value="{{ $i }}" data-price="{{ $guiding->price }}">{{ $i }} {{ $i == 1 ? 'Person' : 'Personen' }}</option>
+                                        <option value="{{ $i }}" data-price="{{ $guiding->price }}">{{ $i }} {{ $i == 1 ? __('booking.person') : __('booking.people') }}</option>
                                     @endfor
                                 @endif
                             </select>
@@ -34,7 +35,7 @@
                         <div class="price-breakdown">
                             <div class="d-flex justify-content-between mb-2 text-center">
                                 <span class="price-item w-100 text-center">
-                                    <span class="base-price"></span>  {{ strtolower(translate('per person for a tour of')) }} <span class="person-count"></span> {{ strtolower(translate('people')) }}{{ translate('. You wont be charged yet.')}}
+                                    <span class="base-price"></span> {{ __('booking.per_person_for_a_tour_of') }} <span class="person-count"></span> <span class="people-text"></span>{{ __('booking.you_wont_be_charged_yet')}}
                                 </span>
                                 <span class="total-price fw-bold"></span>
                             </div>
@@ -42,12 +43,12 @@
                     </div>
                     
                     @if($guiding->min_guests)
-                        <small> * {{ translate('Minimun of ' . $guiding->min_guests . " guest/s is required for this trip" ) }}</small>
+                        <small> * {{str_replace('[Min Guest]', $guiding->min_guests, __('booking.min_guest'))}} </small>
                     @endif
                     
                     <div class="booking-form-container">
                         <input type="hidden" name="guiding_id" value="{{ $guiding->id }}">
-                        <button type="submit" class="btn btn-orange w-100 py-3 mb-3">{{ translate('Reserve now') }}</button>
+                        <button type="submit" class="btn btn-orange w-100 py-3 mb-3 reserve-now-btn">{{ __('booking.reserve_now') }}</button>
                     </div>
                 </form>
             </div>
@@ -56,16 +57,16 @@
     
     @if(!$agent->ismobile())
     <div class="contact-card mb-4 mt-4 tour-details-two__book-tours">
-        <h5 class="contact-card__title">{{ translate('Contact us') }}</h5>
+        <h5 class="contact-card__title">{{ __('booking.contact_us') }}</h5>
         <div class="contact-card__content">
-            <p class="">{{ translate('Do you have questions about this fishing tour? Our team is here to help!') }}</p>
+            <p class="">{{ __('booking.do_you_have_questions') }}</p>
             <div class="">
                 <div class="contact-info">
                     <i class="fas fa-phone-alt me-2"></i>
                     <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>
                 </div>
                 <a href="{{ route('additional.contact') }}" class="btn btn-outline-orange">
-                    {{ translate('Contact Form') }}
+                    {{ __('booking.contact_form') }}
                     <i class="fas fa-arrow-right ms-2"></i>
                 </a>
             </div>
@@ -74,12 +75,15 @@
     @endif
 </div>
 
+
+@section('js_after')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const personSelect = document.getElementById('personSelect');
     const priceCalculation = document.getElementById('priceCalculation');
     const basePrice = document.querySelector('.base-price');
     const personCount = document.querySelector('.person-count');
+    const peopleText = document.querySelector('.people-text');
     const totalPrice = document.querySelector('.total-price');
     const grandTotal = document.querySelector('.grand-total');
     const fromText = document.querySelector('.from-text');
@@ -101,6 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const perPersonPrice = Math.round(firstPrice / persons);
                 basePrice.textContent = perPersonPrice + '€';
                 personCount.textContent = persons;
+                peopleText.textContent = persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}';
             }
         }
     @endif
@@ -123,10 +128,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 const perPersonPrice = Math.round(price / persons);
                 basePrice.textContent = perPersonPrice + '€';
                 personCount.textContent = persons;
+                peopleText.textContent = persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}';
                 const subtotal = price;
             @else
                 basePrice.textContent = price + '€';
                 personCount.textContent = persons;
+                peopleText.textContent = persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}';
                 const subtotal = price;
             @endif
             
@@ -140,3 +147,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+@endsection

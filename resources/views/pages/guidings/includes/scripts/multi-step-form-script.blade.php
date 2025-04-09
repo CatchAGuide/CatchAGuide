@@ -709,12 +709,12 @@
         }
     }
 
-    // Update the no_guest change handler to consider min guests
+    // Update the no_guest change handler to properly limit min guests
     $('#no_guest').change(function() {
         if ($('input[name="price_type"]:checked').val() === 'per_person') {
             $('input[name="price_type"]:checked').change();
             
-            // Make sure min guests is not greater than max guests
+            // Make sure min guests is not greater than max guests - 1
             const maxGuests = parseInt($(this).val()) || 1;
             const minGuestsInput = $('#min_guests');
             const currentMinGuests = parseInt(minGuestsInput.val()) || 1;
@@ -725,26 +725,39 @@
             
             // Update min guests max attribute
             minGuestsInput.attr('max', maxGuests);
-        }
-    });
-
-    // Modify the min guests switch functionality
-    $('#min_guests_switch').change(function() {
-        const isChecked = $(this).is(':checked');
-        $('#min_guests_input_container').toggle(isChecked);
-        $('#min_guests').prop('required', isChecked);
-        
-        // If price type is per_person, update the price fields
-        if ($('input[name="price_type"]:checked').val() === 'per_person') {
+            minGuestsInput.attr('min', 1);
+            
+            // Update price fields to reflect the new min guests value
             updatePriceFieldsBasedOnMinGuests();
         }
     });
 
-    // Add a change handler for min_guests input
+    // Also update the min guests input handler to enforce limits
     $('#min_guests').on('change input', function() {
+        const maxGuests = parseInt($('#no_guest').val()) || 1;
+        const currentValue = parseInt($(this).val()) || 1;
+        
+        // Enforce the upper limit
+        if (currentValue > maxGuests) {
+            $(this).val(maxGuests);
+        }
+        
+        // Enforce the lower limit
+        if (currentValue < 1) {
+            $(this).val(1);
+        }
+        
         if ($('input[name="price_type"]:checked').val() === 'per_person') {
             updatePriceFieldsBasedOnMinGuests();
         }
+    });
+
+    // Add initialization for min guests input when the form loads
+    $(document).ready(function() {
+        // Set initial min/max attributes for min_guests input
+        const maxGuests = parseInt($('#no_guest').val()) || 1;
+        $('#min_guests').attr('max', maxGuests);
+        $('#min_guests').attr('min', 1);
     });
 
     // Seasonal trip selection
