@@ -137,12 +137,16 @@
                     </div>
                 </div>
                 @if ($average_grandtotal_score)
-                <div class="col-auto pe-0 me-1">
-                  
-                    <p class="mb-1">
-                        <span class="text-warning">★</span> {{number_format($average_grandtotal_score, 1)}}/10 ({{$reviews_count}} reviews)
-                    </p>
+                <div class="ave-reviews-row">
+                    <div class="ratings-score">
+                    <span class="rating-value">{{number_format($average_grandtotal_score, 1)}}</span>
+                </div> 
+                    <span class="mb-1">
+                        ({{$reviews_count}} reviews)
+                    </span>
                 </div>
+                @else
+                <span>@lang('guidings.no_reviews')</span>
                 @endif
                 <div class="col-auto p-0">
                 </div>
