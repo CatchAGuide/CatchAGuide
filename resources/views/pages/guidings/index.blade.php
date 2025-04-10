@@ -648,7 +648,8 @@
                                                                 <span class="rating-value">{{number_format($guiding->user->average_rating(), 1)}}</span>
                                                             </div> 
                                                                 <span class="mb-1">
-                                                                    ({{$guiding->user->received_ratings->count()}} reviews)
+                                                                    {{-- ({{$guiding->user->received_ratings->count()}} reviews) --}}
+                                                                    ({{$guiding->user->reviews->count()}} reviews)
                                                                 </span>
                                                             </div>
                                                             @else
