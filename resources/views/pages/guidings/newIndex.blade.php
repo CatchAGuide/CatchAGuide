@@ -88,6 +88,69 @@
             aspect-ratio: 3/2;
         }
 
+        /* Force the ratings slider to display */
+        .ratings-slider {
+            display: block !important;
+            overflow: hidden;
+        }
+        
+        .ratings-item {
+            background: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        
+        .ratings-comment-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        /* Horizontal scrolling reviews container with hidden scrollbar */
+        .ratings-container {
+            display: flex;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            gap: 20px;
+            padding: 10px 0 20px;
+            margin: 20px 0;
+            -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
+            cursor: grab; /* Show grab cursor to indicate draggable */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+        
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .ratings-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .ratings-container:active {
+            cursor: grabbing; /* Change cursor when actively dragging */
+        }
+        
+        .ratings-item {
+            flex: 0 0 300px; /* Fixed width, no growing or shrinking */
+            background: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            user-select: none; /* Prevent text selection during drag */
+        }
+        
+        /* Hide navigation buttons */
+        .ratings-nav {
+            display: none;
+        }
+        
+        @media (max-width: 767px) {
+            .ratings-item {
+                flex: 0 0 85vw; /* Take up most of the viewport width on mobile */
+            }
+        }
     </style>
 @endsection
 
@@ -1068,27 +1131,35 @@
                     </div>
                 </div>
             </div>
-            <div class="ratings-slider owl-carousel">
+            
+            <!-- Horizontal scrolling reviews container -->
+            <div class="ratings-container" id="ratings-container">
                 @foreach($reviews as $review)
                 <div class="ratings-item">
-                        <div class="ratings-comment">
-                            <div class="ratings-comment-top">
-                                <div class="user-info">
-                                    <p class="user">{{$review->user->firstname}}</p>
-                                    <p class="date">{{ ($review->created_at != null) ? Carbon\Carbon::parse($review->created_at)->format('F j, Y') : "-" }}</p>
-                                </div>
-                                <p>
-                                    <span class="text-warning">★</span> {{ number_format($review->grandtotal_score, 1) }}/10
-                                </p>
+                    <div class="ratings-comment">
+                        <div class="ratings-comment-top">
+                            <div class="user-info">
+                                <p class="user">{{$review->user->firstname}}</p>
+                                <p class="date">{{ ($review->created_at != null) ? Carbon\Carbon::parse($review->created_at)->format('F j, Y') : "-" }}</p>
                             </div>
-                            <div class="comment-content">
-                                <p class="description">{{ translate($review->comment) }}</p>
-                                <small class="see-more text-orange">{{ translate('See More') }}</small>
-                                <small class="show-less text-orange">{{ translate('Show Less') }}</small>
-                            </div>
+                            <p>
+                                <span class="text-warning">★</span> {{ number_format($review->grandtotal_score, 1) }}/10
+                            </p>
+                        </div>
+                        <div class="comment-content">
+                            <p class="description">{{ translate($review->comment) }}</p>
+                            <small class="see-more text-orange">{{ translate('See More') }}</small>
+                            <small class="show-less text-orange">{{ translate('Show Less') }}</small>
                         </div>
                     </div>
+                </div>
                 @endforeach
+            </div>
+            
+            <!-- Navigation buttons for scrolling through reviews -->
+            <div class="ratings-nav">
+                <button id="scroll-left" aria-label="Scroll left"><i class="fas fa-chevron-left"></i></button>
+                <button id="scroll-right" aria-label="Scroll right"><i class="fas fa-chevron-right"></i></button>
             </div>
         @endif
     </div>
@@ -1289,31 +1360,48 @@ const totalItems = {{ $same_guiding->count() }};
 
 $(document).ready(function(){
     initMap();
-    $(".ratings-slider").owlCarousel({
-        items: 3,
-        margin: 10,
-        loop:false,
-        nav:false,
-        dots: true,
-        slideBy:3 ,
-        autoplay: true,
-        autoplayTimeout: 10000,
-        responsive: {
-        0: {
-            items: 1,
-            slideBy: 1
-        },
-        767: {
-            items: 2
-        },
-        1000: {
-            items: 3
-        }
-        }
-    });
-    initOwlCarousel(); // Initialize on page load
-    $(window).resize(initOwlCarousel); // Reinitialize on resize
-
+    
+    // Simple drag scrolling for the ratings container
+    const container = document.getElementById('ratings-container');
+    
+    if (container) {
+        let isDragging = false;
+        let startPosition = 0;
+        let scrollLeftPosition = 0;
+        
+        // Desktop mouse events
+        $(container).on('mousedown', function(e) {
+            isDragging = true;
+            startPosition = e.pageX;
+            scrollLeftPosition = container.scrollLeft;
+            $(container).css('cursor', 'grabbing');
+            e.preventDefault(); // Prevent text selection
+        });
+        
+        $(document).on('mouseup', function() {
+            isDragging = false;
+            $(container).css('cursor', 'grab');
+        });
+        
+        $(document).on('mousemove', function(e) {
+            if (!isDragging) return;
+            const dx = e.pageX - startPosition;
+            container.scrollLeft = scrollLeftPosition - dx;
+            e.preventDefault(); // Prevent text selection during drag
+        });
+        
+        // Prevent click events from firing when dragging
+        $(container).find('a, button').on('click', function(e) {
+            if (isDragging) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        });
+        
+        // Mobile touch events are already handled by the browser
+    }
+    
     // "Show More" button functionality for desktop
     const showMoreBtn = document.getElementById("showMoreBtn");
     const items = document.querySelectorAll(".guiding-list-item");
@@ -1359,6 +1447,30 @@ $(document).ready(function(){
                 $(this).toggleClass("show", index < 2);
             });
         }
+    }
+
+    // Horizontal scrolling for reviews
+    const container = document.getElementById('ratings-container');
+    const scrollLeftBtn = document.getElementById('scroll-left');
+    const scrollRightBtn = document.getElementById('scroll-right');
+    
+    if (container && scrollLeftBtn && scrollRightBtn) {
+        // Scroll amount (width of one review card + gap)
+        const scrollAmount = 320; // 300px card width + 20px gap
+        
+        scrollLeftBtn.addEventListener('click', () => {
+            container.scrollBy({
+                left: -scrollAmount,
+                behavior: 'smooth'
+            });
+        });
+        
+        scrollRightBtn.addEventListener('click', () => {
+            container.scrollBy({
+                left: scrollAmount,
+                behavior: 'smooth'
+            });
+        });
     }
 });
 
