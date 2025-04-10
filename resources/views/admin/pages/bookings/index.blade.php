@@ -99,6 +99,7 @@
 
                                                     <a href="{{ route('admin.bookings.edit', $booking) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pen"></i></a>
                                                     <a href="javascript:deleteResource('{{ route('admin.bookings.destroy', $booking, false) }}')" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></a>
+                                                    <a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="showEmailPreview({{ $booking->id }})"><i class="fa fa-envelope"></i></a>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -114,4 +115,62 @@
         <!-- CONTAINER CLOSED -->
 
     </div>
+
+    <!-- Email Preview Modal -->
+    <div class="modal fade" id="emailPreviewModal" tabindex="-1" role="dialog" aria-labelledby="emailPreviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog " role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="emailPreviewModalLabel">Email Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs" id="emailTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="booking-request-tab" data-bs-toggle="tab" data-bs-target="#booking-request" type="button" role="tab" aria-controls="booking-request" aria-selected="true">Booking Request Email</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="expired-booking-tab" data-bs-toggle="tab" data-bs-target="#expired-booking" type="button" role="tab" aria-controls="expired-booking" aria-selected="false">Expired Booking Email</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content mt-3" id="emailTabsContent">
+                        <div class="tab-pane fade show active" id="guest-booking-request" role="tabpanel" aria-labelledby="booking-request-tab">
+                            <div class="email-preview-container" style="height: 600px; overflow-y: auto;">
+                                <iframe id="booking-request-iframe" style="width: 100%; height: 100%; border: 1px solid #ddd;"></iframe>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="guest-expired-booking" role="tabpanel" aria-labelledby="expired-booking-tab">
+                            <div class="email-preview-container" style="height: 600px; overflow-y: auto;">
+                                <iframe id="expired-booking-iframe" style="width: 100%; height: 100%; border: 1px solid #ddd;"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showEmailPreview(bookingId) {
+            // Load the email templates via AJAX
+            fetch(`/admin/bookings/${bookingId}/email-preview`)
+                .then(response => response.json())
+                .then(data => {
+                    // Set the iframe sources with the HTML content
+                    document.getElementById('guest-booking-request-iframe').srcdoc = data.bookingRequestEmail;
+                    document.getElementById('guest-expired-booking-iframe').srcdoc = data.expiredBookingEmail;
+                    
+                    // Show the modal
+                    var modal = new bootstrap.Modal(document.getElementById('emailPreviewModal'));
+                    modal.show();
+                })
+                .catch(error => {
+                    console.error('Error loading email previews:', error);
+                    alert('Failed to load email previews');
+                });
+        }
+    </script>
 @endsection

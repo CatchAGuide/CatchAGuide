@@ -290,6 +290,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('guidings', AdminGuidingsController::class);
         Route::get('guidings/changeguidingstatus/{id}', [AdminGuidingsController::class, 'changeguidingstatus'])->name('changeGuidingStatus');
         Route::resource('bookings', BookingsController::class);
+        Route::get('/bookings/{booking}/email-preview', [BookingsController::class, 'emailPreview'])->name('bookings.email-preview');
         Route::prefix('payments')->name('payments.')->group(function () {
             Route::get('/', [AdminPaymentsController::class, 'index'])->name('index');
             Route::get('/showoutpayments/{id}', [AdminPaymentsController::class, 'showoutpayments'])->name('showoutpayments');
