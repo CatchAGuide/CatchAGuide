@@ -17,7 +17,7 @@
             <p style="font-size:14px;">
             {{$textNote}}
             </p>
-            <p style="font-size:14px;"> @lang('emails.guest_booking_request_text_2')
+            <p style="font-size:14px;"> {{ str_replace('[Guide Name]', $guide->firstname, __('emails.guest_booking_request_text_2'))}}
             </p>
         </div>
     </div>

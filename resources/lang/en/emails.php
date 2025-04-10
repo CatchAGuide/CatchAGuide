@@ -11,6 +11,9 @@ return [
     'time' => 'Time',
     'extras' => 'Extras',
     'price' => 'Price',
+    'guide_name' => 'Guide',
+
+    'no_extras' => 'No extras',
     
     'rating_confirmation_subject' => 'Rating confirmed',
     'rating_confirmation_message' => 'Your rating has been successfully submitted.',

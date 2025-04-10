@@ -33,7 +33,7 @@
             </div>
 
             <div style="margin-top:3rem;">
-                <p style="margin-top: .5rem;">{{ __('emails.rating_confirmation_team') }}</p>
+                <p style="margin-top: .5rem;">{{ __('emails.catchaguide_team') }}</p>
             </div>
         </div>
     </div>

@@ -13,6 +13,9 @@ return [
     'price' => 'Preis',
     'accept' => 'Annehmen',
     'reject' => 'Ablehnen',
+    'guide_name' => 'Guide',
+    
+    'no_extras' => 'Keine Extras',
 
     'rating_confirmation_subject' => 'Bewertung bestätigt',
     'rating_confirmation_message' => 'Ihre Bewertung wurde erfolgreich abgegeben.',
