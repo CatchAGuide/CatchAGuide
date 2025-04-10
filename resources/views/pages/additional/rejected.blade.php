@@ -169,7 +169,9 @@
         }
         
         .litepicker .container__days .day-item:hover {
-            background-color: rgba(var(--thm-primary-rgb), 0.1);
+            background-color: white;
+            color: var(--thm-primary);
+            border: 1px solid rgba(var(--thm-primary-rgb), 0.3);
         }
         
         .litepicker .container__days .day-item.is-locked {
@@ -271,7 +273,7 @@
         }
         
         .litepicker .container__days .day-item.is-selected {
-            background-color: rgba(var(--thm-primary-rgb), 0.7);
+            background-color: #28a745;
             color: white;
             font-weight: bold;
             position: relative;
@@ -354,8 +356,14 @@
 document.addEventListener("DOMContentLoaded", function() {
     // Get blocked events from the booking
     const blockedEvents = @json($blocked_events ?? []);
+    const bookingDate = @json($booking->book_date ?? null);
     
-    console.log(blockedEvents);
+    // Clean up the booking date to remove time component if it exists
+    let cleanBookingDate = bookingDate;
+    if (bookingDate && bookingDate.includes(' ')) {
+        cleanBookingDate = bookingDate.split(' ')[0]; 
+    }
+    
     let lockDays = [];
     if (blockedEvents && typeof blockedEvents === 'object') {
         lockDays = Object.values(blockedEvents).flatMap(event => {
@@ -373,6 +381,17 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             return [];
         });
+    }
+    
+    // Add booking date to locked days if it exists
+    if (cleanBookingDate) {
+        try {
+            // Try different ways to parse the date to ensure it works
+            const bookDate = new Date(cleanBookingDate);
+            lockDays.push(bookDate);
+        } catch (e) {
+            console.error("Error parsing booking date:", e);
+        }
     }
 
     // Array to store selected dates
@@ -589,11 +608,75 @@ document.addEventListener("DOMContentLoaded", function() {
                 });
             },
             onRender: (ui) => {
-                // Add this to highlight selected dates after calendar renders
                 setTimeout(highlightSelectedDates, 100);
             }
         });
 
+        // Add a separate function to highlight the booking date
+        function highlightBookingDate() {
+            if (cleanBookingDate) {
+                
+                const dayItems = document.querySelectorAll('.day-item');
+                
+                dayItems.forEach(dayEl => {
+                    const dayTimestamp = parseInt(dayEl.getAttribute('data-time'));
+                    if (dayTimestamp) {
+                        const dayDate = new Date(dayTimestamp);
+                        
+                        // Get the date parts for comparison
+                        const dayYear = dayDate.getFullYear();
+                        const dayMonth = dayDate.getMonth() + 1;
+                        const dayDay = dayDate.getDate();
+                        
+                        // Parse the clean booking date
+                        const bookingParts = cleanBookingDate.split('-');
+                        const bookingYear = parseInt(bookingParts[0]);
+                        const bookingMonth = parseInt(bookingParts[1]);
+                        const bookingDay = parseInt(bookingParts[2]);
+                        
+                        // Compare the date parts directly
+                        if (dayYear === bookingYear && dayMonth === bookingMonth && dayDay === bookingDay) {
+                            
+                            // Apply strong visual styling
+                            dayEl.classList.add('is-locked');
+                            dayEl.style.color = '#dc3545'; // Red color
+                            dayEl.style.textDecoration = 'line-through';
+                            dayEl.style.backgroundColor = '#f8f8f8';
+                            dayEl.style.fontWeight = 'bold';
+                            dayEl.style.border = '2px solid #dc3545';
+                        }
+                    }
+                });
+            }
+        }
+
+        // Call the function after a delay to ensure the calendar is rendered
+        setTimeout(highlightBookingDate, 500);
+        
+        // Also call it when the month changes
+        picker.on('change:month', () => {
+            setTimeout(highlightBookingDate, 300);
+        });
+        
+        // Modify the updateSelectedDates function to also call highlightBookingDate
+        const originalUpdateSelectedDates = updateSelectedDates;
+        updateSelectedDates = function() {
+            originalUpdateSelectedDates();
+            setTimeout(highlightBookingDate, 100);
+        };
+
+        // Also call highlightBookingDate after highlighting selected dates
+        const originalHighlightSelectedDates = highlightSelectedDates;
+        highlightSelectedDates = function() {
+            originalHighlightSelectedDates();
+            setTimeout(highlightBookingDate, 100);
+        };
+
+        // Add event listener to ensure highlights persist after any calendar interaction
+        datepickerElement.addEventListener('click', function() {
+            setTimeout(highlightBookingDate, 200);
+        });
+        
         // Initialize the selected dates display
         updateSelectedDates();
         
@@ -624,6 +707,18 @@ document.addEventListener("DOMContentLoaded", function() {
                         } else {
                             // Show notification instead of alert
                             showNotification("{{__('guidings.Max_Three_Dates')}}", 'warning');
+                            
+                            // Add white background styling to the clicked element when max is reached
+                            e.target.style.backgroundColor = 'white';
+                            e.target.style.color = 'var(--thm-primary)';
+                            e.target.style.border = '1px solid rgba(var(--thm-primary-rgb), 0.3)';
+                            
+                            // Reset the styling after a short delay
+                            setTimeout(() => {
+                                e.target.style.backgroundColor = '';
+                                e.target.style.color = '';
+                                e.target.style.border = '';
+                            }, 500);
                         }
                     } else {
                         // If date is already selected, remove it
@@ -642,17 +737,6 @@ document.addEventListener("DOMContentLoaded", function() {
             // Use setTimeout to ensure this runs after any other click handlers
             setTimeout(highlightSelectedDates, 10);
         });
-        
-        // Also ensure highlights are maintained when the calendar is redrawn
-        if (picker) {
-            picker.on('render', () => {
-                setTimeout(highlightSelectedDates, 100);
-            });
-            
-            picker.on('change:month', () => {
-                setTimeout(highlightSelectedDates, 100);
-            });
-        }
         
         // Initial form validation
         validateForm();

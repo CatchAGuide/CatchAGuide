@@ -103,4 +103,9 @@ return [
     'Characters' => 'min Zeichen',
     'Min_Characters_Message' => 'Bitte geben Sie mindestens 50 Zeichen ein.',
     'Max_Three_Dates' => 'Sie können bis zu 5 alternative Termine auswählen.',
+
+    'evening' => 'Abend',
+    'morning' => 'Morgen',
+    'noon' => 'Mittag',
+    'night' => 'Nacht',
 ];  

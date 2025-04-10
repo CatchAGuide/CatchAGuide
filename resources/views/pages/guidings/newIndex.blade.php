@@ -384,7 +384,7 @@
                         @if($guiding->desc_departure_time)
                             <div class="time-boxes mb-2 d-flex">
                                 @foreach(json_decode($guiding->desc_departure_time) as $time)
-                                    <small class="badge border border-secondary text-secondary me-1">{{ strtoupper($time) }}</small>
+                                    <small class="badge border border-secondary text-secondary me-1">{{ __('guidings.'.$time) }}</small>
                                 @endforeach
                             </div>
                         @endif

@@ -94,6 +94,8 @@ class BookingController extends Controller
         } else {
             $booking->alternative_dates = $request->alternative_dates;
         }
+
+        $booking->is_rescheduled = true;
         
         $booking->save();
      
@@ -103,10 +105,17 @@ class BookingController extends Controller
     }
 
     public function reschedule($token){
-        $booking = Booking::where('token',$token)->first();
+        $booking = Booking::where('token',$token)->where('status','rejected')->where('is_rescheduled',false)->first();
         $selectedDate = request()->get('date');
         
-        if(!$booking && !$selectedDate){
+        if ($booking && $selectedDate && !empty($booking->alternative_dates)) {
+            $alternativeDates = json_decode($booking->alternative_dates, true);
+            if (!is_array($alternativeDates) || !in_array($selectedDate, $alternativeDates)) {
+                abort(403, 'Selected date is not in the list of alternative dates');
+            }
+        }
+        
+        if(!$booking || !$selectedDate){
             abort(404);
         }
 

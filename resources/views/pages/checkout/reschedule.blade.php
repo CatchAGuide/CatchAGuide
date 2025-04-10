@@ -55,8 +55,21 @@
     }
     
     .btn-proceed {
-        background-color: #e86549;
-        color: white;
+        background-color: #e86549 !important;
+        color: white !important;
+        font-weight: 600;
+        padding: 12px 20px;
+        transition: all 0.3s ease;
+        width: 100%;
+        border: 2px solid #e86549 !important;
+    }
+    
+    .btn-proceed:hover {
+        background-color: white !important;
+        color: #e86549 !important;
+        border: 2px solid #e86549 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
     
     .btn-cancel {
@@ -138,22 +151,6 @@
         border-top: 1px solid #dee2e6;
         padding-top: 10px;
         margin-top: 10px;
-    }
-    
-    .btn-proceed {
-        background-color: #e86549;
-        color: white;
-        font-weight: 600;
-        padding: 12px 20px;
-        transition: all 0.3s ease;
-        width: 100%;
-    }
-    
-    .btn-proceed:hover {
-        background-color: #d55a40;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        color: white;
     }
     
     @media (max-width: 767.98px) {
@@ -395,13 +392,14 @@
                             <div class="col-6 font-weight-bold">Total Guest:</div>
                             <div class="col-6 d-flex align-items-center">
                                 <input type="number" class="form-control me-2" id="guest_count" name="count_of_users" 
-                                       min="1" max="{{ $guiding->max_guests }}" value="{{ $booking->count_of_users }}" style="width: 70px;">
+                                       min="1" max="{{ $guiding->max_guests }}" min="{{ $guiding->min_guests }}" value="{{ $booking->count_of_users }}" style="width: 70px;">
                                 <button type="button" class="btn btn-sm btn-outline-secondary" id="update_guests" style="display: none;">Update</button>
                             </div>
                         </div>
                         
                         <!-- Store max guest value and original guest count for JavaScript -->
                         <input type="hidden" id="max_guest" value="{{ $guiding->max_guests }}">
+                        <input type="hidden" id="min_guest" value="{{ $guiding->min_guests }}">
                         <input type="hidden" id="original_guest_count" value="{{ $booking->count_of_users }}">
                         
                         <div class="row mb-2">
@@ -630,6 +628,7 @@
         let totalPrice = guidingPrice;
         
         const maxGuest = parseInt(document.getElementById('max_guest').value) || 1;
+        const minGuest = parseInt(document.getElementById('min_guest').value) || 1;
         const originalGuestCount = parseInt(document.getElementById('original_guest_count').value) || 1;
         
         // Initially hide the terms warning
@@ -665,14 +664,14 @@
             // Remove non-numeric characters
             this.value = this.value.replace(/[^0-9]/g, '');
             
-            // Ensure minimum value is 1
-            if (this.value === '' || parseInt(this.value) < 1) {
-                this.value = '1';
-            }
+            // Ensure value is within min and max limits
+            const currentValue = parseInt(this.value) || 0;
+            console.log(minGuest);
             
-            // Ensure maximum value doesn't exceed max_guest
-            if (parseInt(this.value) > maxGuest) {
-                this.value = maxGuest;
+            if (this.value === '' || currentValue < minGuest) {
+                this.value = minGuest.toString();
+            } else if (currentValue > maxGuest) {
+                this.value = maxGuest.toString();
             }
             
             // Show update button only if value has changed from original
@@ -683,17 +682,35 @@
             }
         });
         
+        // Add blur event to enforce min/max when user leaves the field
+        guestCountInput.addEventListener('blur', function() {
+            const currentValue = parseInt(this.value) || 0;
+            
+            if (currentValue < minGuest) {
+                this.value = minGuest.toString();
+            } else if (currentValue > maxGuest) {
+                this.value = maxGuest.toString();
+            }
+            
+            // Update button visibility
+            if (parseInt(this.value) !== originalGuestCount) {
+                updateGuestsBtn.style.display = 'block';
+            } else {
+                updateGuestsBtn.style.display = 'none';
+            }
+        });
+        
         function updateGuidingPrice() {
-            const guestCount = parseInt(guestCountInput.value) || 1;
+            const guestCount = parseInt(guestCountInput.value) || minGuest;
             
             // Ensure guest count is within limits
-            if (guestCount < 1) {
-                guestCountInput.value = '1';
+            if (guestCount < minGuest) {
+                guestCountInput.value = minGuest.toString();
                 return;
             }
             
             if (guestCount > maxGuest) {
-                guestCountInput.value = maxGuest;
+                guestCountInput.value = maxGuest.toString();
                 return;
             }
             
