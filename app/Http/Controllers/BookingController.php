@@ -111,12 +111,12 @@ class BookingController extends Controller
         if ($booking && $selectedDate && !empty($booking->alternative_dates)) {
             $alternativeDates = json_decode($booking->alternative_dates, true);
             if (!is_array($alternativeDates) || !in_array($selectedDate, $alternativeDates)) {
-                abort(403, 'Selected date is not in the list of alternative dates');
+                return redirect()->route('ratings.notified')->with(['title' => 'Selected date is not in the list of alternative dates', 'message' => 'Please select a valid date from the list of alternative dates that was provided in the rejection email'])->withErrors(['booking' => 'Invalid booking or date selection']);
             }
         }
         
         if(!$booking || !$selectedDate){
-            abort(404);
+            return redirect()->route('ratings.notified')->with(['title' => 'Booking not found or rejected or selected date is not in the list of alternative dates or is not available', 'message' => 'Please try again with a valid date or booking'])->withErrors(['booking' => 'Invalid booking or date selection']);
         }
 
         return view('pages.checkout.reschedule',[

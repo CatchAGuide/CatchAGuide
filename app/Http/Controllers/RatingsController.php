@@ -17,7 +17,7 @@ class RatingsController extends Controller
         $user = User::find($booking->user_id);
 
         if($booking->is_reviewed){
-            return redirect()->route('ratings.notified')->with('message', 'Thank you for your rating!');
+            return redirect()->route('ratings.notified')->with('title', 'Thank you for your rating!');
         }
 
         return view('pages.rating.show', [
@@ -28,7 +28,7 @@ class RatingsController extends Controller
 
     public function store(StoreRatingRequest $request, $token)
     {
-        $booking = Booking::where('token', $token)->with('guiding', 'guiding.user')->firstOrFail();
+        $booking = Booking::where('token', $token)->with('guiding', 'guiding.user', 'user')->firstOrFail();
         $data = $request->validated();
         
         $dataSave = [
@@ -36,7 +36,7 @@ class RatingsController extends Controller
             'guide_score' => $data['rating_guide'],
             'region_water_score' => $data['rating_region'],
             'comment' => $data['comment'],
-            'user_id' => $booking->user->id,
+            'user_id' => $booking->user_id,
             'guide_id' => $booking->guiding->user->id,
             'booking_id' => $booking->id,
             'guiding_id' => $booking->guiding->id
