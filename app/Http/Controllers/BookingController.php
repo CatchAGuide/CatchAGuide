@@ -94,8 +94,6 @@ class BookingController extends Controller
         } else {
             $booking->alternative_dates = $request->alternative_dates;
         }
-
-        $booking->is_rescheduled = true;
         
         $booking->save();
      
@@ -193,6 +191,9 @@ class BookingController extends Controller
 
         if ($newBooking) {
             // Return success response for AJAX
+            $originalBooking->is_rescheduled = true;
+            $originalBooking->save();
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Your booking has been successfully rescheduled.',
