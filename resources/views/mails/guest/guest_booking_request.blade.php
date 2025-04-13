@@ -69,7 +69,7 @@
                         <a href="tel:+49 (0) {{env('CONTACT_NUM')}}" style="color:#fff; font-size: 14px;">+49 (0) {{env('CONTACT_NUM')}}</a>
                     </p>
                     <p>
-                        <a href="mailto:{{env('CEO_EMAIL')}}" style="color:#fff; font-size: 14px;">{{env('CEO_EMAIL')}}</a>
+                        <a href="mailto:{{env('TO_CEO')}}" style="color:#fff; font-size: 14px;">{{env('TO_CEO')}}</a>
                     </p>
                 </td>
                 <td style="padding: 10px;">

@@ -40,7 +40,7 @@
                         <a href="tel:+49 (0) {{env('CONTACT_NUM')}}" style="color: #fff; font-size: 14px; font-family: 'Morrison', sans-serif;">+49 (0) {{env('CONTACT_NUM')}}</a>
                     </p>
                     <p>
-                        <a href="mailto:{{env('CEO_EMAIL')}}" style="color: #fff; font-size: 14px; font-family: 'Morrison', sans-serif;">{{env('CEO_EMAIL')}}</a>
+                        <a href="mailto:{{env('TO_CEO')}}" style="color: #fff; font-size: 14px; font-family: 'Morrison', sans-serif;">{{env('TO_CEO')}}</a>
                     </p>
                 </td>
                 <td style="padding: 10px;">
