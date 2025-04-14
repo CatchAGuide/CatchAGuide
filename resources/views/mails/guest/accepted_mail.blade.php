@@ -24,8 +24,8 @@
                 <h4 style="font-family: 'Morrison', sans-serif;">@lang('emails.guest_booking_request_accepted_text_3')</h4>
                 <div style="margin-top: 10px; font-family: 'Morrison', sans-serif;">
                     <p><strong>{{__('emails.guide_booking_accepted_text_7')}}</strong> {{$guide->firstname}}</p>
-                    <p><strong>{{__('emails.guide_booking_accepted_text_8')}}:</strong> {{$guide->phone}}</p>
-                    <p><strong>{{__('emails.guide_booking_accepted_text_9')}}:</strong> {{$guide->email}}</p>
+                    <p><strong>{{__('emails.guide_booking_accepted_text_8')}}</strong> {{$guide->phone}}</p>
+                    <p><strong>{{__('emails.guide_booking_accepted_text_9')}}</strong> {{$guide->email}}</p>
                     <p><strong>{{__('emails.tour')}}:</strong> {{$guide->title}}</p>
                     <p><strong>{{__('emails.location')}}:</strong> {{$guide->location}}</p>
                     <p><strong>{{__('emails.date')}}:</strong> {{date('d F Y', strtotime($booking->date))}}</p>
@@ -35,7 +35,7 @@
                             $extras = $booking->extras ? unserialize($booking->extras) : [];
                         @endphp
                         @foreach($extras as $extra)
-                            <li>{{$extra['extra_name']}} ({{$extra['price']}} €)</li>
+                            <li>{{$extra['extra_name']}} ({{$extra['price'] ?? $extra['extra_total_price']}} €)</li>
                         @endforeach
                     </ul>
                     <p><strong>{{__('emails.price')}}:</strong> {{number_format($booking->price, 2, ',', '.')}} €</p>

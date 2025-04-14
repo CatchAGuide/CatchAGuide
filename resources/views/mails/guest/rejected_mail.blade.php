@@ -15,20 +15,21 @@
             <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
             {!! $booking->textNote !!}
             </p>
-            <p style="font-size: 14px; font-family: 'Morrison', sans-serif;"><strong>
-            @lang('emails.guest_booking_request_cancelled_text_2')
-            </strong>
+            <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
+                @lang('emails.guest_booking_request_cancelled_text_2')<strong>{{ $booking->guideName }}</strong>
             </p>
-            <p style="font-size:14px;">@lang('emails.guest_booking_request_cancelled_text_2') {{ $booking->guideName }}:</p>
             <p style="font-size:14px;"><i><b>{{ $booking->additional_information }}</b></i></p>
             <ul>
-                @foreach($booking->alternativeDates as $date)
-                <li>
-                    <a style="font-size: 14px; font-family: 'Morrison', sans-serif;" href="{{ route('booking.reschedule', ['token' => $booking->token]) }}?date={{ $date }}" style="font-size:14px; color:#e8604c; text-decoration:underline; cursor:pointer;">{{ date('F j, Y', strtotime($date)) }}</a>
-                </li>
-                @endforeach
+                @if($booking->alternativeDates)
+                    @foreach($booking->alternativeDates as $date)
+                    <li>
+                        <a style="font-size: 14px; font-family: 'Morrison', sans-serif;" href="{{ route('booking.reschedule', ['token' => $booking->token]) }}?date={{ $date }}" style="font-size:14px; color:#e8604c; text-decoration:underline; cursor:pointer;">{{ date('F j, Y', strtotime($date)) }}</a>
+                    </li>
+                    @endforeach
+                @else
+                    <p style="font-size: 14px; font-family: 'Morrison', sans-serif;"> @lang('emails.guest_booking_request_cancelled_text_5')</p>
+                @endif
             </ul>
-            <p style="font-size: 14px; font-family: 'Morrison', sans-serif;"> @lang('emails.guest_booking_request_cancelled_text_5')</p>
         </div>
         <div style="padding: 0 20px;">
             <p style="font-size: 14px; font-family: 'Morrison', sans-serif;"> @lang('emails.guest_booking_request_cancelled_text_6')</p>

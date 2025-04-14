@@ -22,6 +22,13 @@
             </p>
         </div>
     </div>
+    <div class="" style="padding: 20px;">
+        <div style="margin-top: 20px; text-align: center;">
+            <p style="margin-bottom: 2rem; font-size: 14px;">@lang('emails.guide_new_booking_request_text_2')</p>
+            <a class="btn-theme" style="background-color: #e8604c; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px;" href="{{route('booking.accept', [$booking->token])}}">@lang('emails.accept')</a>
+            <a class="btn-theme" style="background-color: #fff; padding: 10px 20px; color: #e8604c !important; border: 1px solid #e8604c; text-decoration: none; margin-top: 30px;" href="{{route('booking.reject', [$booking->token])}}">@lang('emails.reject')</a>
+        </div>
+    </div>
     <div class="order-details" style="border: 1px solid rgb(132, 132, 132); padding: 10px; border-radius: 12px; margin: 20px;">
         <div class="booking-details">
             <p style="font-size: 14px;"><strong>@lang('emails.guest_name'): </strong> {{$user->firstname}}</p>
@@ -41,15 +48,10 @@
                     <li style="font-size: 14px;">@lang('emails.no_extras')</li>
                 @endif
                 </ul>
-            <p style="font-size: 14px;"><strong>@lang('emails.price'): </strong> {{$booking->price}}</p>
+            <p style="font-size: 14px;"><strong>@lang('emails.price'): </strong> {{$booking->price}} €</p>
         </div>
     </div>
     <div class="" style="padding: 20px;">
-        <div style="margin-top: 20px; text-align: center;">
-        <p style="margin-bottom: 2rem; font-size: 14px;">@lang('emails.guide_new_booking_request_text_2')</p>
-            <a class="btn-theme" style="background-color: #e8604c; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px;" href="{{route('booking.accept', [$booking->token])}}">@lang('emails.accept')</a>
-            <a class="btn-theme" style="background-color: #fff; padding: 10px 20px; color: #e8604c !important; border: 1px solid #e8604c; text-decoration: none; margin-top: 30px;" href="{{route('booking.reject', [$booking->token])}}">@lang('emails.reject')</a>
-        </div>
         <div class="content" style="margin: 2rem 0 0;">
             <p style="font-size: 14px;">
                 @lang('emails.guide_new_booking_request_text_3')

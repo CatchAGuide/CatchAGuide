@@ -23,13 +23,13 @@
     <div class="order-details" style="border: 1px solid rgb(132, 132, 132); padding: 10px; border-radius: 12px; margin: 20px;">
         <h4>{{__('emails.guide_booking_accepted_text_2')}}</h4>
         <div class="booking-details">
-            <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_7')}} : </strong>{{$user->firstname}}</p>
-            <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_8')}} : </strong>{{$user->phone}}</p>
-            <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_9')}} : </strong>{{$user->email}}</p>
-            <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_10')}} : </strong>{{$guiding->title}}</p>
-            <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_11')}} : </strong>{{$guiding->location}}</p>
-            <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_12')}} : </strong>{{date('d F Y', strtotime($booking->date))}}</p>
-            <p style="font-size: 14px;"><strong>{{__('emails.extras')}} : </strong></p>
+            <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_7')}} </strong>{{$user->firstname}}</p>
+            <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_8')}} </strong>{{$user->phone}}</p>
+            <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_9')}} </strong>{{$user->email}}</p>
+            <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_10')}} </strong>{{$guiding->title}}</p>
+            <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_11')}} </strong>{{$guiding->location}}</p>
+            <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_12')}} </strong>{{date('d F Y', strtotime($booking->date))}}</p>
+            <p style="font-size: 14px;"><strong>{{__('emails.extras')}} </strong></p>
             <ul>
                 @php
                     $extras = $booking->extras ? unserialize($booking->extras) : [];
@@ -40,7 +40,7 @@
                     </li>
                 @endforeach
             </ul>
-            <p style="font-size: 14px;"><strong>{{__('emails.price')}} : </strong>{{$booking->price}}</p>
+            <p style="font-size: 14px;"><strong>{{__('emails.price')}} : </strong>{{$booking->price}} €</p>
         </div>
     </div>
     <div style="padding: 0 20px;">

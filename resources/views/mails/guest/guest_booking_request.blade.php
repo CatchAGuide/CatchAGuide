@@ -40,7 +40,7 @@
                     @endforeach
                 </p>
             @endif
-            <p style="font-size:14px;"><strong>{{__('emails.price')}}:</strong> {{$booking->price}}</p>
+            <p style="font-size:14px;"><strong>{{__('emails.price')}}:</strong> {{$booking->price}} €</p>
         </div>
     </div>
 
