@@ -524,6 +524,15 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             });
         }
+        
+        // Force re-apply of styles to ensure visibility
+        dayItems.forEach(el => {
+            if (el.classList.contains('is-selected')) {
+                el.style.backgroundColor = 'var(--thm-primary)';
+                el.style.color = 'white';
+                el.style.fontWeight = 'bold';
+            }
+        });
     }
 
     // Function to validate the form
@@ -571,7 +580,14 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     function initCheckNumberOfColumns() {
-        return window.innerWidth < 768 ? 1 : 2;
+        // More granular breakpoints for better mobile experience
+        if (window.innerWidth < 576) {
+            return 1; // Extra small devices
+        } else if (window.innerWidth < 768) {
+            return 1; // Small devices
+        } else {
+            return 2; // Medium devices and larger
+        }
     }
 
     // Check if the lite-datepicker element exists
@@ -599,16 +615,52 @@ document.addEventListener("DOMContentLoaded", function() {
             minDate: new Date(new Date().getTime() + 24 * 60 * 60 * 1000), // Tomorrow
             lockDays: lockDays,
             lang: '{{app()->getLocale()}}',
+            mobileFriendly: true,
+            showTooltip: false,
+            showWeekNumbers: false,
+            autoApply: true,
+            allowRepick: true,
+            switchingMonths: 1, // Allow switching 1 month at a time
+            useResetBtn: false,
+            resetBtnCallback: () => {},
+            autoRefresh: true,
+            showMonthArrows: true, // Ensure month arrows are visible
             setup: (picker) => {
                 window.addEventListener('resize', () => {
+                    const columns = initCheckNumberOfColumns();
                     picker.setOptions({
-                        numberOfColumns: initCheckNumberOfColumns(),
-                        numberOfMonths: initCheckNumberOfColumns()
+                        numberOfColumns: columns,
+                        numberOfMonths: columns
                     });
+                    // Re-highlight dates after resize
+                    setTimeout(() => {
+                        highlightSelectedDates();
+                        highlightBookingDate();
+                        ensureNavigationArrows();
+                    }, 300);
                 });
             },
             onRender: (ui) => {
-                setTimeout(highlightSelectedDates, 100);
+                setTimeout(() => {
+                    highlightSelectedDates();
+                    highlightBookingDate();
+                    ensureNavigationArrows();
+                }, 100);
+            },
+            onChangeMonth: (date, calendarIdx) => {
+                setTimeout(() => {
+                    highlightSelectedDates();
+                    highlightBookingDate();
+                    ensureNavigationArrows();
+                }, 100);
+            },
+            onSelect: (date) => {
+                // This helps ensure highlights are applied after date selection
+                setTimeout(() => {
+                    highlightSelectedDates();
+                    highlightBookingDate();
+                    ensureNavigationArrows();
+                }, 100);
             }
         });
 
@@ -650,31 +702,110 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
 
+        // Function to ensure navigation arrows are visible and styled properly
+        function ensureNavigationArrows() {
+            // Find the navigation buttons
+            const prevButton = document.querySelector('.litepicker .button-previous-month');
+            const nextButton = document.querySelector('.litepicker .button-next-month');
+            
+            if (prevButton && nextButton) {
+                // Make sure they're visible
+                prevButton.style.display = 'block';
+                nextButton.style.display = 'block';
+                
+                // Add some styling to make them more prominent
+                [prevButton, nextButton].forEach(btn => {
+                    btn.style.padding = '8px';
+                    btn.style.cursor = 'pointer';
+                    btn.style.color = 'var(--thm-primary)';
+                    btn.style.fontSize = '20px';
+                    btn.style.fontWeight = 'bold';
+                    btn.style.backgroundColor = 'rgba(var(--thm-primary-rgb), 0.1)';
+                    btn.style.borderRadius = '50%';
+                    btn.style.width = '36px';
+                    btn.style.height = '36px';
+                    btn.style.display = 'flex';
+                    btn.style.alignItems = 'center';
+                    btn.style.justifyContent = 'center';
+                    btn.style.margin = '0 10px';
+                });
+            } else {
+                // If buttons aren't found, try again after a short delay
+                setTimeout(ensureNavigationArrows, 300);
+            }
+        }
+
         // Call the function after a delay to ensure the calendar is rendered
-        setTimeout(highlightBookingDate, 500);
+        setTimeout(ensureNavigationArrows, 500);
         
-        // Also call it when the month changes
-        picker.on('change:month', () => {
-            setTimeout(highlightBookingDate, 300);
+        // Add additional CSS to improve mobile display
+        const styleElement = document.createElement('style');
+        styleElement.textContent = `
+            @media (max-width: 767px) {
+                .litepicker {
+                    max-width: 100%;
+                    font-size: 0.9rem;
+                }
+                
+                .litepicker .container__days .day-item {
+                    height: 36px;
+                    width: 36px;
+                    line-height: 36px;
+                }
+                
+                .date-tag {
+                    font-size: 12px;
+                    padding: 4px 10px;
+                }
+                
+                .selected-dates-tags {
+                    flex-direction: column;
+                    align-items: center;
+                }
+                
+                .litepicker .container__months {
+                    width: 100%;
+                }
+                
+                .litepicker .container__months .month-item {
+                    width: 100%;
+                }
+                
+                .litepicker .container__months .month-item-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 10px 5px;
+                }
+                
+                .litepicker .container__months .month-item-header div {
+                    flex: 1;
+                    text-align: center;
+                }
+                
+                .litepicker .button-previous-month,
+                .litepicker .button-next-month {
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                    display: block !important;
+                }
+            }
+        `;
+        document.head.appendChild(styleElement);
+        
+        // Add a mutation observer to detect DOM changes in the calendar
+        const observer = new MutationObserver(() => {
+            setTimeout(() => {
+                highlightSelectedDates();
+                highlightBookingDate();
+                ensureNavigationArrows();
+            }, 200);
         });
-        
-        // Modify the updateSelectedDates function to also call highlightBookingDate
-        const originalUpdateSelectedDates = updateSelectedDates;
-        updateSelectedDates = function() {
-            originalUpdateSelectedDates();
-            setTimeout(highlightBookingDate, 100);
-        };
 
-        // Also call highlightBookingDate after highlighting selected dates
-        const originalHighlightSelectedDates = highlightSelectedDates;
-        highlightSelectedDates = function() {
-            originalHighlightSelectedDates();
-            setTimeout(highlightBookingDate, 100);
-        };
-
-        // Add event listener to ensure highlights persist after any calendar interaction
-        datepickerElement.addEventListener('click', function() {
-            setTimeout(highlightBookingDate, 200);
+        // Start observing the calendar container for DOM changes
+        observer.observe(datepickerElement, { 
+            childList: true, 
+            subtree: true 
         });
         
         // Initialize the selected dates display
