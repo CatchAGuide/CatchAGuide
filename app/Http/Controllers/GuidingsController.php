@@ -1,35 +1,36 @@
 <?php
 
 namespace App\Http\Controllers;
-
-use App\Http\Requests\StoreGuidingRequest;
-use App\Http\Requests\StoreNewGuidingRequest;
-use App\Models\Gallery;
-use App\Models\Guiding;
-use App\Models\Target;
-use App\Models\Method;
-use App\Models\Water;
-use App\Models\GuidingRequest;
-use App\Models\Inclussion;
-use App\Models\GuidingBoatType;
-use App\Models\GuidingBoatDescription;
-use App\Models\GuidingAdditionalInformation;
-use App\Models\GuidingRequirements;
-use App\Models\GuidingRecommendations;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
 use Auth;
 use Config;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\GuidingRequestMail;
-use App\Mail\SearchRequestUserMail;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Models\BlockedEvent;
-use App\Models\ExtrasPrice;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Session;
+use App\Http\Requests\StoreGuidingRequest;
+use App\Http\Requests\StoreNewGuidingRequest;
+
+use App\Models\Water;
+use App\Models\Target;
+use App\Models\Method;
+use App\Models\Review;
+use App\Models\Gallery;
+use App\Models\Guiding;
+use App\Models\Inclussion;
 use App\Models\BoatExtras;
 use App\Models\Destination;
-use App\Models\Review;
+use App\Models\ExtrasPrice;
+use App\Models\BlockedEvent;
+use App\Models\GuidingRequest;
+use App\Models\GuidingBoatType;
+use App\Mail\GuidingRequestMail;
+use App\Models\GuidingRequirements;
+use App\Mail\SearchRequestUserMail;
+use App\Models\GuidingBoatDescription;
+use App\Models\GuidingRecommendations;
+use App\Models\GuidingAdditionalInformation;
 
 class GuidingsController extends Controller
 {
@@ -76,105 +77,102 @@ class GuidingsController extends Controller
         ) AS lowest_price')])
         ->where('status', 1);
         
-        // 1. Get price ranges from all active guidings (for price filter)
-        // This is done once and cached
-        // $cacheKey = 'guiding_price_ranges';
+        // Add caching for price ranges
+        $cacheKey = 'guiding_price_ranges';
         $cacheDuration = 60 * 24; // Cache for 24 hours
-        $minPrice = 50;
-        $overallMaxPrice = 1000;
-        
-        // if (Cache::has($cacheKey)) {
-        //     $priceRangeData = Cache::get($cacheKey);
-        //     $priceRanges = $priceRangeData['ranges'];
-        //     $overallMaxPrice = $priceRangeData['maxPrice'];
-        // } else {
-            // Get max price from all active guidings - use the raw query instead of max()
-            // $maxPriceResult = DB::select('
-            //     SELECT MAX(
-            //         CASE 
-            //             WHEN JSON_VALID(prices) THEN (
-            //                 SELECT MIN(
-            //                     CASE 
-            //                         WHEN person > 1 THEN CAST(amount AS DECIMAL(10,2)) / person
-            //                         ELSE CAST(amount AS DECIMAL(10,2))
-            //                     END
-            //                 )
-            //                 FROM JSON_TABLE(
-            //                     prices,
-            //                     "$[*]" COLUMNS(
-            //                         person INT PATH "$.person",
-            //                         amount DECIMAL(10,2) PATH "$.amount"
-            //                     )
-            //                 ) as price_data
-            //             )
-            //             ELSE price
-            //         END
-            //     ) as max_price
-            //     FROM guidings
-            //     WHERE status = 1
-            // ');
 
-            // $overallMaxPrice = ceil(($maxPriceResult[0]->max_price ?? 5000) / 50) * 50;
+        if (Cache::has($cacheKey)) {
+            $priceRangeData = Cache::get($cacheKey);
+            $priceRanges = $priceRangeData['ranges'];
+            $overallMaxPrice = $priceRangeData['maxPrice'];
+        } else {
+            // Get max price from all active guidings
+            $maxPriceResult = DB::select('
+                SELECT MAX(
+                    CASE 
+                        WHEN JSON_VALID(prices) THEN (
+                            SELECT MIN(
+                                CASE 
+                                    WHEN person > 1 THEN CAST(amount AS DECIMAL(10,2)) / person
+                                    ELSE CAST(amount AS DECIMAL(10,2))
+                                END
+                            )
+                            FROM JSON_TABLE(
+                                prices,
+                                "$[*]" COLUMNS(
+                                    person INT PATH "$.person",
+                                    amount DECIMAL(10,2) PATH "$.amount"
+                                )
+                            ) as price_data
+                        )
+                        ELSE price
+                    END
+                ) as max_price
+                FROM guidings
+                WHERE status = 1
+            ');
+
+            $overallMaxPrice = ceil(($maxPriceResult[0]->max_price ?? 5000) / 50) * 50;
             
             // Define price ranges
-            // $priceRanges = [];
-            // $minPrice = 50;
-            // $step = 50;
+            $priceRanges = [];
+            $minPrice = 50;
+            $step = 50;
             
-            // for ($i = $minPrice; $i <= $overallMaxPrice; $i += $step) {
-            //     $rangeEnd = min($i + $step, $overallMaxPrice);
-            //     $priceRanges[] = [
-            //         'min' => $i,
-            //         'max' => $rangeEnd,
-            //         'range' => "€{$i}-€{$rangeEnd}",
-            //         'count' => 0
-            //     ];
-            // }
+            for ($i = $minPrice; $i <= $overallMaxPrice; $i += $step) {
+                $rangeEnd = min($i + $step, $overallMaxPrice);
+                $priceRanges[] = [
+                    'min' => $i,
+                    'max' => $rangeEnd,
+                    'range' => "€{$i}-€{$rangeEnd}",
+                    'count' => 0
+                ];
+            }
             
-            // Count guidings in each price range using a raw query
-            // $priceResults = DB::select('
-            //     SELECT 
-            //         id,
-            //         CASE 
-            //             WHEN JSON_VALID(prices) THEN (
-            //                 SELECT MIN(
-            //                     CASE 
-            //                         WHEN person > 1 THEN CAST(amount AS DECIMAL(10,2)) / person
-            //                         ELSE CAST(amount AS DECIMAL(10,2))
-            //                     END
-            //                 )
-            //                 FROM JSON_TABLE(
-            //                     prices,
-            //                     "$[*]" COLUMNS(
-            //                         person INT PATH "$.person",
-            //                         amount DECIMAL(10,2) PATH "$.amount"
-            //                     )
-            //                 ) as price_data
-            //             )
-            //             ELSE price
-            //         END as lowest_price
-            //     FROM guidings
-            //     WHERE status = 1
-            // ');
+            // Count guidings in each price range
+            $priceResults = DB::select('
+                SELECT 
+                    id,
+                    CASE 
+                        WHEN JSON_VALID(prices) THEN (
+                            SELECT MIN(
+                                CASE 
+                                    WHEN person > 1 THEN CAST(amount AS DECIMAL(10,2)) / person
+                                    ELSE CAST(amount AS DECIMAL(10,2))
+                                END
+                            )
+                            FROM JSON_TABLE(
+                                prices,
+                                "$[*]" COLUMNS(
+                                    person INT PATH "$.person",
+                                    amount DECIMAL(10,2) PATH "$.amount"
+                                )
+                            ) as price_data
+                        )
+                        ELSE price
+                    END as lowest_price
+                FROM guidings
+                WHERE status = 1
+            ');
             
-            // foreach ($priceResults as $guiding) {
-            //     $price = $guiding->lowest_price;
-            //     if ($price >= $minPrice && $price <= $overallMaxPrice) {
-            //         foreach ($priceRanges as &$range) {
-            //             if ($price >= $range['min'] && $price < $range['max']) {
-            //                 $range['count']++;
-            //                 break;
-            //             }
-            //         }
-            //     }
-            // }
+            foreach ($priceResults as $guiding) {
+                $price = $guiding->lowest_price;
+                if ($price >= $minPrice && $price <= $overallMaxPrice) {
+                    foreach ($priceRanges as &$range) {
+                        if ($price >= $range['min'] && $price < $range['max']) {
+                            $range['count']++;
+                            break;
+                        }
+                    }
+                }
+            }
             
             // Cache the results
-            // Cache::put($cacheKey, [
-            //     'ranges' => $priceRanges,
-            //     'maxPrice' => $overallMaxPrice
-            // ], $cacheDuration);
-        // }
+            Cache::put($cacheKey, [
+                'ranges' => $priceRanges,
+                'maxPrice' => $overallMaxPrice
+            ], $cacheDuration);
+        }
         
         // 2. Apply filters to the query
         $filteredQuery = clone $baseQuery;
