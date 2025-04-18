@@ -480,7 +480,7 @@
                         <i class="fas fa-phone-alt me-2"></i>
                         <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>
                     </div>
-                    <a href="{{ route('additional.contact') }}" class="btn btn-outline-orange">
+                    <a href="#" class="btn btn-outline-orange" data-bs-toggle="modal" data-bs-target="#contactModal">
                         {{ translate('Contact Form') }}
                         <i class="fas fa-arrow-right ms-2"></i>
                     </a>
@@ -1356,6 +1356,62 @@
         @include('pages.guidings.content.bookguidingmobile')
     @endif
 </div>
+
+<!-- Contact Modal -->
+<div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contactModalLabel">{{ __('contact.shareYourQuestion') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {!! ReCaptcha::htmlScriptTagJsApi() !!}
+                <div id="contactFormContainer">
+                    <form id="contactModalForm">
+                        @csrf
+                        <input type="hidden" name="source_type" value="guiding">
+                        <input type="hidden" name="source_id" value="{{ $guiding->id }}">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="@lang('contact.yourName')" name="name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="email" class="form-control" placeholder="@lang('contact.email')" name="email" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <input type="tel" class="form-control" placeholder="@lang('contact.phone')" name="phone">
+                        </div>
+                        <div class="form-group mb-3">
+                            <textarea name="description" class="form-control" rows="4" placeholder="@lang('contact.feedback')" required></textarea>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            {!! htmlFormSnippet() !!}
+                            <button type="button" id="contactSubmitBtn" class="btn btn-orange">@lang('contact.btnSend')</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- Loading Overlay -->
+                <div id="contactLoadingOverlay" style="display: none;">
+                    <div class="d-flex justify-content-center align-items-center flex-column p-4">
+                        <div class="spinner-border text-orange mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-center">@lang('contact.submitting')...</p>
+                    </div>
+                </div>
+                <div class="alert alert-success mt-3" id="contactSuccessMessage" style="display: none;">
+                    @lang('contact.successMessage')
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('js_after')
@@ -1367,6 +1423,91 @@ const totalItems = {{ $same_guiding->count() }};
 
 $(document).ready(function(){
     initMap();
+    
+    // Add this code to check if the button exists
+    console.log('Contact button exists:', $('#contactSubmitBtn').length > 0);
+    
+    // Try a direct event binding approach
+    $('#contactSubmitBtn').on('click', function() {
+        console.log('Contact button clicked');
+        handleContactFormSubmission();
+    });
+    
+    // Also try with the modal shown event to ensure the button exists
+    $('#contactModal').on('shown.bs.modal', function() {
+        console.log('Modal shown, rebinding button');
+        $('#contactSubmitBtn').off('click').on('click', function() {
+            console.log('Contact button clicked (from modal shown)');
+            handleContactFormSubmission();
+        });
+    });
+    
+    function handleContactFormSubmission() {
+        const contactForm = document.getElementById('contactModalForm');
+        const contactFormContainer = document.getElementById('contactFormContainer');
+        const loadingOverlay = document.getElementById('contactLoadingOverlay');
+        const successMessage = document.getElementById('contactSuccessMessage');
+        
+        // Validate form
+        if (!contactForm.checkValidity()) {
+            contactForm.reportValidity();
+            return;
+        }
+        
+        // Get form data
+        const formData = new FormData(contactForm);
+        
+        // Show loading overlay
+        contactFormContainer.style.display = 'none';
+        loadingOverlay.style.display = 'block';
+        
+        // Submit form via AJAX
+        fetch('{{route('sendcontactmail')}}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Hide loading overlay
+            loadingOverlay.style.display = 'none';
+            
+            if (data.success) {
+                // Show success message
+                successMessage.style.display = 'block';
+                
+                // Reset form
+                contactForm.reset();
+                
+                // Close modal after 3 seconds
+                setTimeout(() => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('contactModal'));
+                    modal.hide();
+                    
+                    // Reset form display after modal is closed
+                    setTimeout(() => {
+                        contactFormContainer.style.display = 'block';
+                        successMessage.style.display = 'none';
+                    }, 500);
+                }, 3000);
+            } else {
+                console.error('Form submission error:', data);
+                alert('@lang("contact.errorMessage")');
+                contactFormContainer.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            // Hide loading overlay and show form again on error
+            loadingOverlay.style.display = 'none';
+            contactFormContainer.style.display = 'block';
+            
+            console.error('Error:', error);
+            alert('@lang("contact.errorMessage")');
+        });
+    }
     
     // Simple drag scrolling for the ratings container
     const container = document.getElementById('ratings-container');
@@ -1498,7 +1639,6 @@ function moreOrLessFunction(e) {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-    // Add null checks for all querySelector operations
     const descriptionItems = document.querySelectorAll(".description-item .text-wrapper");
     if (descriptionItems) {
         descriptionItems.forEach((item) => {

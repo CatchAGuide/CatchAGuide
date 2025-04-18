@@ -6,6 +6,7 @@ return [
     // form
     'yourName' => 'Dein Name',
     'email' => 'Email Adresse',
+    'phone' => 'Telefonnummer',
     'btnSend' => 'Nachricht senden',
     'feedback' => 'Feedback schreiben'
 ];

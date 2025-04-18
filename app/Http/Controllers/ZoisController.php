@@ -1,14 +1,15 @@
 <?php
 
 namespace App\Http\Controllers;
+use Mail;
+use Illuminate\Http\Request;
 
 use App\Mail\ContactMail;
-use App\Mail\CustomerContactMail;
-use App\Mail\CustomerNewsletterMail;
-use App\Mail\NewsletterMail;
 use App\Models\Newsletter;
-use Illuminate\Http\Request;
-use Mail;
+use App\Mail\NewsletterMail;
+use App\Mail\CustomerContactMail;
+use App\Models\ContactSubmission;
+use App\Mail\CustomerNewsletterMail;
 
 class ZoisController extends Controller
 {
@@ -16,11 +17,44 @@ class ZoisController extends Controller
     {
         $validated = $request->validate([
             'email' => 'required|email',
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'phone' => 'nullable|string|max:20',
             'g-recaptcha-response' => 'recaptcha',
         ]);
 
-        Mail::send(new ContactMail($request->name, $request->email, $request->description));
+        // Get source information if available
+        $sourceType = $request->input('source_type', null);
+        $sourceId = $request->input('source_id', null);
+        
+        // Add source information to the description if available
+        $description = $request->description;
+        if ($sourceType && $sourceId) {
+            $sourceInfo = "\n\nThis contact was submitted from: {$sourceType} ID: {$sourceId}";
+            $description .= $sourceInfo;
+        }
+
+        // Save to database
+        ContactSubmission::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'description' => $request->description,
+            'source_type' => $sourceType,
+            'source_id' => $sourceId
+        ]);
+
+        Mail::send(new ContactMail($request->name, $request->email, $description, $request->phone));
         Mail::send(new CustomerContactMail($request->name, $request->email, $request->description));
+        
+        // If it's an AJAX request or from a modal, return JSON
+        if ($request->ajax() || $request->has('source_type')) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Deine Kontaktanfrage wurde erfolgreich versand! Wir melden uns schnellstmöglich bei Dir'
+            ]);
+        }
+        
         return back()->with('message', 'Deine Kontaktanfrage wurde erfolgreich versand! Wir melden uns schnellstmöglich bei Dir');
     }
 

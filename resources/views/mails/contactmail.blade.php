@@ -33,6 +33,13 @@
                                     Name: {{$name}} Email: {{$email}}
                                 </td>
                             </tr>
+                            @if($phone)
+                            <tr>
+                                <td style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
+                                    Telefon: {{$phone}}
+                                </td>
+                            </tr>
+                            @endif
                             <tr>
                                 <td style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
                                     Beschreibung: {{$description}}
@@ -62,7 +69,7 @@
                                                     <img src="{{asset('assets/images/logo.png')}}" alt="Logo Klein" width="90" style="display: block;" border="0" />
                                                 </a>
                                             </td>
-
+                                        </tr>
                                     </table>
                                 </td>
                             </tr>
