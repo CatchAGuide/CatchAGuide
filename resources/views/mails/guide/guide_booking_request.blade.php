@@ -10,7 +10,7 @@
 <div class="container" style="width: 100%; max-width: 600px; margin: 0 auto; background-color: white; box-shadow: 0 4px 6px 3px rgba(0, 0, 0, 0.1);">
     <div class="header" style="text-align: center; padding: 20px;">
         <a href="{{url('/')}}">
-            <img class="logo" src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_PNG.png" alt="Catchaguide Logo" style="max-width: 150px; padding-top: 10px;">
+            <img class="logo" src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_JPEG.jpg" alt="Catchaguide Logo" style="max-width: 150px; padding-top: 10px;">
         </a>
         <h2 class="header-title" style="padding-top: 10px;">@lang('emails.guide_new_booking_request_title')</h2>
     </div>

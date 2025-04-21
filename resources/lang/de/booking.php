@@ -11,4 +11,5 @@ return [
     'contact_us' => 'Kontakt aufnehmen',
     'do_you_have_questions' => 'Hast du Fragen zu dieser Angeltour? Unser Team hilft dir gerne weiter!',
     'contact_form' => 'Kontaktformular',
+    'fixed_price_for' => 'Festpreis für',
 ];

@@ -431,18 +431,21 @@
                     // Show min guests container if per_person is selected
                     if (priceType === 'per_person') {
                         document.getElementById('min_guests_container').style.display = 'block';
+                        console.log('per_person');
                         
-                        // Handle min_guests and min_price
+                        // Handle min_guests setting
                         const hasMinGuests = {!! isset($formData['min_guests']) && $formData['min_guests'] > 0 ? 'true' : 'false' !!};
-                        const minGuestsSwitch = document.getElementById('min_guests_switch');
-                        const minGuestsInput = document.getElementById('min_guests');
+                        const minGuestsValue = {{ $formData['min_guests'] ?? 0 }};
                         
-                        if (hasMinGuests && minGuestsSwitch) {
-                            minGuestsSwitch.checked = true;
-                            document.getElementById('min_guests_input_container').style.display = 'block';
-                            
-                            if (minGuestsInput) {
-                                minGuestsInput.value = {{ $formData['min_guests'] ?? 1 }};
+                        if (hasMinGuests) {
+                            const minGuestsSwitch = document.getElementById('min_guests_switch');
+                            if (minGuestsSwitch) {
+                                minGuestsSwitch.checked = true;
+                                $('#min_guests_input_container').show();
+                                $('#min_guests').val(minGuestsValue);
+                                
+                                // Trigger the change event to ensure all related UI updates occur
+                                $(minGuestsSwitch).trigger('change');
                             }
                         }
                     }
@@ -658,7 +661,30 @@
         }
     }
 
-    // Modify the price type change handler to include min guests functionality and fix alignment
+    // Add event listener for min guests switch
+    $('#min_guests_switch').change(function() {
+        const isChecked = $(this).is(':checked');
+        $('#min_guests_input_container').toggle(isChecked);
+        
+        // Initialize or update the min guests input
+        if (isChecked) {
+            const maxGuests = parseInt($('#no_guest').val()) || 1;
+            $('#min_guests').attr({
+                'max': maxGuests,
+                'min': 1,
+                'required': true
+            }).val(Math.min($('#min_guests').val() || 1, maxGuests));
+        } else {
+            $('#min_guests').prop('required', false);
+        }
+        
+        // Only update price fields if price type is per_person
+        if ($('input[name="price_type"]:checked').val() === 'per_person') {
+            updatePriceFieldsBasedOnMinGuests();
+        }
+    });
+
+    // Ensure the min_guests_container is only shown when price_type is per_person
     $('input[name="price_type"]').change(function() {
         var priceType = $(this).val();
         var container = $('#dynamic-price-fields-container');
@@ -685,6 +711,9 @@
                 <input type="number" class="form-control" name="price_per_boat" placeholder="{{ __('newguidings.price') }} {{ __('newguidings.per_boat') }}">
                 <span class="input-group-text">€ {{ __('newguidings.per_boat') }}</span>
             </div>`);
+            
+            // Hide min guests container when switching to per_boat
+            $('#min_guests_switch').prop('checked', false).trigger('change');
         }
 
         // Populate fields if editing
@@ -752,12 +781,29 @@
         }
     });
 
-    // Add initialization for min guests input when the form loads
+    // Make sure document ready initializes everything properly
     $(document).ready(function() {
-        // Set initial min/max attributes for min_guests input
-        const maxGuests = parseInt($('#no_guest').val()) || 1;
-        $('#min_guests').attr('max', maxGuests);
-        $('#min_guests').attr('min', 1);
+        // ... existing code ...
+        
+        // Initialize min guests container and input
+        const minGuestsSwitch = document.getElementById('min_guests_switch');
+        if (minGuestsSwitch) {
+            // Set initial state of min guests input container
+            $('#min_guests_input_container').toggle(minGuestsSwitch.checked);
+            
+            // Set initial min/max attributes for min_guests input
+            const maxGuests = parseInt($('#no_guest').val()) || 1;
+            $('#min_guests').attr({
+                'max': maxGuests,
+                'min': 1
+            });
+            
+            // Only show min guests container if price type is per_person
+            const priceType = $('input[name="price_type"]:checked').val();
+            $('#min_guests_container').toggle(priceType === 'per_person');
+        }
+        
+        // ... existing code ...
     });
 
     // Seasonal trip selection
@@ -1218,8 +1264,8 @@
                 }
                 
                 if (!document.getElementById('inclusions').value.trim()) {
-                    errors.push('Included in the price are required.');
-                    isValid = false;
+                    // errors.push('Included in the price are required.');
+                    // isValid = false;
                 }
                 break;
             case 7:

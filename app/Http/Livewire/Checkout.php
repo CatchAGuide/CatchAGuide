@@ -136,7 +136,7 @@ class Checkout extends Component
                 }
             }
         } else {
-            $this->guidingprice = ($this->guiding->price / $this->persons);
+            $this->guidingprice = $this->guiding->price;
         }
 
         if ($this->guidingprice == 0 && !empty($prices)) {

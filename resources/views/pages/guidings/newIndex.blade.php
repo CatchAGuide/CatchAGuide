@@ -1369,36 +1369,36 @@ $(document).ready(function(){
     initMap();
     
     // Simple drag scrolling for the ratings container
-    const container = document.getElementById('ratings-container');
+    const ratingsContainer = document.getElementById('ratings-container');
     
-    if (container) {
+    if (ratingsContainer) {
         let isDragging = false;
         let startPosition = 0;
         let scrollLeftPosition = 0;
         
         // Desktop mouse events
-        $(container).on('mousedown', function(e) {
+        $(ratingsContainer).on('mousedown', function(e) {
             isDragging = true;
             startPosition = e.pageX;
-            scrollLeftPosition = container.scrollLeft;
-            $(container).css('cursor', 'grabbing');
+            scrollLeftPosition = ratingsContainer.scrollLeft;
+            $(ratingsContainer).css('cursor', 'grabbing');
             e.preventDefault(); // Prevent text selection
         });
         
         $(document).on('mouseup', function() {
             isDragging = false;
-            $(container).css('cursor', 'grab');
+            $(ratingsContainer).css('cursor', 'grab');
         });
         
         $(document).on('mousemove', function(e) {
             if (!isDragging) return;
             const dx = e.pageX - startPosition;
-            container.scrollLeft = scrollLeftPosition - dx;
+            ratingsContainer.scrollLeft = scrollLeftPosition - dx;
             e.preventDefault(); // Prevent text selection during drag
         });
         
         // Prevent click events from firing when dragging
-        $(container).find('a, button').on('click', function(e) {
+        $(ratingsContainer).find('a, button').on('click', function(e) {
             if (isDragging) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -1457,23 +1457,23 @@ $(document).ready(function(){
     }
 
     // Horizontal scrolling for reviews
-    const container = document.getElementById('ratings-container');
+    const reviewsContainer = document.getElementById('ratings-container');
     const scrollLeftBtn = document.getElementById('scroll-left');
     const scrollRightBtn = document.getElementById('scroll-right');
     
-    if (container && scrollLeftBtn && scrollRightBtn) {
+    if (reviewsContainer && scrollLeftBtn && scrollRightBtn) {
         // Scroll amount (width of one review card + gap)
         const scrollAmount = 320; // 300px card width + 20px gap
         
         scrollLeftBtn.addEventListener('click', () => {
-            container.scrollBy({
+            reviewsContainer.scrollBy({
                 left: -scrollAmount,
                 behavior: 'smooth'
             });
         });
         
         scrollRightBtn.addEventListener('click', () => {
-            container.scrollBy({
+            reviewsContainer.scrollBy({
                 left: scrollAmount,
                 behavior: 'smooth'
             });
