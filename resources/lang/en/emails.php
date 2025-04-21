@@ -134,7 +134,7 @@ return [
     'user_account_activate_text_9' => '1. Log in using your email and temporary access code',
     'user_account_activate_text_10' => '2. Set your personal password to complete your account setup',
     'user_account_activate_text_11' => 'Once your account is activated, you’ll be able to manage your booking and explore more of what we offer. If you need any help, feel free to reach out to us anytime',
-    'user_account_activate_text_12' => 'Welcome to Catch A Guide, and we look forward to helping you with your fishing adventure!',    
+    'user_account_activate_text_12' => 'Welcome to Catch A Guide, and we look forward to helping you with your fishing adventure!',   
 
     'guest_tour_reminder_title' => 'Your Fishing Adventure with Catch a Guide is 3 Days Away!',
     'guest_tour_reminder_text_1' => 'This is a friendly reminder that your fishing tour with [Guide Name] at [Location] is scheduled for [Date] at [Time]. Please ensure you\'re fully prepared for the tour and have all the necessary equipment and supplies ready.',
