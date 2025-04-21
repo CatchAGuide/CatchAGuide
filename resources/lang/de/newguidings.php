@@ -272,4 +272,43 @@ return [
     'departure_time' => 'Abfahrtszeit',
     'let_guests_know_about_departure_details' => 'Lass deine Gäste wissen, wann du abfahren wirst...',
     'tooltip_departure_time' => 'Gib deinen Gästen Informationen, wann du abfahren wirst...',
+
+    'morning' => 'Morgens',
+    'noon' => 'Nachmittags',
+    'evening' => 'Abends',
+    'night' => 'Nachts',
+
+    'tooltip_min_number_of_guests' => 'Gib die Mindestanzahl der Gäste ein, die für deine Angeltour erforderlich sind...',
+    'weekday_availability' => 'Verfügbarkeit der Angeltour',
+    'tooltip_weekday_availability' => 'Wähle die Tage der Woche, an denen deine Angeltour verfügbar ist...',
+    'available_all_week' => 'Ganzjährig verfügbar',
+    'available_certain_days' => 'Nur in bestimmten Tagen verfügbar',
+    'select_available_weekdays' => 'Verfügbare Tage auswählen...',
+    'monday' => 'Montag',
+    'tuesday' => 'Dienstag',
+    'wednesday' => 'Mittwoch',
+    'thursday' => 'Donnerstag',
+    'friday' => 'Freitag',
+    'saturday' => 'Samstag',
+    'sunday' => 'Sonntag',
+
+    'pricing_info_text' => '
+        <p>
+            Der Gesamtpreis entspricht dem finalen Buchungspreis für die Tour und
+            muss Steuern, Gebühren sowie eventuelle Zuschläge beinhalten. Extras, die
+            für einen Preisaufschlag hinzugebucht werden können sind hier von
+            ausgeschlossen.
+        </p>
+        <p>
+            Bitte beachte, dass vom Gesamtpreis einer Buchung eine Provision nach der
+            Durchführung der Tour in Rechnung gestellt wird. Die Provision wird wie
+            folgt berechnet:
+        </p>
+        <ul>
+            <li>10% des Gesamtpreises bei einer Buchung bis 350€</li>
+            <li>7,5% des Gesamtpreises bei einer Buchung 350 € und 1.500€</li>
+            <li>3% des Gesamtpreises bei einer Buchung über 1.500€</li>
+        </ul>',
+
+    'pricing_extra_info_text' => 'Du kannst die Extras deiner Buchung im Reservierungsprozess hinzufügen'
 ];

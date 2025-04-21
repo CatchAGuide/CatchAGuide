@@ -1445,237 +1445,54 @@
                 <div>
                     <h2 class="h4 text-dark fw-bolder">@lang('homepage.targetfish-title')</h2>
                 </div>
+                <div>
+                    @if(app()->getLocale() == 'de')
+                        <a href="{{ route('target-fish.index') }}" class="color-primary fw-light">Alle Zielfische ansehen</a>
+                    @else
+                        <a href="{{ route('target-fish.index') }}" class="color-primary fw-light">See all target fish</a>
+                    @endif
+                </div>
             </div>
-          
+            
             <p class="fw-light">@lang('homepage.targetfish-message')</p>
         </div>
         @if($agent->ismobile())
         <div class="methods-custom-owl owl-carousel owl-theme">
-            <div class="item">
-                <div class="row">
-                    <div class="my-1 col">
-                        <a href="/guidings?target_fish[]=11">
-                            <div class="flex-row card align-items-center">
-                                <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/04_pike.webp')}}" style="width:150px;height:100px"/>
-                                <div class="card-body">
-                                  <h5 class="card-title">@lang('homepage.targetfish-pike')</h5>
-                                  
+            @foreach($CategoryPage->chunk(2) as $chunk)
+                <div class="item">
+                    <div class="row">
+                        @foreach($chunk as $category)
+                        <div class="my-1 col-6">
+                            <a href="{{ route('target-fish.targets', ['slug' => $category->slug]) }}">
+                                <div class="flex-row card align-items-center">
+                                    <img class="card-img-left example-card-img-responsive img-top" src="{{asset($category->thumbnail_path ?? 'images/placeholder_guide.jpg')}}" style="width:150px;height:100px"/>
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{$category->source->name}}</h5>
+                                    </div>
                                 </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="my-1 col">
-                        <a href="/guidings?target_fish[]=8">
-                            <div class="flex-row card align-items-center">
-                                <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/11_perch.webp')}}" style="width:150px;height:100px"/>
-                                <div class="card-body">
-                                  <h5 class="card-title">@lang('homepage.targetfish-perch')</h5>
-                                  
-                                </div>
-                            </div>
-                        </a>
+                            </a>
+                        </div>
+                        @endforeach
                     </div>
                 </div>
-         
-            </div>
-            <div class="item">
-                <div class="row">
-                    <div class="my-1 col">
-                        <a href="/guidings?target_fish[]=14">
-                            <div class="flex-row card align-items-center">
-                                <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/10_zander.webp')}}" style="width:150px;height:100px"/>
-                                <div class="card-body">
-                                  <h5 class="card-title">@lang('homepage.targetfish-zander')</h5>
-                                  
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="my-1 col">
-                        <a href="/guidings?target_fish[]=6">
-                            <div class="flex-row card align-items-center">
-                                <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/07_catfish.webp')}}" style="width:150px;height:100px"/>
-                                <div class="card-body">
-                                  <h5 class="card-title">@lang('homepage.targetfish-catfish')</h5>
-                                  
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="item">
-                <div class="row">
-                    <div class="my-1 col">
-                        <a href="/guidings?target_fish[]=69">
-                            <div class="flex-row card align-items-center">
-                                <img class="card-img-left example-card-img-responsive img-top" alt="@lang('homepage.targetfish-blackbass')" src="{{asset('assets/2024/12_blackbass.webp')}}" style="width:150px;height:100px"/>
-                                <div class="card-body">
-                                  <h5 class="card-title">@lang('homepage.targetfish-blackbass')</h5>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="my-1 col">
-                        <a href="/guidings?target_fish[]=36">
-                            <div class="flex-row card align-items-center">
-                                <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/09_trout.webp')}}" style="width:150px;height:100px"/>
-                                <div class="card-body">
-                                <h5 class="card-title">@lang('homepage.targetfish-trout')</h5>
-                                
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="item">
-                <div class="row">
-                    <div class="my-1 col">
-                        <a href="/guidings?target_fish[]=40">
-                            <div class="flex-row card align-items-center">
-                                <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/06_tuna.webp')}}" style="width:150px;height:100px"/>
-                                <div class="card-body">
-                                <h5 class="card-title">@lang('homepage.targetfish-tuna')</h5>
-                                
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="my-1 col">
-                        <a href="/guidings?target_fish[]=5">
-                            <div class="flex-row card align-items-center">
-                                <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/03_carp.webp')}}" style="width:150px;height:100px"/>
-                                <div class="card-body">
-                                <h5 class="card-title">@lang('homepage.targetfish-carp')</h5>
-                                
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="item">
-                <div class="row">
-                    <div class="my-1 col">
-                        <a href="/guidings?target_fish[]=18">
-                            <div class="flex-row card align-items-center">
-                                <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/05_salmon.webp')}}" style="width:150px;height:100px"/>
-                                <div class="card-body">
-                                <h5 class="card-title">@lang('homepage.targetfish-salmon')</h5>
-                                
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
+            @endforeach
         </div>
         @else
-        <div class="row">
-            <div class="my-1 col-md-4">
-                <a href="/guidings?target_fish[]=11">
-                    <div class="flex-row card align-items-center">
-                        <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/04_pike.webp')}}" style="width:150px;height:100px"/>
-                        <div class="card-body">
-                          <h5 class="card-title">@lang('homepage.targetfish-pike')</h5>
-                          
-                        </div>
+            <div class="row">
+                @foreach($CategoryPage as $category)
+                    <div class="my-1 col-md-4">
+                        <a href="{{ route('target-fish.targets', ['slug' => $category->slug]) }}">
+                            <div class="flex-row card align-items-center">
+                                <img class="card-img-left example-card-img-responsive img-top" src="{{asset($category->thumbnail_path ?? 'images/placeholder_guide.jpg')}}" style="width:150px;height:100px"/>
+                                <div class="card-body">
+                                <h5 class="card-title">{{$category->source->name}}</h5>
+                                
+                                </div>
+                            </div>
+                        </a>
                     </div>
-                </a>
-
+                @endforeach
             </div>
-            <div class="my-1 col-md-4">
-                <a href="/guidings?target_fish[]=8">
-                    <div class="flex-row card align-items-center">
-                        <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/11_perch.webp')}}" style="width:150px;height:100px"/>
-                        <div class="card-body">
-                          <h5 class="card-title">@lang('homepage.targetfish-perch')</h5>
-                          
-                        </div>
-                    </div>
-                </a>
-
-            </div>
-            <div class="my-1 col-md-4">
-                <a href="/guidings?target_fish[]=14">
-                    <div class="flex-row card align-items-center">
-                        <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/10_zander.webp')}}" style="width:150px;height:100px"/>
-                        <div class="card-body">
-                          <h5 class="card-title">@lang('homepage.targetfish-zander')</h5>
-                          
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="my-1 col-md-4">
-                <a href="/guidings?target_fish[]=6">
-                    <div class="flex-row card align-items-center">
-                        <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/07_catfish.webp')}}" style="width:150px;height:100px"/>
-                        <div class="card-body">
-                          <h5 class="card-title">@lang('homepage.targetfish-catfish')</h5>
-                          
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="my-1 col-md-4">
-                <a href="/guidings?target_fish[]=69">
-                    <div class="flex-row card align-items-center">
-                        <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/12_blackbass.webp')}}" style="width:150px;height:100px"/>
-                        <div class="card-body">
-                          <h5 class="card-title">@lang('homepage.targetfish-blackbass')<h5>
-                          
-                        </div>
-                    </div>
-                </a>
-
-            </div>
-            <div class="my-1 col-md-4">
-                <a href="/guidings?target_fish[]=36">
-                    <div class="flex-row card align-items-center">
-                        <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/09_trout.webp')}}" style="width:150px;height:100px"/>
-                        <div class="card-body">
-                        <h5 class="card-title">@lang('homepage.targetfish-trout')</h5>
-                        
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="my-1 col-md-4">
-                <a href="/guidings?target_fish[]=40">
-                    <div class="flex-row card align-items-center">
-                        <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/06_tuna.webp')}}" style="width:150px;height:100px"/>
-                        <div class="card-body">
-                        <h5 class="card-title">@lang('homepage.targetfish-tuna')</h5>
-                        
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="my-1 col-md-4">
-                <a href="/guidings?target_fish[]=5">
-                    <div class="flex-row card align-items-center">
-                        <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/03_carp.webp')}}" style="width:150px;height:100px"/>
-                        <div class="card-body">
-                        <h5 class="card-title">@lang('homepage.targetfish-carp')</h5>
-                        
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="my-1 col-md-4">
-                <a href="/guidings?target_fish[]=18">
-                    <div class="flex-row card align-items-center">
-                        <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/05_salmon.webp')}}" style="width:150px;height:100px"/>
-                        <div class="card-body">
-                        <h5 class="card-title">@lang('homepage.targetfish-salmon')</h5>
-                        
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
         @endif
     </div>
 </section>

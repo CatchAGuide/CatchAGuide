@@ -7,9 +7,9 @@ use App\Models\Faq;
 use Illuminate\Support\Facades\Log;
 
 if (! function_exists('translate')) {
-    function translate($string)
+    function translate($string, $language = '')
     {
-        $currentLocale = app()->getLocale();
+        $currentLocale = ($language != '' || $language != null) ? $language : app()->getLocale();
         $cacheKey = 'translation_'.$currentLocale.'_'.$string;
 
         $translation = Cache::rememberForever($cacheKey, function () use ($string, $currentLocale) {
@@ -126,5 +126,21 @@ if (!function_exists('targets')) {
     function targets()
     {
         return new \App\Helpers\TargetHelper();
+    }
+}
+
+if (!function_exists('getRatingLabel')) {
+    function getRatingLabel($score)
+    {
+        if ($score >= 9) return __('guidings.Excellent');
+        if ($score >= 8) return __('guidings.Very_Good');
+        if ($score >= 7) return __('guidings.Good');
+        if ($score >= 6) return __('guidings.Satisfactory');
+        if ($score >= 5) return __('guidings.Sufficient');
+        if ($score >= 4) return __('guidings.Poor');
+        if ($score >= 3) return __('guidings.Insufficient');
+        if ($score >= 2) return __('guidings.Very_Poor');
+        if ($score >= 1) return __('guidings.Bad');
+        return __('guidings.Not_Rated');
     }
 }

@@ -131,19 +131,32 @@ class User extends Authenticatable
 
     public function average_rating()
     {
-        $count = 0;
-        $amount = 0;
-        $return = 0;
-        if(count($this->received_ratings) > 0) {
-            foreach($this->received_ratings as $rating) {
-                $amount += $rating->rating;
-                $count++;
-            }
-            $return = $amount / $count;
-        }
+        $reviews = Review::where('guide_id', $this->id)->with('booking', 'booking.user')->get();
+        $reviews_count = $reviews->count();
+
+        // Calculate average scores
+        $average_overall_score = $reviews_count > 0 ? $reviews->avg('overall_score') : 0;
+        $average_guide_score = $reviews_count > 0 ? $reviews->avg('guide_score') : 0;
+        $average_region_water_score = $reviews_count > 0 ? $reviews->avg('region_water_score') : 0;
+        $average_grandtotal_score = $reviews_count > 0 ? $reviews->avg('grandtotal_score') : 0;
+
+        // $count = 0;
+        // $amount = 0;
+        // $return = 0;
+        // if(count($this->received_ratings) > 0) {
+        //     foreach($this->received_ratings as $rating) {
+        //         $amount += $rating->rating;
+        //         $count++;
+        //     }
+        //     $return = $amount / $count;
+        // }
 
 
-        return $return;
+        return $average_grandtotal_score;
+    }
+
+    public function reviews(){
+        return $this->hasMany(Review::class,'guide_id','id');
     }
 
     /**

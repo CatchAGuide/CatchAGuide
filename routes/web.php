@@ -40,7 +40,8 @@ use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThrea
 use App\Http\Controllers\VacationBookingController;
 use App\Http\Controllers\Admin\Category\AdminCategoryVacationCountryController;
 use App\Http\Controllers\Admin\AdminController;
-
+use App\Http\Controllers\Admin\Category\AdminCategoryTargetFishController;
+use App\Http\Controllers\CategoryTargetFishController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -60,6 +61,8 @@ Route::post('/language/switch', [App\Http\Controllers\LanguageController::class,
 Route::get('/booking-accept/{token}',[BookingController::class,'accept'])->name('booking.accept');
 Route::get('/booking-reject/{token}',[BookingController::class,'reject'])->name('booking.reject');
 Route::post('/update/reject/{booking}',[BookingController::class,'rejectProcess'])->name('booking.rejection');
+Route::get('/booking/reschedule/{token}',[BookingController::class,'reschedule'])->name('booking.reschedule');
+Route::post('/booking/reschedule/store',[BookingController::class,'rescheduleStore'])->name('booking.reschedule.store');
 
 Route::get('/reject/success',function(){
     return view('pages.additional.reject_success');
@@ -206,13 +209,17 @@ Route::get('destination', [DestinationCountryController::class, 'index'])->name(
 Route::get('destinationen', [DestinationCountryController::class, 'index'])->name('destination_de');
 Route::get('destination/{country}/{region?}/{city?}', [DestinationCountryController::class, 'country'])->name('destination.country');
 
+Route::get('category/target-fish/', [CategoryTargetFishController::class, 'index'])->name('target-fish.index');
+Route::get('category/target-fish/{slug}', [CategoryTargetFishController::class, 'targets'])->name('target-fish.targets');
+
 Route::post('sendcontact', [\App\Http\Controllers\ZoisController::class, 'sendcontact'])->name('sendcontactmail');
 Route::post('sendnewsletter', [\App\Http\Controllers\ZoisController::class, 'sendnewsletter'])->name('sendnewsletter');
 
 Route::name('ratings.')->prefix('ratings')->group(function () {
-    Route::get('/{booking}', [RatingsController::class, 'show'])->name('show');
-    Route::post('/store/{bookingid}', [RatingsController::class, 'store'])->name('store');
-    Route::get('/review/{id}',[RatingsController::class, 'review'])->name('review');
+    Route::get('/notified', [RatingsController::class, 'notified'])->name('notified');
+    Route::get('/review/{id}', [RatingsController::class, 'review'])->name('review');
+    Route::get('/{token}', [RatingsController::class, 'show'])->name('show');
+    Route::post('/{token}', [RatingsController::class, 'store'])->name('store');
 });
 
 Route::name('law.')->group(function() {
@@ -283,6 +290,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('guidings', AdminGuidingsController::class);
         Route::get('guidings/changeguidingstatus/{id}', [AdminGuidingsController::class, 'changeguidingstatus'])->name('changeGuidingStatus');
         Route::resource('bookings', BookingsController::class);
+        Route::get('/bookings/{booking}/email-preview', [BookingsController::class, 'emailPreview'])->name('bookings.email-preview');
         Route::prefix('payments')->name('payments.')->group(function () {
             Route::get('/', [AdminPaymentsController::class, 'index'])->name('index');
             Route::get('/showoutpayments/{id}', [AdminPaymentsController::class, 'showoutpayments'])->name('showoutpayments');
@@ -359,6 +367,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::resource('vacation-country', AdminCategoryVacationCountryController::class);
             Route::resource('region', AdminCategoryRegionController::class);
             Route::resource('city', AdminCategoryCityController::class);
+            Route::resource('target-fish', AdminCategoryTargetFishController::class);
+            Route::post('target-fish/toggle-favorite', [AdminCategoryTargetFishController::class, 'toggleFavorite'])->name('target-fish.toggle-favorite');
+            Route::get('target-fish/{id}/language-data', [AdminCategoryTargetFishController::class, 'getLanguageData'])->name('target-fish.language-data');
         });
 
         Route::get('request-as-guide', [\App\Http\Controllers\GuideRequestsController::class, 'index'])->name('guide-requests.index');

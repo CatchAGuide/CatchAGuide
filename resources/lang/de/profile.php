@@ -313,6 +313,7 @@ return [
 
     //book with me page
     'bwm-notavailable' => 'nicht verfügbar',
+    'bwm-rescheduled' => 'rescheduled from Booking ID:',
     'bwm-cancelled' => 'storniert',
     'bwm-accepted' => 'angenommen',
     'bwm-rejected' => 'abgelehnt',

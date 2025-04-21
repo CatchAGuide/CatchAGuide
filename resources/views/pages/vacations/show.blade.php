@@ -143,7 +143,7 @@
         .booking-form-container label {
             font-weight: 500;
             margin-bottom: 5px;
-            color: #495057;
+            /* color: #495057; */
         }
 
         .booking-form-container .form-control {

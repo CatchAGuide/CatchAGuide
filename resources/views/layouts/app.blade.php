@@ -69,18 +69,18 @@
     @endif
 
     <!-- favicons Icons -->
-    @if(app()->getLocale() == 'en')
+    {{-- @if(app()->getLocale() == 'en')
         <link rel="apple-touch-icon" sizes="180x180" href="https://catchaguide.com/assets/images/favicon.png"/>
         <link rel="icon" type="image/png" sizes="32x32" href="https://catchaguide.com/assets/images/favicon.png"/>
         <link rel="icon" type="image/png" sizes="16x16" href="https://catchaguide.com/assets/images/favicon.png"/>
         <link rel="icon" type="image/png" sizes="48x48" href="https://catchaguide.com/assets/images/favicon.png"/>
-    @else
-        <link rel="apple-touch-icon" sizes="180x180" href="https://catchaguide.de/assets/images/favicon.png"/>
-        <link rel="icon" type="image/png" sizes="32x32" href="https://catchaguide.de/assets/images/favicon.png"/>
-        <link rel="icon" type="image/png" sizes="16x16" href="https://catchaguide.de/assets/images/favicon.png"/>
-        <link rel="icon" type="image/png" sizes="48x48" href="https://catchaguide.de/assets/images/favicon.png"/>
+    @else --}}
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/images/favicon.png') }}"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/images/favicon.png') }}"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('assets/images/favicon.png') }}"/>
+    <link rel="icon" type="image/png" sizes="48x48" href="{{ asset('assets/images/favicon.png') }}"/>
 
-    @endif
+    {{-- @endif --}}
   
     <!-- HTML TAGS -->
 

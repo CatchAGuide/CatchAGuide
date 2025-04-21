@@ -1,67 +1,67 @@
 @import "../settings/variables";
-#vacations-category{
-  #map-placeholder button {
-    position: absolute;
-    top: calc(50% - 20px);
-    width: max-content;
-    transform: translateX(-50%);
-}
-.guidings-item-icon{
-  span{
-    font-size: 16px;
-  }
-}
-.vacations-item-row{
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.vacations-item-row-top{
-  display: flex;
-  gap: 16px;
-  justify-content: space-between;
-}
-.vacations-info-container{
-  display: flex;
-  gap: 8px;
-  span{
-    text-wrap-mode: nowrap;
-  }
-  ul.list-unstyled{
-      display: flex;
-      align-items: center;
-      gap: 8px;
-  }
-}
-.guidings-item{
-  justify-content: space-between;
-  .inclusions-price{
-    min-height: auto;
-  }
-  .guiding-item-desc{
-    color: #444;
-  }
-  .guidings-item-title {
-    width: calc(100% - 145px);
-    color: #444;
-  }
-}
-.guiding-list-item{
-  .vacations-item-row{
-    color: #444;
-  }
-}
-.guiding-item-desc a{
-  gap: 8px;
-}
-.guiding-list-item {
-  &:hover {
-    box-shadow: 0 0 4px 0px #00000073;
-    .vacations-item-row{
-      color: #444;
+#vacations-category {
+    #map-placeholder button {
+        position: absolute;
+        top: calc(50% - 20px);
+        width: max-content;
+        transform: translateX(-50%);
     }
-  }
-}
+    .guidings-item-icon {
+        span {
+            font-size: 16px;
+        }
+    }
+    .vacations-item-row {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .vacations-item-row-top {
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+    }
+    .vacations-info-container {
+        display: flex;
+        gap: 8px;
+        span {
+            text-wrap-mode: nowrap;
+        }
+        ul.list-unstyled {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    }
+    .guidings-item {
+        justify-content: space-between;
+        .inclusions-price {
+            min-height: auto;
+        }
+        .guiding-item-desc {
+            color: #444;
+        }
+        .guidings-item-title {
+            width: calc(100% - 145px);
+            color: #444;
+        }
+    }
+    .guiding-list-item {
+        .vacations-item-row {
+            color: #444;
+        }
+    }
+    .guiding-item-desc a {
+        gap: 8px;
+    }
+    .guiding-list-item {
+        &:hover {
+            box-shadow: 0 0 4px 0px #00000073;
+            .vacations-item-row {
+                color: #444;
+            }
+        }
+    }
 }
 
 .vacations-single {
@@ -71,32 +71,26 @@
                 flex: 1;
             }
         }
-
         .description-item {
             display: flex;
             flex-direction: column;
             gap: 8px;
             margin-bottom: 8px;
-
             .header-container {}
-
             span {
                 display: flex;
                 align-items: center;
                 gap: 4px;
                 font-weight: 500;
             }
-
             span.text-wrapper {
                 display: block !important;
                 align-items: center;
                 gap: 4px;
-
                 p {
                     font-weight: 400;
                     margin: 0;
                 }
-
                 small {
                     display: block;
                     padding: 0 16px;
@@ -104,30 +98,25 @@
                     width: 100%;
                 }
             }
-
             svg {
                 width: 16px;
                 height: 16px;
                 color: $primary-color;
-
             }
-
             p {
                 padding: 0 16px;
             }
         }
     }
-    .tab-item{
+    .tab-item {
         span.text-wrapper {
             display: block !important;
             align-items: center;
             gap: 4px;
-
             p {
                 font-weight: 400;
                 margin: 0;
             }
-
             small {
                 display: block;
                 padding: 0 16px;
@@ -135,167 +124,160 @@
                 width: 100%;
             }
         }
-        .details-row{
+        .details-row {
             display: flex;
             gap: 8px;
-            p{
-              word-wrap: break-word;
+            p {
+                word-wrap: break-word;
             }
         }
     }
     #guidings-tabs,
-  #guidings-accordion {
-    min-height: 300px;
-    padding: 16px;
-    font-size: 16px;
-
-    .table th {
-      text-align: left;
-      width: 150px !important;
-      font-size: 16px;
-      color: #787780;
-      font-weight: 400;
+    #guidings-accordion {
+        min-height: 300px;
+        padding: 16px;
+        font-size: 16px;
+        .table th {
+            text-align: left;
+            width: 150px !important;
+            font-size: 16px;
+            color: #787780;
+            font-weight: 400;
+        }
+        .table td {
+            width: 70%;
+            font-size: 16px;
+            color: #787780;
+        }
+        // tab-card {
+        //     box-shadow: ;
+        // }
     }
-
-    .table td {
-      width: 70%;
-      font-size: 16px;
-      color: #787780;
-    }
-    // tab-card {
-    //     box-shadow: ;
-    // }
-  }
-  .inclusions{
-    .header-container{
-        span{
-            color: $font-color;
+    .inclusions {
+        .header-container {
+            span {
+                color: $font-color;
+            }
+        }
+        .table th {
+            text-align: left;
+            width: 150px !important;
+            font-size: 16px;
+            color: #787780;
+            font-weight: 400;
+        }
+        .table td {
+            width: 70%;
+            font-size: 16px;
+            color: #787780;
         }
     }
-    .table th {
-        text-align: left;
-        width: 150px !important;
-        font-size: 16px;
-        color: #787780;
-        font-weight: 400;
-      }
-  
-      .table td {
-        width: 70%;
-        font-size: 16px;
-        color: #787780;
-      }
-  }
-  // div#checkoutModal{
-  //   div#selected_items_summary{
-  //       .selected-item {
-  //           display: flex;
-  //       }
-  //   }
-  // }
-}
-.vacations-book-mobile{
-  display: none;
+    // div#checkoutModal{
+    //   div#selected_items_summary{
+    //       .selected-item {
+    //           display: flex;
+    //       }
+    //   }
+    // }
 }
 
+.vacations-book-mobile {
+    display: none;
+}
 
 @media (max-width: 992px) {
-  div#selected_items_summary{
-    .selected-item {
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      align-items: flex-start;
-      .d-flex{
-        flex-direction: column;
-        gap: 8px;
-        align-items: flex-start !important;
-        justify-content: flex-start !important;
-      }
-      .selected-item-info{
-        text-align: left;
-        span.ms-2.fw-medium {
-          display: block;
-          width: 100%;
-          margin-left: 0;
-      }
-      }
-      ul.list-unstyled.ms-4.mb-0 {
-        margin-left: 0 !important;
-    }
-    .price-calculation {
-      padding-left: 0;
-      margin-top: 8px !important;
-  }
-    }
-  }
-  div#vacationModalLabel{
-    label {
-      text-align: left;
-      width: 100%;
-    }
-    .booking-select.mb-3 {
-      flex-direction: column;
-  }
-  } 
-  .vacations-book-mobile {
-    position: fixed;
-    bottom: 0;
-    z-index: 2;
-    width: 100%;
-    display: block;
-    background-color:#faf5ee;
-    padding: 16px;
-    display: flex;
-    justify-content: center;
-    .tour-details-two__book-tours {
-      padding: 0;
-    }
-  
-    .booking-form-container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-direction: column;
-      gap: 16px;
-  
-      .booking-select {
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
-        align-items: center;
-      }
-  
-      .booking-price {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        font-weight: 600;
-        font-size: 18px;
-        min-width: 150px;
-  
-        #priceDisplay {
-          text-decoration: underline 2px $primary-color !important;
+    div#selected_items_summary {
+        .selected-item {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            .d-flex {
+                flex-direction: column;
+                gap: 8px;
+                align-items: flex-start !important;
+                justify-content: flex-start !important;
+            }
+            .selected-item-info {
+                text-align: left;
+                span.ms-2.fw-medium {
+                    display: block;
+                    width: 100%;
+                    margin-left: 0;
+                }
+            }
+            ul.list-unstyled.ms-4.mb-0 {
+                margin-left: 0 !important;
+            }
+            .price-calculation {
+                padding-left: 0;
+                margin-top: 8px !important;
+            }
         }
-      }
     }
-  
-    .booking-price-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
+    div#vacationModalLabel {
+        label {
+            text-align: left;
+            width: 100%;
+        }
+        .booking-select.mb-3 {
+            flex-direction: column;
+        }
     }
-  }
-}
-@media (max-width: 768px) {
-  #vacations-category{
-    .guidings-item{
-      .guidings-item-title {
+    .vacations-book-mobile {
+        position: fixed;
+        bottom: 0;
+        z-index: 2;
         width: 100%;
+        display: block;
+        background-color: #faf5ee;
+        padding: 16px;
+        display: flex;
+        justify-content: center;
+        .tour-details-two__book-tours {
+            padding: 0;
+        }
+        .booking-form-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-direction: column;
+            gap: 16px;
+            .booking-select {
+                display: flex;
+                justify-content: space-between;
+                width: 100%;
+                align-items: center;
+            }
+            .booking-price {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                font-weight: 600;
+                font-size: 18px;
+                min-width: 150px;
+                #priceDisplay {
+                    text-decoration: underline 2px $primary-color !important;
+                }
+            }
+        }
+        .booking-price-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
     }
+}
+
+@media (max-width: 768px) {
+    #vacations-category {
+        .guidings-item {
+            .guidings-item-title {
+                width: 100%;
+            }
+        }
     }
-  }
 }

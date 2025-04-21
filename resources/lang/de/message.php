@@ -252,7 +252,9 @@ return [
     //booking form reject
     'booking-reject-header' => 'Möchtest Du die Buchungsanfrage wirklich ablehnen?',
     'booking-reject-reason' => 'Grund für die Ablehnung',
-    'booking-reject-message' => "Bitte gib Deinem Gast einen Grund für die Absage. Gib im besten Fall 1-3 zeitnahe Alternativtermine für ein neues Guiding an, sodass Dein Gast Dich buchen kann, sobald Du wieder Verfügbar bist.",
+    'booking-reject-message' => "Bitte hinterlasse eine persönliche Nachricht an deinen Gast, warum du die Anfrage absagen musst. Achte darauf, dass dieses Kommentarfeld mindestens 50 Zeichen enthält.
+Wichtiger Hinweis: Solltest du persönliche Kontaktdaten wie z.B. deine E-Mail-Adresse oder Telefonnummer angeben, betrachten wir die Anfrage als vermittelt, da wir in diesem Fall nicht überprüfen können, ob die Buchung tatsächlich zustande kommt oder nicht.",
+    'booking-reject-message-available-dates' => 'Bitte wähle mindestens einen und maximal fünf alternative Termine aus, an denen dein Gast die Buchung erneut vornehmen kann. Wir möchten sicherstellen, dass der Gast die Möglichkeit hat, einen neuen Termin für eine Angeltour mit dir zu finden.',
     'booking-submit' => 'Ablehnen',
 
     //booking success reject
@@ -275,6 +277,9 @@ return [
 
     'Booking' => 'Jetzt reservieren',
     'From' => 'Ab',
-    'Magazine_subtitle' => 'Aktuell, Unterhaltsam & Lehrreich - Beiträge rund ums Angeln'
+    'Magazine_subtitle' => 'Aktuell, Unterhaltsam & Lehrreich - Beiträge rund ums Angeln',
+
+    //booking reject
+    'booking-reject-additional-comment' => 'Zusätzliche Kommentare',
 
 ];

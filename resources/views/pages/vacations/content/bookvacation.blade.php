@@ -1,27 +1,7 @@
-<div class="col-md-12 {{$agent->ismobile() ? 'text-center' : ''}}">
-    <!-- Add Contact Card - Only show when not in modal -->
-    @if(!$agent->ismobile() || !isset($inModal))
-        <div class="contact-card mb-4 tour-details-two__book-tours">
-            <h5 class="contact-card__title">{{ translate('Contact Us') }}</h5>
-            <div class="contact-card__content">
-                <p class="">{{ translate('Do you have questions about this vacation? Our team is here to help!') }}</p>
-                <div class="">
-                    <div class="contact-info">
-                        <i class="fas fa-phone-alt me-2"></i>
-                        <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>
-                    </div>
-                    <a href="{{ route('additional.contact') }}" class="btn btn-outline-orange">
-                        {{ translate('Contact Form') }}
-                        <i class="fas fa-arrow-right ms-2"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-    @endif
-    
+<div class="col-md-12 {{$agent->ismobile() ? 'text-center' : ''}}">    
     <div class="">
-        <div class="tour-details-two__book-tours">
-            <h3 class="tour-details-two__sidebar-title d-none d-md-block">{{ translate('Book Vacation') }}</h3>
+        <div class="tour-details-two__book-tours" style="padding: 40px;">
+            <h3 class="tour-details-two__sidebar-title d-none d-md-block">{{ __('vacations.book_vacation_reserve') }}</h3>
             <div class="card-body">
                 <div class="booking-form-container">
                     <form id="bookingForm">
@@ -179,7 +159,7 @@
                         @endif
 
                         <div class="total-price-container mb-4">
-                            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                            <div class="d-flex justify-content-between align-items-center p-3 bg-secondary rounded">
                                 <h5 class="mb-0">@lang('vacations-booking.total_price'):</h5>
                                 <h5 class="mb-0" id="total-price">€0.00</h5>
                             </div>
@@ -351,6 +331,25 @@
                 </div>
             </div>
         </div>
+        <!-- Add Contact Card - Only show when not in modal -->
+        @if(!$agent->ismobile() || !isset($inModal))
+            <div class="contact-card mb-4 mt-4 tour-details-two__book-tours">
+                <h5 class="contact-card__title">{{ translate('Contact Us') }}</h5>
+                <div class="contact-card__content">
+                    <p class="">{{ translate('Do you have questions about this vacation? Our team is here to help!') }}</p>
+                    <div class="">
+                        <div class="contact-info">
+                            <i class="fas fa-phone-alt me-2"></i>
+                            <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>
+                        </div>
+                        <a href="{{ route('additional.contact') }}" class="btn btn-outline-orange">
+                            {{ translate('Contact Form') }}
+                            <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 </div>
 

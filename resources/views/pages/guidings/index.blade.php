@@ -590,12 +590,12 @@
                                                 $priceMin = request()->get('price_min');
                                                 $priceMax = request()->get('price_max');
                                                 $showPriceMin = isset($priceMin) && $priceMin != 50;
-                                                $showPriceMax = isset($priceMax) && $priceMax != $overallMaxPrice;
+                                                $showPriceMax = isset($priceMax) && $priceMax != 1000;
                                             @endphp
                                             @if($showPriceMin || $showPriceMax)
                                                 <span class="badge bg-light text-dark border">
                                                     @if($showPriceMin && $showPriceMax)
-                                                        Price €{{ $priceMin }} - €{{ $priceMax }}
+                                                        Price from €{{ $priceMin }} to €{{ $priceMax }}
                                                     @elseif($showPriceMin)
                                                         Price from €{{ $priceMin }}
                                                     @elseif($showPriceMax)
@@ -643,13 +643,17 @@
                                                             <span class="truncate"><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }}</span>                                      
                                                             </div>
                                                             @if ($guiding->user->average_rating())
-                                                            <div class="guidings-item-ratings">
-                                                            <div class="ratings-score">
-                                                                    <span class="text-warning">★</span>
-                                                                    <span>{{$guiding->user->average_rating()}} </span>
-                                                                    /5 ({{ $guiding->user->received_ratings->count() }} review/s)
-                                                                </div>
+                                                            <div class="ave-reviews-row">
+                                                                <div class="ratings-score">
+                                                                <span class="rating-value">{{number_format($guiding->user->average_rating(), 1)}}</span>
+                                                            </div> 
+                                                                <span class="mb-1">
+                                                                    {{-- ({{$guiding->user->received_ratings->count()}} reviews) --}}
+                                                                    ({{$guiding->user->reviews->count()}} reviews)
+                                                                </span>
                                                             </div>
+                                                            @else
+                                                            <div class="no-reviews"><span>@lang('guidings.no_reviews')</span></div>
                                                             @endif
                                                         </div>
                                                         <div class="guidings-item-icon">

@@ -73,16 +73,6 @@
             overflow: hidden;
         }
 
-        /* .guidings-gallery .left-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        } */
-
         .guidings-gallery .right-images img {
             width: 100%;
             height: 100%;
@@ -98,6 +88,69 @@
             aspect-ratio: 3/2;
         }
 
+        /* Force the ratings slider to display */
+        .ratings-slider {
+            display: block !important;
+            overflow: hidden;
+        }
+        
+        .ratings-item {
+            background: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        
+        .ratings-comment-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        /* Horizontal scrolling reviews container with hidden scrollbar */
+        .ratings-container {
+            display: flex;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            gap: 20px;
+            padding: 10px 0 20px;
+            margin: 20px 0;
+            -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
+            cursor: grab; /* Show grab cursor to indicate draggable */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+        
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .ratings-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .ratings-container:active {
+            cursor: grabbing; /* Change cursor when actively dragging */
+        }
+        
+        .ratings-item {
+            flex: 0 0 300px; /* Fixed width, no growing or shrinking */
+            background: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            user-select: none; /* Prevent text selection during drag */
+        }
+        
+        /* Hide navigation buttons */
+        .ratings-nav {
+            display: none;
+        }
+        
+        @media (max-width: 767px) {
+            .ratings-item {
+                flex: 0 0 85vw; /* Take up most of the viewport width on mobile */
+            }
+        }
     </style>
 @endsection
 
@@ -119,58 +172,6 @@
             </div>
         </section>
     </div>
-    {{-- <div class="container"> --}}
-        {{-- <section class="page-header">
-            <div class="page-header__bottom">
-                <div class="container">
-                    <div class="page-header__bottom-inner">
-                        <ul class="thm-breadcrumb list-unstyled">
-                            <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                            <li><span>&#183;</span></li>
-                    
-                            @if(request()->has('from_destination'))
-                                @if(isset($destination))
-                                    @if($destination->type == 'country')
-                                        <li><a href="{{ route('destination.country', ['country' => $destination->slug]) }}">
-                                            {{ translate('Fishing Destinations in ')}} {{ $destination->name }}
-                                        </a></li>
-                    
-                                    @elseif($destination->type == 'region')
-                                        <li><a href="{{ route('destination.country', ['country' => $destination->country_slug]) }}">
-                                            {{ translate('Fishing Destinations in ')}} {{ $destination->country_name }}
-                                        </a></li>
-                                        <li><span>&#183;</span></li>
-                                        <li><a href="{{ route('destination.country', ['country' => $destination->country_slug, 'region' => $destination->slug]) }}">
-                                            {{ translate('Fishing Destinations in ')}} {{ $destination->name }}
-                                        </a></li>
-                    
-                                    @elseif($destination->type == 'city')
-                                        <li><a href="{{ route('destination.country', ['country' => $destination->country_slug]) }}">
-                                            {{ translate('Fishing Destinations in ')}} {{ $destination->country_name }}
-                                        </a></li>
-                                        <li><span>&#183;</span></li>
-                                        <li><a href="{{ route('destination.country', ['country' => $destination->country_slug, 'region' => $destination->region_slug]) }}">
-                                            {{ translate('Fishing Destinations in ')}} {{ $destination->region_name }}
-                                        </a></li>
-                                        <li><span>&#183;</span></li>
-                                        <li><a href="{{ route('destination.country', ['country' => $destination->country_slug, 'region' => $destination->region_slug, 'city' => $destination->slug]) }}">
-                                            {{ translate('Fishing Destinations in ')}} {{ $destination->name }}
-                                        </a></li>
-                                    @endif
-                                @else
-                                    <li><a href="{{ route('guidings.index') }}">{{ translate('Fishing Tours') }}</a></li>
-                                @endif
-                            @else
-                                <li><a href="{{ route('guidings.index') }}">{{ translate('Fishing Tours') }}</a></li>
-                            @endif
-                            <li><span>&#183;</span></li>
-                            <li class="active">{{ translate($guiding->title) }}</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section> --}}
 
  <div id="guidings-page" class="container">
     <div class="title-container">
@@ -198,13 +199,17 @@
                         </div>
                     </div>
                 </div>
-                @if ($average_rating)
-                <div class="col-auto pe-0 me-1">
-                  
-                    <p class="mb-1">
-                        <span class="text-warning">★</span> {{$average_rating}}/5 ({{$ratings->count()}} reviews)
-                    </p>
+                @if ($average_grandtotal_score)
+                <div class="ave-reviews-row">
+                    <div class="ratings-score">
+                    <span class="rating-value">{{number_format($average_grandtotal_score, 1)}}</span>
+                </div> 
+                    <span class="mb-1">
+                        ({{$reviews_count}} reviews)
+                    </span>
                 </div>
+                @else
+                <span>@lang('guidings.no_reviews')</span>
                 @endif
                 <div class="col-auto p-0">
                 </div>
@@ -375,138 +380,424 @@
                 </div>
             </div>
         </div>
-    <section class="guidings-description-container mb-5">
+<section class="guidings-description-container mb-5">
         <!-- Left Column -->
-        <div class="guidings-descriptions">
-            <!-- Title, Rating, and Location -->
+    <div class="guidings-descriptions">
+    <!-- Title, Rating, and Location -->
     
-            <!-- Important Information -->
-            <div class="important-info">
-                    <div class="info-item">
-                        <i class="fas fa-ship"></i>
-                        <strong><p class="mb-0">{{$guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}</p></strong>
-                    </div>
-                    <div class="info-item">
-                        <i>
-                            <svg class="time-icon" width="18px" height="18px" viewBox="0 0 347.442 347.442" xmlns="http://www.w3.org/2000/svg">
-                                <g>
-                                    <g>
-                                        <path d="M173.721 347.442c95.919 0 173.721-77.802 173.721-173.721S269.64 0 173.721 0 0 77.802 0 173.721s77.802 173.721 173.721 173.721zm-12.409-272.99c0-6.825 5.584-12.409 12.409-12.409s12.409 5.584 12.409 12.409v93.313l57.39 45.912c5.336 4.281 6.204 12.098 1.923 17.434-2.42 3.04-6.018 4.653-9.679 4.653-2.73 0-5.46-.869-7.755-2.73l-62.043-49.634c-2.916-2.358-4.653-5.894-4.653-9.679v-99.269z"/>
-                                    </g>
-                                </g>
-                            </svg>
-                        </i>
+    <!-- Important Information -->
+    <div class="important-info">
+        <div class="info-item">
+            <i class="fas fa-ship"></i>
+            <strong>
+                <p class="mb-0">{{$guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}</p>
+            </strong>
+        </div>
+        <div class="info-item">
+            <i>
+                <svg class="time-icon" width="18px" height="18px" viewBox="0 0 347.442 347.442" xmlns="http://www.w3.org/2000/svg">
+                    <g>
+                        <g>
+                            <path d="M173.721 347.442c95.919 0 173.721-77.802 173.721-173.721S269.64 0 173.721 0 0 77.802 0 173.721s77.802 173.721 173.721 173.721zm-12.409-272.99c0-6.825 5.584-12.409 12.409-12.409s12.409 5.584 12.409 12.409v93.313l57.39 45.912c5.336 4.281 6.204 12.098 1.923 17.434-2.42 3.04-6.018 4.653-9.679 4.653-2.73 0-5.46-.869-7.755-2.73l-62.043-49.634c-2.916-2.358-4.653-5.894-4.653-9.679v-99.269z"/>
+                        </g>
+                    </g>
+                </svg>
+            </i>
 
-                        <p class="mb-0">{{ __('guidings.'.$guiding->duration_type) }} : <strong>{{$guiding->duration}} {{ $guiding->duration_type == 'multi_day' ? __('guidings.days') : __('guidings.hours') }}</strong></p>                    </div>
-                    <div class="info-item">
-                        <i class="fas fa-users"></i>
-                       <p class="mb-0">{{translate('Number of guests:')}} <strong>{{$guiding->max_guests}}</strong></p>
-                    </div>
-            </div>
+            <p class="mb-0">{{ __('guidings.'.$guiding->duration_type) }} : <strong>{{$guiding->duration}} {{ $guiding->duration_type == 'multi_day' ? __('guidings.days') : __('guidings.hours') }}</strong></p>                    </div>
+        <div class="info-item">
+            <i class="fas fa-users"></i>
+            <p class="mb-0">{{translate('Number of guests:')}} <strong>{{$guiding->max_guests}}</strong></p>
+        </div>
+    </div>
     
-            <!-- Description Section -->
-            <div class="description-container card p-3 mb-5">
-                <div class="description-list">
-                    <!-- Course of Action -->
-                    @if ($guiding->desc_course_of_action)
-                    <div class="description-item">
-                        <div class="header-container">
-                            <span>@lang('guidings.Course_Action')</span>
-                        </div>
-                        <p class="text-wrapper">
-                           {!! translate($guiding->desc_course_of_action) !!}
-                        </p>
+    <!-- Description Section -->
+    <div class="description-container card p-3 mb-5">
+        <div class="description-list">
+            <!-- Course of Action -->
+            @if ($guiding->desc_course_of_action)
+                <div class="description-item">
+                    <div class="header-container">
+                        <span>@lang('guidings.Course_Action')</span>
                     </div>
-                    @endif
-                    @if ($guiding->desc_tour_unique)
-                    <div class="description-item">
-                        <div class="header-container">
-                            <span>{{ translate('Tour Highlights') }}</span>
-                        </div>
-                        <p class="text-wrapper">
-                        {!! translate($guiding->desc_tour_unique) !!}
-                        </p>
-                    </div>
-                    @endif
-                    <div class="row description-item-row">
-                        <!-- Starting Time -->
-                        @if ($guiding->desc_starting_time)
-                        <div class="description-item col-12 col-md-6">
-                            <div class="header-container">
-                                <span> @lang('guidings.Starting_Time')</span>
-                            </div>
-                            <p>{!! translate($guiding->desc_starting_time) !!}</p>
-                        </div>
-                        @endif
-                        <!-- Meeting Point -->
-                        @if ($guiding->desc_meeting_point)
-                        <div class="description-item col-12 col-md-6">
-                            <div class="header-container">
-                            <span> @lang('guidings.Meeting_Point')</span>
-                            </div>
-                            <p>{!! translate($guiding->desc_meeting_point) !!}</p>
-                        </div>
-                        @endif
-                    </div>
+                    <p class="text-wrapper">
+                        {!! translate($guiding->desc_course_of_action) !!}
+                    </p>
                 </div>
-            </div>
-            
-            @if($agent->ismobile())
-                <div class="contact-card card p-3 mb-4">
-                    <h5 class="contact-card__title">{{ translate('Contact us') }}</h5>
-                    <div class="contact-card__content">
-                        <p class="">{{ translate('Do you have questions about this fishing tour? Our team is here to help!') }}</p>
-                        <div class="">
-                            <div class="contact-info">
-                                <i class="fas fa-phone-alt me-2"></i>
-                                <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>
-                            </div>
-                            <a href="{{ route('additional.contact') }}" class="btn btn-outline-orange">
-                                {{ translate('Contact Form') }}
-                                <i class="fas fa-arrow-right ms-2"></i>
-                            </a>
-                        </div>
+            @endif
+            @if ($guiding->desc_tour_unique)
+                <div class="description-item">
+                    <div class="header-container">
+                        <span>{{ translate('Tour Highlights') }}</span>
                     </div>
+                    <p class="text-wrapper">
+                        {!! translate($guiding->desc_tour_unique) !!}
+                    </p>
                 </div>
             @endif
 
-            <div class="tabs-container mb-5">
-                <div class="nav nav-tabs" id="guiding-tab" role="tablist">
-                    <button class="nav-link active" id="nav-fishing-tab" data-bs-toggle="tab" data-bs-target="#fishing" type="button" role="tab" aria-controls="nav-fishing" aria-selected="true">@lang('guidings.Tour_Info')</button>
-                    @if(!empty( json_decode($guiding->inclusions)))
-                    <button class="nav-link" id="nav-include-tab" data-bs-toggle="tab" data-bs-target="#include" type="button" role="tab" aria-controls="nav-include" aria-selected="false">@lang('guidings.Inclusions')</button>
-                    @endif
-                    <!-- check later -->
-                    @if ($guiding->is_boat) 
-                    <button class="nav-link" id="nav-boat-tab" data-bs-toggle="tab" data-bs-target="#boat" type="button" role="tab" aria-controls="nav-boat" aria-selected="false">@lang('guidings.Boat_Details')</button>
-                    @endif
-                    <button class="nav-link" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab" aria-controls="nav-info" aria-selected="false">@lang('guidings.Additional_Info')</button>
+            <div class="row description-item-row">
+                <!-- Starting Time -->
+                @if ($guiding->desc_starting_time || $guiding->desc_departure_time)
+                    <div class="description-item col-12 col-md-6">
+                        <div class="header-container">
+                            <span> @lang('guidings.Starting_Time')</span>
+                        </div>
+                        
+                        @if($guiding->desc_departure_time)
+                            <div class="time-boxes mb-2 d-flex">
+                                @foreach(json_decode($guiding->desc_departure_time) as $time)
+                                    <small class="badge border border-secondary text-secondary me-1">{{ __('guidings.'.$time) }}</small>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        @if($guiding->desc_starting_time)
+                            <p>{!! translate($guiding->desc_starting_time) !!}</p>
+                        @endif
+                    </div>
+                @endif
+                <!-- Meeting Point -->
+                @if ($guiding->desc_meeting_point)
+                    <div class="description-item col-12 col-md-6">
+                        <div class="header-container">
+                            <span> @lang('guidings.Meeting_Point')</span>
+                        </div>
+                        <p>{!! translate($guiding->desc_meeting_point) !!}</p>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+            
+    @if($agent->ismobile())
+        <div class="contact-card card p-3 mb-4">
+            <h5 class="contact-card__title">{{ translate('Contact us') }}</h5>
+            <div class="contact-card__content">
+                <p class="">{{ translate('Do you have questions about this fishing tour? Our team is here to help!') }}</p>
+                <div class="">
+                    <div class="contact-info">
+                        <i class="fas fa-phone-alt me-2"></i>
+                        <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>
+                    </div>
+                    <a href="{{ route('additional.contact') }}" class="btn btn-outline-orange">
+                        {{ translate('Contact Form') }}
+                        <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
                 </div>
+            </div>
+        </div>
+    @endif
+
+    <div class="tabs-container mb-5">
+        <div class="nav nav-tabs" id="guiding-tab" role="tablist">
+            <button class="nav-link active" id="nav-fishing-tab" data-bs-toggle="tab" data-bs-target="#fishing" type="button" role="tab" aria-controls="nav-fishing" aria-selected="true">@lang('guidings.Tour_Info')</button>
+            @if(!empty( json_decode($guiding->inclusions)))
+                <button class="nav-link" id="nav-include-tab" data-bs-toggle="tab" data-bs-target="#include" type="button" role="tab" aria-controls="nav-include" aria-selected="false">@lang('guidings.Inclusions')</button>
+            @endif
+            
+            @if ($guiding->is_boat) 
+                <button class="nav-link" id="nav-boat-tab" data-bs-toggle="tab" data-bs-target="#boat" type="button" role="tab" aria-controls="nav-boat" aria-selected="false">@lang('guidings.Boat_Details')</button>
+            @endif
+            <button class="nav-link" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab" aria-controls="nav-info" aria-selected="false">@lang('guidings.Additional_Info')</button>
+        </div>
+
+        <div class="tab-content mb-5" id="guidings-tabs">
+
+            <!-- What's Included Tab -->
+            <div class="tab-pane fade" id="include" role="tabpanel" aria-labelledby="nav-include-tab">
+                <div class="row card tab-card h-100 shadow m-0 p-2">
+                    <div class="col-6">
+                        @if(!empty( json_decode($guiding->inclusions)))
+                            <div class="row">
+                                <strong class="mb-2 subtitle-text">@lang('guidings.Inclusions')</strong>
+                                @foreach ($guiding->getInclusionNames() as $index => $inclusion)
+                                    <div class="col-12 mb-2 text-start">
+                                    <i data-lucide="wrench"></i> {{ $inclusion['name'] }}
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                    @if(!empty(json_decode($guiding->pricing_extra)) && !empty( json_decode($guiding->inclusions)))
+                    <hr >
+                    @endif
+                    <div class="col-6">
+                        @if(!empty(json_decode($guiding->pricing_extra)))
+                            <div class="row">
+                                <strong class="mb-2 subtitle-text">@lang('guidings.Additional_Extra')</strong>
+                                <div class="alert alert-secondary p-2 mb-3 d-flex align-items-center">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <small>{{ __('newguidings.pricing_extra_info_text') }}</small>
+                                </div>
+                                @foreach (json_decode($guiding->pricing_extra) as $pricing_extras)
+                                    <div class="mb-2">
+                                        <strong>{{translate($pricing_extras->name)}}:</strong> 
+                                        <span>{{$pricing_extras->price}}€ p.P</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fishing Experience Tab -->
+            <div class="tab-pane fade show active" id="fishing" role="tabpanel" aria-labelledby="nav-fishing-tab">
+                <div class="row card tab-card h-100 shadow m-0 p-2" >
+                    
+                    @if(!empty($guiding->target_fish))
+                        <div class="tab-category mb-4 col-12 col-lg-4">
+                            <strong class="subtitle-text">@lang('guidings.Target_Fish')</strong>
+                            <div class="row">
+                                @foreach ($guiding->getTargetFishNames() as $fish)
+                                    <div class="col-12 text-start">
+                                        {{$fish['name']}}
+                                    </div>
+                                    @if(($loop->index + 1) % 2 == 0)
+                                        </div><div class="row">
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    @else
+                    <!-- Fish Section -->
+                        <p class="mb-4">{{ translate('No fish specified') }}</p>
+                    @endif
+                    <!-- Methods Section -->
+                    @if(!empty($guiding->fishing_methods))
+                        <div class="tab-category mb-4 col-12 col-lg-4">
+                            <strong class="subtitle-text">@lang('guidings.Fishing_Method')</strong>
+                            <div class="row">
+                                @foreach ($guiding->getFishingMethodNames() as $index => $fishing_method)
+                                    <div class="col-12 text-start">
+                                        {{$fishing_method['name']}}
+                                    </div>
+                                    @if(($index + 1) % 2 == 0)
+                                        </div><div class="row">
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    @else
+                        <p class="mb-4">{{ translate('No methods specified') }}</p>
+                    @endif
+                
+                    <!-- Water Types Section -->
+                    @if(!empty($guiding->water_types))
+                        <div class="tab-category mb-4 col-12 col-lg-4">
+                            <strong class="subtitle-text">@lang('guidings.Water_Type')</strong>
+                            <div class="row">
+                                @foreach ($guiding->getWaterNames() as $water)
+                                    <div class="col-12 text-start">
+                                        {{$water['name']}}
+                                    </div>
+                                    @if(($loop->index + 1) % 2 == 0)
+                                        </div><div class="row">
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    @else
+                        <p class="mb-4">{{ translate('No water types specified') }}</p>
+                    @endif
+                </div>
+            </div>
+
+            @php
+                $boatInformation = $guiding->getBoatInformationAttribute();
+            @endphp
+            <div class="tab-pane fade" id="boat" role="tabpanel" aria-labelledby="nav-boat-tab">
+                <div class="row card tab-card h-100 shadow m-0 p-2">
+                    @if(!empty($guiding->additional_information))
+                        <div class="col-md-12">
+                            <strong class="subtitle-text">{{translate('Other boat information')}}</strong>
+                            <p>{{$guiding->additional_information}}</p>
+                        </div>
+                    @endif
+
+                    @if(!empty(json_decode($boatInformation)))
+                        <div class="col-md-12">
+                            <strong class="subtitle-text">{{translate('Boat')}}</strong>
+                            <!-- Boat Information as a Table -->
+                            <table class="table ">
+                                <tbody>
+                                    @foreach($boatInformation as $key => $value)
+                                    <tr>
+                                        <th>{{$value['name']}}</th>
+                                        <td colspan="1">{{ translate($value['value']) }}</td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+
+                    @if(!empty(json_decode( $guiding->boat_extras)))
+                    <div class="col-md-6">
+                        @if($guiding->boat_extras != null || $guiding->boat_extras != '' || $guiding->boat_extras != '[]')
+                            <strong class="subtitle-text">@lang('guidings.Boat_Extras'):</strong>
+                            <!-- Boat Extras as a List -->
+                            <ul>
+                                @foreach($guiding->getBoatExtras() as $extra)
+                                    <li>{{ $extra['name'] }}</li>
+                                @endforeach
+                            </ul>
+                        @endif
+                    </div>
+                    @endif
+
+                    @if(empty(json_decode($boatInformation)) && empty(json_decode($guiding->boat_extras)) && ($guiding->additional_information == null || $guiding->additional_information == ''))
+                        <p>{{ translate('No boat information specified') }}</p>
+                    @endif
+                </div>
+            </div>
+                <!-- Important Information Tab -->
+            <div class="tab-pane fade" id="info" role="tabpanel" aria-labelledby="nav-info-tab">
+                <div class="row card tab-card h-100 shadow m-0 p-2">
+                    
+                    <!-- Requirements Section -->
+                    @php
+                        $requirements = $guiding->getRequirementsAttribute();
+                    @endphp
+                    @if(!empty($requirements) && $requirements !== null && $requirements->count() > 0)
+                        <div class="tab-category mb-4">
+                            <strong class="subtitle-text">@lang('guidings.Requirements')</strong>
+                            <div class="row">
+                                @foreach ($requirements as $requirement)
+                                    <div class="col-12 text-start">
+                                        <ul>
+                                            <li>
+                                                <strong>{{ $requirement['name'] }}:</strong> {{ translate($requirement['value']) ?? '' }}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    @if(($loop->index + 1) % 2 == 0)
+                                        </div><div class="row">
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                        <hr/>
+                    @endif
+
+                    <!-- Other Information Section -->
+                    @php
+                        $otherInformation = $guiding->getOtherInformationAttribute();
+                    @endphp
+                    @if(!empty($otherInformation) && $otherInformation !== null && $otherInformation->count() > 0)
+                        <div class="tab-category mb-4">
+                            <strong class="subtitle-text">@lang('guidings.Other_Info')</strong>
+                            <div class="row">
+                                @foreach ($otherInformation as $otherIndex => $other)
+                                    <div class="col-12 text-start">
+                                        <ul>
+                                            <li>
+                                                <strong>{{ $other['name'] }}:</strong> {{ translate($other['value']) ?? '' }}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    @if(($loop->index + 1) % 2 == 0)
+                                        </div><div class="row">
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                        <hr/>
+                    @endif
+
+                    @php
+                        $recommendations = $guiding->getRecommendationsAttribute();
+                    @endphp
+                    @if(!empty($recommendations ) && $recommendations !== null && $recommendations->count() > 0)
+                        <div class="tab-category mb-4">
+                            <strong class="subtitle-text">@lang('guidings.Reco_Prep')</strong>
+                            <div class="row">
+                                @foreach ($recommendations as $recIndex => $recommendation)
+                                    <div class="col-12 text-start">
+                                        <ul>
+                                            <li>
+                                                <strong>{{ $recommendation['name'] }}:</strong> {{ translate($recommendation['value']) ?? '' }}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    @if(($loop->index + 1) % 2 == 0)
+                                        </div><div class="row">
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                        <hr/>
+                    @endif
+                    <!-- Essential Details Section -->
+                    <div class="row mb-4">
+                        @if(!empty($guiding->style_of_fishing))
+                            <div class="col-md-6">
+                                <strong class="subtitle-text">@lang('guidings.Style_Fishing'):</strong> 
+                                <span class="">{{ translate($guiding->style_of_fishing) }}</span>
+                            </div>
+                        @endif
+                        @if(!empty($guiding->tour_type))
+                            <div class="col-md-6">
+                                <div>
+                                    <strong class="subtitle-text">@lang('guidings.Tour_Type'):</strong> 
+                                    <span class="">{{ translate($guiding->tour_type) }}</span>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
     
-                <div class="tab-content mb-5" id="guidings-tabs">
-    
-                    <!-- What's Included Tab -->
-                    <div class="tab-pane fade" id="include" role="tabpanel" aria-labelledby="nav-include-tab">
+                    @if(empty($guiding->experience_level) && empty($guiding->tour_type) && empty($guiding->style_of_fishing))
+                        <p>{{ translate('No information specified') }}</p>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+        
+    <!-- Accordion mobile ver -->
+    <div class="accordion mb-5" id="guidings-accordion">
+
+        <!-- What's Included Accordion -->
+        @if(!empty(json_decode($guiding->pricing_extra)) && !empty( json_decode($guiding->inclusions)))
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingInclude">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInclude" aria-expanded="true" aria-controls="collapseInclude">
+                    @lang('guidings.Inclusions')
+                    </button>
+                </h2>
+                <div id="collapseInclude" class="accordion-collapse collapse show" aria-labelledby="headingInclude" data-bs-parent="#accordionTabs">
+                    <div class="accordion-body">
                         <div class="row card tab-card h-100 shadow m-0 p-2">
-                            <div class="col-6">
-                                @if(!empty( json_decode($guiding->inclusions)))
+                            <div class="col-12 mb-4">
+                                @if(!empty(json_decode( $guiding->inclusions)))
+                                    @php
+                                        $inclussions = $guiding->getInclusionNames();
+                                        $maxToShow = 3; // Maximum number of inclusions to display
+                                    @endphp
                                     <div class="row">
                                         <strong class="mb-2 subtitle-text">@lang('guidings.Inclusions')</strong>
-                                        @foreach ($guiding->getInclusionNames() as $index => $inclusion)
-                                            <div class="col-12 mb-2 text-start">
-                                            <i data-lucide="wrench"></i> {{ $inclusion['name'] }}
+                                        @foreach ($inclussions as $index => $inclussion)
+                                            <div class="col-12 text-start">
+                                                <i data-lucide="wrench"></i> {{$inclussion['name']}}
                                             </div>
                                         @endforeach
                                     </div>
                                 @endif
                             </div>
+
                             @if(!empty(json_decode($guiding->pricing_extra)) && !empty( json_decode($guiding->inclusions)))
                             <hr >
                             @endif
-                            <div class="col-6">
-                            @if(!empty(json_decode($guiding->pricing_extra)))
+
+                            <div class="col-12">
+                                @if(!empty(json_decode($guiding->pricing_extra)))
                                     <div class="row">
                                         <strong class="mb-2 subtitle-text">@lang('guidings.Additional_Extra')</strong>
+                                        <div class="alert alert-info p-2 mb-3 d-flex align-items-center">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            <small>{{ translate('These extras can be added during booking') }}</small>
+                                        </div>
                                         @foreach (json_decode($guiding->pricing_extra) as $pricing_extras)
                                             <div class="mb-2">
                                                 <strong>{{translate($pricing_extras->name)}}:</strong> 
@@ -518,104 +809,107 @@
                             </div>
                         </div>
                     </div>
-    
-                    <!-- Fishing Experience Tab -->
-                    <div class="tab-pane fade show active" id="fishing" role="tabpanel" aria-labelledby="nav-fishing-tab">
-                    <div class="row card tab-card h-100 shadow m-0 p-2" >
-                        
-                        @if(!empty($guiding->target_fish))
-                            <div class="tab-category mb-4 col-12 col-lg-4">
-                                <strong class="subtitle-text">@lang('guidings.Target_Fish')</strong>
-                                <div class="row">
-                                    @foreach ($guiding->getTargetFishNames() as $fish)
-                                        <div class="col-12 text-start">
-                                            {{$fish['name']}}
-                                        </div>
-                                        @if(($loop->index + 1) % 2 == 0)
-                                            </div><div class="row">
-                                        @endif
-                                    @endforeach
-                                </div>
-                            </div>
-                        @else
-                        <!-- Fish Section -->
-                            <p class="mb-4">{{ translate('No fish specified') }}</p>
-                        @endif
-                        <!-- Methods Section -->
-                        @if(!empty($guiding->fishing_methods))
-                            <div class="tab-category mb-4 col-12 col-lg-4">
-                                <strong class="subtitle-text">@lang('guidings.Fishing_Method')</strong>
-                                <div class="row">
-                                    @foreach ($guiding->getFishingMethodNames() as $index => $fishing_method)
-                                        <div class="col-12 text-start">
-                                            {{$fishing_method['name']}}
-                                        </div>
-                                        @if(($index + 1) % 2 == 0)
-                                            </div><div class="row">
-                                        @endif
-                                    @endforeach
-                                </div>
-                            </div>
-                        @else
-                            <p class="mb-4">{{ translate('No methods specified') }}</p>
-                        @endif
-                    
-                        <!-- Water Types Section -->
-                        @if(!empty($guiding->water_types))
-                            <div class="tab-category mb-4 col-12 col-lg-4">
-                                <strong class="subtitle-text">@lang('guidings.Water_Type')</strong>
-                                <div class="row">
-                                    @foreach ($guiding->getWaterNames() as $water)
-                                        <div class="col-12 text-start">
-                                            {{$water['name']}}
-                                        </div>
-                                        @if(($loop->index + 1) % 2 == 0)
-                                            </div><div class="row">
-                                        @endif
-                                    @endforeach
-                                </div>
-                            </div>
-                        @else
-                            <p class="mb-4">{{ translate('No water types specified') }}</p>
-                        @endif
-                    </div>
-    
                 </div>
-    
-                @php
-                    $boatInformation = $guiding->getBoatInformationAttribute();
-                @endphp
-                <div class="tab-pane fade" id="boat" role="tabpanel" aria-labelledby="nav-boat-tab">
-                    <div class="row card tab-card h-100 shadow m-0 p-2">
-                        @if(!empty($guiding->additional_information))
-                            <div class="col-md-12">
-                                <strong class="subtitle-text">{{translate('Other boat information')}}</strong>
-                                <p>{{$guiding->additional_information}}</p>
-                            </div>
-                        @endif
+            </div>
+        @endif
 
-                        @if(!empty(json_decode($boatInformation)))
-                            <div class="col-md-12">
-                                <strong class="subtitle-text">{{translate('Boat')}}</strong>
-                                <!-- Boat Information as a Table -->
-                                <table class="table ">
+        <!-- Fishing Experience Accordion -->
+        @if(!empty($guiding->target_fish) || !empty($guiding->fishing_methods) || !empty($guiding->water_types))
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingFishing">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFishing" aria-expanded="false" aria-controls="collapseFishing">
+                        @lang('guidings.Tour_Info')
+                    </button>
+                </h2>
+                <div id="collapseFishing" class="accordion-collapse collapse" aria-labelledby="headingFishing" data-bs-parent="#accordionTabs">
+                    <div class="accordion-body">
+                        <div class="row card tab-card h-100 shadow m-0 p-2">
+                            @if(!empty($guiding->target_fish))
+                                <div class="col-12 mb-4">
+                                    <strong class="subtitle-text"> @lang('guidings.Target_Fish')</strong>
+                                    <div class="row">
+                                        @foreach ($guiding->getTargetFishNames() as $index => $target_fish)
+                                            <div class="col-12 text-start">
+                                                {{$target_fish['name']}}
+                                            </div>
+                                            @if(($index + 1) % 2 == 0)
+                                                </div><div class="row">
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @else
+                                <p class="mb-4">{{ translate('No fish specified') }}</p>
+                            @endif
+
+                            <!-- Methods Section -->
+                            @if(!empty($guiding->fishing_methods))
+                                <div class="col-12 mb-4">
+                                    <strong class="subtitle-text"> @lang('guidings.Fishing_Method')</strong>
+                                    <div class="row">
+                                        @foreach ($guiding->getFishingMethodNames() as $index => $fishing_method)
+                                            <div class="col-12 text-start">
+                                                {{$fishing_method['name']}}
+                                            </div>
+                                            @if(($index + 1) % 2 == 0)
+                                                </div><div class="row">
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @else
+                                <p class="mb-4">{{ translate('No methods specified') }}</p>
+                            @endif
+
+                            <!-- Water Types Section -->
+                            @if(!empty($guiding->water_types))
+                                <div class="col-12 mb-3">
+                                    <strong class="subtitle-text"> @lang('guidings.Water_Type')</strong>
+                                    <div class="row">
+                                        @foreach ($guiding->getWaterNames() as $index => $water_type)
+                                            <div class="col-12 text-start">
+                                                {{$water_type['name']}}
+                                            </div>
+                                            @if(($index + 1) % 2 == 0)
+                                                </div><div class="row">
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @else
+                                <p class="mb-4">No water types specified</p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if ($guiding->is_boat)
+        <!-- Boat Information Accordion -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingBoat">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBoat" aria-expanded="false" aria-controls="collapseBoat">
+                    @lang('guidings.Boat_Details')
+                    </button>
+                </h2>
+                <div id="collapseBoat" class="accordion-collapse collapse" aria-labelledby="headingBoat" data-bs-parent="#accordionTabs">
+                    <div class="accordion-body">
+                        <div class="row card tab-card h-100 shadow m-0 p-3">
+                            @if(!empty(json_decode($boatInformation) ))
+                                <strong class="subtitle-text">{{ translate('Boat') }}:</strong>
+                                <table class="table my-4">
                                     <tbody>
                                         @foreach($boatInformation as $key => $value)
-                                        <tr>
-                                            <th>{{$value['name']}}</th>
-                                            <td colspan="1">{{ translate($value['value']) }}</td>
-                                        </tr>
+                                            <tr><th>{{ $value['name'] }}</th><td colspan="1">{{ translate($value['value']) }}</td></tr>
                                         @endforeach
                                     </tbody>
                                 </table>
-                            </div>
-                        @endif
-    
-                        @if(!empty(json_decode( $guiding->boat_extras)))
-                        <div class="col-md-6">
-                            @if($guiding->boat_extras != null || $guiding->boat_extras != '' || $guiding->boat_extras != '[]')
+                            @endif
+                    
+                            <!-- Boat Extras Section -->
+                            @if(!empty(json_decode( $guiding->boat_extras)))
                                 <strong class="subtitle-text">@lang('guidings.Boat_Extras'):</strong>
-                                <!-- Boat Extras as a List -->
                                 <ul>
                                     @foreach($guiding->getBoatExtras() as $extra)
                                         <li>{{ $extra['name'] }}</li>
@@ -623,342 +917,83 @@
                                 </ul>
                             @endif
                         </div>
-                        @endif
-    
-                        @if(empty(json_decode($boatInformation)) && empty(json_decode($guiding->boat_extras)) && ($guiding->additional_information == null || $guiding->additional_information == ''))
-                            <p>{{ translate('No boat information specified') }}</p>
-                        @endif
                     </div>
                 </div>
-    
-    
-                    <!-- Important Information Tab -->
-                    <div class="tab-pane fade" id="info" role="tabpanel" aria-labelledby="nav-info-tab">
-                    <div class="row card tab-card h-100 shadow m-0 p-2">
-                        <!-- Requirements Section -->
-                        @php
-                            $requirements = $guiding->getRequirementsAttribute();
-                        @endphp
-                        @if(!empty($requirements) && $requirements !== null && $requirements->count() > 0)
-                            <div class="tab-category mb-4">
+            </div>
+        @endif
+        <!-- Important Information Accordion -->
+
+        @if(!empty(json_decode( $guiding->requirements)) || !empty($guiding->other_information) || !empty($guiding->recommendations) || !empty($guiding->style_of_fishing) || !empty($guiding->tour_type))
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingInfo">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInfo" aria-expanded="false" aria-controls="collapseInfo">
+                    @lang('guidings.Additional_Info')
+                    </button>
+                </h2>
+                <div id="collapseInfo" class="accordion-collapse collapse" aria-labelledby="headingInfo" data-bs-parent="#accordionTabs">
+                    <div class="accordion-body">
+                        <div class="row card tab-card h-100 shadow m-0 p-3">
+                            <!-- Requirements Section -->
+                            @if(!empty(json_decode( $guiding->requirements)))
                                 <strong class="subtitle-text">@lang('guidings.Requirements')</strong>
-                                <div class="row">
-                                    @foreach ($requirements as $requirement)
-                                        <div class="col-12 text-start">
-                                            <ul>
-                                                <li>
-                                                    <strong>{{ $requirement['name'] }}:</strong> {{ translate($requirement['value']) ?? '' }}
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        @if(($loop->index + 1) % 2 == 0)
-                                            </div><div class="row">
-                                        @endif
+                                <ul>
+                                    @foreach ($guiding->getRequirementsAttribute() as $requirements)
+                                        <li><span>{{ $requirements['name'] }}:</span> {{ translate($requirements['value']) ?? '' }}</li>
                                     @endforeach
-                                </div>
-                            </div>
-                            <hr/>
-                        @endif
-                        <!-- Other Information Section -->
-                        @php
-                            $otherInformation = $guiding->getOtherInformationAttribute();
-                        @endphp
-                        @if(!empty($otherInformation) && $otherInformation !== null && $otherInformation->count() > 0)
-                            <div class="tab-category mb-4">
+                                </ul>
+                                <hr/>
+                            @endif
+                            <!-- Other Information Section -->
+                            @if(!empty($guiding->other_information) && $guiding->other_information !== null && $guiding->other_information->count() > 0)
                                 <strong class="subtitle-text">@lang('guidings.Other_Info')</strong>
-                                <div class="row">
-                                    @foreach ($otherInformation as $otherIndex => $other)
-                                        <div class="col-12 text-start">
-                                        <ul>
-                                        <li>
-                                            <strong>{{ $other['name'] }}:</strong> {{ translate($other['value']) ?? '' }}
-                                        </li>
-                                        </ul>
-                                        </div>
-                                        @if(($loop->index + 1) % 2 == 0)
-                                            </div><div class="row">
-                                        @endif
+                                <ul>
+                                    @foreach ($guiding->getOtherInformationAttribute() as $otherIndex => $other)
+                                        <li><span>{{ $other['name'] }}:</span> {{ translate($other['value']) ?? '' }}</li>
                                     @endforeach
-                                </div>
-                            </div>
-                            <hr/>
-                        @endif
-                        @php
-                            $recommendations = $guiding->getRecommendationsAttribute();
-                        @endphp
-                        @if(!empty($recommendations ) && $recommendations !== null && $recommendations->count() > 0)
-                            <div class="tab-category mb-4">
+                                </ul>
+                                <hr/>
+                            @endif
+                            <!-- Recommended Preparation Section -->
+                            @if(!empty($guiding->recommendations ) && $guiding->recommendations !== null && $guiding->recommendations->count() > 0)
                                 <strong class="subtitle-text">@lang('guidings.Reco_Prep')</strong>
-                                <div class="row">
-                                    @foreach ($recommendations as $recIndex => $recommendation)
-                                        <div class="col-12 text-start">
-                                        <ul>
-                                        <li>
-                                            <strong>{{ $recommendation['name'] }}:</strong> {{ translate($recommendation['value']) ?? '' }}
-                                        </li>
-                                        </ul>
-                                        </div>
-                                        @if(($loop->index + 1) % 2 == 0)
-                                            </div><div class="row">
-                                        @endif
+                                <ul>
+                                    @foreach ($guiding->getRecommendationsAttribute() as $recIndex => $recommendations)
+                                        <li><span>{{ $recommendations['name'] }}:</span> {{ translate($recommendations['value']) ?? '' }}</li>
                                     @endforeach
-                                </div>
-                            </div>
-                            <hr/>
-                        @endif
-                        <!-- Essential Details Section -->
-                        <div class="row mb-4">
-        
-                            @if(!empty($guiding->style_of_fishing))
-                            <div class="col-md-6">
-                                        <strong class="subtitle-text">@lang('guidings.Style_Fishing'):</strong> 
-                                        <span class="">{{ translate($guiding->style_of_fishing) }}</span>
-                                    </div>
+                                </ul>
+                                <hr/>
+                            @endif
+                            <div class="row p-0">
+                                <div class="col-md-6">
+                                    @if(!empty($guiding->style_of_fishing))
+                                            <strong class="subtitle-text">@lang('guidings.Style_Fishing'):</strong> 
+                                            <span class="">{{ translate($guiding->style_of_fishing) }}</span>
                                     @endif
+                                </div>
+                                <div class="col-md-6">
                                     @if(!empty($guiding->tour_type))
-                            <div class="col-md-6">
-                                    <div>
-                                        <strong class="subtitle-text">@lang('guidings.Tour_Type'):</strong> 
-                                        <span class="">{{ translate($guiding->tour_type) }}</span>
-                                    </div>
+                                        <div>
+                                            <strong class="subtitle-text">@lang('guidings.Tour_Type'):</strong> 
+                                            <span class="">{{ translate($guiding->tour_type) }}</span>
+                                        </div>
+                                    @endif
                                 </div>
-                                @endif
-                        </div>
-        
-                        @if(empty($guiding->experience_level) && empty($guiding->tour_type) && empty($guiding->style_of_fishing))
-                            <p>{{ translate('No information specified') }}</p>
-                        @endif
-                    </div>
-                    
-                </div>
-                </div>
-            </div>
-<!-- Accordion mobile ver -->
-<div class="accordion mb-5" id="guidings-accordion">
-
-<!-- What's Included Accordion -->
-<div class="accordion-item">
-    <h2 class="accordion-header" id="headingInclude">
-        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInclude" aria-expanded="true" aria-controls="collapseInclude">
-        @lang('guidings.Inclusions')
-        </button>
-    </h2>
-    <div id="collapseInclude" class="accordion-collapse collapse show" aria-labelledby="headingInclude" data-bs-parent="#accordionTabs">
-        <div class="accordion-body">
-            <div class="row card tab-card h-100 shadow m-0 p-2">
-                <div class="col-12 mb-4">
-                @if(!empty(json_decode( $guiding->inclusions)))
-                        @php
-                            $inclussions = $guiding->getInclusionNames();
-                            $maxToShow = 3; // Maximum number of inclusions to display
-                        @endphp
-                        <div class="row">
-                            <strong class="mb-2 subtitle-text">@lang('guidings.Inclusions')</strong>
-                            @foreach ($inclussions as $index => $inclussion)
-                                <div class="col-12 text-start">
-                                    <i data-lucide="wrench"></i> {{$inclussion['name']}}
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
-                @if(!empty(json_decode($guiding->pricing_extra)) && !empty( json_decode($guiding->inclusions)))
-                    <hr >
-                @endif
-                <div class="col-12">
-                @if(!empty(json_decode($guiding->pricing_extra)))
-                    <div class="row">
-                        <strong class="mb-2 subtitle-text">@lang('guidings.Additional_Extra')</strong>
-                        @foreach (json_decode($guiding->pricing_extra) as $pricing_extras)
-                            <div class="mb-2">
-                                <span>{{translate($pricing_extras->name)}}</span> 
-                                <span>{{$pricing_extras->price}}€ p.P</span>
                             </div>
-                        @endforeach
+
+                        </div>
                     </div>
-                    @endif
                 </div>
             </div>
-        </div>
+        @endif
+
+    </div>
+
+    <!-- Description Section -->
+    <div class="">
+        <h2 class="mb-3">@lang('guidings.Availability')</h2>
+        <div id="lite-datepicker" wire:ignore></div>
     </div>
 </div>
-
-<!-- Fishing Experience Accordion -->
-<div class="accordion-item">
-    <h2 class="accordion-header" id="headingFishing">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFishing" aria-expanded="false" aria-controls="collapseFishing">
-            @lang('guidings.Tour_Info')
-        </button>
-    </h2>
-    <div id="collapseFishing" class="accordion-collapse collapse" aria-labelledby="headingFishing" data-bs-parent="#accordionTabs">
-        <div class="accordion-body">
-            <div class="row card tab-card h-100 shadow m-0 p-2">
-                @if(!empty($guiding->target_fish))
-                    <div class="col-12 mb-4">
-                        <strong class="subtitle-text"> @lang('guidings.Target_Fish')</strong>
-                        <div class="row">
-                            @foreach ($guiding->getTargetFishNames() as $index => $target_fish)
-                                <div class="col-12 text-start">
-                                    {{$target_fish['name']}}
-                                </div>
-                                @if(($index + 1) % 2 == 0)
-                                    </div><div class="row">
-                                @endif
-                            @endforeach
-                        </div>
-                    </div>
-                @else
-                    <p class="mb-4">{{ translate('No fish specified') }}</p>
-                @endif
-
-                <!-- Methods Section -->
-                @if(!empty($guiding->fishing_methods))
-                    <div class="col-12 mb-4">
-                        <strong class="subtitle-text"> @lang('guidings.Fishing_Method')</strong>
-                        <div class="row">
-                            @foreach ($guiding->getFishingMethodNames() as $index => $fishing_method)
-                                <div class="col-12 text-start">
-                                    {{$fishing_method['name']}}
-                                </div>
-                                @if(($index + 1) % 2 == 0)
-                                    </div><div class="row">
-                                @endif
-                            @endforeach
-                        </div>
-                    </div>
-                @else
-                    <p class="mb-4">{{ translate('No methods specified') }}</p>
-                @endif
-
-                <!-- Water Types Section -->
-                @if(!empty($guiding->water_types))
-                    <div class="col-12 mb-3">
-                        <strong class="subtitle-text"> @lang('guidings.Water_Type')</strong>
-                        <div class="row">
-                            @foreach ($guiding->getWaterNames() as $index => $water_type)
-                                <div class="col-12 text-start">
-                                    {{$water_type['name']}}
-                                </div>
-                                @if(($index + 1) % 2 == 0)
-                                    </div><div class="row">
-                                @endif
-                            @endforeach
-                        </div>
-                    </div>
-                @else
-                    <p class="mb-4">No water types specified</p>
-                @endif
-            </div>
-        </div>
-    </div>
-</div>
-@if ($guiding->is_boat)
-<!-- Boat Information Accordion -->
-<div class="accordion-item">
-    <h2 class="accordion-header" id="headingBoat">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBoat" aria-expanded="false" aria-controls="collapseBoat">
-        @lang('guidings.Boat_Details')
-        </button>
-    </h2>
-    <div id="collapseBoat" class="accordion-collapse collapse" aria-labelledby="headingBoat" data-bs-parent="#accordionTabs">
-        <div class="accordion-body">
-            <div class="row card tab-card h-100 shadow m-0 p-3">
-                @if(!empty(json_decode($boatInformation) ))
-                <strong class="subtitle-text">{{ translate('Boat') }}:</strong>
-                <table class="table my-4">
-                    <tbody>
-                        @foreach($boatInformation as $key => $value)
-                            <tr><th>{{ $value['name'] }}</th><td colspan="1">{{ translate($value['value']) }}</td></tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            @endif
-    
-            <!-- Boat Extras Section -->
-            @if(!empty(json_decode( $guiding->boat_extras)))
-                    <strong class="subtitle-text">@lang('guidings.Boat_Extras'):</strong>
-                    <ul>
-                        @foreach($guiding->getBoatExtras() as $extra)
-                            <li>{{ $extra['name'] }}</li>
-                        @endforeach
-                    </ul>
-                @endif
-
-            </div>
-    </div>
-</div>
-</div>
-@endif
-<!-- Important Information Accordion -->
-<div class="accordion-item">
-    <h2 class="accordion-header" id="headingInfo">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInfo" aria-expanded="false" aria-controls="collapseInfo">
-        @lang('guidings.Additional_Info')
-        </button>
-    </h2>
-    <div id="collapseInfo" class="accordion-collapse collapse" aria-labelledby="headingInfo" data-bs-parent="#accordionTabs">
-        <div class="accordion-body">
-            <div class="row card tab-card h-100 shadow m-0 p-3">
-                <!-- Requirements Section -->
-                @if(!empty(json_decode( $guiding->requirements)))
-                    <strong class="subtitle-text">@lang('guidings.Requirements')</strong>
-                    <ul>
-                        @foreach ($guiding->getRequirementsAttribute() as $requirements)
-                            <li><span>{{ $requirements['name'] }}:</span> {{ translate($requirements['value']) ?? '' }}</li>
-                        @endforeach
-                    </ul>
-                    <hr/>
-                @endif
-                <!-- Other Information Section -->
-                @if(!empty($guiding->other_information) && $guiding->other_information !== null && $guiding->other_information->count() > 0)
-                    <strong class="subtitle-text">@lang('guidings.Other_Info')</strong>
-                    <ul>
-                        @foreach ($guiding->getOtherInformationAttribute() as $otherIndex => $other)
-                            <li><span>{{ $other['name'] }}:</span> {{ translate($other['value']) ?? '' }}</li>
-                        @endforeach
-                    </ul>
-                    <hr/>
-                @endif
-                <!-- Recommended Preparation Section -->
-                @if(!empty($guiding->recommendations ) && $guiding->recommendations !== null && $guiding->recommendations->count() > 0)
-                    <strong class="subtitle-text">@lang('guidings.Reco_Prep')</strong>
-                    <ul>
-                        @foreach ($guiding->getRecommendationsAttribute() as $recIndex => $recommendations)
-                            <li><span>{{ $recommendations['name'] }}:</span> {{ translate($recommendations['value']) ?? '' }}</li>
-                        @endforeach
-                    </ul>
-                    <hr/>
-                @endif
-                <div class="row p-0">
-                    <div class="col-md-6">
-                        @if(!empty($guiding->style_of_fishing))
-                                <strong class="subtitle-text">@lang('guidings.Style_Fishing'):</strong> 
-                                <span class="">{{ translate($guiding->style_of_fishing) }}</span>
-                        @endif
-                    </div>
-                    <div class="col-md-6">
-                        @if(!empty($guiding->tour_type))
-                            <div>
-                                <strong class="subtitle-text">@lang('guidings.Tour_Type'):</strong> 
-                                <span class="">{{ translate($guiding->tour_type) }}</span>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-</div>
-
-</div>
-
- <!-- Description Section -->
- <div class="">
- <h2 class="mb-3">@lang('guidings.Availability')</h2>
-                    <div id="lite-datepicker" wire:ignore></div>
-            </div>
-        </div>
     
         <!-- Right Column -->
         <div id="book-now" class="guidings-book">
@@ -972,43 +1007,6 @@
     <div id="map" class="mb-5" style="height: 400px;">
         <!-- Google Map will be rendered here -->
     </div>
-
-    <!-- Rating Summary -->
-    <div class="guidings-rating mb-5">
-    @if(round($average_rating) > 0)
-        <div class="ratings-head">
-            <h3>{{ translate('Bewertungen') }}</h3>
-            <div class="ratings-score-ave">
-                <div class="ratings-card">
-                    <span class="text-warning">★</span> {{$average_rating}}/5 ({{ $guiding->user->received_ratings->count() }} reviews)
-                </div>
-            </div>
-        </div>
-        <div class="ratings-slider owl-carousel">
-            @foreach($guiding->user->received_ratings as $received_rating)
-                <div class="ratings-item">
-                    <div class="ratings-comment">
-                        <div class="ratings-comment-top">
-                            <div class="user-info">
-                                <p class="user">{{$received_rating->user->firstname }}</p>
-                                <p class="date">{{ ($received_rating->created_at != null) ? Carbon\Carbon::parse($received_rating->created_at)->format('F j, Y') : "-" }}</p>
-                            </div>
-                            <p>
-                                <span class="text-warning">★</span> {{ floor($received_rating->rating)}}/5
-                            </p>
-                        </div>
-                        <div class="comment-content">
-                            <p class="description">{{ translate($received_rating->description) }}</p>
-                            <small class="see-more text-orange">{{ translate('See More') }}</small>
-                            <small class="show-less text-orange">{{ translate('Show Less') }}</small>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    @endif
-</div>
-
 
     <div class="mb-5">
         <div class="tour-details-two__about">
@@ -1079,6 +1077,100 @@
             </div>
         </div>
     </div>
+
+    <div class="guidings-rating mb-5">
+        @if($reviews_count > 0)
+            <div class="ratings-head">
+                <div class="rating-overview text-center shadow-sm">
+                    <div class="ratings-wrapper">
+                        <!-- Left side - Score and ratings -->
+                        <div class="rating-left">
+                            <div class="score-wrapper">
+                                <div class="score">{{ number_format($average_grandtotal_score, 1) }}</div>
+                                <div class="score-label">@lang('guidings.over_10')</div>
+                            </div>
+                            <div class="rating-info text-center">
+                                <div class="rating-badge">{{ getRatingLabel($average_grandtotal_score) }}</div>
+                                <div class="rating-count">{{ $reviews_count }} @lang('guidings.Reviews')</div>
+                            </div>
+                        </div>
+
+                        <!-- Right side - Rating categories -->
+                        <div class="rating-categories">
+                            <div class="category d-flex align-items-center mb-3">
+                                <span class="category-label me-4">@lang('guidings.Overall')</span>
+                                <div class="d-flex align-items-center flex-grow-1 gap-2">
+                                    <div class="progress flex-grow-1">
+                                        <div class="progress-bar" style="width: {{ ($average_overall_score/10)*100 }}%"></div>
+                                    </div>
+                                    <span class="rating-value">{{ number_format($average_overall_score, 1) }}</span>
+                                </div>
+                            </div>
+                            <div class="category d-flex align-items-center mb-3">
+                                <span class="category-label me-4">@lang('guidings.Guide')</span>
+                                <div class="d-flex align-items-center flex-grow-1 gap-2">
+                                    <div class="progress flex-grow-1">
+                                        <div class="progress-bar" style="width: {{ ($average_guide_score/10)*100 }}%"></div>
+                                    </div>
+                                    <span class="rating-value">{{ number_format($average_guide_score, 1) }}</span>
+                                </div>
+                            </div>
+                            <div class="category d-flex align-items-center">
+                                <span class="category-label me-4">@lang('guidings.Region_Water')</span>
+                                <div class="d-flex align-items-center flex-grow-1 gap-2">
+                                    <div class="progress flex-grow-1">
+                                        <div class="progress-bar" style="width: {{ ($average_region_water_score/10)*100 }}%"></div>
+                                    </div>
+                                    <span class="rating-value">{{ number_format($average_region_water_score, 1) }}</span>
+                                </div>
+                            </div>
+                             <!-- Bottom info section -->
+                    <div class="rating-info mt-4 text-center">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="fas fa-check-circle text-success"></i>
+                            <strong class="mb-0">@lang('guidings.Real_experiences')</strong>
+                        </div>
+                        <p class="text-muted mb-2">
+                            @lang('guidings.Real_experiences_description')
+                        </p>
+                    </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Horizontal scrolling reviews container -->
+            <div class="ratings-container" id="ratings-container">
+                @foreach($reviews as $review)
+                <div class="ratings-item">
+                    <div class="ratings-comment">
+                        <div class="ratings-comment-top">
+                            <div class="user-info">
+                                <p class="user">{{$review->user->firstname}}</p>
+                                <p class="date">{{ ($review->created_at != null) ? Carbon\Carbon::parse($review->created_at)->format('F j, Y') : "-" }}</p>
+                            </div>
+                            <p>
+                                <span class="text-warning">★</span> {{ number_format($review->grandtotal_score, 1) }}/10
+                            </p>
+                        </div>
+                        <div class="comment-content">
+                            <p class="description">{{ translate($review->comment) }}</p>
+                            <small class="see-more text-orange">{{ translate('See More') }}</small>
+                            <small class="show-less text-orange">{{ translate('Show Less') }}</small>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            
+            <!-- Navigation buttons for scrolling through reviews -->
+            <div class="ratings-nav">
+                <button id="scroll-left" aria-label="Scroll left"><i class="fas fa-chevron-left"></i></button>
+                <button id="scroll-right" aria-label="Scroll right"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        @endif
+    </div>
+
     @if($same_guiding && count($same_guiding ) > 0)
     <section class="tour-details-two mb-5 p-0">
         <div class="container">
@@ -1275,31 +1367,48 @@ const totalItems = {{ $same_guiding->count() }};
 
 $(document).ready(function(){
     initMap();
-    $(".ratings-slider").owlCarousel({
-        items: 3,
-        margin: 10,
-        loop:false,
-        nav:false,
-        dots: true,
-        slideBy:3 ,
-        autoplay: true,
-        autoplayTimeout: 10000,
-        responsive: {
-        0: {
-            items: 1,
-            slideBy: 1
-        },
-        767: {
-            items: 2
-        },
-        1000: {
-            items: 3
-        }
-        }
-    });
-    initOwlCarousel(); // Initialize on page load
-    $(window).resize(initOwlCarousel); // Reinitialize on resize
-
+    
+    // Simple drag scrolling for the ratings container
+    const container = document.getElementById('ratings-container');
+    
+    if (container) {
+        let isDragging = false;
+        let startPosition = 0;
+        let scrollLeftPosition = 0;
+        
+        // Desktop mouse events
+        $(container).on('mousedown', function(e) {
+            isDragging = true;
+            startPosition = e.pageX;
+            scrollLeftPosition = container.scrollLeft;
+            $(container).css('cursor', 'grabbing');
+            e.preventDefault(); // Prevent text selection
+        });
+        
+        $(document).on('mouseup', function() {
+            isDragging = false;
+            $(container).css('cursor', 'grab');
+        });
+        
+        $(document).on('mousemove', function(e) {
+            if (!isDragging) return;
+            const dx = e.pageX - startPosition;
+            container.scrollLeft = scrollLeftPosition - dx;
+            e.preventDefault(); // Prevent text selection during drag
+        });
+        
+        // Prevent click events from firing when dragging
+        $(container).find('a, button').on('click', function(e) {
+            if (isDragging) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        });
+        
+        // Mobile touch events are already handled by the browser
+    }
+    
     // "Show More" button functionality for desktop
     const showMoreBtn = document.getElementById("showMoreBtn");
     const items = document.querySelectorAll(".guiding-list-item");
@@ -1345,6 +1454,30 @@ $(document).ready(function(){
                 $(this).toggleClass("show", index < 2);
             });
         }
+    }
+
+    // Horizontal scrolling for reviews
+    const container = document.getElementById('ratings-container');
+    const scrollLeftBtn = document.getElementById('scroll-left');
+    const scrollRightBtn = document.getElementById('scroll-right');
+    
+    if (container && scrollLeftBtn && scrollRightBtn) {
+        // Scroll amount (width of one review card + gap)
+        const scrollAmount = 320; // 300px card width + 20px gap
+        
+        scrollLeftBtn.addEventListener('click', () => {
+            container.scrollBy({
+                left: -scrollAmount,
+                behavior: 'smooth'
+            });
+        });
+        
+        scrollRightBtn.addEventListener('click', () => {
+            container.scrollBy({
+                left: scrollAmount,
+                behavior: 'smooth'
+            });
+        });
     }
 });
 

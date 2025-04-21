@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreGuidingRequest;
 use App\Http\Requests\StoreNewGuidingRequest;
-use App\Models\FishType;
 use App\Models\Gallery;
 use App\Models\Guiding;
 use App\Models\Target;
@@ -12,16 +11,12 @@ use App\Models\Method;
 use App\Models\Water;
 use App\Models\GuidingRequest;
 use App\Models\Inclussion;
-use App\Models\GuidingExtra;
-use App\Models\GuidingPrice;
-use App\Models\GuidingTargetFish;
 use App\Models\GuidingBoatType;
 use App\Models\GuidingBoatDescription;
 use App\Models\GuidingAdditionalInformation;
 use App\Models\GuidingRequirements;
 use App\Models\GuidingRecommendations;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Auth;
@@ -32,11 +27,9 @@ use App\Mail\SearchRequestUserMail;
 use Illuminate\Support\Facades\Log;
 use App\Models\BlockedEvent;
 use App\Models\ExtrasPrice;
-use App\Models\FishingType;
 use App\Models\BoatExtras;
 use App\Models\Destination;
-use App\Facades\Agent;
-use Illuminate\Support\Facades\Cache;
+use App\Models\Review;
 
 class GuidingsController extends Controller
 {
@@ -323,7 +316,7 @@ class GuidingsController extends Controller
         }
 
         // Apply price filters
-        if($request->has('price_min') && $request->has('price_max')){
+        if(($request->has('price_min') && $request->get('price_min') !== "") && ($request->has('price_max') && $request->get('price_max') !== "")){
             // if ($minPrice != $request->get('price_min') || $overallMaxPrice != $request->get('price_max')){
                 $min_price = $request->get('price_min');
                 $max_price = $request->get('price_max');
@@ -605,10 +598,17 @@ class GuidingsController extends Controller
         $fishingFrom = $guiding->fishing_from_id;
         $fishingType = $guiding->fishing_type_id;
 
-        $ratings = $guiding->user->received_ratings;
-        $ratingCount = $ratings->count();
-        $averageRating = $ratingCount > 0 ? $ratings->avg('rating') : 0;
-        
+        // Get reviews instead of ratings
+        // $reviews = $guiding->reviews;
+        $reviews = Review::where('guide_id', $guiding->user_id)->with('booking', 'booking.user')->get();
+        $reviews_count = $reviews->count();
+
+        // Calculate average scores
+        $average_overall_score = $reviews_count > 0 ? $reviews->avg('overall_score') : 0;
+        $average_guide_score = $reviews_count > 0 ? $reviews->avg('guide_score') : 0;
+        $average_region_water_score = $reviews_count > 0 ? $reviews->avg('region_water_score') : 0;
+        $average_grandtotal_score = $reviews_count > 0 ? $reviews->avg('grandtotal_score') : 0;
+
         $otherGuidings = Guiding::where('status', 1)
             ->where('id', '!=', $guiding->id)
             ->where(function($query) use ($guiding, $targetFish, $fishingFrom, $fishingType) {
@@ -643,9 +643,13 @@ class GuidingsController extends Controller
         return view('pages.guidings.newIndex', [
             'guiding' => $guiding,
             'same_guiding' => $sameGuidings,
-            'ratings' => $ratings,
+            'reviews' => $reviews,
+            'reviews_count' => $reviews_count,
+            'average_overall_score' => $average_overall_score,
+            'average_guide_score' => $average_guide_score,
+            'average_region_water_score' => $average_region_water_score,
+            'average_grandtotal_score' => $average_grandtotal_score,
             'other_guidings' => $otherGuidings,
-            'average_rating' => $averageRating,
             'destination' => $destination,
             'blocked_events' => $guiding->getBlockedEvents(),
         ]);
@@ -803,7 +807,7 @@ class GuidingsController extends Controller
             $guiding->desc_meeting_point = $request->has('desc_meeting_point') ? $request->input('desc_meeting_point') : '';
             $guiding->meeting_point = $request->has('meeting_point') ? $request->input('desc_meeting_point') : '';
             $guiding->desc_starting_time = $request->has('desc_starting_time') ? $request->input('desc_starting_time') : '';
-            // $guiding->desc_departure_time = $request->has('desc_departure_time') ? $request->input('desc_departure_time') : '';
+            $guiding->desc_departure_time = $request->has('desc_departure_time') ? json_encode($request->input('desc_departure_time')) : json_encode([]);
             $guiding->desc_tour_unique = $request->has('desc_tour_unique') ? $request->input('desc_tour_unique') : '';
             $guiding->description = $request->has('desc_course_of_action') ? $request->input('desc_course_of_action') : $this->generateLongDescription($request);
 
@@ -839,12 +843,12 @@ class GuidingsController extends Controller
                     }
                     $guiding->price = 0;
                     
-                    // $has_min_guests = $request->has('has_min_guests') ? 1 : 0;
-                    // if ($has_min_guests) {
-                    //     $guiding->min_guests = (int) $request->input('min_guests');
-                    // } else {
-                    //     $guiding->min_guests = null;
-                    // }
+                    $has_min_guests = $request->has('has_min_guests') ? 1 : 0;
+                    if ($has_min_guests) {
+                        $guiding->min_guests = (int) $request->input('min_guests');
+                    } else {
+                        $guiding->min_guests = null;
+                    }
                 } else {
                     for ($i = 1; $i <= $request->input('no_guest'); $i++) {
                         $pricePerPerson[] = [
@@ -933,6 +937,13 @@ class GuidingsController extends Controller
                         ]);
                     }
                 }
+            }
+
+            $guiding->weekday_availability = $request->input('weekday_availability', 'all_week');
+            if ($request->input('weekday_availability') === 'all_week') {
+                $guiding->weekdays = json_encode(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']);
+            } else {
+                $guiding->weekdays = $request->has('weekdays') ? json_encode($request->input('weekdays')) : json_encode([]);
             }
 
             $guiding->save();
@@ -1182,7 +1193,7 @@ class GuidingsController extends Controller
             'long_description' => $guiding->description,
             'desc_course_of_action' => $guiding->desc_course_of_action,
             'desc_starting_time' => $guiding->desc_starting_time,
-            // 'desc_departure_time' => $guiding->desc_departure_time,
+            'desc_departure_time' => json_decode($guiding->desc_departure_time, true),
             'desc_meeting_point' => $guiding->desc_meeting_point,
             'desc_tour_unique' => $guiding->desc_tour_unique,
             
@@ -1196,7 +1207,7 @@ class GuidingsController extends Controller
             'duration' => $guiding->duration,
             'duration_type' => $guiding->duration_type,
             'no_guest' => $guiding->max_guests,
-            // 'min_guests' => $guiding->min_guests,
+            'min_guests' => $guiding->min_guests,
             'price_type' => $guiding->price_type,
             'price' => $guiding->price,
             'prices' => json_decode($guiding->prices, true),
@@ -1208,6 +1219,8 @@ class GuidingsController extends Controller
             'seasonal_trip' => $guiding->seasonal_trip,
             'months' => json_decode($guiding->months, true),
             'other_boat_info' => $guiding->additional_information,
+            'weekday_availability' => $guiding->weekday_availability,
+            'weekdays' => json_decode($guiding->weekdays, true),
         ];
 
         $locale = Config::get('app.locale');

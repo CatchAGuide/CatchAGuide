@@ -430,16 +430,33 @@
                     
                     // Show min guests container if per_person is selected
                     if (priceType === 'per_person') {
-                        // document.getElementById('min_guests_container').style.display = 'block';
+                        document.getElementById('min_guests_container').style.display = 'block';
                         
-                        // // Set min guests switch and value if editing
-                        // const hasMinGuests = {{ isset($formData['has_min_guests']) ? ($formData['has_min_guests'] ? 'true' : 'false') : 'false' }};
-                        // const minGuestsSwitch = document.getElementById('min_guests_switch');
-                        // if (minGuestsSwitch && hasMinGuests) {
-                        //     minGuestsSwitch.checked = true;
-                        //     document.getElementById('min_guests_input_container').style.display = 'block';
-                        //     document.getElementById('min_guests').required = true;
-                        // }
+                        // Handle min_guests and min_price
+                        const hasMinGuests = {!! isset($formData['min_guests']) && $formData['min_guests'] > 0 ? 'true' : 'false' !!};
+                        const minGuestsSwitch = document.getElementById('min_guests_switch');
+                        const minGuestsInput = document.getElementById('min_guests');
+                        
+                        if (hasMinGuests && minGuestsSwitch) {
+                            minGuestsSwitch.checked = true;
+                            document.getElementById('min_guests_input_container').style.display = 'block';
+                            
+                            if (minGuestsInput) {
+                                minGuestsInput.value = {{ $formData['min_guests'] ?? 1 }};
+                            }
+                        }
+                    }
+                    
+                    // Set min_price if available
+                    const minPrice = {{ $formData['min_price'] ?? 0 }};
+                    if (minPrice > 0) {
+                        // Find the price input field and set its value
+                        setTimeout(() => {
+                            const priceInput = document.querySelector('input[name="price"]');
+                            if (priceInput) {
+                                priceInput.value = minPrice;
+                            }
+                        }, 100); // Small delay to ensure dynamic fields are created
                     }
                 }
             }
@@ -510,6 +527,43 @@
                     }
                 }
             }
+
+
+            const timeOfDayData = {!! json_encode($formData['desc_departure_time'] ?? []) !!};
+            if (timeOfDayData && timeOfDayData.length > 0) {
+                timeOfDayData.forEach(timeOfDay => {
+                    const checkbox = document.querySelector(`input[name="desc_departure_time[]"][value="${timeOfDay}"]`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        checkbox.dispatchEvent(new Event('change'));
+                    }
+                });
+            }
+
+            const weekdayAvailabilityData = '{{ $formData['weekday_availability'] ?? '' }}';
+            if (weekdayAvailabilityData) {
+                const weekdayRadio = document.querySelector(`input[name="weekday_availability"][value="${weekdayAvailabilityData}"]`);
+                if (weekdayRadio) {
+                    weekdayRadio.checked = true;
+                    weekdayRadio.dispatchEvent(new Event('change'));
+                    
+                    // Show weekday selection if certain_days is selected
+                    if (weekdayAvailabilityData === 'certain_days') {
+                        document.getElementById('weekday_selection').style.display = 'block';
+                    }
+                }
+            }
+
+            const weekdaysData = {!! json_encode($formData['weekdays'] ?? []) !!};
+            if (weekdaysData && weekdaysData.length > 0) {
+                weekdaysData.forEach(weekday => {
+                    const checkbox = document.querySelector(`input[name="weekdays[]"][value="${weekday}"]`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        checkbox.dispatchEvent(new Event('change'));
+                    }
+                });
+            }
         }
     }
 
@@ -566,26 +620,71 @@
         }
     }
 
-    // Modify the price type change handler to show/hide min guests option
+    // Function to update price fields based on min guests
+    function updatePriceFieldsBasedOnMinGuests() {
+        const minGuestsSwitch = document.getElementById('min_guests_switch');
+        const minGuestsInput = document.getElementById('min_guests');
+        const container = $('#dynamic-price-fields-container');
+        
+        if (!minGuestsSwitch || !minGuestsInput || !container) return;
+        
+        const isMinGuestsEnabled = minGuestsSwitch.checked;
+        const minGuests = isMinGuestsEnabled ? parseInt(minGuestsInput.value) || 1 : 1;
+        const maxGuests = parseInt($('#no_guest').val()) || 1;
+        
+        // Update all price input fields
+        for (let i = 1; i <= maxGuests; i++) {
+            const priceInput = container.find(`input[name="price_per_person_${i}"]`);
+            if (priceInput.length) {
+                const shouldBeDisabled = isMinGuestsEnabled && i < minGuests;
+                priceInput.prop('disabled', shouldBeDisabled);
+                
+                // If disabled, set value to 0
+                if (shouldBeDisabled) {
+                    priceInput.val(0);
+                }
+                
+                // Add visual indication for disabled fields
+                const inputGroup = priceInput.closest('.input-group');
+                if (inputGroup.length) {
+                    if (shouldBeDisabled) {
+                        inputGroup.addClass('opacity-50');
+                    } else {
+                        inputGroup.removeClass('opacity-50');
+                        inputGroup.find('.min-guests-note').remove();
+                    }
+                }
+            }
+        }
+    }
+
+    // Modify the price type change handler to include min guests functionality and fix alignment
     $('input[name="price_type"]').change(function() {
         var priceType = $(this).val();
         var container = $('#dynamic-price-fields-container');
         container.empty();
 
         // Show min guests option only for per_person pricing
-        // $('#min_guests_container').toggle(priceType === 'per_person');
+        $('#min_guests_container').toggle(priceType === 'per_person');
 
         if (priceType === 'per_person') {
             var guestCount = parseInt($('#no_guest').val()) || 1;
             for (var i = 1; i <= guestCount; i++) {
                 container.append(`<div class="input-group mt-2">
-                    <span class="input-group-text">{{__('newguidings.total_price_for_number_of_guests', ['number' => '${i}'])}}</span>
+                    <span class="input-group-text" style="min-width: 250px; flex: 0 0 auto;">{{__('newguidings.total_price_for_number_of_guests', ['number' => '${i}'])}}</span>
                     <input type="number" class="form-control" name="price_per_person_${i}" placeholder="{{__('newguidings.price_per_person', ['number' => '${i}'])}}">
                     <span class="input-group-text">€</span>
                 </div>`);
             }
+            
+            // Apply min guests logic after creating the fields
+            updatePriceFieldsBasedOnMinGuests();
         } else if (priceType === 'per_boat') {
-            container.append(`<div class="input-group mt-2"><span class="input-group-text">{{__('newguidings.price')}}</span><input type="number" class="form-control" name="price_per_boat" placeholder="{{ __('newguidings.price') . ' ' . __('newguidings.per_boat')}}"><span class="input-group-text">€ {{ __('newguidings.per_boat') }}</span></div>`);
+            container.append(`<div class="input-group mt-2">
+                <span class="input-group-text" style="min-width: 250px; flex: 0 0 auto;">{{__('newguidings.price')}}</span>
+                <input type="number" class="form-control" name="price_per_boat" placeholder="{{ __('newguidings.price') }} {{ __('newguidings.per_boat') }}">
+                <span class="input-group-text">€ {{ __('newguidings.per_boat') }}</span>
+            </div>`);
         }
 
         // Populate fields if editing
@@ -594,13 +693,7 @@
         }
     });
 
-    $('#no_guest').change(function() {
-        if ($('input[name="price_type"]:checked').val() === 'per_person') {
-            $('input[name="price_type"]:checked').change();
-        }
-    });
-
-    // Add this function to populate price fields when editing
+    // Modify the populatePriceFields function to respect min guests
     function populatePriceFields(priceType) {
         var prices = {!! json_encode($formData['prices'] ?? []) !!};
         var price = {!! json_encode($formData['price'] ?? []) !!};
@@ -608,10 +701,64 @@
             Object.entries(prices).forEach(([key, value]) => {
                 $(`input[name="price_per_person_${value.person}"]`).val(value.amount);
             });
+            
+            // Apply min guests logic after populating the fields
+            updatePriceFieldsBasedOnMinGuests();
         } else if (priceType === 'per_boat') {
             $('input[name="price_per_boat"]').val(price);
         }
     }
+
+    // Update the no_guest change handler to properly limit min guests
+    $('#no_guest').change(function() {
+        if ($('input[name="price_type"]:checked').val() === 'per_person') {
+            $('input[name="price_type"]:checked').change();
+            
+            // Make sure min guests is not greater than max guests - 1
+            const maxGuests = parseInt($(this).val()) || 1;
+            const minGuestsInput = $('#min_guests');
+            const currentMinGuests = parseInt(minGuestsInput.val()) || 1;
+            
+            if (currentMinGuests > maxGuests) {
+                minGuestsInput.val(maxGuests);
+            }
+            
+            // Update min guests max attribute
+            minGuestsInput.attr('max', maxGuests);
+            minGuestsInput.attr('min', 1);
+            
+            // Update price fields to reflect the new min guests value
+            updatePriceFieldsBasedOnMinGuests();
+        }
+    });
+
+    // Also update the min guests input handler to enforce limits
+    $('#min_guests').on('change input', function() {
+        const maxGuests = parseInt($('#no_guest').val()) || 1;
+        const currentValue = parseInt($(this).val()) || 1;
+        
+        // Enforce the upper limit
+        if (currentValue > maxGuests) {
+            $(this).val(maxGuests);
+        }
+        
+        // Enforce the lower limit
+        if (currentValue < 1) {
+            $(this).val(1);
+        }
+        
+        if ($('input[name="price_type"]:checked').val() === 'per_person') {
+            updatePriceFieldsBasedOnMinGuests();
+        }
+    });
+
+    // Add initialization for min guests input when the form loads
+    $(document).ready(function() {
+        // Set initial min/max attributes for min_guests input
+        const maxGuests = parseInt($('#no_guest').val()) || 1;
+        $('#min_guests').attr('max', maxGuests);
+        $('#min_guests').attr('min', 1);
+    });
 
     // Seasonal trip selection
     $('input[name="seasonal_trip"]').change(function() {
@@ -875,17 +1022,24 @@
 
         const errorList = document.createElement('ul'); // Create a new list for errors
 
-        for (const field in errors) {
-            const errorMessage = errors[field][0]; 
-            const fieldInfo = errorMapping[field]; 
-            
+        if (!errors || Object.keys(errors).length === 0) {
+            // Show default error message if errors is undefined or empty
             const listItem = document.createElement('li');
-            if (fieldInfo) {
-                listItem.textContent = `${fieldInfo.field} (Step ${fieldInfo.step}): ${errorMessage}`;
-            } else {
-                listItem.textContent = errorMessage; 
-            }
+            listItem.textContent = 'An unexpected error occurred. Please try again. | If Error persists, contact support.';
             errorList.appendChild(listItem);
+        } else {
+            for (const field in errors) {
+                const errorMessage = errors[field][0]; 
+                const fieldInfo = errorMapping[field]; 
+                
+                const listItem = document.createElement('li');
+                if (fieldInfo) {
+                    listItem.textContent = `${fieldInfo.field} (Step ${fieldInfo.step}): ${errorMessage}`;
+                } else {
+                    listItem.textContent = errorMessage; 
+                }
+                errorList.appendChild(listItem);
+            }
         }
 
         errorContainer.appendChild(errorList);
@@ -996,10 +1150,11 @@
                     isValid = false;
                 }
                 // Validate departure time
-                // if (!document.getElementById('desc_departure_time').value.trim()) {
-                //     errors.push('Departure time is required.');
-                //     isValid = false;
-                // }
+                if (!document.querySelector('input[name="desc_departure_time[]"]:checked')) {
+                    errors.push('Please select at least one departure time.');
+                    isValid = false;
+                }
+                
                 if (!document.getElementById('desc_meeting_point').value.trim()) {
                     errors.push('Meeting point description is required.');
                     isValid = false;
@@ -1046,26 +1201,26 @@
                 }
                 
                 // Add validation for min guests
-                // const minGuestsSwitch = document.getElementById('min_guests_switch');
-                // if (minGuestsSwitch && minGuestsSwitch.checked) {
-                //     const minGuests = document.getElementById('min_guests').value;
-                //     if (!minGuests || minGuests < 1) {
-                //         errors.push('Minimum number of guests is required and must be at least 1.');
-                //         isValid = false;
-                //     }
+                const minGuestsSwitch = document.getElementById('min_guests_switch');
+                if (minGuestsSwitch && minGuestsSwitch.checked) {
+                    const minGuests = document.getElementById('min_guests').value;
+                    if (!minGuests || minGuests < 1) {
+                        errors.push('Minimum number of guests is required and must be at least 1.');
+                        isValid = false;
+                    }
                     
-                //     // Validate that min guests is less than max guests
-                //     const maxGuests = parseInt(document.getElementById('no_guest').value);
-                //     if (parseInt(minGuests) > maxGuests) {
-                //         errors.push('Minimum number of guests cannot be greater than maximum number of guests.');
-                //         isValid = false;
-                //     }
-                // }
+                    // Validate that min guests is less than max guests
+                    const maxGuests = parseInt(document.getElementById('no_guest').value);
+                    if (parseInt(minGuests) > maxGuests) {
+                        errors.push('Minimum number of guests cannot be greater than maximum number of guests.');
+                        isValid = false;
+                    }
+                }
                 
-                // if (!document.getElementById('inclusions').value.trim()) {
-                //     errors.push('Included in the price are required.');
-                //     isValid = false;
-                // }
+                if (!document.getElementById('inclusions').value.trim()) {
+                    errors.push('Included in the price are required.');
+                    isValid = false;
+                }
                 break;
             case 7:
                 if (!document.querySelector('input[name="allowed_booking_advance"]:checked')) {
@@ -1303,16 +1458,10 @@
             });
         });
 
-        // Min guests switch functionality
-        // const minGuestsSwitch = document.getElementById('min_guests_switch');
-        // const minGuestsContainer = document.getElementById('min_guests_input_container');
-        
-        // if (minGuestsSwitch) {
-        //     minGuestsSwitch.addEventListener('change', function() {
-        //         minGuestsContainer.style.display = this.checked ? 'block' : 'none';
-        //         document.getElementById('min_guests').required = this.checked;
-        //     });
-        // }
+        // Show/hide weekday selection based on weekday availability selection
+        $('input[name="weekday_availability"]').change(function() {
+            $('#weekday_selection').toggle($(this).val() === 'certain_days');
+        });
     });
 
     // Update the form's submit event listener

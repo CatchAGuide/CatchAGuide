@@ -32,11 +32,15 @@ class Booking extends Model
         'book_date',
         'additional_information',
         'phone',
+        'email',
         'last_employee_id',
         'expires_at',
         'is_guest',
         'created_at',
         'updated_at',
+        'alternative_dates',
+        'parent_id',
+        'is_reviewed',
     ];
     
     public function user()
@@ -68,6 +72,11 @@ class Booking extends Model
     public function rating(): BelongsTo
     {
         return $this->belongsTo(Rating::class);
+    }
+
+    public function review(): BelongsTo
+    {
+        return $this->belongsTo(Review::class);
     }
 
     public function isBookingOver()

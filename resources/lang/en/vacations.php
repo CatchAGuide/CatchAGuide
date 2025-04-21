@@ -6,6 +6,8 @@ return [
     'Coordinates' => 'Coordinates',
     'Radius' => 'Radius',
     'Show_on_map' => 'Show on map',
+
+    'book_vacation_reserve' => 'Reserve',
     
     'title' => 'Fishing Holidays in Europe – Top Destinations for Unforgettable Fishing Adventures',
     'header_title' => 'Fishing Holidays in Europe – Top Destinations for Unforgettable Fishing Adventures', 

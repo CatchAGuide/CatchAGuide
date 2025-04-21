@@ -338,29 +338,25 @@
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="{{ __('newguidings.tooltip_starting_time') }}"></i>
                     </label>
-                    <textarea name="desc_starting_time" id="desc_starting_time" class="form-control" placeholder="{{ __('newguidings.let_guests_know_when_you_begin') }}">{{ $formData['desc_starting_time'] ?? '' }}</textarea>
-                </div>
-
-                <hr>
-                
-                {{-- <div class="form-group">
-                    <label for="desc_departure_time" class="form-label fw-bold fs-5">
-                        {{ __('newguidings.departure_time') }}
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                           title="{{ __('newguidings.tooltip_departure_time') }}"></i>
-                    </label>
-                    <textarea name="desc_departure_time" id="desc_departure_time" class="form-control" placeholder="{{ __('newguidings.let_guests_know_about_departure_details') }}">{{ $formData['desc_departure_time'] ?? '' }}</textarea>
-                </div> --}}
-
-                <hr>
-                
-                <div class="form-group">
-                    <label for="desc_departure_time" class="form-label fw-bold fs-5">
-                        {{ __('newguidings.departure_time') }}
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                           title="{{ __('newguidings.tooltip_departure_time') }}"></i>
-                    </label>
-                    <textarea name="desc_departure_time" id="desc_departure_time" class="form-control" placeholder="{{ __('newguidings.let_guests_know_about_departure_details') }}">{{ $formData['desc_departure_time'] ?? '' }}</textarea>
+                    <div class="d-flex flex-wrap mb-2">
+                        <div class="form-check form-check-inline me-3">
+                            <input class="form-check-input time-of-day-checkbox" type="checkbox" name="desc_departure_time[]" value="morning" id="morning_checkbox">
+                            <label class="form-check-label" for="morning_checkbox">{{ __('newguidings.morning') }}</label>
+                        </div>
+                        <div class="form-check form-check-inline me-3">
+                            <input class="form-check-input time-of-day-checkbox" type="checkbox" name="desc_departure_time[]" value="noon" id="noon_checkbox">
+                            <label class="form-check-label" for="noon_checkbox">{{ __('newguidings.noon') }}</label>
+                        </div>
+                        <div class="form-check form-check-inline me-3">
+                            <input class="form-check-input time-of-day-checkbox" type="checkbox" name="desc_departure_time[]" value="evening" id="evening_checkbox">
+                            <label class="form-check-label" for="evening_checkbox">{{ __('newguidings.evening') }}</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input time-of-day-checkbox" type="checkbox" name="desc_departure_time[]" value="night" id="night_checkbox">
+                            <label class="form-check-label" for="night_checkbox">{{ __('newguidings.night') }}</label>
+                        </div>
+                    </div>
+                    <textarea class="form-control" id="desc_starting_time" name="desc_starting_time" rows="3" placeholder="{{ __('newguidings.starting_time_placeholder') }}">{{ $formData['desc_starting_time'] ?? '' }}</textarea>
                 </div>
 
                 <hr>
@@ -580,6 +576,12 @@
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="{{ __('newguidings.tooltip_pricing') }}"></i>
                     </label>
+                    
+                    <div class="alert alert-secondary mb-3 d-flex">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <div>{!! __('newguidings.pricing_info_text') !!}</div>
+                    </div>
+                    
                     <div class="d-flex flex-wrap btn-group-toggle">
                         <input type="radio" name="price_type" value="per_person" id="per_person_checkbox">
                         <label for="per_person_checkbox" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">
@@ -592,7 +594,7 @@
                         </label>
                     </div>
                     
-                    {{-- <div id="min_guests_container" style="display: none; margin-top: 15px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+                    <div id="min_guests_container" style="display: none; margin-top: 15px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
                         <label for="min_guests_switch" class="form-label fw-bold">
                             {{ __('newguidings.min_guests_required') }}
                             <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
@@ -607,7 +609,7 @@
                                 <input type="number" class="form-control" id="min_guests" name="min_guests" value="{{ $formData['min_guests'] ?? '' }}" placeholder="1" min="1">
                             </div>
                         </div>
-                    </div> --}}
+                    </div>
                     
                     <div class="form-group" id="dynamic-price-fields-container"></div>
                 </div>
@@ -751,6 +753,39 @@
                     </div>
                 </div>
 
+                <hr>
+
+                <div class="form-group">
+                    <label for="weekday_availability" class="form-label fw-bold fs-5">
+                        {{ __('newguidings.weekday_availability') }}
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                           title="{{ __('newguidings.tooltip_weekday_availability') }}"></i>
+                    </label>
+                    <div class="d-flex flex-wrap btn-group-toggle">
+                        <input type="radio" name="weekday_availability" value="all_week" id="all_week">
+                        <label for="all_week" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(50% - 20px);">
+                            {{ __('newguidings.available_all_week') }}
+                        </label>
+                        
+                        <input type="radio" name="weekday_availability" value="certain_days" id="certain_days">
+                        <label for="certain_days" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(50% - 20px);">
+                            {{ __('newguidings.available_certain_days') }}
+                        </label>
+                    </div>
+                    <div id="weekday_selection" style="display: none;">
+                        <p class="mb-0" style="text-align:center;">{{ __('newguidings.select_available_weekdays') }}</p>
+                        <div class="d-flex flex-wrap btn-group-toggle">
+                            @foreach(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as $day)
+                                <div class="btn-checkbox-container" style="flex: 0 0 25%; max-width: 25%; padding: 5px;">
+                                    <input type="checkbox" name="weekdays[]" value="{{ $day }}" id="avail_{{ $day }}">
+                                    <label for="avail_{{ $day }}" class="btn btn-outline-primary btn-checkbox w-100">
+                                        {{ __('newguidings.'.$day) }}
+                                    </label>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
 
                 <div class="button-group">
                     <div class="left-buttons">

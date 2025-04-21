@@ -22,13 +22,13 @@ Route::middleware('auth:sanctum')->group(function () {
     }); 
 
     Route::post('/update/status', function () {
-        \Artisan::call('update:booking-status'); 
-        return response()->json(['message' => 'Booking status executed successfully']);
+        // \Artisan::call('update:booking-status'); 
+        // return response()->json(['message' => 'Booking status executed successfully']);
     });
 
     Route::post('/run/reminder', function () {
-        \Artisan::call('run:bookreminders'); 
-        return response()->json(['message' => 'Reminders executed successfully']);
+        // \Artisan::call('run:bookreminders'); 
+        // return response()->json(['message' => 'Reminders executed successfully']);
     });
     
 });

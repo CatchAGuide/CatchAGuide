@@ -20,13 +20,12 @@ class BookingAcceptedListener  implements ShouldQueue
 
     public function handle(BookingStatusChanged $event)
     {   
-   
-        
+        $bookingUserEmail = $event->booking->email ? $event->booking->email : $event->booking->user->email;
         if ($event->status === 'accepted') {
             if($event->booking->user->language == 'en'){
                 \App::setLocale('en');
             }
-             Mail::to($event->booking->user->email)->send(new BookingAcceptMail($event->booking));
+             Mail::to($bookingUserEmail)->send(new BookingAcceptMail($event->booking));
 
             if($event->booking->guiding->user->language == 'en'){
                 \App::setLocale('en');
@@ -42,7 +41,7 @@ class BookingAcceptedListener  implements ShouldQueue
             if($event->booking->user->language == 'en'){
                 \App::setLocale('en');
             }
-            Mail::to($event->booking->user->email)->send(new BookingRejectMail($event->booking));
+            Mail::to($bookingUserEmail)->send(new BookingRejectMail($event->booking));
 
             \App::setLocale('de');
             Mail::to(env('TO_CEO','info@catchaguide.com'))->send(new BookingRejectMailToCEO($event->booking));

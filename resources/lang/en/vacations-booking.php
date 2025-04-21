@@ -15,5 +15,5 @@ return [
     'has_pets' => 'Do you have pets?',
     'extra_offers' => 'Extra offers',
     'total_price' => 'Total Price',
-    'proceed_booking' => 'Proceed to booking',
+    'proceed_booking' => 'Reserve now',
 ];

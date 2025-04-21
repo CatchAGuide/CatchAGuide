@@ -22,6 +22,7 @@ class RejectionRequest extends FormRequest
     {
         return [
             'reason' => 'required',
+            'alternative_dates' => 'required',
         ];
     }
 }
