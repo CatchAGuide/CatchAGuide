@@ -33,11 +33,17 @@
                     
                     <div id="priceCalculation" class="price-calculation mt-3" style="display: none;">
                         <div class="price-breakdown">
-                            <div class="d-flex justify-content-between mb-2 text-center">
-                                <span class="price-item w-100 text-center">
-                                    <span class="base-price"></span> {{ __('booking.per_person_for_a_tour_of') }} <span class="person-count"></span> <span class="people-text"></span>{{ __('booking.you_wont_be_charged_yet')}}
-                                </span>
-                                <span class="total-price fw-bold"></span>
+                            <div class="d-flex justify-content-between mb-2">
+                                <div class="price-item">
+                                    @if($guiding->price_type == 'per_person')
+                                        <span class="base-price"></span> {{ __('booking.per_person_for_a_tour_of') }} <span class="person-count"></span> <span class="people-text"></span>{{ __('booking.you_wont_be_charged_yet')}}
+                                    @else
+                                        {{ __('booking.fixed_price_for') }} <span class="person-count"></span> <span class="people-text"></span>{{ __('booking.you_wont_be_charged_yet')}}
+                                    @endif
+                                </div>
+                                <div class="ms-2">
+                                    <span class="total-price fw-bold"></span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -76,7 +82,7 @@
 </div>
 
 
-@section('js_after')
+{{-- @section('js_after') --}}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const personSelect = document.getElementById('personSelect');
@@ -131,7 +137,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 peopleText.textContent = persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}';
                 const subtotal = price;
             @else
-                basePrice.textContent = price + '€';
                 personCount.textContent = persons;
                 peopleText.textContent = persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}';
                 const subtotal = price;
@@ -147,4 +152,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-@endsection
+{{-- @endsection --}}
