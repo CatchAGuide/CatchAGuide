@@ -12,6 +12,8 @@ return [
     'extras' => 'Extras',
     'price' => 'Price',
     'guide_name' => 'Guide',
+    'accept' => 'Accept',
+    'reject' => 'Reject',
 
     'no_extras' => 'No extras',
     
@@ -133,4 +135,13 @@ return [
     'user_account_activate_text_10' => '2. Set your personal password to complete your account setup',
     'user_account_activate_text_11' => 'Once your account is activated, you’ll be able to manage your booking and explore more of what we offer. If you need any help, feel free to reach out to us anytime',
     'user_account_activate_text_12' => 'Welcome to Catch A Guide, and we look forward to helping you with your fishing adventure!',    
+
+    'guest_tour_reminder_title' => 'Your Fishing Adventure with Catch a Guide is 3 Days Away!',
+    'guest_tour_reminder_text_1' => 'This is a friendly reminder that your fishing tour with [Guide Name] at [Location] is scheduled for [Date] at [Time]. Please ensure you\'re fully prepared for the tour and have all the necessary equipment and supplies ready.',
+    'guest_tour_reminder_text_2' => '<strong>Check the Weather:</strong> Check the weather forecast for [Location] and dress appropriately.',
+    'guest_tour_reminder_text_3' => '<strong>Bring Essentials:</strong> Don\'t forget any necessary fishing licenses, sunscreen, hats, sunglasses, and any personal items you might need.',
+    'guest_tour_reminder_text_4' => '<strong>Check the Tour Details:</strong> Check the tour details on your booking confirmation to ensure you have all the necessary information.',
+    'guest_tour_reminder_text_5' => 'We are sure you will have an unforgettable experience with [Guide Name].',
+    'guest_tour_reminder_text_6' => 'If you have any questions or need further assistance, please don\'t hesitate to contact us:',
+    'guest_tour_reminder_text_7' => 'We wish you a fantastic fishing experience!',
 ];

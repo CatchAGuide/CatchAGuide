@@ -26,18 +26,20 @@
                     <p><strong>{{__('emails.guide_booking_accepted_text_7')}}</strong> {{$guide->firstname}}</p>
                     <p><strong>{{__('emails.guide_booking_accepted_text_8')}}</strong> {{$guide->phone}}</p>
                     <p><strong>{{__('emails.guide_booking_accepted_text_9')}}</strong> {{$guide->email}}</p>
-                    <p><strong>{{__('emails.tour')}}:</strong> {{$guide->title}}</p>
-                    <p><strong>{{__('emails.location')}}:</strong> {{$guide->location}}</p>
-                    <p><strong>{{__('emails.date')}}:</strong> {{date('d F Y', strtotime($booking->date))}}</p>
-                    <p><strong>{{__('emails.extras')}}:</strong></p>
-                    <ul>
-                        @php
-                            $extras = $booking->extras ? unserialize($booking->extras) : [];
-                        @endphp
-                        @foreach($extras as $extra)
-                            <li>{{$extra['extra_name']}} ({{$extra['price'] ?? $extra['extra_total_price']}} €)</li>
-                        @endforeach
-                    </ul>
+                    <p><strong>{{__('emails.tour')}}:</strong> {{$guiding->title}}</p>
+                    <p><strong>{{__('emails.location')}}:</strong> {{$guiding->location}}</p>
+                    <p><strong>{{__('emails.date')}}:</strong> {{date('d F Y', strtotime($booking->book_date))}}</p>
+                    @php
+                        $extras = $booking->extras ? unserialize($booking->extras) : [];
+                    @endphp
+                    @if(count($extras) > 0)
+                        <p><strong>{{__('emails.extras')}}:</strong></p>
+                        <ul>
+                            @foreach($extras as $extra)
+                                <li>{{$extra['extra_name']}} ({{$extra['price'] ?? $extra['extra_total_price']}} €)</li>
+                            @endforeach
+                        </ul>
+                    @endif
                     <p><strong>{{__('emails.price')}}:</strong> {{number_format($booking->price, 2, ',', '.')}} €</p>
                 </div>
             </div>

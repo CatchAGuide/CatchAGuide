@@ -28,7 +28,7 @@
             <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_9')}} </strong>{{$user->email}}</p>
             <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_10')}} </strong>{{$guiding->title}}</p>
             <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_11')}} </strong>{{$guiding->location}}</p>
-            <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_12')}} </strong>{{date('d F Y', strtotime($booking->date))}}</p>
+            <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_12')}} </strong>{{date('d F Y', strtotime($booking->book_date))}}</p>
             <p style="font-size: 14px;"><strong>{{__('emails.extras')}} </strong></p>
             <ul>
                 @php

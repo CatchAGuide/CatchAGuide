@@ -29,7 +29,7 @@
             <p style="font-size:14px;"><strong>{{__('emails.guide_name')}}:</strong> {{$guide->firstname}}</p>
             <p style="font-size:14px;"><strong>{{__('emails.tour')}}:</strong> {{$guiding->title}}</p>
             <p style="font-size:14px;"><strong>{{__('emails.location')}}:</strong> {{$guiding->location}} </p>
-            <p style="font-size:14px;"><strong>{{__('emails.date')}}:</strong> {{date('d F Y', strtotime($booking->date))}}</p>
+            <p style="font-size:14px;"><strong>{{__('emails.date')}}:</strong> {{date('d F Y', strtotime($booking->book_date))}}</p>
             @if($booking->extras)
                 <p style="font-size:14px;"><strong>{{__('emails.extras')}}:</strong>
                     @php
