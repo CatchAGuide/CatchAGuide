@@ -1218,8 +1218,8 @@
                 }
                 
                 if (!document.getElementById('inclusions').value.trim()) {
-                    errors.push('Included in the price are required.');
-                    isValid = false;
+                    // errors.push('Included in the price are required.');
+                    // isValid = false;
                 }
                 break;
             case 7:
