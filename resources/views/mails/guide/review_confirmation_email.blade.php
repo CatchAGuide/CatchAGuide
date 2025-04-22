@@ -31,10 +31,11 @@
                 </div>
                 @endif
             </div>
-
-            <div style="margin-top:3rem;">
-                <p style="margin-top: .5rem;">{{ __('emails.catchaguide_team') }}</p>
-            </div>
+            
+            <p style="margin-top: 2rem; margin-bottom: .5rem; font-size: 14px; font-family: 'Arial', sans-serif;">
+                @lang('emails.best_regards')
+            </p>
+            <p style="margin-top: .5rem; font-size: 14px; font-family: 'Arial', sans-serif;">@lang('emails.catchaguide_team')</p>
         </div>
     </div>
     <div style="text-align: center; padding: 20px; color: #fff; background-color: #313041; margin-top: 2rem;">

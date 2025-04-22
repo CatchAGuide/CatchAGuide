@@ -288,6 +288,14 @@
             color: white;
         }
         
+        /* Add styles for the currently being selected date (like May 9 in the image) */
+        .litepicker .container__days .day-item.is-start-date:not(.is-selected),
+        .litepicker .container__days .day-item:hover:not(.is-selected):not(.is-locked) {
+            background-color: #f0f0f0; /* Light gray highlight for the date being selected */
+            color: #212529;
+            border: 1px solid #e0e0e0;
+        }
+        
     </style>
     <!------ Include the above in your HEAD tag ---------->
 
@@ -528,7 +536,7 @@ document.addEventListener("DOMContentLoaded", function() {
         // Force re-apply of styles to ensure visibility
         dayItems.forEach(el => {
             if (el.classList.contains('is-selected')) {
-                el.style.backgroundColor = 'var(--thm-primary)';
+                el.style.backgroundColor = '#28a745'; // Green color
                 el.style.color = 'white';
                 el.style.fontWeight = 'bold';
             }

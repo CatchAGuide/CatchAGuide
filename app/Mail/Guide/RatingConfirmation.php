@@ -22,7 +22,7 @@ class RatingConfirmation extends Mailable
     {
         return $this->view('mails.guide.review_confirmation_email')
                     ->with([
-                        'name' => $this->rating->guide->full_name,
+                        'name' => $this->rating->guide->firstname,
                         'guiding_name' => $this->rating->guiding->title,
                         'score' => round($this->rating->grandtotal_score, 1),
                         'comment' => $this->rating->comment,

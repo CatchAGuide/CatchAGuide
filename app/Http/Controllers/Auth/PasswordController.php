@@ -13,9 +13,9 @@ class PasswordController extends Controller
     {
         $request->validate([
             'new_password' => ['required', 'confirmed', Password::min(8)
-                ->mixedCase()
-                ->numbers()
-                ->symbols()
+                // ->mixedCase()
+                // ->numbers()
+                // ->symbols()
             ],
         ]);
 
