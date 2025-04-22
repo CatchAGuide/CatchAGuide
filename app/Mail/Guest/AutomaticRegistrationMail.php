@@ -28,11 +28,11 @@ class AutomaticRegistrationMail extends Mailable
      */
     public function build()
     {
-            return $this->view('mails.guest.automatic_guest_registration')
-            ->with([
-                'user' => $this->user,
-                'tempPassword' => $this->tempPassword,
-            ])
-            ->subject(__('profile.br-confirmation')." – Catch A Guide");
+        // return $this->view('mails.guest.automatic_guest_registration')
+        // ->with([
+        //     'user' => $this->user,
+        //     'tempPassword' => $this->tempPassword,
+        // ])
+        // ->subject(__('profile.br-confirmation')." – Catch A Guide");
     }
 }
