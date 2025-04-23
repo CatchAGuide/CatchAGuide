@@ -16,7 +16,7 @@
             {!! $booking->textNote !!}
             </p>
             <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
-                @lang('emails.guest_booking_request_cancelled_text_2')<strong>{{ $booking->guideName }}</strong>
+                @lang('emails.guest_booking_request_cancelled_text_2') <strong>{{ $booking->guideName }}</strong>
             </p>
             <p style="font-size:14px;"><i><b>{{ $booking->additional_information }}</b></i></p>
             <ul>

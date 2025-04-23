@@ -19,6 +19,7 @@ class BookingController extends Controller
         $tokenParts = explode('|', $token);
         $token = $tokenParts[0];
         $source = $tokenParts[1] ?? null; 
+
         
         $booking = Booking::where('token',$token)->first();
 

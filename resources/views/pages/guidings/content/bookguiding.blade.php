@@ -10,7 +10,7 @@
                         @if($guiding->price_type == 'per_person')
                             <h4 class="mb-0"><small class="from-text">{{ __('booking.from') }}</small> <span class="total-price">0€</span></h4>
                         @else
-                            <h4 class="mb-0">{{ $guiding->price }}€ <span class="fs-6 fw-normal text-muted">{{ __('booking.per_guiding') }}</span></h4>
+                            <h4 class="mb-0"><span class="total-price">{{ $guiding->price }}€</span> <span class="fs-6 fw-normal text-muted per-guiding-text">{{ __('booking.per_guiding') }}</span></h4>
                         @endif
                         
                         <div class="booking-select" style="min-width: 150px;">
@@ -40,9 +40,6 @@
                                     @else
                                         {{ __('booking.fixed_price_for') }} <span class="person-count"></span> <span class="people-text"></span>{{ __('booking.you_wont_be_charged_yet')}}
                                     @endif
-                                </div>
-                                <div class="ms-2">
-                                    <span class="total-price fw-bold"></span>
                                 </div>
                             </div>
                         </div>
@@ -93,6 +90,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalPrice = document.querySelector('.total-price');
     const grandTotal = document.querySelector('.grand-total');
     const fromText = document.querySelector('.from-text');
+    const perGuidingText = document.querySelector('.per-guiding-text');
+    const priceItem = document.querySelector('.price-item');
+    
+    // Format price to remove .00 decimals
+    function formatPrice(price) {
+        return parseFloat(price).toFixed(2).replace(/\.00$/, '');
+    }
     
     // Set default price display for per_person price type
     @if($guiding->price_type == 'per_person')
@@ -103,15 +107,37 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Update the total price display without changing the select
             if (firstPrice) {
-                totalPrice.textContent = firstPrice + '€';
+                totalPrice.textContent = formatPrice(firstPrice) + '€';
                 
                 // Show price calculation with default values
                 priceCalculation.style.display = 'block';
                 const persons = firstOption.value;
                 const perPersonPrice = Math.round(firstPrice / persons);
-                basePrice.textContent = perPersonPrice + '€';
+                basePrice.textContent = formatPrice(perPersonPrice) + '€';
                 personCount.textContent = persons;
                 peopleText.textContent = persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}';
+            }
+        }
+    @else
+        // For fixed price, show the calculation with default values for the first person option
+        if (personSelect.options.length > 1) {
+            const firstOption = personSelect.options[1]; // Index 1 because index 0 is the disabled "People" option
+            const persons = firstOption.value;
+            const price = firstOption.getAttribute('data-price');
+            
+            // Format the price to remove .00 decimals
+            if (totalPrice) {
+                totalPrice.textContent = formatPrice(price) + '€';
+            }
+            
+            // Show price calculation with default values
+            priceCalculation.style.display = 'block';
+            personCount.textContent = persons;
+            peopleText.textContent = persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}';
+            
+            // Make sure we're showing the correct text for fixed price
+            if (priceItem) {
+                priceItem.innerHTML = '{{ __('booking.fixed_price_for') }} <span class="person-count">' + persons + '</span> <span class="people-text">' + (persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}') + '</span>{{ __('booking.you_wont_be_charged_yet')}}';
             }
         }
     @endif
@@ -132,19 +158,41 @@ document.addEventListener('DOMContentLoaded', function() {
             
             @if($guiding->price_type == 'per_person')
                 const perPersonPrice = Math.round(price / persons);
-                basePrice.textContent = perPersonPrice + '€';
+                basePrice.textContent = formatPrice(perPersonPrice) + '€';
                 personCount.textContent = persons;
                 peopleText.textContent = persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}';
                 const subtotal = price;
+                
+                // Update the main price display
+                totalPrice.textContent = formatPrice(subtotal) + '€';
+                
+                // Show the "per guiding" text after selection
+                if (perGuidingText) {
+                    perGuidingText.style.display = '';
+                }
             @else
                 personCount.textContent = persons;
                 peopleText.textContent = persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}';
+                
+                // Calculate price per person for display in the breakdown
+                const pricePerPerson = formatPrice(price / persons);
                 const subtotal = price;
+                
+                // Make sure the "per guiding" text remains visible
+                if (perGuidingText) {
+                    perGuidingText.style.display = '';
+                }
+                
+                // Use the same format as per_person but with per-person calculation
+                if (priceItem) {
+                    // Directly construct the text without relying on translation strings that might be missing
+                    const personText = persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}';
+                    priceItem.innerHTML = pricePerPerson + '€ per person for a tour of <span class="person-count">' + persons + '</span> ' + personText + '. You won\'t be charged yet.';
+                }
             @endif
             
-            totalPrice.textContent = subtotal + '€';
             if (grandTotal) {
-                grandTotal.textContent = (parseInt(subtotal) + parseInt(serviceFee)) + '€';
+                grandTotal.textContent = formatPrice(parseInt(subtotal) + parseInt(serviceFee)) + '€';
             }
         } else {
             priceCalculation.style.display = 'none';
