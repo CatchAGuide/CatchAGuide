@@ -25,6 +25,10 @@ return [
     'rating_confirmation_guest_comment' => 'Guest\'s Comment',
     'rating_confirmation_contact_us' => 'Contact us',
     'rating_confirmation_follow_us' => 'Follow us',
+    'rating_confirmation_guide_rating' => 'Guide Rating',
+    'rating_confirmation_region_rating' => 'Region Rating',
+    'rating_confirmation_experience_rating' => 'Experience Rating',
+    'rating_confirmation_thank_you' => 'Thank you for your rating!',
 
     'guide_new_booking_request_title' => 'New Booking Request for Your Fishing Tour',
     'guide_new_booking_request_text_1' => 'You have received a new booking request on our platform. Below are the details of the request:',

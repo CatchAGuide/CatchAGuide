@@ -69,6 +69,7 @@ class BookingsController extends Controller
         $alternativeText = __('emails.guest_booking_request_text_5');
         $alternativeText = str_replace('[Guide Name]', $guideName, $alternativeText);
         
+        
         // Render the guest email templates
         $bookingRequestEmail = view('mails.guest.guest_booking_request', compact(
             'user', 'guide', 'guiding', 'booking', 'textNote', 'alternativeText'
@@ -86,9 +87,31 @@ class BookingsController extends Controller
         
         if ($booking->status === 'rejected') {
             try {
-                $rejectedBookingEmail = view('mails.guest.rejected_mail', compact(
-                    'user', 'guide', 'guiding', 'booking'
-                ))->render();
+                $rejection = $booking;
+                $text = __('emails.guest_booking_request_cancelled_text_1');
+                $text = str_replace('[Guide Name]', $guideName, $text);
+
+                $formattedDate = date('F j, Y', strtotime($booking->book_date));
+                $text = str_replace('[Date]', $formattedDate, $text);
+
+                $text = str_replace('[Location]', $guiding->location, $text);
+
+                $rejection->guideName = $guideName;
+                $rejection->textNote = $text;
+                
+                $textProvide = __('emails.guest_booking_request_cancelled_text_4');
+                $textProvide = str_replace('[Guide Name]', $guideName, $textProvide);
+
+                $rejection->alternativeText = $textProvide;
+                $rejection->alternativeDates = json_decode($rejection->alternative_dates);
+
+                $rejectedBookingEmail = view('mails.guest.rejected_mail', [
+                    'user' => $user,
+                    'guide' => $guide,
+                    'guiding' => $guiding,
+                    'booking' => $rejection
+                ])->render();
+
             } catch (\Exception $e) {
                 \Log::error('Error rendering rejected booking email template: ' . $e->getMessage());
             }
@@ -126,20 +149,18 @@ class BookingsController extends Controller
                 \Log::error('Error rendering tour reminder email template: ' . $e->getMessage());
             }
             
-            if ($booking->book_date < Carbon::now()->addDays(1)) {
-                try {
-                    $reviewUrl = route('ratings.show', ['token' => $booking->token]);
-                    $userName = $user->firstname;
-                    $guideName = $guide->firstname;
-                    $location = $guiding->location;
-                    
-                    $guestReviewEmail = view('mails.guest.guest_review', compact(
-                        'userName', 'guideName', 'location', 'reviewUrl'
-                    ))->render();
-                } catch (\Exception $e) {
-                    dd($e->getMessage());
-                    \Log::error('Error rendering guest review email template: ' . $e->getMessage());
-                }
+            try {
+                $reviewUrl = route('ratings.show', ['token' => $booking->token]);
+                $userName = $user->firstname;
+                $guideName = $guide->firstname;
+                $location = $guiding->location;
+                
+                $guestReviewEmail = view('mails.guest.guest_review', compact(
+                    'userName', 'guideName', 'location', 'reviewUrl'
+                ))->render();
+            } catch (\Exception $e) {
+                dd($e->getMessage());
+                \Log::error('Error rendering guest review email template: ' . $e->getMessage());
             }
         }
         
@@ -150,6 +171,7 @@ class BookingsController extends Controller
         $guideReminderEmail = null;
         $guideReminder12hrsEmail = null;
         $guideUpcomingTourEmail = null;
+        $guideReviewConfirmationEmail = null;
         
         // Render guide booking request email
         try {
@@ -211,6 +233,32 @@ class BookingsController extends Controller
             }
         }
         
+        // Render guide review confirmation email
+        try {            
+            // Check if review exists, if not create a mock object for preview purposes
+            $review = $booking->review;
+            if (!$review) {
+                $review = new \stdClass();
+                $review->grandtotal_score = 8.5;
+                $review->guide_score = 9.0;
+                $review->region_water_score = 8.0;
+                $review->overall_score = 8.5;
+                $review->comment = "This is a sample review comment for preview purposes.";
+            }
+            $guideReviewConfirmationEmail = view('mails.guide.review_confirmation_email')
+                ->with([
+                    'name' => $guide->firstname,
+                    'guiding_name' => $guiding->title,
+                    'score' => round($review->grandtotal_score, 1),
+                    'comment' => $review->comment,
+                    'guide_score' => round($review->guide_score, 1),
+                    'region_water_score' => round($review->region_water_score, 1),
+                    'overall_score' => round($review->overall_score, 1),
+                ])->render();
+        } catch (\Exception $e) {
+            \Log::error('Error rendering guide review confirmation email template: ' . $e->getMessage());
+        }
+        
         return response()->json([
             // Guest emails
             'bookingRequestEmail' => $bookingRequestEmail,
@@ -226,7 +274,8 @@ class BookingsController extends Controller
             'guideAcceptedBookingEmail' => $guideAcceptedBookingEmail,
             'guideReminderEmail' => $guideReminderEmail,
             'guideReminder12hrsEmail' => $guideReminder12hrsEmail,
-            'guideUpcomingTourEmail' => $guideUpcomingTourEmail
+            'guideUpcomingTourEmail' => $guideUpcomingTourEmail,
+            'guideReviewConfirmationEmail' => $guideReviewConfirmationEmail
         ]);
     }
 }

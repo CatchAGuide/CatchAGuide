@@ -69,26 +69,37 @@ if (! function_exists('get_galleries_image_link')) {
     function get_galleries_image_link($model, $type = 0)
     {   
         $links = [];
+        $uniqueUrls = []; // Track unique URLs to prevent duplicates
 
+        // Add thumbnail if it exists
         if($model->thumbnail_path && file_exists(public_path($model->thumbnail_path))){
-            $links[] = asset($model->thumbnail_path);
+            $thumbnailUrl = asset($model->thumbnail_path);
+            $links[] = $thumbnailUrl;
+            $uniqueUrls[] = $thumbnailUrl;
         }
 
+        // Get gallery images based on type
         if($type == 0){
-            $galleries = json_decode($model->gallery_images,true);
+            $galleries = json_decode($model->gallery_images, true);
         }else{
-            $galleries = json_decode($model->gallery,true);
+            $galleries = json_decode($model->gallery, true);
         }
 
+        // Add gallery images, avoiding duplicates
         if(is_array($galleries) && count($galleries)){
             foreach($galleries as $url){
                 if(!empty($url) && file_exists(public_path($url))){
-                    $links[] = asset($url);
+                    $galleryUrl = asset($url);
+                    // Only add if not already in the links array
+                    if(!in_array($galleryUrl, $uniqueUrls)){
+                        $links[] = $galleryUrl;
+                        $uniqueUrls[] = $galleryUrl;
+                    }
                 }
             }
-        
         }
 
+        // Fallback to placeholder if no images
         if(count($links) == 0){
             $links[] = 'images/placeholder_guide.jpg';
         }

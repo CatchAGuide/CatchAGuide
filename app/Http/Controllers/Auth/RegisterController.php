@@ -125,7 +125,8 @@ class RegisterController extends Controller
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Registration successful!'
+                'message' => 'Registration successful!',
+                'redirect' => route('profile.index')
             ]);
         }
 

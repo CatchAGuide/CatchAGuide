@@ -23,9 +23,9 @@
             <div class="order-details" style="border: 1px solid rgb(132, 132, 132); padding: 10px; border-radius: 12px; font-family: 'Morrison', sans-serif;">
                 <h4 style="font-family: 'Morrison', sans-serif;">@lang('emails.guest_booking_request_accepted_text_3')</h4>
                 <div style="margin-top: 10px; font-family: 'Morrison', sans-serif;">
-                    <p><strong>{{__('emails.guide_booking_accepted_text_7')}}</strong> {{$guide->firstname}}</p>
-                    <p><strong>{{__('emails.guide_booking_accepted_text_8')}}</strong> {{$guide->phone}}</p>
-                    <p><strong>{{__('emails.guide_booking_accepted_text_9')}}</strong> {{$guide->email}}</p>
+                    <p><strong>{{__('emails.guide_booking_accepted_text_7')}}</strong> {{$user->firstname}}</p>
+                    <p><strong>{{__('emails.guide_booking_accepted_text_8')}}</strong> {{$user->phone}}</p>
+                    <p><strong>{{__('emails.guide_booking_accepted_text_9')}}</strong> {{$user->email}}</p>
                     <p><strong>{{__('emails.tour')}}:</strong> {{$guiding->title}}</p>
                     <p><strong>{{__('emails.location')}}:</strong> {{$guiding->location}}</p>
                     <p><strong>{{__('emails.date')}}:</strong> {{date('d F Y', strtotime($booking->book_date))}}</p>

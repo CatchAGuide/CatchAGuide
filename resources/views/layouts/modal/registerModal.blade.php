@@ -234,7 +234,15 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data.success) {
                 // Keep loading state while page reloads
+                // Check if user is being redirected to profile page
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                    return;
+                }
+                
+                // If no specific redirect is provided, default to reloading the page
                 window.location.reload();
+
             } else {
                 // Reset loading state
                 submitBtn.disabled = false;

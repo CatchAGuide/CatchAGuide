@@ -25,6 +25,10 @@ return [
     'rating_confirmation_guest_comment' => 'Kommentar des Gastes',
     'rating_confirmation_contact_us' => 'Kontaktieren Sie uns',
     'rating_confirmation_follow_us' => 'Folgen Sie uns',
+    'rating_confirmation_guide_rating' => 'Guide Bewertung',
+    'rating_confirmation_region_rating' => 'Region Bewertung',
+    'rating_confirmation_experience_rating' => 'Erfahrung Bewertung',
+    'rating_confirmation_thank_you' => 'Danke für Ihre Bewertung!',
     
     'guide_new_booking_request_title' => 'Neue Buchungsanfrage für Deine Angeltour',
     'guide_new_booking_request_text_1' => 'Du hast eine neue Buchungsanfrage auf unserer Plattform erhalten. Hier sind die Details der Anfrage:',
