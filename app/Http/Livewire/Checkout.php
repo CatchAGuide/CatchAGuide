@@ -360,7 +360,7 @@ class Checkout extends Component
                 $user->save();
 
                 if (!app()->environment('local')) {
-                    Mail::to($user->email)->queue(new AutomaticRegistrationMail($user, $randomPassword));
+                    // Mail::to($user->email)->queue(new AutomaticRegistrationMail($user, $randomPassword));
                 }
                  
                 $isGuest = false;

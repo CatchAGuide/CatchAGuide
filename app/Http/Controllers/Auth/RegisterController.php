@@ -120,7 +120,7 @@ class RegisterController extends Controller
         Auth::login($user);
 
         // Send verification email
-        Mail::send(new RegistrationVerification($user));
+        // Mail::send(new RegistrationVerification($user));
 
         if ($request->ajax()) {
             return response()->json([
