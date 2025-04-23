@@ -31,11 +31,11 @@ class RegistrationVerification extends Mailable
      */
     public function build()
     {
-        // $user = $this->user;
-        // $data = compact('user');
-        // return $this->view('mails.registration-verification', $data)
-        //     ->to($user->email)
-        //     //->cc(env('CC_MAIL','info@catchaguide.com'))
-        //     ->subject(__('registration-verification.subject'));
+        $user = $this->user;
+        $data = compact('user');
+        return $this->view('mails.registration-verification', $data)
+            ->to($user->email)
+            //->cc(env('CC_MAIL','info@catchaguide.com'))
+            ->subject(__('registration-verification.subject'));
     }
 }
