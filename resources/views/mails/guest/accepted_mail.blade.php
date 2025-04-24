@@ -28,6 +28,7 @@
                     <p><strong>{{__('emails.guide_booking_accepted_text_9')}}</strong> {{$user->email}}</p>
                     <p><strong>{{__('emails.tour')}}:</strong> {{$guiding->title}}</p>
                     <p><strong>{{__('emails.location')}}:</strong> {{$guiding->location}}</p>
+                    <p><strong>{{__('emails.number_of_guests')}}:</strong> {{$booking->count_of_users}}</p>
                     <p><strong>{{__('emails.date')}}:</strong> {{date('d F Y', strtotime($booking->book_date))}}</p>
                     @php
                         $extras = $booking->extras ? unserialize($booking->extras) : [];

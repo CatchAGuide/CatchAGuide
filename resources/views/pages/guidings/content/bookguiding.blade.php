@@ -8,7 +8,7 @@
                     @csrf
                     <div class="d-flex align-items-center justify-content-between mb-3">
                         @if($guiding->price_type == 'per_person')
-                            <h4 class="mb-0"><small class="from-text">{{ __('booking.from') }}</small> <span class="total-price">0€</span></h4>
+                            <h4 class="mb-0"><small class="from-text">{{ __('booking.from') }}</small> <span class="total-price">€</span> <span class="fs-6 fw-normal text-muted per-guiding-text" style="display: none;">{{ __('booking.per_guiding') }}</span></h4>
                         @else
                             <h4 class="mb-0"><span class="total-price">{{ $guiding->price }}€</span> <span class="fs-6 fw-normal text-muted per-guiding-text">{{ __('booking.per_guiding') }}</span></h4>
                         @endif
@@ -187,7 +187,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (priceItem) {
                     // Directly construct the text without relying on translation strings that might be missing
                     const personText = persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}';
-                    priceItem.innerHTML = pricePerPerson + '€ per person for a tour of <span class="person-count">' + persons + '</span> ' + personText + '. You won\'t be charged yet.';
+                    priceItem.innerHTML = pricePerPerson + '€ {{ __('booking.per_person_for_a_tour_of') }} <span class="person-count">' + persons + '</span> ' + personText + '. {{ __('booking.you_wont_be_charged_yet') }}';
+
                 }
             @endif
             

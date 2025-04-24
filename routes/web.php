@@ -231,6 +231,7 @@ Route::name('law.')->group(function() {
 
 Route::get('login', [LoginAuthController::class, 'index'])->name('login');//->middleware('guest:employees');
 Route::post('login', [LoginAuthController::class, 'login'])->name('login');//->middleware('guest:employees');
+Route::post('logout', [LoginAuthController::class, 'logout'])->name('logout');//->middleware('auth:employees');
 Route::post('register', [RegisterController::class, 'register'])->name('register');//->middleware('guest:employees');
 Route::get('registration-verfication', [RegisterController::class, 'verfication'])->name('registration-verfication');//->middleware('guest:employees');
 Route::get('password/reset', [ForgotPasswordController::class, 'index'])->name('password.request');

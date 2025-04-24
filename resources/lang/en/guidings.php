@@ -110,4 +110,5 @@ return [
     'noon' => 'Noon',
     'night' => 'Night',
     
+    'View_all_guidings' => 'View all guidings',
 ];  

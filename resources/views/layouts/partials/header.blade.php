@@ -120,7 +120,7 @@
                                                 </ul>
                                             </li>
                                         </ul>
-                                        <form action="{{ route('admin.auth.logout') }}" id="logoutForm" method="POST">
+                                        <form action="{{ route('logout') }}" id="logoutForm" method="POST">
                                             @csrf
                                         </form>
                                     @else

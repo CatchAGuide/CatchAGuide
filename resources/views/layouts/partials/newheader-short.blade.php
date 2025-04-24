@@ -49,7 +49,7 @@
                                     <i class="fas fa-user me-2"></i> @lang('homepage.header-profile')
                                 </a>
                                 <div class="dropdown-divider"></div>
-                                <form method="POST" action="{{ route('admin.auth.logout') }}" class="logout-form">
+                                <form method="POST" action="{{ route('logout') }}" class="logout-form">
                                     @csrf
                                     <button type="submit" class="dropdown-item">
                                         <i class="fas fa-sign-out-alt me-2"></i> @lang('homepage.header-logout')
@@ -1100,7 +1100,7 @@ input[type=number] {
                     
                     @auth
                         <div class="menu-divider"></div>
-                        <form method="POST" action="{{ route('admin.auth.logout') }}" class="logout-form">
+                        <form method="POST" action="{{ route('logout') }}" class="logout-form">
                             @csrf
                             <button type="submit" class="menu-item text-danger">
                                 <i class="fas fa-sign-out-alt"></i>

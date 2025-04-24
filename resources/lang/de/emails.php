@@ -14,6 +14,7 @@ return [
     'accept' => 'Annehmen',
     'reject' => 'Ablehnen',
     'guide_name' => 'Guide',
+    'number_of_guests' => 'Anzahl der Gäste',
     
     'no_extras' => 'Keine Extras',
 
