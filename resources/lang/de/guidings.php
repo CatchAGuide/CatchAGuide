@@ -108,4 +108,6 @@ return [
     'morning' => 'Morgen',
     'noon' => 'Mittag',
     'night' => 'Nacht',
+
+    'View_all_guidings' => 'Angeltoure',
 ];  
