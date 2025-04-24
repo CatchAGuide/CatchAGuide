@@ -14,6 +14,7 @@ return [
     'guide_name' => 'Guide',
     'accept' => 'Accept',
     'reject' => 'Reject',
+    'number_of_guests' => 'Number of Guests',
 
     'no_extras' => 'No extras',
     
