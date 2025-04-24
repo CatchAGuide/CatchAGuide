@@ -320,7 +320,7 @@
                                                 <img src="{{ $fav->getThumbnailPath() }}" class="dimg-fluid" alt="{{ $fav->language->title }}">
                                             </div>
                                             <div class="card-img-overlay">
-                                                <h5>{{ $fav->language->title }}</h5>
+                                                <h5>{{ $fav->source->name }}</h5>
                                             </div>
                                         </div>
                                     </a>
@@ -345,7 +345,7 @@
                                                 <div class="overlay-wrapper"></div>
                                                 <div class="trending-card-main">
                                                     <div class="trending-text-wrapper">
-                                                        <h4 class="trending-title">{{$targets->language->title}}</h4>
+                                                        <h4 class="trending-title">{{$targets->source->name}}</h4>
                                                     </div>
                                                 </div>
                                             </div>
