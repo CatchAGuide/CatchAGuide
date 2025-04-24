@@ -188,6 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Directly construct the text without relying on translation strings that might be missing
                     const personText = persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}';
                     priceItem.innerHTML = pricePerPerson + '€ {{ __('booking.per_person_for_a_tour_of') }} <span class="person-count">' + persons + '</span> ' + personText + '. {{ __('booking.you_wont_be_charged_yet') }}';
+
                 }
             @endif
             
