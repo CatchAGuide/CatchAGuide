@@ -103,6 +103,7 @@ class AdminCategoryTargetFishController extends Controller
                     $valueSave['source_id'] = $categoryPage->id;
                     Faq::create($valueSave);
                 }
+                $language->faq = $request->faq;
             }
 
             if($isCreate){
@@ -154,7 +155,7 @@ class AdminCategoryTargetFishController extends Controller
                 $introduction = $languageData->introduction ?? '';
                 $content = $languageData->content ?? '';
                 $faq_title = $languageData->faq_title ?? '';
-                $faq = $row->faq($language);
+                $faq = $row->faq($language) ?? [];
             }
         }
         $allowed_fields = false;
@@ -277,6 +278,7 @@ class AdminCategoryTargetFishController extends Controller
         $introduction = '';
         $content = '';
         $faq_title = '';
+        $faq = [];
         
         if ($row) {
             $languageData = $row->language($language);

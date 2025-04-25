@@ -10,7 +10,7 @@
                             <select class="form-select" id="personSelect" aria-label="Personenanzahl" name="person" required>
                                 <option selected disabled>{{ __('booking.people') }}</option>
                                 @foreach(json_decode($guiding->prices) as $price)
-                                    <option value="{{ $price->person }}" data-price="{{ $price->amount }}">
+                                    <option value="{{ $price->person }}" data-price="{{ $price->amount }}" @if($guiding->price_type == 'per_boat') data-total-price="{{ $guiding->price }}" @endif>
                                         {{ $price->person }} {{ $price->person == 1 ? __('booking.person') : __('booking.people') }}
                                     </option>
                                 @endforeach
@@ -20,13 +20,13 @@
                             </button>
                         </div>
                         <div class="booking-price">
+                            <span id="priceLabel" class="from-text">{{ __('booking.from') }}</span>
                             @if($guiding->price_type == 'per_person')
-                                <span id="priceLabel" class="from-text">{{ __('booking.from') }}</span>
                                 <span id="priceDisplay" class="text-orange total-price">€</span>
-                                <span class="per-guiding-text" style="display: none;">{{ __('booking.per_guiding') }}</span>
                             @else
                                 <span id="priceDisplay" class="text-orange total-price">{{ number_format($guiding->price, 2, '.', '') == number_format($guiding->price, 0, '.', '') . '.00' ? number_format($guiding->price, 0, '.', '') : number_format($guiding->price, 2, '.', '') }}€</span>
                             @endif
+                            <span class="per-guiding-text" style="display: none;">{{ __('booking.per_guiding') }}</span>
                         </div>
                     </div>
                     <div class="booking-price-container">
@@ -34,11 +34,7 @@
                             <div class="price-breakdown">
                                 <div class="text-center">
                                     <div class="price-item small">
-                                        @if($guiding->price_type == 'per_person')
-                                            <span class="base-price"></span> {{ __('booking.per_person_for_a_tour_of') }} <span class="person-count"></span> <span class="people-text"></span>
-                                        @else
-                                            {{ __('booking.fixed_price_for') }} <span class="person-count"></span> <span class="people-text"></span>{{ __('booking.you_wont_be_charged_yet')}}
-                                        @endif
+                                        <span class="base-price"></span> {{ __('booking.per_person_for_a_tour_of') }} <span class="person-count"></span> <span class="people-text"></span>
                                     </div>
                                     
                                     @if($guiding->min_guests)
@@ -85,6 +81,7 @@
     personSelect.addEventListener('change', function () {
         const selectedOption = this.options[this.selectedIndex];
         const price = selectedOption.getAttribute('data-price');
+        const totPrice = selectedOption.getAttribute('data-total-price');
         const persons = selectedOption.value;
         
         if (price && persons) {
@@ -116,7 +113,7 @@
                 peopleText.textContent = persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}';
                 
                 // Calculate price per person for display in the breakdown
-                const pricePerPerson = formatPriceMobile(price / persons);
+                const pricePerPerson = formatPriceMobile(totPrice / persons);
                 const subtotal = price;
                 
                 // Make sure the "per guiding" text remains visible
@@ -175,43 +172,34 @@
     
     // Function to initialize price calculation with default values
     function initializePriceCalculation() {
-        @if($guiding->price_type == 'per_person')
-            // Get the first price option (lowest price)
-            if (personSelect.options.length > 1) {
-                const firstOption = personSelect.options[1]; // Index 1 because index 0 is the disabled option
-                const firstPrice = firstOption.getAttribute('data-price');
-                
-                // Update the total price display without changing the select
-                if (firstPrice) {
-                    totalPrice.textContent = formatPriceMobile(firstPrice) + '€';
-                    
-                    // Show price calculation with default values
-                    priceCalculation.style.display = 'block';
-                    const persons = firstOption.value;
-                    const perPersonPrice = Math.round(firstPrice / persons);
-                    basePrice.textContent = formatPriceMobile(perPersonPrice) + '€';
-                    personCount.textContent = persons;
-                    peopleText.textContent = persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}';
-                }
-            }
-        @else
-            // For fixed price, show the calculation with default values for the first person option
-            if (personSelect.options.length > 1) {
-                const firstOption = personSelect.options[1]; // Index 1 because index 0 is the disabled option
-                const persons = firstOption.value;
-                const price = firstOption.getAttribute('data-price');
-                
+        // Only proceed if we have options to work with
+        if (personSelect.options.length > 1) {
+            const firstOption = personSelect.options[1]; // Index 1 because index 0 is the disabled option
+            const persons = firstOption.value;
+            const firstPrice = firstOption.getAttribute('data-price');
+            const totPrice = firstOption.getAttribute('data-total-price');
+            const personText = persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}';
+            
+            if (firstPrice) {
                 // Show price calculation with default values
                 priceCalculation.style.display = 'block';
-                personCount.textContent = persons;
-                peopleText.textContent = persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}';
                 
-                // Make sure we're showing the correct text for fixed price
-                if (priceItem) {
-                    priceItem.innerHTML = '{{ __('booking.fixed_price_for') }} <span class="person-count">' + persons + '</span> <span class="people-text">' + (persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}') + '</span>';
-                }
+                @if($guiding->price_type == 'per_person')
+                    // Update the total price display
+                    totalPrice.textContent = formatPriceMobile(firstPrice) + '€';
+                    const perPersonPrice = Math.round(firstPrice / persons);
+                    basePrice.textContent = formatPriceMobile(perPersonPrice) + '€';
+                @else
+                    const maxGuest = firstOption.getAttribute('data-max-guest');
+                    const perPersonPrice = Math.round(totPrice / persons );
+                    basePrice.textContent = formatPriceMobile(perPersonPrice) + '€';
+                @endif
+                
+                // Update person count and text
+                personCount.textContent = persons;
+                peopleText.textContent = personText;
             }
-        @endif
+        }
     }
 });
 </script>
