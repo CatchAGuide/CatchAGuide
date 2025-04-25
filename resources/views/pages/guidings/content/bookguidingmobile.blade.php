@@ -25,7 +25,7 @@
                                 <span id="priceDisplay" class="text-orange total-price">€</span>
                                 <span class="per-guiding-text" style="display: none;">{{ __('booking.per_guiding') }}</span>
                             @else
-                                <span id="priceDisplay" class="text-orange total-price">{{ $guiding->price }}€</span>
+                                <span id="priceDisplay" class="text-orange total-price">{{ number_format($guiding->price, 2, '.', '') == number_format($guiding->price, 0, '.', '') . '.00' ? number_format($guiding->price, 0, '.', '') : number_format($guiding->price, 2, '.', '') }}€</span>
                             @endif
                         </div>
                     </div>
@@ -35,7 +35,7 @@
                                 <div class="text-center">
                                     <div class="price-item small">
                                         @if($guiding->price_type == 'per_person')
-                                            <span class="base-price"></span> {{ __('booking.per_person_for_a_tour_of') }} <span class="person-count"></span> <span class="people-text"></span>{{ __('booking.you_wont_be_charged_yet')}}
+                                            <span class="base-price"></span> {{ __('booking.per_person_for_a_tour_of') }} <span class="person-count"></span> <span class="people-text"></span>
                                         @else
                                             {{ __('booking.fixed_price_for') }} <span class="person-count"></span> <span class="people-text"></span>{{ __('booking.you_wont_be_charged_yet')}}
                                         @endif
@@ -48,7 +48,7 @@
                             </div>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-orange w-100">{{ __('booking.book_now') }}</button>
+                    <button type="submit" class="btn btn-orange w-100">{{ __('booking.reserve_now') }}</button>
                     <input type="hidden" name="guiding_id" value="{{ $guiding->id }}">
                 </div>
             </form>
@@ -58,6 +58,7 @@
 </div>
 
 <script>
+
   document.addEventListener('DOMContentLoaded', function () {
     const personSelect = document.getElementById('personSelect');
     const priceLabel = document.getElementById('priceLabel');
@@ -71,9 +72,9 @@
     const fromText = document.querySelector('.from-text');
     const perGuidingText = document.querySelector('.per-guiding-text');
     const priceItem = document.querySelector('.price-item');
-
+    
     // Format price to remove .00 decimals
-    function formatPrice(price) {
+    function formatPriceMobile(price) {
         return parseFloat(price).toFixed(2).replace(/\.00$/, '');
     }
 
@@ -98,13 +99,13 @@
             
             @if($guiding->price_type == 'per_person')
                 const perPersonPrice = Math.round(price / persons);
-                basePrice.textContent = formatPrice(perPersonPrice) + '€';
+                basePrice.textContent = formatPriceMobile(perPersonPrice) + '€';
                 personCount.textContent = persons;
                 peopleText.textContent = persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}';
                 const subtotal = price;
                 
                 // Update the main price display
-                totalPrice.textContent = formatPrice(subtotal) + '€';
+                totalPrice.textContent = formatPriceMobile(subtotal) + '€';
                 
                 // Show the "per guiding" text after selection
                 if (perGuidingText) {
@@ -115,7 +116,7 @@
                 peopleText.textContent = persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}';
                 
                 // Calculate price per person for display in the breakdown
-                const pricePerPerson = formatPrice(price / persons);
+                const pricePerPerson = formatPriceMobile(price / persons);
                 const subtotal = price;
                 
                 // Make sure the "per guiding" text remains visible
@@ -127,11 +128,30 @@
                 if (priceItem) {
                     // Directly construct the text without relying on translation strings that might be missing
                     const personText = persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}';
-                    priceItem.innerHTML = pricePerPerson + '€ {{ __('booking.per_person_for_a_tour_of') }} <span class="person-count">' + persons + '</span> ' + personText + '. {{ __('booking.you_wont_be_charged_yet') }}';
+                    priceItem.innerHTML = pricePerPerson + '€ {{ __('booking.per_person_for_a_tour_of') }} <span class="person-count">' + persons + '</span> ' + personText;
                 }
             @endif
         } else {
             priceCalculation.style.display = 'none';
+            
+            // Check if price is null and return to original text
+            if (!price) {
+                @if($guiding->price_type == 'per_person')
+                    if (fromText) {
+                        fromText.style.display = '';
+                    }
+                    if (perGuidingText) {
+                        perGuidingText.style.display = 'none';
+                    }
+                    // Reset to initial state
+                    initializePriceCalculation();
+                @else
+                    // Reset to initial state for fixed price
+                    initializePriceCalculation();
+                @endif
+            } else {
+                priceItem.innerHTML = price + '€ {{ __('booking.per_person_for_a_tour_of') }} <span class="person-count">' + persons + '</span> ';
+            }
         }
     });
 
@@ -148,9 +168,9 @@
             }
         @endif
         
-        priceCalculation.style.display = 'none';
-        clearSelect.style.display = "none"; // Hide the clear button
+        // Instead of hiding, reset to initial state
         initializePriceCalculation();
+        clearSelect.style.display = "none"; // Hide the clear button
     });
     
     // Function to initialize price calculation with default values
@@ -163,13 +183,13 @@
                 
                 // Update the total price display without changing the select
                 if (firstPrice) {
-                    totalPrice.textContent = formatPrice(firstPrice) + '€';
+                    totalPrice.textContent = formatPriceMobile(firstPrice) + '€';
                     
                     // Show price calculation with default values
                     priceCalculation.style.display = 'block';
                     const persons = firstOption.value;
                     const perPersonPrice = Math.round(firstPrice / persons);
-                    basePrice.textContent = formatPrice(perPersonPrice) + '€';
+                    basePrice.textContent = formatPriceMobile(perPersonPrice) + '€';
                     personCount.textContent = persons;
                     peopleText.textContent = persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}';
                 }
@@ -188,7 +208,7 @@
                 
                 // Make sure we're showing the correct text for fixed price
                 if (priceItem) {
-                    priceItem.innerHTML = '{{ __('booking.fixed_price_for') }} <span class="person-count">' + persons + '</span> <span class="people-text">' + (persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}') + '</span>{{ __('booking.you_wont_be_charged_yet')}}';
+                    priceItem.innerHTML = '{{ __('booking.fixed_price_for') }} <span class="person-count">' + persons + '</span> <span class="people-text">' + (persons == 1 ? '{{ __('booking.person') }}' : '{{ __('booking.people') }}') + '</span>';
                 }
             }
         @endif
