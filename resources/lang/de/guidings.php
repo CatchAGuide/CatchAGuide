@@ -109,5 +109,5 @@ return [
     'noon' => 'Mittag',
     'night' => 'Nacht',
 
-    'View_all_guidings' => 'Angeltoure',
+    'View_all_guidings' => 'Alle Angeltouren ansehen',
 ];  
