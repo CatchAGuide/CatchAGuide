@@ -50,9 +50,10 @@ class BookingController extends Controller
 
         event(new BookingStatusChanged($booking, 'accepted'));
 
-        if($source !== null || $source !== 'null' || $source !== ''){
+        if($source !== null && $source !== 'null' && $source !== '' && !is_null($source)){
             return back();
         }
+        
         return view('pages.additional.accepted');
     }
 

@@ -34,21 +34,21 @@
                             @if(app()->getLocale() == 'en')
                                 Booking Already Accepted
                             @elseif(app()->getLocale() == 'de')
-                                Booking Already Accepted
+                                Buchung angenommen
                             @endif
                         @endif
                         @if($booking->status == 'rejected')
                             @if(app()->getLocale() == 'en')
                                 Booking Already Rejected
                             @elseif(app()->getLocale() == 'de')
-                                Booking Already Rejected
+                                Buchung abgelehnt
                             @endif
                         @endif
                         @if($booking->status == 'cancelled')
                             @if(app()->getLocale() == 'en')
                                 Booking Canceled
                             @elseif(app()->getLocale() == 'de')
-                                Booking Canceled
+                                Buchung abgebrochen
                             @endif
                         @endif
                     </h2>
@@ -56,22 +56,22 @@
                         @if($booking->status == 'accepted')
                             @if(app()->getLocale() == 'en')
                                 We apologize, but the booking you are trying to {{$action}} has already been accepted. 
-                            @elseif(app()->getLocale() == 'de')
-                                We apologize, but the booking you are trying to {{$action}} has already been accepted. 
-                            @endif
+                        @elseif(app()->getLocale() == 'de')
+                            Es tut uns leid, aber die Buchung, die Sie versuchen zu {{$action}} hat bereits angenommen worden. 
+                        @endif
                         @endif
                         @if($booking->status == 'rejected')
                             @if(app()->getLocale() == 'en')
                                 We apologize, but the booking you are trying to {{$action}} has already been rejected. 
                             @elseif(app()->getLocale() == 'de')
-                                We apologize, but the booking you are trying to {{$action}} has already been rejected. 
+                                Es tut uns leid, aber die Buchung, die Sie versuchen zu {{$action}} hat bereits abgelehnt worden. 
                             @endif
                         @endif
                         @if($booking->status == 'cancelled')
                             @if(app()->getLocale() == 'en')
                                 We apologize, but the booking you are trying to {{$action}} has already been cancelled. 
                             @elseif(app()->getLocale() == 'de')
-                                We apologize, but the booking you are trying to {{$action}} has already been cancelled. 
+                                Es tut uns leid, aber die Buchung, die Sie versuchen zu {{$action}} hat bereits abgebrochen worden. 
                             @endif
                         @endif
                     </p>
