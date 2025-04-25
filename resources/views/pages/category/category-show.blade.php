@@ -238,7 +238,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 4px;
+        border-radius: 4px;        
+        background-image: url({{ url('') }}/assets/images/map-bg.png);
     }
 
     #map-placeholder button {
@@ -973,31 +974,70 @@
     $(function() {
         var word_char_count_allowed = $(window).width() <= 768 ? 300 : 1200;  // Adjust character count based on screen size
         var page_main_intro = $('.page-main-intro-text');
-        var page_main_intro_text = page_main_intro.html();
-        var page_main_intro_count = page_main_intro.text().length;
+        var page_main_intro_html = page_main_intro.html();
+        var page_main_intro_text = page_main_intro.text();
+        var page_main_intro_count = page_main_intro_text.length;
         var ellipsis = "..."; 
         var moreText = '<a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a>';
         var lessText = '<a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_less')</a>';
 
-        var visible_text = page_main_intro_text.substring(0, word_char_count_allowed);
-        var hidden_text = page_main_intro_text.substring(word_char_count_allowed);
-
         if (page_main_intro_count >= word_char_count_allowed) {
-            $('.page-main-intro-text').html(visible_text + '<span class="more-ellipsis">' + ellipsis + '</span><span class="more-text" style="display:none;">' + hidden_text + '</span>');
-            //$('.more-text').show();
+            // Store the full HTML content
+            page_main_intro.attr('data-full-content', page_main_intro_html);
+            
+            // Create a truncated version by counting characters in the text
+            var truncatedText = '';
+            var currentLength = 0;
+            var tempDiv = $('<div>').html(page_main_intro_html);
+            
+            // Process each child node to create truncated content
+            tempDiv.contents().each(function() {
+                var node = $(this).clone();
+                var nodeText = node.text();
+                
+                if (currentLength + nodeText.length <= word_char_count_allowed) {
+                    // Add the entire node if it fits
+                    truncatedText += node[0].outerHTML || node[0].textContent;
+                    currentLength += nodeText.length;
+                } else {
+                    // Add partial content of the node
+                    var remainingChars = word_char_count_allowed - currentLength;
+                    if (remainingChars > 0) {
+                        // For text nodes
+                        if (node[0].nodeType === 3) {
+                            truncatedText += node[0].textContent.substring(0, remainingChars);
+                        } 
+                        // For element nodes (like paragraphs)
+                        else {
+                            var textNode = $(node).text().substring(0, remainingChars);
+                            var newNode = $('<' + node[0].tagName + '>').html(textNode);
+                            truncatedText += newNode[0].outerHTML;
+                        }
+                    }
+                    return false; // Stop the loop
+                }
+            });
+            
+            // Set the truncated content
+            page_main_intro.html(truncatedText + '<span class="more-ellipsis">' + ellipsis + '</span>');
+            page_main_intro.append('<span class="more-text" style="display:none;">' + page_main_intro.attr('data-full-content') + '</span>');
+            
+            // Handle click events
             $('.see-more').click(function(e) {
                 e.preventDefault();
-                var textContainer = $(this).prev('.page-main-intro-text'); // Get the content element
+                var textContainer = $(this).prev('.page-main-intro-text');
 
                 if ($(this).hasClass('less')) {
                     $(this).removeClass('less');
                     $(this).html(moreText);
                     textContainer.find('.more-text').hide();
+                    textContainer.find('> :not(.more-text, .more-ellipsis)').show();
                     textContainer.find('.more-ellipsis').show();
                 } else {
                     $(this).addClass('less');
                     $(this).html(lessText);
                     textContainer.find('.more-text').show();
+                    textContainer.find('> :not(.more-text)').hide();
                     textContainer.find('.more-ellipsis').hide();
                 }
             });
@@ -1007,12 +1047,15 @@
 
         // Re-adjust the text length if window is resized
         $(window).resize(function() {
-            word_char_count_allowed = $(window).width() <= 768 ? 300 : 1200;
-            visible_text = page_main_intro_text.substring(0, word_char_count_allowed);
-            hidden_text = page_main_intro_text.substring(word_char_count_allowed);
-
-            if (page_main_intro_count >= word_char_count_allowed) {
-                $('.page-main-intro-text').html(visible_text + '<span class="more-ellipsis">' + ellipsis + '</span><span class="more-text" style="display:none;">' + hidden_text + '</span>');
+            if (!$('.see-more').hasClass('less')) {
+                word_char_count_allowed = $(window).width() <= 768 ? 300 : 1200;
+                // Reapply the truncation logic on resize
+                if (page_main_intro_count >= word_char_count_allowed) {
+                    $('.see-more').show();
+                    // Similar truncation logic as above could be applied here if needed
+                } else {
+                    $('.see-more').hide();
+                }
             }
         });
     });
@@ -1126,7 +1169,7 @@ function initializeSelect2() {
 
 // Add form submit handler to clean up parameters
 $('.filter-form, #filterContainerOffCanvass').on('submit', function(e) {
-    e.preventDefault();
+                e.preventDefault();
     
     var formData = new FormData(this);
     var params = new URLSearchParams();
