@@ -76,7 +76,6 @@
 </div>
 
 
-@section('js_after')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const personSelect = document.getElementById('personSelect');
@@ -147,4 +146,3 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-@endsection

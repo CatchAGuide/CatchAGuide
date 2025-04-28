@@ -8,5 +8,9 @@ return [
     'email' => 'Email Address',
     'phone' => 'Phone Number',
     'btnSend' => 'Send Message',
-    'feedback' => 'Write your feedback'
+    'feedback' => 'Write your feedback',
+
+    'submitting' => 'Submitting...',
+    'errorMessage' => 'An error occurred. Please try again.',
+    'successMessage' => 'Your message has been sent successfully!',
 ];

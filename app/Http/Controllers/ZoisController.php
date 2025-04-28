@@ -20,7 +20,7 @@ class ZoisController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'phone' => 'nullable|string|max:20',
-            'g-recaptcha-response' => 'recaptcha',
+            'g-recaptcha-response' => app()->environment('production') ? 'recaptcha' : '',
         ]);
 
         // Get source information if available
