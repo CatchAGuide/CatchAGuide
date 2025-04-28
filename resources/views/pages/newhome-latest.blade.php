@@ -1445,6 +1445,7 @@
                 <div>
                     <h2 class="h4 text-dark fw-bolder">@lang('homepage.targetfish-title')</h2>
                 </div>
+                @if(!$agent->ismobile())
                 <div>
                     @if(app()->getLocale() == 'de')
                         <a href="{{ route('target-fish.index') }}" class="color-primary fw-light">Alle Zielfische ansehen</a>
@@ -1452,30 +1453,38 @@
                         <a href="{{ route('target-fish.index') }}" class="color-primary fw-light">See all target fish</a>
                     @endif
                 </div>
+                @endif
             </div>
             
             <p class="fw-light">@lang('homepage.targetfish-message')</p>
         </div>
         @if($agent->ismobile())
         <div class="methods-custom-owl owl-carousel owl-theme">
-            @foreach($CategoryPage->chunk(2) as $chunk)
+            @foreach($CategoryPage as $category)
                 <div class="item">
-                    <div class="row">
-                        @foreach($chunk as $category)
-                        <div class="my-1 col-6">
-                            <a href="{{ route('target-fish.targets', ['slug' => $category->slug]) }}">
-                                <div class="flex-row card align-items-center">
-                                    <img class="card-img-left example-card-img-responsive img-top" src="{{asset($category->thumbnail_path ?? 'images/placeholder_guide.jpg')}}" style="width:150px;height:100px"/>
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{$category->source->name}}</h5>
+                    <a href="{{ route('target-fish.targets', ['slug' => $category->slug]) }}">
+                        <div class="card">
+                            <div class="row g-0">
+                                <div class="col-5">
+                                    <img class="img-fluid rounded-start img-top" src="{{asset($category->thumbnail_path ?? 'images/placeholder_guide.jpg')}}" style="height:100px; object-fit:cover;" alt="{{$category->source->name}}">
+                                </div>
+                                <div class="col-7">
+                                    <div class="card-body py-2 px-3 d-flex align-items-center h-100">
+                                        <h5 class="card-title mb-0">{{$category->source->name}}</h5>
                                     </div>
                                 </div>
-                            </a>
+                            </div>
                         </div>
-                        @endforeach
-                    </div>
+                    </a>
                 </div>
             @endforeach
+        </div>
+        <div class="p-1 d-flex justify-content-end">
+            @if(app()->getLocale() == 'de')
+                <a href="{{ route('target-fish.index') }}" class="color-primary fw-light">Alle Zielfische ansehen</a>
+            @else
+                <a href="{{ route('target-fish.index') }}" class="color-primary fw-light">See all target fish</a>
+            @endif
         </div>
         @else
             <div class="row">
