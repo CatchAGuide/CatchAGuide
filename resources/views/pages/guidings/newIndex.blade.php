@@ -1343,7 +1343,7 @@
                     @endforeach
                 </div>
                 <div class="text-center my-3">
-                    <a href="/guidings" class="btn btn-outline-secondary">{{ translate('View all guidings') }}</a>
+                    <a href="/guidings" class="btn btn-outline-secondary">{{ __('guidings.View_all_guidings') }}</a>
                 </div>
             </div>
             

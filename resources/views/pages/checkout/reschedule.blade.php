@@ -205,6 +205,42 @@
         width: 3rem;
         height: 3rem;
     }
+
+    /* Modal styling to match thankYouModal */
+    #successModal .modal-content,
+    #errorModal .modal-content {
+        border-radius: 1rem;
+        border: none;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    #successModal .modal-header,
+    #errorModal .modal-header {
+        padding: 1.5rem 1.5rem 0;
+    }
+
+    #successModal .modal-body,
+    #errorModal .modal-body {
+        padding: 2rem;
+    }
+
+    #successModal .fa-check-circle {
+        color: #28a745;
+    }
+
+    #errorModal .fa-exclamation-triangle {
+        color: #dc3545;
+    }
+
+    #successModal .btn-orange:hover,
+    #errorModal .btn-orange:hover {
+        opacity: 0.9;
+    }
+
+    /* Ensure proper z-index hierarchy */
+    #successModal, #errorModal {
+        z-index: 1070;
+    }
 </style>
 @endsection
 
@@ -562,43 +598,39 @@
     </div>
 
     <!-- Success Modal -->
-    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="successModalLabel">Reschedule Confirmed</h5>
+                <div class="modal-header border-0">
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="text-center mb-4">
-                        <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
-                    </div>
-                    <p>Your booking has been successfully rescheduled. You will receive a confirmation email shortly.</p>
-                </div>
-                <div class="modal-footer">
-                    <a href="{{ route('profile.bookings') }}" class="btn btn-primary">Go to My Bookings</a>
+                <div class="modal-body text-center px-4 py-5">
+                    <i class="fas fa-check-circle text-success mb-4" style="font-size: 4rem;"></i>
+                    <h3 class="mb-4">{{ translate('Reschedule Confirmed') }}</h3>
+                    <p class="mb-4">{{ translate('Your booking has been successfully rescheduled. You will receive a confirmation email shortly.') }}</p>
+                    <a href="{{ route('profile.bookings') }}" class="btn btn-orange">
+                        {{ translate('Go to My Bookings') }}
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Error Modal -->
-    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                <div class="modal-header border-0">
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="text-center mb-4">
-                        <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                <div class="modal-body text-center px-4 py-5">
+                    <i class="fas fa-exclamation-triangle text-danger mb-4" style="font-size: 4rem;"></i>
+                    <h3 class="mb-4">{{ translate('Error') }}</h3>
+                    <p class="mb-4" id="error-message">{{ translate('There was an error processing your reschedule request. Please try again.') }}</p>
+                    <div class="d-flex justify-content-center">
+                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">{{ translate('Close') }}</button>
+                        <button type="button" class="btn btn-orange" id="retry-button">{{ translate('Try Again') }}</button>
                     </div>
-                    <p id="error-message">There was an error processing your reschedule request. Please try again.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="retry-button">Try Again</button>
                 </div>
             </div>
         </div>

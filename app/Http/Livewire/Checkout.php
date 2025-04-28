@@ -136,7 +136,7 @@ class Checkout extends Component
                 }
             }
         } else {
-            $this->guidingprice = ($this->guiding->price / $this->persons);
+            $this->guidingprice = $this->guiding->price;
         }
 
         if ($this->guidingprice == 0 && !empty($prices)) {
@@ -360,7 +360,7 @@ class Checkout extends Component
                 $user->save();
 
                 if (!app()->environment('local')) {
-                    Mail::to($user->email)->queue(new AutomaticRegistrationMail($user, $randomPassword));
+                    // Mail::to($user->email)->queue(new AutomaticRegistrationMail($user, $randomPassword));
                 }
                  
                 $isGuest = false;

@@ -234,6 +234,9 @@
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link" id="guide-upcoming-tour-tab" data-bs-toggle="tab" data-bs-target="#guide-upcoming-tour" type="button" role="tab" aria-controls="guide-upcoming-tour" aria-selected="false">Upcoming Tour</button>
                                 </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="guide-review-confirmation-tab" data-bs-toggle="tab" data-bs-target="#guide-review-confirmation" type="button" role="tab" aria-controls="guide-review-confirmation" aria-selected="false">Review Confirmation</button>
+                                </li>
                             </ul>
                             
                             <!-- Guide Email Content -->
@@ -283,6 +286,14 @@
                                     <iframe id="guide-upcoming-tour-iframe" style="width: 100%; height: 500px; border: none;"></iframe>
                                     <div id="guide-upcoming-tour-not-available" class="alert alert-warning d-none">
                                         Guide upcoming tour email template is not available.
+                                    </div>
+                                </div>
+                                
+                                <!-- Guide Review Confirmation Email -->
+                                <div class="tab-pane fade" id="guide-review-confirmation" role="tabpanel" aria-labelledby="guide-review-confirmation-tab">
+                                    <iframe id="guide-review-confirmation-iframe" style="width: 100%; height: 500px; border: none;"></iframe>
+                                    <div id="guide-review-confirmation-not-available" class="alert alert-warning d-none">
+                                        Guide review confirmation email template is not available.
                                     </div>
                                 </div>
                             </div>
@@ -397,6 +408,15 @@
                     } else {
                         document.getElementById('guide-upcoming-tour-iframe').srcdoc = '';
                         document.getElementById('guide-upcoming-tour-not-available').classList.remove('d-none');
+                    }
+                    
+                    // Guide review confirmation email
+                    if (data.guideReviewConfirmationEmail) {
+                        document.getElementById('guide-review-confirmation-iframe').srcdoc = data.guideReviewConfirmationEmail;
+                        document.getElementById('guide-review-confirmation-not-available').classList.add('d-none');
+                    } else {
+                        document.getElementById('guide-review-confirmation-iframe').srcdoc = '';
+                        document.getElementById('guide-review-confirmation-not-available').classList.remove('d-none');
                     }
                     
                     // Show the modal

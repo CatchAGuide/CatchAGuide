@@ -22,6 +22,31 @@
                     </div>
                 </div>
 
+                <div style="margin-bottom: 20px; text-align: center;">
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                        <tr>
+                            <td width="33%" style="padding: 10px; text-align: center; border-right: 1px solid #e1e1e1;">
+                                <h4 style="color: #313041; margin-bottom: 5px;">{{ __('emails.rating_confirmation_guide_rating') }}</h4>
+                                <div style="font-size: 24px; color: #e8604c; font-weight: bold;">
+                                    {{ $guide_score }}/10
+                                </div>
+                            </td>
+                            <td width="33%" style="padding: 10px; text-align: center; border-right: 1px solid #e1e1e1;">
+                                <h4 style="color: #313041; margin-bottom: 5px;">{{ __('emails.rating_confirmation_region_rating') }}</h4>
+                                <div style="font-size: 24px; color: #e8604c; font-weight: bold;">
+                                    {{ $region_water_score }}/10
+                                </div>
+                            </td>
+                            <td width="33%" style="padding: 10px; text-align: center;">
+                                <h4 style="color: #313041; margin-bottom: 5px;">{{ __('emails.rating_confirmation_experience_rating') }}</h4>
+                                <div style="font-size: 24px; color: #e8604c; font-weight: bold;">
+                                    {{ $overall_score }}/10
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
                 @if($comment)
                 <div style="border-top: 1px solid #e1e1e1; padding-top: 20px;">
                     <h3 style="color: #313041; margin-bottom: 10px;">{{ __('emails.rating_confirmation_guest_comment') }}</h3>
@@ -31,10 +56,11 @@
                 </div>
                 @endif
             </div>
-
-            <div style="margin-top:3rem;">
-                <p style="margin-top: .5rem;">{{ __('emails.catchaguide_team') }}</p>
-            </div>
+            
+            <p style="margin-top: 2rem; margin-bottom: .5rem; font-size: 14px; font-family: 'Arial', sans-serif;">
+                @lang('emails.best_regards')
+            </p>
+            <p style="margin-top: .5rem; font-size: 14px; font-family: 'Arial', sans-serif;">@lang('emails.catchaguide_team')</p>
         </div>
     </div>
     <div style="text-align: center; padding: 20px; color: #fff; background-color: #313041; margin-top: 2rem;">

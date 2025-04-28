@@ -19,6 +19,7 @@ class BookingController extends Controller
         $tokenParts = explode('|', $token);
         $token = $tokenParts[0];
         $source = $tokenParts[1] ?? null; 
+
         
         $booking = Booking::where('token',$token)->first();
 
@@ -49,9 +50,10 @@ class BookingController extends Controller
 
         event(new BookingStatusChanged($booking, 'accepted'));
 
-        if($source !== null || $source !== 'null' || $source !== ''){
+        if($source !== null && $source !== 'null' && $source !== '' && !is_null($source)){
             return back();
         }
+        
         return view('pages.additional.accepted');
     }
 

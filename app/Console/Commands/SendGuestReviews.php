@@ -33,8 +33,8 @@ class SendGuestReviews extends Command
     {
         // Find bookings that ended exactly 24 hours ago and were accepted/completed
         $bookings = Booking::where('status', 'accepted')
-            ->whereDate('book_date', Carbon::now()->subDay()->toDateString())
-            ->whereTime('book_date', '<=', Carbon::now()->subDay()->toTimeString())
+            ->whereDate('book_date', Carbon::now()->subDay()->toDateString()) // start of the day time to 0000
+            ->whereTime('book_date', '<=', Carbon::now()->subDay()->toTimeString()) // end of the day
             ->where('is_reviewed', 0)
             ->get();
 

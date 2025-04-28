@@ -14,17 +14,22 @@ return [
     'accept' => 'Annehmen',
     'reject' => 'Ablehnen',
     'guide_name' => 'Guide',
+    'number_of_guests' => 'Anzahl der Gäste',
     
     'no_extras' => 'Keine Extras',
 
     'rating_confirmation_subject' => 'Bewertung bestätigt',
     'rating_confirmation_message' => 'Ihre Bewertung wurde erfolgreich abgegeben.',
     'rating_confirmation_hello' => 'Hallo',
-    'rating_confirmation_someone_rated_your_tour' => 'Jemand hat Ihre Tour bewertet',
+    'rating_confirmation_someone_rated_your_tour' => 'dein Gast hat deine Angeltour bewertet',
     'rating_confirmation_overall_rating' => 'Gesamtbewertung',
     'rating_confirmation_guest_comment' => 'Kommentar des Gastes',
     'rating_confirmation_contact_us' => 'Kontaktieren Sie uns',
     'rating_confirmation_follow_us' => 'Folgen Sie uns',
+    'rating_confirmation_guide_rating' => 'Guide Bewertung',
+    'rating_confirmation_region_rating' => 'Region Bewertung',
+    'rating_confirmation_experience_rating' => 'Erfahrung Bewertung',
+    'rating_confirmation_thank_you' => 'Danke für Ihre Bewertung!',
     
     'guide_new_booking_request_title' => 'Neue Buchungsanfrage für Deine Angeltour',
     'guide_new_booking_request_text_1' => 'Du hast eine neue Buchungsanfrage auf unserer Plattform erhalten. Hier sind die Details der Anfrage:',
