@@ -185,6 +185,32 @@
                 margin-left: 0;
             }
         }
+        
+        @media (max-width: 767.98px) {
+            #contactModal .modal-dialog {
+                margin: 0.5rem;
+                max-width: calc(100% - 1rem);
+            }
+            
+            #contactModal .modal-body {
+                padding: 1rem;
+            }
+            
+            #contactModal .d-flex {
+                flex-direction: column;
+            }
+            
+            #contactModal .g-recaptcha {
+                transform: scale(0.85);
+                transform-origin: 0 0;
+                margin-bottom: 1rem;
+            }
+            
+            #contactModal .btn-orange {
+                width: 100%;
+                margin-top: 1rem;
+            }
+        }
     </style>
 @endsection
 
@@ -1022,6 +1048,63 @@
    
 </div>
 </div>
+
+<!-- Contact Modal -->
+<div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contactModalLabel">{{ __('contact.shareYourQuestion') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {!! ReCaptcha::htmlScriptTagJsApi() !!}
+                <div id="contactFormContainer">
+                    <form id="contactModalForm">
+                        @csrf
+                        <input type="hidden" name="source_type" value="vacation">
+                        <input type="hidden" name="source_id" value="{{ $vacation->id }}">
+                        <div class="alert alert-danger" id="contactError" style="display: none;"></div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="@lang('contact.yourName')" name="name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="email" class="form-control" placeholder="@lang('contact.email')" name="email" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <input type="tel" class="form-control" placeholder="@lang('contact.phone')" name="phone">
+                        </div>
+                        <div class="form-group mb-3">
+                            <textarea name="description" class="form-control" rows="4" placeholder="@lang('contact.feedback')" required></textarea>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            {!! htmlFormSnippet() !!}
+                            <button type="button" id="contactSubmitBtn" class="btn btn-orange">@lang('contact.btnSend')</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- Loading Overlay -->
+                <div id="contactLoadingOverlay" style="display: none;">
+                    <div class="d-flex justify-content-center align-items-center flex-column p-4">
+                        <div class="spinner-border text-orange mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-center">@lang('contact.submitting')...</p>
+                    </div>
+                </div>
+                <div class="alert alert-success mt-3" id="contactSuccessMessage" style="display: none;">
+                    @lang('contact.successMessage')
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('js_after')
@@ -1255,6 +1338,77 @@ document.addEventListener("DOMContentLoaded", function() {
                     });
                 });
             },
+        });
+    }
+    
+    const contactForm = document.getElementById('contactModalForm');
+    const contactFormContainer = document.getElementById('contactFormContainer');
+    const loadingOverlay = document.getElementById('contactLoadingOverlay');
+    const successMessage = document.getElementById('contactSuccessMessage');
+    const submitButton = document.getElementById('contactSubmitBtn');
+    const contactError = document.getElementById('contactError');
+    
+    if (submitButton && contactForm) {
+        submitButton.addEventListener('click', function() {
+            // Validate form
+            if (!contactForm.checkValidity()) {
+                contactForm.reportValidity();
+                return;
+            }
+            
+            // Get form data
+            const formData = new FormData(contactForm);
+            
+            // Show loading overlay
+            contactFormContainer.style.display = 'none';
+            loadingOverlay.style.display = 'block';
+            
+            // Submit form via AJAX
+            fetch('{{route('sendcontactmail')}}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading overlay
+                loadingOverlay.style.display = 'none';
+                
+                if (data.success) {
+                    // Show success message
+                    successMessage.style.display = 'block';
+                    
+                    // Reset form
+                    contactForm.reset();
+                    
+                    // Close modal after 3 seconds
+                    setTimeout(() => {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('contactModal'));
+                        modal.hide();
+                        
+                        // Reset form display after modal is closed
+                        setTimeout(() => {
+                            contactFormContainer.style.display = 'block';
+                            successMessage.style.display = 'none';
+                        }, 500);
+                    }, 3000);
+                } else {
+                    contactError.style.display = 'block';
+                    contactError.innerHTML = data.message;
+                    contactFormContainer.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                // Hide loading overlay and show form again on error
+                loadingOverlay.style.display = 'none';
+                contactFormContainer.style.display = 'block';
+                
+                contactError.style.display = 'block';
+                contactError.innerHTML = error.message;
+            });
         });
     }
 });

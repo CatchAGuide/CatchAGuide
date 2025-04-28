@@ -6,6 +6,11 @@ return [
     // form
     'yourName' => 'Dein Name',
     'email' => 'Email Adresse',
+    'phone' => 'Telefonnummer',
     'btnSend' => 'Nachricht senden',
-    'feedback' => 'Feedback schreiben'
+    'feedback' => 'Feedback schreiben',
+
+    'submitting' => 'Wird gesendet...',
+    'errorMessage' => 'Es ist ein Fehler aufgetreten. Bitte versuche es erneut.',
+    'successMessage' => 'Deine Nachricht wurde erfolgreich gesendet!',
 ];

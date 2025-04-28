@@ -13,17 +13,19 @@ class ContactMail extends Mailable
     public $name;
     public $email;
     public $description;
+    public $phone;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($name, $email, $description)
+    public function __construct($name, $email, $description, $phone = null)
     {
         $this->name = $name;
         $this->email = $email;
         $this->description = $description;
+        $this->phone = $phone;
     }
 
     /**
@@ -34,7 +36,7 @@ class ContactMail extends Mailable
     public function build()
     {
         return $this->view('mails.contactmail')
-            ->to('info@catchaguide.com')
+            ->to(env('TO_CEO'))
             ->subject("Neue Kontaktanfrage");
     }
 }
