@@ -13,9 +13,9 @@
     </div>
     <div style="padding-bottom: 0px;">
         <div style="padding: 20px;">
-            <p style="font-size: 16px;">@lang('emails.dear') <strong>{{$guestName}}</strong>,</p>
+            <p style="font-size: 14px;">@lang('emails.dear') {{$guestName}},</p>
             <p style="font-size: 14px;">
-                {!!str_replace(['[Date]', '[Time]', '[Location]', '[Guide Name]'], [$date, $time, $location, $guideName], __('emails.guest_tour_reminder_text_1'))!!}
+                {!!str_replace(['[Date]','[Location]', '[Guide Name]'], [$date, $location, $guideName], __('emails.guest_tour_reminder_text_1'))!!}
             </p>
             <ul>
                 <li>
@@ -32,8 +32,8 @@
                 {!!str_replace('[Guide Name]', $guideName, __('emails.guest_tour_reminder_text_5'))!!}
             </p>
             <div style="text-align: center; margin-top: 2rem;">
-                <p style="font-size: 14px;">{!!__('emails.guest_tour_reminder_text_6')!!}</p>
-                <a style="background-color: #e8604c; padding: 10px 20px; color: #fff; border: 0; text-decoration: none; margin-top: 30px; display: inline-block; font-size: 14px;" href="{{route('additional.contact')}}">Contact us</a>
+                <p style="font-size: 14px; text-align: left; " >{!!__('emails.guest_tour_reminder_text_6')!!}</p>
+                <a style="background-color: #e8604c; padding: 10px 20px; color: #fff; border: 0; text-decoration: none; margin-top: 30px; display: inline-block; font-size: 14px;" href="{{route('additional.contact')}}" target="_blank">@lang('emails.contact_us')</a>
             </div>
             <div style="margin-top: 3rem;">
                 <p style="font-size: 14px;">
@@ -52,16 +52,17 @@
                 <td style="padding: 10px; text-align: left; width: 50%;">
                     <img src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_PNG.png" width="100px" alt="Catchaguide Logo" style="display: block;">
                     <p style="margin: 10px 0;">
-                        <a href="tel:+49 (0) {{env('CONTACT_NUM')}}" style="color: #fff; font-size: 14px; text-decoration: none;">+49 (0) {{env('CONTACT_NUM')}}</a>
+                        <a href="tel:+49 (0) {{env('CONTACT_NUM')}}" style="color: #fff; font-size: 14px; text-decoration: none; text-decoration: none;">+49 (0) {{env('CONTACT_NUM')}}</a>
                     </p>
                     <p style="margin: 10px 0;">
-                        <a href="mailto:{{env('TO_CEO')}}" style="color: #fff; font-size: 14px; text-decoration: none;">{{env('TO_CEO')}}</a>
+                        <a href="mailto:{{env('TO_CEO')}}" style="color: #fff; font-size: 14px; text-decoration: none; text-decoration: none;">{{env('TO_CEO')}}</a>
                     </p>
                 </td>
                 <td style="padding: 10px; text-align: center;">
                     <a style="color: #fff; text-decoration: none; font-size: 14px;" href="{{route('additional.contact')}}" target="_blank">
-                        <p style="margin: 10px 0;">Contact us</p></a>
-                    <p style="margin: .5rem 0; font-size: 14px;">Follow us</p>
+                        <p style="margin: 10px 0;">@lang('emails.contact_us')</p>
+                    </a>
+                    <p style="margin: .5rem 0; font-size: 14px;">@lang('emails.follow_us')</p>
                     <div style="margin: 10px 0;">
                         <a href="https://www.facebook.com/CatchAGuide" target="_blank" style="display: inline-block;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 512 512" fill="#fff"><path d="M512 256C512 114.6 397.4 0 256 0S0 114.6 0 256C0 376 82.7 476.8 194.2 504.5V334.2H141.4V256h52.8V222.3c0-87.1 39.4-127.5 125-127.5c16.2 0 44.2 3.2 55.7 6.4V172c-6-.6-16.5-1-29.6-1c-42 0-58.2 15.9-58.2 57.2V256h83.6l-14.4 78.2H287V510.1C413.8 494.8 512 386.9 512 256h0z"/></svg>

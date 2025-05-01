@@ -131,19 +131,17 @@ class BookingsController extends Controller
                     ? ($booking->user->firstname ?? 'Guest') 
                     : $booking->user->firstname;
                 
-                $guideName = $booking->guiding->user->name;
+                $guideName = $booking->guiding->user->firstname;
                 $location = $booking->guiding->location;
                 
-                $eventDate = Carbon::parse($booking->blocked_event->from)->format('d.m.Y');
-                $eventTime = Carbon::parse($booking->blocked_event->from)->format('H:i');
+                $eventDate = Carbon::parse($booking->blocked_event->from)->format('F j, Y');
         
                 $tourReminderEmail = view('mails.guest.guest_tour_reminder')
                     ->with([
                         'guestName' => $guestName,
                         'guideName' => $guideName,
                         'location' => $location,
-                        'date' => $eventDate,
-                        'time' => $eventTime,
+                        'date' => $eventDate
                     ])->render();
             } catch (\Exception $e) {
                 \Log::error('Error rendering tour reminder email template: ' . $e->getMessage());
@@ -200,14 +198,6 @@ class BookingsController extends Controller
             } catch (\Exception $e) {
                 \Log::error('Error rendering guide reminder email template: ' . $e->getMessage());
             }
-
-            try {
-                $guideReminder12hrsEmail = view('mails.guide.guide_reminder_12hrs', compact(
-                    'user', 'guide', 'guiding', 'booking'
-                ))->render();
-            } catch (\Exception $e) {
-                \Log::error('Error rendering guide 12hrs reminder email template: ' . $e->getMessage());
-            }
         }
         
         // Render guide upcoming tour email if applicable
@@ -230,6 +220,14 @@ class BookingsController extends Controller
             } catch (\Exception $e) {
                 dd($e->getMessage());
                 \Log::error('Error rendering guide upcoming tour email template: ' . $e->getMessage());
+            }
+
+            try {
+                $guideReminder12hrsEmail = view('mails.guide.guide_reminder_12hrs', compact(
+                    'user', 'guide', 'guiding', 'booking'
+                ))->render();
+            } catch (\Exception $e) {
+                \Log::error('Error rendering guide 12hrs reminder email template: ' . $e->getMessage());
             }
         }
         

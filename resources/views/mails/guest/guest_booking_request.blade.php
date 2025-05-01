@@ -13,7 +13,7 @@
     </div>
     <div>
         <div style="padding: 20px;">
-            <p style="font-size:16px;">{{__('emails.dear')}} <strong>{{$user->firstname}},</strong></p>
+            <p style="font-size:14px;">{{__('emails.dear')}} {{$user->firstname}},</p>
             <p style="font-size:14px;">
             {{$textNote}}
             </p>
@@ -27,7 +27,7 @@
         </div>
         <div>
             <p style="font-size:14px;"><strong>{{__('emails.guide_name')}}:</strong> {{$guide->firstname}}</p>
-            <p style="font-size:14px;"><strong>{{__('emails.tour')}}:</strong> {{$guiding->title}}</p>
+            <p style="font-size:14px;"><strong>{{__('emails.tour')}}:</strong> <a href="{{route('guidings.show', ['id' => $guiding->id, 'slug' => $guiding->slug])}}" target="__blank">{{$guiding->title}}</a></p>
             <p style="font-size:14px;"><strong>{{__('emails.location')}}:</strong> {{$guiding->location}} </p>
             <p style="font-size:14px;"><strong>{{__('emails.number_of_guests')}}:</strong> {{$booking->count_of_users}} </p>
             <p style="font-size:14px;"><strong>{{__('emails.date')}}:</strong> {{date('d F Y', strtotime($booking->book_date))}}</p>
@@ -50,7 +50,7 @@
     </div>
     <div style="text-align: center; margin-top: 2rem; padding: 0 20px;">
         <p style="margin-bottom: 2rem; font-size:14px;"> {{$booking->alternativeText}}</p>
-        <a style="background-color: #e8604c; padding:10px 20px; color:#fff !important; border:0; text-decoration: none; margin-top:30px; display: inline-block;" href="{{route('additional.contact')}}">Contact us</a>
+        <a style="background-color: #e8604c; padding:10px 20px; color:#fff !important; border:0; text-decoration: none; margin-top:30px; display: inline-block;" href="{{route('additional.contact')}}">@lang('emails.contact_us')</a>
     </div>
     <div style="margin-top:3rem; padding: 0 20px;">
         <p style="font-size:14px;">
@@ -67,16 +67,16 @@
                 <td style="padding: 10px; text-align: left; width: 50%;">
                     <img src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_PNG.png" width="100px" alt="Catchaguide Logo">
                     <p>
-                        <a href="tel:+49 (0) {{env('CONTACT_NUM')}}" style="color:#fff; font-size: 14px;">+49 (0) {{env('CONTACT_NUM')}}</a>
+                        <a href="tel:+49 (0) {{env('CONTACT_NUM')}}" style="color:#fff; font-size: 14px; text-decoration: none;">+49 (0) {{env('CONTACT_NUM')}}</a>
                     </p>
                     <p>
-                        <a href="mailto:{{env('TO_CEO')}}" style="color:#fff; font-size: 14px;">{{env('TO_CEO')}}</a>
+                        <a href="mailto:{{env('TO_CEO')}}" style="color:#fff; font-size: 14px; text-decoration: none;">{{env('TO_CEO')}}</a>
                     </p>
                 </td>
                 <td style="padding: 10px;">
-                    <a style="color: #fff;" href="{{route('additional.contact')}}" target="_blank">
-                        <p>Contact us</p></a>
-                    <p style="margin: .5rem 0">Follow us</p>
+                    <a style="color: #fff; text-decoration: none;" href="{{route('additional.contact')}}" target="_blank">
+                        <p>@lang('emails.contact_us')</p></a>
+                    <p style="margin: .5rem 0; text-decoration: none;">@lang('emails.follow_us')</p>
                     <div>
                         <a href="https://www.facebook.com/CatchAGuide" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 512 512" fill="#fff"><path d="M512 256C512 114.6 397.4 0 256 0S0 114.6 0 256C0 376 82.7 476.8 194.2 504.5V334.2H141.4V256h52.8V222.3c0-87.1 39.4-127.5 125-127.5c16.2 0 44.2 3.2 55.7 6.4V172c-6-.6-16.5-1-29.6-1c-42 0-58.2 15.9-58.2 57.2V256h83.6l-14.4 78.2H287V510.1C413.8 494.8 512 386.9 512 256h0z"/></svg>

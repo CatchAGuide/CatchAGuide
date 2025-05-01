@@ -16,7 +16,7 @@
     </div>
     <div class="content" style="padding-bottom: 0px;">
         <div class="content-header" style="padding: 20px;">
-            <p style="font-size: 16px; margin-top: 0;">{{__('emails.dear')}} {{$guide->firstname}},</p>
+            <p style="font-size: 14px; margin-top: 0;">{{__('emails.dear')}} {{$guide->firstname}},</p>
             <p style="font-size: 14px;">{{__('emails.guide_booking_accepted_text_1')}}</p>
         </div>
     </div>
@@ -26,7 +26,7 @@
             <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_7')}} </strong>{{$user->firstname}}</p>
             <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_8')}} </strong>{{$user->phone}}</p>
             <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_9')}} </strong>{{$user->email}}</p>
-            <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_10')}} </strong>{{$guiding->title}}</p>
+            <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_10')}} </strong><a href="{{route('guidings.show', [$guiding->id, $guiding->slug])}}" target="_blank" style="text-decoration: none; font-weight: bold;">{{$guiding->title}}</a></p>
             <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_11')}} </strong>{{$guiding->location}}</p>
             <p style="font-size: 14px;"><strong>{{__('emails.number_of_guests')}} </strong>{{$booking->count_of_users}}</p>
             <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_12')}} </strong>{{date('d F Y', strtotime($booking->book_date))}}</p>
@@ -48,11 +48,11 @@
         <p style="font-size: 14px;">
             {{__('emails.best_regards')}}
         </p>
-        <p style="margin-top: 2rem; margin-bottom: .5rem; font-size: 14px;">
+        <p style="margin-bottom: .5rem; font-size: 14px;">
             {{__('emails.catchaguide_team')}}
         </p>
         <div style="text-align: center; margin: 2rem 0;">
-            <a href="{{route('additional.contact')}}" style="background-color: #e8604c; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px;">Contact us</a>
+            <a href="{{route('additional.contact')}}" target="_blank" style="background-color: #e8604c; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px;">@lang('emails.contact_us')</a>
         </div>
     </div>
 
@@ -62,16 +62,16 @@
                 <td style="padding: 10px; text-align: left; width: 50%;">
                     <img class="logo" src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_PNG.png" width="100px" alt="Catchaguide Logo">
                     <p>
-                        <a href="tel:+49 (0) {{env('CONTACT_NUM')}}" style="color: #fff; font-size: 14px;">+49 (0) {{env('CONTACT_NUM')}}</a>
+                        <a href="tel:+49 (0) {{env('CONTACT_NUM')}}" style="color: #fff; font-size: 14px; text-decoration: none;">+49 (0) {{env('CONTACT_NUM')}}</a>
                     </p>
                     <p>
-                        <a href="mailto:{{env('TO_CEO')}}" style="color: #fff; font-size: 14px;">{{env('TO_CEO')}}</a>
+                        <a href="mailto:{{env('TO_CEO')}}" style="color: #fff; font-size: 14px; text-decoration: none;">{{env('TO_CEO')}}</a>
                     </p>
                 </td>
                 <td style="padding: 10px;">
-                    <a href="{{route('additional.contact')}}" target="_blank" style="color: #fff;">
-                        <p style="font-size: 14px;">Contact us</p></a>
-                    <p style="margin: .5rem 0; font-size: 14px;">Follow us</p>
+                    <a href="{{route('additional.contact')}}" target="_blank" style="color: #fff; text-decoration: none;">
+                        <p style="font-size: 14px;">@lang('emails.contact_us')</p></a>
+                    <p style="margin: .5rem 0; font-size: 14px;">@lang('emails.follow_us')</p>
                     <div class="social-icons">
                         <a href="https://www.facebook.com/CatchAGuide" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 512 512" fill="#fff"><path d="M512 256C512 114.6 397.4 0 256 0S0 114.6 0 256C0 376 82.7 476.8 194.2 504.5V334.2H141.4V256h52.8V222.3c0-87.1 39.4-127.5 125-127.5c16.2 0 44.2 3.2 55.7 6.4V172c-6-.6-16.5-1-29.6-1c-42 0-58.2 15.9-58.2 57.2V256h83.6l-14.4 78.2H287V510.1C413.8 494.8 512 386.9 512 256h0z"/></svg>

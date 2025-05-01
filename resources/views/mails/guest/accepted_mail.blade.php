@@ -13,7 +13,7 @@
     </div>
     <div class="content" style="padding-bottom: 0px; font-family: 'Morrison', sans-serif;">
         <div class="content-header" style="padding: 20px; font-family: 'Morrison', sans-serif;">
-            <p style="font-size: 16px; font-family: 'Morrison', sans-serif;">{{__('emails.dear')}} <strong>{{$user->firstname}}</strong>,</p>
+            <p style="font-size: 16px; font-family: 'Morrison', sans-serif;">{{__('emails.dear')}} {{$user->firstname}},</p>
             <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
                 @lang('emails.guest_booking_request_accepted_text_1') 
             </p>
@@ -23,10 +23,10 @@
             <div class="order-details" style="border: 1px solid rgb(132, 132, 132); padding: 10px; border-radius: 12px; font-family: 'Morrison', sans-serif;">
                 <h4 style="font-family: 'Morrison', sans-serif;">@lang('emails.guest_booking_request_accepted_text_3')</h4>
                 <div style="margin-top: 10px; font-family: 'Morrison', sans-serif;">
-                    <p><strong>{{__('emails.guide_booking_accepted_text_7')}}</strong> {{$user->firstname}}</p>
-                    <p><strong>{{__('emails.guide_booking_accepted_text_8')}}</strong> {{$user->phone}}</p>
-                    <p><strong>{{__('emails.guide_booking_accepted_text_9')}}</strong> {{$user->email}}</p>
-                    <p><strong>{{__('emails.tour')}}:</strong> {{$guiding->title}}</p>
+                    <p><strong>{{__('emails.guest_booking_accepted_text_7')}}</strong> {{$guide->firstname}}</p>
+                    <p><strong>{{__('emails.guest_booking_accepted_text_8')}}</strong> {{$guide->phone}}</p>
+                    <p><strong>{{__('emails.guest_booking_accepted_text_9')}}</strong> {{$guide->email}}</p>
+                    <p><strong>{{__('emails.tour')}}:</strong> <a href="{{route('guidings.show', ['id' => $guiding->id, 'slug' => $guiding->slug])}}" target="_blank">{{$guiding->title}}</a></p>
                     <p><strong>{{__('emails.location')}}:</strong> {{$guiding->location}}</p>
                     <p><strong>{{__('emails.number_of_guests')}}:</strong> {{$booking->count_of_users}}</p>
                     <p><strong>{{__('emails.date')}}:</strong> {{date('d F Y', strtotime($booking->book_date))}}</p>
@@ -50,7 +50,7 @@
                     @lang('emails.guest_booking_request_accepted_text_4') 
                 </p>
                 <div style="text-align: center; margin-top: 2rem; font-family: 'Morrison', sans-serif;">
-                    <a class="btn-theme" style="background-color: #e8604c; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px; font-family: 'Morrison', sans-serif; display: inline-block;" href="https://catchaguide.com/contact">Contact Us</a>
+                    <a class="btn-theme" style="background-color: #e8604c; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px; font-family: 'Morrison', sans-serif; display: inline-block;" href="{{route('additional.contact')}}" target="_blank">@lang('emails.contact_us')</a>
                 </div>
             </div>
         </div>
@@ -70,15 +70,15 @@
                 <td style="padding: 10px;text-align: left;width: 50%;">
                     <img class="logo" src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_PNG.png" width="100px" alt="Catchaguide Logo">
                     <p>
-                        <a href="tel:+49 (0) {{env('CONTACT_NUM')}}" style="color:#fff; font-size: 14px;">+49 (0) {{env('CONTACT_NUM')}}</a>
+                        <a href="tel:+49 (0) {{env('CONTACT_NUM')}}" style="color:#fff; font-size: 14px; text-decoration: none;">+49 (0) {{env('CONTACT_NUM')}}</a>
 
                     </p>
                     <p>
-                        <a href="mailto:{{env('TO_CEO')}}" style="color:#fff; font-size: 14px;">{{env('TO_CEO')}}</a>
+                        <a href="mailto:{{env('TO_CEO')}}" style="color:#fff; font-size: 14px; text-decoration: none;">{{env('TO_CEO')}}</a>
                     </p>
                 </td>
                 <td style="padding: 10px;">
-                    <a style="color: #fff;" href="{{route('additional.contact')}}" target="_blank">
+                    <a style="color: #fff; text-decoration: none;" href="{{route('additional.contact')}}" target="_blank">
                         <p>Contact us</p></a>
                     <p style="margin: .5rem 0">Follow us</p>
                     <div class="social-icons">

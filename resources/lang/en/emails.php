@@ -2,7 +2,7 @@
 
 return [
     'dear' => 'Dear',
-    'catchaguide_team' => 'The Catch a Guide Team',
+    'catchaguide_team' => 'The Catch A Guide Team',
     'best_regards' => 'Best regards,',
     'guest_name' => 'Guest',
     'tour' => 'Tour',
@@ -16,9 +16,12 @@ return [
     'reject' => 'Reject',
     'number_of_guests' => 'Number of Guests',
 
+    'contact_us' => 'Contact us',
+    'follow_us' => 'Follow us',
+
     'no_extras' => 'No extras',
     
-    'rating_confirmation_subject' => 'Rating confirmed',
+    'rating_confirmation_subject' => 'A Guest Rated Your Tour',
     'rating_confirmation_message' => 'Your rating has been successfully submitted.',
     'rating_confirmation_hello' => 'Hello',
     'rating_confirmation_someone_rated_your_tour' => 'Someone has rated your tour',
@@ -54,6 +57,10 @@ return [
     'guide_booking_accepted_text_11' => 'Location :',
     'guide_booking_accepted_text_12' => 'Date :',
     
+    'guest_booking_accepted_text_7' => 'Guide Name :',
+    'guest_booking_accepted_text_8' => 'Guide Phone :',
+    'guest_booking_accepted_text_9' => 'Guide Email :',
+    
     'guide_booking_expired_title' => 'Booking Request Expired – No Response Received',
     'guide_booking_expired_text_1' => 'We wanted to inform you that the recent booking request for a fishing tour has expired due to a missing response from you within the 72-hour timeframe.',
     'guide_booking_expired_text_2' => 'As a reminder, all booking requests on our platform expire after 72 hours if not responded to, ensuring that guests can continue planning their trips without unnecessary delays. We encourage you to respond to new requests as soon as possible to avoid missing out on future opportunities.',
@@ -65,15 +72,15 @@ return [
     'guide_reminder_to_respond_12hrs_text_3' => 'Thank you for being a part of our platform, and we look forward to your prompt response.',
     
     'guide_reminder_upcoming_tour_title' => 'Your Fishing Tour with [Guest Name] in 3 Days!',
-    'guide_reminder_upcoming_tour_text_1' => 'This is a reminder that you have a fishing tour scheduled with [Guest Name] at [Location] on [Date] at [Time]. Please ensure you\'re fully prepared for the tour and have all the necessary equipment and supplies ready.',
+    'guide_reminder_upcoming_tour_text_1' => 'This is a reminder that you have a fishing tour scheduled with [Guest Name] at [Location] on [Date]. Please ensure you\'re fully prepared for the tour and have all the necessary equipment and supplies ready.',
     'guide_reminder_upcoming_tour_text_2' => 'Review Guest Details: Please review the tour details and guest information on your guide dashboard.',
     'guide_reminder_upcoming_tour_text_3' => 'Prepare Equipment: Make sure all your gear is in top condition.',
     'guide_reminder_upcoming_tour_text_4' => 'Check Weather and Water Conditions: Stay updated on the weather and water conditions at [Location].',
     'guide_reminder_upcoming_tour_text_5' => 'We wish you and [Guest Name] a successful and enjoyable fishing tour.',
     'guide_reminder_upcoming_tour_text_6' => 'If you have any questions or need assistance, please contact us:',
-    'guide_reminder_upcoming_tour_text_7' => 'Thank you for being a valued guide with Catch a Guide.',
+    'guide_reminder_upcoming_tour_text_7' => 'Thank you for being a valued guide with Catch A Guide.',
     
-    'guest_booking_request_title' => 'Your Catch a Guide Booking Request Has Been Submitted!',
+    'guest_booking_request_title' => 'Your Catch A Guide Booking Request Has Been Submitted!',
     'guest_booking_request_text_1' => 'Thank you for your booking request with [Guide Name] at [Location] for [Date]!',
     'guest_booking_request_text_2' => 'We\'ve successfully sent your request to [Guide Name] who will review it shortly. You can expect to hear from your guide within 72 hours regarding the acceptance or decline of your booking.',
     'guest_booking_request_text_3' => 'Here\'s a quick recap of your request:',
@@ -81,14 +88,14 @@ return [
     'guest_booking_request_text_5' => 'If you have any questions or need assistance before you hear back from [Guide Name], please don\'t hesitate to contact us:',
     'guest_booking_request_text_6' => 'We appreciate your patience and look forward to connecting you with your guide soon!',
     
-    'guest_booking_request_accepted_title' => 'Booking Confirmation – Your Fishing Tour Details',
+    'guest_booking_request_accepted_title' => 'Booking Confirmation – Your Fishing Tour Has Been Accepted!',
     'guest_booking_request_accepted_text_1' => 'Your guide has accepted your booking request! Below, you’ll find all the details for your fishing tour. Please reach out to your guide as soon as possible to organize the tour and finalize the payment.',
     'guest_booking_request_accepted_text_2' => 'Please note that the payment will be handled directly with the guide.',
     'guest_booking_request_accepted_text_3' => 'Booking Summary:',
     'guest_booking_request_accepted_text_4' => 'If you have any questions or need assistance during the process, we are here as a neutral third party and will be happy to help in any situation.',
     'guest_booking_request_accepted_text_5' => 'Thank you for using our platform. We wish you a fantastic fishing experience and hope you enjoy the adventure ahead!',
 
-    'guest_booking_request_cancelled_title' => 'Update on Your Catch a Guide Booking Request!',
+    'guest_booking_request_cancelled_title' => 'Update on Your Catch A Guide Booking Request!',
     'guest_booking_request_cancelled_text_1' => 'We\'re writing to inform you that <b>[Guide Name]</b> has declined your booking request for <b>[Date]</b> at <b>[Location]</b>. We understand this can be disappointing, and we apologize for any inconvenience.',
     'guest_booking_request_cancelled_text_2' => 'Here is the message provided by',
     'guest_booking_request_cancelled_text_3' => '"[Guide\'s Cancellation Message - This is the text the guide entered when declining the booking.]"',
@@ -97,7 +104,7 @@ return [
     'guest_booking_request_cancelled_text_6' => 'We understand you might have questions or would like to discuss other options. Please don\'t hesitate to contact us.',
     'guest_booking_request_cancelled_text_7' => 'We appreciate your understanding and hope to help you find the perfect fishing experience soon.',
 
-    'guest_booking_request_reminder_title' => 'Your Fishing Adventure with Catch a Guide is 3 Days Away!',
+    'guest_booking_request_reminder_title' => 'Your Fishing Adventure with Catch A Guide is 3 Days Away!',
     'guest_booking_request_reminder_text_1' => 'Just a friendly reminder that your fishing tour with [Guide Name] at [Location] is scheduled for [Date] at [Time]!',
     'guest_booking_request_reminder_text_2' => 'We\'re sure you\'re getting excited to hit the water. To ensure you\'re fully prepared, here are a few things to keep in mind:',
     'guest_booking_request_reminder_text_3' => 'Check the Weather: Make sure to check the weather forecast for [Location] and dress appropriately.',
@@ -106,12 +113,13 @@ return [
     'guest_booking_request_reminder_text_6' => 'We\'re confident you\'ll have an unforgettable experience with [Guide Name].',
     'guest_booking_request_reminder_text_7' => 'If you have any questions or need further assistance, please don\'t hesitate to contact us:',
     
-    'guest_tour_review_title' => 'Share Your Fishing Adventure! Review Your Guide on Catch a Guide',
+    'guest_tour_review_title' => 'Share Your Experience! Review Your Guide on Catch A Guide',
     'guest_tour_review_text_1' => 'We hope you had an incredible fishing experience with [Guide Name] on your recent tour at [Location]! Your feedback is invaluable to us and helps other anglers find the perfect guide. We\'ve made it super easy for you to share your thoughts',
-    'guest_tour_review_text_2' => 'Simply rate your experience by clicking on the stars below:',
+    'guest_tour_review_text_2' => 'Simply rate your experience by clicking on the button below:',
     'guest_tour_review_text_3' => 'Or, if you\'d like to provide more details about your trip, please click the button below to submit a detailed review with comments:',
     'guest_tour_review_text_4' => 'We appreciate you taking the time to share your experience! Your insights help us maintain the highest standards for our guides and ensure that every angler has a memorable adventure.',
-    'guest_tour_review_text_5' => 'Thank you for choosing Catch a Guide. We hope to see you on the water again soon!',
+    'guest_tour_review_text_5' => 'Thank you for choosing Catch A Guide. We hope to see you on the water again soon!',
+    'guest_tour_review_text_6' => 'Review',
     
     'new_user_account_confirm_title' => 'Confirm Your Email Address to Complete Registration',
     'new_user_account_confirm_text_1' => 'Thank you for registering with Catch A Guide! We\'re excited to have you on board',
@@ -120,7 +128,8 @@ return [
     'new_user_account_confirm_text_4' => 'If you need any assistance, feel free to reach out to us. We’re here to help!',
     'new_user_account_confirm_text_5' => 'Welcome to Catch A Guide!',
 
-    'guest_booking_request_expired_title' => 'Booking Request Expired – No Response from Guide',
+    'guest_booking_request_expired_title' => 'Booking Request Expired – No Response from your Guide',
+    'guest_booking_request_expired_find_other_fishing_tours' => 'Find other fishing tours',
     'guest_booking_request_expired_text_1' => 'Thank you for your booking request for a fishing tour on our platform.',
     'guest_booking_request_expired_text_2' => 'Unfortunately, your fishing guide you contacted has not responded to your request within the 72-hour period, and your booking request has now expired. A booking request will expire after 72 hours so that you can continue planning your next trip without waiting for a response from a fishing guide for too long.',
     'guest_booking_request_expired_text_3' => 'If you have any further questions or would like assistance, please feel free to contact us anytime. Our team will be happy to assist you. ',
@@ -141,8 +150,8 @@ return [
     'user_account_activate_text_11' => 'Once your account is activated, you’ll be able to manage your booking and explore more of what we offer. If you need any help, feel free to reach out to us anytime',
     'user_account_activate_text_12' => 'Welcome to Catch A Guide, and we look forward to helping you with your fishing adventure!',   
 
-    'guest_tour_reminder_title' => 'Your Fishing Adventure with Catch a Guide is 3 Days Away!',
-    'guest_tour_reminder_text_1' => 'This is a friendly reminder that your fishing tour with [Guide Name] at [Location] is scheduled for [Date] at [Time]. Please ensure you\'re fully prepared for the tour and have all the necessary equipment and supplies ready.',
+    'guest_tour_reminder_title' => 'Your Fishing Adventure with Catch A Guide is 3 Days Away!',
+    'guest_tour_reminder_text_1' => 'This is a friendly reminder that your fishing tour with [Guide Name] at [Location] is scheduled for [Date]. Please ensure you\'re fully prepared for the tour and have all the necessary equipment and supplies ready.',
     'guest_tour_reminder_text_2' => '<strong>Check the Weather:</strong> Check the weather forecast for [Location] and dress appropriately.',
     'guest_tour_reminder_text_3' => '<strong>Bring Essentials:</strong> Don\'t forget any necessary fishing licenses, sunscreen, hats, sunglasses, and any personal items you might need.',
     'guest_tour_reminder_text_4' => '<strong>Check the Tour Details:</strong> Check the tour details on your booking confirmation to ensure you have all the necessary information.',

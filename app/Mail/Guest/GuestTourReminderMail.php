@@ -41,20 +41,18 @@ class GuestTourReminderMail extends Mailable
             ? ($this->booking->user->firstname ?? 'Guest') 
             : $this->booking->user->firstname;
         
-        $guideName = $this->booking->guiding->user->name;
+        $guideName = $this->booking->guiding->user->firstname;
         $location = $this->booking->guiding->location;
         
-        $eventDate = Carbon::parse($this->booking->blocked_event->from)->format('d.m.Y');
-        $eventTime = Carbon::parse($this->booking->blocked_event->from)->format('H:i');
+        $eventDate = Carbon::parse($this->booking->blocked_event->from)->format('F j, Y');
 
-        return $this->subject('Your Fishing Tour with Catch a Guide is in 2 Days!')
+        return $this->subject(__('emails.guest_tour_reminder_title'))
             ->view('mails.guest.guest_tour_reminder')
             ->with([
                 'guestName' => $guestName,
                 'guideName' => $guideName,
                 'location' => $location,
                 'date' => $eventDate,
-                'time' => $eventTime,
             ]);
     }
 } 
