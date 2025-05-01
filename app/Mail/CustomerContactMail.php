@@ -34,7 +34,7 @@ class CustomerContactMail extends Mailable
     public function build()
     {
         return $this->view('mails.customercontactmail')
-            ->to($this->email)->cc('info@catchaguide.com')
+            ->to($this->email)->cc(env('TO_CEO'))
             ->subject("Deine Kontaktanfrage");
     }
 }

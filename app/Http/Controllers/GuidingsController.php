@@ -49,35 +49,36 @@ class GuidingsController extends Controller
             Session::put('random_seed', $randomSeed);
         }
 
-        // Base query for all active guidings with lowest price calculation
-        $baseQuery = Guiding::select(['*', DB::raw('(
-            WITH price_per_person AS (
-                SELECT 
-                    CASE 
-                        WHEN JSON_VALID(prices) THEN (
-                            SELECT MIN(
-                                CASE 
-                                    WHEN person > 1 THEN CAST(amount AS DECIMAL(10,2)) / person
-                                    ELSE CAST(amount AS DECIMAL(10,2))
-                                END
-                            )
-                            FROM JSON_TABLE(
-                                prices,
-                                "$[*]" COLUMNS(
-                                    person INT PATH "$.person",
-                                    amount DECIMAL(10,2) PATH "$.amount"
+        // Eager load relationships to avoid N+1 problem
+        $baseQuery = Guiding::with(['target_fish', 'methods', 'water_types', 'boatType'])
+            ->select(['*', DB::raw('(
+                WITH price_per_person AS (
+                    SELECT 
+                        CASE 
+                            WHEN JSON_VALID(prices) THEN (
+                                SELECT MIN(
+                                    CASE 
+                                        WHEN person > 1 THEN CAST(amount AS DECIMAL(10,2)) / person
+                                        ELSE CAST(amount AS DECIMAL(10,2))
+                                    END
                                 )
-                            ) as price_data
-                        )
-                        ELSE price
-                    END as lowest_pp
-            )
-            SELECT COALESCE(lowest_pp, price) 
-            FROM price_per_person
-        ) AS lowest_price')])
-        ->where('status', 1);
+                                FROM JSON_TABLE(
+                                    prices,
+                                    "$[*]" COLUMNS(
+                                        person INT PATH "$.person",
+                                        amount DECIMAL(10,2) PATH "$.amount"
+                                    )
+                                ) as price_data
+                            )
+                            ELSE price
+                        END as lowest_pp
+                )
+                SELECT COALESCE(lowest_pp, price) 
+                FROM price_per_person
+            ) AS lowest_price')])
+            ->where('status', 1);
         
-        // Add caching for price ranges
+        // Use caching for price ranges
         $cacheKey = 'guiding_price_ranges';
         $cacheDuration = 60 * 24; // Cache for 24 hours
 
@@ -86,9 +87,9 @@ class GuidingsController extends Controller
             $priceRanges = $priceRangeData['ranges'];
             $overallMaxPrice = $priceRangeData['maxPrice'];
         } else {
-            // Get max price from all active guidings
-            $maxPriceResult = DB::select('
-                SELECT MAX(
+            // Optimize max price query
+            $maxPriceResult = DB::table('guidings')
+                ->selectRaw('MAX(
                     CASE 
                         WHEN JSON_VALID(prices) THEN (
                             SELECT MIN(
@@ -107,12 +108,11 @@ class GuidingsController extends Controller
                         )
                         ELSE price
                     END
-                ) as max_price
-                FROM guidings
-                WHERE status = 1
-            ');
+                ) as max_price')
+                ->where('status', 1)
+                ->first();
 
-            $overallMaxPrice = ceil(($maxPriceResult[0]->max_price ?? 5000) / 50) * 50;
+            $overallMaxPrice = ceil(($maxPriceResult->max_price ?? 5000) / 50) * 50;
             
             // Define price ranges
             $priceRanges = [];
@@ -130,9 +130,8 @@ class GuidingsController extends Controller
             }
             
             // Count guidings in each price range
-            $priceResults = DB::select('
-                SELECT 
-                    id,
+            $priceResults = DB::table('guidings')
+                ->select('id', DB::raw('
                     CASE 
                         WHEN JSON_VALID(prices) THEN (
                             SELECT MIN(
@@ -151,9 +150,9 @@ class GuidingsController extends Controller
                         )
                         ELSE price
                     END as lowest_price
-                FROM guidings
-                WHERE status = 1
-            ');
+                '))
+                ->where('status', 1)
+                ->get();
             
             foreach ($priceResults as $guiding) {
                 $price = $guiding->lowest_price;
@@ -225,11 +224,12 @@ class GuidingsController extends Controller
                         $filteredQuery->orderBy('duration', 'asc');
                         break;
                     default:
-                        // Keep default ordering if no valid sort option is provided
-                        if (!$hasOnlyPageParam) {
-                            $filteredQuery->latest();
-                        }
+                        // Default to sorting by lowest price if no valid sort option is provided
+                        $filteredQuery->orderBy('lowest_price', 'asc');
                 }
+            } else {
+                // Default to sorting by lowest price if no sort option is provided
+                $filteredQuery->orderBy('lowest_price', 'asc');
             }
         }
 
@@ -372,7 +372,7 @@ class GuidingsController extends Controller
         }
 
         // 3. Get all filtered guidings (for counts and filter options)
-        $allGuidings = $filteredQuery->with(['target_fish', 'methods', 'water_types', 'boatType'])->get();
+        $allGuidings = $filteredQuery->get();
         
         // 4. Extract available filter options from filtered results
         $availableTargetFish = collect();
@@ -445,7 +445,7 @@ class GuidingsController extends Controller
         }
 
         // 6. Get paginated results
-        $guidings = $filteredQuery->with('boatType')->paginate(20);
+        $guidings = $filteredQuery->paginate(20);
         $guidings->appends(request()->except('page'));
 
         // Finalize filter title

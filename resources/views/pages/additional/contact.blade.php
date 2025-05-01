@@ -52,19 +52,26 @@
                                 <div class="row">
                                     <div class="col-xl-6">
                                         <div class="comment-form__input-box">
-                                            <input type="text" placeholder="@lang('contact.yourName')" name="name">
+                                            <input type="text" placeholder="@lang('contact.yourName')" name="name" required>
                                         </div>
                                     </div>
                                     <div class="col-xl-6">
                                         <div class="comment-form__input-box">
-                                            <input type="email" placeholder="@lang('contact.email')" name="email">
+                                            <input type="email" placeholder="@lang('contact.email')" name="email" required>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-xl-12">
                                         <div class="comment-form__input-box">
-                                            <textarea name="description" placeholder="@lang('contact.feedback')"></textarea>
+                                            <input type="tel" placeholder="@lang('contact.phone')" name="phone">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xl-12">
+                                        <div class="comment-form__input-box">
+                                            <textarea name="description" placeholder="@lang('contact.feedback')" required></textarea>
                                         </div>
                                         <div class="submit-container">
                                             {!! htmlFormSnippet() !!}

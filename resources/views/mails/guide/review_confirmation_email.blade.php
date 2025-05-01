@@ -9,8 +9,8 @@
     </div>
     <div style="padding-bottom:0px;">
         <div style="padding: 20px;">
-            <p style="font-size:16px;">{{ __('emails.rating_confirmation_hello') }} <strong>{{$name}}</strong>,</p>
-            <p>
+            <p style="font-size:14px;">{{ __('emails.rating_confirmation_hello') }} {{$name}},</p>
+            <p style="font-size:14px;">
                 {{ __('emails.rating_confirmation_someone_rated_your_tour') }} <strong>{{$guiding_name}}</strong>
             </p>
             
@@ -69,14 +69,14 @@
                 <td style="padding: 10px; text-align: left; width: 50%;">
                     <img style="max-width: 100px;" src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_PNG.png" width="100px" alt="Catchaguide Logo">
                     <p>
-                        <a href="tel:+49 (0) 15155495574" style="color:#fff; font-size: 14px;">+49 (0) 15155495574</a>
+                        <a href="tel:+49 (0) {{env('CONTACT_NUM')}}" style="color:#fff; font-size: 14px; text-decoration: none;">+49 (0) {{env('CONTACT_NUM')}}</a>
                     </p>
                     <p>
-                        <a href="mailto:info.catchaguide@gmail.com" style="color:#fff; font-size: 14px;">info.catchaguide@gmail.com</a>
+                        <a href="mailto:{{env('TO_CEO')}}" style="color:#fff; font-size: 14px; text-decoration: none;">{{env('TO_CEO')}}</a>
                     </p>
                 </td>
                 <td style="padding: 10px;">
-                    <a style="color: #fff;" href="https://catchaguide.com/contact" target="_blank">
+                    <a style="color: #fff; text-decoration: none;" href="{{route('additional.contact')}}" target="_blank">
                         <p>{{ __('emails.rating_confirmation_contact_us') }}</p>
                     </a>
                     <p style="margin: .5rem 0">{{ __('emails.rating_confirmation_follow_us') }}</p>

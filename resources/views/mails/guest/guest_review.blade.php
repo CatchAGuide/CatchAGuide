@@ -18,23 +18,23 @@
     </div>
     <div class="content" style="padding-bottom:0px;">
         <div class="content-header" style="padding: 20px;">
-            <p style="font-size:16px;">{{__('emails.dear')}} <strong>{{$userName}}</strong>,</p>
+            <p style="font-size:14px;">{{__('emails.dear')}} {{$userName}},</p>
             <p style="font-size: 14px;">
                 {!! str_replace(['[Guide Name]', '[Location]'], [$guideName, $location], __('emails.guest_tour_review_text_1')) !!}
             </p>
             <div style="margin: 1.5rem 0;">
                 <p style="text-align: center; font-size: 14px;">@lang('emails.guest_tour_review_text_2')</p>
-                <p style="text-align: center; font-size: .5em;">
-                    <a  style="margin: 0 .5rem;" href="https://catchaguide.com/guide_review"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 512 512"><path d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm176.5 64.3C196.1 302.1 223.8 288 256 288s59.9 14.1 79.5 32.3C354.5 338.1 368 362 368 384c0 5.4-2.7 10.4-7.2 13.4s-10.2 3.4-15.2 1.3l-17.2-7.5c-22.8-10-47.5-15.1-72.4-15.1s-49.6 5.2-72.4 15.1l-17.2 7.5c-4.9 2.2-10.7 1.7-15.2-1.3s-7.2-8-7.2-13.4c0-22 13.5-45.9 32.5-63.7zm-43-173.6l89.9 47.9c10.7 5.7 10.7 21.1 0 26.8l-89.9 47.9c-7.9 4.2-17.5-1.5-17.5-10.5c0-2.8 1-5.5 2.8-7.6l36-43.2-36-43.2c-1.8-2.1-2.8-4.8-2.8-7.6c0-9 9.6-14.7 17.5-10.5zM396 157.1c0 2.8-1 5.5-2.8 7.6l-36 43.2 36 43.2c1.8 2.1 2.8 4.8 2.8 7.6c0 9-9.6 14.7-17.5 10.5l-89.9-47.9c-10.7-5.7-10.7-21.1 0-26.8l89.9-47.9c7.9-4.2 17.5 1.5 17.5 10.5z"/></svg></a>
+                {{-- <p style="text-align: center; font-size: .5em;">
+                    <a  style="margin: 0 .5rem;" href="{}"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 512 512"><path d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm176.5 64.3C196.1 302.1 223.8 288 256 288s59.9 14.1 79.5 32.3C354.5 338.1 368 362 368 384c0 5.4-2.7 10.4-7.2 13.4s-10.2 3.4-15.2 1.3l-17.2-7.5c-22.8-10-47.5-15.1-72.4-15.1s-49.6 5.2-72.4 15.1l-17.2 7.5c-4.9 2.2-10.7 1.7-15.2-1.3s-7.2-8-7.2-13.4c0-22 13.5-45.9 32.5-63.7zm-43-173.6l89.9 47.9c10.7 5.7 10.7 21.1 0 26.8l-89.9 47.9c-7.9 4.2-17.5-1.5-17.5-10.5c0-2.8 1-5.5 2.8-7.6l36-43.2-36-43.2c-1.8-2.1-2.8-4.8-2.8-7.6c0-9 9.6-14.7 17.5-10.5zM396 157.1c0 2.8-1 5.5-2.8 7.6l-36 43.2 36 43.2c1.8 2.1 2.8 4.8 2.8 7.6c0 9-9.6 14.7-17.5 10.5l-89.9-47.9c-10.7-5.7-10.7-21.1 0-26.8l89.9-47.9c7.9-4.2 17.5 1.5 17.5 10.5z"/></svg></a>
                     <a  style="margin: 0 .5rem;" href="https://catchaguide.com/guide_review"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 512 512"><path d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zM174.6 384.1c-4.5 12.5-18.2 18.9-30.7 14.4s-18.9-18.2-14.4-30.7C146.9 319.4 198.9 288 256 288s109.1 31.4 126.6 79.9c4.5 12.5-2 26.2-14.4 30.7s-26.2-2-30.7-14.4C328.2 358.5 297.2 336 256 336s-72.2 22.5-81.4 48.1zM144.4 208a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm192-32a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg></a>
                     <a  style="margin: 0 .5rem;" href="https://catchaguide.com/guide_review"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 512 512"><path d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM256 0a256 256 0 1 0 0 512A256 256 0 1 0 256 0zM176.4 240a32 32 0 1 0 0-64 32 32 0 1 0 0 64zm192-32a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zM184 328c-13.3 0-24 10.7-24 24s10.7 24 24 24l144 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-144 0z"/></svg></a>
                     <a  style="margin: 0 .5rem;" href="https://catchaguide.com/guide_review"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 512 512"><path d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm177.6 62.1C192.8 334.5 218.8 352 256 352s63.2-17.5 78.4-33.9c9-9.7 24.2-10.4 33.9-1.4s10.4 24.2 1.4 33.9c-22 23.8-60 49.4-113.6 49.4s-91.7-25.5-113.6-49.4c-9-9.7-8.4-24.9 1.4-33.9s24.9-8.4 33.9 1.4zM144.4 208a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm192-32a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg></a>
                     <a  style="margin: 0 .5rem;" href="https://catchaguide.com/guide_review"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 512 512"><path d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm130.7 57.9c-4.2-13.6 7.1-25.9 21.3-25.9l212.5 0c14.2 0 25.5 12.4 21.3 25.9C369 368.4 318.2 408 258.2 408s-110.8-39.6-127.5-94.1zM144.4 192a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm192-32a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg></a>
-                </p>
+                </p> --}}
             </div>
             <div style="text-align:center;margin-top: 2rem;">
-                <p style="margin-bottom:2rem; font-size: 14px;">@lang('emails.guest_tour_review_text_3')</p>
-                <a  class="btn-theme" style="background-color: #e8604c;padding:10px 20px;color:#fff !important;border:0;text-decoration: none;margin-top:30px;" href="{{$reviewUrl}}">Review</a>
+                {{-- <p style="margin-bottom:2rem; font-size: 14px;">@lang('emails.guest_tour_review_text_3')</p> --}}
+                <a  class="btn-theme" style="background-color: #e8604c;padding:10px 20px;color:#fff !important;border:0;text-decoration: none;margin-top:30px;" href="{{$reviewUrl}}">@lang('emails.guest_tour_review_text_6')</a>
             </div>
             <div>
             </div>
@@ -57,17 +57,17 @@
                 <td style="padding: 10px;text-align: left;width: 50%;">
                     <img class="logo" src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_PNG.png" width="100px" alt="Catchaguide Logo">
                     <p>
-                        <a href="tel:+49 (0) {{env('CONTACT_NUM')}}" style="color:#fff; font-size: 14px;">+49 (0) {{env('CONTACT_NUM')}}</a>
+                        <a href="tel:+49 (0) {{env('CONTACT_NUM')}}" style="color:#fff; font-size: 14px; text-decoration: none;">+49 (0) {{env('CONTACT_NUM')}}</a>
 
                     </p>
                     <p>
-                        <a href="mailto:{{env('TO_CEO')}}" style="color:#fff; font-size: 14px;">{{env('TO_CEO')}}</a>
+                        <a href="mailto:{{env('TO_CEO')}}" style="color:#fff; font-size: 14px; text-decoration: none;">{{env('TO_CEO')}}</a>
                     </p>
                 </td>
                 <td style="padding: 10px;">
-                    <a style="color: #fff;" href="{{route('additional.contact')}}" target="_blank">
-                        <p>Contact us</p></a>
-                    <p style="margin: .5rem 0">Follow us</p>
+                    <a style="color: #fff; text-decoration: none;" href="{{route('additional.contact')}}" target="_blank">
+                        <p>@lang('emails.contact_us')</p></a>
+                    <p style="margin: .5rem 0">@lang('emails.follow_us')</p>
                     <div class="social-icons">
                         <a  href="https://www.facebook.com/CatchAGuide" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 512 512" fill="#fff"><path d="M512 256C512 114.6 397.4 0 256 0S0 114.6 0 256C0 376 82.7 476.8 194.2 504.5V334.2H141.4V256h52.8V222.3c0-87.1 39.4-127.5 125-127.5c16.2 0 44.2 3.2 55.7 6.4V172c-6-.6-16.5-1-29.6-1c-42 0-58.2 15.9-58.2 57.2V256h83.6l-14.4 78.2H287V510.1C413.8 494.8 512 386.9 512 256h0z"/></svg>
@@ -84,7 +84,7 @@
         </table> 
         <hr>
         <div style="text-align: center;">
-            <p>© Catchaguide 2025</p>
+            <p>© Catchaguide {{date('Y')}}</p>
         </div>       
     </div>
 </div>

@@ -342,7 +342,7 @@
                             <i class="fas fa-phone-alt me-2"></i>
                             <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>
                         </div>
-                        <a href="{{ route('additional.contact') }}" class="btn btn-outline-orange">
+                        <a href="#" class="btn btn-outline-orange" data-bs-toggle="modal" data-bs-target="#contactModal">
                             {{ translate('Contact Form') }}
                             <i class="fas fa-arrow-right ms-2"></i>
                         </a>

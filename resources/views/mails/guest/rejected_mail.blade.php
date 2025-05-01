@@ -11,19 +11,24 @@
     </div>
     <div class="content" style="padding-bottom: 0px;">
         <div class="content-header" style="padding: 20px;">
-            <p style="font-size: 16px; font-family: 'Morrison', sans-serif;">@lang('emails.dear') {{$user->firstname}},</p>
+            <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">@lang('emails.dear') {{$user->firstname}},</p>
             <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
             {!! $booking->textNote !!}
             </p>
             <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
-                @lang('emails.guest_booking_request_cancelled_text_2') <strong>{{ $booking->guideName }}</strong>
+                @lang('emails.guest_booking_request_cancelled_text_2') {{ $booking->guideName }}:
             </p>
-            <p style="font-size:14px;"><i><b>{{ $booking->additional_information }}</b></i></p>
+            <div style="border: 1px solid #e8604c; border-radius: 12px; padding: 15px; background-color: #f9f9f9; margin: 10px 0;">
+                <p style="font-size:14px; margin: 0;"><i><b>"{{ $booking->additional_information }}"</b></i></p>
+            </div>
+
+            <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">@php echo str_replace('[Guide Name]', $booking->guideName, __('emails.guest_booking_request_cancelled_text_4')) @endphp</p>
+
             <ul>
                 @if($booking->alternativeDates)
                     @foreach($booking->alternativeDates as $date)
                     <li>
-                        <a style="font-size: 14px; font-family: 'Morrison', sans-serif;" href="{{ route('booking.reschedule', ['token' => $booking->token]) }}?date={{ $date }}" style="font-size:14px; color:#e8604c; text-decoration:underline; cursor:pointer;">{{ date('F j, Y', strtotime($date)) }}</a>
+                        <a style="font-size: 14px; font-family: 'Morrison', sans-serif;" href="{{ route('booking.reschedule', ['token' => $booking->token]) }}?date={{ $date }}" style="font-size:14px; color:#e8604c; text-decoration:underline; cursor:pointer;" target="_blank">{{ date('F j, Y', strtotime($date)) }}</a>
                     </li>
                     @endforeach
                 @else
@@ -35,7 +40,7 @@
             <p style="font-size: 14px; font-family: 'Morrison', sans-serif;"> @lang('emails.guest_booking_request_cancelled_text_6')</p>
         </div>
         <div style="text-align: center; margin: 2rem 0;">
-            <a style="background-color: #e8604c; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px; font-family: 'Morrison', sans-serif;" href="{{route('additional.contact')}}">Contact us</a>
+            <a style="background-color: #e8604c; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px; font-family: 'Morrison', sans-serif;" href="{{route('additional.contact')}}" target="_blank">@lang('emails.contact_us')</a>
         </div>
     </div>
     <div style="padding: 0 20px;">
@@ -54,16 +59,16 @@
                 <td style="padding: 10px; text-align: left; width: 50%;">
                     <img class="logo" src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_PNG.png" width="100px" alt="Catchaguide Logo">
                     <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
-                        <a href="tel:+49 (0) {{env('CONTACT_NUM')}}" style="color: #fff; font-size: 14px;">+49 (0) {{env('CONTACT_NUM')}}</a>
+                        <a href="tel:+49 (0) {{env('CONTACT_NUM')}}" style="color: #fff; font-size: 14px; text-decoration: none;">+49 (0) {{env('CONTACT_NUM')}}</a>
                     </p>
                     <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
-                        <a href="mailto:{{env('TO_CEO')}}" style="color: #fff; font-size: 14px;">{{env('TO_CEO')}}</a>
+                        <a href="mailto:{{env('TO_CEO')}}" style="color: #fff; font-size: 14px; text-decoration: none;">{{env('TO_CEO')}}</a>
                     </p>
                 </td>
                 <td style="padding: 10px;">
-                    <a style="color: #fff;" href="{{route('additional.contact')}}" target="_blank">
-                        <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">Contact us</p></a>
-                    <p style="margin: .5rem 0; font-size: 14px; font-family: 'Morrison', sans-serif;">Follow us</p>
+                    <a style="color: #fff; text-decoration: none;" href="{{route('additional.contact')}}" target="_blank">
+                        <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">@lang('emails.contact_us')</p></a>
+                    <p style="margin: .5rem 0; font-size: 14px; font-family: 'Morrison', sans-serif;">@lang('emails.follow_us')</p>
                     <div class="social-icons" style="font-family: 'Morrison', sans-serif;">
                         <a href="https://www.facebook.com/CatchAGuide" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 512 512" fill="#fff"><path d="M512 256C512 114.6 397.4 0 256 0S0 114.6 0 256C0 376 82.7 476.8 194.2 504.5V334.2H141.4V256h52.8V222.3c0-87.1 39.4-127.5 125-127.5c16.2 0 44.2 3.2 55.7 6.4V172c-6-.6-16.5-1-29.6-1c-42 0-58.2 15.9-58.2 57.2V256h83.6l-14.4 78.2H287V510.1C413.8 494.8 512 386.9 512 256h0z"/></svg>

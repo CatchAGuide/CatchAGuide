@@ -16,13 +16,13 @@
     </div>
     <div class="content" style="padding-bottom: 0px;">
         <div class="content-header" style="padding: 20px;">
-            <p style="font-size: 16px;">@lang('emails.dear') <strong>{{$guide->firstname}}</strong>,</p>
-            <p style="font-size: 14px;">
+            <p style="font-size: 14px;">@lang('emails.dear') {{$guide->firstname}},</p>
+            <p style="font-size: 14px;margin-bottom: 0px;">
                 @lang('emails.guide_new_booking_request_text_1')
             </p>
         </div>
     </div>
-    <div class="" style="padding: 20px;">
+    <div class="" style="padding: 0px 20px 20px 20px;">
         <div style="margin-top: 20px; text-align: center;">
             <p style="margin-bottom: 2rem; font-size: 14px;">@lang('emails.guide_new_booking_request_text_2')</p>
             <a class="btn-theme" style="background-color: #e8604c; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px;" href="{{route('booking.accept', [$booking->token])}}">@lang('emails.accept')</a>
@@ -32,7 +32,7 @@
     <div class="order-details" style="border: 1px solid rgb(132, 132, 132); padding: 10px; border-radius: 12px; margin: 20px;">
         <div class="booking-details">
             <p style="font-size: 14px;"><strong>@lang('emails.guest_name'): </strong> {{$user->firstname}}</p>
-            <p style="font-size: 14px;"><strong>@lang('emails.tour'): </strong><a href="{{route('guidings.show', [$guiding->id, $guiding->slug])}}" style="text-decoration: none; font-weight: bold;">{{$guiding->title}}</a></p>
+            <p style="font-size: 14px;"><strong>@lang('emails.tour'): </strong><a href="{{route('guidings.show', [$guiding->id, $guiding->slug])}}" target="_blank" style="text-decoration: none; font-weight: bold;">{{$guiding->title}}</a></p>
             <p style="font-size: 14px;"><strong>@lang('emails.location'): </strong> {{$guiding->location}}</p>
             <p style="font-size: 14px;"><strong>@lang('emails.number_of_guests'): </strong> {{$booking->count_of_users}}</p>
             <p style="font-size: 14px;"><strong>@lang('emails.date'): </strong> {{date('d F Y', strtotime($booking->book_date))}}</p>
@@ -53,10 +53,11 @@
         </div>
     </div>
     <div class="" style="padding: 20px;">
-        <div class="content" style="margin: 2rem 0 0;">
-            <p style="font-size: 14px;">
-                @lang('emails.guide_new_booking_request_text_3')
-            </p>
+        
+        <div style="text-align: center; margin-top: 2rem; padding: 0 20px;">
+            <p style="margin-bottom: 2rem; font-size:14px; text-align: left;"> 
+                @lang('emails.guide_new_booking_request_text_3')</p>
+            <a style="background-color: #e8604c; padding:10px 20px; color:#fff !important; border:0; text-decoration: none; margin-top:30px; display: inline-block;" href="{{route('additional.contact')}}">@lang('emails.contact_us')</a>
         </div>
         <div style="margin-top: 3rem;">
             <p style="font-size: 14px;">
@@ -76,16 +77,16 @@
                 <td style="padding: 10px; text-align: left; width: 50%;">
                     <img class="logo" src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_PNG.png" width="100px" alt="Catchaguide Logo">
                     <p style="font-size: 14px;">
-                        <a href="tel:+49 (0) {{env('CONTACT_NUM')}}" style="color: #fff; font-size: 14px;">+49 (0) {{env('CONTACT_NUM')}}</a>
+                        <a href="tel:+49 (0) {{env('CONTACT_NUM')}}" style="color: #fff; font-size: 14px; text-decoration: none;">+49 (0) {{env('CONTACT_NUM')}}</a>
                     </p>
                     <p style="font-size: 14px;">
-                        <a href="mailto:{{env('TO_CEO')}}" style="color: #fff; font-size: 14px;">{{env('TO_CEO')}}</a>
+                        <a href="mailto:{{env('TO_CEO')}}" style="color: #fff; font-size: 14px; text-decoration: none;">{{env('TO_CEO')}}</a>
                     </p>
                 </td>
                 <td style="padding: 10px;">
-                    <a style="color: #fff;" href="{{route('additional.contact')}}" target="_blank">
-                        <p style="font-size: 14px;">Contact us</p></a>
-                    <p style="margin: .5rem 0; font-size: 14px;">Follow us</p>
+                    <a style="color: #fff; text-decoration: none;" href="{{route('additional.contact')}}" target="_blank">
+                        <p style="font-size: 14px;">@lang('emails.contact_us')</p></a>
+                    <p style="margin: .5rem 0; font-size: 14px;">@lang('emails.follow_us')</p>
                     <div class="social-icons">
                         <a href="https://www.facebook.com/CatchAGuide" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 512 512" fill="#fff"><path d="M512 256C512 114.6 397.4 0 256 0S0 114.6 0 256C0 376 82.7 476.8 194.2 504.5V334.2H141.4V256h52.8V222.3c0-87.1 39.4-127.5 125-127.5c16.2 0 44.2 3.2 55.7 6.4V172c-6-.6-16.5-1-29.6-1c-42 0-58.2 15.9-58.2 57.2V256h83.6l-14.4 78.2H287V510.1C413.8 494.8 512 386.9 512 256h0z"/></svg>
