@@ -25,6 +25,7 @@
                                         <option value="{{ $i }}" data-price="{{ $guiding->price }}">{{ $i }} {{ $i == 1 ? __('booking.person') : __('booking.people') }}</option>
                                     @endfor
                                 @endif
+
                             </select>
                         </div>
                     </div>
@@ -79,6 +80,7 @@
 </div>
 
 
+<script>
 document.addEventListener('DOMContentLoaded', function() {
     const personSelect = document.getElementById('personSelect');
     const priceCalculation = document.getElementById('priceCalculation');
