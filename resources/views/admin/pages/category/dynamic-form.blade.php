@@ -185,6 +185,7 @@
 <script>
     CKEDITOR.replace( 'body' );
     CKEDITOR.replace( 'introduction' );
+    CKEDITOR.replace( 'content' );
 
     function initialize() {
         var input = document.getElementById('searchPlace');
