@@ -1,47 +1,52 @@
 <?php
-use App\Http\Controllers\Admin\AuthenticationController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Auth\PasswordController;
-use App\Http\Controllers\Auth\LoginAuthController;
-use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\Admin\Blog\CategoriesController as AdminCategoriesController;
-use App\Http\Controllers\Admin\Blog\ThreadsController as AdminThreadsController;
+
+use Illuminate\Support\Facades\Route;
+
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\GuidesController;
 use App\Http\Controllers\Admin\BookingsController;
 use App\Http\Controllers\Admin\CustomersController;
 use App\Http\Controllers\Admin\EmployeesController;
-use App\Http\Controllers\Admin\GuidesController;
+use App\Http\Controllers\Admin\EmailLogsController;
 use App\Http\Controllers\Admin\TranslationController;
-use App\Http\Controllers\Admin\GuidingsController as AdminGuidingsController;
 use App\Http\Controllers\Admin\PageAttributeController;
+use App\Http\Controllers\Admin\AuthenticationController;
+use App\Http\Controllers\Admin\FAQController as AdminFaqController;
+use App\Http\Controllers\Admin\Category\AdminCategoryCityController;
+use App\Http\Controllers\Admin\Category\AdminCategoryRegionController;
+use App\Http\Controllers\Admin\Category\AdminCategoryCountryController;
+use App\Http\Controllers\Admin\Category\AdminCategoryTargetFishController;
+use App\Http\Controllers\Admin\GuidingsController as AdminGuidingsController;
+use App\Http\Controllers\Admin\PaymentsController as AdminPaymentsController;
 use App\Http\Controllers\Admin\VacationsController as AdminVacationsController;
-use App\Http\Controllers\Blog\BlogController;
-use App\Http\Controllers\Blog\CategoriesController;
-use App\Http\Controllers\Blog\ThreadsController;
-use App\Http\Controllers\Category\DestinationCountryController;
-use App\Http\Controllers\ChatController;
-use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\Admin\Category\AdminCategoryVacationCountryController;
+use App\Http\Controllers\Admin\Blog\ThreadsController as AdminThreadsController;
+use App\Http\Controllers\Admin\Blog\CategoriesController as AdminCategoriesController;
+use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThreadsController;
 use App\Http\Controllers\FAQController;
-use App\Http\Controllers\GuidingsController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\RatingsController;
 use App\Http\Controllers\SiteMapController;
 use App\Http\Controllers\WelcomeController;
-use App\Http\Controllers\LanguageController;
-use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\BookingController;
-use App\Http\Controllers\GuideThreadController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\GuidingsController;
+use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\Blog\BlogController;
 use App\Http\Controllers\VacationsController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\PaymentsController as AdminPaymentsController;
-use App\Http\Controllers\Admin\FAQController as AdminFaqController;
-use App\Http\Controllers\Admin\Category\AdminCategoryCountryController;
-use App\Http\Controllers\Admin\Category\AdminCategoryRegionController;
-use App\Http\Controllers\Admin\Category\AdminCategoryCityController;
-use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThreadsController;
+use App\Http\Controllers\FileUploadController;
+use App\Http\Controllers\GuideThreadController;
+use App\Http\Controllers\Blog\ThreadsController;
+use App\Http\Controllers\GuideRequestsController;
+use App\Http\Controllers\Auth\PasswordController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\LoginAuthController;
+use App\Http\Controllers\Blog\CategoriesController;
 use App\Http\Controllers\VacationBookingController;
-use App\Http\Controllers\Admin\Category\AdminCategoryVacationCountryController;
-use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Admin\Category\AdminCategoryTargetFishController;
 use App\Http\Controllers\CategoryTargetFishController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Category\DestinationCountryController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -128,7 +133,6 @@ Route::post('/guide', [GuidesController::class, 'store'])->name('guide');
 Route::get('/info',function(){
     return phpinfo();
 });
-
 
 if (app()->environment('production')) {
     Route::middleware(['check_domain:catchaguide.de'])->group(function () {
@@ -373,7 +377,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('target-fish/{id}/language-data', [AdminCategoryTargetFishController::class, 'getLanguageData'])->name('target-fish.language-data');
         });
 
-        Route::get('request-as-guide', [\App\Http\Controllers\GuideRequestsController::class, 'index'])->name('guide-requests.index');
+        Route::get('request-as-guide', [GuideRequestsController::class, 'index'])->name('guide-requests.index');
+
+        Route::get('email-logs', [EmailLogsController::class, 'index'])->name('email-logs.index');
     });
 });
 

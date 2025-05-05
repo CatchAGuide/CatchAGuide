@@ -368,6 +368,7 @@ class Checkout extends Component
             } else {
                 // Check if guest user already exists with this email
                 $user = UserGuest::where('email', $this->userData['email'])->first();
+                $locale = app()->getLocale();
 
                 if (!$user) {
                     // Create new guest user if not found
@@ -382,6 +383,7 @@ class Checkout extends Component
                         'country' => $this->userData['country'],
                         'phone' => $this->userData['phone'],
                         'email' => $this->userData['email'],
+                        'language' => $locale,
                     ]);
                 } else {
                     // Update existing guest user information
@@ -395,6 +397,7 @@ class Checkout extends Component
                         'city' => $this->userData['city'],
                         'country' => $this->userData['country'],
                         'phone' => $this->userData['phone'],
+                        'language' => $locale,
                     ]);
                 }
                 
@@ -436,8 +439,6 @@ class Checkout extends Component
             'email' => $this->userData['email'],
             'token' => $this->generateBookingToken($blockedEvent->id),
         ]);
-
-        Log::debug("User ID: " . $userId . " and Booking details: " . json_encode($this->guiding));
 
         if (!app()->environment('local')) {
             SendCheckoutEmail::dispatch($booking, $user, $this->guiding, $this->guiding->user);

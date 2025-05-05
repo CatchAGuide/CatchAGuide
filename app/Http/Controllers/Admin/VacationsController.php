@@ -93,6 +93,7 @@ class VacationsController extends Controller
                 $formattedData['gallery'] = json_encode($galleryImages);
             }
 
+            Log::info($formattedData);
             // Begin transaction
             DB::beginTransaction();
 

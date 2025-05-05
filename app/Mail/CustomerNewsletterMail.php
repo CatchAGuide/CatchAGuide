@@ -17,9 +17,10 @@ class CustomerNewsletterMail extends Mailable
      *
      * @return void
      */
-    public function __construct($email)
+    public function __construct($email, $locale)
     {
         $this->email = $email;
+        $this->locale = $locale;
     }
 
     /**

@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class RegisterController extends Controller
 {
@@ -86,6 +87,7 @@ class RegisterController extends Controller
             'lastname' => mb_convert_encoding($data['lastname'], 'UTF-8', 'auto'),
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            
         ]);
     }
 
@@ -110,8 +112,11 @@ class RegisterController extends Controller
                 ->withInput();
         }
 
+        $locale = app()->getLocale();
+        $request->merge(['language' => $locale]);
+
         // Create and get the user
-        $user = $this->create($request->all());
+        $user = User::create($request->all());
 
         // Fire registered event
         event(new Registered($user));

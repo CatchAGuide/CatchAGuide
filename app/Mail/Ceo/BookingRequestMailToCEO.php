@@ -13,13 +13,24 @@ class BookingRequestMailToCEO extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public $booking;
+    
+    // Properties for email logging
+    public $type = 'ceo_booking_notification';
+    public $language = 'de'; // As specified in your SendCheckoutEmail job
+    public $target;
 
-    protected $booking;
-
+    /**
+     * Create a new message instance.
+     *
+     * @return void
+     */
     public function __construct(Booking $booking)
     {
         $this->booking = $booking;
-
+        
+        // Set properties for email logging
+        $this->target = 'admin_booking_' . $booking->id;
     }
 
     public function build()

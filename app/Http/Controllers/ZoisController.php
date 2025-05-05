@@ -62,15 +62,24 @@ class ZoisController extends Controller
     {
         $validated = $request->validate([
             'email' => 'required|email',
-            'g-recaptcha-response' => 'recaptcha',
+            'g-recaptcha-response' => app()->environment('production') ? 'recaptcha' : '',
         ]);
 
+        $locale = app()->getLocale();
+
+        $check = Newsletter::where('email',$request->email)->first();
+        if ($check) {
+            return back()->with('message', 'Du bist bereits in unserem Newsletterverteiler aufgenommen. Du kannst diesen jederzeit wieder abbestellen!');
+        }
+        
         $newsletter = new Newsletter();
         $newsletter->email = $request->email;
+        $newsletter->language = $locale;
+
         $newsletter->save();
 
-        Mail::send(new NewsletterMail($request->email));
-        Mail::send(new CustomerNewsletterMail($request->email));
+        Mail::send(new NewsletterMail($request->email,$locale));
+        Mail::send(new CustomerNewsletterMail($request->email,$locale));
         return back()->with('message', 'Vielen Dank wir haben Dich in unseren Newsletterverteiler aufgenommen. Du kannst diesen jederzeit wieder abbestellen!');
     }
 }

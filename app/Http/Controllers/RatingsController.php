@@ -47,7 +47,7 @@ class RatingsController extends Controller
         if ($rating) {
             $booking->is_reviewed = true;
             $booking->save();
-            Mail::to($rating->guide->email)->send(new RatingConfirmation($rating));
+            // Mail::to($rating->guide->email)->send(new RatingConfirmation($rating));
         }
 
         return response()->json([

@@ -14,6 +14,9 @@ class GuideReminder12Hours extends Mailable
 
     public $booking;
     public $guide;
+    public $language;
+    public $target;
+    public $type = 'guide_reminder_12hrs';
 
     /**
      * Create a new message instance.
@@ -24,6 +27,8 @@ class GuideReminder12Hours extends Mailable
     {
         $this->booking = $booking;
         $this->guide = $guide;
+        $this->language = $guide?->language ?? app()->getLocale();
+        $this->target = 'booking_' . $booking->id;
     }
 
     /**

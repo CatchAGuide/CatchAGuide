@@ -21,6 +21,7 @@ class UserGuest extends Model
         'country',
         'phone',
         'email',
+        'language',
     ];
 
     public function bookings(): HasMany

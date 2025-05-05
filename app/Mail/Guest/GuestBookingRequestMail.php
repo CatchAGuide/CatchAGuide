@@ -12,18 +12,31 @@ class GuestBookingRequestMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    protected $booking;
-    protected $user;
-    protected $guiding;
-    protected $guide;
+    public $booking;
+    public $user;
+    public $guiding;
+    public $guide;
+    
+    // Properties for email logging
+    public $type = 'guest_booking_request';
+    public $language;
+    public $target;
 
-
-    public function __construct(Booking $booking,$user,$guiding,$guide)
+    /**
+     * Create a new message instance.
+     *
+     * @return void
+     */
+    public function __construct($booking, $user, $guiding, $guide)
     {
         $this->booking = $booking;
         $this->user = $user;
         $this->guiding = $guiding;
         $this->guide = $guide;
+        
+        // Set properties for email logging
+        $this->language = $user->language ?? app()->getLocale();
+        $this->target = 'booking_' . $booking->id;
     }
 
     /**
