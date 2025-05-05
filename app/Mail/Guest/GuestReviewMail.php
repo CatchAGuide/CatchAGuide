@@ -15,6 +15,9 @@ class GuestReviewMail extends Mailable
     public $booking;
     public $guide;
     public $user;
+    public $language;
+    public $target;
+    public $type = 'guest_review';
 
     /**
      * Create a new message instance.
@@ -26,6 +29,8 @@ class GuestReviewMail extends Mailable
         $this->booking = $booking;
         $this->guide = $booking->guiding;
         $this->user = $booking->user;
+        $this->language = $this->user?->language ?? app()->getLocale();
+        $this->target = 'booking_' . $booking->id;
     }
 
     /**

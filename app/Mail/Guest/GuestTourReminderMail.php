@@ -18,6 +18,9 @@ class GuestTourReminderMail extends Mailable
      * @var Booking
      */
     public $booking;
+    public $language;
+    public $target;
+    public $type = 'guest_tour_reminder';
 
     /**
      * Create a new message instance.
@@ -28,6 +31,10 @@ class GuestTourReminderMail extends Mailable
     public function __construct(Booking $booking)
     {
         $this->booking = $booking;
+        
+        // Set properties for email logging
+        $this->language = $booking->is_guest ? $booking->email : $booking->user?->language ?? app()->getLocale();
+        $this->target = 'booking_' . $booking->id;
     }
 
     /**

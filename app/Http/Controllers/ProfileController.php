@@ -88,7 +88,7 @@ class ProfileController extends Controller
         } else {
             $user->information->create($request->information);
         }
-        $user->language_speak = json_encode($request->get('language_speak'));
+        $user->language = json_encode($request->get('language_speak'));
         $user->tax_id = $request->get('information')['tax_id'];
         $user->phone = $request->phone;
 

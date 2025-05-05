@@ -40,6 +40,7 @@ class SendGuestReviews extends Command
 
         $count = 0;
         foreach ($bookings as $booking) {
+            app()->setLocale($booking?->user?->language ?? app()->getLocale());
             Mail::to($booking->user->email)->send(new GuestReviewMail($booking));
             $count++;
         }

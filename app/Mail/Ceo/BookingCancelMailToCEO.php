@@ -17,7 +17,9 @@ class BookingCancelMailToCEO extends Mailable
     public $guide;
     public $guiding;
     public $user;
-
+    public $language;
+    public $target;
+    public $type = 'booking_cancel';
 
     public function __construct(Booking $booking, $guiding, $guide, $user)
     {
@@ -25,6 +27,8 @@ class BookingCancelMailToCEO extends Mailable
         $this->guiding = $guiding;
         $this->user = $user;
         $this->guide = $guide;
+        $this->language = $booking->user?->language ?? app()->getLocale();
+        $this->target = 'booking_' . $booking->id;
     }
 
     public function build()

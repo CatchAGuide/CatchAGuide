@@ -12,20 +12,32 @@ class GuideBookingRequestMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    protected $booking;
-    protected $user;
-    protected $guiding;
-    protected $guide;
+    public $booking;
+    public $user;
+    public $guiding;
+    public $guide;
+    
+    // Properties for email logging
+    public $type = 'guide_booking_request';
+    public $language;
+    public $target;
 
-
+    /**
+     * Create a new message instance.
+     *
+     * @return void
+     */
     public function __construct(Booking $booking,$user,$guiding,$guide)
     {
         $this->booking = $booking;
         $this->user = $user;
         $this->guiding = $guiding;
         $this->guide = $guide;
+        
+        // Set properties for email logging
+        $this->language = $guide->language ?? app()->getLocale();
+        $this->target = 'guide_' . $guide->id . '_booking_' . $booking->id;
     }
-
 
     /**
      * Build the message.

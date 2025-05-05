@@ -201,6 +201,9 @@
                 form.querySelector('input[name="country"]').value = country;
                 form.querySelector('input[name="region"]').value = region;
                 
+                console.log(city);
+                console.log(country);
+                console.log(region);
                 // Set the full formatted address in the location input
                 locationInput.value = place.formatted_address;
             });
@@ -229,6 +232,7 @@
         addButtons.forEach(button => {
             button.removeEventListener('click', addItemHandler);
             button.addEventListener('click', function(e) {
+                console.log('Button clicked');
                 addItemHandler.call(this, e);
                 // Initialize CKEditor for newly added textarea
                 setTimeout(() => {

@@ -14,11 +14,15 @@ class BookingAcceptMailToCEO extends Mailable
     use Queueable, SerializesModels;
 
     protected $booking;
-
+    public $language;
+    public $target;
+    public $type = 'booking_accept';
 
     public function __construct(Booking $booking)
     {
         $this->booking = $booking;
+        $this->language = $booking->user?->language ?? app()->getLocale();
+        $this->target = 'booking_' . $booking->id;
     }
 
     public function build()

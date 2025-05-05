@@ -11,15 +11,22 @@ class NewsletterMail extends Mailable
     use Queueable, SerializesModels;
 
     public $email;
+    public $locale;
+    public $target;
+    public $language;
+    public $type = 'newsletter';
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($email)
+    public function __construct($email, $locale)
     {
         $this->email = $email;
+        $this->locale = $locale;
+        $this->target = 'newsletter';
+        $this->language = $locale;
     }
 
     /**

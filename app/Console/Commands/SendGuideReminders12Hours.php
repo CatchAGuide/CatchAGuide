@@ -2,10 +2,13 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Booking;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
+
+
+use App\Models\Booking;
+use App\Mail\GuideReminder12Hours;
 
 class SendGuideReminders12Hours extends Command
 {
@@ -44,7 +47,8 @@ class SendGuideReminders12Hours extends Command
             $guide = $booking->guiding->user;
             
             // Create a mailable class for the 12-hour reminder
-            Mail::send(new \App\Mail\GuideReminder12Hours($booking, $guide));
+            app()->setLocale($guide?->language ?? app()->getLocale());
+            Mail::send(new GuideReminder12Hours($booking, $guide));
             
             $count++;
         }
