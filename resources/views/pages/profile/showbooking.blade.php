@@ -237,7 +237,7 @@
         </div>
         
 
-            @if(!$authUser->is_guide)
+            {{-- @if(!$authUser->is_guide)
                 @if($booking->blocked_event)
                     @if(\Carbon\Carbon::now() < $booking->blocked_event->from && $booking->status != "storniert")
                         <a href="{{route('profile.stornobooking', $booking->id)}}">
@@ -245,7 +245,7 @@
                         </a>
                     @endif
                 @endif
-            @endif
+            @endif --}}
 
 
     </div>
