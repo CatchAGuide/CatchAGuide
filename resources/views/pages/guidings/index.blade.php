@@ -589,8 +589,10 @@
                                             @php
                                                 $priceMin = request()->get('price_min');
                                                 $priceMax = request()->get('price_max');
-                                                $showPriceMin = isset($priceMin) && $priceMin != 50;
-                                                $showPriceMax = isset($priceMax) && $priceMax != 1000;
+                                                $defaultMinPrice = 50;
+                                                $defaultMaxPrice = isset($overallMaxPrice) ? $overallMaxPrice : 1000;
+                                                $showPriceMin = isset($priceMin) && $priceMin != $defaultMinPrice;
+                                                $showPriceMax = isset($priceMax) && $priceMax != $defaultMaxPrice;
                                             @endphp
                                             @if($showPriceMin || $showPriceMax)
                                                 <span class="badge bg-light text-dark border">
@@ -1295,10 +1297,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             // Check price range separately
+            const defaultMinPrice = 50;
+            const defaultMaxPrice = {{ isset($overallMaxPrice) ? $overallMaxPrice : 1000 }}; // Use the actual max price from controller
             const priceMin = parseInt(urlParams.get('price_min'));
             const priceMax = parseInt(urlParams.get('price_max'));
-            if (priceMin && priceMin !== 50) activeFilterCount++;
-            if (priceMax && priceMax !== window.maxPrice) activeFilterCount++;
+            
+            if (priceMin && priceMin !== defaultMinPrice) activeFilterCount++;
+            if (priceMax && priceMax !== defaultMaxPrice) activeFilterCount++;
 
             // Update the counter
             const filterCounter = document.getElementById('active-filter-counter');
