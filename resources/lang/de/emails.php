@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'dear' => 'Lieber',
+    'dear' => 'Hallo',
     'catchaguide_team' => 'Das Catch A Guide Team',
     'best_regards' => 'Mit freundlichen Grüßen,',
     'guest_name' => 'Gast',
