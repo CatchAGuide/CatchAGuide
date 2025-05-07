@@ -1580,12 +1580,19 @@
         .tour-details-two__book-tours {
             width: 400px; /* Fixed width for desktop */
             margin-left: auto; /* Center if needed */
+            position: relative; /* Add this */
+            z-index: 1; /* Add this to ensure proper stacking */
         }
     }
 
     @media (max-width: 767.98px) {
         .tour-details-two__book-tours {
             width: 100%; /* Fluid width for mobile */
+        }
+        
+        .contact-card {
+            position: relative; /* Add this */
+            z-index: 1; /* Add this to ensure proper stacking */
         }
     }
     
