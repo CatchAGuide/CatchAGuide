@@ -15,6 +15,9 @@ class BookingConfirmationMail extends Mailable
     public $guide;
     public $guiding;
     public $booking;
+    public $language;
+    public $target;
+    public $type = 'booking_confirmation_mail';
     private $phoneFromUser;
 
     /**
@@ -29,6 +32,8 @@ class BookingConfirmationMail extends Mailable
         $this->guide = $guide;
         $this->booking = $booking;
         $this->phoneFromUser = $phoneFromUser;
+        $this->language = $guide?->language ?? app()->getLocale();
+        $this->target = 'booking_' . $booking->id;
     }
 
     /**

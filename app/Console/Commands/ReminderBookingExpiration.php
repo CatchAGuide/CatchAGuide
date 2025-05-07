@@ -30,6 +30,9 @@ class ReminderBookingExpiration extends Command
      */
     protected $description = 'Command description';
 
+    protected $language;
+    protected $target;
+
     /**
      * Create a new command instance.
      *

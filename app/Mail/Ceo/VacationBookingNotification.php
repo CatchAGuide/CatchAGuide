@@ -12,10 +12,15 @@ class VacationBookingNotification extends Mailable
     use Queueable, SerializesModels;
 
     public $booking;
+    public $language;
+    public $target;
+    public $type = 'vacation_booking_notification';
 
     public function __construct(VacationBooking $booking)
     {
         $this->booking = $booking;
+        $this->language = $booking->user->language;
+        $this->target = 'booking_' . $booking->id;
     }
 
     public function build()

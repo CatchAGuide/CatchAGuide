@@ -15,6 +15,10 @@ class BookingConfirmationMailGuest extends Mailable
     public $guide;
     public $guiding;
     private $phoneFromUser;
+    public $language;
+    public $target;
+    public $type = 'booking_confirmation_mail_guest';
+
 
     /**
      * Create a new message instance.
@@ -28,6 +32,8 @@ class BookingConfirmationMailGuest extends Mailable
         $this->user = $user;
         $this->guide = $guide;
         $this->phoneFromUser = $phoneFromUser;
+        $this->language = $user?->language ?? app()->getLocale();
+        $this->target = 'booking_' . $booking->id;
     }
 
     /**

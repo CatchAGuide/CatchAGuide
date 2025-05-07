@@ -13,6 +13,9 @@ class CustomerContactMail extends Mailable
     public $name;
     public $email;
     public $description;
+    public $language;
+    public $target;
+    public $type = 'customer_contact_mail';
 
     /**
      * Create a new message instance.
@@ -24,6 +27,8 @@ class CustomerContactMail extends Mailable
         $this->name = $name;
         $this->email = $email;
         $this->description = $description;
+        $this->language = app()->getLocale();
+        $this->target = 'customer_contact_mail';
     }
 
     /**

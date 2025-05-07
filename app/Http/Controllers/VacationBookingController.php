@@ -81,6 +81,7 @@ class VacationBookingController extends Controller
         // Send email notification
         try {
             Mail::to(env('TO_CEO'))->send(new VacationBookingNotification($booking));
+            // Mail::to($booking->email)->send(new VacationBookingNotification($booking));
         } catch (\Exception $e) {
             Log::error('Failed to send booking notification email:', [
                 'booking_id' => $booking->id,

@@ -12,7 +12,9 @@ class CustomerGuidesMail extends Mailable
 
     public $name;
     public $email;
-
+    public $language;
+    public $target;
+    public $type = 'customerguidesmail';
     /**
      * Create a new message instance.
      *
@@ -22,6 +24,8 @@ class CustomerGuidesMail extends Mailable
     {
         $this->name = $name;
         $this->email = $email;
+        $this->language = app()->getLocale();
+        $this->target = 'customerguidesmail';   
     }
 
     /**

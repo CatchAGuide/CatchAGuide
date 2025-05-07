@@ -26,7 +26,9 @@ class GuideUpcomingTourMail extends Mailable
      * @var \App\Models\Booking
      */
     public $booking;
-
+    public $language;
+    public $target;
+    public $type = 'guide_reminder_upcoming_tour';
     /**
      * Create a new message instance.
      *
@@ -38,6 +40,8 @@ class GuideUpcomingTourMail extends Mailable
     {
         $this->guide = $guide;
         $this->booking = $booking;
+        $this->language = $guide->user->language;
+        $this->target = 'booking_' . $booking->id;
     }
 
     /**

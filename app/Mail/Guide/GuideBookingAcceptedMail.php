@@ -15,10 +15,15 @@ class GuideBookingAcceptedMail extends Mailable
     use Queueable, SerializesModels;
 
     protected $booking;
+    public $language;
+    public $target;
+    public $type = 'guide_booking_accepted_mail';   
 
     public function __construct(Booking $booking)
     {
           $this->booking = $booking;
+          $this->language = $booking->guiding?->user?->language ?? app()->getLocale();
+          $this->target = 'booking_' . $booking->id;
     }
 
     /**

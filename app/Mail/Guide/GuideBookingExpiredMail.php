@@ -22,6 +22,9 @@ class GuideBookingExpiredMail extends Mailable
     protected $user;
     protected $guiding;
     protected $guide;
+    public $language;
+    public $target;
+    public $type = 'guide_booking_expired';
 
     public function __construct(Booking $booking,$user,$guiding,$guide)
     {
@@ -29,6 +32,8 @@ class GuideBookingExpiredMail extends Mailable
         $this->user = $user;
         $this->guiding = $guiding;
         $this->guide = $guide;
+        $this->language = $guide->user->language;
+        $this->target = 'booking_' . $booking->id;
     }
 
     /**

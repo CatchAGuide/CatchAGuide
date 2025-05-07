@@ -24,6 +24,9 @@ class GuideEmail extends Mailable
     public $favorite_fish;
     public $years;
     private $taxId;
+    public $language;
+    public $target;
+    public $type = 'guide_email';
 
 
     /**
@@ -47,6 +50,8 @@ class GuideEmail extends Mailable
         $this->favorite_fish = $favorite_fish;
         $this->years = $years;
         $this->taxId = $taxId;
+        $this->language = app()->getLocale();
+        $this->target = 'guide_email';
     }
 
     /**

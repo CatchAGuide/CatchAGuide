@@ -18,6 +18,10 @@ class StorniGuidingMail extends Mailable
     public $guide;
     public $guiding;
     public $booking;
+    public $language;
+    public $target;
+    public $type = 'storni_guiding_mail';
+
 
     /**
      * Create a new message instance.
@@ -30,6 +34,8 @@ class StorniGuidingMail extends Mailable
         $this->guiding = $guiding;
         $this->user = $user;
         $this->guide = $guide;
+        $this->language = $user->language;
+        $this->target = 'booking_' . $booking->id;
     }
 
     /**

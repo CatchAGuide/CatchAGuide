@@ -17,6 +17,10 @@ class BookingExpireMailToCEO extends Mailable
     public $guide;
     public $guiding;
     public $user;
+    public $language;
+    public $target;
+    public $type = 'booking_expire_mail_to_ceo';
+
 
     public function __construct(Booking $booking, $guiding, $guide, $user)
     {
@@ -24,6 +28,8 @@ class BookingExpireMailToCEO extends Mailable
         $this->guiding = $guiding;
         $this->user = $user;
         $this->guide = $guide;
+        $this->language = $user->language;
+        $this->target = 'booking_' . $booking->id;
     }
 
 

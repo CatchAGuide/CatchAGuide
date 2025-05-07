@@ -14,11 +14,16 @@ class AutomaticRegistrationMail extends Mailable
 
     protected $user;
     protected $tempPassword;
+    public $language;   
+    public $target;
+    public $type = 'automatic_registration_mail';
 
     public function __construct($user,$tempPassword)
     {
         $this->user = $user;
         $this->tempPassword = $tempPassword;
+        $this->language = app()->getLocale();
+        $this->target = 'automatic_registration_mail';
     }
 
     /**
