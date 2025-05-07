@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\VacationBooking;
 use Illuminate\Http\Request;
-use App\Models\Vacation;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\Ceo\VacationBookingNotification;
 
+use App\Models\Vacation;
+use App\Models\VacationBooking;
+use App\Mail\Ceo\VacationBookingNotification;
+use App\Mail\Guest\GuestVacationBookingNotification;
 class VacationBookingController extends Controller
 {
     public function store(Request $request)
@@ -81,7 +82,7 @@ class VacationBookingController extends Controller
         // Send email notification
         try {
             Mail::to(env('TO_CEO'))->send(new VacationBookingNotification($booking));
-            // Mail::to($booking->email)->send(new VacationBookingNotification($booking));
+            Mail::to($booking->email)->send(new GuestVacationBookingNotification($booking));
         } catch (\Exception $e) {
             Log::error('Failed to send booking notification email:', [
                 'booking_id' => $booking->id,

@@ -154,4 +154,9 @@ return [
     'guest_tour_reminder_text_5' => 'Wir sind sicher, dass Du eine unvergessliche Erfahrung mit [Guide Name] haben wirst.',
     'guest_tour_reminder_text_6' => 'Wenn Du Fragen hast oder weitere Unterstützung benötigst, zögere nicht, uns zu kontaktieren:',
     'guest_tour_reminder_text_7' => 'Wir wünschen Dir eine fantastische Angeltour!',
+
+    'guest_vacation_booking_notification_title' => 'Neue Urlaubsbuchungsanfrage',
+    'guest_vacation_booking_notification_text_2' => 'Wir haben eine neue Urlaubsbuchungsanfrage erhalten. Bitte überprüfe die Details unten:',
+    'guest_vacation_booking_notification_text_3' => 'Buchungsübersicht:',
+    'guest_vacation_booking_notification_text_6' => 'Wir werden Dich bald kontaktieren, sobald die Buchung bestätigt ist.',
 ];
