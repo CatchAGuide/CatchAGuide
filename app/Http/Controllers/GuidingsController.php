@@ -49,6 +49,9 @@ class GuidingsController extends Controller
             Session::put('random_seed', $randomSeed);
         }
 
+        // Clean up request parameters before processing
+        $cleanedRequest = $this->cleanRequestParameters($request);
+        
         // Eager load relationships to avoid N+1 problem
         $baseQuery = Guiding::with(['target_fish', 'methods', 'water_types', 'boatType'])
             ->select(['*', DB::raw('(
@@ -177,8 +180,8 @@ class GuidingsController extends Controller
         $filteredQuery = clone $baseQuery;
         
         // If coming from destination page, get the destination context
-        if ($request->has('from_destination')) {
-            $destination = Destination::where('id', $request->input('destination_id'))->first();
+        if ($cleanedRequest->has('from_destination')) {
+            $destination = Destination::where('id', $cleanedRequest->input('destination_id'))->first();
             
             if ($destination) {
                 switch ($destination->type) {
@@ -199,15 +202,15 @@ class GuidingsController extends Controller
         }
 
         // Apply sorting
-        $hasOnlyPageParam = count(array_diff(array_keys($request->all()), ['page'])) === 0;
-        $isFirstPage = !$request->has('page') || $request->get('page') == 1;
+        $hasOnlyPageParam = count(array_diff(array_keys($cleanedRequest->all()), ['page'])) === 0;
+        $isFirstPage = !$cleanedRequest->has('page') || $cleanedRequest->get('page') == 1;
 
         if ($hasOnlyPageParam && $isFirstPage) {
             $filteredQuery->orderByRaw("RAND($randomSeed)");
         } else {
             // Default ordering for all other cases
-            if ($request->has('sortby') && !empty($request->get('sortby'))) {
-                switch ($request->get('sortby')) {
+            if ($cleanedRequest->has('sortby') && !empty($cleanedRequest->get('sortby'))) {
+                switch ($cleanedRequest->get('sortby')) {
                     case 'newest':
                         $filteredQuery->orderBy('created_at', 'desc');
                         break;
@@ -234,18 +237,18 @@ class GuidingsController extends Controller
         }
 
         // Apply title and filter title
-        if($request->has('page')){
-            $title .= __('guidings.Page') . ' ' . $request->page . ' - ';
+        if($cleanedRequest->has('page')){
+            $title .= __('guidings.Page') . ' ' . $cleanedRequest->page . ' - ';
         }
 
         // Apply method filters
-        if($request->has('methods') && !empty($request->get('methods'))){
-            $requestMethods = array_filter($request->get('methods'));
+        if($cleanedRequest->has('methods') && !empty($cleanedRequest->get('methods'))){
+            $requestMethods = array_filter($cleanedRequest->get('methods'));
 
             if(count($requestMethods)){
                 $title .= __('guidings.Method') . ' (';
                 $filter_title .= __('guidings.Method') . ' (';
-                $method_rows = Method::whereIn('id', $request->methods)->get();
+                $method_rows = Method::whereIn('id', $cleanedRequest->methods)->get();
                 $title_row = '';
                 foreach ($method_rows as $row) {
                     $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
@@ -264,13 +267,13 @@ class GuidingsController extends Controller
         }
 
         // Apply water filters
-        if($request->has('water') && !empty($request->get('water'))){
-            $requestWater = array_filter($request->get('water'));
+        if($cleanedRequest->has('water') && !empty($cleanedRequest->get('water'))){
+            $requestWater = array_filter($cleanedRequest->get('water'));
 
             if(count($requestWater)){
                 $title .= __('guidings.Water') . ' (';
                 $filter_title .= __('guidings.Water') . ' (';
-                $method_rows = Water::whereIn('id', $request->water)->get();
+                $method_rows = Water::whereIn('id', $cleanedRequest->water)->get();
                 $title_row = '';
                 foreach ($method_rows as $row) {
                     $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
@@ -289,8 +292,8 @@ class GuidingsController extends Controller
         }
 
         // Apply target fish filters
-        if($request->has('target_fish')){
-            $requestFish = array_filter($request->target_fish);
+        if($cleanedRequest->has('target_fish')){
+            $requestFish = array_filter($cleanedRequest->target_fish);
 
             if(count($requestFish)){
                 $title .= __('guidings.Target_Fish') . ' (';
@@ -314,10 +317,10 @@ class GuidingsController extends Controller
         }
 
         // Apply price filters
-        if(($request->has('price_min') && $request->get('price_min') !== "") && ($request->has('price_max') && $request->get('price_max') !== "")){
+        if(($cleanedRequest->has('price_min') && $cleanedRequest->get('price_min') !== "") && ($cleanedRequest->has('price_max') && $cleanedRequest->get('price_max') !== "")){
             // if ($minPrice != $request->get('price_min') || $overallMaxPrice != $request->get('price_max')){
-                $min_price = $request->get('price_min');
-                $max_price = $request->get('price_max');
+                $min_price = $cleanedRequest->get('price_min');
+                $max_price = $cleanedRequest->get('price_max');
 
                 $title .= 'Price ' . $min_price . '€ - ' . $max_price . '€ | ';
                 $filter_title .= 'Price ' . $min_price . '€ - ' . $max_price . '€, ';
@@ -328,36 +331,36 @@ class GuidingsController extends Controller
         }
 
         // Apply duration filters
-        if ($request->has('duration_types') && !empty($request->get('duration_types'))) {
-            $filteredQuery->whereIn('duration_type', $request->get('duration_types'));
+        if ($cleanedRequest->has('duration_types') && !empty($cleanedRequest->get('duration_types'))) {
+            $filteredQuery->whereIn('duration_type', $cleanedRequest->get('duration_types'));
         }
 
         // Apply person filters
-        if($request->has('num_persons')){
-            $title .= __('guidings.Number of People') . ' ' . $request->get('num_persons') . ' | ';
-            $filter_title .= __('guidings.Number of People') . ' ' . $request->get('num_persons') . ', ';
+        if($cleanedRequest->has('num_persons')){
+            $title .= __('guidings.Number of People') . ' ' . $cleanedRequest->get('num_persons') . ' | ';
+            $filter_title .= __('guidings.Number of People') . ' ' . $cleanedRequest->get('num_persons') . ', ';
             
             // For single selection, we just need to check if the guiding supports at least this many people
-            $minPersons = $request->get('num_persons');
+            $minPersons = $cleanedRequest->get('num_persons');
             $filteredQuery->where('max_guests', '>=', $minPersons);
         }
 
         // Apply radius filters
         $radius = null; // Radius in miles
-        if($request->has('radius')){
-            $title .= __('guidings.Radius') . ' ' . $request->radius . 'km | ';
-            $filter_title .= __('guidings.Radius') . ' ' . $request->radius . 'km, ';
-            $radius = $request->get('radius');
+        if($cleanedRequest->has('radius')){
+            $title .= __('guidings.Radius') . ' ' . $cleanedRequest->radius . 'km | ';
+            $filter_title .= __('guidings.Radius') . ' ' . $cleanedRequest->radius . 'km, ';
+            $radius = $cleanedRequest->get('radius');
         }
 
         // Apply location filters
-        $placeLat = $request->get('placeLat');
-        $placeLng = $request->get('placeLng');
+        $placeLat = $cleanedRequest->get('placeLat');
+        $placeLng = $cleanedRequest->get('placeLng');
 
-        if(!empty($placeLat) && !empty($placeLng) && !empty($request->get('place'))){
+        if(!empty($placeLat) && !empty($placeLng) && !empty($cleanedRequest->get('place'))){
             $title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
             $filter_title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ', ';
-            $guidingFilter = Guiding::locationFilter($request->get('city'), $request->get('country'), $request->get('region') ?? null, $radius, $placeLat, $placeLng);
+            $guidingFilter = Guiding::locationFilter($cleanedRequest->get('city'), $cleanedRequest->get('country'), $cleanedRequest->get('region') ?? null, $radius, $placeLat, $placeLng);
             $searchMessage = $guidingFilter['message'];
             
             // Add a subquery to order by the position in the filtered IDs array
@@ -435,9 +438,9 @@ class GuidingsController extends Controller
         // 5. Get other guidings if needed
         $otherguidings = [];
         if($allGuidings->isEmpty() || count($allGuidings) <= 10){
-            if($request->has('placeLat') && $request->has('placeLng') && !empty($request->get('placeLat')) && !empty($request->get('placeLng')) ){
-                $latitude = $request->get('placeLat');
-                $longitude = $request->get('placeLng');
+            if($cleanedRequest->has('placeLat') && $cleanedRequest->has('placeLng') && !empty($cleanedRequest->get('placeLat')) && !empty($cleanedRequest->get('placeLng')) ){
+                $latitude = $cleanedRequest->get('placeLat');
+                $longitude = $cleanedRequest->get('placeLng');
                 $otherguidings = $this->otherGuidingsBasedByLocation($latitude, $longitude, $allGuidings);
             } else {
                 $otherguidings = $this->otherGuidings();
@@ -457,7 +460,7 @@ class GuidingsController extends Controller
         $guiding_methods = Method::select('id', 'name', 'name_en')->orderBy('name')->get();
 
         // Check if mobile
-        $isMobile = $request->get('ismobile') == 'true' || app('agent')->isMobile();
+        $isMobile = $cleanedRequest->get('ismobile') == 'true' || app('agent')->isMobile();
 
         // Ensure personCounts is always an array
         if (empty($personCounts)) {
@@ -474,7 +477,7 @@ class GuidingsController extends Controller
         // }, $priceRanges);
 
         // Handle AJAX requests
-        if ($request->ajax()) {
+        if ($cleanedRequest->ajax()) {
             $view = view('pages.guidings.partials.guiding-list', [
                 'title' => $title,
                 'filter_title' => $filter_title,
@@ -567,6 +570,48 @@ class GuidingsController extends Controller
             'maxPrice' => $overallMaxPrice,
             'overallMaxPrice' => $overallMaxPrice,
         ]);
+    }
+
+    /**
+     * Clean up request parameters before processing
+     */
+    private function cleanRequestParameters(Request $request)
+    {
+        // Only process if price parameters exist
+        if (!$request->has('price_min') && !$request->has('price_max')) {
+            return $request; // Return original request if no price parameters
+        }
+        
+        // Clone the request only if we need to modify it
+        $cleanedRequest = clone $request;
+        $requestData = $cleanedRequest->all();
+        
+        // Get default values (use cached value for max price)
+        $defaultMinPrice = 50;
+        $cacheKey = 'guiding_price_ranges';
+        $defaultMaxPrice = Cache::has($cacheKey) ? Cache::get($cacheKey)['maxPrice'] : 1000;
+        
+        // Check and remove price parameters if they match defaults
+        $modified = false;
+        
+        if (isset($requestData['price_min']) && (int)$requestData['price_min'] === $defaultMinPrice) {
+            unset($requestData['price_min']);
+            $modified = true;
+        }
+        
+        if (isset($requestData['price_max']) && (int)$requestData['price_max'] === $defaultMaxPrice) {
+            unset($requestData['price_max']);
+            $modified = true;
+        }
+        
+        // Only replace if we actually modified something
+        if ($modified) {
+            $cleanedRequest->replace($requestData);
+            return $cleanedRequest;
+        }
+        
+        // Return original request if no changes needed
+        return $request;
     }
 
     public function newShow($id, $slug, Request $request)

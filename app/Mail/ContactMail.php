@@ -14,6 +14,9 @@ class ContactMail extends Mailable
     public $email;
     public $description;
     public $phone;
+    public $language;
+    public $target;
+    public $type = 'contact_mail';
 
     /**
      * Create a new message instance.
@@ -26,6 +29,8 @@ class ContactMail extends Mailable
         $this->email = $email;
         $this->description = $description;
         $this->phone = $phone;
+        $this->language = app()->getLocale();
+        $this->target = 'contact_mail';
     }
 
     /**

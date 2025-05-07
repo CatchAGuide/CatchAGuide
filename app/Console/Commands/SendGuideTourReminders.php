@@ -42,21 +42,36 @@ class SendGuideTourReminders extends Command
         
         $bookings = $query->get();
         
-
         $count = 0;
         foreach ($bookings as $booking) {
             // Get the guide from the guiding relationship
             $guide = $booking->guiding->user;
+            
+            // Define language and type for logging
+            $language = $guide->language ?? config('app.locale');
+            $type = 'guide_reminder';
+            $target = 'booking_' . $booking->id;
             
             // Send the reminder email
             Mail::send('mails.guide.guide_reminder', [
                 'guide' => $guide,
                 'booking' => $booking,
                 'guideName' => $guide->name,
-            ], function ($message) use ($guide) {
+                'language' => $language,
+                'type' => $type,
+                'target' => $target,
+            ], function ($message) use ($guide, $language, $type, $target) {
                 $message->to($guide->email)
-                    ->subject(__('emails.guide_reminder_to_respond_24hrs_title'));
+                    ->subject(__('emails.guide_reminder_to_respond_24hrs_title'))
+                    ->with([
+                        'language' => $language,
+                        'type' => $type,
+                        'target' => $target,
+                    ]);
             });
+            
+            // Log the email
+            $this->info("Sent guide reminder email to {$guide->email} for booking #{$booking->id} in {$language}");
             
             $count++;
         }

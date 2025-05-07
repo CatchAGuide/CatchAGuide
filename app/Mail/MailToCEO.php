@@ -14,6 +14,10 @@ class MailToCEO extends Mailable
     private $guiding;
     private $user;
     private $guide;
+    public $language;
+    public $target;
+    public $type = 'mailtoceo';
+
 
     /**
      * Create a new message instance.
@@ -26,6 +30,8 @@ class MailToCEO extends Mailable
         $this->guiding = $guiding;
         $this->user = $user;
         $this->guide = $guide;
+        $this->language = app()->getLocale();
+        $this->target = 'booking_' . $booking->id;
     }
 
     /**

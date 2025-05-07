@@ -158,4 +158,9 @@ return [
     'guest_tour_reminder_text_5' => 'We are sure you will have an unforgettable experience with [Guide Name].',
     'guest_tour_reminder_text_6' => 'If you have any questions or need further assistance, please don\'t hesitate to contact us:',
     'guest_tour_reminder_text_7' => 'We wish you a fantastic fishing experience!',
+
+    'guest_vacation_booking_notification_title' => 'New Vacation Booking Request',
+    'guest_vacation_booking_notification_text_2' => 'We have received a new vacation booking request. Please review the details below:',
+    'guest_vacation_booking_notification_text_3' => 'Booking Summary:',
+    'guest_vacation_booking_notification_text_6' => 'We will contact you soon once the booking is confirmed.',
 ];

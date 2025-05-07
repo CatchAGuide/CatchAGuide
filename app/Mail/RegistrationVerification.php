@@ -13,6 +13,9 @@ class RegistrationVerification extends Mailable
     use Queueable, SerializesModels;
 
     public $user;
+    public $language;
+    public $target;
+    public $type = 'registration_verification';
 
     /**
      * Create a new message instance.
@@ -22,6 +25,8 @@ class RegistrationVerification extends Mailable
     public function __construct($user)
     {
         $this->user = $user;
+        $this->language = app()->getLocale();
+        $this->target = 'registration_verification';
     }
 
     /**

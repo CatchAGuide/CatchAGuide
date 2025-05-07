@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\EmailLogsController;
 use App\Http\Controllers\Admin\TranslationController;
 use App\Http\Controllers\Admin\PageAttributeController;
 use App\Http\Controllers\Admin\AuthenticationController;
+use App\Http\Controllers\Admin\ContactRequestsController;
 use App\Http\Controllers\Admin\FAQController as AdminFaqController;
 use App\Http\Controllers\Admin\Category\AdminCategoryCityController;
 use App\Http\Controllers\Admin\Category\AdminCategoryRegionController;
@@ -380,6 +381,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('request-as-guide', [GuideRequestsController::class, 'index'])->name('guide-requests.index');
 
         Route::get('email-logs', [EmailLogsController::class, 'index'])->name('email-logs.index');
+        Route::get('contact-requests', [ContactRequestsController::class, 'index'])->name('contact-requests.index');
     });
 });
 

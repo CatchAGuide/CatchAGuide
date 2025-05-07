@@ -12,6 +12,10 @@ class GuidingRequestMail extends Mailable
 {
     use Queueable, SerializesModels;
     public $request;
+    public $language;   
+    public $target;
+    public $type = 'guiding_request_mail';
+
 
     /**
      * Create a new message instance.
@@ -21,6 +25,8 @@ class GuidingRequestMail extends Mailable
     public function __construct(SearchRequest $request)
     {
         $this->request = $request;
+        $this->language = $request->user->language;
+        $this->target = 'guiding_request_mail';
     }
 
     /**

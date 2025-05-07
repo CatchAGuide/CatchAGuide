@@ -41,6 +41,10 @@
                 </li>
 
                 <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.contact-requests.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.contact-requests.index') }}"><i class="side-menu__icon fe fe-mail"></i><span class="side-menu__label">Contact Request</span></a>
+                </li>
+
+                <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.email-logs.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.email-logs.index') }}"><i class="side-menu__icon fe fe-mail"></i><span class="side-menu__label">Email Logs</span></a>
                 </li>
 

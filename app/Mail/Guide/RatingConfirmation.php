@@ -12,10 +12,15 @@ class RatingConfirmation extends Mailable
     use Queueable, SerializesModels;
 
     public $rating;
+    public $language;
+    public $target;
+    public $type = 'rating_confirmation';
 
     public function __construct(Review $rating)
     {
         $this->rating = $rating;
+        $this->language = $rating->user->language;
+        $this->target = 'rating_confirmation';
     }
 
     public function build()

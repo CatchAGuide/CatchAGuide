@@ -11,6 +11,9 @@ class CustomerNewsletterMail extends Mailable
     use Queueable, SerializesModels;
 
     public $email;
+    public $language;
+    public $target;
+    public $type = 'customer_newsletter_mail';
 
     /**
      * Create a new message instance.
@@ -21,6 +24,8 @@ class CustomerNewsletterMail extends Mailable
     {
         $this->email = $email;
         $this->locale = $locale;
+        $this->language = $locale;
+        $this->target = 'customer_newsletter_mail';
     }
 
     /**
