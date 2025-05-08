@@ -31,18 +31,24 @@ class SendGuestReviews extends Command
      */
     public function handle()
     {
-        // Find bookings that ended exactly 24 hours ago and were accepted/completed
+        // Find bookings that occurred 24 hours ago and were accepted/completed
+        $yesterday = Carbon::now()->subDay();
+        $dayBeforeYesterday = Carbon::now()->subDays(2);
+        
         $bookings = Booking::where('status', 'accepted')
-            ->whereDate('book_date', Carbon::now()->subDay()->toDateString()) // start of the day time to 0000
-            ->whereTime('book_date', '<=', Carbon::now()->subDay()->toTimeString()) // end of the day
+            ->where('book_date', '>=', $dayBeforeYesterday)
+            ->where('book_date', '<', $yesterday)
             ->where('is_reviewed', 0)
             ->get();
-
+        
         $count = 0;
         foreach ($bookings as $booking) {
             app()->setLocale($booking?->user?->language ?? app()->getLocale());
-            Mail::to($booking->user->email)->send(new GuestReviewMail($booking));
-            $count++;
+
+            if (!CheckEmailLog('guest_review', 'booking_' . $booking->id, $booking->user->email)) {
+                Mail::to($booking->user->email)->send(new GuestReviewMail($booking));
+                $count++;
+            }
         }
 
         $this->info("Sent {$count} guest review emails.");

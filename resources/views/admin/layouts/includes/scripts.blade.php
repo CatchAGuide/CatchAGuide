@@ -76,7 +76,7 @@
 <!-- CUSTOM JS -->
 <script src="{{ asset('assets/admin/js/custom.js') }}"></script>
 
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY') }}&libraries=places,geocoding,marker"></script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&libraries=places,geocoding,marker"></script>
 <script src="/js/app.js"></script>
 {{-- <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script> --}}
 

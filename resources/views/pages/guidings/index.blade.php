@@ -1006,60 +1006,10 @@
 
     async function initializeMap() {
         var mapStyle = [
-          {
-            featureType: "poi",
-            elementType: "labels",
-            stylers: [
-              {
-                visibility: "off",
-              },
-            ],
-          },
-          {
-            featureType: "transit",
-            elementType: "labels",
-            stylers: [
-              {
-                visibility: "off",
-              },
-            ],
-          },
-          {
-            featureType: "road",
-            elementType: "labels.icon",
-            stylers: [
-              {
-                visibility: "off",
-              },
-            ],
-          },
-          {
-            featureType: "road",
-            elementType: "labels.text",
-            stylers: [
-              {
-                visibility: "on",
-              },
-            ],
-          },
-          {
-            featureType: "road",
-            elementType: "labels.text.fill",
-            stylers: [
-              {
-                visibility: "on",
-              },
-            ],
-          },
-          {
-            featureType: "administrative.locality",
-            elementType: "labels",
-            stylers: [
-              {
-                visibility: "on",
-              },
-            ],
-          },
+            { featureType: "all", elementType: "labels", stylers: [{ visibility: "off" }] },
+            { featureType: "poi", elementType: "all", stylers: [{ visibility: "off" }] },
+            { featureType: "transit", elementType: "all", stylers: [{ visibility: "off" }] },
+            { featureType: "road", elementType: "labels.icon", stylers: [{ visibility: "off" }] },
         ];
 
         @php
@@ -1072,14 +1022,18 @@
 
         // Initialize map only if it hasn't been initialized yet
         if (!map) {
-            map = new Map(document.getElementById("map"), {
+            const mapOptions = {
                 zoom: 5,
                 center: position,
                 styles: mapStyle,
-                mapId: "DEMO_MAP_ID",
+                mapId: "{{env('GOOGLE_MAPS_MAP_ID')}}",
                 mapTypeControl: false,
                 streetViewControl: false,
-            });
+                // Disable points of interest
+                clickableIcons: false
+            };
+            
+            map = new Map(document.getElementById("map"), mapOptions);
         }
 
         @if($allGuidings->isEmpty())
