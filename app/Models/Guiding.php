@@ -507,7 +507,7 @@ class Guiding extends Model
      * @param int|null $radius Search radius in kilometers
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public static function locationFilter(string $city = null, string $country = null, $region = null, ?int $radius = null, $placeLat = null, $placeLng = null)
+    public static function locationFilter($city = null, $country = null, $region = null, ?int $radius = null, $placeLat = null, $placeLng = null)
     {
         // Get standardized English names using the helper
         if ($city || $country) {
