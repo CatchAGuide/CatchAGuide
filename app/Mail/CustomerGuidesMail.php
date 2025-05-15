@@ -36,7 +36,7 @@ class CustomerGuidesMail extends Mailable
     public function build()
     {
         return $this->view('mails.customerguidesmail')
-            ->to($this->email)->cc(env('CC_MAIL','info@catchaguide.com'))
+            ->to($this->email)->cc(env('TO_CEO','info@catchaguide.com'))
             ->subject("Deine Anfrage zur Guide Verifizierung");
     }
 }
