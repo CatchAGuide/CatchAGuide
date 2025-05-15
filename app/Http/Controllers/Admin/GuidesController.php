@@ -77,7 +77,7 @@ class GuidesController extends Controller
 
         $fullname = $request->firstname . ' ' . $request->lastname;
 
-        Mail::send(new CustomerGuidesMail($fullname, $request->email));
+        Mail::send(new CustomerGuidesMail($fullname, $request->email ?? $user->email));
         Mail::send(new GuideEmail(
             $request->firstname,
             $request->lastname,
