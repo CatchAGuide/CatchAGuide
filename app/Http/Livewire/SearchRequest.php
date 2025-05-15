@@ -121,9 +121,13 @@ class SearchRequest extends Component
         }else{
             \App::setLocale('de');
         }
-        
-        Mail::to(env('TO_CEO'))->send(new GuidingRequestMail($searchRequest));
-        Mail::to($this->email)->send(new SearchRequestUserMail($searchRequest));
+        $email = env('TO_CEO','info@catchaguide.com');
+        if (!CheckEmailLog('guiding_request_mail', 'guiding_request_mail', $email)) {
+            Mail::to($email)->send(new GuidingRequestMail($searchRequest));
+        }
+        if (!CheckEmailLog('search_request_user_mail', 'search_request_user_mail', $this->email)) {
+            Mail::to($this->email)->send(new SearchRequestUserMail($searchRequest));
+        }
 
         return redirect()->route('request.thank-you')->with(['message' => 'Das Guiding wurde erfolgreich erstellt!']);       
 

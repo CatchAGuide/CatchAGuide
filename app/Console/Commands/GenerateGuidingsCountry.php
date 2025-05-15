@@ -64,7 +64,7 @@ class GenerateGuidingsCountry extends Command
                         'input' => $searchString,
                         'types' => '(regions)',
                         'language' => 'en',
-                        'key' => env('GOOGLE_MAP_API_KEY')
+                        'key' => env('GOOGLE_MAPS_API_KEY')
                     ]
                 ]);
                 
@@ -80,7 +80,7 @@ class GenerateGuidingsCountry extends Command
                             'place_id' => $placeId,
                             'fields' => 'address_component',
                             'language' => 'en',
-                            'key' => env('GOOGLE_MAP_API_KEY')
+                            'key' => env('GOOGLE_MAPS_API_KEY')
                         ]
                     ]);
                     
@@ -103,7 +103,7 @@ class GenerateGuidingsCountry extends Command
                                     'query' => "capital of $countryName",
                                     'type' => 'locality',
                                     'language' => 'en',
-                                    'key' => env('GOOGLE_MAP_API_KEY')
+                                    'key' => env('GOOGLE_MAPS_API_KEY')
                                 ]
                             ]);
                             
@@ -122,7 +122,7 @@ class GenerateGuidingsCountry extends Command
                         'query' => $searchString,
                         'type' => 'administrative_area_level_1',
                         'language' => 'en',
-                        'key' => env('GOOGLE_MAP_API_KEY')
+                        'key' => env('GOOGLE_MAPS_API_KEY')
                     ]
                 ]);
                 
@@ -137,7 +137,7 @@ class GenerateGuidingsCountry extends Command
                             'query' => $searchString,
                             'type' => 'locality',  // Focus on localities/cities
                             'language' => 'en',
-                            'key' => env('GOOGLE_MAP_API_KEY')
+                            'key' => env('GOOGLE_MAPS_API_KEY')
                         ]
                     ]);
                     
@@ -152,7 +152,7 @@ class GenerateGuidingsCountry extends Command
                                 'input' => $searchString,
                                 'types' => '(cities)',
                                 'language' => 'en',
-                                'key' => env('GOOGLE_MAP_API_KEY')
+                                'key' => env('GOOGLE_MAPS_API_KEY')
                             ]
                         ]);
                         $autocompleteResult = json_decode($autocompleteResponse->getBody(), true);
@@ -170,7 +170,7 @@ class GenerateGuidingsCountry extends Command
                         'place_id' => $placeId,
                         'fields' => 'address_component',  // Removed invalid field
                         'language' => 'en',
-                        'key' => env('GOOGLE_MAP_API_KEY')
+                        'key' => env('GOOGLE_MAPS_API_KEY')
                     ]
                 ]);
                 

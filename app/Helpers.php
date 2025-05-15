@@ -1,10 +1,10 @@
 <?php
-use Stichoza\GoogleTranslate\GoogleTranslate;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Str;
-use Intervention\Image\Facades\Image;
-use App\Models\Faq;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
+use Stichoza\GoogleTranslate\GoogleTranslate;
+
+use App\Models\Faq;
+use App\Models\EmailLog;
 
 if (! function_exists('translate')) {
     function translate($string, $language = '')
@@ -153,5 +153,23 @@ if (!function_exists('getRatingLabel')) {
         if ($score >= 2) return __('guidings.Very_Poor');
         if ($score >= 1) return __('guidings.Bad');
         return __('guidings.Not_Rated');
+    }
+}
+
+if (!function_exists('CheckEmailLog')) {
+    function CheckEmailLog($type, $target, $email)
+    {
+        $existingEmail = EmailLog::where('email', $email)
+            ->where('type', $type)
+            ->where('target', $target)
+            ->where('created_at', '>=', now()->subHours(24)) // Adjust time window as needed
+            ->first();
+            
+        if ($existingEmail) {
+            Log::info("Duplicate email prevented: {$type} to {$email} for target {$target}");
+            return true; // Exit without sending the email
+        }
+
+        return false;
     }
 }

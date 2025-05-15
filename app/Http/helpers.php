@@ -163,7 +163,7 @@ if (!function_exists('getCoordinatesFromLocation')) {
             $response = $client->get('https://maps.googleapis.com/maps/api/geocode/json', [
                 'query' => [
                     'address' => $location,
-                    'key' => env('GOOGLE_MAP_API_KEY')
+                    'key' => env('GOOGLE_MAPS_API_KEY')
                 ]
             ]);
 
@@ -198,7 +198,7 @@ if (!function_exists('getCoordinatesFromLocation')) {
                             $capitalResponse = $client->get('https://maps.googleapis.com/maps/api/place/textsearch/json', [
                                 'query' => [
                                     'query' => "{$component['long_name']} capital city",
-                                    'key' => env('GOOGLE_MAP_API_KEY')
+                                    'key' => env('GOOGLE_MAPS_API_KEY')
                                 ]
                             ]);
                             $capitalData = json_decode($capitalResponse->getBody(), true);
@@ -256,7 +256,7 @@ if (!function_exists('getLocationDetails')) {
                         'input' => $searchString,
                         'types' => '(regions)',  // This includes countries and administrative areas
                         'language' => 'en',
-                        'key' => env('GOOGLE_MAP_API_KEY')
+                        'key' => env('GOOGLE_MAPS_API_KEY')
                     ]
                 ]);
                 
@@ -272,7 +272,7 @@ if (!function_exists('getLocationDetails')) {
                             'input' => $searchString,
                             'types' => '(cities)',
                             'language' => 'en',
-                            'key' => env('GOOGLE_MAP_API_KEY')
+                            'key' => env('GOOGLE_MAPS_API_KEY')
                         ]
                     ]);
                     $autocompleteResult = json_decode($autocompleteResponse->getBody(), true);
@@ -288,7 +288,7 @@ if (!function_exists('getLocationDetails')) {
                         'query' => $searchString,
                         'type' => 'administrative_area_level_1',
                         'language' => 'en',
-                        'key' => env('GOOGLE_MAP_API_KEY')
+                        'key' => env('GOOGLE_MAPS_API_KEY')
                     ]
                 ]);
                 
@@ -303,7 +303,7 @@ if (!function_exists('getLocationDetails')) {
                             'query' => $searchString,
                             'type' => 'locality',  // Focus on localities/cities
                             'language' => 'en',
-                            'key' => env('GOOGLE_MAP_API_KEY')
+                            'key' => env('GOOGLE_MAPS_API_KEY')
                         ]
                     ]);
                     
@@ -318,7 +318,7 @@ if (!function_exists('getLocationDetails')) {
                                 'input' => $searchString,
                                 'types' => '(cities)',
                                 'language' => 'en',
-                                'key' => env('GOOGLE_MAP_API_KEY')
+                                'key' => env('GOOGLE_MAPS_API_KEY')
                             ]
                         ]);
                         $autocompleteResult = json_decode($autocompleteResponse->getBody(), true);
@@ -336,7 +336,7 @@ if (!function_exists('getLocationDetails')) {
                         'place_id' => $placeId,
                         'fields' => 'address_component',  // Removed invalid field
                         'language' => 'en',
-                        'key' => env('GOOGLE_MAP_API_KEY')
+                        'key' => env('GOOGLE_MAPS_API_KEY')
                     ]
                 ]);
                 
