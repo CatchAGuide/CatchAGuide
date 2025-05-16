@@ -235,6 +235,255 @@
         border-radius: 0 !important;
         padding-left: 30px !important;
     }
+
+    .slider-label {
+        position: absolute;
+        top: -25px; /* Adjust as needed */
+        transform: translateX(-50%);
+        background-color: white;
+        padding: 2px 5px;
+        border-radius: 3px;
+        font-size: 12px;
+        color: black;
+        white-space: nowrap;
+    }
+
+    #radius {
+        background: url("data:image/svg+xml,<svg height='10px' width='10px' viewBox='0 0 16 16' fill='%23808080' xmlns='http://www.w3.org/2000/svg'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>") no-repeat;
+        background-position: right 0.3rem center !important;
+    }
+
+    .custom-select:has(option:disabled:checked[hidden]) {
+        color: gray;
+    }
+    .custom-select option {
+        color: black;
+    }
+
+    .form-custom-input {
+        border: 1px solid #d4d5d6;
+        border-radius: 5px;
+        padding: 8px 10px;
+        width: 100%;
+    }
+    .form-control:focus {
+        box-shadow: none;
+    }
+    .form-custom-input:focus-visible {
+        border: 0;
+        outline: solid #e8604c 1px !important;
+    }
+
+    #guidings-menu-search {
+        position: absolute;
+        top: 133px;
+        z-index: 3;
+    }
+    #guidings-result {
+        line-height: 14px;
+    }
+    .pac-container {
+        z-index: 2000;
+    }
+
+    .guiding-item-price {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+
+    .guiding-item-price h5 {
+        margin: 0;
+        white-space: nowrap;
+        font-size: clamp(14px, 2vw, 18px);  /* Responsive font size between 14px and 18px */
+    }
+
+    .guiding-item-price span {
+        display: inline-block;
+        padding: 4px 8px;
+    }
+
+    .tours-list {
+        position: relative;
+        padding: 30px 0;  /* Reduced default padding */
+    }
+
+    @media only screen and (max-width: 767px) {
+        .tours-list {
+            padding: 15px 0;  /* Even smaller padding for mobile */
+        }
+    }
+
+    .inclusions-price {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .guidings-inclusions-container {
+        flex: 1;
+        min-width: 0; /* Prevents flex item from overflowing */
+    }
+
+    .guidings-included {
+        font-size: 14px;
+    }
+
+    .guidings-included strong {
+        display: block;
+    }
+
+    .inclusions-list {
+        display: flex;
+        flex-wrap: wrap;
+        max-width: 100%;
+    }
+
+    .inclusion-item {
+        white-space: nowrap;
+        padding: 2px 8px;
+        border-radius: 4px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .inclusion-item i {
+        font-size: 10px;
+        margin-right: 4px;
+        /* color: #E8604C; */
+    }
+
+    @media (max-width: 767px) {
+        .inclusions-price {
+            flex-direction: column;
+        }
+        
+        .guiding-item-price {
+            width: 100%;
+            text-align: left;
+            padding-left: 0;
+        }
+
+        .inclusion-item {
+            font-size: 13px; /* Larger font size for mobile */
+            padding: 3px 10px;
+        }
+        
+        .guidings-included strong {
+            font-size: 14px;
+        }
+    }
+
+    .guidings-item-title {
+        margin-bottom: 10px;
+    }
+
+    .guidings-item-title h5 {
+        font-size: clamp(18px, 2vw, 22px);
+        margin-bottom: 5px;
+    }
+
+    .guidings-item-title span {
+        display: block;
+        font-size: 15px;
+        color: #444;
+        max-width: 100%;
+    }
+
+    /* Only apply truncation on desktop */
+    @media (min-width: 768px) {
+        .guidings-item-title span.truncate {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+
+    .guidings-item-title i {
+        font-size: 13px;
+        margin-right: 4px;
+        color: #666;
+    }
+
+    .guidings-item-icon {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .guidings-icon-container {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 14px;
+    }
+
+    .carousel-image {
+        height: 250px;
+        object-fit: cover;
+        width: 100%;
+        background: black;
+    }
+
+    #filter-loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.7);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: opacity 0.3s ease;
+    }
+    
+    .listings-container.loading {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .sort-row .form-select {
+        width: auto;
+    }
+
+    .active-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 10px;
+    }
+
+    .filter-sort-container {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
+    }
+
+    .ave-reviews-row {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 10px;
+    }
+
+    .ratings-score {
+        background-color: #E8604C;
+        color: white;
+        padding: 2px 5px;
+        border-radius: 3px;
+        font-weight: bold;
+    }
+
+    .no-reviews {
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
 </style>
 @endsection
 
@@ -378,7 +627,7 @@
                                                 @if($agent->ismobile())
                                                     <h5 class="fw-bolder text-truncate">{{ translate(Str::limit($guiding->title, 45)) }}</h5>
                                                 @endif
-                                                    <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }} </span>                                      
+                                                    <span><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }} </span>                                      
                                                 </div>
                                                 @if ($guiding->user->average_rating())
                                                 <div class="guidings-item-ratings">
