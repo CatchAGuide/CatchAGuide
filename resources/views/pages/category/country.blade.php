@@ -547,7 +547,7 @@
                                                 <img src="{{ $region->getThumbnailPath() }}" class="dimg-fluid" alt="Image Not Available">
                                             </div>
                                             <div class="card-img-overlay">
-                                                <h5>{{ translate($region->name) }}</h5>
+                                                <h5>{{ $region->name }}</h5>
                                             </div>
                                         </div>
                                     </a>
@@ -568,7 +568,7 @@
                                             <img src="{{ $city->getThumbnailPath() }}" class="dimg-fluid" alt="Image Not Available">
                                         </div>
                                         <div class="card-img-overlay">
-                                            <h5>{{ translate($city->name) }}</h5>
+                                            <h5>{{ $city->name }}</h5>
                                         </div>
                                     </div>
                                 </a>
@@ -660,7 +660,7 @@
                                                                 @endphp
                                                                 
                                                                 @if(!empty($guidingTargets))
-                                                                    {{ translate(implode(', ', $guidingTargets)) }}
+                                                                    {{ implode(', ', $guidingTargets) }}
                                                                 @endif
                                                             </div>
                                                         
@@ -689,7 +689,7 @@
 
                                                                 @foreach ($inclusions as $index => $inclusion)
                                                                     @if ($index < $maxToShow)
-                                                                        <span class="inclusion-item"><i class="fa fa-check"></i>{{ translate($inclusion['name']) }}</span>
+                                                                        <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclusion['name'] }}</span>
                                                                     @endif
                                                                 @endforeach
 
