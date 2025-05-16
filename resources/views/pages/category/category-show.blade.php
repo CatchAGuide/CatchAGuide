@@ -1208,62 +1208,6 @@ $(document).ready(function() {
      initializeMap();
 
      async function initializeMap() {
-        var mapStyle = [
-          {
-            featureType: "poi",
-            elementType: "labels",
-            stylers: [
-              {
-                visibility: "off",
-              },
-            ],
-          },
-          {
-            featureType: "transit",
-            elementType: "labels",
-            stylers: [
-              {
-                visibility: "off",
-              },
-            ],
-          },
-          {
-            featureType: "road",
-            elementType: "labels.icon",
-            stylers: [
-              {
-                visibility: "off",
-              },
-            ],
-          },
-          {
-            featureType: "road",
-            elementType: "labels.text",
-            stylers: [
-              {
-                visibility: "on",
-              },
-            ],
-          },
-          {
-            featureType: "road",
-            elementType: "labels.text.fill",
-            stylers: [
-              {
-                visibility: "on",
-              },
-            ],
-          },
-          {
-            featureType: "administrative.locality",
-            elementType: "labels",
-            stylers: [
-              {
-                visibility: "on",
-              },
-            ],
-          },
-        ];
 
     @php
         $lat = isset($guides[0]) ? $guides[0]->lat : 51.165691;
@@ -1279,8 +1223,7 @@ $(document).ready(function() {
     const map = new Map(document.getElementById("map"), {
         zoom: 5,
         center: position,
-        styles: mapStyle,
-        mapId: "DEMO_MAP_ID",
+        mapId: "{{env('GOOGLE_MAPS_MAP_ID')}}",
         mapTypeControl: false,
         streetViewControl: false,
     });
@@ -1306,7 +1249,7 @@ $(document).ready(function() {
       return (Math.random() - 0.5) * 0.0080;
     }
    
-    const markerCluster = new MarkerClusterer({ markers, map, mapStyle });
+    const markerCluster = new MarkerClusterer({ markers, map });
     // Add click event listeners to individual markers inside the cluster
     google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
         // You can control the zoom level here
