@@ -897,7 +897,6 @@
     @include('pages.guidings.includes.filters-mobile', ['formAction' => route('guidings.index')])
 @endsection
 
-@stack('guidingListingScripts')
 @section('js_after')
 <script>
     $('#sortby, #sortby-2').on('change', function() {
@@ -1005,13 +1004,7 @@
     initializeMap();
 
     async function initializeMap() {
-        var mapStyle = [
-            { featureType: "all", elementType: "labels", stylers: [{ visibility: "off" }] },
-            { featureType: "poi", elementType: "all", stylers: [{ visibility: "off" }] },
-            { featureType: "transit", elementType: "all", stylers: [{ visibility: "off" }] },
-            { featureType: "road", elementType: "labels.icon", stylers: [{ visibility: "off" }] },
-        ];
-
+    
         @php
             $lat = isset($guidings[0]) ? $guidings[0]->lat : 51.165691;
             $lng = isset($guidings[0]) ? $guidings[0]->lng : 10.451526;
@@ -1025,11 +1018,8 @@
             const mapOptions = {
                 zoom: 5,
                 center: position,
-                styles: mapStyle,
                 mapId: "{{env('GOOGLE_MAPS_MAP_ID')}}",
-                mapTypeControl: false,
                 streetViewControl: false,
-                // Disable points of interest
                 clickableIcons: false
             };
             
@@ -1061,7 +1051,7 @@
             return (Math.random() - 0.5) * 0.0080;
         }
 
-        markerCluster = new MarkerClusterer({ markers, map, mapStyle });
+        markerCluster = new MarkerClusterer({ markers, map });
         google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
             map.setZoom(map.getZoom() + 2);
             map.setCenter(cluster.getCenter());
@@ -1272,3 +1262,5 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 @endsection
+
+@stack('guidingListingScripts')

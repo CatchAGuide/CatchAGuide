@@ -641,64 +641,7 @@
     import { MarkerClusterer } from "https://cdn.skypack.dev/@googlemaps/markerclusterer@2.3.1";
          initializeMap();
     
-         async function initializeMap() {
-    
-            var mapStyle = [
-                {
-                featureType: "poi",
-                elementType: "labels",
-                stylers: [
-                    {
-                    visibility: "off",
-                    },
-                ],
-                },
-                {
-                featureType: "transit",
-                elementType: "labels",
-                stylers: [
-                    {
-                    visibility: "off",
-                    },
-                ],
-                },
-                {
-                featureType: "road",
-                elementType: "labels.icon",
-                stylers: [
-                    {
-                    visibility: "off",
-                    },
-                ],
-                },
-                {
-                featureType: "road",
-                elementType: "labels.text",
-                stylers: [
-                    {
-                    visibility: "on",
-                    },
-                ],
-                },
-                {
-                featureType: "road",
-                elementType: "labels.text.fill",
-                stylers: [
-                    {
-                    visibility: "on",
-                    },
-                ],
-                },
-                {
-                featureType: "administrative.locality",
-                elementType: "labels",
-                stylers: [
-                    {
-                    visibility: "on",
-                    },
-                ],
-            },
-        ];
+    async function initializeMap() {
     
         @php
             $lat = isset($vacations[0]) ? $vacations[0]->latitude : 51.165691;
@@ -711,8 +654,7 @@
         const map = new Map(document.getElementById("map"), {
             zoom: 5,
             center: position,
-            styles: mapStyle,
-            mapId: "DEMO_MAP_ID",
+            mapId: "{{env('GOOGLE_MAPS_MAP_ID')}}",
             mapTypeControl: false,
             streetViewControl: false,
         });
@@ -736,7 +678,7 @@
           return (Math.random() - 0.5) * 0.0080;
         }
     
-        const markerCluster = new MarkerClusterer({ markers, map, mapStyle });
+        const markerCluster = new MarkerClusterer({ markers, map });
         google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
             map.setZoom(map.getZoom() + 2);
             map.setCenter(cluster.getCenter());
