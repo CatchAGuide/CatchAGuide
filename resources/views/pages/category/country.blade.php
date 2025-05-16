@@ -468,6 +468,10 @@
         display: flex;
         gap: 8px;
         align-items: center;
+        justify-content: flex-end;
+        position: absolute;
+        right: 0px;
+        top: 0;  /* Position at the top, aligned with the title */
         .ratings-score{
             background-color: #313041;
             color: #fff;
@@ -481,13 +485,12 @@
             border-radius: 8px 8px 0 8px;
             font-size: 12px;
             .rating-value{
-            color: #fff;
-            min-width: unset;
-            font-size: 14px;
+                color: #fff;
+                min-width: unset;
+                font-size: 14px;
             }
             .rating-label{
-            color: #fff;
-            
+                color: #fff;
             }
         }
     }
@@ -509,6 +512,32 @@
             font-size: 14px;
             width: 100%;
         }
+    }
+
+    /* Adjust the mobile layout */
+    @media (max-width: 767px) {
+        .ave-reviews-row {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: auto;
+            display: block;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        
+        .ratings-score {
+            margin-left: auto; /* Push to the right */
+        }
+        
+        .guidings-item-title {
+            padding-right: 50px;  /* Make room for the rating */
+        }
+    }
+    
+    /* Make sure the parent container has proper positioning */
+    .guidings-item {
+        position: relative;
     }
 </style>
 @endsection
