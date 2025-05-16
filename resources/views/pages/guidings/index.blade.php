@@ -1004,7 +1004,7 @@
     initializeMap();
 
     async function initializeMap() {
-
+    
         @php
             $lat = isset($guidings[0]) ? $guidings[0]->lat : 51.165691;
             $lng = isset($guidings[0]) ? $guidings[0]->lng : 10.451526;
@@ -1015,14 +1015,13 @@
 
         // Initialize map only if it hasn't been initialized yet
         if (!map) {
-            map = new Map(document.getElementById("map"), {
+            const mapOptions = {
                 zoom: 5,
                 center: position,
                 mapId: "{{env('GOOGLE_MAPS_MAP_ID')}}",
                 streetViewControl: false,
                 clickableIcons: false
             };
-            console.log(mapOptions);
             
             map = new Map(document.getElementById("map"), mapOptions);
         }
