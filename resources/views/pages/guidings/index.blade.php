@@ -641,8 +641,8 @@
                                                     <a href="{{ route('guidings.show', [$guiding->id, $guiding->slug])}}">
                                                         <div class="guidings-item">
                                                             <div class="guidings-item-title">
-                                                            <h5 class="fw-bolder text-truncate">{{ Str::limit(translate($guiding->title), 70) }}</h5>
-                                                            <span class="truncate"><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }}</span>                                      
+                                                                <h5 class="fw-bolder text-truncate">{{ Str::limit(translate($guiding->title), 70) }}</h5>
+                                                                <span class="truncate"><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }}</span>                                      
                                                             </div>
                                                             @if ($guiding->user->average_rating())
                                                             <div class="ave-reviews-row">

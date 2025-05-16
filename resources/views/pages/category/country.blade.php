@@ -466,9 +466,30 @@
 
     .ave-reviews-row {
         display: flex;
+        gap: 8px;
         align-items: center;
-        gap: 5px;
-        margin-bottom: 10px;
+        .ratings-score{
+            background-color: #313041;
+            color: #fff;
+            font-weight: bold;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border-radius: 8px 8px 0 8px;
+            font-size: 12px;
+            .rating-value{
+            color: #fff;
+            min-width: unset;
+            font-size: 14px;
+            }
+            .rating-label{
+            color: #fff;
+            
+            }
+        }
     }
 
     .ratings-score {
@@ -480,9 +501,14 @@
     }
 
     .no-reviews {
-        color: #666;
-        font-size: 14px;
-        margin-bottom: 10px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        text-align: right;
+        span{
+            font-size: 14px;
+            width: 100%;
+        }
     }
 </style>
 @endsection
@@ -621,21 +647,26 @@
                                     <a href="{{ route('guidings.show', ['id' => $guiding->id, 'slug' => $guiding->slug, 'from_destination' => true, 'destination_id' => $row_data->id]) }}">
                                             <div class="guidings-item">
                                                 <div class="guidings-item-title">
-                                                @if(!$agent->ismobile())
-                                                <h5 class="fw-bolder text-truncate">{{translate($guiding->title)}}</h5>
-                                                @endif
-                                                @if($agent->ismobile())
-                                                    <h5 class="fw-bolder text-truncate">{{ translate(Str::limit($guiding->title, 45)) }}</h5>
-                                                @endif
+                                                    @if(!$agent->ismobile())
+                                                    <h5 class="fw-bolder text-truncate">{{translate($guiding->title)}}</h5>
+                                                    @endif
+                                                    @if($agent->ismobile())
+                                                        <h5 class="fw-bolder text-truncate">{{ translate(Str::limit($guiding->title, 45)) }}</h5>
+                                                    @endif
                                                     <span><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }} </span>                                      
                                                 </div>
                                                 @if ($guiding->user->average_rating())
-                                                <div class="guidings-item-ratings">
-                                                <div class="ratings-score">
-                                                        <span class="text-warning">★</span>
-                                                        <span>{{$guiding->user->average_rating()}} </span>
-                                                    </div>
+                                                <div class="ave-reviews-row">
+                                                    <div class="ratings-score">
+                                                    <span class="rating-value">{{number_format($guiding->user->average_rating(), 1)}}</span>
+                                                </div> 
+                                                    <span class="mb-1">
+                                                        {{-- ({{$guiding->user->received_ratings->count()}} reviews) --}}
+                                                        ({{$guiding->user->reviews->count()}} reviews)
+                                                    </span>
                                                 </div>
+                                                @else
+                                                <div class="no-reviews"><span>@lang('guidings.no_reviews')</span></div>
                                                 @endif
                                             </div>
                                             <div class="guidings-item-icon">
