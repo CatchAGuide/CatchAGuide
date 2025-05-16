@@ -897,7 +897,6 @@
     @include('pages.guidings.includes.filters-mobile', ['formAction' => route('guidings.index')])
 @endsection
 
-@stack('guidingListingScripts')
 @section('js_after')
 <script>
     $('#sortby, #sortby-2').on('change', function() {
@@ -1005,62 +1004,6 @@
     initializeMap();
 
     async function initializeMap() {
-        var mapStyle = [
-          {
-            featureType: "poi",
-            elementType: "labels",
-            stylers: [
-              {
-                visibility: "off",
-              },
-            ],
-          },
-          {
-            featureType: "transit",
-            elementType: "labels",
-            stylers: [
-              {
-                visibility: "off",
-              },
-            ],
-          },
-          {
-            featureType: "road",
-            elementType: "labels.icon",
-            stylers: [
-              {
-                visibility: "off",
-              },
-            ],
-          },
-          {
-            featureType: "road",
-            elementType: "labels.text",
-            stylers: [
-              {
-                visibility: "on",
-              },
-            ],
-          },
-          {
-            featureType: "road",
-            elementType: "labels.text.fill",
-            stylers: [
-              {
-                visibility: "on",
-              },
-            ],
-          },
-          {
-            featureType: "administrative.locality",
-            elementType: "labels",
-            stylers: [
-              {
-                visibility: "on",
-              },
-            ],
-          },
-        ];
 
         @php
             $lat = isset($guidings[0]) ? $guidings[0]->lat : 51.165691;
@@ -1075,11 +1018,13 @@
             map = new Map(document.getElementById("map"), {
                 zoom: 5,
                 center: position,
-                styles: mapStyle,
-                mapId: "DEMO_MAP_ID",
-                mapTypeControl: false,
+                mapId: "{{env('GOOGLE_MAPS_MAP_ID')}}",
                 streetViewControl: false,
-            });
+                clickableIcons: false
+            };
+            console.log(mapOptions);
+            
+            map = new Map(document.getElementById("map"), mapOptions);
         }
 
         @if($allGuidings->isEmpty())
@@ -1107,7 +1052,7 @@
             return (Math.random() - 0.5) * 0.0080;
         }
 
-        markerCluster = new MarkerClusterer({ markers, map, mapStyle });
+        markerCluster = new MarkerClusterer({ markers, map });
         google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
             map.setZoom(map.getZoom() + 2);
             map.setCenter(cluster.getCenter());
@@ -1318,3 +1263,5 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 @endsection
+
+@stack('guidingListingScripts')

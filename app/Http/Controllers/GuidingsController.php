@@ -749,12 +749,12 @@ class GuidingsController extends Controller
             } else {
                 $guiding = new Guiding();
                 $guiding->user_id = auth()->id();
+                $guiding->slug = slugify($request->input('title') . "-in-" . $request->input('location'));
             }
 
             Log::info($guiding);
 
             $guiding->is_newguiding = 1;
-            $guiding->slug = slugify($request->input('title') . "-in-" . $request->input('location'));
 
             //step 1
             $guiding->location = $request->has('location') ? $request->input('location') : '';
