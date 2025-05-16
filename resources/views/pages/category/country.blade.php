@@ -273,40 +273,6 @@
             </div>
         </section>
     </div>
-        {{-- <section class="page-header">
-            <div class="page-header__bottom">
-                <div class="container">
-                    <div class="page-header__bottom-inner">
-                        <ul class="thm-breadcrumb list-unstyled">
-                            <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                            <li><span>&#183;</span></li>
-                            @if($row_data->type == 'country')
-                                <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
-                            
-                            @elseif($row_data->type == 'region')
-                                <li><a href="{{ route('destination.country', ['country' => $row_data->country_slug]) }}">
-                                    {{ translate('Fishing Destinations in ')}} {{ $row_data->country_name }}
-                                </a></li>
-                                <li><span>&#183;</span></li>    
-                                <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
-                            
-                            @elseif($row_data->type == 'city')
-                                <li><a href="{{ route('destination.country', ['country' => $row_data->country_slug]) }}">
-                                    {{ translate('Fishing Destinations in ')}} {{ $row_data->country_name }}
-                                </a></li>
-                                <li><span>&#183;</span></li>
-                                <li><a href="{{ route('destination.country', ['country' => $row_data->country_slug, 'region' => $row_data->region_slug]) }}">
-                                    {{ translate('Fishing Destinations in ')}} {{ $row_data->region_name }}
-                                </a></li>
-                                <li><span>&#183;</span></li>
-                                <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
-                            @endif
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section> --}}
-
         <div class="container">
             <div class="col-12">
                 <div id="page-main-intro" class="mb-3">
@@ -364,137 +330,14 @@
                 @endif
                 <h5 class="mb-2">{{ translate('Fishing tours in ' . $row_data->name) }}</h5>
                 <div class="row mb-5">
-                    <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
-                        <div class="d-grid gap-2 w-100">
-                            <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-                                <div class="btn-group border rounded-start cag-btn-inverted" role="group" style=" width:30%;">
-                                    <button type="button" class="btn dropdown-toggle text-white" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-arrow-down-arrow-up me-1"></i>@lang('message.sortby')</button>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="{{ url()->current() }}?sortby=newest">@lang('message.newest')</a></li>
-                                        <li><a class="dropdown-item" href="{{ url()->current() }}?sortby=price-asc">@lang('message.lowprice')</a></li>
-                                        <li><a class="dropdown-item" href="{{ url()->current() }}?sortby=short-duration">@lang('message.shortduration')</a></li>
-                                        <li><a class="dropdown-item" href="{{ url()->current() }}?sortby=long-duration">@lang('message.longduration')</a></li>
-                                    </ul>
 
-                                    @foreach(request()->except('sortby') as $key => $value)
-                                        @if(is_array($value))
-                                            @foreach($value as $arrayValue)
-                                                <input type="hidden" name="{{ $key }}[]" value="{{ $arrayValue }}">
-                                            @endforeach
-                                        @else
-                                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                                        @endif
-                                    @endforeach
-                                </div>
-                                <a class="btn border-start cag-btn-inverted" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottomSearch" aria-controls="offcanvasBottomSearch" href="javascript:void(0)" style="border-left: 1px solid #ccc!important; z-index: 2; width:30%;">
-                                    <i class="fa fa-filter me-1"></i>@lang('message.filter')
-                                    @if($guidings_total > 0)
-                                        @if(request()->has('radius') || request()->has('num_guests') || request()->has('target_fish') || request()->has('water') || request()->has('fishing_type') || request()->has('price_range'))
-                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="guiding-filter-counter">{{ $guidings->count() }}</span>
-                                        @endif
-                                    @endif
-                                </a>
-                                <a class="btn border cag-btn-inverted" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)" style=" border-left: 2px solid #ccc!important; width:40%;"><i class="fa fa-map-marker-alt me-2"></i>@lang('destination.show_on_map')</a>
-
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-lg-3">
+                    <div id="filterCard" class="col-sm-12 col-lg-3">        
                         <div class="card mb-2 d-none d-sm-block">
                             <div id="map-placeholder">
-                                <button class="btn btn-primary read-more-btn" data-bs-target="#mapModal" data-bs-toggle="modal">@lang('destination.show_on_map')</button>
+                                <a class="btn btn-primary" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)">@lang('destination.show_on_map')</a>
                             </div>
-                        </div>
-                        <div class="card d-block d-none d-sm-block mb-1">
-                            <div class="card-header">
-                                @lang('message.sortby'):
-                            </div>
-                            <div class="card-body border-bottom">
-                                <div class="btn-group w-100">
-                                    <button type="button" class="btn dropdown-toggle text-dark" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fa fa-arrow-down-arrow-up me-1"></i>
-                                        @if(request()->get('sortby') == 'newest')
-                                            @lang('message.newest')
-                                        @elseif(request()->get('sortby') == 'price-asc') 
-                                            @lang('message.lowprice')
-                                        @elseif(request()->get('sortby') == 'short-duration')
-                                            @lang('message.shortduration') 
-                                        @elseif(request()->get('sortby') == 'long-duration')
-                                            @lang('message.longduration')
-                                        @else
-                                            @lang('message.choose')...
-                                        @endif
-                                    </button>
-                                    <ul class="dropdown-menu w-100">
-                                        <li><a class="dropdown-item" href="{{ request()->fullUrlWithQuery(['sortby' => 'newest']) }}">@lang('message.newest')</a></li>
-                                        <li><a class="dropdown-item" href="{{ request()->fullUrlWithQuery(['sortby' => 'price-asc']) }}">@lang('message.lowprice')</a></li>
-                                        <li><a class="dropdown-item" href="{{ request()->fullUrlWithQuery(['sortby' => 'short-duration']) }}">@lang('message.shortduration')</a></li>
-                                        <li><a class="dropdown-item" href="{{ request()->fullUrlWithQuery(['sortby' => 'long-duration']) }}">@lang('message.longduration')</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card d-block d-none d-sm-block">
-                            <div class="card-header">
-                                @lang('destination.filter_by'):
-                            </div>
-                            <div class="card-body border-bottom">
-                                <form method="get" action="{{ url()->current() }}" class="filter-form">
-                                    @if(request()->has('sortby'))
-                                        <input type="hidden" name="sortby" value="{{ request()->get('sortby') }}">
-                                    @endif
-                                    <div class="filter-group">
-                                        <div class="filter-icon">
-                                            <i class="fas fa-user"></i>
-                                        </div>
-                                        <select class="form-control filter-select" id="num_guests" name="num_guests">
-                                            <option disabled selected hidden>-- @lang('destination.select') --</option>
-                                            <option value="">@lang('message.choose')...</option>
-                                            <option value="1">1</option>
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4">4</option>
-                                            <option value="5">5</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="filter-group">
-                                        <div class="filter-icon">
-                                            <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
-                                        </div>
-                                        <select class="form-control filter-select" id="target_fish" name="target_fish[]" multiple></select>
-                                    </div>
-                                    <div class="filter-group">
-                                        <div class="filter-icon">
-                                            <img src="{{asset('assets/images/icons/water-waves.png')}}" height="20" width="20" alt="" />
-                                        </div>
-                                        <select class="form-control filter-select" id="water" name="water[]" multiple></select>
-                                    </div>
-                                    <div class="filter-group">
-                                        <div class="filter-icon">
-                                            <img src="{{asset('assets/images/icons/fishing.png')}}" height="20" width="20" alt="" />
-                                        </div>
-                                        <select class="form-control filter-select" id="methods" name="methods[]" multiple></select>
-                                    </div>
-                                    <div class="filter-group">
-                                        <div class="filter-icon">
-                                            <i class="fa fa-euro-sign"></i>
-                                        </div>
-                                        <select class="form-control filter-select" id="price_range" name="price_range">
-                                            <option selected disabled hidden>{{ translate('Price per Person') }}</option>
-                                            <option value="">@lang('message.choose')...</option>
-                                            <option value="1-50">1 - 50 p.P.</option>
-                                            <option value="51-100">51 - 100 p.P.</option>
-                                            <option value="101-150">101 - 150 p.P.</option>
-                                            <option value="151-200">151 - 200 p.P.</option>
-                                            <option value="201-250">201 - 250 p.P.</option>
-                                            <option value="350">350 and more</option>
-                                        </select>
-                                    </div>
-                                    <button class="btn btn-sm theme-primary btn-theme-new w-100" type="submit">@lang('destination.search')</button>
-                                </form> 
-                            </div>
-                        </div>
+                        </div>            
+                        @include('pages.guidings.includes.filters', ['formAction' => route('guidings.index')])
                     </div>
                     <div class="col-sm-12 col-lg-9 country-listing-item">
                         @foreach($guidings as $guiding)
@@ -743,6 +586,7 @@
                     </div>
                 @endif
             </div>
+            @include('pages.guidings.includes.filters-mobile', ['formAction' => route('guidings.index')])
         </div>
     </div>
     <!--News One End-->
@@ -758,8 +602,7 @@
             </div>
         </div>
     </div>
-
-    <div class="offcanvas offcanvas-bottom" tabindex="-1" id="offcanvasBottomSearch" aria-labelledby="offcanvasBottomLabel">
+    {{-- <div class="offcanvas offcanvas-bottom" tabindex="-1" id="offcanvasBottomSearch" aria-labelledby="offcanvasBottomLabel">
         <div class="offcanvas-header">
             <h5 class="offcanvas-title" id="offcanvasBottomLabel">{{ translate('Filter') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -839,7 +682,8 @@
                 </div>
             </form>
         </div>
-    </div>
+    </div> --}}
+
 @endsection
 
 @section('js_after')

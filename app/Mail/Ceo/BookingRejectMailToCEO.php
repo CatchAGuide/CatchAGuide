@@ -14,11 +14,12 @@ class BookingRejectMailToCEO extends Mailable
     use Queueable, SerializesModels;
 
     protected $booking;
-
+    public $target;
+    public $type = 'booking_reject_mail_to_ceo';
     public function __construct(Booking $booking)
     {
         $this->booking = $booking;
-
+        $this->target = 'admin_booking_' . $booking->id;    
     }
 
     public function build()

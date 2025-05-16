@@ -50,8 +50,10 @@ class SendGuideUpcomingTourReminders extends Command
                 $this->info("Sending reminder to guide {$guide->user->firstname} {$guide->user->lastname} for booking #{$booking->id}");
                 
                 try {
-                    Mail::to($guide->user->email)->send(new GuideUpcomingTourMail($guide, $booking));
-                    $this->info("Reminder sent successfully.");
+                    if (!CheckEmailLog('guide_upcoming_tour_reminder', 'booking_' . $booking->id, $guide->user->email)) {
+                        Mail::to($guide->user->email)->send(new GuideUpcomingTourMail($guide, $booking));
+                        $this->info("Reminder sent successfully.");
+                    }
                 } catch (\Exception $e) {
                     $this->error("Failed to send reminder: {$e->getMessage()}");
                 }

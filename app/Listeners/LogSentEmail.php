@@ -5,6 +5,7 @@ namespace App\Listeners;
 use Illuminate\Mail\Events\MessageSent;
 use App\Models\EmailLog;
 use Illuminate\Support\Facades\Log;
+
 class LogSentEmail
 {
     /**
@@ -27,7 +28,6 @@ class LogSentEmail
     {
         $message = $event->message;
         $data = $event->data;
-        $mailable = $data['mailable'] ?? null;
         
         // Extract recipient
         $to = $message->getTo();
