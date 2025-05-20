@@ -989,11 +989,42 @@
             };
 
             // Process cropped images
+            console.log("All cropped images:", croppedImages);
+
             Promise.all(
                 croppedImages.map((image, index) => {
                     if (image && image.dataUrl) {
+                        let fileName;
+                        
+                        // Try to use the original filename if available
+                        if (image.filename) {
+                            fileName = image.filename;
+                            console.log(`Using original filename: ${fileName}`);
+                        } else {
+                            // Create a unique filename with timestamp and index
+                            const timestamp = new Date().getTime();
+                            
+                            // Try to extract the MIME type from the data URL
+                            let extension = 'jpg'; // Default extension
+                            try {
+                                const mimeType = image.dataUrl.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,/)[1];
+                                if (mimeType.includes('png')) {
+                                    extension = 'png';
+                                } else if (mimeType.includes('gif')) {
+                                    extension = 'gif';
+                                } else if (mimeType.includes('webp')) {
+                                    extension = 'webp';
+                                }
+                            } catch (e) {
+                                console.log("Could not extract MIME type, using default extension");
+                            }
+                            
+                            fileName = `image_${timestamp}_${index}.${extension}`;
+                            console.log(`Generated fallback filename: ${fileName}`);
+                        }
+                        
                         return compressImage(image.dataUrl, maxWidth, quality).then((compressedBlob) => {
-                            formData.append(`title_image[]`, compressedBlob, `compressed_image_${index}.jpg`);
+                            formData.append(`title_image[]`, compressedBlob, fileName);
                         });
                     }
                 })
