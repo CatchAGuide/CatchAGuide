@@ -1230,7 +1230,35 @@ window.addEventListener('load', function() {
         document.getElementById('placeLat').value = placeLatitude;
         document.getElementById('placeLng').value = placeLongitude;
     }
-});       
+});     
+
+document.addEventListener('DOMContentLoaded', function() {
+    const filterInputs = document.querySelectorAll('input[type="checkbox"], select');
+    console.log('Filter inputs found:', filterInputs.length);
+    
+    filterInputs.forEach(input => {
+        input.addEventListener('change', function(event) {
+            console.log('Input changed:', this);
+            console.log('Form:', this.form);
+            
+            // If the input has a form, use it
+            if (this.form) {
+                const formData = new FormData(this.form);
+                const params = new URLSearchParams();
+                
+                for (const [key, value] of formData.entries()) {
+                    if (value) {
+                        params.append(key, value);
+                    }
+                }
+                
+                window.location.href = `${window.location.pathname}?${params.toString()}`;
+            } else {
+                console.error('Input has no form:', this);
+            }
+        });
+    });
+});  
 </script>
 
 

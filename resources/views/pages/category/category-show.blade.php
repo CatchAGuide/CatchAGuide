@@ -972,6 +972,90 @@
                 }
             }
         });
+        
+        // Add this function to handle filter form submissions properly
+        window.updateResults = function() {
+            // Try different ways to find the form
+            let form = document.getElementById('filterContainer');
+            
+            // If not found, try by name
+            if (!form) {
+                form = document.querySelector('form[name="filterContainer"]');
+            }
+            
+            // If still not found, try by class
+            if (!form) {
+                form = document.querySelector('form.filter-form');
+            }
+            
+            // If still not found, try any form that might be related to filtering
+            if (!form) {
+                form = document.querySelector('form[action*="guidings"]');
+            }
+            
+            // If still not found, try the offcanvas form
+            if (!form) {
+                form = document.getElementById('filterContainerOffCanvass');
+            }
+            
+            // If we found a form, use it
+            if (form && form instanceof HTMLFormElement) {
+                const formData = new FormData(form);
+                const params = new URLSearchParams();
+                
+                // Add form parameters to URL
+                for (const [key, value] of formData.entries()) {
+                    if (value) {
+                        params.append(key, value);
+                    }
+                }
+                
+                // Redirect to the new URL
+                window.location.href = `${window.location.pathname}?${params.toString()}`;
+            } else {
+                console.error('Filter form not found');
+                
+                // As a last resort, try to get the form from the input that triggered the change
+                const inputs = document.querySelectorAll('input[type="checkbox"], select');
+                inputs.forEach(input => {
+                    if (input.form) {
+                        const formData = new FormData(input.form);
+                        const params = new URLSearchParams();
+                        
+                        for (const [key, value] of formData.entries()) {
+                            if (value) {
+                                params.append(key, value);
+                            }
+                        }
+                        
+                        window.location.href = `${window.location.pathname}?${params.toString()}`;
+                        return;
+                    }
+                });
+            }
+        };
+        
+        // Add event listeners to all filter inputs
+        document.querySelectorAll('input[type="checkbox"], select').forEach(input => {
+            input.addEventListener('change', function() {
+                if (this.form) {
+                    // If the input has a form, use it directly
+                    const formData = new FormData(this.form);
+                    const params = new URLSearchParams();
+                    
+                    for (const [key, value] of formData.entries()) {
+                        if (value) {
+                            params.append(key, value);
+                        }
+                    }
+                    
+                    window.location.href = `${window.location.pathname}?${params.toString()}`;
+                } else {
+                    // Otherwise use the updateResults function
+                    updateResults();
+                }
+            });
+        });
     });
 
     let itemsCollapseCities = document.querySelectorAll('#carousel-cities .carousel-item');
