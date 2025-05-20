@@ -911,87 +911,6 @@
             </div>
         </div>
     </div>
-    {{-- <div class="offcanvas offcanvas-bottom" tabindex="-1" id="offcanvasBottomSearch" aria-labelledby="offcanvasBottomLabel">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasBottomLabel">{{ translate('Filter') }}</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body small">
-            <form id="filterContainerOffCanvass" action="{{ url()->current() }}" method="get" class="px-4 py-2">
-                @if(request()->has('sortby'))
-                    <input type="hidden" name="sortby" value="{{ request()->get('sortby') }}">
-                @endif
-                <div class="row">
-                    <div class="col-12">
-                        <div class="input-group my-1">
-                            <div class="input-group-prepend border-0 border-bottom">
-                                <span class="d-flex align-items-center px-2 h-100">
-                                    <i class="fas fa-user"></i>
-                                </span>
-                            </div>
-                            <select id="num-guestsOffCanvass" class="form-control form-select border-0 border-bottom rounded-0" name="num_guests">
-                                <option value="">@lang('message.choose')...</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                            </select>
-                        </div>
-                    </div>
-                 
-                    <div class="col-12">
-                        <div class="form-group my-1 d-flex align-items-center border-bottom">
-                            <div class="px-2 select2-icon">
-                                <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
-                            </div>
-                           
-                            <select class="form-control form-select border-0 rounded-0" id="target_fishOffCanvass" name="target_fish[]" multiple></select>
-                        </div>
-                    </div>
-                    
-                    <div class="col-12">
-                        <div class="form-group my-1 d-flex align-items-center border-bottom">
-                            <div class="px-2 select2-icon">
-                                <img src="{{asset('assets/images/icons/water-waves.png')}}" height="20" width="20" alt="" />
-                            </div>
-                            <select class="form-control form-select border-0  rounded-0" id="waterOffCanvass" name="water[]" multiple></select>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="form-group my-1 d-flex align-items-center border-bottom ">
-                            <div class="px-2 select2-icon">
-                                <img src="{{asset('assets/images/icons/fishing.png')}}" height="20" width="20" alt="" />
-                            </div>
-                            <select class="form-control form-select border-0 rounded-0" id="methodsOffCanvass" name="methods[]" multiple></select>
-                        </div>
-                    </div>
-                    <div class="col-12 mb-2">
-                        <div class="input-group my-1">
-                            <div class="input-group-prepend border-0 border-bottom ">
-                                <span class="d-flex align-items-center px-2 h-100">
-                                    <i class="fa fa-euro-sign"></i>
-                                </span>
-                            </div>
-                            <select id="price_rangeOffCanvass" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="price_range">
-                                <option selected disabled hidden>{{ translate('Price per Person') }}</option>
-                                <option value="" >@lang('message.choose')...</option>
-                                <option value="1-50">1 - 50 p.P.</option>
-                                <option value="51-100">51 - 100 p.P.</option>
-                                <option value="101-150">101 - 150 p.P.</option>
-                                <option value="151-200">151 - 200 p.P.</option>
-                                <option value="201-250">201 - 250 p.P.</option>
-                                <option value="350">350 and more</option>
-                            </select>
-                          </div>
-                    </div>
-                    <div class="col-sm-12 col-lg-12 ps-md-0">
-                        <button class="btn btn-sm theme-primary btn-theme-new w-100 h-100" >@lang('message.Search')</button>    
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div> --}}
 
 @endsection
 
@@ -1103,18 +1022,6 @@
         });
     });
 
-</script>
-<script>
-// Get the toggle button and filter container elements
-var toggleBtn = document.getElementById('toggleFilterBtn');
-var filterContainer = document.getElementById('filterContainer');
-
-// Add click event listener to the toggle button
-if (toggleBtn) {
-    toggleBtn.addEventListener('click', function() {
-        filterContainer.classList.toggle('d-block');
-    });
-}
 </script>
 
 <script>
@@ -1330,3 +1237,5 @@ window.addEventListener('load', function() {
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 
 @endsection
+
+@stack('guidingListingScripts')

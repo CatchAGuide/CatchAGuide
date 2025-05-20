@@ -9,21 +9,33 @@ use App\Models\EmailLog;
 if (! function_exists('translate')) {
     function translate($string, $language = '')
     {
+        if ($string === null) {
+            return '';
+        }
+        
         $currentLocale = ($language != '' || $language != null) ? $language : app()->getLocale();
         $cacheKey = 'translation_'.$currentLocale.'_'.$string;
 
         $translation = Cache::rememberForever($cacheKey, function () use ($string, $currentLocale) {
-            $translate = GoogleTranslate::trans($string, $currentLocale);
+            try {
+                $translate = GoogleTranslate::trans($string, $currentLocale);
 
-            if (strpos($translate, 'Führungen')) {
-                $translate = str_replace('Führungen', 'Angelguidings', $translate);
+                if (strpos($translate, 'Führungen')) {
+                    $translate = str_replace('Führungen', 'Angelguidings', $translate);
+                }
+
+                if (strpos($translate, 'Führung')) {
+                    $translate = str_replace('Führung', 'guiding', $translate);
+                }
+
+                return ucfirst($translate);
+            } catch (\Exception $e) {
+                Log::error('Translation failed: ' . $e->getMessage(), [
+                    'string' => $string,
+                    'locale' => $currentLocale
+                ]);
+                return $string;
             }
-
-            if (strpos($translate, 'Führung')) {
-                $translate = str_replace('Führung', 'guiding', $translate);
-            }
-
-            return ucfirst($translate);
         });
 
         return $translation;

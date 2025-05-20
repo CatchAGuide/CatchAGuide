@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Spatie\Geocoder\Geocoder;
-
+use Illuminate\Support\Facades\Log;
 class DestinationCountryController extends Controller
 {
     public function index()
@@ -278,7 +278,7 @@ class DestinationCountryController extends Controller
         if($cleanedRequest->has('methods') && !empty($cleanedRequest->get('methods'))){
             $requestMethods = array_filter($cleanedRequest->get('methods'));
 
-            if(count($requestMethods)){
+            if(count($requestMethods)) {
                 $title .= __('guidings.Method') . ' (';
                 $filter_title .= __('guidings.Method') . ' (';
                 $method_rows = Method::whereIn('id', $cleanedRequest->methods)->get();
@@ -507,6 +507,7 @@ class DestinationCountryController extends Controller
         
         // Handle AJAX requests
         if ($cleanedRequest->ajax()) {
+            Log::info('AJAX request received'); 
             $view = view('pages.guidings.partials.guiding-list', [
                 'title' => $title,
                 'filter_title' => $filter_title,
@@ -607,196 +608,6 @@ class DestinationCountryController extends Controller
             'maxPrice' => $overallMaxPrice,
             'overallMaxPrice' => $overallMaxPrice,
         ]);
-        ///////////////////////////////////////////////////////////////////////////////
-
-        
-        // Get or generate a random seed and store it in the session
-        // $randomSeed = Session::get('random_seed');
-        // if (!$randomSeed) {
-        //     $randomSeed = rand();
-        //     Session::put('random_seed', $randomSeed);
-        // }
-
-        // Only apply random ordering if:
-        // 1. There are no query parameters except page
-        // 2. We're on page 1 or no page is specified
-        // $hasOnlyPageParam = count(array_diff(array_keys($request->all()), ['page'])) === 0;
-        // $isFirstPage = !$request->has('page') || $request->get('page') == 1;
-
-        // if ($hasOnlyPageParam && $isFirstPage) {
-        //     $query->orderByRaw("RAND($randomSeed)");
-        // } else {
-        //     // Default ordering for all other cases
-        //     if (!$request->has('sortby')) {
-        //         $query->latest();
-        //     }
-        // }
-
-        // if($request->has('page')){
-        //     $title .= __('guidings.Page') . ' ' . $request->page . ' - ';
-        // }
-        // if($request->has('num_guests') && !empty($request->get('num_guests'))){
-        //     $title .= __('guidings.Guest') . ' ' . $request->num_guests . ' | ';
-        //     $q = $query->where('max_guests','>=',$request->get('num_guests'));
-        // }
-
-        // Apply sorting if specified
-        // if($request->has('sortby') && !empty($request->get('sortby'))){
-        //     switch ($request->get('sortby')) {
-        //         case 'newest':
-        //             $query->orderBy('created_at', 'desc');
-        //             break;
-        //         case 'price-asc':
-        //             $query->orderBy(DB::raw('lowest_price'), 'asc');
-        //             break;
-        //         case 'price-desc':
-        //             $query->orderBy(DB::raw('lowest_price'), 'desc');
-        //             break;
-        //         case 'long-duration':
-        //             $query->orderBy('duration', 'desc');
-        //             break;
-        //         case 'short-duration':
-        //             $query->orderBy('duration', 'asc');
-        //             break;
-        //     }
-        // }
-
-        // if($request->has('methods') && !empty($request->get('methods'))){
-        //     $requestMethods = array_filter($request->get('methods'));
-
-        //     if(count($requestMethods)){
-        //         $title .= __('guidings.Method') . ' (';
-        //         $method_rows = Method::whereIn('id', $request->methods)->get();
-        //         $title_row = '';
-        //         foreach ($method_rows as $row) {
-        //             $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
-        //         }
-        //         $title .= substr($title_row, 0, -2);
-        //         $title .= ') | ';
-
-        //         $query->where(function($query) use ($requestMethods) {
-        //             foreach($requestMethods as $methodId) {
-        //                 $query->orWhereJsonContains('fishing_methods', (int)$methodId);
-        //             }
-        //         });
-        //     }
-        // }
-
-        // if($request->has('water') && !empty($request->get('water'))){
-        //     $requestWater = array_filter($request->get('water'));
-
-        //     if(count($requestWater)){
-        //         $title .= __('guidings.Water') . ' (';
-        //         $water_rows = Water::whereIn('id', $request->water)->get();
-        //         $title_row = '';
-        //         foreach ($water_rows as $row) {
-        //             $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
-        //         }
-        //         $title .= substr($title_row, 0, -2);
-        //         $title .= ') | ';
-
-        //         $query->where(function($query) use ($requestWater) {
-        //             foreach($requestWater as $waterId) {
-        //                 $query->orWhereJsonContains('water_types', (int)$waterId);
-        //             }
-        //         });
-        //     }
-        // }
-
-        // if($request->has('target_fish')){
-        //     $requestFish = array_filter($request->get('target_fish'));
-
-        //     if(count($requestFish)){
-        //         $title .= __('guidings.Target_Fish') . ' (';
-        //         $target_rows = Target::whereIn('id', $requestFish)->get();
-        //         $title_row = '';
-        //         foreach ($target_rows as $row) {
-        //             $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
-        //         }
-        //         $title .= substr($title_row, 0, -2);
-        //         $title .= ') | ';
-
-        //         $query->where(function($query) use ($requestFish) {
-        //             foreach($requestFish as $fishId) {
-        //                 $query->orWhereJsonContains('target_fish', (int)$fishId);
-        //             }
-        //         });
-        //     }
-        // }
-
-        // $radius = null; // Radius in miles
-        // if($request->has('radius')){
-        //     $title .= __('guidings.Radius') . ' ' . $request->radius . 'km | ';
-        //     $radius = $request->get('radius');
-        // }
-
-        // $filterData = json_decode($row_data->filters, true);
-
-        // Set default values if $filterData is null
-        // $placeLat = $filterData['placeLat'] ?? null;
-        // $placeLng = $filterData['placeLng'] ?? null;
-        // $city = $filterData['city'] ?? null;
-        // $country = $filterData['country'] ?? null;
-        // $region = $filterData['region'] ?? null;
-
-        // $title .= __('guidings.Country') . ' ' . $country . ' | ';
-
-        // if(!empty($placeLat) && !empty($placeLng)){
-        //     $title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
-        //     $guidingFilter = Guiding::locationFilter($city, $country, $region, $radius, $placeLat, $placeLng);
-        //     $searchMessage = $guidingFilter['message'];
-            
-        //     // Add a subquery to order by the position in the filtered IDs array
-        //     $orderByCase = 'CASE guidings.id ';
-        //     foreach($guidingFilter['ids'] as $position => $id) {
-        //         $orderByCase .= "WHEN $id THEN $position ";
-        //     }
-        //     $orderByCase .= 'ELSE ' . count($guidingFilter['ids']) . ' END';
-            
-        //     $query->whereIn('guidings.id', $guidingFilter['ids'])
-        //           ->orderByRaw($orderByCase);
-        // }
-
-        // if($request->has('price_range') && !empty($request->get('price_range'))){
-        //     $price_range = explode('-', $request->get('price_range'));
-            
-        //     if(count($price_range) == 2) {
-        //         $min_price = $price_range[0];
-        //         $max_price = $price_range[1];
-        //         $title .= __('guidings.Price') . ' ' . $min_price . '€ - ' . $max_price . '€ | ';
-                
-        //         $query->having(DB::raw('lowest_price'), '>=', $min_price)
-        //               ->having(DB::raw('lowest_price'), '<=', $max_price);
-        //     } elseif(count($price_range) == 1) {
-        //         // Handle single value (350 and more)
-        //         $min_price = $price_range[0];
-        //         $title .= __('guidings.Price') . ' ' . $min_price . '€+ | ';
-                
-        //         $query->having(DB::raw('lowest_price'), '>=', $min_price);
-        //     }
-        // }
-
-        // $guidings_total = $query->count();
-        // $allGuidings = $query->get();
-
-        // $otherguidings = array();
-
-        // if($allGuidings->isEmpty()){
-        //     if($request->has('placeLat') && $request->has('placeLng') && !empty($request->get('placeLat')) && !empty($request->get('placeLng'))){
-        //         $latitude = $request->get('placeLat');
-        //         $longitude = $request->get('placeLng');
-        //         $otherguidings = $this->otherGuidingsBasedByLocation($latitude,$longitude);
-        //     } else {
-        //         $otherguidings = $this->otherGuidings();
-        //     }
-        // }
-       
-        // $guidings = $query->paginate(6);
-        // $guidings->appends(request()->except('page'));
-
-        // $data = compact('row_data', 'regions', 'cities', 'faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit', 'guidings', 'radius', 'allGuidings', 'otherguidings', 'title', 'guidings_total');
-
-        // return view('pages.category.country', $data);
     }
 
     public function otherGuidings(){
