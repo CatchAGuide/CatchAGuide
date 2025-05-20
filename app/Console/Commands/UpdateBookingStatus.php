@@ -2,14 +2,16 @@
 
 namespace App\Console\Commands;
 
+use Mail;
 use Illuminate\Console\Command;
+
+use App\Models\User;
 use App\Models\Booking;
+use App\Models\Guiding;
+use App\Models\EmailLog;
+use App\Mail\Ceo\BookingExpireMailToCEO;
 use App\Mail\Guest\GuestBookingExpiredMail;
 use App\Mail\Guide\GuideBookingExpiredMail;
-use App\Mail\Ceo\BookingExpireMailToCEO;
-use Mail;
-use App\Models\User;
-use App\Models\Guiding;
 
 class UpdateBookingStatus extends Command
 {
@@ -49,27 +51,32 @@ class UpdateBookingStatus extends Command
             ->get();
 
         foreach ($expiredBookings as $booking) {
-            $booking->status = 'cancelled';
-            $booking->save();
-
             $user = User::where('id',$booking->user_id)->first();
             $guiding = Guiding::where('id',$booking->guiding_id)->first();
             $guide = $guiding->user;
             
+            $booking->status = 'cancelled';
+            $booking->save();
 
             // Send an email notification to the guest and guide
             if($user->language == 'en'){
                 \App::setLocale('en');
             }
-            Mail::to($user->email)->send(new GuestBookingExpiredMail($booking,$user,$guiding,$guide));
+            if (!CheckEmailLog('guest_booking_expired', 'booking_' . $booking->id, $user->email)) {
+                Mail::to($user->email)->send(new GuestBookingExpiredMail($booking,$user,$guiding,$guide));
+            }
 
             if($guide->language == 'en'){
                 \App::setLocale('en');
             }
-            Mail::to($guide->email)->send(new GuideBookingExpiredMail($booking,$user,$guiding,$guide));
+            if (!CheckEmailLog('guide_booking_expired', 'booking_' . $booking->id, $guide->email)) {
+                Mail::to($guide->email)->send(new GuideBookingExpiredMail($booking,$user,$guiding,$guide));
+            }
 
             \App::setLocale('de');
-            Mail::to(env('TO_CEO','info@catchaguide.com'))->send(new BookingExpireMailToCEO($booking,$user,$guiding,$guide));
+            if (!CheckEmailLog('booking_expire_to_ceo', 'booking_' . $booking->id, env('TO_CEO','info@catchaguide.com'))) {
+                Mail::to(env('TO_CEO','info@catchaguide.com'))->send(new BookingExpireMailToCEO($booking,$user,$guiding,$guide));
+            }
         }
     }
 }

@@ -94,7 +94,8 @@ Route::get('/all-countries',function(){
 
 Route::post('/upload/{guiding?}', [FileUploadController::class, 'upload'])->name('upload');
 
-Route::post('/newguiding', [GuidingsController::class, 'guidingsStore'])->name('profile.newguiding.store')->middleware('auth:web,employees');
+
+Route::post('/newguiding', [GuidingsController::class, 'guidingsStore'])->name('profile.newguiding.store');
 Route::post('/newguiding/save-draft', [GuidingsController::class, 'saveDraft'])->name('profile.newguiding.save-draft');
 
 Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(function () {

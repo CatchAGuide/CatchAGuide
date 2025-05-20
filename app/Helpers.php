@@ -1,29 +1,41 @@
 <?php
-use Stichoza\GoogleTranslate\GoogleTranslate;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Str;
-use Intervention\Image\Facades\Image;
-use App\Models\Faq;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
+use Stichoza\GoogleTranslate\GoogleTranslate;
+
+use App\Models\Faq;
+use App\Models\EmailLog;
 
 if (! function_exists('translate')) {
     function translate($string, $language = '')
     {
+        if ($string === null) {
+            return '';
+        }
+        
         $currentLocale = ($language != '' || $language != null) ? $language : app()->getLocale();
         $cacheKey = 'translation_'.$currentLocale.'_'.$string;
 
         $translation = Cache::rememberForever($cacheKey, function () use ($string, $currentLocale) {
-            $translate = GoogleTranslate::trans($string, $currentLocale);
+            try {
+                $translate = GoogleTranslate::trans($string, $currentLocale);
 
-            if (strpos($translate, 'Führungen')) {
-                $translate = str_replace('Führungen', 'Angelguidings', $translate);
+                if (strpos($translate, 'Führungen')) {
+                    $translate = str_replace('Führungen', 'Angelguidings', $translate);
+                }
+
+                if (strpos($translate, 'Führung')) {
+                    $translate = str_replace('Führung', 'guiding', $translate);
+                }
+
+                return ucfirst($translate);
+            } catch (\Exception $e) {
+                Log::error('Translation failed: ' . $e->getMessage(), [
+                    'string' => $string,
+                    'locale' => $currentLocale
+                ]);
+                return $string;
             }
-
-            if (strpos($translate, 'Führung')) {
-                $translate = str_replace('Führung', 'guiding', $translate);
-            }
-
-            return ucfirst($translate);
         });
 
         return $translation;
@@ -153,5 +165,23 @@ if (!function_exists('getRatingLabel')) {
         if ($score >= 2) return __('guidings.Very_Poor');
         if ($score >= 1) return __('guidings.Bad');
         return __('guidings.Not_Rated');
+    }
+}
+
+if (!function_exists('CheckEmailLog')) {
+    function CheckEmailLog($type, $target, $email)
+    {
+        $existingEmail = EmailLog::where('email', $email)
+            ->where('type', $type)
+            ->where('target', $target)
+            ->where('created_at', '>=', now()->subHours(24)) // Adjust time window as needed
+            ->first();
+            
+        if ($existingEmail) {
+            Log::info("Duplicate email prevented: {$type} to {$email} for target {$target}");
+            return true; // Exit without sending the email
+        }
+
+        return false;
     }
 }

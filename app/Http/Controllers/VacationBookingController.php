@@ -81,8 +81,13 @@ class VacationBookingController extends Controller
 
         // Send email notification
         try {
-            Mail::to(env('TO_CEO'))->send(new VacationBookingNotification($booking));
-            Mail::to($booking->email)->send(new GuestVacationBookingNotification($booking));
+            $email = env('TO_CEO','info@catchaguide.com');
+            if (!CheckEmailLog('vacation_booking_notification', 'booking_' . $booking->id, $email)) {
+                Mail::to($email)->send(new VacationBookingNotification($booking));
+            }
+            if (!CheckEmailLog('guest_vacation_booking_notification', 'booking_' . $booking->id, $booking->email)) {
+                Mail::to($booking->email)->send(new GuestVacationBookingNotification($booking));
+            }
         } catch (\Exception $e) {
             Log::error('Failed to send booking notification email:', [
                 'booking_id' => $booking->id,

@@ -43,12 +43,18 @@ class SendCheckoutEmail implements ShouldQueue
         if($this->user->language == 'en'){
             \App::setLocale('en');
         }
-        Mail::to($this->booking->email)->queue(new GuestBookingRequestMail($this->booking,$this->user,$this->guiding,$this->guide));
-        Mail::to($this->guide->email)->queue(new GuideBookingRequestMail($this->booking,$this->user,$this->guiding,$this->guide));
+        if (!CheckEmailLog('guest_booking_request', 'booking_' . $this->booking->id, $this->booking->email)) {
+            Mail::to($this->booking->email)->queue(new GuestBookingRequestMail($this->booking,$this->user,$this->guiding,$this->guide));
+        }
+        if (!CheckEmailLog('guide_booking_request', 'guide_' . $this->guide->id . '_booking_' . $this->booking->id, $this->guide->email)) {
+            Mail::to($this->guide->email)->queue(new GuideBookingRequestMail($this->booking,$this->user,$this->guiding,$this->guide));
+        }
 
 
         \App::setLocale('de');
-        Mail::to(env('TO_CEO'))->queue(new BookingRequestMailToCEO($this->booking));
-       
+        $email = env('TO_CEO','info@catchaguide.com');
+        if (!CheckEmailLog('ceo_booking_notification', 'admin_booking_' . $this->booking->id, $email)) {
+            Mail::to($email)->queue(new BookingRequestMailToCEO($this->booking));
+        }
     }
 }
