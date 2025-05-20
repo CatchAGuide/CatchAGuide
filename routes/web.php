@@ -94,6 +94,9 @@ Route::get('/all-countries',function(){
 
 Route::post('/upload/{guiding?}', [FileUploadController::class, 'upload'])->name('upload');
 
+Route::post('/newguiding', [GuidingsController::class, 'guidingsStore'])->name('profile.newguiding.store');
+Route::post('/newguiding/save-draft', [GuidingsController::class, 'saveDraft'])->name('profile.newguiding.save-draft');
+
 Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(function () {
     Route::get('/', [App\Http\Controllers\ProfileController::class, 'index'])->name('index');
     Route::get('/settings', [App\Http\Controllers\ProfileController::class, 'settings'])->name('settings');
@@ -117,8 +120,6 @@ Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(functi
     Route::get('/guidebookings/reject/{booking}', [App\Http\Controllers\ProfileController::class, 'reject'])->name('guidebookings.reject');
     
     Route::get('/newguiding', [App\Http\Controllers\ProfileController::class, 'newguiding'])->name('newguiding');
-    Route::post('/newguiding', [GuidingsController::class, 'guidingsStore'])->name('newguiding.store');
-    Route::post('/newguiding/save-draft', [GuidingsController::class, 'saveDraft'])->name('newguiding.save-draft');
 
     Route::get('/payments', [App\Http\Controllers\ProfileController::class, 'payments'])->name('payments');
     Route::get('/calendar', [App\Http\Controllers\ProfileController::class, 'calendar'])->name('calendar');

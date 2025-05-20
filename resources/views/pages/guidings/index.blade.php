@@ -645,17 +645,17 @@
                                                                 <span class="truncate"><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }}</span>                                      
                                                             </div>
                                                             @if ($guiding->user->average_rating())
-                                                            <div class="ave-reviews-row">
-                                                                <div class="ratings-score">
-                                                                <span class="rating-value">{{number_format($guiding->user->average_rating(), 1)}}</span>
-                                                            </div> 
-                                                                <span class="mb-1">
-                                                                    {{-- ({{$guiding->user->received_ratings->count()}} reviews) --}}
-                                                                    ({{$guiding->user->reviews->count()}} reviews)
-                                                                </span>
-                                                            </div>
+                                                                <div class="ave-reviews-row">
+                                                                    <div class="ratings-score">
+                                                                    <span class="rating-value">{{number_format($guiding->user->average_rating(), 1)}}</span>
+                                                                </div>
+                                                                    <span class="mb-1">
+                                                                        {{-- ({{$guiding->user->received_ratings->count()}} reviews) --}}
+                                                                        ({{$guiding->user->reviews->count()}} reviews)
+                                                                    </span>
+                                                                </div>
                                                             @else
-                                                            <div class="no-reviews"><span>@lang('guidings.no_reviews')</span></div>
+                                                                <div class="no-reviews"><span>@lang('guidings.no_reviews')</span></div>
                                                             @endif
                                                         </div>
                                                         <div class="guidings-item-icon">
@@ -1217,48 +1217,44 @@ document.addEventListener('DOMContentLoaded', function() {
     // Make functions available globally
     window.reinitializeComponents = reinitializeComponents;
     window.attachFilterRemoveListeners = attachFilterRemoveListeners;
-});
-</script>
+    
+    updateActiveFilterCounter();
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        updateActiveFilterCounter();
+    function updateActiveFilterCounter() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let activeFilterCount = 0;
 
-        function updateActiveFilterCounter() {
-            const urlParams = new URLSearchParams(window.location.search);
-            let activeFilterCount = 0;
+        // List of filter parameters to check
+        const filterParams = ['target_fish[]', 'methods[]', 'water[]', 'duration_types[]', 'num_persons'];
 
-            // List of filter parameters to check
-            const filterParams = ['target_fish[]', 'methods[]', 'water[]', 'duration_types[]', 'num_persons'];
-
-            filterParams.forEach(param => {
-                if (urlParams.has(param)) {
-                    const values = urlParams.getAll(param);
-                    if (values.length > 0) {
-                        activeFilterCount += values.length;
-                    }
+        filterParams.forEach(param => {
+            if (urlParams.has(param)) {
+                const values = urlParams.getAll(param);
+                if (values.length > 0) {
+                    activeFilterCount += values.length;
                 }
-            });
-
-            // Check price range separately
-            const defaultMinPrice = 50;
-            const defaultMaxPrice = {{ isset($overallMaxPrice) ? $overallMaxPrice : 1000 }}; // Use the actual max price from controller
-            const priceMin = parseInt(urlParams.get('price_min'));
-            const priceMax = parseInt(urlParams.get('price_max'));
-            
-            if (priceMin && priceMin !== defaultMinPrice) activeFilterCount++;
-            if (priceMax && priceMax !== defaultMaxPrice) activeFilterCount++;
-
-            // Update the counter
-            const filterCounter = document.getElementById('active-filter-counter');
-            if (activeFilterCount > 0) {
-                filterCounter.textContent = activeFilterCount;
-                filterCounter.style.display = 'inline-block';
-            } else {
-                filterCounter.style.display = 'none';
             }
+        });
+
+        // Check price range separately
+        const defaultMinPrice = 50;
+        const defaultMaxPrice = {{ isset($overallMaxPrice) ? $overallMaxPrice : 1000 }}; // Use the actual max price from controller
+        const priceMin = parseInt(urlParams.get('price_min'));
+        const priceMax = parseInt(urlParams.get('price_max'));
+        
+        if (priceMin && priceMin !== defaultMinPrice) activeFilterCount++;
+        if (priceMax && priceMax !== defaultMaxPrice) activeFilterCount++;
+
+        // Update the counter
+        const filterCounter = document.getElementById('active-filter-counter');
+        if (activeFilterCount > 0) {
+            filterCounter.textContent = activeFilterCount;
+            filterCounter.style.display = 'inline-block';
+        } else {
+            filterCounter.style.display = 'none';
         }
-    });
+    }
+});
 </script>
 
 @endsection
