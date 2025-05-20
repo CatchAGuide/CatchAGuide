@@ -1233,6 +1233,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (values.length > 0) {
                     activeFilterCount += values.length;
                 }
+            });
+
+            // Check price range separately
+            const defaultMinPrice = 50;
+            const defaultMaxPrice = {{ isset($overallMaxPrice) ? $overallMaxPrice : 1000 }}; // Use the actual max price from controller
+            const priceMin = parseInt(urlParams.get('price_min'));
+            const priceMax = parseInt(urlParams.get('price_max'));
+            
+            if (priceMin && priceMin !== defaultMinPrice) activeFilterCount++;
+            if (priceMax && priceMax !== defaultMaxPrice) activeFilterCount++;
+
+            // Update the counter
+            const filterCounter = document.getElementById('active-filter-counter');
+            if (activeFilterCount > 0) {
+                filterCounter.textContent = activeFilterCount;
+                filterCounter.style.display = 'inline-block';
+            } else {
+                filterCounter.style.display = 'none';
             }
         });
 

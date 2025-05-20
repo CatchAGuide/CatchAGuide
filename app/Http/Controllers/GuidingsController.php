@@ -778,7 +778,12 @@ class GuidingsController extends Controller
                 
                 // Only keep images that are in the image_list
                 foreach ($existingImages as $existingImage) {
-                    if (in_array('/' . $existingImage, $keepImages)) {
+                    // Check if the image path is in the keepImages list
+                    // Handle both formats: with and without leading slash
+                    $imagePath = $existingImage;
+                    $imagePathWithSlash = '/' . $existingImage;
+                    
+                    if (in_array($imagePath, $keepImages) || in_array($imagePathWithSlash, $keepImages)) {
                         $galeryImages[] = $existingImage;
                     } else {
                         media_delete($existingImage);
@@ -788,8 +793,12 @@ class GuidingsController extends Controller
 
             if ($request->has('title_image')) {
                 $imageCount = count($galeryImages);
-                foreach($request->file('title_image') as $index => $image){
-                    if (in_array($image->getClientOriginalName(), $imageList)) {
+                foreach($request->file('title_image') as $index => $image) {
+                    // Extract just the filename without path
+                    $filename = 'guidings-images/'.$image->getClientOriginalName();
+                    
+                    // Check if this file is already in our list (avoid duplicates)
+                    if (in_array($filename, $imageList) || in_array('/' . $filename, $imageList)) {
                         continue;
                     }
                     
@@ -799,8 +808,13 @@ class GuidingsController extends Controller
                 }
             }
 
-            foreach($galeryImages as $index => $image){
-                if($index == $request->input('primaryImage', 0)){
+            if (count($galeryImages) < 5) {
+                throw new \Exception('Please upload at least 5 images');
+            }
+
+            // Set the primary image
+            foreach($galeryImages as $index => $image) {
+                if($index == $request->input('primaryImage', 0)) {
                     $guiding->thumbnail_path = $image;
                 }
             }
