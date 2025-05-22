@@ -759,14 +759,14 @@
     <div class="accordion mb-5" id="guidings-accordion">
 
         <!-- What's Included Accordion -->
-        @if(!empty(json_decode($guiding->pricing_extra)) && !empty( json_decode($guiding->inclusions)))
+        @if(!empty(json_decode($guiding->pricing_extra)) || !empty( json_decode($guiding->inclusions)))
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingInclude">
                     <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInclude" aria-expanded="true" aria-controls="collapseInclude">
                     @lang('guidings.Inclusions')
                     </button>
                 </h2>
-                <div id="collapseInclude" class="accordion-collapse collapse show" aria-labelledby="headingInclude" data-bs-parent="#accordionTabs">
+                <div id="collapseInclude" class="accordion-collapse collapse show" aria-labelledby="headingInclude" data-bs-parent="#guidings-accordion">
                     <div class="accordion-body">
                         <div class="row card tab-card h-100 shadow m-0 p-2">
                             <div class="col-12 mb-4">
@@ -817,11 +817,11 @@
         @if(!empty($guiding->target_fish) || !empty($guiding->fishing_methods) || !empty($guiding->water_types))
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingFishing">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFishing" aria-expanded="false" aria-controls="collapseFishing">
+                    <button class="accordion-button {{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFishing" aria-expanded="{{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) ? 'true' : 'false' }}" aria-controls="collapseFishing">
                         @lang('guidings.Tour_Info')
                     </button>
                 </h2>
-                <div id="collapseFishing" class="accordion-collapse collapse" aria-labelledby="headingFishing" data-bs-parent="#accordionTabs">
+                <div id="collapseFishing" class="accordion-collapse collapse {{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) ? 'show' : '' }}" aria-labelledby="headingFishing" data-bs-parent="#guidings-accordion">
                     <div class="accordion-body">
                         <div class="row card tab-card h-100 shadow m-0 p-2">
                             @if(!empty($guiding->target_fish))
@@ -889,11 +889,11 @@
         <!-- Boat Information Accordion -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingBoat">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBoat" aria-expanded="false" aria-controls="collapseBoat">
+                    <button class="accordion-button {{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBoat" aria-expanded="{{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) ? 'true' : 'false' }}" aria-controls="collapseBoat">
                     @lang('guidings.Boat_Details')
                     </button>
                 </h2>
-                <div id="collapseBoat" class="accordion-collapse collapse" aria-labelledby="headingBoat" data-bs-parent="#accordionTabs">
+                <div id="collapseBoat" class="accordion-collapse collapse {{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) ? 'show' : '' }}" aria-labelledby="headingBoat" data-bs-parent="#guidings-accordion">
                     <div class="accordion-body">
                         <div class="row card tab-card h-100 shadow m-0 p-3">
                             @if(!empty(json_decode($boatInformation) ))
@@ -926,11 +926,11 @@
         @if(!empty(json_decode( $guiding->requirements)) || !empty($guiding->other_information) || !empty($guiding->recommendations) || !empty($guiding->style_of_fishing) || !empty($guiding->tour_type))
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingInfo">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInfo" aria-expanded="false" aria-controls="collapseInfo">
+                    <button class="accordion-button {{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) && !$guiding->is_boat ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInfo" aria-expanded="{{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) && !$guiding->is_boat ? 'true' : 'false' }}" aria-controls="collapseInfo">
                     @lang('guidings.Additional_Info')
                     </button>
                 </h2>
-                <div id="collapseInfo" class="accordion-collapse collapse" aria-labelledby="headingInfo" data-bs-parent="#accordionTabs">
+                <div id="collapseInfo" class="accordion-collapse collapse {{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) && !$guiding->is_boat ? 'show' : '' }}" aria-labelledby="headingInfo" data-bs-parent="#guidings-accordion">
                     <div class="accordion-body">
                         <div class="row card tab-card h-100 shadow m-0 p-3">
                             <!-- Requirements Section -->

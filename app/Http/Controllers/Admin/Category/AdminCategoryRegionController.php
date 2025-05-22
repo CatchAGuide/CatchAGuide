@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
+use Exception;
 
 class AdminCategoryRegionController extends Controller
 {
@@ -295,7 +296,7 @@ class AdminCategoryRegionController extends Controller
         }
     }
 
-    public function show(Category $category)
+    public function show(Destination $destination)
     {
         //
     }

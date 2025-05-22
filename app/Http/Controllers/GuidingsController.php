@@ -680,6 +680,7 @@ class GuidingsController extends Controller
 
         $sameGuidings = Guiding::where('user_id', $guiding->user_id)
             ->where('id', '!=', $guiding->id)
+            ->where('status', 1)
             ->limit(10)
             ->get();
 
