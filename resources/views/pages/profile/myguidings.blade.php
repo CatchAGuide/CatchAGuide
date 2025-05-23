@@ -180,8 +180,8 @@
           @foreach($guidings as $guidingIndex => $guiding)
             <div class="row m-0 mb-2">
               <div class="col-sm-6 col-md-12">
-                <div class="row border shadow-sm bg-white xszzs">
-                  <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-1">
+                <div class="row border shadow-sm bg-white rounded">
+                  <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-0">
                     <div id="carouselExampleControls-{{$guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
                       <div class="carousel-inner">
                         @if(count(get_galleries_image_link($guiding)))
@@ -203,210 +203,63 @@
                           <span class="visually-hidden">Next</span>
                         </button>
                       @endif
-
                     </div>
                   </div>
-                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 mt-1 p-1">
-                    {{-- @if ($guiding->is_newguiding == 0)
-                      <h5 class="fw-bolder text-truncate"><a class="text-dark" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">{{$guiding->title}}</a></h5>
-                    @else --}}
-                      <h5 class="fw-bolder text-truncate"><a class="text-dark" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">{{$guiding->title}}</a></h5>
-                    {{-- @endif --}}
-                    <div class="ratings mr-2 color-primary my-1" style="font-size:0.80rem">
-                      @if(count($guiding->user->received_ratings) > 0)
-                        @switch(two($guiding->user->average_rating()))
-                          @case(two($guiding->user->average_rating()) >= 5)
-                            - {{one($guiding->user->average_rating())}}
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            @break
-                          @case(two($guiding->user->average_rating()) >= 4.5)
-                            - {{one($guiding->user->average_rating())}}
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star-half"></i>
-                            @break
-                          @case(two($guiding->user->average_rating()) >= 4)
-                            - {{one($guiding->user->average_rating())}}
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            @break
-                          @case(two($guiding->user->average_rating()) >= 3.5)
-                            - {{one($guiding->user->average_rating())}}
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star-half"></i>
-                            @break
-                          @case(two($guiding->user->average_rating()) >= 3)
-                            - {{one($guiding->user->average_rating())}}
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            @break
-                          @case(two($guiding->user->average_rating()) >= 2.5)
-                            - {{one($guiding->user->average_rating())}}
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star-half"></i>
-                            @break
-                          @case(two($guiding->user->average_rating()) >= 2)
-                            - {{one($guiding->user->average_rating())}}
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            @break
-                          @case(two($guiding->user->average_rating()) >= 1.5)
-                            - {{one($guiding->user->average_rating())}}
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star-half"></i>
-                            @break
-                          @case(two($guiding->user->average_rating()) >= 1)
-                            - {{one($guiding->user->average_rating())}}
-                            <i class="fa fa-star"></i>
-                            @break
-                          @default
-                            - {{one($guiding->user->average_rating())}}
-                            <i class="fa fa-star"></i>
-                        @endswitch
-
-                        @if(count($guiding->user->received_ratings) >= 2) 
-                          ({{count($guiding->user->received_ratings)}} Bewertungen)
-                        @else 
-                          ({{count($guiding->user->received_ratings)}} Bewertung)
-                        @endif
-
-                      @endif     
+                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 p-2 px-md-3 pt-md-2">
+                    <h5 class="fw-bolder text-truncate"><a class="text-dark" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">{{$guiding->title}}</a></h5>
+                    <p class="mb-2"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($guiding->location) }}</p>
+                    
+                    <div class="d-flex align-items-center mb-2">
+                      <div class="me-4">
+                        <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" class="me-2" alt="" />
+                        {{ $guiding->duration }} @lang('guidings.hours')
+                      </div>
+                      <div>
+                        <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" class="me-2" alt="" />
+                        {{ $guiding->max_guests }} @lang('message.persons')
+                      </div>
                     </div>
-                    <span class="text-center" style="font-size:1rem;color:rgb(28, 28, 28)"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($guiding->location) }}</span>                                      
-                    <div class="row mt-2">
-                      <div class="col-6 col-sm-6 col-md-6">
-                        <div class="d-flex align-items-center">
-                          <div>
-                            <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
-                          </div>
-                          <div class="mx-2">
-                            <div class="tours-list__content__trait__text" style="font-size:0.75rem">
-                              @php
-                                $guidingTargets = collect($guiding->getTargetFishNames())->pluck('name')->toArray();
-                              @endphp
-                              
-                              @if(!empty($guidingTargets))
-                                {{ implode(', ', $guidingTargets) }}
-                              @endif
-                            </div>
-                          </div>
-                        </div>
+                    
+                    <div class="d-flex align-items-center mb-2">
+                      <div class="me-4">
+                        <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" class="me-2" alt="" />
+                        @php
+                          $guidingTargets = collect($guiding->getTargetFishNames())->pluck('name')->toArray();
+                        @endphp
+                        {{ !empty($guidingTargets) ? implode(', ', $guidingTargets) : '' }}
                       </div>
-                      <div class="col-6 col-sm-6 col-md-6">
-                        <div class="d-flex align-items-center">
-                          <div>
-                            <img src="{{asset('assets/images/icons/water-waves.png')}}" height="20" width="20" alt="" />
-                          </div>
-                          <div class="mx-2">
-                            <div class="tours-list__content__trait__text" style="font-size:0.75rem">
-                              @php
-                                $guidingWaters = collect($guiding->getWaterNames())->pluck('name')->toArray();
-                              @endphp
-                              
-                              @if(!empty($guidingWaters))
-                                {{ implode(', ', $guidingWaters) }}
-                              @endif
-                            </div>
-                          </div>
-                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center mb-2">
+                      <div>
+                        <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" class="me-2" alt="" />
+                        {{$guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
                       </div>
-                      <div class="col-6 col-sm-6 col-md-6">
-                        <div class="d-flex align-items-center">
-                          <div>
-                            <img src="{{asset('assets/images/icons/fishing-tool.png')}}" height="20" width="20" alt="" />
-                          </div>
-                          <div class="mx-2">
-                            <div class="tours-list__content__trait__text" style="font-size:0.75rem">
-                              @php
-                                $fishingtype = null;
-                                if($guiding->fishingTypes){
-                                  if(app()->getLocale() == 'en'){
-                                    $fishingtype = $guiding->fishingTypes->name_en;
-                                  }else{
-                                    $fishingtype =  $guiding->fishingTypes->name;
-                                  }
-                                }
-                              @endphp
-                              @if($fishingtype) {{$fishingtype}}  @else {{$guiding->fishing_type}}@endif
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col-6 col-sm-6 col-md-6">
-                        <div class="d-flex align-items-center">
-                          <div>
-                            <img src="{{asset('assets/images/icons/fishing.png')}}" height="20" width="20" alt="" />
-                          </div>
-                          <div class="mx-2">
-                            <div class="tours-list__content__trait__text" style="font-size:0.75rem">
-                              @php
-                                $guidingMethods = collect($guiding->getFishingMethodNames())->pluck('name')->toArray();
-                              @endphp
-                              
-                              @if(!empty($guidingMethods))
-                                {{ implode(', ', $guidingMethods) }}
-                              @endif
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col-6 col-sm-6 col-md-6">
-                        <div class="d-flex align-items-center">
-                          <div>
-                            <img src="{{asset('assets/images/icons/fishing-man.png')}}" height="20" width="20" alt="" />
-                          </div>
-                          <div class="mx-2">
-                            <div class="tours-list__content__trait__text" style="font-size:0.75rem">
-                              {{ translate('Fishing from ')}}:  {{$guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col-6 col-sm-6 col-md-6">
-                        <div class="d-flex align-items-center mt-2">
-                          <div class="icon-small">
-                            <span class="icon-user"></span>
-                          </div>
-                          <div class="mx-2" style="font-size:0.75rem">
-                            {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col-6 col-sm-6 col-md-6">
-                        <div class="d-flex align-items-center">
-                          <div>
-                            <img src="{{asset('assets/images/icons/clock.svg')}}" height="20" width="20" alt="" />
-                          </div>
-                          <div class="mx-2" style="font-size:0.75rem">
-                            {{ $guiding->duration }} @if($guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col-12">
-                        <div class="mt-3">
-                          @if($guiding->user->profil_image)
-                            <img class="center-block rounded-circle" src="{{asset('images/'. $guiding->user->profil_image)}}" alt="" width="20" height="20">
-                          @else
-                            <img class="center-block rounded-circle" src="{{asset('images/placeholder_guide.jpg')}}" alt="" width="20" height="20">
+                    </div>
+                    
+                    <div class="mt-3">
+                      <strong>@lang('guidings.Whats_Included')</strong>
+                      <div class="d-flex flex-wrap">
+                        @if(!empty($guiding->getInclusionNames()))
+                          @php
+                            $inclussions = $guiding->getInclusionNames();
+                            $maxToShow = 3;
+                          @endphp
+                          
+                          @foreach ($inclussions as $index => $inclussion)
+                            @if ($index < $maxToShow)
+                              <span class="me-3"><i class="fa fa-check me-1"></i>{{ $inclussion['name'] }}</span>
+                            @endif
+                          @endforeach
+                          
+                          @if (count($inclussions) > $maxToShow)
+                            <span>+{{ count($inclussions) - $maxToShow }} more</span>
                           @endif
-                          <span class="color-primary" style="font-size:1rem">{{$guiding->user->firstname}}</span>
-                        </div>
+                        @endif
                       </div>
                     </div>
                   </div>
-                  <div class="col-12 col-sm-12 col-md-2 col-lg-3 col-xl-2 col-xxl-2 position-relative">
+                  <div class="col-12 col-sm-12 col-md-2 col-lg-2 col-xl-2 col-xxl-2 position-relative">
                     <div class="d-flex flex-column my-5 py-2">
                       <a class="btn btn-outline-theme btn-sm my-1" href="{{route('guidings.show', [$guiding->id,$guiding->slug])}}">View</a>
                       <a class="btn btn-outline-theme btn-sm my-1" href="{{route('guidings.edit_newguiding', $guiding->id)}}">@lang('profile.edit')</a>

@@ -151,6 +151,77 @@
                 flex: 0 0 85vw; /* Take up most of the viewport width on mobile */
             }
         }
+        
+        /* Desktop/Mobile view toggling */
+        @media (min-width: 768px) {
+            .tours-list__inner.mobile-view {
+                display: none !important;
+            }
+            .tours-list__inner.desktop-view {
+                display: block !important;
+            }
+            .mobile-view {
+                display: none !important;
+            }
+            .desktop-view {
+                display: block !important;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .tours-list__inner.desktop-view {
+                display: none !important;
+            }
+            .tours-list__inner.mobile-view {
+                display: block !important;
+            }
+            .desktop-view {
+                display: none !important;
+            }
+            .mobile-view {
+                display: block !important;
+            }
+            
+            /* Mobile carousel styling */
+            .popular-tours__single {
+                margin: 0 5px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                border-radius: 8px;
+                overflow: hidden;
+                background: #fff;
+            }
+            
+            .popular-tours__img__wrapper {
+                height: 180px;
+                overflow: hidden;
+            }
+            
+            .popular-tours__img__wrapper img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+            
+            .popular-tours__content {
+                padding: 15px;
+            }
+            
+            .crop-text-2 {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            .crop-text-1 {
+                display: -webkit-box;
+                -webkit-line-clamp: 1;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
     </style>
 @endsection
 
@@ -759,14 +830,14 @@
     <div class="accordion mb-5" id="guidings-accordion">
 
         <!-- What's Included Accordion -->
-        @if(!empty(json_decode($guiding->pricing_extra)) && !empty( json_decode($guiding->inclusions)))
+        @if(!empty(json_decode($guiding->pricing_extra)) || !empty( json_decode($guiding->inclusions)))
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingInclude">
                     <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInclude" aria-expanded="true" aria-controls="collapseInclude">
                     @lang('guidings.Inclusions')
                     </button>
                 </h2>
-                <div id="collapseInclude" class="accordion-collapse collapse show" aria-labelledby="headingInclude" data-bs-parent="#accordionTabs">
+                <div id="collapseInclude" class="accordion-collapse collapse show" aria-labelledby="headingInclude" data-bs-parent="#guidings-accordion">
                     <div class="accordion-body">
                         <div class="row card tab-card h-100 shadow m-0 p-2">
                             <div class="col-12 mb-4">
@@ -817,11 +888,11 @@
         @if(!empty($guiding->target_fish) || !empty($guiding->fishing_methods) || !empty($guiding->water_types))
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingFishing">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFishing" aria-expanded="false" aria-controls="collapseFishing">
+                    <button class="accordion-button {{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFishing" aria-expanded="{{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) ? 'true' : 'false' }}" aria-controls="collapseFishing">
                         @lang('guidings.Tour_Info')
                     </button>
                 </h2>
-                <div id="collapseFishing" class="accordion-collapse collapse" aria-labelledby="headingFishing" data-bs-parent="#accordionTabs">
+                <div id="collapseFishing" class="accordion-collapse collapse {{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) ? 'show' : '' }}" aria-labelledby="headingFishing" data-bs-parent="#guidings-accordion">
                     <div class="accordion-body">
                         <div class="row card tab-card h-100 shadow m-0 p-2">
                             @if(!empty($guiding->target_fish))
@@ -889,11 +960,11 @@
         <!-- Boat Information Accordion -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingBoat">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBoat" aria-expanded="false" aria-controls="collapseBoat">
+                    <button class="accordion-button {{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBoat" aria-expanded="{{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) ? 'true' : 'false' }}" aria-controls="collapseBoat">
                     @lang('guidings.Boat_Details')
                     </button>
                 </h2>
-                <div id="collapseBoat" class="accordion-collapse collapse" aria-labelledby="headingBoat" data-bs-parent="#accordionTabs">
+                <div id="collapseBoat" class="accordion-collapse collapse {{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) ? 'show' : '' }}" aria-labelledby="headingBoat" data-bs-parent="#guidings-accordion">
                     <div class="accordion-body">
                         <div class="row card tab-card h-100 shadow m-0 p-3">
                             @if(!empty(json_decode($boatInformation) ))
@@ -926,11 +997,11 @@
         @if(!empty(json_decode( $guiding->requirements)) || !empty($guiding->other_information) || !empty($guiding->recommendations) || !empty($guiding->style_of_fishing) || !empty($guiding->tour_type))
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingInfo">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInfo" aria-expanded="false" aria-controls="collapseInfo">
+                    <button class="accordion-button {{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) && !$guiding->is_boat ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInfo" aria-expanded="{{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) && !$guiding->is_boat ? 'true' : 'false' }}" aria-controls="collapseInfo">
                     @lang('guidings.Additional_Info')
                     </button>
                 </h2>
-                <div id="collapseInfo" class="accordion-collapse collapse" aria-labelledby="headingInfo" data-bs-parent="#accordionTabs">
+                <div id="collapseInfo" class="accordion-collapse collapse {{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) && !$guiding->is_boat ? 'show' : '' }}" aria-labelledby="headingInfo" data-bs-parent="#guidings-accordion">
                     <div class="accordion-body">
                         <div class="row card tab-card h-100 shadow m-0 p-3">
                             <!-- Requirements Section -->
@@ -1174,140 +1245,174 @@
     @if($same_guiding && count($same_guiding ) > 0)
     <section class="tour-details-two mb-5 p-0">
         <div class="container">
-    <div class="row">
-        <div class="col-lg-12 col-sm-12">
-            <h3 class="tour-details-two__title">@lang('guidings.More_Fishing') {{$guiding->user->firstname}}</h3>
-            <div class="tours-list__right">
-                <!-- Slider container -->
-                <div class="tours-list__inner">
-                    @foreach($same_guiding as $index => $other_guiding) <!-- Removed `.take(4)` -->
-                    <div class="row m-0 mb-2 guiding-list-item {{ $index < 2 ? 'show' : '' }}">
-                        <div class="col-md-12">
-                            <div class="row p-2 border shadow-sm bg-white rounded">
-                                <!-- Carousel and other content for each guiding item -->
-                                <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-0">
-                                    <div id="carouselExampleControls-{{$other_guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
-                                        <div class="carousel-inner">
-                                            @if(count(get_galleries_image_link($other_guiding)))
-                                                @foreach(get_galleries_image_link($other_guiding) as $index => $gallery_image_link)
-                                                    <div class="carousel-item @if($index == 0) active @endif">
-                                                        <img class="d-block" src="{{$gallery_image_link}}">
-                                                    </div>
-                                                @endforeach
-                                            @endif
-                                        </div>
-                                        @if(count(get_galleries_image_link($other_guiding)) > 1)
-                                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls-{{$other_guiding->id}}" data-bs-slide="prev">
-                                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                                <span class="visually-hidden">Previous</span>
-                                            </button>
-                                            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls-{{$other_guiding->id}}" data-bs-slide="next">
-                                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                                <span class="visually-hidden">Next</span>
-                                            </button>
-                                        @endif
-                                    </div>
-                                </div>
-                                <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 p-md-3 mt-md-1">
-                                    <a href="{{ route('guidings.show', [$other_guiding->id, $other_guiding->slug]) }}">
-                                            <div class="guidings-item">
-                                                <div class="guidings-item-title">
-                                                    <h5 class="fw-bolder text-truncate">{{translate($other_guiding->title)}}</h5>
-                                                    <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ $other_guiding->location }}</span>                                      
+            <div class="row">
+                <div class="col-lg-12 col-sm-12">
+                    <h3 class="tour-details-two__title">@lang('guidings.More_Fishing') {{$guiding->user->firstname}}</h3>
+                    <div class="tours-list__right">
+                        <!-- Desktop view (row-based layout) -->
+                        <div class="tours-list__inner desktop-view">
+                            @foreach($same_guiding as $index => $other_guiding)
+                            <div class="row m-0 mb-2 guiding-list-item {{ $index < 2 ? 'show' : '' }}">
+                                <div class="col-md-12">
+                                    <div class="row p-2 border shadow-sm bg-white rounded">
+                                        <!-- Existing desktop layout -->
+                                        <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-0">
+                                            <div id="carouselExampleControls-{{$other_guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
+                                                <div class="carousel-inner">
+                                                    @if(count(get_galleries_image_link($other_guiding)))
+                                                        @foreach(get_galleries_image_link($other_guiding) as $index => $gallery_image_link)
+                                                            <div class="carousel-item @if($index == 0) active @endif">
+                                                                <img class="d-block" src="{{$gallery_image_link}}">
+                                                            </div>
+                                                        @endforeach
+                                                    @endif
                                                 </div>
-                                                @if ($other_guiding->user->average_rating())
-                                                <div class="guidings-item-ratings">
-                                                <div class="ratings-score">
-                                                <span class="text-warning">★</span>
-                                                        <span>{{$other_guiding->user->average_rating()}} </span>
-                                                    </div>
-                                                </div>
+                                                @if(count(get_galleries_image_link($other_guiding)) > 1)
+                                                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls-{{$other_guiding->id}}" data-bs-slide="prev">
+                                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                                        <span class="visually-hidden">Previous</span>
+                                                    </button>
+                                                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls-{{$other_guiding->id}}" data-bs-slide="next">
+                                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                                        <span class="visually-hidden">Next</span>
+                                                    </button>
                                                 @endif
                                             </div>
-                                            <div class="guidings-item-icon">
-                                                <div class="guidings-icon-container"> 
-                                                            <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
-                                                        <div class="">
-                                                            {{ $other_guiding->duration }} @if($other_guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
+                                        </div>
+                                        <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 p-md-3 mt-md-1">
+                                            <!-- Existing content -->
+                                            <a href="{{ route('guidings.show', [$other_guiding->id, $other_guiding->slug]) }}">
+                                                <!-- Existing content structure -->
+                                                <div class="guidings-item">
+                                                    <div class="guidings-item-title">
+                                                        <h5 class="fw-bolder text-truncate">{{translate($other_guiding->title)}}</h5>
+                                                        <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ $other_guiding->location }}</span>                                      
+                                                    </div>
+                                                    @if ($other_guiding->user->average_rating())
+                                                    <div class="guidings-item-ratings">
+                                                    <div class="ratings-score">
+                                                    <span class="text-warning">★</span>
+                                                            <span>{{$other_guiding->user->average_rating()}} </span>
                                                         </div>
+                                                    </div>
+                                                    @endif
                                                 </div>
-                                                <div class="guidings-icon-container"> 
-                                                        <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" />
-                                                        <div class="">
-                                                        {{ $other_guiding->max_guests }} @if($other_guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
-                                                        </div>
-                                                </div>
-                                                <div class="guidings-icon-container"> 
-                                                            <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
-                                                        <div class="">
-                                                            <div class="tours-list__content__trait__text" >
-
-                                                                @php
-                                                                $guidingTargets = collect($guiding->getTargetFishNames())->pluck('name')->toArray();
-                                                                @endphp
-                                                                
-                                                                @if(!empty($guidingTargets))
-                                                                    {{ implode(', ', $guidingTargets) }}
-                                                                @endif
+                                                <div class="guidings-item-icon">
+                                                    <div class="guidings-icon-container"> 
+                                                                <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
+                                                            <div class="">
+                                                                {{ $other_guiding->duration }} @if($other_guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
                                                             </div>
-                                                        
-                                                        </div>
-                                                </div>
-                                                <div class="guidings-icon-container">
-                                                            <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
-                                                        <div class="">
-                                                            <div class="tours-list__content__trait__text" >
-                                                                {{$other_guiding->is_boat ? ($other_guiding->boatType && $other_guiding->boatType->name !== null ? $other_guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
+                                                    </div>
+                                                    <div class="guidings-icon-container"> 
+                                                            <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" />
+                                                            <div class="">
+                                                            {{ $other_guiding->max_guests }} @if($other_guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
                                                             </div>
-                                                        
-                                                        </div>
-                                                </div>
-                                            </div>
-                                            <div class="inclusions-price">
-                                                    <div class="guidings-inclusions-container">
-                                                        @if(!empty($other_guiding->getInclusionNames()))
-                                                        <div class="guidings-included">
-                                                            <strong>@lang('guidings.Whats_Included')</strong>
-                                                            <div class="inclusions-list">
-                                                                @php
-                                                                    $inclussions = $guiding->getInclusionNames();
-                                                                    $maxToShow = 3; // Maximum number of inclusions to display
-                                                                @endphp
+                                                    </div>
+                                                    <div class="guidings-icon-container"> 
+                                                                <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
+                                                            <div class="">
+                                                                <div class="tours-list__content__trait__text" >
 
-                                                                @foreach ($inclussions as $index => $inclussion)
-                                                                    @if ($index < $maxToShow)
-                                                                        <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclussion['name'] }}</span>
+                                                                    @php
+                                                                    $guidingTargets = collect($guiding->getTargetFishNames())->pluck('name')->toArray();
+                                                                    @endphp
+                                                                    
+                                                                    @if(!empty($guidingTargets))
+                                                                        {{ implode(', ', $guidingTargets) }}
                                                                     @endif
-                                                                @endforeach
+                                                                </div>
+                                                            
+                                                            </div>
+                                                    </div>
+                                                    <div class="guidings-icon-container">
+                                                                <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
+                                                            <div class="">
+                                                                <div class="tours-list__content__trait__text" >
+                                                                    {{$other_guiding->is_boat ? ($other_guiding->boatType && $other_guiding->boatType->name !== null ? $other_guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
+                                                                </div>
+                                                            
+                                                            </div>
+                                                    </div>
+                                                </div>
+                                                <div class="inclusions-price">
+                                                        <div class="guidings-inclusions-container">
+                                                            @if(!empty($other_guiding->getInclusionNames()))
+                                                            <div class="guidings-included">
+                                                                <strong>@lang('guidings.Whats_Included')</strong>
+                                                                <div class="inclusions-list">
+                                                                    @php
+                                                                        $inclussions = $guiding->getInclusionNames();
+                                                                        $maxToShow = 3; // Maximum number of inclusions to display
+                                                                    @endphp
 
-                                                                @if (count($inclussions) > $maxToShow)
-                                                                    <span class="inclusion-item">+{{ count($inclussions) - $maxToShow }} more</span>
-                                                                @endif
+                                                                    @foreach ($inclussions as $index => $inclussion)
+                                                                        @if ($index < $maxToShow)
+                                                                            <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclussion['name'] }}</span>
+                                                                        @endif
+                                                                    @endforeach
+
+                                                                    @if (count($inclussions) > $maxToShow)
+                                                                        <span class="inclusion-item">+{{ count($inclussions) - $maxToShow }} more</span>
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                            @endif
+                                                        </div>
+                                                        <div class="guiding-item-price">
+                                                            <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$other_guiding->getLowestPrice()}}€ p.P.</span></h5>
+                                                            <div class="d-none d-flex flex-column mt-4">
                                                             </div>
                                                         </div>
-                                                        @endif
-                                                    </div>
-                                                    <div class="guiding-item-price">
-                                                        <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$other_guiding->getLowestPrice()}}€ p.P.</span></h5>
-                                                        <div class="d-none d-flex flex-column mt-4">
-                                                        </div>
-                                                    </div>
-                                            </div>    
-                                    </a>
+                                                </div>    
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+                            @endforeach
+                        </div>
+                        
+                        <!-- Mobile view (carousel layout) -->
+                        <div class="tours-list__inner mobile-view owl-carousel">
+                            @foreach($same_guiding as $other_guiding)
+                                <div class="popular-tours__single">
+                                    <a class="popular-tours__img" href="{{ route('guidings.show',[$other_guiding->id,$other_guiding->slug]) }}" title="Guide aufmachen">
+                                        <div class="popular-tours__img__wrapper">
+                                            @if($other_guiding->thumbnail_path)
+                                                <img src="{{ asset($other_guiding->thumbnail_path) }}" alt="{{ $other_guiding->title }}"/>
+                                            @endif
+                                        </div>
+                                    </a>
+                                    <div class="popular-tours__content">
+                                        <h5 class="crop-text-2 card-title h6">
+                                            <a href="{{ route('guidings.show', [$other_guiding->id, $other_guiding->slug]) }}">
+                                                {{ $other_guiding->title ? translate(Str::limit($other_guiding->title, 50)) : translate($other_guiding->title) }}
+                                            </a>
+                                        </h5>    
+                                        <small class="crop-text-1 small-text text-muted">{{ $other_guiding->location }}</small>
+                                        <p class="fw-bold text-muted">
+                                            <span>@lang('message.from') {{ $other_guiding->getLowestPrice() }}€</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <div class="text-center desktop-view">
+                            <button id="showMoreBtn" class="btn btn-orange mt-3 text-center">{{ translate('Show More') }}</button>
+                        </div>
+                        
+                        <div class="text-center mobile-view">
+                            <a href="{{ route('guidings.index', ['guide_id' => $guiding->user->id]) }}" class="btn btn-outline-secondary mt-3">
+                                {{ translate('View all from') }} {{ $guiding->user->firstname }}
+                            </a>
                         </div>
                     </div>
-                    @endforeach
-                </div>
-
-                <div class="text-center">
-                    <button id="showMoreBtn" class="btn btn-orange mt-3 text-center">{{ translate('Show More') }}</button>
                 </div>
             </div>
         </div>
-    </div>
-</div>
     </section>
     @endif
     @if ($other_guidings)
@@ -1617,8 +1722,50 @@ $(document).ready(function(){
             });
         });
     }
+    
+    // Initialize carousels for mobile view
+    initMobileCarousels();
+    
+    // Re-initialize on window resize
+    $(window).on('resize', function() {
+        initMobileCarousels();
+    });
 });
 
+function initMobileCarousels() {
+    if (window.innerWidth < 768) {
+        // Initialize the same_guiding carousel for mobile
+        if (!$('.tours-list__inner.mobile-view').hasClass('owl-loaded')) {
+            $('.tours-list__inner.mobile-view').owlCarousel({
+                items: 1.2,
+                loop: false,
+                margin: 10,
+                nav: true,
+                dots: true,
+                navText: [
+                    '<i class="fas fa-chevron-left"></i>',
+                    '<i class="fas fa-chevron-right"></i>'
+                ],
+                responsive: {
+                    0: {
+                        items: 1.2
+                    },
+                    480: {
+                        items: 1.5
+                    },
+                    576: {
+                        items: 2
+                    }
+                }
+            });
+        }
+    } else {
+        // Destroy carousel on desktop if it was initialized
+        if ($('.tours-list__inner.mobile-view').hasClass('owl-loaded')) {
+            $('.tours-list__inner.mobile-view').trigger('destroy.owl.carousel');
+        }
+    }
+}
 
 const moreText = document.querySelector(".js-trigger-more-text");
 let expanded = false;

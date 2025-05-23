@@ -680,6 +680,7 @@ class GuidingsController extends Controller
 
         $sameGuidings = Guiding::where('user_id', $guiding->user_id)
             ->where('id', '!=', $guiding->id)
+            ->where('status', 1)
             ->limit(10)
             ->get();
 
@@ -1431,9 +1432,13 @@ class GuidingsController extends Controller
         }else{
             \App::setLocale('de');
         }
-        
-        Mail::to(env('TO_CEO'))->queue(new GuidingRequestMail($guideRequest));
-        Mail::to($request->email)->queue(new SearchRequestUserMail($guideRequest));
+        $email = env('TO_CEO','info@catchaguide.com');
+        if (!CheckEmailLog('guiding_request_mail', 'guiding_request_mail', $email)) {
+            Mail::to($email)->queue(new GuidingRequestMail($guideRequest));
+        }
+        if (!CheckEmailLog('search_request_user_mail', 'search_request_user_mail', $request->email)) {
+            Mail::to($request->email)->queue(new SearchRequestUserMail($guideRequest));
+        }
 
         return redirect()->back()->with('message', "Email Has been Sent");
     }

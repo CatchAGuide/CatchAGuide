@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
+use Exception;
 
 class AdminCategoryCityController extends Controller
 {
@@ -302,7 +303,7 @@ class AdminCategoryCityController extends Controller
         }
     }
 
-    public function show(Category $category)
+    public function show(Destination $destination)
     {
         //
     }

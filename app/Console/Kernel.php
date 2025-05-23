@@ -15,12 +15,12 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('bookings:send-guide-reminders')->dailyAt('06:00');
-        $schedule->command('update:booking-status')->dailyAt('06:00');
-        // $schedule->command('bookings:send-guest-reviews')->dailyAt('06:00');
-        $schedule->command('bookings:send-guest-tour-reminders')->dailyAt('06:00');
-        $schedule->command('bookings:send-guide-upcoming-tour-reminders')->dailyAt('06:00');
-        // $schedule->command('bookings:send-guide-reminders-12hrs')->hourly('06:00');
+        $schedule->command('bookings:send-guide-reminders')->hourly();
+        $schedule->command('update:booking-status')->hourly();
+        $schedule->command('bookings:send-guest-reviews')->hourly();
+        $schedule->command('bookings:send-guest-tour-reminders')->hourly();
+        $schedule->command('bookings:send-guide-upcoming-tour-reminders')->hourly();
+        $schedule->command('bookings:send-guide-reminders-12hrs')->hourly();
     }
 
     /**

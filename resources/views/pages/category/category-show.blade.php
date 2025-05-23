@@ -16,88 +16,276 @@
 
 @section('custom_style')
 <style>
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 15px;
+    #destination{
+        max-width: 1600px;
+    }
+    .guiding-item-desc a:hover {
+        color: #000!important;
+    }
+    #page-main-intro {
+    }
+    #carousel-regions,
+    #carousel-cities {
+        min-height: 301.6px;
+    }
+    #carousel-regions .dimg-fluid,
+    #carousel-cities .dimg-fluid {
+        min-height: 301.6px;
+    }
+    .country-listing-item p {
+        font-size: 12px;
+    }
+    .country-listing-item-rating p {
+        line-height: 12px;
+    }
+    #destination-form input,
+    #destination-form select {
+        padding-left: 30px;
+    }
+
+    @media (max-width: 767px) {
+        #carousel-regions .carousel-inner .carousel-item > div {
+            display: none;
+        }
+        #carousel-regions .carousel-inner .carousel-item > div:first-child {
+            display: block;
+        }
+        .dimg-fluid {
+            width: 100%!important;
+        }
+    }
+
+    #carousel-regions .carousel-inner .carousel-item.active,
+    #carousel-regions .carousel-inner .carousel-item-next,
+    #carousel-regions .carousel-inner .carousel-item-prev,
+    #carousel-cities .carousel-inner .carousel-item.active,
+    #carousel-cities .carousel-inner .carousel-item-next,
+    #carousel-cities .carousel-inner .carousel-item-prev {
+        display: flex;
+    }
+
+    /* medium and up screens */
+    @media (min-width: 768px) {
+        #carousel-regions .carousel-inner .carousel-item img,
+        #carousel-cities .carousel-inner .carousel-item img {
+            margin-right: 2px;
+        }
+        
+        #carousel-regions .carousel-inner .carousel-item-end.active,
+        #carousel-regions .carousel-inner .carousel-item-next,
+        #carousel-cities .carousel-inner .carousel-item-end.active,
+        #carousel-cities .carousel-inner .carousel-item-next {
+          transform: translateX(25%);
+        }
+        
+        #carousel-regions .carousel-inner .carousel-item-start.active, 
+        #carousel-regions .carousel-inner .carousel-item-prev,
+        #carousel-cities .carousel-inner .carousel-item-start.active, 
+        #carousel-cities .carousel-inner .carousel-item-prev {
+          transform: translateX(-25%);
+        }
+    }
+
+    #carousel-regions .carousel-inner .carousel-item-end,
+    #carousel-regions .carousel-inner .carousel-item-start,
+    #carousel-cities .carousel-inner .carousel-item-end,
+    #carousel-cities .carousel-inner .carousel-item-start { 
+      transform: translateX(0);
+    }
+
+    #map-placeholder {
         width: 100%;
-    }
-
-    .carousel.slide img {
-        height: 250px;
-        object-fit: cover;
-        width: 100%;
-        background: black;
-    }
-
-    .carousel-item {
-        aspect-ratio: 4/3;
-        background-color: #f8f9fa;
-    }
-
-    .carousel-item-next, .carousel-item-prev, .carousel-item.active {
+        height: 200px;
+        background-image: url({{ url('') }}/assets/images/map-bg.png);
+        background-size: cover;
+        background-position: center;
+        position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
     }
 
-    /* Filter styles */
-    .card {
-        border-radius: 4px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        margin-bottom: 15px;
+    #map-placeholder button {
+        position: static;
+        margin: 0;
     }
 
-    .card-header {
-        background-color: #f8f9fa;
-        padding: 12px 15px;
-        font-weight: 600;
-        border-bottom: 1px solid rgba(0,0,0,0.125);
+    #offcanvasBottomSearch {
+        height: 90%!important;
     }
 
-    .card-body {
-        padding: 15px;
+    .btn-outline-theme {
+        color: #E8604C!important;
+        border-color: #E8604C!important;
+    }
+    #num-guests {
+        background: url("data:image/svg+xml,<svg height='10px' width='10px' viewBox='0 0 16 16' fill='%23808080' xmlns='http://www.w3.org/2000/svg'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>") no-repeat;
+        background-position: right 0.3rem center !important;
+    }
+
+    li.select2-selection__choice{
+        background-color: #E8604C !important;
+        color: #fff !important;
+        border: 0 !important;
+        font-size:14px;
+        vertical-align: middle !important;
+        margin-top:0 !important;
+     
+    }
+    button.select2-selection__choice__remove{
+        border: 0 !important;
+        color: #fff !important;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover, .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:focus{
+        background:none;
+    }
+    span.select2-selection.select2-selection--multiple{
+        border: 1px solid #d4d5d6;
+        border-radius: 5px;
+        padding: 7px 10px;
+    }
+    .select2-selection--multiple:before {
+        content: "";
+        position: absolute;
+        right: 7px;
+        top: 42%;
+        border-top: 5px solid #888;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+    }
+    
+    #fish_size_limit_table th:first-child, 
+    #fish_size_limit_table td:first-child,
+    #fish_time_limit_table th:first-child, 
+    #fish_time_limit_table td:first-child
+    {
+        /*background-color: #fad4b9;*/
+    }
+    @media (min-width: 400px) {
+        #fish_chart_table th:first-child, 
+        #fish_chart_table td:first-child
+        {
+            position:sticky;
+            left:0px;
+            background-color: #fff;
+            min-width: 156px !important;
+        }
+    }
+    .card-img-overlay h5 {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        color: #fff;
+    }
+    .read-more-btn {
+        background-color: #E8604C !important;
+        color: #fff !important;
+        border: 2px solid #E8604C !important;
+    }
+    .cag-btn {
+        background-color: #E8604C !important;
+        color: #fff !important;
+        border: 2px solid #E8604C !important;
+    }
+    .cag-btn-inverted {
+        background-color: #313041 !important;
+        color: #fff !important;
+        border: 2px solid #313041 !important;
+    }
+    .mobile-selection-sfm {
+        position: sticky;
+        z-index: 10;
+        top: 0;
+        background-color: #fff;
+        padding-top: 15px;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    .dimg-fluid {
+        width: 300px;
+        height:300px;
+    }
+    .filter-select {
+        background: url("data:image/svg+xml,<svg height='10px' width='10px' viewBox='0 0 16 16' fill='%23808080' xmlns='http://www.w3.org/2000/svg'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>") no-repeat;
+        background-position: right 0.3rem center !important;
+        padding-left: 30px !important;
+        border: 0;
+        border-bottom: 1px solid #ccc;
     }
 
     .filter-group {
-        display: flex;
-        align-items: center;
-        margin-bottom: 15px;
         position: relative;
+        margin-bottom: 1rem;
     }
 
     .filter-icon {
         position: absolute;
-        left: 10px;
+        left: 8px;
         top: 50%;
         transform: translateY(-50%);
         z-index: 1;
-        color: #666;
+        color: #808080;
     }
 
-    .filter-select {
-        padding-left: 35px !important;
+    /* Override Select2 styles to match */
+    .select2-container--default .select2-selection--single,
+    .select2-container--default .select2-selection--multiple {
+        border: 0 !important;
+        border-bottom: 1px solid #ccc !important;
+        border-radius: 0 !important;
+        padding-left: 30px !important;
+    }
+
+    .slider-label {
+        position: absolute;
+        top: -25px; /* Adjust as needed */
+        transform: translateX(-50%);
+        background-color: white;
+        padding: 2px 5px;
+        border-radius: 3px;
+        font-size: 12px;
+        color: black;
+        white-space: nowrap;
+    }
+
+    #radius {
+        background: url("data:image/svg+xml,<svg height='10px' width='10px' viewBox='0 0 16 16' fill='%23808080' xmlns='http://www.w3.org/2000/svg'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>") no-repeat;
+        background-position: right 0.3rem center !important;
+    }
+
+    .custom-select:has(option:disabled:checked[hidden]) {
+        color: gray;
+    }
+    .custom-select option {
+        color: black;
+    }
+
+    .form-custom-input {
+        border: 1px solid #d4d5d6;
+        border-radius: 5px;
+        padding: 8px 10px;
         width: 100%;
-        height: 38px;
-        border-radius: 4px;
-        border: 1px solid #ced4da;
+    }
+    .form-control:focus {
+        box-shadow: none;
+    }
+    .form-custom-input:focus-visible {
+        border: 0;
+        outline: solid #e8604c 1px !important;
     }
 
-    .btn-theme-new {
-        background-color: #E8604C;
-        color: white;
-        border: none;
-        padding: 8px 15px;
-        border-radius: 4px;
-        font-weight: 500;
-        transition: background-color 0.2s;
+    #guidings-menu-search {
+        position: absolute;
+        top: 133px;
+        z-index: 3;
+    }
+    #guidings-result {
+        line-height: 14px;
+    }
+    .pac-container {
+        z-index: 2000;
     }
 
-    .btn-theme-new:hover {
-        background-color: #d4503c;
-    }
-
-    /* Guiding item styles */
     .guiding-item-price {
         display: flex;
         flex-direction: column;
@@ -107,12 +295,23 @@
     .guiding-item-price h5 {
         margin: 0;
         white-space: nowrap;
-        font-size: clamp(14px, 2vw, 18px);
+        font-size: clamp(14px, 2vw, 18px);  /* Responsive font size between 14px and 18px */
     }
 
     .guiding-item-price span {
         display: inline-block;
         padding: 4px 8px;
+    }
+
+    .tours-list {
+        position: relative;
+        padding: 30px 0;  /* Reduced default padding */
+    }
+
+    @media only screen and (max-width: 767px) {
+        .tours-list {
+            padding: 15px 0;  /* Even smaller padding for mobile */
+        }
     }
 
     .inclusions-price {
@@ -125,7 +324,7 @@
 
     .guidings-inclusions-container {
         flex: 1;
-        min-width: 0;
+        min-width: 0; /* Prevents flex item from overflowing */
     }
 
     .guidings-included {
@@ -134,13 +333,11 @@
 
     .guidings-included strong {
         display: block;
-        margin-bottom: 5px;
     }
 
     .inclusions-list {
         display: flex;
         flex-wrap: wrap;
-        gap: 5px;
         max-width: 100%;
     }
 
@@ -150,20 +347,33 @@
         border-radius: 4px;
         display: inline-flex;
         align-items: center;
-        font-size: 13px;
-        background-color: #f8f9fa;
     }
 
     .inclusion-item i {
         font-size: 10px;
         margin-right: 4px;
-        color: #E8604C;
+        /* color: #E8604C; */
     }
 
-    .guiding-item-price {
-        text-align: right;
-        min-width: fit-content;
-        padding-left: 10px;
+    @media (max-width: 767px) {
+        .inclusions-price {
+            flex-direction: column;
+        }
+        
+        .guiding-item-price {
+            width: 100%;
+            text-align: left;
+            padding-left: 0;
+        }
+
+        .inclusion-item {
+            font-size: 13px; /* Larger font size for mobile */
+            padding: 3px 10px;
+        }
+        
+        .guidings-included strong {
+            font-size: 14px;
+        }
     }
 
     .guidings-item-title {
@@ -180,6 +390,15 @@
         font-size: 15px;
         color: #444;
         max-width: 100%;
+    }
+
+    /* Only apply truncation on desktop */
+    @media (min-width: 768px) {
+        .guidings-item-title span.truncate {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
     }
 
     .guidings-item-title i {
@@ -200,221 +419,125 @@
         align-items: center;
         gap: 5px;
         font-size: 14px;
-        color: #555;
-        margin-right: 15px;
     }
 
-    .guidings-icon-container img {
-        margin-right: 8px;
+    .carousel-image {
+        height: 250px;
+        object-fit: cover;
+        width: 100%;
+        background: black;
+    }
+
+    #filter-loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.7);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: opacity 0.3s ease;
+    }
+    
+    .listings-container.loading {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .sort-row .form-select {
+        width: auto;
+    }
+
+    .active-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 10px;
+    }
+
+    .filter-sort-container {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
     }
 
     .ave-reviews-row {
         display: flex;
+        gap: 8px;
         align-items: center;
-        gap: 5px;
-        margin-bottom: 10px;
+        justify-content: flex-end;
+        position: absolute;
+        right: 0px;
+        top: 0;  /* Position at the top, aligned with the title */
+        .ratings-score{
+            background-color: #313041;
+            color: #fff;
+            font-weight: bold;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border-radius: 8px 8px 0 8px;
+            font-size: 12px;
+            .rating-value{
+                color: #fff;
+                min-width: unset;
+                font-size: 14px;
+            }
+            .rating-label{
+                color: #fff;
+            }
+        }
     }
 
     .ratings-score {
         background-color: #E8604C;
         color: white;
-        padding: 2px 8px;
-        border-radius: 4px;
+        padding: 2px 5px;
+        border-radius: 3px;
         font-weight: bold;
-        margin-right: 5px;
     }
 
     .no-reviews {
-        color: #777;
-        font-size: 14px;
-        margin-bottom: 10px;
-    }
-
-    /* Map placeholder */
-    #map-placeholder {
-        position: relative;
-        height: 200px;
-        background-color: #f8f9fa;
+        width: 100%;
         display: flex;
         align-items: center;
-        justify-content: center;
-        border-radius: 4px;        
-        background-image: url({{ url('') }}/assets/images/map-bg.png);
-    }
-
-    #map-placeholder button {
-        background-color: #E8604C;
-        color: white;
-        border: none;
-        padding: 8px 15px;
-        border-radius: 4px;
-    }
-
-    /* Mobile styles */
-    @media (max-width: 767px) {
-        .inclusions-price {
-            flex-direction: column;
-        }
-        
-        .guiding-item-price {
-            width: 100%;
-            text-align: left;
-            padding-left: 0;
-        }
-
-        .inclusion-item {
-            font-size: 13px;
-            padding: 3px 10px;
-        }
-        
-        .guidings-included strong {
-            font-size: 14px;
-        }
-
-        .guidings-item-title h5 {
-            font-size: 18px;
-            margin-bottom: 0;
-        }
-        
-        .guidings-item-title span {
-            font-size: 15px;
-        }
-
-        .inclusion-item {
-            font-size: 15px;
-            padding: 3px 10px;
-        }
-        
-        .guiding-item-price h5 {
-            font-size: 18px;
-        }
-        
-        .guidings-included strong {
-            font-size: 15px;
-        }
-
-        .mobile-selection-sfm {
-            margin-bottom: 15px;
-        }
-
-        .mobile-selection-sfm .btn-group {
-            width: 100%;
-        }
-    }
-
-    .cag-btn {
-        background-color: #E8604C !important;
-        color: #fff !important;
-        border: 2px solid #E8604C !important;
-    }
-    
-    .cag-btn-inverted {
-        background-color: #313041 !important;
-        color: #fff !important;
-        border: 2px solid #313041 !important;
-    }
-
-    /* Filter sidebar specific styles */
-    .filter-form {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .filter-form select {
-        width: 100%;
-        padding: 8px 12px;
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        background-color: white;
-    }
-
-    .filter-form button {
-        margin-top: 10px;
-    }
-
-    /* Fix for select2 */
-    .select2-container {
-        width: 100% !important;
-    }
-
-    /* Additional styling to match the image */
-    .guiding-list-item {
-        border: 1px solid #e5e5e5;
-        border-radius: 8px;
-        overflow: hidden;
-        margin-bottom: 20px;
-        background-color: #fff;
-    }
-    
-    .carousel-item img {
-        height: 250px;
-        object-fit: cover;
-        width: 100%;
-    }
-    
-    .guidings-item-title {
-        display: flex;
-        flex-direction: column;
-        margin-bottom: 10px;
-    }
-    
-    .guidings-item-title h5 {
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 5px;
-        color: #333;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    
-    .guidings-item-title span {
-        color: #666;
-        font-size: 14px;
-    }
-    
-    .no-reviews-text {
-        color: #666;
-        font-size: 14px;
-        margin-bottom: 15px;
-    }
-    
-    .tour-info-row {
-        display: flex;
-        align-items: center;
-        margin-bottom: 8px;
-    }
-    
-    .tour-info-row img {
-        margin-right: 10px;
-    }
-    
-    .tour-info-text {
-        color: #555;
-        font-size: 14px;
-    }
-    
-    .whats-included-title {
-        font-size: 14px;
-        font-weight: 600;
-        margin-bottom: 5px;
-    }
-    
-    .inclusion-item {
-        display: inline-block;
-        margin-right: 10px;
-        font-size: 13px;
-    }
-    
-    .inclusion-item i {
-        color: #E8604C;
-        margin-right: 3px;
-    }
-    
-    .price-display {
         text-align: right;
-        font-size: 16px;
-        font-weight: 600;
+        span{
+            font-size: 14px;
+            width: 100%;
+        }
+    }
+
+    /* Adjust the mobile layout */
+    @media (max-width: 767px) {
+        .ave-reviews-row {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: auto;
+            display: block;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        
+        .ratings-score {
+            margin-left: auto; /* Push to the right */
+        }
+        
+        .guidings-item-title {
+            padding-right: 50px;  /* Make room for the rating */
+        }
+    }
+
+    /* Make sure the parent container has proper positioning */
+    .guidings-item {
+        position: relative;
     }
 </style>
 @endsection
@@ -445,142 +568,18 @@
                 </div>
                 <h5 class="mb-2">{{ $row_data->source->name }}</h5>
                 <div class="row mb-5">
-                    <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
-                        <div class="d-grid gap-2 w-100">
-                            <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-                                <div class="btn-group border rounded-start cag-btn-inverted" role="group" style=" width:30%;">
-                                    <button type="button" class="btn dropdown-toggle text-white" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-arrow-down-arrow-up me-1"></i>@lang('message.sortby')</button>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="{{ url()->current() }}?sortby=newest">@lang('message.newest')</a></li>
-                                        <li><a class="dropdown-item" href="{{ url()->current() }}?sortby=price-asc">@lang('message.lowprice')</a></li>
-                                        <li><a class="dropdown-item" href="{{ url()->current() }}?sortby=short-duration">@lang('message.shortduration')</a></li>
-                                        <li><a class="dropdown-item" href="{{ url()->current() }}?sortby=long-duration">@lang('message.longduration')</a></li>
-                                    </ul>
-
-                                    @foreach(request()->except('sortby') as $key => $value)
-                                        @if(is_array($value))
-                                            @foreach($value as $arrayValue)
-                                                <input type="hidden" name="{{ $key }}[]" value="{{ $arrayValue }}">
-                                            @endforeach
-                                        @else
-                                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                                        @endif
-                                    @endforeach
-                                </div>
-                                <a class="btn border-start cag-btn-inverted" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottomSearch" aria-controls="offcanvasBottomSearch" href="javascript:void(0)" style="border-left: 1px solid #ccc!important; z-index: 2; width:30%;">
-                                    <i class="fa fa-filter me-1"></i>@lang('message.filter')
-                                    @if($category_total > 0)
-                                        @if(request()->has('radius') || request()->has('num_guests') || request()->has('target_fish') || request()->has('water') || request()->has('fishing_type') || request()->has('price_range'))
-                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="guiding-filter-counter">{{ $category_total }}</span>
-                                        @endif
-                                    @endif
-                                </a>
-                                <a class="btn border cag-btn-inverted" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)" style=" border-left: 2px solid #ccc!important; width:40%;"><i class="fa fa-map-marker-alt me-2"></i>@lang('destination.show_on_map')</a>
-
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-lg-3">
+                    <div id="filterCard" class="col-sm-12 col-lg-3">        
                         <div class="card mb-2 d-none d-sm-block">
                             <div id="map-placeholder">
-                                <button class="btn btn-primary read-more-btn" data-bs-target="#mapModal" data-bs-toggle="modal">@lang('destination.show_on_map')</button>
+                                <a class="btn btn-primary" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)">@lang('destination.show_on_map')</a>
                             </div>
-                        </div>
-                        <div class="card d-block d-none d-sm-block mb-1">
-                            <div class="card-header">
-                                @lang('message.sortby'):
-                            </div>
-                            <div class="card-body border-bottom">
-                                <div class="btn-group w-100">
-                                    <button type="button" class="btn dropdown-toggle text-dark" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fa fa-arrow-down-arrow-up me-1"></i>
-                                        @if(request()->get('sortby') == 'newest')
-                                            @lang('message.newest')
-                                        @elseif(request()->get('sortby') == 'price-asc') 
-                                            @lang('message.lowprice')
-                                        @elseif(request()->get('sortby') == 'short-duration')
-                                            @lang('message.shortduration') 
-                                        @elseif(request()->get('sortby') == 'long-duration')
-                                            @lang('message.longduration')
-                                        @else
-                                            @lang('message.choose')...
-                                        @endif
-                                    </button>
-                                    <ul class="dropdown-menu w-100">
-                                        <li><a class="dropdown-item" href="{{ request()->fullUrlWithQuery(['sortby' => 'newest']) }}">@lang('message.newest')</a></li>
-                                        <li><a class="dropdown-item" href="{{ request()->fullUrlWithQuery(['sortby' => 'price-asc']) }}">@lang('message.lowprice')</a></li>
-                                        <li><a class="dropdown-item" href="{{ request()->fullUrlWithQuery(['sortby' => 'short-duration']) }}">@lang('message.shortduration')</a></li>
-                                        <li><a class="dropdown-item" href="{{ request()->fullUrlWithQuery(['sortby' => 'long-duration']) }}">@lang('message.longduration')</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card d-block d-none d-sm-block">
-                            <div class="card-header">
-                                @lang('destination.filter_by'):
-                            </div>
-                            <div class="card-body border-bottom">
-                                <form method="get" action="{{ url()->current() }}" class="filter-form">
-                                    @if(request()->has('sortby'))
-                                        <input type="hidden" name="sortby" value="{{ request()->get('sortby') }}">
-                                    @endif
-                                    <div class="filter-group">
-                                        <div class="filter-icon">
-                                            <i class="fas fa-user"></i>
-                                        </div>
-                                        <select class="form-control filter-select" id="num_guests" name="num_guests">
-                                            <option disabled selected hidden>-- @lang('destination.select') --</option>
-                                            <option value="">@lang('message.choose')...</option>
-                                            <option value="1">1</option>
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4">4</option>
-                                            <option value="5">5</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="filter-group">
-                                        <div class="filter-icon">
-                                            <img src="{{asset('assets/images/icons/fish.png')}}" height="20" width="20" alt="" />
-                                        </div>
-                                        <select class="form-control filter-select" id="target_fish" name="target_fish[]" multiple></select>
-                                    </div>
-                                    <div class="filter-group">
-                                        <div class="filter-icon">
-                                            <img src="{{asset('assets/images/icons/water-waves.png')}}" height="20" width="20" alt="" />
-                                        </div>
-                                        <select class="form-control filter-select" id="water" name="water[]" multiple></select>
-                                    </div>
-                                    <div class="filter-group">
-                                        <div class="filter-icon">
-                                            <img src="{{asset('assets/images/icons/fishing.png')}}" height="20" width="20" alt="" />
-                                        </div>
-                                        <select class="form-control filter-select" id="methods" name="methods[]" multiple></select>
-                                    </div>
-                                    <div class="filter-group">
-                                        <div class="filter-icon">
-                                            <i class="fa fa-euro-sign"></i>
-                                        </div>
-                                        <select class="form-control filter-select" id="price_range" name="price_range">
-                                            <option selected disabled hidden>{{ translate('Price per Person') }}</option>
-                                            <option value="">@lang('message.choose')...</option>
-                                            <option value="1-50">1 - 50 p.P.</option>
-                                            <option value="51-100">51 - 100 p.P.</option>
-                                            <option value="101-150">101 - 150 p.P.</option>
-                                            <option value="151-200">151 - 200 p.P.</option>
-                                            <option value="201-250">201 - 250 p.P.</option>
-                                            <option value="350">350 and more</option>
-                                        </select>
-                                    </div>
-                                    <button class="btn btn-sm theme-primary btn-theme-new w-100" type="submit">@lang('destination.search')</button>
-                                </form> 
-                            </div>
-                        </div>
+                        </div>            
+                        @include('pages.guidings.includes.filters', ['formAction' => route('guidings.index')])
                     </div>
                     <div class="col-sm-12 col-lg-9 country-listing-item">
                         @foreach($guides as $guiding)
-                        <div class="row mb-2 guiding-list-item">
-                            <div class="col-md-12">
+                        <div class="row m-0 mb-2 guiding-list-item">
+                            <div class="tours-list__right col-md-12">
                                 <div class="row p-2 border shadow-sm bg-white rounded">
                                     <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-0">
                                         <div id="carouselExampleControls-{{$guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
@@ -588,7 +587,7 @@
                                                 @if(count(get_galleries_image_link($guiding)))
                                                     @foreach(get_galleries_image_link($guiding) as $index => $gallery_image_link)
                                                         <div class="carousel-item @if($index == 0) active @endif">
-                                                            <img class="d-block" src="{{asset($gallery_image_link)}}">
+                                                            <img  class="carousel-image" src="{{asset($gallery_image_link)}}">
                                                         </div>
                                                     @endforeach
                                                 @endif
@@ -606,84 +605,102 @@
                                             @endif
                                         </div>
                                     </div>
-                                    <div class="col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 px-md-3 pt-md-2">
-                                        <a href="{{ route('guidings.show', ['id' => $guiding->id, 'slug' => $guiding->slug, 'from_destination' => true, 'destination_id' => $row_data->id]) }}">
-                                            <div class="row">
-                                                <div class="d-flex justify-content-between align-items-start col-9">
-                                                    <div class="guidings-item-title">
-                                                        <h5>{{ Str::limit(translate($guiding->title), 50) }}</h5>
-                                                        <span><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }}</span>
-                                                    </div>
+                                    <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 p-md-3 mt-md-1">
+                                    <a href="{{ route('guidings.show', ['id' => $guiding->id, 'slug' => $guiding->slug, 'from_destination' => true, 'destination_id' => $row_data->id]) }}">
+                                            <div class="guidings-item">
+                                                <div class="guidings-item-title">
+                                                    @if(!$agent->ismobile())
+                                                    <h5 class="fw-bolder text-truncate">{{translate($guiding->title)}}</h5>
+                                                    @endif
+                                                    @if($agent->ismobile())
+                                                        <h5 class="fw-bolder text-truncate">{{ translate(Str::limit($guiding->title, 45)) }}</h5>
+                                                    @endif
+                                                    <span><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }} </span>                                      
                                                 </div>
-                                                
-                                                <div class="no-reviews-text col-3">
-                                                    @if ($guiding->user->average_rating())
-                                                        <div class="d-flex align-items-center">
-                                                            <div class="ratings-score me-2">
-                                                                <span class="rating-value">{{number_format($guiding->user->average_rating(), 1)}}</span>
-                                                            </div>
-                                                            <span>({{$guiding->user->reviews->count()}} reviews)</span>
+                                                @if ($guiding->user->average_rating())
+                                                <div class="ave-reviews-row">
+                                                    <div class="ratings-score">
+                                                    <span class="rating-value">{{number_format($guiding->user->average_rating(), 1)}}</span>
+                                                </div> 
+                                                    <span class="mb-1">
+                                                        {{-- ({{$guiding->user->received_ratings->count()}} reviews) --}}
+                                                        ({{$guiding->user->reviews->count()}} reviews)
+                                                    </span>
+                                                </div>
+                                                @else
+                                                <div class="no-reviews"><span>@lang('guidings.no_reviews')</span></div>
+                                                @endif
+                                            </div>
+                                            <div class="guidings-item-icon">
+                                                <div class="guidings-icon-container"> 
+                                                            <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
+                                                        <div class="">
+                                                            {{ $guiding->duration }} @if($guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
                                                         </div>
-                                                    @else
-                                                        <span>No reviews yet</span>
-                                                    @endif
+                                                </div>
+                                                <div class="guidings-icon-container"> 
+                                                        <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" />
+                                                        <div class="">
+                                                        {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
+                                                        </div>
+                                                </div>
+                                                <div class="guidings-icon-container"> 
+                                                            <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
+                                                        <div class="">
+                                                            <div class="tours-list__content__trait__text" >
+                                                                @php
+                                                                $guidingTargets = collect($guiding->getTargetFishNames())->pluck('name')->toArray();
+                                                                @endphp
+                                                                
+                                                                @if(!empty($guidingTargets))
+                                                                    {{ implode(', ', $guidingTargets) }}
+                                                                @endif
+                                                            </div>
+                                                        
+                                                        </div>
+                                                </div>
+                                                <div class="guidings-icon-container">
+                                                            <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
+                                                        <div class="">
+                                                            <div class="tours-list__content__trait__text" >
+                                                            {{$guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
+                                                            </div>
+                                                        
+                                                        </div>
                                                 </div>
                                             </div>
-                                            
-                                            <div class="tour-info-row">
-                                                <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
-                                                <div class="tour-info-text">{{$guiding->duration}} {{ $guiding->duration_type == 'multi_day' ? __('guidings.days') : __('guidings.hours') }}</div>
-                                                
-                                                <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" class="ms-4" />
-                                                <div class="tour-info-text">{{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Persons')}} @else {{translate('Person')}} @endif</div>
-                                            </div>
-                                            
-                                            <div class="tour-info-row">
-                                                <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
-                                                <div class="tour-info-text">
-                                                    @php
-                                                    $guidingTargets = collect($guiding->getTargetFishNames())->pluck('name')->toArray();
-                                                    @endphp
-                                                    
-                                                    @if(!empty($guidingTargets))
-                                                        {{ Str::limit(implode(', ', $guidingTargets), 60) }}
-                                                    @endif
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="tour-info-row">
-                                                <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
-                                                <div class="tour-info-text">
-                                                    {{$guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="d-flex justify-content-between align-items-end">
-                                                <div class="whats-included">
-                                                    <div class="whats-included-title">What's Included</div>
-                                                    <div>
-                                                        @php
-                                                            $inclussions = $guiding->getInclusionNames();
-                                                            $maxToShow = 3;
-                                                        @endphp
+                                            <div class="inclusions-price">
+                                                    <div class="guidings-inclusions-container">
+                                                        @if(!empty($guiding->getInclusionNames()))
+                                                        <div class="guidings-included">
+                                                            <strong>@lang('guidings.Whats_Included')</strong>
+                                                            <div class="inclusions-list">
+                                                                @php
+                                                                    $inclusions = $guiding->getInclusionNames();
+                                                                    $maxToShow = 3; // Maximum number of inclusions to display
+                                                                @endphp
 
-                                                        @foreach ($inclussions as $index => $inclussion)
-                                                            @if ($index < $maxToShow)
-                                                                <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclussion['name'] }}</span>
-                                                            @endif
-                                                        @endforeach
+                                                                @foreach ($inclusions as $index => $inclusion)
+                                                                    @if ($index < $maxToShow)
+                                                                        <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclusion['name'] }}</span>
+                                                                    @endif
+                                                                @endforeach
 
-                                                        @if (count($inclussions) > $maxToShow)
-                                                            <span class="inclusion-item">+{{ count($inclussions) - $maxToShow }} more</span>
+                                                                @if (count($inclusions) > $maxToShow)
+                                                                    <span class="inclusion-item">+{{ count($inclusions) - $maxToShow }} more</span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
                                                         @endif
                                                     </div>
-                                                </div>
-                                                <div class="price-display">
-                                                    From {{$guiding->getLowestPrice()}}€ p.P.
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </div>
+                                                    <div class="guiding-item-price">
+                                                        <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$guiding->getLowestPrice()}}€ p.P.</span></h5>
+                                                        <div class="d-none d-flex flex-column mt-4">
+                                                        </div>
+                                                    </div>
+                                            </div>    
+                                    </a>
+                                </div>
                                 </div>
                             </div>
                         </div>
@@ -954,6 +971,90 @@
                     items: 4   // Show 4 items on large screens
                 }
             }
+        });
+        
+        // Add this function to handle filter form submissions properly
+        window.updateResults = function() {
+            // Try different ways to find the form
+            let form = document.getElementById('filterContainer');
+            
+            // If not found, try by name
+            if (!form) {
+                form = document.querySelector('form[name="filterContainer"]');
+            }
+            
+            // If still not found, try by class
+            if (!form) {
+                form = document.querySelector('form.filter-form');
+            }
+            
+            // If still not found, try any form that might be related to filtering
+            if (!form) {
+                form = document.querySelector('form[action*="guidings"]');
+            }
+            
+            // If still not found, try the offcanvas form
+            if (!form) {
+                form = document.getElementById('filterContainerOffCanvass');
+            }
+            
+            // If we found a form, use it
+            if (form && form instanceof HTMLFormElement) {
+                const formData = new FormData(form);
+                const params = new URLSearchParams();
+                
+                // Add form parameters to URL
+                for (const [key, value] of formData.entries()) {
+                    if (value) {
+                        params.append(key, value);
+                    }
+                }
+                
+                // Redirect to the new URL
+                window.location.href = `${window.location.pathname}?${params.toString()}`;
+            } else {
+                console.error('Filter form not found');
+                
+                // As a last resort, try to get the form from the input that triggered the change
+                const inputs = document.querySelectorAll('input[type="checkbox"], select');
+                inputs.forEach(input => {
+                    if (input.form) {
+                        const formData = new FormData(input.form);
+                        const params = new URLSearchParams();
+                        
+                        for (const [key, value] of formData.entries()) {
+                            if (value) {
+                                params.append(key, value);
+                            }
+                        }
+                        
+                        window.location.href = `${window.location.pathname}?${params.toString()}`;
+                        return;
+                    }
+                });
+            }
+        };
+        
+        // Add event listeners to all filter inputs
+        document.querySelectorAll('input[type="checkbox"], select').forEach(input => {
+            input.addEventListener('change', function() {
+                if (this.form) {
+                    // If the input has a form, use it directly
+                    const formData = new FormData(this.form);
+                    const params = new URLSearchParams();
+                    
+                    for (const [key, value] of formData.entries()) {
+                        if (value) {
+                            params.append(key, value);
+                        }
+                    }
+                    
+                    window.location.href = `${window.location.pathname}?${params.toString()}`;
+                } else {
+                    // Otherwise use the updateResults function
+                    updateResults();
+                }
+            });
         });
     });
 
@@ -1287,3 +1388,5 @@ window.addEventListener('load', function() {
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 
 @endsection
+
+@stack('guidingListingScripts')

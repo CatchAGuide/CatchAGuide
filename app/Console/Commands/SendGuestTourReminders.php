@@ -40,8 +40,11 @@ class SendGuestTourReminders extends Command
         foreach ($bookings as $booking) {
             try {
                 // Send reminder email
-                Mail::to($booking->is_guest ? $booking->email : $booking->user->email)
-                    ->send(new GuestTourReminderMail($booking));
+                $email = $booking->is_guest ? $booking->email : $booking->user->email;
+                if (!CheckEmailLog('guest_tour_reminder', 'booking_' . $booking->id, $email)) {
+                    Mail::to($email)
+                        ->send(new GuestTourReminderMail($booking));
+                }
                 
                 $count++;
                 $this->info("Sent reminder for booking #{$booking->id}");

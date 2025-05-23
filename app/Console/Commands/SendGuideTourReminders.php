@@ -2,10 +2,12 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Booking;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
+
+use App\Models\Booking;
+use App\Models\EmailLog;
 
 class SendGuideTourReminders extends Command
 {
@@ -53,6 +55,7 @@ class SendGuideTourReminders extends Command
             $target = 'booking_' . $booking->id;
             
             // Send the reminder email
+            app()->setLocale($language);
             Mail::send('mails.guide.guide_reminder', [
                 'guide' => $guide,
                 'booking' => $booking,
