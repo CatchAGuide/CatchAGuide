@@ -91,6 +91,7 @@
                 <a class="side-menu__item {{ request()->routeIs('admin.newblog.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#"><i class="side-menu__icon fe fe-book-open"></i><span class="side-menu__label">Category</span><i class="angle fe fe-chevron-right"></i></a>
                 <ul class="slide-menu">
                     <li><a href="{{ route('admin.category.target-fish.index') }}" class="slide-item  {{ request()->routeIs('admin.category.target-fish.*') ? 'active' : '' }}"> Target Fish</a></li>
+                    <li><a href="{{ route('admin.category.methods.index') }}" class="slide-item  {{ request()->routeIs('admin.category.methods.*') ? 'active' : '' }}"> Methods</a></li>
                     <li><a href="{{ route('admin.newblog.threads.index') }}" class="slide-item  {{ request()->routeIs('admin.newblog.threads.*') ? 'active' : '' }}"> Posts</a></li>
                     <li><a href="{{ route('admin.category.country.index') }}" class="slide-item  {{ request()->routeIs('admin.category.country.*') ? 'active' : '' }}"> Country</a></li>
                     <li><a href="{{ route('admin.category.vacation-country.index') }}" class="slide-item  {{ request()->routeIs('admin.category.vacation-country.*') ? 'active' : '' }}"> Vacation Country</a></li>

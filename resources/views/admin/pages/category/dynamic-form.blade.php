@@ -63,7 +63,9 @@
                         <div class="card-header">
                             <h3 class="card-title">@yield('title')</h3>
                         </div>
-                        <form action="{{ $route }}" method="post" id="dynamic-form" enctype="multipart/form-data">
+                        <form action="{{ $route }}" method="post" id="dynamic-form" enctype="multipart/form-data" 
+                            data-category-type="{{ strtolower(str_replace(' ', '-', $form)) }}"
+                            data-language-route="{{ route('admin.category.' . strtolower(str_replace(' ', '-', $form)) . '.language-data', ':id') }}">
                             @method('post')
                             @csrf
                             <div class="card-body">
@@ -287,24 +289,18 @@
 
 <script>
     $(document).ready(function() {
-        // Handle language change
         $('#languageSwitch').on('change', function() {
             var selectedLanguage = $(this).val();
-            
-            // Extract the ID from the form action URL instead of the current URL
             var formAction = $('#dynamic-form').attr('action');
             var id = formAction.split('/').pop();
-            
-            console.log('Selected language:', selectedLanguage);
-            console.log('Form action:', formAction);
-            console.log('Extracted ID:', id);
+            var languageRoute = $('#dynamic-form').data('language-route').replace(':id', id);
             
             // Show loading indicator
             $('body').append('<div class="overlay"><div class="spinner"></div></div>');
             
             // Make AJAX request to get content in selected language
             $.ajax({
-                url: "{{ route('admin.category.target-fish.language-data', ['id' => ':id']) }}".replace(':id', id),
+                url: languageRoute,
                 type: 'GET',
                 data: {
                     language: selectedLanguage
