@@ -18,4 +18,9 @@ class Method extends Model
     {        
         return app()->getLocale() == 'en' ? $this->attributes['name_en'] : $this->attributes['name'];
     }
+
+    public function categoryPage()
+    {
+        return $this->hasOne(CategoryPage::class, 'source_id')->where('type', 'Methods');
+    }
 }

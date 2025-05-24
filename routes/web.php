@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\ContactRequestsController;
 use App\Http\Controllers\Admin\FAQController as AdminFaqController;
 use App\Http\Controllers\Admin\Category\AdminCategoryCityController;
 use App\Http\Controllers\Admin\Category\AdminCategoryRegionController;
+use App\Http\Controllers\Admin\Category\AdminCategoryMethodsController;
 use App\Http\Controllers\Admin\Category\AdminCategoryCountryController;
 use App\Http\Controllers\Admin\Category\AdminCategoryTargetFishController;
 use App\Http\Controllers\Admin\GuidingsController as AdminGuidingsController;
@@ -375,6 +376,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::resource('vacation-country', AdminCategoryVacationCountryController::class);
             Route::resource('region', AdminCategoryRegionController::class);
             Route::resource('city', AdminCategoryCityController::class);
+            Route::resource('methods', AdminCategoryMethodsController::class);
+            Route::post('methods/toggle-favorite', [AdminCategoryMethodsController::class, 'toggleFavorite'])->name('methods.toggle-favorite');
+            Route::get('methods/{id}/language-data', [AdminCategoryMethodsController::class, 'getLanguageData'])->name('methods.language-data');
             Route::resource('target-fish', AdminCategoryTargetFishController::class);
             Route::post('target-fish/toggle-favorite', [AdminCategoryTargetFishController::class, 'toggleFavorite'])->name('target-fish.toggle-favorite');
             Route::get('target-fish/{id}/language-data', [AdminCategoryTargetFishController::class, 'getLanguageData'])->name('target-fish.language-data');
