@@ -30,4 +30,10 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'gemini' => [
+        'key' => env('GOOGLE_GEMINI_API_KEY'),
+        'model' => env('GOOGLE_GEMINI_MODEL', 'gemini-pro'),
+        'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta/models'),
+    ],
+
 ];
