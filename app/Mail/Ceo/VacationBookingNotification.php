@@ -19,7 +19,7 @@ class VacationBookingNotification extends Mailable
     public function __construct(VacationBooking $booking)
     {
         $this->booking = $booking;
-        $this->language = $booking->user->language;
+        $this->language = $booking->user?->language ?? app()->getLocale();
         $this->target = 'booking_' . $booking->id;
     }
 
