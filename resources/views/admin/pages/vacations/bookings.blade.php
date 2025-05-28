@@ -7,7 +7,7 @@
 <style>
     /* Ensure Google Maps autocomplete appears above the modal */
     .pac-container {
-        z-index: 1055 !important; /* Bootstrap modal has z-index: 1050 */
+        z-index: 1055 !important;
         position: fixed !important;
     }
 

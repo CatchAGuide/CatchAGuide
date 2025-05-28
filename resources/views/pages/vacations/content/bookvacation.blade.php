@@ -196,7 +196,7 @@
                             <div class="modal-body p-4">
                                 <!-- Add Booking Summary Section -->
                                 <div class="booking-summary mb-4">
-                                    <h6 class="border-bottom pb-2 mb-3">{{ translate('Booking Summary') }}</h6>
+                                    <h6 class="border-bottom pb-2 mb-3 color-black">{{ translate('Booking Summary') }}</h6>
                                     <div class="row g-3">
                                         <div class="col-md-6">
                                             <div class="d-flex justify-content-between">
@@ -1129,8 +1129,8 @@
             loadingOverlay.style.display = 'flex';
             
             // Disable submit button
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{{ translate("Processing...") }}';
+            // submitBtn.disabled = true;
+            // submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{{ translate("Processing...") }}';
             
             // Submit form via AJAX
             fetch('{{ route("vacation.booking.store") }}', {
@@ -1208,29 +1208,29 @@
 <style>
     /* Reset and update z-index hierarchy */
     .modal {
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1050 !important;
+        background: none !important;
     }
     
     .modal-backdrop {
-        display: none !important;
+        /* display: none !important; */
+        opacity: 0.5 !important;
+        z-index: 10 !important;
     }
     
     .modal-dialog {
-        z-index: 10000 !important;
-        position: relative;
+        z-index: 1052;
     }
     
     .modal-content {
+        background: white;
         position: relative;
-        z-index: 10001 !important;
-        border-radius: 8px;
-        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        z-index: 1053;
     }
     
     .modal-body {
         position: relative;
-        z-index: 10002 !important;
+        z-index: auto;
+        background: white;
     }
     
     /* Ensure form elements are clickable */
@@ -1581,7 +1581,6 @@
             width: 400px; /* Fixed width for desktop */
             margin-left: auto; /* Center if needed */
             position: relative; /* Add this */
-            z-index: 1; /* Add this to ensure proper stacking */
         }
     }
 
@@ -1608,6 +1607,58 @@
         .contact-card__content > div {
             justify-content: center;
         }
+    }
+
+    /* Fix contact card positioning */
+    .contact-card {
+        position: relative;
+        z-index: auto; /* Reset z-index */
+    }
+
+    /* Ensure modals are properly stacked */
+    #checkoutModal {
+        z-index: 1050;
+    }
+
+    #contactModal {
+        z-index: 1060;
+    }
+
+    #thankYouModal {
+        z-index: 1070;
+    }
+
+    /* Remove any competing z-index values */
+    .tour-details-two__sidebar-title {
+        position: relative;
+        z-index: auto;
+    }
+
+    /* Ensure form elements are visible */
+    .modal-body {
+        position: relative;
+        z-index: auto;
+        background: white;
+    }
+
+    /* Add these to ensure proper modal display */
+    .modal.show {
+        display: block !important;
+        overflow-y: auto;
+    }
+
+    .modal-dialog {
+        margin: 1.75rem auto;
+        max-width: 800px;
+    }
+
+    #checkoutModal h1,
+    #checkoutModal h2,
+    #checkoutModal h3,
+    #checkoutModal h4,
+    #checkoutModal h5,
+    #checkoutModal h6 {
+        color: #313041;
     }
 </style>
 
