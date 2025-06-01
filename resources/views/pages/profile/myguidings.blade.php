@@ -147,6 +147,25 @@
     background-color: #E8604C;
   }
 
+  .z-1 {
+    z-index: 1;
+  }
+
+  /* Updated Draft badge styling */
+  .badge.bg-warning {
+    background-color: #ff0707 !important;
+    color: #ffffff !important;
+    font-size: 1rem;
+    padding: 0.5rem 0.8rem;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .draft-container {
+    background-color: #eeecec;
+  }
+
 </style>
 @endsection
 
@@ -180,9 +199,14 @@
           @foreach($guidings as $guidingIndex => $guiding)
             <div class="row m-0 mb-2">
               <div class="col-sm-6 col-md-12">
-                <div class="row border shadow-sm bg-white rounded">
+                <div class="row border shadow-sm bg-white rounded ">
                   <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-0">
                     <div id="carouselExampleControls-{{$guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
+                      @if($guiding->status == 2)
+                        <div class="position-absolute start-0 top-0 m-2 z-1">
+                          <span class="badge bg-warning">Draft</span>
+                        </div>
+                      @endif
                       <div class="carousel-inner">
                         @if(count(get_galleries_image_link($guiding)))
                           @foreach(get_galleries_image_link($guiding) as $index => $gallery_image_link)
@@ -205,7 +229,7 @@
                       @endif
                     </div>
                   </div>
-                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 p-2 px-md-3 pt-md-2">
+                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 p-2 px-md-3 pt-md-2 {{$guiding->status == 2 ? 'draft-container' : ''}}">
                     <h5 class="fw-bolder text-truncate"><a class="text-dark" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">{{$guiding->title}}</a></h5>
                     <p class="mb-2"><i class="fas fa-map-marker-alt me-2"></i>{{ translate($guiding->location) }}</p>
                     
@@ -259,7 +283,7 @@
                       </div>
                     </div>
                   </div>
-                  <div class="col-12 col-sm-12 col-md-2 col-lg-2 col-xl-2 col-xxl-2 position-relative">
+                  <div class="col-12 col-sm-12 col-md-2 col-lg-2 col-xl-2 col-xxl-2 position-relative {{$guiding->status == 2 ? 'draft-container' : ''}}">
                     <div class="d-flex flex-column my-5 py-2">
                       <a class="btn btn-outline-theme btn-sm my-1" href="{{route('guidings.show', [$guiding->id,$guiding->slug])}}">View</a>
                       <a class="btn btn-outline-theme btn-sm my-1" href="{{route('guidings.edit_newguiding', $guiding->id)}}">@lang('profile.edit')</a>

@@ -1349,6 +1349,11 @@
             return;
         }
 
+        // Call AJAX to save progress when moving forward
+        if (stepNumber > currentStep) {
+            saveStepProgress(currentStep);
+        }
+
         // Update step visibility
         $('.step').removeClass('active');
         $(`#step${stepNumber}`).addClass('active');
@@ -1377,6 +1382,7 @@
         e.stopPropagation(); // Prevent event bubbling
         
         if (validateStep(currentStep)) {
+            saveStepProgress(currentStep); // Save before moving to next step
             const nextStep = currentStep + 1;
             showStep(nextStep);
         }
@@ -1530,6 +1536,9 @@
                     if (targetStep > currentStepNumber && !validateStep(currentStepNumber)) {
                         return;
                     }
+                    if (targetStep > currentStepNumber) {
+                        saveStepProgress(currentStepNumber);
+                    }
                     showStep(targetStep);
                 }
             });
@@ -1543,6 +1552,86 @@
 
     // Update the form's submit event listener
     document.getElementById('newGuidingForm').addEventListener('submit', handleSubmit);
+
+    // Add these variables at the top of your script
+    let saveStepProgressTimeout = null;
+    let saveStepProgressLock = false;
+
+    function saveStepProgress(stepNumber) {
+        // Prevent duplicate calls within 2 seconds
+        if (saveStepProgressLock) {
+            // Optionally, console.log('Save in progress, skipping duplicate call');
+            return;
+        }
+        saveStepProgressLock = true;
+
+        // Release the lock after 2 seconds
+        clearTimeout(saveStepProgressTimeout);
+        saveStepProgressTimeout = setTimeout(() => {
+            saveStepProgressLock = false;
+        }, 1500);
+
+        const form = document.getElementById('newGuidingForm');
+        const formData = new FormData(form);
+
+        formData.append('current_step', stepNumber);
+        formData.append('is_draft', 1);
+
+        // Always append these if present
+        const guidingId = $('#guiding_id').val();
+        const isUpdate = $('#is_update').val();
+        if (guidingId) formData.append('guiding_id', guidingId);
+        if (isUpdate) formData.append('is_update', isUpdate);
+
+        // --- FIX: Append cropped images as files ---
+        if (window.imageManagerLoaded && typeof imageManagerLoaded.getCroppedImages === 'function') {
+            const croppedImages = imageManagerLoaded.getCroppedImages();
+            if (croppedImages.length > 0) {
+                // Remove any existing title_image[] from FormData
+                formData.delete('title_image[]');
+                croppedImages.forEach((imgObj, idx) => {
+                    // Convert dataURL to Blob
+                    const blob = dataURLtoBlob(imgObj.dataUrl);
+                    // Use the original filename if available, otherwise fallback
+                    const filename = imgObj.filename || `cropped_${idx}.png`;
+                    formData.append('title_image[]', blob, filename);
+                });
+            }
+        }
+        // --- END FIX ---
+
+        $.ajax({
+            url: window.saveDraftUrl,
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                if (response.guiding_id) {
+                    $('#guiding_id').val(response.guiding_id);
+                    $('#is_update').val(1);
+                }
+            },
+            error: function(xhr) {
+                console.error('Failed to save draft:', xhr.responseText);
+            }
+        });
+    }
+
+    // Helper function to convert data URL to Blob
+    function dataURLtoBlob(dataurl) {
+        const arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+        for (let i = 0; i < n; i++) {
+            u8arr[i] = bstr.charCodeAt(i);
+        }
+        return new Blob([u8arr], { type: mime });
+    }
+    
+    window.saveDraftUrl = "{{ route('profile.newguiding.save-draft') }}";
 </script>
 
 @endpush
