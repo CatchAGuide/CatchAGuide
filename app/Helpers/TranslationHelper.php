@@ -10,6 +10,7 @@ class TranslationHelper
 {
     private static $prompts;
     private static $translator;
+    private static $language = ['de' => 'German', 'en' => 'English', 'es' => 'Spanish', 'fr' => 'French', 'it' => 'Italian', 'ja' => 'Japanese', 'ko' => 'Korean', 'pt' => 'Portuguese', 'ru' => 'Russian', 'zh' => 'Chinese'];
 
     public static function init()
     {
@@ -25,15 +26,32 @@ class TranslationHelper
         }
     }
 
+    public static function getLanguageName(string $language): string
+    {
+        return self::$language[$language] ?? $language;
+    }
+
+    public static function simpleBatchTranslate(array $texts, string $toLanguage, string $fromLanguage = 'en')
+    {
+        self::init();
+
+        $fromLanguageName = self::getLanguageName($fromLanguage);
+        $toLanguageName = self::getLanguageName($toLanguage);
+        $forTranslate = json_encode($texts);
+
+        $prompt = "Translate the following text in this JSON object field {$forTranslate} from {$fromLanguageName} to {$toLanguageName} while keeping the JSON structure and keys as return/response";
+
+        Log::info($prompt);
+
+        return self::$translator->translate($prompt, $fromLanguage, $toLanguage);
+    }
+
     public static function batchTranslate(array $texts, string $toLanguage, string $fromLanguage = 'en', string $context = 'destination'): array
     {
         self::init();
 
         // Get context-specific instructions from prompts
         $contextInstructions = self::getContextInstructions($context);
-
-        Log::info("contextInstructions");
-        Log::info($contextInstructions);
 
         // Prepare the structured content for translation
         $structuredContent = [];
@@ -47,8 +65,6 @@ class TranslationHelper
             }
         }
 
-        Log::info("structuredContent");
-        Log::info($structuredContent);
         if (empty($structuredContent)) {
             return $texts;
         }
@@ -56,10 +72,8 @@ class TranslationHelper
         // Create a JSON string of the content to translate
         $jsonContent = json_encode($structuredContent, JSON_PRETTY_PRINT);
 
-        Log::info("jsonContent");
-        Log::info($jsonContent);
-
         // Create a single prompt that includes context-specific instructions
+        // $prompt = "Please translate the content from {$jsonContent} from German to English";
         $prompt = "You are translating content for a tourism and fishing website.
                    Translate the following JSON content from {$fromLanguage} to {$toLanguage}.
                    
@@ -74,9 +88,6 @@ class TranslationHelper
                    Content to translate:
                    {$jsonContent}";
 
-        Log::info("prompt");
-        Log::info($prompt);
-
         try {
             $translatedJson = self::$translator->translate($prompt, $fromLanguage, $toLanguage);
             
@@ -85,10 +96,6 @@ class TranslationHelper
             
             $translatedData = json_decode($translatedJson, true);
 
-            Log::info("translatedJson");
-            Log::info($translatedJson);
-            Log::info("translatedData");
-            Log::info($translatedData);
             // Validate the response
             if (json_last_error() !== JSON_ERROR_NONE) {
                 throw new \Exception('Invalid JSON response from translation service');
@@ -99,9 +106,6 @@ class TranslationHelper
             foreach ($texts as $key => $originalValue) {
                 $result[$key] = $translatedData[$key]['text'] ?? $originalValue;
             }
-
-            Log::info("result");
-            Log::info($result);
 
             return $result;
         } catch (\Exception $e) {

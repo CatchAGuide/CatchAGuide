@@ -402,6 +402,32 @@ class AdminCategoryCountryController extends Controller
 
     private function translate($data)
     {
+        $texts = [
+            "name" => $data->name,
+            "title" => $data->title,
+            "sub_title" => $data->sub_title,
+            "introduction" => $data->introduction,
+            "content" => $data->content
+        ];
+        
+        $translatedData = $data->replicate();
+
+        foreach ($this->language as $toLanguage) {
+            if ($toLanguage !== $data->language) {
+
+                $translatedTexts = TranslationHelper::simpleBatchTranslate(
+                    $texts,
+                    $toLanguage,
+                    $data->language
+                );
+
+                Log::info($translatedTexts);
+            }
+        }
+    }
+
+    private function translate_old($data)
+    {
         $sourceLanguage = $data->language;
         
         foreach ($this->language as $language) {

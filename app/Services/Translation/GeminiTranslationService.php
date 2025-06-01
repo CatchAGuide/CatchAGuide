@@ -16,10 +16,10 @@ class GeminiTranslationService
         $this->apiKey = config('services.gemini.key');
     }
 
-    public function translate(string $text, string $fromLanguage, string $toLanguage): string
+    public function translate(string $text): string
     {
         try {
-            $response = $this->makeTranslationRequest($text, $fromLanguage, $toLanguage);
+            $response = $this->makeTranslationRequest($text);
             
             if ($response->failed()) {
                 throw new TranslationException('Gemini API error: ' . $response->body());
