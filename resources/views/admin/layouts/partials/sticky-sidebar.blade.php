@@ -68,6 +68,7 @@
                         <li><a href="{{route('admin.settings.methodindex')}}" class="slide-item  {{ request()->routeIs('admin.settings.methodindex') ? 'active' : '' }}" class="slide-item">Method</a></li>
                         <li><a href="{{route('admin.settings.waterindex')}}" class="slide-item  {{ request()->routeIs('admin.settings.waterindex') ? 'active' : '' }}" class="slide-item">Water Types</a></li>
                         <li><a href="{{route('admin.settings.targetindex')}}" class="slide-item  {{ request()->routeIs('admin.settings.targetindex') ? 'active' : '' }}"> Target Fish</a></li>
+                        <li><a href="{{route('admin.settings.emailmaintenance')}}" class="slide-item  {{ request()->routeIs('admin.settings.emailmaintenance') ? 'active' : '' }}"> Email Maintenance</a></li>
                     </ul>
                 </li>
 

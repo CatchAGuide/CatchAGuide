@@ -342,23 +342,23 @@ input[type=number] {
 
     @if(isset($fish_chart))
         @foreach($fish_chart as $row)
-            add_fish_chart_item({{ $row->id }}, '{{ $row->fish }}', {{ $row->jan }}, {{ $row->feb }}, {{ $row->mar }}, {{ $row->apr }}, {{ $row->may }}, {{ $row->jun }}, {{ $row->jul }}, {{ $row->aug }}, {{ $row->sep }}, {{ $row->oct }}, {{ $row->nov }}, {{ $row->dec }});
+            add_fish_chart_item({{ $row['id'] }}, '{{ $row['fish'] }}', {{ $row['jan'] }}, {{ $row['feb'] }}, {{ $row['mar'] }}, {{ $row['apr'] }}, {{ $row['may'] }}, {{ $row['jun'] }}, {{ $row['jul'] }}, {{ $row['aug'] }}, {{ $row['sep'] }}, {{ $row['oct'] }}, {{ $row['nov'] }}, {{ $row['dec'] }});
         @endforeach
     @endif
     @if(isset($fish_size_limit))
         @foreach($fish_size_limit as $row)
-            add_fish_size_limit_item({{ $row->id }}, '{{ $row->fish }}', '{{ $row->data }}');
+            add_fish_size_limit_item({{ $row['id'] }}, '{{ $row['fish'] }}', '{{ $row['data'] }}');
         @endforeach
     @endif
     @if(isset($fish_time_limit))
         @foreach($fish_time_limit as $row)
-            add_fish_time_limit_item({{ $row->id }}, '{{ $row->fish }}', '{{ $row->data }}');
+            add_fish_time_limit_item({{ $row['id'] }}, '{{ $row['fish'] }}', '{{ $row['data'] }}');
         @endforeach
     @endif
 
     @if(isset($faq))
         @foreach($faq as $row)
-            add_faq_item({{ $row->id }}, '{{ $row->question }}', '{{ $row->answer }}');
+            add_faq_item({{ $row['id'] }}, '{{ $row['question'] }}', '{{ $row['answer'] }}');
         @endforeach
     @endif
     });

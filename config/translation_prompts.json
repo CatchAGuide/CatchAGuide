@@ -1,0 +1,47 @@
+{
+    "default": {
+        "instructions": "Maintain the original formatting and tone. Ensure accurate and natural translation.",
+        "prompt": "Translate the following text from {from_language} to {to_language}. Only return the translated text."
+    },
+    "destination": {
+        "instructions": "This content is for a tourism website. Maintain professional tone while being engaging and appealing to tourists.",
+        "title": {
+            "instructions": "Keep titles concise and appealing for tourism",
+            "prompt": "Translate this destination title. Keep it concise and appealing for tourism."
+        },
+        "sub_title": {
+            "instructions": "Subtitles should be descriptive and engaging",
+            "prompt": "Translate this destination subtitle. Maintain the marketing appeal and tourism context."
+        },
+        "introduction": {
+            "instructions": "Introductions should be welcoming and informative",
+            "prompt": "Translate this destination introduction. Maintain the tourism context and engaging tone."
+        },
+        "content": {
+            "instructions": "Preserve HTML formatting and maintain professional tone",
+            "prompt": "Translate this detailed destination content. Preserve HTML formatting and tourism-specific terminology."
+        }
+    },
+    "fish": {
+        "instructions": "Use accurate fishing terminology and maintain technical precision",
+        "chart": {
+            "instructions": "Use proper local fish species names and terminology",
+            "prompt": "Translate this fish species information. Use proper local fishing terminology."
+        },
+        "limits": {
+            "instructions": "Maintain accuracy of measurements and regulations",
+            "prompt": "Translate these fishing regulations. Maintain accuracy of technical terms and measurements."
+        }
+    },
+    "faq": {
+        "instructions": "Keep a conversational yet professional tone",
+        "question": {
+            "instructions": "Questions should be clear and natural",
+            "prompt": "Translate this FAQ question. Keep the tone conversational but professional."
+        },
+        "answer": {
+            "instructions": "Answers should be clear and helpful",
+            "prompt": "Translate this FAQ answer. Maintain accuracy of information and keep the explanatory tone."
+        }
+    }
+} 

@@ -28,6 +28,11 @@ use App\Models\GuidingBoatDescription;
 use App\Models\GuidingBoatExtras;
 use App\Models\BoatExtras;
 
+/**
+ * @property string|null $target_fish
+ * @property string|null $water_types
+ * // ... add other dynamic properties as needed
+ */
 class Guiding extends Model
 {
     use HasFactory, Geoly, ModelImageTrait;

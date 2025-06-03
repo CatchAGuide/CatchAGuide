@@ -32,7 +32,7 @@ class StoreNewGuidingRequest extends FormRequest
             'duration' => 'required|string',
             'duration_hours' => 'required_if:duration,half_day,full_day|nullable|integer|min:1|max:24',
             'duration_days' => 'required_if:duration,multi_day|nullable|integer|min:1|max:365',
-            'no_guest' => 'required|integer|min:1',
+            'no_guest' => 'required|integer|min:0',
             'price_type' => 'required|in:per_person,per_boat',
             'price_per_person_*' => 'required_if:price_type,per_person|numeric|min:0',
             'price_per_boat' => 'required_if:price_type,per_boat|numeric|min:0',

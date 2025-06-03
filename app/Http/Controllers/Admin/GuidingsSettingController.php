@@ -256,7 +256,7 @@ class GuidingsSettingController extends Controller
         return back()->with('success', 'Die Ausgelegt für wurde erfolgreich gelöscht');
     }
 
-    
-
-
+    public function emailmaintenance(){
+        return view('admin.pages.setting.emails.maintenance');
+    }
 }

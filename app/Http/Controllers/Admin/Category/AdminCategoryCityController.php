@@ -16,9 +16,20 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
 use Exception;
+use App\Helpers\TranslationHelper;
 
 class AdminCategoryCityController extends Controller
 {
+    private $language;
+    
+    public function __construct()
+    {
+        $this->language = [
+            'en',
+            'de'
+        ];
+    }
+
     public function index()
     {
         $rows = Destination::whereType('city')->paginate(25);
@@ -140,6 +151,9 @@ class AdminCategoryCityController extends Controller
                     DestinationFaq::create($value);
                 }
             }
+
+            // Add translation after creating the city
+            $this->translate($country);
 
             DB::commit();
 
@@ -341,5 +355,145 @@ class AdminCategoryCityController extends Controller
     public function slug_format($value)
     {
         return str_replace(' ', '-', strtolower($value));
+    }
+
+    private function translate($data)
+    {
+        $sourceLanguage = $data->language;
+        
+        foreach ($this->language as $language) {
+            if ($language !== $sourceLanguage) {
+                // Create translated destination
+                $translatedData = $data->replicate();
+                $translatedData->language = $language;
+                
+                // Prepare all texts for batch translation
+                $textsToTranslate = [
+                    'title' => $data->title,
+                    'sub_title' => $data->sub_title,
+                    'introduction' => $data->introduction,
+                    'content' => $data->content,
+                    'fish_avail_title' => $data->fish_avail_title,
+                    'fish_avail_intro' => $data->fish_avail_intro,
+                    'size_limit_title' => $data->size_limit_title,
+                    'size_limit_intro' => $data->size_limit_intro,
+                    'time_limit_title' => $data->time_limit_title,
+                    'time_limit_intro' => $data->time_limit_intro,
+                    'faq_title' => $data->faq_title
+                ];
+
+                // Perform batch translation
+                $translatedTexts = TranslationHelper::batchTranslate(
+                    $textsToTranslate,
+                    $language,
+                    $sourceLanguage
+                );
+
+                // Apply translations
+                foreach ($translatedTexts as $field => $translation) {
+                    $translatedData->$field = $translation;
+                }
+                
+                $translatedData->save();
+
+                // Handle related translations (fish chart, size limits, time limits, FAQs)
+                $this->translateRelatedData($data, $translatedData, $language, $sourceLanguage);
+            }
+        }
+    }
+
+    private function translateRelatedData($sourceData, $translatedData, $targetLanguage, $sourceLanguage)
+    {
+        // Translate fish charts
+        if ($sourceData->fish_chart->count() > 0) {
+            $fishChartTexts = [];
+            foreach ($sourceData->fish_chart as $index => $chart) {
+                $fishChartTexts["fish_$index"] = $chart->fish;
+            }
+
+            $translatedFishChart = TranslationHelper::batchTranslate(
+                $fishChartTexts,
+                $targetLanguage,
+                $sourceLanguage
+            );
+
+            foreach ($sourceData->fish_chart as $index => $chart) {
+                $translatedChart = $chart->replicate();
+                $translatedChart->destination_id = $translatedData->id;
+                $translatedChart->language = $targetLanguage;
+                $translatedChart->fish = $translatedFishChart["fish_$index"];
+                $translatedChart->save();
+            }
+        }
+
+        // Translate size limits
+        if ($sourceData->fish_size_limit->count() > 0) {
+            $sizeLimitTexts = [];
+            foreach ($sourceData->fish_size_limit as $index => $limit) {
+                $sizeLimitTexts["fish_size_$index"] = $limit->fish;
+            }
+
+            $translatedSizeLimits = TranslationHelper::batchTranslate(
+                $sizeLimitTexts,
+                $targetLanguage,
+                $sourceLanguage
+            );
+
+            foreach ($sourceData->fish_size_limit as $index => $limit) {
+                $translatedLimit = $limit->replicate();
+                $translatedLimit->destination_id = $translatedData->id;
+                $translatedLimit->language = $targetLanguage;
+                $translatedLimit->fish = $translatedSizeLimits["fish_size_$index"];
+                $translatedLimit->data = $limit->data;
+                $translatedLimit->save();
+            }
+        }
+
+        // Translate time limits
+        if ($sourceData->fish_time_limit->count() > 0) {
+            $timeLimitTexts = [];
+            foreach ($sourceData->fish_time_limit as $index => $limit) {
+                $timeLimitTexts["fish_time_$index"] = $limit->fish;
+            }
+
+            $translatedTimeLimits = TranslationHelper::batchTranslate(
+                $timeLimitTexts,
+                $targetLanguage,
+                $sourceLanguage
+            );
+
+            foreach ($sourceData->fish_time_limit as $index => $limit) {
+                $translatedLimit = $limit->replicate();
+                $translatedLimit->destination_id = $translatedData->id;
+                $translatedLimit->language = $targetLanguage;
+                $translatedLimit->fish = $translatedTimeLimits["fish_time_$index"];
+                $translatedLimit->data = $limit->data;
+                $translatedLimit->save();
+            }
+        }
+
+        // Translate FAQs
+        if ($sourceData->faq->count() > 0) {
+            $faqTexts = [];
+            foreach ($sourceData->faq as $index => $faq) {
+                $faqTexts["question_$index"] = $faq->question;
+                $faqTexts["answer_$index"] = $faq->answer;
+            }
+
+            $translatedFaqs = TranslationHelper::batchTranslate(
+                $faqTexts,
+                $targetLanguage,
+                $sourceLanguage
+            );
+
+            foreach ($sourceData->faq as $index => $faq) {
+                $translatedFaq = $faq->replicate();
+                $translatedFaq->destination_id = $translatedData->id;
+                $translatedFaq->language = $targetLanguage;
+                $translatedFaq->question = $translatedFaqs["question_$index"];
+                $translatedFaq->answer = $translatedFaqs["answer_$index"];
+                $translatedFaq->save();
+            }
+        }
     }
 }

@@ -32,7 +32,7 @@ class GuideBookingExpiredMail extends Mailable
         $this->user = $user;
         $this->guiding = $guiding;
         $this->guide = $guide;
-        $this->language = $guide->user->language;
+        $this->language = $guide->user?->language ?? config('app.locale');
         $this->target = 'booking_' . $booking->id;
     }
 

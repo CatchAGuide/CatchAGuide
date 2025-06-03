@@ -353,6 +353,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/storelevel', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'storelevel'])->name('storelevel');
             Route::put('/updatelevel/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'updatelevel'])->name('updatelevel');
             Route::get('/deletelevel/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'deletelevel'])->name('deletelevel');
+
+            Route::get('/emailmaintenance', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'emailmaintenance'])->name('emailmaintenance');
         });
 
         Route::get('/translation/create', [TranslationController::class,'create'])->name('translation.create');

@@ -180,6 +180,7 @@ return [
     //myguidings
     'danger' => 'Danger! The specified location was not recognized!',
     'edit' => 'Edit',
+    'draft' => 'Continue to save draft',
     'notcreated' => "You haven't created any guides yet!",
     'lets-change' => "Let's change that as soon as possible",
 

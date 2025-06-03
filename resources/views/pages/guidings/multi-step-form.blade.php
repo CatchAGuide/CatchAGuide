@@ -47,6 +47,7 @@
 
             <input type="hidden" name="target_redirect" id="target_redirect" value="{{ $target_redirect ?? route('profile.myguidings') }}">
             <input type="hidden" name="is_update" id="is_update" value="{{ $formData['is_update'] ?? 0 }}">
+            <input type="hidden" name="is_draft" id="is_draft" value="{{ isset($formData['status']) && $formData['status'] == 2 ? 1 : 0 }}">
             <input type="hidden" name="guiding_id" id="guiding_id" value="{{ $formData['id'] ?? 0 }}">
             <input type="hidden" name="thumbnail_path" id="thumbnail_path" value="{{ $formData['thumbnail_path'] ?? '' }}">
             <input type="hidden" name="existing_images" id="existing_images" value="{{ $formData['gallery_images'] ?? "" }}">
@@ -212,9 +213,9 @@
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        {{-- <button type="button" class="btn btn-secondary" id="saveDraftBtn2">
+                        <button type="button" class="btn btn-secondary" id="saveDraftBtn2" onclick="window.location.href='{{ route('profile.myguidings') }}'">
                             {{ __('newguidings.leave_save_draft') }}
-                        </button> --}}
+                        </button>
                     </div>
                     <div class="right-buttons">
                         <div class="row-button">
@@ -297,9 +298,9 @@
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        {{-- <button type="button" class="btn btn-secondary" id="saveDraftBtn3">
+                        <button type="button" class="btn btn-secondary" id="saveDraftBtn3" onclick="window.location.href='{{ route('profile.myguidings') }}'">
                             {{ __('newguidings.leave_save_draft') }}
-                        </button> --}}
+                        </button>
                     </div>
                     <div class="right-buttons">
                     <div class="row-button">
@@ -392,9 +393,9 @@
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        {{-- <button type="button" class="btn btn-secondary" id="saveDraftBtn4">
+                        <button type="button" class="btn btn-secondary" id="saveDraftBtn4" onclick="window.location.href='{{ route('profile.myguidings') }}'">
                             {{ __('newguidings.leave_save_draft') }}
-                        </button> --}}
+                        </button>
                     </div>
                     <div class="right-buttons">
                     <div class="row-button">
@@ -479,9 +480,9 @@
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        {{-- <button type="button" class="btn btn-secondary" id="saveDraftBtn5">
+                        <button type="button" class="btn btn-secondary" id="saveDraftBtn5" onclick="window.location.href='{{ route('profile.myguidings') }}'">
                             {{ __('newguidings.leave_save_draft') }}
-                        </button> --}}
+                        </button>
                     </div>
                     <div class="right-buttons">
                     <div class="row-button">
@@ -638,9 +639,9 @@
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        {{-- <button type="button" class="btn btn-secondary" id="saveDraftBtn6">
+                        <button type="button" class="btn btn-secondary" id="saveDraftBtn6" onclick="window.location.href='{{ route('profile.myguidings') }}'">
                             {{ __('newguidings.leave_save_draft') }}
-                        </button> --}}
+                        </button>
                     </div>
                     <div class="right-buttons">
                         <div class="row-button">
@@ -799,7 +800,7 @@
 
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary" id="submitBtn7" onclick="console.log('Form submitted');">
+                        <button type="submit" class="btn btn-primary" id="submitBtn7" onclick="document.getElementById('is_draft').value = '0';">
                             {{ __('newguidings.submit_publish') }}
                         </button>
                     </div>
