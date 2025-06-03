@@ -41,9 +41,25 @@ class TranslationHelper
 
         $prompt = "Translate the following text in this JSON object field {$forTranslate} from {$fromLanguageName} to {$toLanguageName} while keeping the JSON structure and keys as return/response";
 
-        Log::info($prompt);
+        $translated = self::$translator->translate($prompt, $fromLanguage, $toLanguage);
 
-        return self::$translator->translate($prompt, $fromLanguage, $toLanguage);
+        $translated = preg_replace('/^```json\s*|\s*```\s*$/m', '', $translated); // Remove markdown code blocks
+        
+        // Attempt to decode and re-encode to ensure valid JSON format
+        try {
+            $decodedJson = json_decode($translated, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $translated = json_encode($decodedJson);
+            } else {
+                Log::error('JSON decode error: ' . json_last_error_msg());
+            }
+        } catch (\Exception $e) {
+            Log::error('JSON processing error: ' . $e->getMessage());
+        }
+
+        Log::debug((array) json_decode($translated));
+
+        return (array) json_decode($translated);
     }
 
     public static function batchTranslate(array $texts, string $toLanguage, string $fromLanguage = 'en', string $context = 'destination'): array

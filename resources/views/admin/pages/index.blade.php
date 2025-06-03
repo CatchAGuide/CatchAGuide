@@ -76,7 +76,7 @@
                         <div class="flex-grow-1 ms-3">
                             <h6 class="mb-0">Active Tours</h6>
                             <h2 class="mb-0">{{ $activeTours }}</h2>
-                            <small>{{ $totalGuides }} active guides</small>
+                            <small>{{ $guidesWithActiveTours }} active guides</small>
                         </div>
                     </div>
                 </div>
