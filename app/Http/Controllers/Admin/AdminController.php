@@ -44,6 +44,11 @@ class AdminController extends Controller
         // Guide and Tour statistics
         $totalGuides = User::where('is_guide', true)->count();
         $activeTours = Guiding::where('status', 1)->count();
+        $guidesWithActiveTours = User::where('is_guide', true)
+            ->whereHas('guidings', function($query) {
+                $query->where('status', 1);
+            })
+            ->count();
 
         // Recent Bookings with guest support
         $recentBookings = Booking::with(['user', 'guiding'])
@@ -101,6 +106,7 @@ class AdminController extends Controller
             'guestUsers',
             'activeTours',
             'totalGuides',
+            'guidesWithActiveTours',
             'recentBookings',
             'upcomingTours',
             'revenueData',
