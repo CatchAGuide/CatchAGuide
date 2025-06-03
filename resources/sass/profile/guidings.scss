@@ -266,16 +266,17 @@
     }
 
     [id^="saveDraftBtn"] {
-        background-color: #787780;
-        color: white;
+        background-color: transparent;
+        color: #787780;
         border-color: #787780;
         order: 2;
         margin-left: auto;
     }
 
     [id^="saveDraftBtn"]:hover {
-        background-color: #e8604c;
+        background-color: transparent;
         border-color: #e8604c;
+        color: #e8604c;
     }
 
     button {

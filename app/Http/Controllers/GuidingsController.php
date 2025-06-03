@@ -969,11 +969,13 @@ class GuidingsController extends Controller
                     $guiding->min_guests = null;
                 }
             } else {
-                for ($i = 1; $i <= $request->input('no_guest', 0); $i++) {
-                    $pricePerPerson[] = [
-                        'person' => $i,
-                        'amount' => (float) ($request->input('price_per_boat', 0) / max(1, $request->input('no_guest', 1))) * $i
-                    ];
+                if($request->has('no_guest')){
+                    for ($i = 1; $i <= $request->input('no_guest', 0); $i++) {
+                        $pricePerPerson[] = [
+                            'person' => $i,
+                            'amount' => (float) ($request->input('price_per_boat', 0) / max(1, $request->input('no_guest', 1))) * $i
+                        ];
+                    }
                 }
                 $guiding->price = (float) $request->input('price_per_boat', 0);
             }
@@ -1257,6 +1259,7 @@ class GuidingsController extends Controller
         $formData = [
             'id' => $guiding->id,
             'is_update' => 1,
+            'status' => $guiding->status,
             //step1
             'title' => $guiding->title,
             'location' => $guiding->location,

@@ -1370,8 +1370,9 @@
 
         // Update button visibility
         const isUpdate = document.getElementById('is_update').value === '1';
-        $(`#saveDraftBtn${stepNumber}`).toggle(!isUpdate);
-        $(`#submitBtn${stepNumber}`).toggle(isUpdate || currentStep === totalSteps);
+        const isDraft = document.getElementById('is_draft').value === '1';
+        $(`#saveDraftBtn${stepNumber}`).toggle(!isUpdate && !isDraft);
+        $(`#submitBtn${stepNumber}`).toggle((isUpdate && !isDraft) || currentStep === totalSteps);
         $(`#prevBtn${stepNumber}`).toggle(currentStep > 1);
         $(`#nextBtn${stepNumber}`).toggle(currentStep < totalSteps);
     }

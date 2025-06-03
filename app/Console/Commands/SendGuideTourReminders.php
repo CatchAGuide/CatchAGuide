@@ -63,14 +63,9 @@ class SendGuideTourReminders extends Command
                 'language' => $language,
                 'type' => $type,
                 'target' => $target,
-            ], function ($message) use ($guide, $language, $type, $target) {
+            ], function ($message) use ($guide) {
                 $message->to($guide->email)
-                    ->subject(__('emails.guide_reminder_to_respond_24hrs_title'))
-                    ->with([
-                        'language' => $language,
-                        'type' => $type,
-                        'target' => $target,
-                    ]);
+                    ->subject(__('emails.guide_reminder_to_respond_24hrs_title'));
             });
             
             // Log the email

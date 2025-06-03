@@ -177,6 +177,7 @@ return [
     //myguidings
     'danger' => 'Achtung! Die angegebene Lokation wurde nicht erkannt!',
     'edit' => 'Bearbeiten',
+    'draft' => 'Weiter speichern',
     'notcreated' => 'Du hast noch keine Guidings erstellt!',
     'lets-change' => 'Lass uns das schleunigst ändern',
 
