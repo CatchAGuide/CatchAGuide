@@ -392,11 +392,23 @@ class AdminCategoryVacationCountryController extends Controller
             );
 
             foreach ($sourceData->fish_chart as $index => $chart) {
-                $translatedChart = $chart->replicate();
-                $translatedChart->destination_id = $translatedData->id;
-                $translatedChart->language = $targetLanguage;
-                $translatedChart->fish = $translatedFishChart["fish_$index"];
-                $translatedChart->save();
+                DestinationFishChart::create([
+                    'destination_id' => $translatedData->id,
+                    'language' => $targetLanguage,
+                    'fish' => $translatedFishChart["fish_$index"],
+                    'jan' => $chart->jan,
+                    'feb' => $chart->feb,
+                    'mar' => $chart->mar,
+                    'apr' => $chart->apr,
+                    'may' => $chart->may,
+                    'jun' => $chart->jun,
+                    'jul' => $chart->jul,
+                    'aug' => $chart->aug,
+                    'sep' => $chart->sep,
+                    'oct' => $chart->oct,
+                    'nov' => $chart->nov,
+                    'dec' => $chart->dec
+                ]);
             }
         }
 
@@ -414,12 +426,12 @@ class AdminCategoryVacationCountryController extends Controller
             );
 
             foreach ($sourceData->fish_size_limit as $index => $limit) {
-                $translatedLimit = $limit->replicate();
-                $translatedLimit->destination_id = $translatedData->id;
-                $translatedLimit->language = $targetLanguage;
-                $translatedLimit->fish = $translatedSizeLimits["fish_size_$index"];
-                $translatedLimit->data = $limit->data;
-                $translatedLimit->save();
+                DestinationFishSizeLimit::create([
+                    'destination_id' => $translatedData->id,
+                    'language' => $targetLanguage,
+                    'fish' => $translatedSizeLimits["fish_size_$index"],
+                    'data' => $limit->data
+                ]);
             }
         }
 
@@ -437,12 +449,12 @@ class AdminCategoryVacationCountryController extends Controller
             );
 
             foreach ($sourceData->fish_time_limit as $index => $limit) {
-                $translatedLimit = $limit->replicate();
-                $translatedLimit->destination_id = $translatedData->id;
-                $translatedLimit->language = $targetLanguage;
-                $translatedLimit->fish = $translatedTimeLimits["fish_time_$index"];
-                $translatedLimit->data = $limit->data;
-                $translatedLimit->save();
+                DestinationFishTimeLimit::create([
+                    'destination_id' => $translatedData->id,
+                    'language' => $targetLanguage,
+                    'fish' => $translatedTimeLimits["fish_time_$index"],
+                    'data' => $limit->data
+                ]);
             }
         }
 
@@ -461,12 +473,12 @@ class AdminCategoryVacationCountryController extends Controller
             );
 
             foreach ($sourceData->faq as $index => $faq) {
-                $translatedFaq = $faq->replicate();
-                $translatedFaq->destination_id = $translatedData->id;
-                $translatedFaq->language = $targetLanguage;
-                $translatedFaq->question = $translatedFaqs["question_$index"];
-                $translatedFaq->answer = $translatedFaqs["answer_$index"];
-                $translatedFaq->save();
+                DestinationFaq::create([
+                    'destination_id' => $translatedData->id,
+                    'language' => $targetLanguage,
+                    'question' => $translatedFaqs["question_$index"],
+                    'answer' => $translatedFaqs["answer_$index"]
+                ]);
             }
         }
     }
