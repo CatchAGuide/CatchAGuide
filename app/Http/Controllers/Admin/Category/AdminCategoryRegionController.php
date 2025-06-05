@@ -118,6 +118,8 @@ class AdminCategoryRegionController extends Controller
 
             $this->translate($country, $request);
 
+            $this->translate($country);
+
             DB::commit();
 
             return redirect()->back()->with('success', 'Region Successfully Added!');

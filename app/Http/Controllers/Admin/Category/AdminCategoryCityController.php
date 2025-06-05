@@ -123,6 +123,9 @@ class AdminCategoryCityController extends Controller
             // Add translation after creating the city
             $this->translate($country, $request);
 
+            // Add translation after creating the city
+            $this->translate($country);
+
             DB::commit();
 
             return redirect()->back()->with('success', 'City Successfully Added!');

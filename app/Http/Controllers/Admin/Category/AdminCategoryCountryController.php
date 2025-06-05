@@ -143,6 +143,9 @@ class AdminCategoryCountryController extends Controller
             // Translate to other languages
             $this->translate($country, $request);
 
+            // Translate to other languages
+            $this->translate($country);
+
             DB::commit();
 
             return redirect()->back()->with('success', 'Country Successfully Added!');

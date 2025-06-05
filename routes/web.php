@@ -357,6 +357,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/emailmaintenance', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'emailmaintenance'])->name('emailmaintenance');
             Route::get('/email-preview/{template}/{locale}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'emailPreview'])->name('email.preview');
             Route::get('/email-preview-ajax/{template}/{locale}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'emailPreviewAjax'])->name('email.preview.ajax');
+
         });
 
         Route::get('/translation/create', [TranslationController::class,'create'])->name('translation.create');
