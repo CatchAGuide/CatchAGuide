@@ -108,37 +108,40 @@ class AdminCategoryCountryController extends Controller
             $data['thumbnail_path'] = $webp_path;
             $country = Destination::create($data);
 
-            if ($request->has('fish_chart')) {
-                foreach ($request->fish_chart as $key => $value) {
-                    $value['destination_id'] = $country->id;
-                    $value['language'] = $request->language;
-                    DestinationFishChart::create($value);
-                }
-            }
+            // if ($request->has('fish_chart')) {
+            //     foreach ($request->fish_chart as $key => $value) {
+            //         $value['destination_id'] = $country->id;
+            //         $value['language'] = $request->language;
+            //         DestinationFishChart::create($value);
+            //     }
+            // }
 
-            if ($request->has('fish_size_limit')) {
-                foreach ($request->fish_size_limit as $key => $value) {
-                    $value['destination_id'] = $country->id;
-                    $value['language'] = $request->language;
-                    DestinationFishSizeLimit::create($value);
-                }
-            }
+            // if ($request->has('fish_size_limit')) {
+            //     foreach ($request->fish_size_limit as $key => $value) {
+            //         $value['destination_id'] = $country->id;
+            //         $value['language'] = $request->language;
+            //         DestinationFishSizeLimit::create($value);
+            //     }
+            // }
 
-            if ($request->has('fish_time_limit')) {
-                foreach ($request->fish_time_limit as $key => $value) {
-                    $value['destination_id'] = $country->id;
-                    $value['language'] = $request->language;
-                    DestinationFishTimeLimit::create($value);
-                }
-            }
+            // if ($request->has('fish_time_limit')) {
+            //     foreach ($request->fish_time_limit as $key => $value) {
+            //         $value['destination_id'] = $country->id;
+            //         $value['language'] = $request->language;
+            //         DestinationFishTimeLimit::create($value);
+            //     }
+            // }
 
-            if ($request->has('faq')) {
-                foreach ($request->faq as $key => $value) {
-                    $value['destination_id'] = $country->id;
-                    $value['language'] = $request->language;
-                    DestinationFaq::create($value);
-                }
-            }
+            // if ($request->has('faq')) {
+            //     foreach ($request->faq as $key => $value) {
+            //         $value['destination_id'] = $country->id;
+            //         $value['language'] = $request->language;
+            //         DestinationFaq::create($value);
+            //     }
+            // }
+
+            // Translate to other languages
+            $this->translate($country, $request);
 
             // Translate to other languages
             $this->translate($country);
@@ -400,20 +403,64 @@ class AdminCategoryCountryController extends Controller
         return str_replace(' ', '-', strtolower($value));
     }
 
-    private function translate($data)
+    private function translate($data, $request = null)
     {
         $texts = [
             "name" => $data->name,
             "title" => $data->title,
             "sub_title" => $data->sub_title,
             "introduction" => $data->introduction,
-            "content" => $data->content
+            "content" => $data->content,
+            'fish_avail_title' => $data->fish_avail_title,
+            'fish_avail_intro' => $data->fish_avail_intro,
+            'size_limit_title' => $data->size_limit_title,
+            'size_limit_intro' => $data->size_limit_intro,
+            'time_limit_title' => $data->time_limit_title,
+            'time_limit_intro' => $data->time_limit_intro,
+            'faq_title' => $data->faq_title
         ];
-        
-        $translatedData = $data->replicate();
+
+        if ($request->has('fish_chart')) {
+            $fishChartTexts = [];
+            foreach ($request->fish_chart as $index => $chart) {
+                $fishChartTexts[$index] = $chart['fish'];
+            }
+
+            $texts['fish_chart'] = $fishChartTexts;
+        }
+
+        if ($request->has('fish_size_limit')) {
+            $fishSizeLimitTexts = [];
+            foreach ($request->fish_size_limit as $index => $limit) {
+                $fishSizeLimitTexts[$index] = $limit['fish'];
+            }
+
+            $texts['fish_size_limit'] = $fishSizeLimitTexts;
+        }
+
+        if ($request->has('fish_time_limit')) {
+            $fishTimeLimitTexts = [];
+            foreach ($request->fish_time_limit as $index => $limit) {
+                $fishTimeLimitTexts[$index] = $limit['fish'];
+            }
+
+            $texts['fish_time_limit'] = $fishTimeLimitTexts;
+        }
+
+        if ($request->has('faq')) {
+            $faqTexts = [];
+            foreach ($request->faq as $index => $faq) {
+                $faqTexts["question_$index"] = $faq['question'];
+                $faqTexts["answer_$index"] = $faq['answer'];
+            }
+
+            $texts['faq'] = $faqTexts;
+        }
 
         foreach ($this->language as $toLanguage) {
             if ($toLanguage !== $data->language) {
+
+                $translatedData = $data->replicate();
 
                 $translatedTexts = TranslationHelper::simpleBatchTranslate(
                     $texts,
@@ -421,139 +468,71 @@ class AdminCategoryCountryController extends Controller
                     $data->language
                 );
 
-                Log::info($translatedTexts);
-            }
-        }
-    }
+                $forTranslatedData = $translatedTexts;
+                unset($forTranslatedData['fish_chart'], $forTranslatedData['fish_size_limit'], $forTranslatedData['fish_time_limit'], $forTranslatedData['faq']);
 
-    private function translate_old($data)
-    {
-        $sourceLanguage = $data->language;
-        
-        foreach ($this->language as $language) {
-            if ($language !== $sourceLanguage) {
-                // Create translated destination
-                $translatedData = $data->replicate();
-                $translatedData->language = $language;
-                
-                // Prepare all texts for batch translation
-                $textsToTranslate = [
-                    'title' => $data->title,
-                    'sub_title' => $data->sub_title,
-                    'introduction' => $data->introduction,
-                    'content' => $data->content,
-                    'fish_avail_title' => $data->fish_avail_title,
-                    'fish_avail_intro' => $data->fish_avail_intro,
-                    'size_limit_title' => $data->size_limit_title,
-                    'size_limit_intro' => $data->size_limit_intro,
-                    'time_limit_title' => $data->time_limit_title,
-                    'time_limit_intro' => $data->time_limit_intro,
-                    'faq_title' => $data->faq_title
-                ];
-
-                // Perform batch translation
-                $translatedTexts = TranslationHelper::batchTranslate(
-                    $textsToTranslate,
-                    $language,
-                    $sourceLanguage
-                );
-
-                // Apply translations
-                foreach ($translatedTexts as $field => $translation) {
+                foreach ($forTranslatedData as $field => $translation) {
                     $translatedData->$field = $translation;
                 }
-                
+
                 $translatedData->save();
+
+                if (isset($translatedTexts['fish_chart'])) {
+                    foreach ($request->fish_chart as $index => $originalChart) {
+                        $chartData = array_filter($originalChart, function($key) {
+                            return $key !== 'fish' && $key !== 'id';
+                        }, ARRAY_FILTER_USE_KEY);
+                        
+                        $translatedFishChart = DestinationFishChart::create([
+                            'destination_id' => $translatedData->id,
+                            'language' => $toLanguage,
+                            'fish' => $translatedTexts['fish_chart'][$index],
+                            ...$chartData
+                        ]);
+                    }
+                }
+
+                if (isset($translatedTexts['fish_size_limit'])) {
+                    foreach ($request->fish_size_limit as $index => $originalLimit) {
+                        $translatedFishSizeLimit = DestinationFishSizeLimit::create([
+                            'destination_id' => $translatedData->id,
+                            'language' => $toLanguage,
+                            'fish' => $translatedTexts['fish_size_limit'][$index],
+                            'data' => $originalLimit['data']
+                        ]);
+                    }
+                }
+
+                if (isset($translatedTexts['fish_time_limit'])) {
+                    foreach ($request->fish_time_limit as $index => $originalLimit) {
+                        $translatedFishTimeLimit = DestinationFishTimeLimit::create([
+                            'destination_id' => $translatedData->id,
+                            'language' => $toLanguage,
+                            'fish' => $translatedTexts['fish_time_limit'][$index],
+                            'data' => $originalLimit['data']
+                        ]);
+                    }
+                }
                 
-                // Handle fish chart translations
-                if ($data->fish_chart->count() > 0) {
-                    $fishChartTexts = [];
-                    foreach ($data->fish_chart as $index => $chart) {
-                        $fishChartTexts["fish_$index"] = $chart->fish;
-                    }
-
-                    $translatedFishChart = TranslationHelper::batchTranslate(
-                        $fishChartTexts,
-                        $language,
-                        $sourceLanguage
-                    );
-
-                    foreach ($data->fish_chart as $index => $chart) {
-                        $translatedChart = $chart->replicate();
-                        $translatedChart->destination_id = $translatedData->id;
-                        $translatedChart->language = $language;
-                        $translatedChart->fish = $translatedFishChart["fish_$index"];
-                        $translatedChart->save();
-                    }
-                }
-
-                // Handle fish size limit translations
-                if ($data->fish_size_limit->count() > 0) {
-                    $sizeLimitTexts = [];
-                    foreach ($data->fish_size_limit as $index => $limit) {
-                        $sizeLimitTexts["fish_size_$index"] = $limit->fish;
-                    }
-
-                    $translatedSizeLimits = TranslationHelper::batchTranslate(
-                        $sizeLimitTexts,
-                        $language,
-                        $sourceLanguage
-                    );
-
-                    foreach ($data->fish_size_limit as $index => $limit) {
-                        $translatedLimit = $limit->replicate();
-                        $translatedLimit->destination_id = $translatedData->id;
-                        $translatedLimit->language = $language;
-                        $translatedLimit->fish = $translatedSizeLimits["fish_size_$index"];
-                        $translatedLimit->data = $limit->data; // Keep numeric data as is
-                        $translatedLimit->save();
-                    }
-                }
-
-                // Handle fish time limit translations
-                if ($data->fish_time_limit->count() > 0) {
-                    $timeLimitTexts = [];
-                    foreach ($data->fish_time_limit as $index => $limit) {
-                        $timeLimitTexts["fish_time_$index"] = $limit->fish;
-                    }
-
-                    $translatedTimeLimits = TranslationHelper::batchTranslate(
-                        $timeLimitTexts,
-                        $language,
-                        $sourceLanguage
-                    );
-
-                    foreach ($data->fish_time_limit as $index => $limit) {
-                        $translatedLimit = $limit->replicate();
-                        $translatedLimit->destination_id = $translatedData->id;
-                        $translatedLimit->language = $language;
-                        $translatedLimit->fish = $translatedTimeLimits["fish_time_$index"];
-                        $translatedLimit->data = $limit->data; // Keep numeric data as is
-                        $translatedLimit->save();
-                    }
-                }
-
-                // Handle FAQ translations
-                if ($data->faq->count() > 0) {
-                    $faqTexts = [];
-                    foreach ($data->faq as $index => $faq) {
-                        $faqTexts["question_$index"] = $faq->question;
-                        $faqTexts["answer_$index"] = $faq->answer;
-                    }
-
-                    $translatedFaqs = TranslationHelper::batchTranslate(
-                        $faqTexts,
-                        $language,
-                        $sourceLanguage
-                    );
-
-                    foreach ($data->faq as $index => $faq) {
-                        $translatedFaq = $faq->replicate();
-                        $translatedFaq->destination_id = $translatedData->id;
-                        $translatedFaq->language = $language;
-                        $translatedFaq->question = $translatedFaqs["question_$index"];
-                        $translatedFaq->answer = $translatedFaqs["answer_$index"];
-                        $translatedFaq->save();
+                if (isset($translatedTexts['faq'])) {
+                    foreach ($request->faq as $index => $faq) {
+                        $questionIndex = "question_$index";
+                        $answerIndex = "answer_$index";
+                        
+                        $translatedQuestion = is_object($translatedTexts['faq']) 
+                            ? $translatedTexts['faq']->$questionIndex 
+                            : $translatedTexts['faq'][$questionIndex];
+                            
+                        $translatedAnswer = is_object($translatedTexts['faq']) 
+                            ? $translatedTexts['faq']->$answerIndex 
+                            : $translatedTexts['faq'][$answerIndex];
+                            
+                        $translatedFaq = DestinationFaq::create([
+                            'destination_id' => $translatedData->id,
+                            'language' => $toLanguage,
+                            'question' => $translatedQuestion,
+                            'answer' => $translatedAnswer
+                        ]);
                     }
                 }
             }

@@ -783,45 +783,31 @@ class GuidingsController extends Controller
     public function saveDraft(StoreNewGuidingRequest $request)
     {
         try {
-            DB::beginTransaction();
-
-            // Try to find an existing draft for this user and (optionally) title/location
-            if ($request->input('is_update') == '1' && $request->input('guiding_id')) {
-                $guiding = Guiding::findOrFail($request->input('guiding_id'));
-            } else {
-                $guiding = Guiding::where('user_id', auth()->id())
-                    ->where('status', 2)
-                    ->where('title', $request->input('title'))
-                    ->where('city', $request->input('city'))
-                    ->where('country', $request->input('country'))
-                    ->where('region', $request->input('region'))
-                    ->first();
-
-                if (!$guiding) {
-                    $guiding = new Guiding(['user_id' => auth()->id()]);
-                }
-            }
-
-            $this->fillGuidingFromRequest($guiding, $request, true);
-
-            // Slug generation (always for new, or if title/location changed)
-            if ($request->input('is_update') !== '1') {
-                $guiding->slug = slugify($guiding->title . "-in-" . $guiding->location);
-            }
-
-            $guiding->is_newguiding = 1;
-            $guiding->status = 2;
-
-            $guiding->save();
-            DB::commit();
+            // Handle file uploads synchronously first
+            $processedData = $this->processFileUploads($request);
+            
+            // Prepare data for the job
+            $guidingData = $this->prepareGuidingDataForJob($request, $processedData);
+            
+            $isUpdate = $request->input('is_update') == '1';
+            $guidingId = $isUpdate ? $request->input('guiding_id') : null;
+            
+            // Dispatch the job for database operations
+            \App\Jobs\SaveGuidingDraftJob::dispatch(
+                $guidingData, 
+                auth()->id(), 
+                $isUpdate, 
+                $guidingId
+            );
 
             return response()->json([
                 'success' => true,
-                'guiding_id' => $guiding->id,
-                'message' => 'Draft saved successfully.'
+                'guiding_id' => $guidingId,
+                'message' => 'Draft is being saved...'
             ]);
+
         } catch (\Exception $e) {
-            DB::rollBack();
+            Log::error('Error in saveDraft: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to save draft.',
@@ -831,6 +817,284 @@ class GuidingsController extends Controller
     }
 
     /**
+     * Process file uploads synchronously and return processed data
+     */
+    private function processFileUploads(StoreNewGuidingRequest $request): array
+    {
+        $galeryImages = [];
+        $imageList = json_decode($request->input('image_list', '[]')) ?? [];
+        $thumbnailPath = '';
+
+        // Handle existing images for updates
+        if ($request->input('is_update') == '1') {
+            $existingImagesJson = $request->input('existing_images');
+            $existingImages = json_decode($existingImagesJson, true) ?? [];
+            $keepImages = array_filter($imageList);
+
+            foreach ($existingImages as $existingImage) {
+                $imagePath = $existingImage;
+                $imagePathWithSlash = '/' . $existingImage;
+                if (in_array($imagePath, $keepImages) || in_array($imagePathWithSlash, $keepImages)) {
+                    $galeryImages[] = $existingImage;
+                } else {
+                    media_delete($existingImage);
+                }
+            }
+        }
+
+        // Process new file uploads
+        if ($request->has('title_image')) {
+            $imageCount = count($galeryImages);
+            $tempSlug = slugify(($request->input('title') ?? 'temp') . "-in-" . ($request->input('location') ?? 'location'));
+            
+            foreach($request->file('title_image') as $index => $image) {
+                $filename = 'guidings-images/'.$image->getClientOriginalName();
+                if (in_array($filename, $imageList) || in_array('/' . $filename, $imageList)) {
+                    continue;
+                }
+                $index = $index + $imageCount;
+                $webp_path = media_upload($image, 'guidings-images', $tempSlug. "-". $index . "-" . time());
+                $galeryImages[] = $webp_path;
+            }
+        }
+
+        // Set the primary image if available
+        $primaryImageIndex = $request->input('primaryImage', 0);
+        if (isset($galeryImages[$primaryImageIndex])) {
+            $thumbnailPath = $galeryImages[$primaryImageIndex];
+        }
+
+        return [
+            'gallery_images' => $galeryImages,
+            'thumbnail_path' => $thumbnailPath
+        ];
+    }
+
+    /**
+     * Prepare data for the job from request
+     */
+    private function prepareGuidingDataForJob(StoreNewGuidingRequest $request, array $processedData): array
+    {
+        // Basic fields
+        $data = [
+            'location' => $request->input('location', ''),
+            'title' => $request->input('title', ''),
+            'latitude' => $request->input('latitude', ''),
+            'longitude' => $request->input('longitude', ''),
+            'country' => $request->input('country', ''),
+            'city' => $request->input('city', ''),
+            'region' => $request->input('region', ''),
+            
+            // Processed images
+            'gallery_images' => $processedData['gallery_images'],
+            'thumbnail_path' => $processedData['thumbnail_path'],
+            
+            // Boat and fishing info
+            'is_boat' => $request->has('type_of_fishing') ? ($request->input('type_of_fishing') == 'boat' ? 1 : 0) : 0,
+            'fishing_from_id' => (int) $request->has('type_of_fishing') ? ($request->input('type_of_fishing') == 'boat' ? 1 : 2) : 2,
+            'other_boat_info' => $request->input('other_boat_info', ''),
+            'boat_type' => $request->input('type_of_boat', ''),
+            
+            // Process boat information
+            'boat_information' => $this->prepareDescriptionsForJob($request),
+            'boat_extras' => $this->prepareJsonDataForJob($request->input('boat_extras') ?? '[]'),
+            
+            // Target fish, methods, water types
+            'target_fish' => $this->prepareJsonDataForJob($request->input('target_fish') ?? '[]'),
+            'methods' => $this->prepareJsonDataForJob($request->input('methods') ?? '[]'),
+            'style_of_fishing' => (int) $request->input('style_of_fishing', 3),
+            'water_types' => $this->prepareJsonDataForJob($request->input('water_types') ?? '[]'),
+            
+            // Descriptions
+            'desc_course_of_action' => $request->input('desc_course_of_action', ''),
+            'desc_meeting_point' => $request->input('desc_meeting_point', ''),
+            'meeting_point' => $request->input('meeting_point', ''),
+            'desc_starting_time' => $request->input('desc_starting_time', ''),
+            'desc_departure_time' => $request->input('desc_departure_time', []),
+            'desc_tour_unique' => $request->input('desc_tour_unique', ''),
+            'description' => $request->input('desc_course_of_action', $this->generateLongDescription($request)),
+            
+            // Requirements, recommendations, other info
+            'requirements' => $this->prepareRequirementsForJob($request),
+            'recommendations' => $this->prepareRecommendationsForJob($request),
+            'other_information' => $this->prepareOtherInformationForJob($request),
+            
+            // Tour details
+            'tour_type' => $request->input('tour_type', ''),
+            'duration' => $request->input('duration', ''),
+            'duration_value' => $request->input('duration') == 'multi_day' 
+                ? (int) $request->input('duration_days', 0) 
+                : (int) $request->input('duration_hours', 0),
+            'no_guest' => (int) $request->input('no_guest', 0),
+            'min_guests' => $request->has('has_min_guests') ? (int) $request->input('min_guests') : null,
+            
+            // Pricing
+            'price_type' => $request->input('price_type', ''),
+            'price' => $this->calculatePrice($request),
+            'prices' => $this->preparePricesForJob($request),
+            'inclusions' => $this->prepareJsonDataForJob($request->input('inclusions') ?? '[]'),
+            'pricing_extra' => $this->preparePricingExtrasForJob($request),
+            
+            // Booking settings
+            'allowed_booking_advance' => $request->input('allowed_booking_advance', ''),
+            'booking_window' => $request->input('booking_window', ''),
+            'seasonal_trip' => $request->input('seasonal_trip', ''),
+            'months' => $request->input('months', []),
+            'weekday_availability' => $request->input('weekday_availability', 'all_week'),
+            'weekdays' => $request->input('weekday_availability') === 'all_week' 
+                ? ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+                : $request->input('weekdays', []),
+        ];
+
+        return $data;
+    }
+
+    /**
+     * Helper methods for data preparation
+     */
+    private function prepareJsonDataForJob(?string $jsonString): array
+    {
+        if ($jsonString === null) {
+            return [];
+        }
+        
+        $data = collect(json_decode($jsonString, true) ?? []);
+        return $data->map(function($item) {
+            return $item['id'] ?? $item['value'] ?? $item;
+        })->toArray();
+    }
+
+    private function prepareDescriptionsForJob($request): array
+    {
+        $descriptions = $request->input('descriptions', []);
+        $descriptionData = [];
+
+        foreach ($descriptions as $description) {
+            $descriptionData[$description] = $request->input("boat_description_".$description);
+        }
+
+        return $descriptionData;
+    }
+
+    private function prepareRequirementsForJob($request): array
+    {
+        $requirements = $request->input('requiements_taking_part', []);
+        $requirementData = [];
+
+        foreach ($requirements as $requirement) {
+            $requirementData[$requirement] = $request->input("requiements_taking_part_".$requirement);
+        }
+
+        return $requirementData;
+    }
+
+    private function prepareRecommendationsForJob($request): array
+    {
+        $recommendations = $request->input('recommended_preparation', []);
+        $recommendationData = [];
+
+        foreach ($recommendations as $recommendation) {
+            $recommendationData[$recommendation] = $request->input("recommended_preparation_".$recommendation);
+        }
+
+        return $recommendationData;
+    }
+
+    private function prepareOtherInformationForJob($request): array
+    {
+        $otherInformations = $request->input('other_information', []);
+        $otherInformationData = [];
+
+        foreach ($otherInformations as $otherInformation) {
+            $otherInformationData[$otherInformation] = $request->input("other_information_".$otherInformation);
+        }
+
+        return $otherInformationData;
+    }
+
+    private function calculatePrice($request): float
+    {
+        if ($request->input('price_type') === 'per_person') {
+            return 0;
+        }
+        
+        return (float) $request->input('price_per_boat', 0);
+    }
+
+    private function preparePricesForJob($request): array
+    {
+        $pricePerPerson = [];
+        
+        if ($request->input('price_type') === 'per_person') {
+            foreach ($request->all() as $key => $value) {
+                if (strpos($key, 'price_per_person_') === 0) {
+                    $guestNumber = substr($key, strlen('price_per_person_'));
+                    $pricePerPerson[] = [
+                        'person' => $guestNumber,
+                        'amount' => $value
+                    ];
+                }
+            }
+        } else {
+            if($request->has('no_guest')){
+                for ($i = 1; $i <= $request->input('no_guest', 0); $i++) {
+                    $pricePerPerson[] = [
+                        'person' => $i,
+                        'amount' => (float) ($request->input('price_per_boat', 0) / max(1, $request->input('no_guest', 1))) * $i
+                    ];
+                }
+            }
+        }
+        
+        return $pricePerPerson;
+    }
+
+    private function preparePricingExtrasForJob($request): array
+    {
+        $pricingExtras = [];
+        $i = 1;
+        
+        while (true) {
+            $nameKey = "extra_name_" . $i;
+            $priceKey = "extra_price_" . $i;
+
+            if ($request->has($nameKey) && $request->has($priceKey)) {
+                $extraPrice = \App\Models\ExtrasPrice::where('name', $request->input($nameKey))
+                    ->orWhere('name_en', $request->input($nameKey))
+                    ->first();
+                $extraname = $extraPrice ? $extraPrice->name : $request->input($nameKey);
+                
+                if ($extraname && $request->input($priceKey)) {
+                    $pricingExtras[] = [
+                        'name' => $extraname,
+                        'price' => $request->input($priceKey)
+                    ];
+                }
+                $i++;
+            } else {
+                break;
+            }
+        }
+        
+        return $pricingExtras;
+    }
+
+    private function generateLongDescription($request)
+    {
+        $longDescriptions = json_decode(file_get_contents(public_path('assets/prompts/long_description.json')), true);
+        $randomDescription = $longDescriptions['options'][array_rand($longDescriptions['options'])];
+
+        $description = str_replace(
+            ['{course_of_action}', '{meeting_point}', '{special_about}', '{tour_unique}', '{starting_time}'],
+            [$request->desc_course_of_action, $request->desc_meeting_point, "", $request->desc_tour_unique, $request->desc_starting_time],
+            $randomDescription['text']
+        );
+
+        return $description;
+    }
+
+    /**
+     * Legacy method maintained for compatibility with guidingsStore
      * Fill a Guiding model from request data.
      * Handles both draft and final save logic.
      */
@@ -1065,20 +1329,6 @@ class GuidingsController extends Controller
         } else {
             $guiding->weekdays = $request->has('weekdays') ? json_encode($request->input('weekdays')) : json_encode([]);
         }
-    }
-
-    private function generateLongDescription($request)
-    {
-        $longDescriptions = json_decode(file_get_contents(public_path('assets/prompts/long_description.json')), true);
-        $randomDescription = $longDescriptions['options'][array_rand($longDescriptions['options'])];
-
-        $description = str_replace(
-            ['{course_of_action}', '{meeting_point}', '{special_about}', '{tour_unique}', '{starting_time}'],
-            [$request->desc_course_of_action, $request->desc_meeting_point, "", $request->desc_tour_unique, $request->desc_starting_time],
-            $randomDescription['text']
-        );
-
-        return $description;
     }
 
     private function saveDescriptions( $request)
@@ -1480,5 +1730,64 @@ class GuidingsController extends Controller
         }
 
         return redirect()->back()->with('message', "Email Has been Sent");
+    }
+
+    /**
+     * Alternative synchronous version of saveDraft for immediate feedback
+     * Use this if you need immediate response with guiding_id
+     */
+    public function saveDraftSync(StoreNewGuidingRequest $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Handle file uploads first
+            $processedData = $this->processFileUploads($request);
+
+            // Try to find an existing draft for this user and (optionally) title/location
+            if ($request->input('is_update') == '1' && $request->input('guiding_id')) {
+                $guiding = Guiding::findOrFail($request->input('guiding_id'));
+            } else {
+                $guiding = Guiding::where('user_id', auth()->id())
+                    ->where('status', 2)
+                    ->where('title', $request->input('title'))
+                    ->where('city', $request->input('city'))
+                    ->where('country', $request->input('country'))
+                    ->where('region', $request->input('region'))
+                    ->first();
+
+                if (!$guiding) {
+                    $guiding = new Guiding(['user_id' => auth()->id()]);
+                }
+            }
+
+            // Use the legacy method for consistency
+            $this->fillGuidingFromRequest($guiding, $request, true);
+
+            // Slug generation (always for new, or if title/location changed)
+            if ($request->input('is_update') !== '1') {
+                $guiding->slug = slugify($guiding->title . "-in-" . $guiding->location);
+            }
+
+            $guiding->is_newguiding = 1;
+            $guiding->status = 2;
+
+            $guiding->save();
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'guiding_id' => $guiding->id,
+                'message' => 'Draft saved successfully.'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error in saveDraftSync: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to save draft.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
