@@ -13,7 +13,7 @@ class StoreNewGuidingRequest extends FormRequest
             'is_draft' => 'sometimes|boolean',
             'title' => 'required|string|max:255',
             'title_image' => 'nullable|array',
-            'title_image.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'title_image.*' => 'image|mimes:jpeg,png,jpg,gif,svg',
             'primaryImage' => 'required|integer|min:0',
             'location' => 'required|string|max:255',
             'type_of_fishing' => 'required|string|in:shore,boat',
