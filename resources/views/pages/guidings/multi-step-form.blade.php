@@ -213,7 +213,7 @@
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn2" onclick="window.location.href='{{ route('profile.myguidings') }}'">
+                        <button type="button" class="btn btn-secondary" id="saveDraftBtn2">
                             {{ __('newguidings.leave_save_draft') }}
                         </button>
                     </div>
@@ -298,7 +298,7 @@
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn3" onclick="window.location.href='{{ route('profile.myguidings') }}'">
+                        <button type="button" class="btn btn-secondary" id="saveDraftBtn3">
                             {{ __('newguidings.leave_save_draft') }}
                         </button>
                     </div>
@@ -393,7 +393,7 @@
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn4" onclick="window.location.href='{{ route('profile.myguidings') }}'">
+                        <button type="button" class="btn btn-secondary" id="saveDraftBtn4">
                             {{ __('newguidings.leave_save_draft') }}
                         </button>
                     </div>
@@ -480,7 +480,7 @@
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn5" onclick="window.location.href='{{ route('profile.myguidings') }}'">
+                        <button type="button" class="btn btn-secondary" id="saveDraftBtn5">
                             {{ __('newguidings.leave_save_draft') }}
                         </button>
                     </div>
@@ -639,7 +639,7 @@
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn6" onclick="window.location.href='{{ route('profile.myguidings') }}'">
+                        <button type="button" class="btn btn-secondary" id="saveDraftBtn6">
                             {{ __('newguidings.leave_save_draft') }}
                         </button>
                     </div>

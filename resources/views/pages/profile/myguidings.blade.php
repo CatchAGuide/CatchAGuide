@@ -285,7 +285,7 @@
                   </div>
                   <div class="col-12 col-sm-12 col-md-2 col-lg-2 col-xl-2 col-xxl-2 position-relative {{$guiding->status == 2 ? 'draft-container' : ''}}">
                     <div class="d-flex flex-column my-5 py-2">
-                      <a class="btn btn-outline-theme btn-sm my-1" href="{{route('guidings.show', [$guiding->id,$guiding->slug])}}">View</a>
+                      <a class="btn btn-outline-theme btn-sm my-1" href="{{route('guidings.show', [$guiding->id,$guiding->slug])}}">@lang('profile.view')</a>
                       <a class="btn btn-outline-theme btn-sm my-1" href="{{route('guidings.edit_newguiding', $guiding->id)}}">{{$guiding->status == 2 ? __('profile.draft') : __('profile.edit')}}</a>
                       @if($guiding->status !== 2)
                         @if($guiding->status == 1)

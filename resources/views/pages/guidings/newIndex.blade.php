@@ -146,6 +146,30 @@
             display: none;
         }
         
+        /* Highlight effect for reviews section */
+        .highlight-reviews {
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(255, 165, 0, 0.3);
+            border-radius: 8px;
+        }
+        
+        /* Make reviews link look clickable */
+        #reviews-link:hover {
+            color: var(--primary-color, #007bff) !important;
+            text-decoration: underline !important;
+        }
+        
+        /* Make rating scores clickable */
+        .rating-clickable {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .rating-clickable:hover {
+            color: var(--primary-color, #007bff) !important;
+            transform: scale(1.05);
+        }
+        
         @media (max-width: 767px) {
             .ratings-item {
                 flex: 0 0 85vw; /* Take up most of the viewport width on mobile */
@@ -273,10 +297,10 @@
                 @if ($average_grandtotal_score)
                 <div class="ave-reviews-row">
                     <div class="ratings-score">
-                    <span class="rating-value">{{number_format($average_grandtotal_score, 1)}}</span>
+                    <span class="rating-value rating-clickable" id="rating-score-link">{{number_format($average_grandtotal_score, 1)}}</span>
                 </div> 
                     <span class="mb-1">
-                        ({{$reviews_count}} reviews)
+                        (<a href="#" id="reviews-link" class="text-decoration-none text-muted">{{$reviews_count}} reviews</a>)
                     </span>
                 </div>
                 @else
@@ -560,6 +584,10 @@
         </div>
     @endif
 
+    @php
+        $boatInformation = $guiding->getBoatInformationAttribute();
+    @endphp
+    
     <div class="tabs-container mb-5">
         <div class="nav nav-tabs" id="guiding-tab" role="tablist">
             <button class="nav-link active" id="nav-fishing-tab" data-bs-toggle="tab" data-bs-target="#fishing" type="button" role="tab" aria-controls="nav-fishing" aria-selected="true">@lang('guidings.Tour_Info')</button>
@@ -567,7 +595,7 @@
                 <button class="nav-link" id="nav-include-tab" data-bs-toggle="tab" data-bs-target="#include" type="button" role="tab" aria-controls="nav-include" aria-selected="false">@lang('guidings.Inclusions')</button>
             @endif
             
-            @if ($guiding->is_boat) 
+            @if ($guiding->is_boat && (!empty(json_decode($boatInformation)) || !empty(json_decode($guiding->boat_extras)) || (!empty($guiding->additional_information) && $guiding->additional_information !== null && $guiding->additional_information !== '')))
                 <button class="nav-link" id="nav-boat-tab" data-bs-toggle="tab" data-bs-target="#boat" type="button" role="tab" aria-controls="nav-boat" aria-selected="false">@lang('guidings.Boat_Details')</button>
             @endif
             <button class="nav-link" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab" aria-controls="nav-info" aria-selected="false">@lang('guidings.Additional_Info')</button>
@@ -675,9 +703,7 @@
                 </div>
             </div>
 
-            @php
-                $boatInformation = $guiding->getBoatInformationAttribute();
-            @endphp
+            @if ($guiding->is_boat && (!empty(json_decode($boatInformation)) || !empty(json_decode($guiding->boat_extras)) || (!empty($guiding->additional_information) && $guiding->additional_information !== null && $guiding->additional_information !== '')))
             <div class="tab-pane fade" id="boat" role="tabpanel" aria-labelledby="nav-boat-tab">
                 <div class="row card tab-card h-100 shadow m-0 p-2">
                     @if(!empty($guiding->additional_information))
@@ -718,11 +744,9 @@
                     </div>
                     @endif
 
-                    @if(empty(json_decode($boatInformation)) && empty(json_decode($guiding->boat_extras)) && ($guiding->additional_information == null || $guiding->additional_information == ''))
-                        <p>{{ translate('No boat information specified') }}</p>
-                    @endif
                 </div>
             </div>
+            @endif
                 <!-- Important Information Tab -->
             <div class="tab-pane fade" id="info" role="tabpanel" aria-labelledby="nav-info-tab">
                 <div class="row card tab-card h-100 shadow m-0 p-2">
@@ -956,7 +980,7 @@
             </div>
         @endif
 
-        @if ($guiding->is_boat)
+        @if ($guiding->is_boat && (!empty(json_decode($boatInformation)) || !empty(json_decode($guiding->boat_extras)) || (!empty($guiding->additional_information) && $guiding->additional_information !== null && $guiding->additional_information !== '')))
         <!-- Boat Information Accordion -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingBoat">
@@ -967,6 +991,13 @@
                 <div id="collapseBoat" class="accordion-collapse collapse {{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) ? 'show' : '' }}" aria-labelledby="headingBoat" data-bs-parent="#guidings-accordion">
                     <div class="accordion-body">
                         <div class="row card tab-card h-100 shadow m-0 p-3">
+                            @if(!empty($guiding->additional_information))
+                                <div class="col-md-12">
+                                    <strong class="subtitle-text">{{translate('Other boat information')}}</strong>
+                                    <p>{{$guiding->additional_information}}</p>
+                                </div>
+                            @endif
+
                             @if(!empty(json_decode($boatInformation) ))
                                 <strong class="subtitle-text">{{ translate('Boat') }}:</strong>
                                 <table class="table my-4">
@@ -1157,7 +1188,7 @@
                         <!-- Left side - Score and ratings -->
                         <div class="rating-left">
                             <div class="score-wrapper">
-                                <div class="score">{{ number_format($average_grandtotal_score, 1) }}</div>
+                                <div class="score rating-clickable" id="rating-overview-link">{{ number_format($average_grandtotal_score, 1) }}</div>
                                 <div class="score-label">@lang('guidings.over_10')</div>
                             </div>
                             <div class="rating-info text-center">
@@ -1528,6 +1559,34 @@ const totalItems = {{ $same_guiding->count() }};
 
 $(document).ready(function(){
     initMap();
+    
+    // Function to scroll to reviews with highlight effect
+    function scrollToReviews() {
+        const ratingsContainer = document.getElementById('ratings-container');
+        if (ratingsContainer) {
+            ratingsContainer.scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'center'
+            });
+            
+            // Add a subtle highlight effect
+            $(ratingsContainer).addClass('highlight-reviews');
+            setTimeout(() => {
+                $(ratingsContainer).removeClass('highlight-reviews');
+            }, 2000);
+        }
+    }
+    
+    // Auto-scroll to reviews when reviews link is clicked
+    $('#reviews-link').on('click', function(e) {
+        e.preventDefault();
+        scrollToReviews();
+    });
+    
+    // Auto-scroll to reviews when rating scores are clicked
+    $('#rating-score-link, #rating-overview-link').on('click', function() {
+        scrollToReviews();
+    });
     
     // Add this code to check if the button exists
     console.log('Contact button exists:', $('#contactSubmitBtn').length > 0);
