@@ -139,33 +139,197 @@
 
 
     function showLoadingScreen() {
-        const loadingScreen = document.createElement('div');
-        loadingScreen.id = 'loadingScreen';
-        loadingScreen.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        `;
-        
-        const spinner = document.createElement('div');
-        spinner.style.cssText = `
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3498db;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-        `;
-        
-        loadingScreen.appendChild(spinner);
-        document.body.appendChild(loadingScreen);
+        let loadingScreen = document.getElementById('loadingScreen');
+        if (!loadingScreen) {
+            loadingScreen = document.createElement('div');
+            loadingScreen.id = 'loadingScreen';
+            loadingScreen.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(135deg, rgba(52, 152, 219, 0.9), rgba(41, 128, 185, 0.9));
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+                backdrop-filter: blur(10px);
+            `;
+            
+            // Create the main container
+            const container = document.createElement('div');
+            container.style.cssText = `
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            `;
+            
+            // Create fishing boat icon with animation
+            const boatIcon = document.createElement('div');
+            boatIcon.innerHTML = '🚤';
+            boatIcon.style.cssText = `
+                font-size: 4rem;
+                margin-bottom: 1rem;
+                animation: float 3s ease-in-out infinite;
+            `;
+            
+            // Create waves animation
+            const wavesContainer = document.createElement('div');
+            wavesContainer.style.cssText = `
+                position: relative;
+                width: 200px;
+                height: 20px;
+                margin-bottom: 2rem;
+            `;
+            
+            for (let i = 0; i < 3; i++) {
+                const wave = document.createElement('div');
+                wave.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: ${60 + i * 40}px;
+                    height: 4px;
+                    background: rgba(255, 255, 255, ${0.7 - i * 0.2});
+                    border-radius: 2px;
+                    animation: wave ${2 + i * 0.5}s ease-in-out infinite;
+                    animation-delay: ${i * 0.3}s;
+                `;
+                wavesContainer.appendChild(wave);
+            }
+            
+            // Create loading dots
+            const dotsContainer = document.createElement('div');
+            dotsContainer.style.cssText = `
+                display: flex;
+                gap: 8px;
+                margin-bottom: 1rem;
+            `;
+            
+            for (let i = 0; i < 3; i++) {
+                const dot = document.createElement('div');
+                dot.style.cssText = `
+                    width: 12px;
+                    height: 12px;
+                    background: white;
+                    border-radius: 50%;
+                    animation: bounce 1.4s ease-in-out infinite both;
+                    animation-delay: ${i * 0.16}s;
+                `;
+                dotsContainer.appendChild(dot);
+            }
+            
+            // Create loading text with typing effect
+            const loadingText = document.createElement('div');
+            loadingText.style.cssText = `
+                color: white;
+                font-size: 1.2rem;
+                font-weight: 500;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin-bottom: 0.5rem;
+            `;
+            
+            const subText = document.createElement('div');
+            subText.style.cssText = `
+                color: rgba(255, 255, 255, 0.8);
+                font-size: 0.9rem;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            `;
+            
+            // Add all elements to container
+            container.appendChild(boatIcon);
+            container.appendChild(wavesContainer);
+            container.appendChild(dotsContainer);
+            container.appendChild(loadingText);
+            container.appendChild(subText);
+            
+            loadingScreen.appendChild(container);
+            
+            // Add CSS animations
+            const keyframes = `
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+                
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px); }
+                    50% { transform: translateY(-10px); }
+                }
+                
+                @keyframes wave {
+                    0%, 100% { transform: translateX(-50%) scaleX(1); opacity: 0.7; }
+                    50% { transform: translateX(-50%) scaleX(1.2); opacity: 1; }
+                }
+                
+                @keyframes bounce {
+                    0%, 80%, 100% { 
+                        transform: scale(0);
+                        opacity: 0.5;
+                    } 
+                    40% { 
+                        transform: scale(1);
+                        opacity: 1;
+                    }
+                }
+                
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            `;
+            
+            if (!document.getElementById('interactive-loader-styles')) {
+                const style = document.createElement('style');
+                style.id = 'interactive-loader-styles';
+                style.textContent = keyframes;
+                document.head.appendChild(style);
+            }
+            
+            // Animate text changes
+            const messages = [
+                'Preparing your fishing adventure...',
+                'Setting up your guide experience...',
+                'Loading fishing spots...',
+                'Getting everything ready...'
+            ];
+            
+            let messageIndex = 0;
+            loadingText.textContent = messages[0];
+            subText.textContent = 'Please wait a moment';
+            
+            const textInterval = setInterval(() => {
+                messageIndex = (messageIndex + 1) % messages.length;
+                loadingText.style.animation = 'fadeIn 0.5s ease-in-out';
+                loadingText.textContent = messages[messageIndex];
+                
+                setTimeout(() => {
+                    loadingText.style.animation = '';
+                }, 500);
+            }, 2000);
+            
+            // Store interval reference to clear it later
+            loadingScreen.textInterval = textInterval;
+            
+            document.body.appendChild(loadingScreen);
+        }
+        loadingScreen.style.display = 'flex';
+    }
+
+    function hideLoadingScreen() {
+        const loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen) {
+            // Clear the text animation interval to prevent memory leaks
+            if (loadingScreen.textInterval) {
+                clearInterval(loadingScreen.textInterval);
+                loadingScreen.textInterval = null;
+            }
+            loadingScreen.style.display = 'none';
+        }
     }
 
     function saveDraft() {
@@ -908,10 +1072,7 @@
         }
         
         // Show loading screen
-        const loadingScreen = document.getElementById('loadingScreen');
-        if (loadingScreen) {
-            loadingScreen.style.display = 'block';
-        }
+        showLoadingScreen();
         
         if (isDraft && isDraft.value === '1') {
             submitForm(form);
@@ -919,9 +1080,7 @@
             submitForm(form);
         } else {
             // Hide loading screen if validation fails
-            if (loadingScreen) {
-                loadingScreen.style.display = 'none';
-            }
+            hideLoadingScreen();
             
             // Scroll to error container if there are validation errors
             const errorContainer = document.getElementById('error-container');
@@ -1074,24 +1233,26 @@
                         }
                     })
                     .finally(() => {
-                        const loadingScreen = document.getElementById('loadingScreen');
-                        if (loadingScreen) {
-                            loadingScreen.style.display = 'none';
-                        }
+                        hideLoadingScreen();
                     });
             }).catch(error => {
                 console.error('Image compression error:', error);
+                hideLoadingScreen();
                 alert('Failed to compress images. Please try again.');
             });
 
         } catch (error) {
             console.error('Error preparing form data:', error);
+            hideLoadingScreen();
             alert('An error occurred while preparing the form data. Please try again.');
         }
     }
 
 
     function displayValidationErrors(errors) {
+        // Hide loading screen when displaying errors
+        hideLoadingScreen();
+        
         scrollToFormCenter();
         const errorContainer = document.getElementById('error-container');
         errorContainer.innerHTML = ''; // Clear previous errors
@@ -1327,6 +1488,8 @@
         }
 
         if (!isValid) {
+            // Hide loading screen when validation fails
+            hideLoadingScreen();
             errorContainer.style.display = 'block';
             errorContainer.innerHTML = '<ul>' + errors.map(error => `<li>${error}</li>`).join('') + '</ul>';
             return false;
@@ -1340,12 +1503,14 @@
         // Prevent invalid step numbers
         if (stepNumber < 1 || stepNumber > totalSteps) {
             console.error('Invalid step number:', stepNumber);
+            hideLoadingScreen();
             return;
         }
 
         // Only validate when moving forward
         if (stepNumber > currentStep && !validateStep(currentStep)) {
             console.error('Validation failed for current step');
+            hideLoadingScreen();
             return;
         }
 
@@ -1375,6 +1540,9 @@
         $(`#submitBtn${stepNumber}`).toggle((isUpdate && !isDraft) || currentStep === totalSteps);
         $(`#prevBtn${stepNumber}`).toggle(currentStep > 1);
         $(`#nextBtn${stepNumber}`).toggle(currentStep < totalSteps);
+
+        // Hide loading screen after step transition is complete
+        hideLoadingScreen();
     }
 
     // Update the next button click handlers
@@ -1382,11 +1550,25 @@
         e.preventDefault(); // Prevent any default behavior
         e.stopPropagation(); // Prevent event bubbling
         
-        if (validateStep(currentStep)) {
-            saveStepProgress(currentStep); // Save before moving to next step
-            const nextStep = currentStep + 1;
-            showStep(nextStep);
-        }
+        // Show loading screen
+        showLoadingScreen();
+        
+        // Use setTimeout to allow the loading screen to render before validation
+        setTimeout(() => {
+            try {
+                if (validateStep(currentStep)) {
+                    saveStepProgress(currentStep); // Save before moving to next step
+                    const nextStep = currentStep + 1;
+                    showStep(nextStep);
+                } else {
+                    // Hide loading if validation fails
+                    hideLoadingScreen();
+                }
+            } catch (error) {
+                console.error('Error during step transition:', error);
+                hideLoadingScreen();
+            }
+        }, 100); // Small delay to ensure loading screen appears
     });
 
     // Update the previous button click handlers similarly
@@ -1534,13 +1716,24 @@
 
                 // Only allow moving to previous steps or the next immediate step
                 if (targetStep < currentStepNumber || targetStep === currentStepNumber + 1) {
-                    if (targetStep > currentStepNumber && !validateStep(currentStepNumber)) {
-                        return;
-                    }
-                    if (targetStep > currentStepNumber) {
-                        saveStepProgress(currentStepNumber);
-                    }
-                    showStep(targetStep);
+                    // Show loading for step navigation
+                    showLoadingScreen();
+                    
+                    setTimeout(() => {
+                        try {
+                            if (targetStep > currentStepNumber && !validateStep(currentStepNumber)) {
+                                hideLoadingScreen();
+                                return;
+                            }
+                            if (targetStep > currentStepNumber) {
+                                saveStepProgress(currentStepNumber);
+                            }
+                            showStep(targetStep);
+                        } catch (error) {
+                            console.error('Error during step button navigation:', error);
+                            hideLoadingScreen();
+                        }
+                    }, 100);
                 }
             });
         });
@@ -1548,6 +1741,12 @@
         // Show/hide weekday selection based on weekday availability selection
         $('input[name="weekday_availability"]').change(function() {
             $('#weekday_selection').toggle($(this).val() === 'certain_days');
+        });
+
+        // Add click handlers for submit buttons to show loading immediately
+        $(document).on('click', '[id^="submitBtn"]', function(e) {
+            // Don't prevent default as we want the form to submit
+            showLoadingScreen();
         });
     });
 
