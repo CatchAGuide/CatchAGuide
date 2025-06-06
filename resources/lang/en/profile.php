@@ -179,8 +179,9 @@ return [
 
     //myguidings
     'danger' => 'Danger! The specified location was not recognized!',
+    'view' => 'View',
     'edit' => 'Edit',
-    'draft' => 'Continue to save draft',
+    'draft' => 'Finalize tour',
     'notcreated' => "You haven't created any guides yet!",
     'lets-change' => "Let's change that as soon as possible",
 

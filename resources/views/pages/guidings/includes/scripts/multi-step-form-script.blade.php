@@ -120,9 +120,11 @@
         // });
     }
 
-    $(document).on('click', '[id^="saveDraftBtn"]', function(e) {
+    $(document).on('click', '[id^="saveDraftBtn"]', async function(e) {
         e.preventDefault();
-        saveDraft();
+        
+        // Always redirect after saving draft
+        await saveDraft(true);
     });
     
     function scrollToFormCenter() {
@@ -332,24 +334,107 @@
         }
     }
 
-    function saveDraft() {
+    async function saveDraft(shouldRedirect = false) {
         const form = document.getElementById('newGuidingForm');
         if (!form) {
             console.error('Form not found');
             return;
         }
 
-        if (currentStep !== totalSteps) {
-            const draftInput = document.createElement('input');
-            draftInput.type = 'hidden';
-            draftInput.name = 'is_draft';
-            draftInput.value = '1';
-            form.appendChild(draftInput);
-
-            form.noValidate = true;
+        // Show loading screen
+        showLoadingScreen();
+        
+        // Update loading screen message
+        const loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen) {
+            const loadingText = loadingScreen.querySelector('div[style*="font-size: 1.2rem"]');
+            if (loadingText) {
+                loadingText.textContent = 'Saving draft...';
+            }
         }
 
-        // form.submit();
+        try {
+            const formData = new FormData(form);
+            
+            // Force draft mode
+            formData.set('is_draft', '1');
+            formData.set('current_step', currentStep);
+
+            // Always append these if present
+            const guidingId = $('#guiding_id').val();
+            const isUpdate = $('#is_update').val();
+            if (guidingId) formData.set('guiding_id', guidingId);
+            if (isUpdate) formData.set('is_update', isUpdate);
+
+            // Append cropped images as files if available
+            if (window.imageManagerLoaded && typeof imageManagerLoaded.getCroppedImages === 'function') {
+                const croppedImages = imageManagerLoaded.getCroppedImages();
+                if (croppedImages.length > 0) {
+                    // Remove any existing title_image[] from FormData
+                    formData.delete('title_image[]');
+                    croppedImages.forEach((imgObj, idx) => {
+                        // Convert dataURL to Blob
+                        const blob = dataURLtoBlob(imgObj.dataUrl);
+                        // Use the original filename if available, otherwise fallback
+                        const filename = imgObj.filename || `cropped_${idx}.png`;
+                        formData.append('title_image[]', blob, filename);
+                    });
+                }
+            }
+
+            const response = await fetch(window.saveDraftUrl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            if (data.guiding_id) {
+                $('#guiding_id').val(data.guiding_id);
+                $('#is_update').val(1);
+            }
+
+            console.log('Draft saved successfully');
+            
+            if (shouldRedirect) {
+                // Redirect to my guidings page
+                window.location.href = '{{ route("profile.myguidings") }}';
+            } else {
+                // Show success message
+                const errorContainer = document.getElementById('error-container');
+                if (errorContainer) {
+                    errorContainer.style.display = 'block';
+                    errorContainer.innerHTML = '<div class="alert alert-success">Draft saved successfully!</div>';
+                    scrollToFormCenter();
+                    
+                    // Hide success message after 3 seconds
+                    setTimeout(() => {
+                        errorContainer.style.display = 'none';
+                    }, 3000);
+                }
+            }
+
+        } catch (error) {
+            console.error('Failed to save draft:', error);
+            
+            // Show error message
+            const errorContainer = document.getElementById('error-container');
+            if (errorContainer) {
+                errorContainer.style.display = 'block';
+                errorContainer.innerHTML = '<div class="alert alert-danger">Failed to save draft. Please try again.</div>';
+                scrollToFormCenter();
+            }
+        } finally {
+            // Hide loading screen
+            hideLoadingScreen();
+        }
     }
 
     function setFormDataIfEdit() {
@@ -1499,7 +1584,7 @@
     }
 
     // Step navigation
-    function showStep(stepNumber) {
+    async function showStep(stepNumber) {
         // Prevent invalid step numbers
         if (stepNumber < 1 || stepNumber > totalSteps) {
             console.error('Invalid step number:', stepNumber);
@@ -1514,9 +1599,43 @@
             return;
         }
 
-        // Call AJAX to save progress when moving forward
+        // Call AJAX to save progress when moving forward and wait for completion
         if (stepNumber > currentStep) {
-            saveStepProgress(currentStep);
+            try {
+                console.log('Saving draft for step:', currentStep);
+                
+                // Update loading screen message to indicate saving
+                const loadingScreen = document.getElementById('loadingScreen');
+                if (loadingScreen) {
+                    const loadingText = loadingScreen.querySelector('div[style*="font-size: 1.2rem"]');
+                    if (loadingText) {
+                        loadingText.textContent = 'Saving your progress...';
+                    }
+                }
+                
+                await saveStepProgress(currentStep);
+                console.log('Draft saved successfully, proceeding to step:', stepNumber);
+                
+                // Update loading screen message to indicate proceeding
+                if (loadingScreen) {
+                    const loadingText = loadingScreen.querySelector('div[style*="font-size: 1.2rem"]');
+                    if (loadingText) {
+                        loadingText.textContent = 'Proceeding to next step...';
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Failed to save draft before proceeding:', error);
+                hideLoadingScreen();
+                // Show error message to user
+                const errorContainer = document.getElementById('error-container');
+                if (errorContainer) {
+                    errorContainer.style.display = 'block';
+                    errorContainer.innerHTML = '<div class="alert alert-danger">Failed to save progress. Please try again.</div>';
+                    scrollToFormCenter();
+                }
+                return; // Don't proceed if save failed
+            }
         }
 
         // Update step visibility
@@ -1536,7 +1655,10 @@
         // Update button visibility
         const isUpdate = document.getElementById('is_update').value === '1';
         const isDraft = document.getElementById('is_draft').value === '1';
-        $(`#saveDraftBtn${stepNumber}`).toggle(!isUpdate && !isDraft);
+        
+        // Show save draft button on all steps except the last one (since last step has submit)
+        $(`#saveDraftBtn${stepNumber}`).toggle(currentStep < totalSteps);
+        
         $(`#submitBtn${stepNumber}`).toggle((isUpdate && !isDraft) || currentStep === totalSteps);
         $(`#prevBtn${stepNumber}`).toggle(currentStep > 1);
         $(`#nextBtn${stepNumber}`).toggle(currentStep < totalSteps);
@@ -1546,7 +1668,7 @@
     }
 
     // Update the next button click handlers
-    $(document).off('click', '[id^="nextBtn"]').on('click', '[id^="nextBtn"]', function(e) {
+    $(document).off('click', '[id^="nextBtn"]').on('click', '[id^="nextBtn"]', async function(e) {
         e.preventDefault(); // Prevent any default behavior
         e.stopPropagation(); // Prevent event bubbling
         
@@ -1554,12 +1676,11 @@
         showLoadingScreen();
         
         // Use setTimeout to allow the loading screen to render before validation
-        setTimeout(() => {
+        setTimeout(async () => {
             try {
                 if (validateStep(currentStep)) {
-                    saveStepProgress(currentStep); // Save before moving to next step
                     const nextStep = currentStep + 1;
-                    showStep(nextStep);
+                    await showStep(nextStep); // Save will happen in showStep before proceeding
                 } else {
                     // Hide loading if validation fails
                     hideLoadingScreen();
@@ -1709,7 +1830,7 @@
 
         // Add click handlers for step buttons
         document.querySelectorAll('.step-button').forEach(button => {
-            button.addEventListener('click', function() {
+            button.addEventListener('click', async function() {
                 const targetStep = parseInt(this.dataset.step);
                 const currentStepElement = document.querySelector('.step.active');
                 const currentStepNumber = parseInt(currentStepElement.id.replace('step', ''));
@@ -1719,16 +1840,13 @@
                     // Show loading for step navigation
                     showLoadingScreen();
                     
-                    setTimeout(() => {
+                    setTimeout(async () => {
                         try {
                             if (targetStep > currentStepNumber && !validateStep(currentStepNumber)) {
                                 hideLoadingScreen();
                                 return;
                             }
-                            if (targetStep > currentStepNumber) {
-                                saveStepProgress(currentStepNumber);
-                            }
-                            showStep(targetStep);
+                            await showStep(targetStep); // Save will happen in showStep if moving forward
                         } catch (error) {
                             console.error('Error during step button navigation:', error);
                             hideLoadingScreen();
@@ -1758,66 +1876,76 @@
     let saveStepProgressLock = false;
 
     function saveStepProgress(stepNumber) {
-        // Prevent duplicate calls within 2 seconds
-        if (saveStepProgressLock) {
-            // Optionally, console.log('Save in progress, skipping duplicate call');
-            return;
-        }
-        saveStepProgressLock = true;
-
-        // Release the lock after 2 seconds
-        clearTimeout(saveStepProgressTimeout);
-        saveStepProgressTimeout = setTimeout(() => {
-            saveStepProgressLock = false;
-        }, 1500);
-
-        const form = document.getElementById('newGuidingForm');
-        const formData = new FormData(form);
-
-        formData.append('current_step', stepNumber);
-        formData.append('is_draft', 1);
-
-        // Always append these if present
-        const guidingId = $('#guiding_id').val();
-        const isUpdate = $('#is_update').val();
-        if (guidingId) formData.append('guiding_id', guidingId);
-        if (isUpdate) formData.append('is_update', isUpdate);
-
-        // --- FIX: Append cropped images as files ---
-        if (window.imageManagerLoaded && typeof imageManagerLoaded.getCroppedImages === 'function') {
-            const croppedImages = imageManagerLoaded.getCroppedImages();
-            if (croppedImages.length > 0) {
-                // Remove any existing title_image[] from FormData
-                formData.delete('title_image[]');
-                croppedImages.forEach((imgObj, idx) => {
-                    // Convert dataURL to Blob
-                    const blob = dataURLtoBlob(imgObj.dataUrl);
-                    // Use the original filename if available, otherwise fallback
-                    const filename = imgObj.filename || `cropped_${idx}.png`;
-                    formData.append('title_image[]', blob, filename);
-                });
+        // Return a Promise to allow waiting for completion
+        return new Promise((resolve, reject) => {
+            // Prevent duplicate calls within 2 seconds
+            if (saveStepProgressLock) {
+                console.log('Save in progress, skipping duplicate call');
+                resolve(); // Resolve immediately for duplicate calls
+                return;
             }
-        }
-        // --- END FIX ---
+            saveStepProgressLock = true;
 
-        $.ajax({
-            url: window.saveDraftUrl,
-            method: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
-                if (response.guiding_id) {
-                    $('#guiding_id').val(response.guiding_id);
+            // Release the lock after 2 seconds
+            clearTimeout(saveStepProgressTimeout);
+            saveStepProgressTimeout = setTimeout(() => {
+                saveStepProgressLock = false;
+            }, 1500);
+
+            const form = document.getElementById('newGuidingForm');
+            const formData = new FormData(form);
+
+            formData.append('current_step', stepNumber);
+            formData.append('is_draft', 1);
+
+            // Always append these if present
+            const guidingId = $('#guiding_id').val();
+            const isUpdate = $('#is_update').val();
+            if (guidingId) formData.append('guiding_id', guidingId);
+            if (isUpdate) formData.append('is_update', isUpdate);
+
+            // --- FIX: Append cropped images as files ---
+            if (window.imageManagerLoaded && typeof imageManagerLoaded.getCroppedImages === 'function') {
+                const croppedImages = imageManagerLoaded.getCroppedImages();
+                if (croppedImages.length > 0) {
+                    // Remove any existing title_image[] from FormData
+                    formData.delete('title_image[]');
+                    croppedImages.forEach((imgObj, idx) => {
+                        // Convert dataURL to Blob
+                        const blob = dataURLtoBlob(imgObj.dataUrl);
+                        // Use the original filename if available, otherwise fallback
+                        const filename = imgObj.filename || `cropped_${idx}.png`;
+                        formData.append('title_image[]', blob, filename);
+                    });
+                }
+            }
+            // --- END FIX ---
+
+            fetch(window.saveDraftUrl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.guiding_id) {
+                    $('#guiding_id').val(data.guiding_id);
                     $('#is_update').val(1);
                 }
-            },
-            error: function(xhr) {
-                console.error('Failed to save draft:', xhr.responseText);
-            }
+                console.log('Draft saved successfully for step:', stepNumber);
+                resolve(data); // Resolve the promise on success
+            })
+            .catch(error => {
+                console.error('Failed to save draft:', error);
+                reject(error); // Reject the promise on error
+            });
         });
     }
 
