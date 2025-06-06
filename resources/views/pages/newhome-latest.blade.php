@@ -393,7 +393,7 @@
 
 @endsection
 @section('content')
-<section id="usps" class="my-5">
+{{-- <section id="usps" class="my-5">
     <div class="container">
         <div class="my-2 row fs-6">
             <div class="col-md-4 usps-item">
@@ -440,7 +440,7 @@
             </div>
         </div>
     </div>
-</section>
+</section> --}}
 
 <!-- <section id="nearest-listing" class="py-1 my-5 offer d-none">
 
