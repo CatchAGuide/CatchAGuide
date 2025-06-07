@@ -51,4 +51,6 @@ return [
     'i_hereby_confirm' => 'I hereby confirm that I have read and understood the',
     'i_agree' => 'I agree to be bound by these terms for this booking.',
     'please_accept' => 'Please accept the Terms and Conditions to proceed with your booking.',
+    'available_for_request' => 'Available for request',
+    'blocked' => 'Blocked',
 ];

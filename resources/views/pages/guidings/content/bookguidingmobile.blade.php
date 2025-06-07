@@ -44,8 +44,9 @@
                             </div>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-orange w-100">{{ __('booking.reserve_now') }}</button>
+                    <button type="submit" class="btn btn-orange w-100" id="reserveButtonMobile">{{ __('booking.reserve_now') }}</button>
                     <input type="hidden" name="guiding_id" value="{{ $guiding->id }}">
+                    <input type="hidden" name="selected_date" id="selectedDateInputMobile" value="">
                 </div>
             </form>
             </div>
@@ -200,6 +201,43 @@
                 peopleText.textContent = personText;
             }
         }
+    }
+});
+
+// Listen for calendar date selection events (outside DOMContentLoaded for immediate availability)
+window.addEventListener('dateSelected', function(event) {
+    console.log('Mobile booking: Date selected event received', event.detail); // Debug log
+    const selectedDate = event.detail.date;
+    const reserveButton = document.getElementById('reserveButtonMobile');
+    const selectedDateInput = document.getElementById('selectedDateInputMobile');
+    
+    if (selectedDate && reserveButton) {
+        // Format the date for display
+        const date = new Date(selectedDate);
+        const formattedDate = date.toLocaleDateString('{{ app()->getLocale() }}', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        
+        // Update button text and hidden input
+        reserveButton.textContent = `{{ __('booking.reserve_for_date') }} ${formattedDate}`;
+        selectedDateInput.value = selectedDate;
+        console.log('Mobile booking: Button text updated to', reserveButton.textContent); // Debug log
+    }
+});
+
+// Listen for calendar date deselection events
+window.addEventListener('dateDeselected', function(event) {
+    console.log('Mobile booking: Date deselected event received'); // Debug log
+    const reserveButton = document.getElementById('reserveButtonMobile');
+    const selectedDateInput = document.getElementById('selectedDateInputMobile');
+    
+    if (reserveButton) {
+        // Reset button text and clear hidden input
+        reserveButton.textContent = '{{ __('booking.reserve_now') }}';
+        selectedDateInput.value = '';
+        console.log('Mobile booking: Button text reset'); // Debug log
     }
 });
 </script>

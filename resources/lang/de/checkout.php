@@ -51,4 +51,6 @@ return [
     'i_hereby_confirm' => 'Ich bestätige hiermit, dass ich die folgenden Informationen gelesen und verstanden habe',
     'i_agree' => 'Ich erkläre mich mit diesen Bedingungen für diese Buchung einverstanden.',
     'please_accept' => 'Bitte akzeptieren Sie die Allgemeinen Geschäftsbedingungen, um mit Ihrer Buchung fortzufahren.',
+    'available_for_request' => 'Verfügbar für Anfrage',
+    'blocked' => 'Blockiert',
 ];
