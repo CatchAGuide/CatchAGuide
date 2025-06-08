@@ -4608,5 +4608,5 @@ select.list-dt:focus {
         </div>
     </section> --}}
     <!--Page Header End-->
-    <livewire:checkout :guiding="$guiding" :persons="$persons" />
+    <livewire:checkout :guiding="$guiding" :persons="$persons" :initial-selected-date="$selectedDate" />
 @endsection

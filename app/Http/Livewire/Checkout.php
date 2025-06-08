@@ -31,6 +31,7 @@ class Checkout extends Component
 {
     public Guiding $guiding;
     public int $persons;
+    public $initialSelectedDate;
 
     public int $page = 1;
 
@@ -76,6 +77,17 @@ class Checkout extends Component
     ];
 
     public $checkoutType = 'guest';
+
+    public function getIsFormValidProperty()
+    {
+        return $this->selectedDate && 
+               !empty(trim($this->userData['firstname'] ?? '')) && 
+               !empty(trim($this->userData['lastname'] ?? '')) && 
+               !empty(trim($this->userData['email'] ?? '')) && 
+               !empty(trim($this->userData['address'] ?? '')) && 
+               !empty(trim($this->userData['city'] ?? '')) && 
+               !empty(trim($this->userData['phone'] ?? ''));
+    }
 
     protected $rules = [
         // 'userData.firstname' => 'required|string',
@@ -162,12 +174,14 @@ class Checkout extends Component
         // Set checkoutType based on authentication status
         $this->checkoutType = $user ? 'login' : 'guest';
         
+        $address = trim(($user->information->address ?? '') . ' ' . ($user->information->address_number ?? ''));
+        
         $this->userData = [
             'salutation' => 'male',
             'title' => '',
             'firstname' => ($user->firstname ?? ''),
             'lastname' => ($user->lastname ?? ''),
-            'address' => ($user->information->address ?? '') . ' ' . ($user->information->address_number ?? ''),
+            'address' => $address ?: '',
             'postal' => ($user->information->postal ?? ''),
             'city' => ($user->information->city ?? ''),
             'country' => ($user->information->country ?? 'Deutschland'),
@@ -178,7 +192,8 @@ class Checkout extends Component
             'guestCheckTerms' => false,
         ];
 
-        $this->selectedDate = null; // Ensure it starts as null
+        // Set the initial selected date if provided
+        $this->selectedDate = $this->initialSelectedDate ?? null;
     }
 
     public function updatedSelectedExtras($value, $index)
@@ -460,12 +475,16 @@ class Checkout extends Component
 
     public function updatedSelectedDate()
     {
-        $this->availableEvents = (new EventService())->getAvailableEvents($this->guiding->duration, $this->selectedDate, $this->guiding->user);
+        if ($this->selectedDate) {
+            // Automatically set a default time when date is selected
+            $this->selectedTime = '00:00';
+            $this->availableEvents = (new EventService())->getAvailableEvents($this->guiding->duration, $this->selectedDate, $this->guiding->user);
+        }
     }
 
     public function setSelectedTime($selectedTime)
     {
         $this->selectedTime = $selectedTime;
     }
-
+    
 }

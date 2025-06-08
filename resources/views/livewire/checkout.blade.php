@@ -50,6 +50,19 @@
                               {{ $message }}
                           </div>
                           @enderror
+                          
+                          <!-- Calendar Legend -->
+                          <div class="calendar-legend">
+                              <div class="legend-item">
+                                  <div class="legend-color legend-available"></div>
+                                  <span>{{ __('checkout.available_for_request') }}</span>
+                              </div>
+                              <div class="legend-item">
+                                  <div class="legend-color legend-blocked"></div>
+                                  <span>{{ __('checkout.blocked') }}</span>
+                              </div>
+                          </div>
+                          
                           <div class="col-md-12 d-flex justify-content-center">
                             <div id="lite-datepicker" wire:ignore></div>
                           </div>
@@ -296,11 +309,9 @@
                                 <div class="button-container">
                                   @if($page === 1)
                                     <div class="pull-right">
-                                      @if($selectedTime !== null)
-                                        <button class="thm-btn" type="button" wire:click="next">@lang('message.further') <i class="fa fa-chevron-right"></i></button>
-                                      @else
-                                        <button class="thm-btn thm-btn-disabled" type="button" wire:click="next" disabled>@lang('message.further')<i class="fa fa-chevron-right"></i></button>
-                                      @endif
+                                      <button class="thm-btn" type="button" wire:click="next" id="nextButton">
+                                        @lang('message.further') <i class="fa fa-chevron-right"></i>
+                                      </button>
                                     </div>
                                   @elseif ($page !== 2)
                                     <div class="pull-right">
@@ -670,9 +681,22 @@
 
     let lockDays = [];
     if (blockedEvents && typeof blockedEvents === 'object') {
-      lockDays = Object.values(blockedEvents).map(event => [event.from, event.due]);
+      lockDays = Object.values(blockedEvents).flatMap(event => {
+          const fromDate = new Date(event.from);
+          const dueDate = new Date(event.due);
+
+          // Create an array of all dates in the range
+          const dates = [];
+          for (let d = new Date(fromDate); d <= dueDate; d.setDate(d.getDate() + 1)) {
+              dates.push(d.toISOString().split('T')[0]); // Format as YYYY-MM-DD
+          }
+          return dates;
+      });
     }
 
+    // Get initial selected date from Livewire
+    const initialSelectedDate = @this.selectedDate;
+    
     const picker = new Litepicker({
       element: document.getElementById('lite-datepicker'),
       inlineMode: true,
@@ -680,7 +704,10 @@
       numberOfColumns: initCheckNumberOfColumns(),
       numberOfMonths: initCheckNumberOfColumns(),
       minDate: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
-      lockDays: lockDays,
+      lockDays: lockDays, // Use the dynamically calculated blocked days
+      lockDaysFormat: 'YYYY-MM-DD',
+      disallowLockDaysInRange: true,
+      startDate: initialSelectedDate ? new Date(initialSelectedDate) : null, // Set initial date
       lang: '{{app()->getLocale()}}',
       setup: (picker) => {
         picker.on('selected', (date1, date2) => {
@@ -688,15 +715,9 @@
           @this.selectedDate = date1.format('YYYY-MM-DD');
           // Set Date to function
           $("#currentDate").html(date1.format('DD-MM-YYYY'));
-          @this.setSelectedTime('{{ '00:00' }}');
-          // Add the selected date to the selected column
-          const selectedColumn = document.querySelector('.litepicker-column.selected');
-          if (selectedColumn) {
-            const selectedDateCell = selectedColumn.querySelector('.litepicker-cell.is-selected');
-            if (selectedDateCell) {
-              selectedDateCell.classList.add('selected-date');
-            }
-          }
+          @this.setSelectedTime('00:00');
+          // Force component refresh to update button state
+          @this.$refresh();
         });
 
         // Change picker columns on resize
@@ -747,15 +768,14 @@ document.addEventListener('livewire:next', function () {
   function scrollToFormCenter() {
           const form = document.getElementById('all');
           if (form) {
-              // form.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              const formTop = form.getBoundingClientRect().top + window.pageYOffset; // Get the element's position relative to the document
-          window.scrollTo({ 
-              top: formTop - 50, // Adjust for 150px offset
-              console.log('test')
-              behavior: 'smooth'  // Smooth scrolling
-          });
+              const formTop = form.getBoundingClientRect().top + window.pageYOffset;
+              window.scrollTo({ 
+                  top: formTop - 50,
+                  behavior: 'smooth'
+              });
           }
       }
+      scrollToFormCenter();
 });
 </script>
 
@@ -777,6 +797,40 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 2000);
     }
   });
+  
+  // Simple button validation
+  function validateForm() {
+    const nextButton = document.getElementById('nextButton');
+    if (!nextButton) return;
+    
+    const hasDate = '{{ $selectedDate }}' !== '';
+    const firstname = document.getElementById('firstname')?.value?.trim() || '';
+    const lastname = document.getElementById('lastname')?.value?.trim() || '';
+    const email = document.getElementById('email')?.value?.trim() || '';
+    const address = document.getElementById('address')?.value?.trim() || '';
+    const city = document.getElementById('city')?.value?.trim() || '';
+    const phone = document.getElementById('phone')?.value?.trim() || '';
+    
+    const isValid = hasDate && firstname && lastname && email && address && city && phone;
+    
+    nextButton.disabled = !isValid;
+    nextButton.className = isValid ? 'thm-btn' : 'thm-btn thm-btn-disabled';
+  }
+  
+  // Run validation on page load and input changes
+  validateForm();
+  
+  const inputs = ['firstname', 'lastname', 'email', 'address', 'city', 'phone'];
+  inputs.forEach(function(inputId) {
+    const input = document.getElementById(inputId);
+    if (input) {
+      input.addEventListener('input', validateForm);
+      input.addEventListener('change', validateForm);
+    }
+  });
+  
+  // Watch for Livewire updates
+  document.addEventListener('livewire:updated', validateForm);
 });
 </script>
 
@@ -784,6 +838,101 @@ document.addEventListener('DOMContentLoaded', function() {
 
 @section('css_after')
 <style>
+  /* Calendar availability indicators - same as product page */
+  .litepicker .day-item {
+      transition: all 0.2s ease !important;
+  }
+  
+  .litepicker .day-item:not(.is-locked):not(.is-start-date):not(.is-end-date):not(.is-selected) {
+      background-color: #d4edda !important; /* Light green for available dates */
+      border: 1px solid #28a745 !important;
+      color: #155724 !important;
+  }
+  
+  .litepicker .day-item.is-locked {
+      background-color: #ffeaea !important; /* More subtle light red for blocked dates */
+      border: 1px solid #ffb3b3 !important;
+      color: #b85450 !important;
+      cursor: not-allowed !important;
+      opacity: 0.7;
+  }
+  
+  .litepicker .day-item:not(.is-locked):not(.is-selected):hover {
+      background-color: #c3e6cb !important; /* Slightly darker green on hover */
+      border-color: #28a745 !important;
+      color: #155724 !important;
+      transform: scale(1.02) !important;
+      transition: all 0.2s ease !important;
+      box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2) !important;
+  }
+  
+  .litepicker .day-item.is-locked:hover {
+      /* Keep blocked dates unchanged on hover to maintain disabled state */
+      cursor: not-allowed !important;
+  }
+  
+  /* Selected date styling - works for both desktop and mobile */
+  .litepicker .day-item.is-selected,
+  .litepicker .day-item.is-start-date,
+  .litepicker .day-item.is-end-date {
+      background-color: #313041 !important;
+      color: white !important;
+      border: 1px solid #2a2938 !important;
+  }
+  
+  .litepicker .day-item.is-selected:hover,
+  .litepicker .day-item.is-start-date:hover,
+  .litepicker .day-item.is-end-date:hover {
+      background-color: #2a2938 !important;
+      color: white !important;
+      transform: scale(1.02) !important;
+      box-shadow: 0 2px 4px rgba(49, 48, 65, 0.3) !important;
+  }
+  
+  /* Calendar legend */
+  .calendar-legend {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 15px;
+      font-size: 14px;
+  }
+  
+  .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+  }
+  
+  .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      border: 1px solid;
+  }
+  
+  .legend-available {
+      background-color: #d4edda;
+      border-color: #28a745;
+  }
+  
+  .legend-blocked {
+      background-color: #ffeaea;
+      border-color: #ffb3b3;
+      opacity: 0.7;
+  }
+  
+  @media (max-width: 767px) {
+      .calendar-legend {
+          gap: 15px;
+          font-size: 13px;
+      }
+      
+      .legend-color {
+          width: 14px;
+          height: 14px;
+      }
+  }
   .booking-overview{
     height: fit-content;
   }

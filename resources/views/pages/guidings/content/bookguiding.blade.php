@@ -52,7 +52,8 @@
                     
                     <div class="booking-form-container">
                         <input type="hidden" name="guiding_id" value="{{ $guiding->id }}">
-                        <button type="submit" class="btn btn-orange w-100 py-3 mb-3 reserve-now-btn">{{ __('booking.reserve_now') }}</button>
+                        <input type="hidden" name="selected_date" id="selectedDateInput" value="">
+                        <button type="submit" class="btn btn-orange w-100 py-3 mb-3 reserve-now-btn" id="reserveButton">{{ __('booking.reserve_now') }}</button>
                     </div>
                 </form>
             </div>
@@ -199,5 +200,123 @@ document.addEventListener('DOMContentLoaded', function() {
             priceCalculation.style.display = 'none';
         }
     });
+});
+
+// Listen for calendar date selection events (outside DOMContentLoaded for immediate availability)
+window.addEventListener('dateSelected', function(event) {
+    console.log('Desktop booking: Date selected event received', event.detail); // Debug log
+    const selectedDate = event.detail.date;
+    const reserveButton = document.getElementById('reserveButton');
+    const selectedDateInput = document.getElementById('selectedDateInput');
+    
+    if (selectedDate && reserveButton) {
+        // Format the date for display
+        const date = new Date(selectedDate);
+        const formattedDate = date.toLocaleDateString('{{ app()->getLocale() }}', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        
+        // Update button text and hidden input
+        reserveButton.textContent = `{{ __('booking.reserve_for_date') }} ${formattedDate}`;
+        selectedDateInput.value = selectedDate;
+        console.log('Desktop booking: Button text updated to', reserveButton.textContent); // Debug log
+    }
+});
+
+// Listen for calendar date deselection events
+window.addEventListener('dateDeselected', function(event) {
+    console.log('Desktop booking: Date deselected event received'); // Debug log
+    const reserveButton = document.getElementById('reserveButton');
+    const selectedDateInput = document.getElementById('selectedDateInput');
+    
+    if (reserveButton) {
+        // Reset button text and clear hidden input
+        reserveButton.textContent = '{{ __('booking.reserve_now') }}';
+        selectedDateInput.value = '';
+        console.log('Desktop booking: Button text reset'); // Debug log
+    }
+});
+
+// Add form validation to prevent submission without person selection
+document.querySelector('.checkout-form').addEventListener('submit', function(event) {
+    const personSelect = document.getElementById('personSelect');
+    
+    if (!personSelect.value || personSelect.selectedIndex === 0) {
+        event.preventDefault();
+        
+        // Show validation bubble
+        const selectContainer = personSelect.closest('.booking-select');
+        
+        // Remove any existing validation bubble
+        const existingBubble = document.querySelector('.validation-bubble');
+        if (existingBubble) {
+            existingBubble.remove();
+        }
+        
+        // Create validation bubble
+        const validationBubble = document.createElement('div');
+        validationBubble.className = 'validation-bubble';
+        validationBubble.innerHTML = `
+            <div class="validation-bubble-content">
+                {{ __('booking.please_select_number_of_people') }}
+                <div class="validation-bubble-arrow"></div>
+            </div>
+        `;
+        
+        // Add bubble styles
+        validationBubble.style.cssText = `
+            position: absolute;
+            top: -45px;
+            right: 0;
+            z-index: 1000;
+            background: #dc3545;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        `;
+        
+        // Add arrow styles
+        const arrow = validationBubble.querySelector('.validation-bubble-arrow');
+        arrow.style.cssText = `
+            position: absolute;
+            bottom: -5px;
+            right: 20px;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid #dc3545;
+        `;
+        
+        // Position container relatively for absolute positioning
+        selectContainer.style.position = 'relative';
+        selectContainer.appendChild(validationBubble);
+        
+        // Add error styling to select
+        personSelect.classList.add('is-invalid');
+        
+        // Auto-hide bubble after 3 seconds
+        setTimeout(() => {
+            if (validationBubble && validationBubble.parentNode) {
+                validationBubble.remove();
+            }
+        }, 3000);
+        
+        // Remove error styling and bubble when user makes selection
+        personSelect.addEventListener('change', function() {
+            personSelect.classList.remove('is-invalid');
+            const bubble = document.querySelector('.validation-bubble');
+            if (bubble) {
+                bubble.remove();
+            }
+        }, { once: true });
+        
+        return false;
+    }
 });
 </script>

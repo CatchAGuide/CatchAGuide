@@ -44,8 +44,9 @@
                             </div>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-orange w-100">{{ __('booking.reserve_now') }}</button>
+                    <button type="submit" class="btn btn-orange w-100" id="reserveButtonMobile">{{ __('booking.reserve_now') }}</button>
                     <input type="hidden" name="guiding_id" value="{{ $guiding->id }}">
+                    <input type="hidden" name="selected_date" id="selectedDateInputMobile" value="">
                 </div>
             </form>
             </div>
@@ -200,6 +201,147 @@
                 peopleText.textContent = personText;
             }
         }
+    }
+});
+
+// Listen for calendar date selection events (outside DOMContentLoaded for immediate availability)
+window.addEventListener('dateSelected', function(event) {
+    console.log('Mobile booking: Date selected event received', event.detail); // Debug log
+    const selectedDate = event.detail.date;
+    const reserveButton = document.getElementById('reserveButtonMobile');
+    const selectedDateInput = document.getElementById('selectedDateInputMobile');
+    
+    if (selectedDate && reserveButton) {
+        // Format the date for display
+        const date = new Date(selectedDate);
+        const formattedDate = date.toLocaleDateString('{{ app()->getLocale() }}', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        
+        // Update button text and hidden input
+        reserveButton.textContent = `{{ __('booking.reserve_for_date') }} ${formattedDate}`;
+        selectedDateInput.value = selectedDate;
+        console.log('Mobile booking: Button text updated to', reserveButton.textContent); // Debug log
+    }
+});
+
+// Listen for calendar date deselection events
+window.addEventListener('dateDeselected', function(event) {
+    console.log('Mobile booking: Date deselected event received'); // Debug log
+    const reserveButton = document.getElementById('reserveButtonMobile');
+    const selectedDateInput = document.getElementById('selectedDateInputMobile');
+    
+    if (reserveButton) {
+        // Reset button text and clear hidden input
+        reserveButton.textContent = '{{ __('booking.reserve_now') }}';
+        selectedDateInput.value = '';
+        console.log('Mobile booking: Button text reset'); // Debug log
+    }
+});
+
+// Add form validation to prevent submission without person selection
+document.querySelector('.checkout-form').addEventListener('submit', function(event) {
+    const personSelect = document.getElementById('personSelect');
+    
+    if (!personSelect.value || personSelect.selectedIndex === 0) {
+        event.preventDefault();
+        
+        // Show validation bubble
+        const selectContainer = personSelect.closest('.booking-select');
+        
+        // Remove any existing validation bubble
+        const existingBubble = document.querySelector('.validation-bubble');
+        if (existingBubble) {
+            existingBubble.remove();
+        }
+        
+        // Create validation bubble
+        const validationBubble = document.createElement('div');
+        validationBubble.className = 'validation-bubble';
+        validationBubble.innerHTML = `
+            <div class="validation-bubble-content">
+                {{ __('booking.please_select_number_of_people') }}
+                <div class="validation-bubble-arrow"></div>
+            </div>
+        `;
+        
+        // Add bubble styles (mobile-optimized)
+        validationBubble.style.cssText = `
+            position: absolute;
+            top: -50px;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: #dc3545;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+            text-align: center;
+            margin: 0 10px;
+            animation: fadeInBounce 0.3s ease-out;
+        `;
+        
+        // Add CSS animation keyframes
+        if (!document.querySelector('#bubble-animation-styles')) {
+            const style = document.createElement('style');
+            style.id = 'bubble-animation-styles';
+            style.textContent = `
+                @keyframes fadeInBounce {
+                    0% {
+                        opacity: 0;
+                        transform: translateY(-10px) scale(0.9);
+                    }
+                    100% {
+                        opacity: 1;
+                        transform: translateY(0) scale(1);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Add arrow styles
+        const arrow = validationBubble.querySelector('.validation-bubble-arrow');
+        arrow.style.cssText = `
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid #dc3545;
+        `;
+        
+        // Position container relatively for absolute positioning
+        selectContainer.style.position = 'relative';
+        selectContainer.appendChild(validationBubble);
+        
+        // Add error styling to select
+        personSelect.classList.add('is-invalid');
+        
+        // Auto-hide bubble after 3 seconds
+        setTimeout(() => {
+            if (validationBubble && validationBubble.parentNode) {
+                validationBubble.remove();
+            }
+        }, 3000);
+        
+        // Remove error styling and bubble when user makes selection
+        personSelect.addEventListener('change', function() {
+            personSelect.classList.remove('is-invalid');
+            const bubble = document.querySelector('.validation-bubble');
+            if (bubble) {
+                bubble.remove();
+            }
+        }, { once: true });
+        
+        return false;
     }
 });
 </script>
