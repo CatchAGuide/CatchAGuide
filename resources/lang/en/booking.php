@@ -13,4 +13,5 @@ return [
     'do_you_have_questions' => 'Do you have questions about this fishing tour? Our team is here to help!',
     'contact_form' => 'Contact Form',
     'fixed_price_for' => 'Fixed price for',
+    'please_select_number_of_people' => 'Please select the number of people',
 ];
