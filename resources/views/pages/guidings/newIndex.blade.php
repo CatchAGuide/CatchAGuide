@@ -1194,11 +1194,11 @@
         <div class="calendar-legend">
             <div class="legend-item">
                 <div class="legend-color legend-available"></div>
-                <span>{{ translate('Available for request') }}</span>
+                <span>{{ __('checkout.available_for_request') }}</span>
             </div>
             <div class="legend-item">
                 <div class="legend-color legend-blocked"></div>
-                <span>{{ translate('Blocked') }}</span>
+                <span>{{ __('checkout.blocked') }}</span>
             </div>
         </div>
         
