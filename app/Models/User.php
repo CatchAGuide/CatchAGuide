@@ -175,6 +175,11 @@ class User extends Authenticatable
         return $this->hasMany(BlockedEvent::class);
     }
 
+    public function calendar_schedules(): HasMany
+    {
+        return $this->hasMany(CalendarSchedule::class);
+    }
+
     /**
      * @return HasMany
      */

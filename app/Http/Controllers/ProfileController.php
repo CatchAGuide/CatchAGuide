@@ -314,7 +314,15 @@ class ProfileController extends Controller
 
     public function calendar()
     {
-        return view('pages.profile.calendar');
+        // Get user's guidings for the filter dropdown
+        $userGuidings = Guiding::where('user_id', auth()->id())
+            ->select('id', 'title', 'location')
+            ->orderBy('title')
+            ->get();
+            
+        return view('pages.profile.calendar', [
+            'userGuidings' => $userGuidings
+        ]);
     }
 
     public function showBooking($bookingid)

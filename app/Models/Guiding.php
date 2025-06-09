@@ -100,6 +100,7 @@ class Guiding extends Model
         'prices',
         'pricing_extra',
         'months',
+        'weekdays',
         'seasonal_trip',
         'allowed_booking_advance',
         'booking_window',
