@@ -2,6 +2,8 @@
 
 @section('title', __('profile.calendar'))
 @section('css_after')
+    <!-- Litepicker CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css"/>
     <style>
         .fc .fc-button-primary {
             background-color: var(--thm-primary);
@@ -26,38 +28,383 @@
             border-radius: calc(var(--fc-daygrid-event-dot-width,8px)/ 2);
         }
 
-        /* Calendar Filter Styles */
-        .calendar-filters {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+        /* 3-Panel Layout Styles */
+        .calendar-panel, .tour-filter-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            height: 100%;
+            min-height: 700px !important;
         }
         
-        .filter-group {
-            margin-bottom: 10px;
+        .calendar-panel {
+            display: flex;
+            flex-direction: column;
         }
         
-        .filter-group label {
+        .calendar-container {
+            flex: 1;
+            min-height: 550px !important;
+            position: relative;
+        }
+        
+        /* Calendar Loading Overlay */
+        .calendar-loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            border-radius: 12px;
+        }
+        
+        .calendar-loading-overlay.show {
+            display: flex;
+        }
+        
+        .calendar-loading-spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--thm-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            color: var(--thm-primary);
             font-weight: 600;
-            margin-right: 10px;
+            font-size: 14px;
+        }
+        
+        /* Force Litepicker to be large */
+        #lite-datepicker {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        .litepicker {
+            width: 100% !important;
+            height: 100% !important;
+            font-size: 16px !important;
+            transform: scale(1.05) !important;
+            transform-origin: center !important;
+        }
+        
+        .litepicker .container__main {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        .litepicker .container__months {
+            width: 100% !important;
+            height: 100% !important;
+            display: flex !important;
+            justify-content: space-between !important;
+        }
+        
+        .litepicker .container__months .month-item {
+            flex: 1 !important;
+            margin: 0 10px !important;
+        }
+        
+        .litepicker .month-item-header {
+            font-size: 20px !important;
+            font-weight: bold !important;
+            padding: 15px 0 !important;
+        }
+        
+        .litepicker .month-item-weekdays-row {
+            padding: 10px 0 !important;
+        }
+        
+        .litepicker .month-item-weekdays-row > div {
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            padding: 8px 0 !important;
+        }
+        
+        .litepicker .day-item {
+            width: 45px !important;
+            height: 45px !important;
+            line-height: 45px !important;
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            margin: 2px !important;
+            border-radius: 6px !important;
+            transition: all 0.2s ease !important;
+            position: relative !important;
+            cursor: pointer !important;
+        }
+        
+        /* Default white background for all dates */
+        .litepicker .day-item {
+            background-color: white !important;
+            border: 2px solid #e9ecef !important;
+            color: #495057 !important;
+        }
+        
+        /* Booking Status Colors (Priority) */
+        .litepicker .day-item.booking-accepted {
+            background-color: #28a745 !important;
+            border: 2px solid #28a745 !important;
+            color: white !important;
+        }
+        
+        .litepicker .day-item.booking-pending {
+            background-color: #ffc107 !important;
+            border: 2px solid #ffc107 !important;
+            color: #000 !important;
+        }
+        
+        .litepicker .day-item.booking-rejected {
+            background-color: #dc3545 !important;
+            border: 2px solid #dc3545 !important;
+            color: white !important;
+        }
+        
+        .litepicker .day-item.booking-cancelled {
+            background-color: #6c757d !important;
+            border: 2px solid #6c757d !important;
+            color: white !important;
+        }
+        
+        /* Custom Event Color (when no bookings) */
+        .litepicker .day-item.custom-event {
+            background-color: #17a2b8 !important;
+            border: 2px solid #17a2b8 !important;
+            color: white !important;
+        }
+        
+        /* Blocked Tour Indicator (dot on upper right) */
+        .litepicker .day-item.blocked-tour::after {
+            content: '';
+            position: absolute !important;
+            top: 4px !important;
+            right: 4px !important;
+            width: 10px !important;
+            height: 10px !important;
+            background-color: #fd7e14 !important;
+            border-radius: 50% !important;
+            z-index: 10 !important;
+        }
+        
+        .litepicker .day-item:hover {
+            transform: scale(1.1) !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+            z-index: 5 !important;
+        }
+        
+        .litepicker .day-item.is-selected,
+        .litepicker .day-item.is-start-date,
+        .litepicker .day-item.is-end-date {
+            background-color: var(--thm-primary) !important;
+            color: white !important;
+            border: 2px solid var(--thm-primary) !important;
+            transform: scale(1.15) !important;
+            z-index: 10 !important;
+        }
+        
+        /* Previous/Next month buttons */
+        .litepicker .button-previous-month,
+        .litepicker .button-next-month {
+            width: 40px !important;
+            height: 40px !important;
+            font-size: 18px !important;
+            border-radius: 50% !important;
+        }
+
+        /* Updated Legend Styles */
+        .calendar-legend {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .legend-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            border: 1px solid;
+        }
+        
+        .legend-accepted {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        
+        .legend-pending {
+            background-color: #ffc107;
+            border-color: #ffc107;
+        }
+        
+        .legend-rejected {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+        
+        .legend-custom {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+        }
+        
+        .legend-blocked {
+            background-color: white;
+            border-color: #e9ecef;
+            position: relative;
+        }
+        
+        .legend-blocked::after {
+            content: '';
+            position: absolute;
+            top: 1px;
+            right: 1px;
+            width: 5px;
+            height: 5px;
+            background-color: #fd7e14;
+            border-radius: 50%;
+        }
+        
+        .legend-text {
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        /* Tour Filter Dropdown Styles with Scrolling */
+        .dropdown-menu {
+            max-height: 350px !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+        }
+        
+        .tour-filter-card-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+        }
+        
+        .tour-filter-image-dropdown {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .tour-filter-thumbnail-dropdown {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .tour-filter-icon-dropdown {
+            width: 40px;
+            height: 40px;
+            background: var(--thm-primary);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .tour-filter-info-dropdown {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .tour-filter-title-dropdown {
+            font-size: 14px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .tour-filter-location-dropdown {
+            font-size: 12px;
+            color: #6c757d;
+            display: block;
+            margin-bottom: 2px;
+        }
+        
+        .tour-filter-price-dropdown {
+            font-size: 12px;
+            color: var(--thm-primary);
+            font-weight: 600;
+        }
+        
+        .tour-filter-subtitle-dropdown {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .tour-filter-option.active {
+            background-color: rgba(232, 96, 76, 0.1);
+        }
+
+        /* Filter Controls */
+        .filter-group {
+            margin-bottom: 15px;
+        }
+        
+        .filter-group .form-label {
+            font-weight: 600;
+            margin-bottom: 8px;
             color: var(--thm-primary);
         }
         
         .filter-buttons {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
         }
         
         .filter-btn {
-            padding: 5px 15px;
+            padding: 6px 12px;
             border: 1px solid #ddd;
             background: white;
-            border-radius: 20px;
+            border-radius: 15px;
             cursor: pointer;
             transition: all 0.3s;
-            font-size: 14px;
+            font-size: 12px;
         }
         
         .filter-btn.active {
@@ -70,134 +417,57 @@
             background: var(--thm-primary);
             color: white;
         }
-
-        /* Legend Styles */
-        .calendar-legend {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
         
-        .legend-title {
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: var(--thm-primary);
-        }
-        
-        .legend-items {
+        /* Quick Actions */
+        .quick-actions {
             display: flex;
+            gap: 10px;
             flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .legend-color {
-            width: 16px;
-            height: 16px;
-            border-radius: 3px;
-        }
-        
-        .legend-text {
-            font-size: 14px;
         }
 
-        /* Custom Event Styles */
-        .fc-event {
-            cursor: pointer;
-            font-size: 11px;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-            position: relative;
+        /* Detail Panel Updates */
+        .calendar-detail-panel {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-top: 20px;
             overflow: hidden;
+            transition: all 0.4s ease;
+            max-height: 200px;
+            opacity: 1;
         }
         
-        .fc-event:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            z-index: 10;
-        }
-
-        /* Tooltip Styles */
-        .event-tooltip {
-            position: fixed;
-            background: rgba(0,0,0,0.9);
-            color: white;
-            padding: 12px 15px;
-            border-radius: 8px;
-            font-size: 12px;
-            z-index: 1000;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            max-width: 280px;
-            pointer-events: none;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.3s ease;
-            display: none;
-            --arrow-position: bottom;
-        }
-
-        .event-tooltip.show {
+        .calendar-detail-panel.show {
+            max-height: none;
             opacity: 1;
-            transform: translateY(0);
-            display: block;
         }
 
-        .event-tooltip::before {
-            content: '';
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 6px solid transparent;
+        .detail-content {
+            min-height: 200px;
         }
 
-        .event-tooltip[style*="--arrow-position: bottom"]::before {
-            bottom: -6px;
-            border-top-color: rgba(0,0,0,0.9);
-            border-bottom: none;
+        .schedule-item {
+            background: #f8f9fa;
+            transition: all 0.2s ease;
         }
 
-        .event-tooltip[style*="--arrow-position: top"]::before {
-            top: -6px;
-            border-bottom-color: rgba(0,0,0,0.9);
-            border-top: none;
+        .schedule-item:hover {
+            background: #e9ecef;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        .tooltip-header {
-            font-weight: 600;
-            margin-bottom: 8px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
+        .schedule-details {
+            line-height: 1.6;
         }
 
-        .tooltip-row {
-            margin-bottom: 4px;
-            display: flex;
-            justify-content: space-between;
+        .schedule-details i {
+            width: 16px;
+            text-align: center;
+            margin-right: 5px;
         }
-
-        .tooltip-label {
-            font-weight: 500;
-            opacity: 0.8;
-        }
-
-        .tooltip-value {
-            font-weight: 600;
-        }
-
-        /* Modal Styles */
-        .modal-header {
-            background: var(--thm-primary);
-            color: white;
-        }
-
-        /* Inline Detail Panel */
+        
+        /* Detail Panel Styling */
         .calendar-detail-panel {
             background: white;
             border-radius: 12px;
@@ -208,19 +478,19 @@
             max-height: 0;
             opacity: 0;
         }
-
+        
         .calendar-detail-panel.show {
-            max-height: 600px;
+            max-height: 800px;
             opacity: 1;
         }
-
+        
         .detail-panel-header {
             background: linear-gradient(135deg, var(--thm-primary), #2c5aa0);
             color: white;
             padding: 20px;
             position: relative;
         }
-
+        
         .detail-panel-header::after {
             content: '';
             position: absolute;
@@ -230,52 +500,56 @@
             height: 4px;
             background: linear-gradient(90deg, #ffd700, #ff6b6b, #4ecdc4, #45b7d1);
         }
-
+        
         .detail-panel-body {
             padding: 25px;
         }
-
-        .detail-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .detail-card {
+        
+                .detail-card {
             background: #f8f9fa;
             border-radius: 8px;
             padding: 15px;
             border-left: 4px solid var(--thm-primary);
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
         }
 
         .detail-card h6 {
             color: var(--thm-primary);
             font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .detail-item {
+            margin-bottom: 15px;
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            padding: 4px 0;
-            border-bottom: 1px solid #e9ecef;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
         }
 
-        .detail-item:last-child {
-            border-bottom: none;
+        .detail-card-content {
+            max-height: 300px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 5px;
         }
 
-        .detail-label {
-            font-weight: 500;
-            color: #6c757d;
+        .detail-card-content::-webkit-scrollbar {
+            width: 6px;
         }
 
-        .detail-value {
-            font-weight: 600;
-            color: #495057;
+        .detail-card-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
         }
 
+        .detail-card-content::-webkit-scrollbar-thumb {
+            background: var(--thm-primary);
+            border-radius: 3px;
+        }
+
+        .detail-card-content::-webkit-scrollbar-thumb:hover {
+            background: #d63384;
+        }
+        
         .close-panel-btn {
             position: absolute;
             top: 15px;
@@ -287,9 +561,41 @@
             cursor: pointer;
             transition: transform 0.2s ease;
         }
-
+        
         .close-panel-btn:hover {
             transform: scale(1.2);
+        }
+        
+        .schedule-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.2s ease;
+        }
+        
+        .schedule-item:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .schedule-details {
+            margin-top: 10px;
+        }
+        
+        .schedule-details small {
+            display: block;
+            margin-bottom: 5px;
+            color: #6c757d;
+        }
+        
+        .schedule-details i {
+            width: 16px;
+            text-align: center;
+            margin-right: 8px;
+            color: var(--thm-primary);
         }
         
         .status-badge {
@@ -309,15 +615,138 @@
         .status-custom { background: #20c997; color: white; }
 
         @media screen and (max-width:767px) { 
-            .fc-toolbar.fc-header-toolbar {font-size: 60%}
-            .calendar-filters {
-                padding: 10px;
+            .calendar-panel, .tour-filter-panel {
+                padding: 15px;
+                margin-bottom: 20px;
+                min-height: 500px !important;
+                height: auto;
             }
+            
+            .calendar-container {
+                min-height: 400px !important;
+            }
+            
+            .detail-card-content {
+                max-height: 250px;
+            }
+            
+            .detail-card {
+                padding: 12px !important;
+                margin-bottom: 15px !important;
+            }
+            
+            .detail-card h6 {
+                font-size: 16px !important;
+                margin-bottom: 12px !important;
+            }
+            
+            .d-flex.justify-content-between {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+            }
+            
+            .d-flex.justify-content-between .status-badge,
+            .d-flex.justify-content-between .badge {
+                align-self: flex-end !important;
+                margin-top: 5px !important;
+            }
+            
+            .litepicker {
+                transform: scale(1) !important;
+                font-size: 14px !important;
+            }
+            
+            .litepicker .container__months {
+                flex-direction: column !important;
+            }
+            
+            .litepicker .container__months .month-item {
+                margin: 10px 0 !important;
+            }
+            
+            .litepicker .day-item {
+                width: 36px !important;
+                height: 36px !important;
+                line-height: 36px !important;
+                font-size: 14px !important;
+                margin: 1px !important;
+            }
+            
+            .litepicker .month-item-header {
+                font-size: 16px !important;
+                padding: 10px 0 !important;
+            }
+            
+            .col-md-8, .col-md-4 {
+                width: 100%;
+                max-width: 100%;
+                flex: 0 0 100%;
+            }
+            
             .legend-items {
-                gap: 10px;
+                gap: 8px;
+                justify-content: flex-start;
             }
+            
             .filter-buttons {
                 gap: 5px;
+            }
+            
+            .filter-btn {
+                padding: 4px 8px;
+                font-size: 11px;
+            }
+            
+            .quick-actions {
+                justify-content: center;
+            }
+            
+            .calendar-detail-panel {
+                margin-top: 15px;
+            }
+            
+            .detail-panel-header h4 {
+                font-size: 1.1rem;
+            }
+            
+            .tour-filter-card-dropdown {
+                padding: 6px 0;
+                gap: 8px;
+            }
+            
+            .tour-filter-image-dropdown,
+            .tour-filter-icon-dropdown {
+                width: 35px;
+                height: 35px;
+            }
+            
+            .schedule-item {
+                padding: 12px !important;
+                margin-bottom: 10px !important;
+            }
+            
+            .schedule-item h6 {
+                font-size: 14px !important;
+                margin-bottom: 8px !important;
+            }
+            
+            .schedule-details small {
+                font-size: 12px !important;
+                margin-bottom: 3px !important;
+            }
+            
+            .status-badge {
+                font-size: 10px !important;
+                padding: 2px 8px !important;
+            }
+            
+            .btn-sm {
+                font-size: 11px !important;
+                padding: 4px 8px !important;
+            }
+            
+            .calendar-panel {
+                display: block;
             }
         }
     </style>
@@ -326,142 +755,156 @@
 @section('profile-content')
 
 <div class="container" style="margin-bottom: 120px;">
-    <!-- Calendar Filters -->
-
-
-    <!-- Enhanced Filter Controls -->
-    <div class="calendar-filters">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="filter-group">
-                    <label>@lang('profile.filter-by-type'):</label>
-                    <div class="filter-buttons">
-                        <button class="filter-btn active" data-type="">@lang('profile.all')</button>
-                        <button class="filter-btn" data-type="tour_request">@lang('profile.bookings')</button>
-                        <button class="filter-btn" data-type="tour_schedule">@lang('profile.blocked')</button>
-                        <button class="filter-btn" data-type="vacation_schedule">@lang('profile.vacation')</button>
-                        <button class="filter-btn" data-type="custom_schedule">@lang('profile.custom')</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-6">
-                <div class="filter-group">
-                    <label>@lang('profile.filter-by-status'):</label>
-                    <div class="filter-buttons">
-                        <button class="filter-btn active" data-status="">@lang('profile.all')</button>
-                        <button class="filter-btn" data-status="accepted">@lang('profile.confirmed')</button>
-                        <button class="filter-btn" data-status="pending">@lang('profile.pending')</button>
-                        <button class="filter-btn" data-status="cancelled">@lang('profile.cancelled')</button>
-                        <button class="filter-btn" data-status="rejected">@lang('profile.rejected')</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tours Filter Slider -->
-    <div class="tours-filter-section mb-3">
-        <h6 class="mb-2 text-muted">@lang('profile.select-tour-to-filter')</h6>
-        <div class="tours-slider-container">
-            <div class="tours-slider owl-carousel owl-theme">
-                <!-- All Tours Option -->
-                <div class="item">
-                    <div class="tour-filter-card active" data-guiding-id="">
-                        <div class="tour-filter-content">
-                            <div class="tour-filter-icon">
-                                <i class="fas fa-list"></i>
-                            </div>
-                            <div class="tour-filter-info">
-                                <div class="tour-filter-title">@lang('profile.all-tours')</div>
-                                <small class="tour-filter-subtitle">@lang('profile.show-all-events')</small>
-                            </div>
+    <!-- 3-Panel Layout -->
+    <div class="row">
+        <!-- Top Left Panel: Calendar -->
+        <div class="col-md-8">
+            <div class="calendar-panel">
+                <!-- Calendar Container -->
+                <div class="calendar-container">
+                    <div id="lite-datepicker"></div>
+                    <!-- Loading Overlay -->
+                    <div id="calendarLoadingOverlay" class="calendar-loading-overlay">
+                        <div class="calendar-loading-spinner">
+                            <div class="spinner"></div>
+                            <div class="loading-text">Applying calendar colors...</div>
                         </div>
                     </div>
                 </div>
                 
-                @foreach($userGuidings as $guiding)
-                    <div class="item">
-                        <div class="tour-filter-card" data-guiding-id="{{ $guiding->id }}">
-                            <div class="tour-filter-content">
-                                <div class="tour-filter-image">
-                                    @if(get_featured_image_link($guiding))
-                                        <img src="{{get_featured_image_link($guiding)}}" alt="{{ $guiding->title }}" class="tour-filter-thumbnail">
-                                    @else
-                                        <img src="{{asset('images/placeholder_guide.webp')}}" alt="{{ $guiding->title }}" class="tour-filter-thumbnail">
-                                    @endif
-                                </div>
-                                <div class="tour-filter-info">
-                                    <div class="tour-filter-title">{{ Str::limit($guiding->title, 20) }}</div>
-                                    <small class="tour-filter-location">{{ Str::limit($guiding->location, 15) }}</small>
-                                    <small class="tour-filter-price">{{ $guiding->getLowestPrice() }}€</small>
-                                </div>
-                            </div>
+                <!-- Calendar Legend - Below Calendar -->
+                <div class="calendar-legend mt-3">
+                    <div class="legend-items">
+                        <div class="legend-item">
+                            <div class="legend-color legend-accepted"></div>
+                            <span class="legend-text">@lang('profile.confirmed')</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color legend-pending"></div>
+                            <span class="legend-text">@lang('profile.pending')</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color legend-rejected"></div>
+                            <span class="legend-text">@lang('profile.rejected')</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color legend-custom"></div>
+                            <span class="legend-text">@lang('profile.custom')</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color legend-blocked"></div>
+                            <span class="legend-text">@lang('profile.blocked')</span>
                         </div>
                     </div>
-                @endforeach
+                </div>
             </div>
         </div>
-    </div>
-
-    <!-- Calendar Legend -->
-    <div class="calendar-legend">
-        <div class="legend-title">@lang('profile.calendar-legend')</div>
-        <div class="legend-items">
-            <div class="legend-item">
-                <div class="legend-color" style="background: #28a745;"></div>
-                <span class="legend-text">@lang('profile.confirmed-bookings')</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #ffc107;"></div>
-                <span class="legend-text">@lang('profile.pending-bookings')</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #dc3545;"></div>
-                <span class="legend-text">@lang('profile.rejected-bookings')</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #6c757d;"></div>
-                <span class="legend-text">@lang('profile.cancelled-bookings')</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #28a745; opacity: 0.3;"></div>
-                <span class="legend-text">@lang('profile.available')</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #6f42c1;"></div>
-                <span class="legend-text">@lang('profile.vacation')</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #20c997;"></div>
-                <span class="legend-text">@lang('profile.custom-events')</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Calendar -->
-    <div class="col-md-12">
-        <div id="calendar" class="mt-3"></div>
         
-        <!-- Interactive Detail Panel -->
-        <div id="detailPanel" class="calendar-detail-panel">
-            <div class="detail-panel-header">
-                <button class="close-panel-btn" onclick="closeDetailPanel()">&times;</button>
-                <h4 id="detailPanelTitle">Event Details</h4>
-                <p id="detailPanelSubtitle" class="mb-0"></p>
-            </div>
-            <div class="detail-panel-body">
-                <div id="detailPanelContent" class="detail-grid">
-                    <!-- Content will be populated by JavaScript -->
+        <!-- Top Right Panel: Tour Filter -->
+        <div class="col-md-4">
+            <div class="tour-filter-panel">
+                <h3 class="mb-3">@lang('profile.select-tour-to-filter')</h3>
+                
+                <!-- Tour Filter Dropdown -->
+                <div class="dropdown mb-3">
+                    <button class="btn btn-outline-primary dropdown-toggle w-100" type="button" id="tourFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span id="selectedTourText">@lang('profile.all-tours')</span>
+                    </button>
+                    <ul class="dropdown-menu w-100" aria-labelledby="tourFilterDropdown" id="tourDropdownMenu">
+                        <!-- All Tours Option -->
+                        <li>
+                            <a class="dropdown-item tour-filter-option active" href="#" data-guiding-id="">
+                                <div class="tour-filter-card-dropdown">
+                                    <div class="tour-filter-icon-dropdown">
+                                        <i class="fas fa-list"></i>
+                                    </div>
+                                    <div class="tour-filter-info-dropdown">
+                                        <div class="tour-filter-title-dropdown">@lang('profile.all-tours')</div>
+                                        <small class="tour-filter-subtitle-dropdown">@lang('profile.show-all-events')</small>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                        
+                        @foreach($userGuidings as $guiding)
+                            <li>
+                                <a class="dropdown-item tour-filter-option" href="#" data-guiding-id="{{ $guiding->id }}">
+                                    <div class="tour-filter-card-dropdown">
+                                        <div class="tour-filter-image-dropdown">
+                                            @if(get_featured_image_link($guiding))
+                                                <img src="{{get_featured_image_link($guiding)}}" alt="{{ $guiding->title }}" class="tour-filter-thumbnail-dropdown">
+                                            @else
+                                                <img src="{{asset('images/placeholder_guide.webp')}}" alt="{{ $guiding->title }}" class="tour-filter-thumbnail-dropdown">
+                                            @endif
+                                        </div>
+                                        <div class="tour-filter-info-dropdown">
+                                            <div class="tour-filter-title-dropdown">{{ Str::limit($guiding->title, 25) }}</div>
+                                            <small class="tour-filter-location-dropdown">{{ Str::limit($guiding->location, 20) }}</small>
+                                            <small class="tour-filter-price-dropdown">{{ $guiding->getLowestPrice() }}€</small>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+                
+                <!-- Filter Controls -->
+                <div class="filter-controls">
+                    <div class="filter-group mb-3">
+                        <label class="form-label">@lang('profile.filter-by-type'):</label>
+                        <div class="filter-buttons">
+                            <button class="filter-btn active" data-type="">@lang('profile.all')</button>
+                            <button class="filter-btn" data-type="tour_request">@lang('profile.bookings')</button>
+                            <button class="filter-btn" data-type="tour_schedule">@lang('profile.blocked')</button>
+                            <button class="filter-btn" data-type="vacation_schedule">@lang('profile.vacation')</button>
+                            <button class="filter-btn" data-type="custom_schedule">@lang('profile.custom')</button>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group mb-3">
+                        <label class="form-label">@lang('profile.filter-by-status'):</label>
+                        <div class="filter-buttons">
+                            <button class="filter-btn active" data-status="">@lang('profile.all')</button>
+                            <button class="filter-btn" data-status="accepted">@lang('profile.confirmed')</button>
+                            <button class="filter-btn" data-status="pending">@lang('profile.pending')</button>
+                            <button class="filter-btn" data-status="cancelled">@lang('profile.cancelled')</button>
+                            <button class="filter-btn" data-status="rejected">@lang('profile.rejected')</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addEventModal">
+                        <i class="fas fa-plus"></i> @lang('profile.add-event')
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="refreshCalendar()">
+                        <i class="fas fa-sync"></i> @lang('profile.refresh')
+                    </button>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Event Tooltip -->
-    <div id="eventTooltip" class="event-tooltip">
-        <div class="tooltip-content">
-            <!-- Content will be populated by JavaScript -->
+    <!-- Bottom Panel: Details Display -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div id="detailPanel" class="calendar-detail-panel">
+                            <div class="detail-panel-header">
+                <button class="close-panel-btn" onclick="closeDetailPanel()">&times;</button>
+                    <h4 id="detailPanelTitle">Schedule for Date</h4>
+                    <p id="detailPanelDate" class="mb-0"></p>
+            </div>
+            <div class="detail-panel-body">
+                    <div id="detailPanelContent" class="detail-content">
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-calendar-alt fa-3x mb-3"></i>
+                            <p>Click on a date to view schedule details</p>
+                </div>
+            </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -838,15 +1281,17 @@
 @endsection
 
 @section('js_after')
+    <!-- Litepicker JS -->
+    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
     <script>
-        document.querySelector('style').textContent += "@media screen and (max-width:767px) { .fc-toolbar.fc-header-toolbar {flex-direction:column;} .fc-toolbar-chunk { display: table-row; text-align:center; padding:5px 0; } }";
-        
-        let calendar;
+        let picker;
         let currentFilters = {
             guiding_id: '',
             type: '',
             status: ''
         };
+        let calendarEvents = {};
+        let selectedDate = null;
 
         document.addEventListener('DOMContentLoaded', function() {
             @if(app()->getLocale() == 'de')
@@ -855,73 +1300,399 @@
                 var locale = 'en';
             @endif
 
-            var calendarEl = document.getElementById('calendar');
-            calendar = new FullCalendar.Calendar(calendarEl, {
-                windowResize: true,
-                initialView: 'dayGridMonth',
-                height: 650,
-                locale: locale,
-                events: function(fetchInfo, successCallback, failureCallback) {
-                    fetch('/events?' + new URLSearchParams({
-                        start: fetchInfo.startStr,
-                        end: fetchInfo.endStr,
-                        ...currentFilters
-                    }))
-                    .then(response => response.json())
-                    .then(data => successCallback(data))
-                    .catch(error => failureCallback(error));
-                },
-                eventClick: function (info) {
-                    handleEventClick(info);
-                },
-                eventMouseEnter: function(info) {
-                    showEventTooltip(info);
-                },
-                eventMouseLeave: function(info) {
-                    hideEventTooltip();
-                },
-                eventDisplay: 'auto',
-                displayEventTime: false,
-                customButtons: {
-                    addEvent: {
-                        text: '@lang('profile.add-event')',
-                        click: function () {
-                            $('#addEventModal').modal('show');
-                        },
-                    },
-                    refreshEvents: {
-                        text: '@lang('profile.refresh')',
-                        click: function () {
-                            calendar.refetchEvents();
-                        },
-                    }
-                },
-                headerToolbar: {
-                    @if(!$agent->ismobile())
-                        center: 'title',
-                        left: 'dayGridMonth,timeGridWeek,timeGridDay',
-                        right: 'addEvent,refreshEvents,prev,next',
-                    @else
-                        right: 'prev,next',
-                    @endif
-                },
-                @if($agent->ismobile())
-                footerToolbar: {
-                    center: 'addEvent,refreshEvents',
-                }
-                @endif
-            });
-            calendar.render();
-
+            // Initialize calendar
+            initializeCalendar();
+            
             // Initialize filters
             initializeFilters();
             
             // Initialize forms
             initializeForms();
             
-            // Initialize tours slider
-            initializeToursSlider();
+            // Initialize tour dropdown
+            initializeTourDropdown();
+            
+            // Load initial events
+            loadCalendarEvents();
         });
+
+        function initializeCalendar() {
+            // Get blocked events for calendar
+            const blockedEvents = @json($blocked_events ?? []);
+            let lockDays = [];
+            
+            if (blockedEvents && typeof blockedEvents === 'object') {
+                lockDays = Object.values(blockedEvents).flatMap(event => {
+                    const fromDate = new Date(event.from);
+                    const dueDate = new Date(event.due);
+                    
+                    const dates = [];
+                    for (let d = new Date(fromDate); d <= dueDate; d.setDate(d.getDate() + 1)) {
+                        dates.push(d.toISOString().split('T')[0]);
+                    }
+                    return dates;
+                });
+            }
+
+            picker = new Litepicker({
+                element: document.getElementById('lite-datepicker'),
+                inlineMode: true,
+                singleDate: true,
+                numberOfColumns: window.innerWidth < 768 ? 1 : 2,
+                numberOfMonths: window.innerWidth < 768 ? 1 : 2,
+                lang: '{{app()->getLocale()}}',
+                lockDaysFormat: 'YYYY-MM-DD',
+                disallowLockDaysInRange: false,
+                allowRepick: true,
+                autoRefresh: true,
+                setup: (picker) => {
+                    window.addEventListener('resize', () => {
+                        picker.setOptions({
+                            numberOfColumns: window.innerWidth < 768 ? 1 : 2,
+                            numberOfMonths: window.innerWidth < 768 ? 1 : 2
+                        });
+                        // Reapply styles after resize
+                        setTimeout(updateCalendarDisplay, 500);
+                    });
+                },
+                onSelect: (date1, date2) => {
+                    if (date1) {
+                        let selectedDateStr;
+                        
+                        try {
+                            if (typeof date1 === 'string') {
+                                selectedDateStr = date1;
+                            } else if (date1.toISOString) {
+                                selectedDateStr = date1.toISOString().split('T')[0];
+                            } else if (date1.format) {
+                                selectedDateStr = date1.format('YYYY-MM-DD');
+                            } else if (date1.dateInstance) {
+                                selectedDateStr = date1.dateInstance.toISOString().split('T')[0];
+                            } else {
+                                const newDate = new Date(date1);
+                                selectedDateStr = newDate.toISOString().split('T')[0];
+                            }
+                            
+                            selectedDate = selectedDateStr;
+                            showDayDetails(selectedDateStr);
+                        } catch (error) {
+                            console.error('Error formatting selected date:', error, date1);
+                        }
+                    }
+                },
+                onShow: () => {
+                    setTimeout(updateCalendarDisplay, 1000);
+                },
+                onChangeMonth: () => {
+                    setTimeout(updateCalendarDisplay, 500);
+                },
+                onRender: () => {
+                    setTimeout(updateCalendarDisplay, 500);
+                }
+            });
+
+            // Additional fallback for date selection and color monitoring
+            setTimeout(() => {
+                const calendarContainer = document.getElementById('lite-datepicker');
+                if (calendarContainer) {
+                    // Click fallback
+                    calendarContainer.addEventListener('click', function(event) {
+                        const dayElement = event.target.closest('.day-item');
+                        if (dayElement && !dayElement.classList.contains('is-locked')) {
+                            const dayText = dayElement.textContent.trim();
+                            if (dayText && /^\d+$/.test(dayText)) {
+                                const monthContainer = dayElement.closest('.month-item');
+                                if (monthContainer) {
+                                    setTimeout(() => {
+                                        const currentDate = picker.getDate();
+                                        if (currentDate) {
+                                            let dateStr;
+                                            if (typeof currentDate === 'string') {
+                                                dateStr = currentDate;
+                                            } else if (currentDate.format) {
+                                                dateStr = currentDate.format('YYYY-MM-DD');
+                                            } else {
+                                                dateStr = currentDate.toISOString().split('T')[0];
+                                            }
+                                            selectedDate = dateStr;
+                                            showDayDetails(dateStr);
+                                        }
+                                    }, 100);
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Monitor DOM changes to reapply colors when calendar re-renders
+                    const observer = new MutationObserver(function(mutations) {
+                        let shouldUpdate = false;
+                        mutations.forEach(function(mutation) {
+                            if (mutation.type === 'childList') {
+                                const addedNodes = Array.from(mutation.addedNodes);
+                                if (addedNodes.some(node => 
+                                    node.nodeType === Node.ELEMENT_NODE && 
+                                    (node.classList?.contains('day-item') || 
+                                     node.querySelector?.('.day-item') ||
+                                     node.classList?.contains('month-item') ||
+                                     node.querySelector?.('.month-item'))
+                                )) {
+                                    shouldUpdate = true;
+                                }
+                            }
+                        });
+                        
+                        if (shouldUpdate) {
+                            setTimeout(updateCalendarDisplay, 300);
+                        }
+                    });
+                    
+                    observer.observe(calendarContainer, {
+                        childList: true,
+                        subtree: true
+                    });
+                }
+            }, 1000);
+        }
+
+        function loadCalendarEvents() {
+            const startDate = new Date();
+            startDate.setMonth(startDate.getMonth() - 6); // Load 6 months back
+            const endDate = new Date();
+            endDate.setMonth(endDate.getMonth() + 6); // Load 6 months forward
+            
+            fetch('/events?' + new URLSearchParams({
+                start: startDate.toISOString().split('T')[0],
+                end: endDate.toISOString().split('T')[0],
+                ...currentFilters
+            }))
+            .then(response => {
+                return response.json();
+            })
+            .then(data => {
+                calendarEvents = {};
+                
+                if (Array.isArray(data)) {
+                    data.forEach(event => {
+                        const dateKey = event.start ? event.start.split('T')[0] : event.date;
+                        if (dateKey) {
+                            if (!calendarEvents[dateKey]) {
+                                calendarEvents[dateKey] = [];
+                            }
+                            calendarEvents[dateKey].push(event);
+                        }
+                    });
+                } else {
+                    console.error('Events data is not an array:', data);
+                }
+                
+                updateCalendarDisplay();
+            })
+            .catch(error => {
+                console.error('Error loading calendar events:', error);
+            });
+        }
+
+        function updateCalendarDisplay() {
+            // Show loading overlay
+            const loadingOverlay = document.getElementById('calendarLoadingOverlay');
+            if (loadingOverlay) {
+                loadingOverlay.classList.add('show');
+            }
+            
+            console.log('=== STARTING COLOR UPDATE ===');
+            console.log('Calendar events available:', Object.keys(calendarEvents).length);
+            console.log('Events data:', calendarEvents);
+            
+            setTimeout(() => {
+                // First, completely reset ALL day elements
+                const allDayElements = document.querySelectorAll('.day-item');
+                console.log(`Found ${allDayElements.length} total day elements to reset`);
+                
+                allDayElements.forEach(dayEl => {
+                    // Remove ALL possible color classes
+                    dayEl.classList.remove('booking-accepted', 'booking-pending', 'booking-rejected', 'booking-cancelled', 'custom-event', 'blocked-tour');
+                    // Reset to default white background
+                    dayEl.style.backgroundColor = '';
+                    dayEl.style.border = '';
+                    dayEl.style.color = '';
+                    dayEl.style.cursor = 'pointer';
+                });
+                
+                // Get all month containers for better date matching
+                const monthContainers = document.querySelectorAll('.month-item');
+                console.log(`Found ${monthContainers.length} month containers`);
+                
+                // Get currently visible months from the calendar
+                const visibleMonths = [];
+                monthContainers.forEach(monthContainer => {
+                    const monthHeader = monthContainer.querySelector('.month-item-header div');
+                    if (monthHeader) {
+                        const headerText = monthHeader.textContent.trim();
+                        visibleMonths.push(headerText);
+                    }
+                });
+                console.log(`Currently visible months: [${visibleMonths.join(', ')}]`);
+
+                Object.keys(calendarEvents).forEach(dateKey => {
+                    const events = calendarEvents[dateKey];
+                    const date = new Date(dateKey);
+                    const dayNumber = date.getDate();
+                    const monthName = date.toLocaleDateString('en-US', { month: 'long' });
+                    const year = date.getFullYear();
+                    
+                    console.log(`\n--- Processing ${dateKey} (day ${dayNumber}, ${monthName} ${year}) with ${events.length} events ---`);
+                    
+                    // Check if this event date is for a currently visible month
+                    const isMonthVisible = visibleMonths.some(visibleMonth => {
+                        // Handle different month name formats (Juni vs June, etc.)
+                        const cleanVisible = visibleMonth.toLowerCase().replace(/\s+/g, '');
+                        const targetMonth = monthName.toLowerCase();
+                        const targetYear = year.toString();
+                        
+                        // Check various month name variations
+                        const monthVariations = {
+                            'january': ['januar', 'january'],
+                            'february': ['februar', 'february'],
+                            'march': ['märz', 'march'],
+                            'april': ['april'],
+                            'may': ['mai', 'may'],
+                            'june': ['juni', 'june'],
+                            'july': ['juli', 'july'],
+                            'august': ['august'],
+                            'september': ['september'],
+                            'october': ['oktober', 'october'],
+                            'november': ['november'],
+                            'december': ['dezember', 'december']
+                        };
+                        
+                        const possibleNames = monthVariations[targetMonth] || [targetMonth];
+                        
+                        return possibleNames.some(name => 
+                            cleanVisible.includes(name) && cleanVisible.includes(targetYear)
+                        );
+                    });
+                    
+                    if (!isMonthVisible) {
+                        console.log(`⏭ Skipping ${dateKey} - not in currently visible months`);
+                        return;
+                    }
+                    
+                    console.log(`✓ Event date matches visible month, proceeding...`);
+                    
+                    let foundDayElements = [];
+                    
+                    // Strategy: Find the correct month container first, then find the day
+                    monthContainers.forEach(monthContainer => {
+                        const monthHeader = monthContainer.querySelector('.month-item-header div');
+                        if (monthHeader) {
+                            const headerText = monthHeader.textContent.trim();
+                            console.log(`Checking month header: "${headerText}"`);
+                            
+                            // More flexible month matching
+                            const cleanHeader = headerText.toLowerCase().replace(/\s+/g, '');
+                            const targetMonth = monthName.toLowerCase();
+                            const targetYear = year.toString();
+                            
+                            const monthVariations = {
+                                'january': ['januar', 'january'],
+                                'february': ['februar', 'february'],
+                                'march': ['märz', 'march'],
+                                'april': ['april'],
+                                'may': ['mai', 'may'],
+                                'june': ['juni', 'june'],
+                                'july': ['juli', 'july'],
+                                'august': ['august'],
+                                'september': ['september'],
+                                'october': ['oktober', 'october'],
+                                'november': ['november'],
+                                'december': ['dezember', 'december']
+                            };
+                            
+                            const possibleNames = monthVariations[targetMonth] || [targetMonth];
+                            const monthMatches = possibleNames.some(name => cleanHeader.includes(name));
+                            const yearMatches = cleanHeader.includes(targetYear);
+                            
+                            if (monthMatches && yearMatches) {
+                                console.log(`✓ Found matching month container for ${monthName} ${year}`);
+                                
+                                // Now find the day within this month
+                                const dayElements = monthContainer.querySelectorAll('.day-item');
+                                dayElements.forEach(dayEl => {
+                                    if (dayEl.textContent.trim() === dayNumber.toString()) {
+                                        foundDayElements.push(dayEl);
+                                        console.log(`✓ Found day element for ${dayNumber} in correct month`);
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    
+                    if (foundDayElements.length === 0) {
+                        console.log(`❌ No day elements found for ${dateKey} in visible months`);
+                        return;
+                    }
+                    
+                    // Apply colors to found elements
+                    foundDayElements.forEach((dayEl, index) => {
+                        console.log(`Applying colors to day element ${index + 1}/${foundDayElements.length} for ${dateKey}`);
+                        
+                        // Remove existing classes first
+                        dayEl.classList.remove('booking-accepted', 'booking-pending', 'booking-rejected', 'booking-cancelled', 'custom-event', 'blocked-tour');
+                        
+                        // Categorize events
+                        const bookings = events.filter(e => e.extendedProps && e.extendedProps.booking);
+                        const blockedTours = events.filter(e => e.extendedProps && e.extendedProps.type && 
+                            (e.extendedProps.type === 'tour_schedule' || e.extendedProps.type === 'vacation_schedule'));
+                        const customEvents = events.filter(e => e.extendedProps && e.extendedProps.type === 'custom_schedule');
+                        
+                        console.log(`  Events breakdown: ${bookings.length} bookings, ${blockedTours.length} blocked, ${customEvents.length} custom`);
+                        
+                        // Apply priority-based coloring
+                        if (bookings.length > 0) {
+                            const statuses = bookings.map(b => b.extendedProps.booking.status);
+                            console.log(`  Booking statuses:`, statuses);
+                            
+                            if (statuses.includes('accepted')) {
+                                dayEl.classList.add('booking-accepted');
+                                console.log(`  ✓ Applied booking-accepted`);
+                            } else if (statuses.includes('pending')) {
+                                dayEl.classList.add('booking-pending');
+                                console.log(`  ✓ Applied booking-pending`);
+                            } else if (statuses.includes('rejected')) {
+                                dayEl.classList.add('booking-rejected');
+                                console.log(`  ✓ Applied booking-rejected`);
+                            } else if (statuses.includes('cancelled')) {
+                                dayEl.classList.add('booking-cancelled');
+                                console.log(`  ✓ Applied booking-cancelled`);
+                            }
+                        } else if (customEvents.length > 0) {
+                            dayEl.classList.add('custom-event');
+                            console.log(`  ✓ Applied custom-event`);
+                        }
+                        
+                        // Add blocked tour indicator
+                        if (blockedTours.length > 0) {
+                            dayEl.classList.add('blocked-tour');
+                            console.log(`  ✓ Applied blocked-tour (dot)`);
+                        }
+                        
+                        // Ensure clickability
+                        dayEl.style.cursor = 'pointer';
+                    });
+                });
+                
+                console.log('=== COLOR UPDATE COMPLETE ===\n');
+                
+                // Hide loading overlay
+                if (loadingOverlay) {
+                    loadingOverlay.classList.remove('show');
+                }
+            }, 1500);
+        }
+
+        function refreshCalendar() {
+            loadCalendarEvents();
+        }
 
         function initializeFilters() {
             // Type filter buttons
@@ -933,7 +1704,7 @@
                     this.classList.add('active');
                     // Update filter
                     currentFilters.type = this.dataset.type;
-                    calendar.refetchEvents();
+                    loadCalendarEvents();
                 });
             });
 
@@ -946,52 +1717,322 @@
                     this.classList.add('active');
                     // Update filter
                     currentFilters.status = this.dataset.status;
-                    calendar.refetchEvents();
+                    loadCalendarEvents();
                 });
             });
         }
 
-        function initializeToursSlider() {
-            // Initialize Owl Carousel for tours with minimal settings
-            $('.tours-slider').owlCarousel({
-                items: 4,
-                margin: 8,
-                nav: true,
-                dots: true,
-                autoWidth: false,
-                responsive: {
-                    0: { items: 1 },
-                    576: { items: 2 },
-                    768: { items: 3 },
-                    992: { items: 4 },
-                    1200: { items: 5 }
-                }
-            });
-
-            // Handle tour card clicks
-            document.querySelectorAll('.tour-filter-card').forEach(card => {
-                card.addEventListener('click', function() {
-                    // Remove active class from all tour cards
-                    document.querySelectorAll('.tour-filter-card').forEach(c => c.classList.remove('active'));
-                    // Add active class to clicked card
+        function initializeTourDropdown() {
+            // Handle tour filter dropdown selection
+            document.querySelectorAll('.tour-filter-option').forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all options
+                    document.querySelectorAll('.tour-filter-option').forEach(opt => opt.classList.remove('active'));
+                    // Add active class to clicked option
                     this.classList.add('active');
                     
                     // Update filter
                     const guidingId = this.dataset.guidingId;
                     currentFilters.guiding_id = guidingId;
                     
-                    // Refresh calendar
-                    calendar.refetchEvents();
+                    // Update dropdown button text
+                    const selectedText = guidingId ? 
+                        this.querySelector('.tour-filter-title-dropdown').textContent : 
+                        '@lang('profile.all-tours')';
+                    document.getElementById('selectedTourText').textContent = selectedText;
                     
-                    // Show success message
-                    if (guidingId) {
-                        const tourTitle = this.querySelector('.tour-filter-title').textContent;
-                        showAlert('success', `Filtering events for: ${tourTitle}`);
-                    } else {
-                        showAlert('info', 'Showing all tours');
+                    // Refresh calendar
+                    loadCalendarEvents();
+                    
+                    // Close dropdown
+                    const dropdown = bootstrap.Dropdown.getInstance(document.getElementById('tourFilterDropdown'));
+                    if (dropdown) {
+                        dropdown.hide();
                     }
                 });
             });
+        }
+
+        function showDayDetails(dateStr) {            
+            const panel = document.getElementById('detailPanel');
+            const title = document.getElementById('detailPanelTitle');
+            const dateElement = document.getElementById('detailPanelDate');
+            const content = document.getElementById('detailPanelContent');
+            
+            // Format date for display
+            const date = new Date(dateStr);
+            const formattedDate = date.toLocaleDateString('{{app()->getLocale()}}', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            title.textContent = 'Schedule for Date';
+            dateElement.textContent = formattedDate;
+            
+            // Get events for this date
+            const dayEvents = calendarEvents[dateStr] || [];
+            
+            if (dayEvents.length === 0) {
+                content.innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-calendar-check fa-2x mb-3"></i>
+                        <p>No events scheduled for this date</p>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addEventModal">
+                            <i class="fas fa-plus"></i> Add Event
+                        </button>
+                    </div>
+                `;
+            } else {
+                let contentHtml = '<div class="row">';
+                
+                // Group events by type
+                const bookings = dayEvents.filter(e => e.extendedProps && e.extendedProps.booking);
+                const blockedTours = dayEvents.filter(e => e.extendedProps && e.extendedProps.type && 
+                    (e.extendedProps.type === 'tour_schedule' || e.extendedProps.type === 'vacation_schedule'));
+                const customEvents = dayEvents.filter(e => e.extendedProps && e.extendedProps.type === 'custom_schedule');
+                const otherEvents = dayEvents.filter(e => !e.extendedProps || (!e.extendedProps.booking && 
+                    e.extendedProps.type !== 'tour_schedule' && e.extendedProps.type !== 'vacation_schedule' && 
+                    e.extendedProps.type !== 'custom_schedule'));
+                
+                // Display bookings
+                if (bookings.length > 0) {
+                    contentHtml += `
+                        <div class="col-md-6">
+                            <div class="detail-card">
+                                <h6><i class="fas fa-calendar-check"></i> Bookings (${bookings.length})</h6>
+                                <div class="detail-card-content">
+                    `;
+                    
+                    bookings.forEach(event => {
+                        const booking = event.extendedProps.booking;
+                        const user = event.extendedProps.user;
+                        const guiding = event.extendedProps.guiding;
+                        
+                        contentHtml += `
+                            <div class="schedule-item">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="mb-1">${guiding ? guiding.title : 'Tour Booking'}</h6>
+                                    <span class="status-badge status-${booking.status}">${booking.status}</span>
+                                </div>
+                                <div class="schedule-details">
+                                    <small><i class="fas fa-user"></i> ${user ? user.firstname + ' ' + user.lastname : 'Guest User'}</small>
+                                    <small><i class="fas fa-users"></i> ${booking.count_of_users} guests</small>
+                                    <small><i class="fas fa-euro-sign"></i> ${booking.price}€</small>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary mt-2" onclick="showBookingDetails('${booking.id}')">
+                                    View Details
+                                </button>
+                            </div>
+                        `;
+                    });
+                    
+                    contentHtml += '</div></div></div>';
+                }
+                
+                // Display blocked tours
+                if (blockedTours.length > 0) {
+                    contentHtml += `
+                        <div class="col-md-6">
+                            <div class="detail-card">
+                                <h6><i class="fas fa-ban"></i> Blocked Tours (${blockedTours.length})</h6>
+                                <div class="detail-card-content">
+                    `;
+                    
+                    blockedTours.forEach(event => {
+                        const type = getTypeLabel(event.extendedProps.type);
+                        const canDelete = event.extendedProps.canDelete;
+                        const guiding = event.extendedProps.guiding;
+                        
+                        contentHtml += `
+                            <div class="schedule-item">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="mb-1">${event.title || (guiding ? guiding.title : 'Blocked Tour')}</h6>
+                                    <span class="badge bg-warning">${type}</span>
+                                </div>
+                                <div class="schedule-details">
+                                    <small><i class="fas fa-clock"></i> ${event.extendedProps.date || dateStr}</small>
+                                    ${event.extendedProps.note ? `<small><i class="fas fa-note-sticky"></i> ${event.extendedProps.note}</small>` : ''}
+                                    ${guiding ? `
+                                        <small><i class="fas fa-map-marker-alt"></i> ${guiding.location}</small>
+                                        <small><i class="fas fa-fishing"></i> ${guiding.title}</small>
+                                        <small><i class="fas fa-users"></i> Max ${guiding.max_guests} guests</small>
+                                        <small><i class="fas fa-clock"></i> ${guiding.duration} hours</small>
+                                        <small><i class="fas fa-euro-sign"></i> From ${guiding.price}€</small>
+                                    ` : ''}
+                                </div>
+                                ${canDelete ? `<button class="btn btn-sm btn-outline-danger mt-2" onclick="deleteEvent('${event.extendedProps.scheduleId}')"><i class="fas fa-trash"></i> Delete</button>` : ''}
+                            </div>
+                        `;
+                    });
+                    
+                    contentHtml += '</div></div></div>';
+                }
+                
+                // Display custom events
+                if (customEvents.length > 0) {
+                    contentHtml += `
+                        <div class="col-md-6 mb-4">
+                            <div class="detail-card">
+                                <h6><i class="fas fa-calendar-plus text-info"></i> @lang('profile.custom-events') (${customEvents.length})</h6>
+                                <div class="detail-card-content">
+                    `;
+                    
+                    customEvents.forEach(event => {
+                        const type = getTypeLabel(event.extendedProps.type);
+                        const canDelete = event.extendedProps.canDelete;
+                        
+                        contentHtml += `
+                            <div class="schedule-item mb-3 p-3 border rounded">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="mb-1">${event.title || 'Custom Event'}</h6>
+                                    <span class="badge bg-info">${type}</span>
+                                </div>
+                                <div class="schedule-details">
+                                    <small class="text-muted d-block">
+                                        <i class="fas fa-clock"></i> ${event.extendedProps.date || dateStr}
+                                    </small>
+                                    ${event.extendedProps.note ? `<small class="text-muted d-block"><i class="fas fa-note-sticky"></i> ${event.extendedProps.note}</small>` : ''}
+                                </div>
+                                ${canDelete ? `<button class="btn btn-sm btn-outline-danger mt-2" onclick="deleteEvent('${event.extendedProps.scheduleId}')"><i class="fas fa-trash"></i> @lang('profile.delete')</button>` : ''}
+                            </div>
+                        `;
+                    });
+                    
+                    contentHtml += '</div></div></div>';
+                }
+                
+                // Display other events if any
+                if (otherEvents.length > 0) {
+                    contentHtml += `
+                        <div class="col-md-6 mb-4">
+                            <div class="detail-card">
+                                <h6><i class="fas fa-calendar text-secondary"></i> @lang('profile.other-events') (${otherEvents.length})</h6>
+                                <div class="detail-card-content">
+                    `;
+                    
+                    otherEvents.forEach(event => {
+                        const type = event.extendedProps ? getTypeLabel(event.extendedProps.type) : 'Event';
+                        const canDelete = event.extendedProps ? event.extendedProps.canDelete : false;
+                        
+                        contentHtml += `
+                            <div class="schedule-item mb-3 p-3 border rounded">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="mb-1">${event.title || 'Event'}</h6>
+                                    <span class="badge bg-secondary">${type}</span>
+                                </div>
+                                <div class="schedule-details">
+                                    <small class="text-muted d-block">
+                                        <i class="fas fa-clock"></i> ${event.extendedProps ? event.extendedProps.date : dateStr}
+                                    </small>
+                                    ${event.extendedProps && event.extendedProps.note ? `<small class="text-muted d-block"><i class="fas fa-note-sticky"></i> ${event.extendedProps.note}</small>` : ''}
+                                </div>
+                                ${canDelete ? `<button class="btn btn-sm btn-outline-danger mt-2" onclick="deleteEvent('${event.extendedProps.scheduleId}')"><i class="fas fa-trash"></i> @lang('profile.delete')</button>` : ''}
+                            </div>
+                        `;
+                    });
+                    
+                    contentHtml += '</div></div></div>';
+                }
+                
+                contentHtml += '</div>';
+                content.innerHTML = contentHtml;
+            }
+            
+            // Show panel
+            panel.classList.add('show');
+            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function showBookingDetails(bookingId) {
+            // Find the booking in our current events data
+            let booking = null;
+            let bookingEvent = null;
+            
+            Object.values(calendarEvents).forEach(dayEvents => {
+                dayEvents.forEach(event => {
+                    if (event.extendedProps && event.extendedProps.booking && event.extendedProps.booking.id == bookingId) {
+                        booking = event.extendedProps.booking;
+                        bookingEvent = event;
+                    }
+                });
+            });
+            
+            if (!booking) {
+                showAlert('error', 'Booking details not found');
+                return;
+            }
+            
+            const user = bookingEvent.extendedProps.user;
+            const guiding = bookingEvent.extendedProps.guiding;
+            
+            // Populate the booking detail modal
+            const bookingDetailsHtml = `
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-0 mb-3">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0"><i class="fas fa-calendar-check"></i> Booking Information</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Status:</strong> <span class="status-badge status-${booking.status}">${booking.status.toUpperCase()}</span></p>
+                                        <p><strong>Date:</strong> ${booking.book_date}</p>
+                                        <p><strong>Guests:</strong> ${booking.count_of_users} ${booking.count_of_users > 1 ? 'people' : 'person'}</p>
+                                        <p><strong>Price:</strong> ${booking.price}€</p>
+                                        ${booking.total_extra_price ? `<p><strong>Extra Services:</strong> ${booking.total_extra_price}€</p>` : ''}
+                                    </div>
+                                    <div class="col-md-6">
+                                        ${user ? `
+                                            <p><strong>Customer:</strong> ${user.firstname} ${user.lastname}</p>
+                                            <p><strong>Email:</strong> ${user.email}</p>
+                                            ${user.phone ? `<p><strong>Phone:</strong> ${user.phone}</p>` : ''}
+                                        ` : `
+                                            <p><strong>Customer:</strong> Guest User</p>
+                                            ${booking.email ? `<p><strong>Email:</strong> ${booking.email}</p>` : ''}
+                                            ${booking.phone ? `<p><strong>Phone:</strong> ${booking.phone}</p>` : ''}
+                                        `}
+                                        <p><strong>Guest Booking:</strong> ${booking.is_guest ? 'Yes' : 'No'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        ${guiding ? `
+                        <div class="card border-0">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0"><i class="fas fa-fishing"></i> Tour Information</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Tour:</strong> ${guiding.title}</p>
+                                        <p><strong>Location:</strong> ${guiding.location}</p>
+                                        <p><strong>Duration:</strong> ${guiding.duration} hours</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Max Guests:</strong> ${guiding.max_guests}</p>
+                                        <p><strong>Base Price:</strong> ${guiding.price}€</p>
+                                        ${guiding.meeting_point ? `<p><strong>Meeting Point:</strong> ${guiding.meeting_point}</p>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            // Set the modal content and show it
+            document.getElementById('bookingDetails').innerHTML = bookingDetailsHtml;
+            
+            // Show the modal using Bootstrap
+            const modal = new bootstrap.Modal(document.getElementById('bookingDetailModal'));
+            modal.show();
         }
 
         function initializeForms() {
@@ -1060,7 +2101,7 @@
                 .then(data => {
                     if (data.success) {
                         $('#addEventModal').modal('hide');
-                        calendar.refetchEvents();
+                        loadCalendarEvents();
                         showAlert('success', data.message);
                         document.getElementById('addEventForm').reset();
                         // Reset the min attribute when form is reset
@@ -1084,135 +2125,6 @@
             });
         }
 
-        function handleEventClick(info) {
-            const event = info.event;
-            const extendedProps = event.extendedProps;
-            hideEventTooltip(); // Hide tooltip when showing detail panel
-            showDetailPanel(extendedProps);
-        }
-        
-        function showEventTooltip(info) {
-            const event = info.event;
-            const extendedProps = event.extendedProps;
-            const tooltip = document.getElementById('eventTooltip');
-            
-            let content = `<div class="tooltip-header">${event.title}</div>`;
-            
-            if (extendedProps.booking) {
-                const booking = extendedProps.booking;
-                const user = extendedProps.user;
-                
-                content += `
-                    <div class="tooltip-row">
-                        <span class="tooltip-label">Status:</span>
-                        <span class="tooltip-value">${booking.status}</span>
-                    </div>
-                    <div class="tooltip-row">
-                        <span class="tooltip-label">Guests:</span>
-                        <span class="tooltip-value">${booking.count_of_users}</span>
-                    </div>
-                    <div class="tooltip-row">
-                        <span class="tooltip-label">Price:</span>
-                        <span class="tooltip-value">${booking.price}€</span>
-                    </div>
-                `;
-                
-                if (user && user.email) {
-                    content += `
-                        <div class="tooltip-row">
-                            <span class="tooltip-label">Email:</span>
-                            <span class="tooltip-value">${user.email}</span>
-                        </div>
-                    `;
-                }
-            } else {
-                content += `
-                    <div class="tooltip-row">
-                        <span class="tooltip-label">Type:</span>
-                        <span class="tooltip-value">${getTypeLabel(extendedProps.type)}</span>
-                    </div>
-                    <div class="tooltip-row">
-                        <span class="tooltip-label">Date:</span>
-                        <span class="tooltip-value">${extendedProps.date}</span>
-                    </div>
-                `;
-            }
-            
-            content += '<div style="margin-top: 8px; font-size: 11px; opacity: 0.7;">Click for details</div>';
-            
-            tooltip.querySelector('.tooltip-content').innerHTML = content;
-            
-            // Position tooltip properly relative to the event element
-            const rect = info.el.getBoundingClientRect();
-            const tooltipRect = tooltip.getBoundingClientRect();
-            const viewportWidth = window.innerWidth;
-            const viewportHeight = window.innerHeight;
-            
-            // Calculate initial position (centered above the event)
-            let left = rect.left + (rect.width / 2);
-            let top = rect.top - 15; // 15px gap above the event
-            
-            // Make tooltip visible to get accurate dimensions
-            tooltip.style.opacity = '0';
-            tooltip.style.display = 'block';
-            tooltip.classList.add('show');
-            
-            // Get actual tooltip dimensions after content is set
-            const actualTooltipRect = tooltip.getBoundingClientRect();
-            
-            // Adjust horizontal position to center tooltip
-            left = left - (actualTooltipRect.width / 2);
-            
-            // Ensure tooltip doesn't go off-screen horizontally
-            if (left < 10) {
-                left = 10;
-            } else if (left + actualTooltipRect.width > viewportWidth - 10) {
-                left = viewportWidth - actualTooltipRect.width - 10;
-            }
-            
-            // Adjust vertical position if tooltip would go off-screen
-            if (top < 10) {
-                // Show below the event instead
-                top = rect.bottom + 10;
-                // Flip the arrow by adjusting CSS
-                tooltip.style.setProperty('--arrow-position', 'top');
-            } else {
-                top = top - actualTooltipRect.height;
-                tooltip.style.setProperty('--arrow-position', 'bottom');
-            }
-            
-            // Apply final position
-            tooltip.style.left = left + 'px';
-            tooltip.style.top = top + 'px';
-            tooltip.style.opacity = '1';
-        }
-        
-        function hideEventTooltip() {
-            const tooltip = document.getElementById('eventTooltip');
-            tooltip.classList.remove('show');
-            // Reset all inline styles set by JavaScript
-            tooltip.style.display = 'none';
-            tooltip.style.opacity = '0';
-            tooltip.style.left = '';
-            tooltip.style.top = '';
-        }
-        
-        function showDetailPanel(extendedProps) {
-            const panel = document.getElementById('detailPanel');
-            const title = document.getElementById('detailPanelTitle');
-            const subtitle = document.getElementById('detailPanelSubtitle');
-            const content = document.getElementById('detailPanelContent');
-            
-            if (extendedProps.booking) {
-                showBookingDetailPanel(extendedProps);
-            } else {
-                showEventDetailPanel(extendedProps);
-            }
-            
-            panel.classList.add('show');
-            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-        
         function closeDetailPanel() {
             const panel = document.getElementById('detailPanel');
             panel.classList.remove('show');
@@ -1406,7 +2318,7 @@
             .then(data => {
                 if (data.success) {
                     $('#deleteEventModal').modal('hide');
-                    calendar.refetchEvents();
+                    loadCalendarEvents();
                     showAlert('success', data.message);
                 } else {
                     showAlert('error', data.error || 'Error deleting event');

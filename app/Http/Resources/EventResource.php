@@ -23,12 +23,62 @@ class EventResource extends JsonResource
         $title = $this->getDisplayTitle();
         $color = $this->getEventColor();
         
-        // Don't show blocked tour_schedule events to reduce clutter
+        // For blocked tour_schedule events, we still want to return them for the dots
+        // but with a special marker so the frontend knows how to handle them
         if ($this->type === 'tour_schedule' && !$title) {
-            return null;
+            return [
+                'id' => $this->id,
+                'start' => $this->date,
+                'end' => $this->date,
+                'title' => 'Blocked Tour', // Provide a default title
+                'color' => $color,
+                'backgroundColor' => 'transparent', // Make background transparent for dots
+                'borderColor' => $color,
+                'textColor' => $color,
+                'allDay' => true,
+                'display' => 'dot', // Special marker for dot display
+                
+                // Event type and status information
+                'type' => $this->type,
+                'status' => $status,
+                'note' => $this->note,
+                
+                // Extended properties for modal display
+                'extendedProps' => [
+                    'scheduleId' => $this->id,
+                    'type' => $this->type,
+                    'status' => $status,
+                    'note' => $this->note ?: 'Tour blocked on this date',
+                    'date' => $this->date,
+                    
+                    // Booking information (if available)
+                    'booking' => null,
+                    
+                    // User information (if available)
+                    'user' => null,
+                    
+                    // Guiding information (if available)
+                    'guiding' => $this->guiding ? [
+                        'id' => $this->guiding->id,
+                        'title' => $this->guiding->title,
+                        'location' => $this->guiding->location,
+                        'meeting_point' => $this->guiding->meeting_point,
+                        'duration' => $this->guiding->duration,
+                        'price' => $this->guiding->price,
+                        'max_guests' => $this->guiding->max_guests,
+                    ] : null,
+                    
+                    // Vacation information (if available)  
+                    'vacation' => null,
+                    
+                    // Permissions
+                    'canEdit' => $this->user_id === auth()->id(),
+                    'canDelete' => $this->user_id === auth()->id() && !in_array($this->type, ['tour_request']),
+                ]
+            ];
         }
         
-        // Skip events with no title
+        // Skip events with no title (but we've already handled tour_schedule above)
         if (!$title) {
             return null;
         }

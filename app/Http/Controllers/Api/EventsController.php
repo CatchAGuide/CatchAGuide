@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreBlockedEventRequest;
 use App\Http\Resources\EventResource;
-use App\Models\BlockedEvent;
 use App\Models\CalendarSchedule;
 use App\Models\Guiding;
 use Carbon\Carbon;
