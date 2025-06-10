@@ -1319,6 +1319,7 @@
         function initializeCalendar() {
             // Get blocked events for calendar
             const blockedEvents = @json($blocked_events ?? []);
+            console.log(blockedEvents);
             let lockDays = [];
             
             if (blockedEvents && typeof blockedEvents === 'object') {
@@ -1499,14 +1500,9 @@
                 loadingOverlay.classList.add('show');
             }
             
-            console.log('=== STARTING COLOR UPDATE ===');
-            console.log('Calendar events available:', Object.keys(calendarEvents).length);
-            console.log('Events data:', calendarEvents);
-            
             setTimeout(() => {
                 // First, completely reset ALL day elements
                 const allDayElements = document.querySelectorAll('.day-item');
-                console.log(`Found ${allDayElements.length} total day elements to reset`);
                 
                 allDayElements.forEach(dayEl => {
                     // Remove ALL possible color classes
@@ -1520,7 +1516,6 @@
                 
                 // Get all month containers for better date matching
                 const monthContainers = document.querySelectorAll('.month-item');
-                console.log(`Found ${monthContainers.length} month containers`);
                 
                 // Get currently visible months from the calendar
                 const visibleMonths = [];
@@ -1531,7 +1526,6 @@
                         visibleMonths.push(headerText);
                     }
                 });
-                console.log(`Currently visible months: [${visibleMonths.join(', ')}]`);
 
                 Object.keys(calendarEvents).forEach(dateKey => {
                     const events = calendarEvents[dateKey];
@@ -1539,8 +1533,6 @@
                     const dayNumber = date.getDate();
                     const monthName = date.toLocaleDateString('en-US', { month: 'long' });
                     const year = date.getFullYear();
-                    
-                    console.log(`\n--- Processing ${dateKey} (day ${dayNumber}, ${monthName} ${year}) with ${events.length} events ---`);
                     
                     // Check if this event date is for a currently visible month
                     const isMonthVisible = visibleMonths.some(visibleMonth => {
@@ -1573,11 +1565,9 @@
                     });
                     
                     if (!isMonthVisible) {
-                        console.log(`⏭ Skipping ${dateKey} - not in currently visible months`);
                         return;
                     }
                     
-                    console.log(`✓ Event date matches visible month, proceeding...`);
                     
                     let foundDayElements = [];
                     
@@ -1586,7 +1576,6 @@
                         const monthHeader = monthContainer.querySelector('.month-item-header div');
                         if (monthHeader) {
                             const headerText = monthHeader.textContent.trim();
-                            console.log(`Checking month header: "${headerText}"`);
                             
                             // More flexible month matching
                             const cleanHeader = headerText.toLowerCase().replace(/\s+/g, '');
@@ -1613,14 +1602,12 @@
                             const yearMatches = cleanHeader.includes(targetYear);
                             
                             if (monthMatches && yearMatches) {
-                                console.log(`✓ Found matching month container for ${monthName} ${year}`);
                                 
                                 // Now find the day within this month
                                 const dayElements = monthContainer.querySelectorAll('.day-item');
                                 dayElements.forEach(dayEl => {
                                     if (dayEl.textContent.trim() === dayNumber.toString()) {
                                         foundDayElements.push(dayEl);
-                                        console.log(`✓ Found day element for ${dayNumber} in correct month`);
                                     }
                                 });
                             }
@@ -1628,13 +1615,11 @@
                     });
                     
                     if (foundDayElements.length === 0) {
-                        console.log(`❌ No day elements found for ${dateKey} in visible months`);
                         return;
                     }
                     
                     // Apply colors to found elements
                     foundDayElements.forEach((dayEl, index) => {
-                        console.log(`Applying colors to day element ${index + 1}/${foundDayElements.length} for ${dateKey}`);
                         
                         // Remove existing classes first
                         dayEl.classList.remove('booking-accepted', 'booking-pending', 'booking-rejected', 'booking-cancelled', 'custom-event', 'blocked-tour');
@@ -1645,43 +1630,33 @@
                             (e.extendedProps.type === 'tour_schedule' || e.extendedProps.type === 'vacation_schedule'));
                         const customEvents = events.filter(e => e.extendedProps && e.extendedProps.type === 'custom_schedule');
                         
-                        console.log(`  Events breakdown: ${bookings.length} bookings, ${blockedTours.length} blocked, ${customEvents.length} custom`);
                         
                         // Apply priority-based coloring
                         if (bookings.length > 0) {
                             const statuses = bookings.map(b => b.extendedProps.booking.status);
-                            console.log(`  Booking statuses:`, statuses);
                             
                             if (statuses.includes('accepted')) {
                                 dayEl.classList.add('booking-accepted');
-                                console.log(`  ✓ Applied booking-accepted`);
                             } else if (statuses.includes('pending')) {
                                 dayEl.classList.add('booking-pending');
-                                console.log(`  ✓ Applied booking-pending`);
                             } else if (statuses.includes('rejected')) {
                                 dayEl.classList.add('booking-rejected');
-                                console.log(`  ✓ Applied booking-rejected`);
                             } else if (statuses.includes('cancelled')) {
                                 dayEl.classList.add('booking-cancelled');
-                                console.log(`  ✓ Applied booking-cancelled`);
                             }
                         } else if (customEvents.length > 0) {
                             dayEl.classList.add('custom-event');
-                            console.log(`  ✓ Applied custom-event`);
                         }
                         
                         // Add blocked tour indicator
                         if (blockedTours.length > 0) {
                             dayEl.classList.add('blocked-tour');
-                            console.log(`  ✓ Applied blocked-tour (dot)`);
                         }
                         
                         // Ensure clickability
                         dayEl.style.cursor = 'pointer';
                     });
                 });
-                
-                console.log('=== COLOR UPDATE COMPLETE ===\n');
                 
                 // Hide loading overlay
                 if (loadingOverlay) {

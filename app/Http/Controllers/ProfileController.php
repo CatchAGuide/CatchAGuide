@@ -316,7 +316,6 @@ class ProfileController extends Controller
     {
         // Get user's guidings for the filter dropdown
         $userGuidings = Guiding::where('user_id', auth()->id())
-            ->select('id', 'title', 'location')
             ->orderBy('title')
             ->get();
         

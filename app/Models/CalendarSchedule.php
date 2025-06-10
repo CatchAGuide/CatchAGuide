@@ -33,12 +33,6 @@ class CalendarSchedule extends Model
 
     public function user()
     {
-        // If this schedule has a booking, use the booking's user relationship
-        if ($this->booking) {
-            return $this->booking->user();
-        }
-        
-        // Otherwise, default to regular user relationship
         return $this->belongsTo(User::class);
     }
 

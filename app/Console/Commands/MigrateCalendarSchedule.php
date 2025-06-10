@@ -217,7 +217,7 @@ class MigrateCalendarSchedule extends Command
                 $note .= " ({$userType} error: {$e->getMessage()}) [{$tableRef}.id={$booking->user_id}]";
             }
             
-            CalendarSchedule::create([
+            $calendarSchedule = CalendarSchedule::create([
                 'type' => 'tour_request',
                 'date' => Carbon::parse($booking->book_date)->format('Y-m-d'),
                 'note' => $note,
@@ -226,7 +226,10 @@ class MigrateCalendarSchedule extends Command
                 'vacation_id' => null,
                 'booking_id' => $booking->id,
             ]);
-            
+
+            $booking->blocked_event_id = $calendarSchedule->id;
+            $booking->save();
+
             $bookingType = $booking->is_guest ? 'Guest' : 'User';
             $this->info("Created schedule for {$bookingType} booking ID: {$booking->id}");
             

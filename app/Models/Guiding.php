@@ -450,21 +450,22 @@ class Guiding extends Model
 
     public function getBlockedEvents()
     {
-        $blocked_events = collect($this->user->blocked_events)
+        $blocked_events = collect($this->user->calendar_schedules)
             ->filter(function($blocked) {
                 return $blocked->guiding_id == $this->id || 
-                       ($blocked->guiding_id === null && 
-                        $this->bookings()
-                            ->where('blocked_event_id', $blocked->id)
-                            ->exists());
+                       $blocked->type === 'custom_schedule' || 
+                       $this->bookings()->where('blocked_event_id', $blocked->id)->exists();
             })
             ->map(function($blocked) {
                 return [
-                    "from" => date('Y-m-d', strtotime($blocked->from)),
-                    "due" => date('Y-m-d', strtotime($blocked->due))
+                    "from" => date('Y-m-d', strtotime($blocked->date)),
+                    "due" => date('Y-m-d', strtotime($blocked->date)),
+                    "id" => $blocked->id
                 ];
             })
             ->toArray();
+
+        // dd($blocked_events);
 
         $today = now();
 
