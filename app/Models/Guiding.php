@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 use Illuminate\Support\Str;
 use App\Traits\MethodTraits;
+use Illuminate\Support\Facades\Log;
 use App\Traits\ModelImageTrait;
 
 use App\Models\GuidingInclussion;
@@ -533,7 +534,7 @@ class Guiding extends Model
             'message' => '',
             'ids' => []
         ];
-        
+    
         // Try direct database match based on standardized names
         $guidings = self::select('id')
             ->where(function($query) use ($locationParts) {
@@ -570,6 +571,7 @@ class Guiding extends Model
             ->where('status', 1)
             ->pluck('id');
 
+
         if ($guidings->isNotEmpty()) {
             $returnData['ids'] = $guidings;
             $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel1') . ': $countReplace total');
@@ -580,9 +582,17 @@ class Guiding extends Model
         if ($placeLat && $placeLng) {
             $coordinates = ['lat' => $placeLat, 'lng' => $placeLng];
         } else {
-            // $coordinates = self::getCoordinatesFromLocation($locationParts['original']);
-            $coordinates = ['lat' => 48.1373, 'lng' => 11.5755];
+            // Try to get coordinates from the location string
+            $locationString = implode(', ', array_filter([$city, $region, $country]));
+            $coordinates = self::getCoordinatesFromLocation($locationString);
+            
+            // If geocoding fails, use fallback coordinates (Munich, Germany)
+            if (!$coordinates) {
+                $coordinates = ['lat' => 48.1373, 'lng' => 11.5755];
+            }
         }
+
+        Log::info('guidings', ['guidings' => $guidings]);
         
         if (!$coordinates) {
             return collect();

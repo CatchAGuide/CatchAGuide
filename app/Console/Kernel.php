@@ -21,9 +21,13 @@ class Kernel extends ConsoleKernel
         $schedule->command('bookings:send-guest-tour-reminders')->hourly();
         $schedule->command('bookings:send-guide-upcoming-tour-reminders')->hourly();
         $schedule->command('bookings:send-guide-reminders-12hrs')->hourly();
-        
-        // Update calendar schedules daily - extends availability for next 24 months and cleanup old entries
-        $schedule->command('migrate:calendar-schedule --months=24 --cleanup')->daily();
+      
+        // Generate guiding filter mappings every hour
+        $schedule->command('guidings:generate-filters')
+                ->hourly()
+                ->withoutOverlapping()
+                ->runInBackground();
+//         $schedule->command('migrate:calendar-schedule --months=24 --cleanup')->daily();
     }
 
     /**
