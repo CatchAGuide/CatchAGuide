@@ -795,7 +795,7 @@ class GuidingsController extends Controller
             // Dispatch the job for database operations
             \App\Jobs\SaveGuidingDraftJob::dispatch(
                 $guidingData, 
-                auth()->id(), 
+                $request->has('user_id') && $request->input('user_id') != null && $request->input('user_id') != '' ? $request->input('user_id') : auth()->id(), 
                 $isUpdate, 
                 $guidingId
             );
@@ -1510,6 +1510,7 @@ class GuidingsController extends Controller
             'id' => $guiding->id,
             'is_update' => 1,
             'status' => $guiding->status,
+            'user_id' => $guiding->user_id,
             //step1
             'title' => $guiding->title,
             'location' => $guiding->location,
