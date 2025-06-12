@@ -157,8 +157,12 @@ class GuidingsController extends Controller
             }
         }
 
-        // For direct queries without filters, use empty filter counts
-        $filterCounts = [
+        // For direct queries without filters, get basic filter counts from the filter service
+        // This ensures filter options are shown on initial load
+        $filterCounts = $this->getFilterService()->getFilterCounts();
+        
+        // Ensure all filter count arrays have default values to prevent undefined key errors
+        $filterCounts = array_merge([
             'targets' => [],
             'methods' => [],
             'water_types' => [],
@@ -168,7 +172,7 @@ class GuidingsController extends Controller
                 'multi_day' => 0
             ],
             'person_ranges' => []
-        ];
+        ], $filterCounts);
 
         // Get other guidings if needed (only for very small result sets)
         $otherguidings = [];
@@ -180,10 +184,10 @@ class GuidingsController extends Controller
             }
         }
 
-        // Get filter options for display (empty for direct queries)
-        $targetFishOptions = collect();
-        $methodOptions = collect();
-        $waterTypeOptions = collect();
+        // Get filter options for display
+        $targetFishOptions = Target::whereIn('id', array_keys($filterCounts['targets'] ?? []))->get();
+        $methodOptions = Method::whereIn('id', array_keys($filterCounts['methods'] ?? []))->get();
+        $waterTypeOptions = Water::whereIn('id', array_keys($filterCounts['water_types'] ?? []))->get();
 
         // Build title and filter title
         $titleData = $this->buildTitleAndFilterTitle($request, $locale, $targetFishOptions, $methodOptions, $waterTypeOptions);
