@@ -27,6 +27,12 @@ class Kernel extends ConsoleKernel
                 ->hourly()
                 ->withoutOverlapping()
                 ->runInBackground();
+                
+        // Warm file existence cache every 2 hours
+        $schedule->command('cache:warm-files')
+                ->everyTwoHours()
+                ->withoutOverlapping()
+                ->runInBackground();
 //         $schedule->command('migrate:calendar-schedule --months=24 --cleanup')->daily();
     }
 

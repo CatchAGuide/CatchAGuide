@@ -65,6 +65,11 @@ class GuidingsController extends Controller
         // Clean up request parameters before processing
         $cleanedRequest = $this->cleanRequestParameters($request);
         
+        // Emergency fallback for staging environment
+        if (app()->environment('staging') && config('app.simple_mode', false)) {
+            return $this->indexSimpleMode($cleanedRequest, $locale, $randomSeed, $destination);
+        }
+        
         // Check if we actually need the filter service
         $hasCheckboxFilters = $this->hasActiveCheckboxFilters($cleanedRequest);
         
@@ -75,6 +80,42 @@ class GuidingsController extends Controller
             // Use direct database queries for location-only or no-filter searches
             return $this->indexWithDirectQuery($cleanedRequest, $locale, $randomSeed, $destination);
         }
+    }
+
+    private function indexSimpleMode($request, $locale, $randomSeed, $destination)
+    {
+        // Ultra-simple mode for staging performance issues
+        $guidings = Guiding::where('status', 1)
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+        
+        $guidings->appends($request->except('page'));
+        
+        return view('pages.guidings.index-simple', [
+            'guidings' => $guidings,
+            'allGuidings' => $guidings->getCollection(),
+            'otherguidings' => collect(),
+            'title' => 'All Guidings',
+            'filter_title' => '',
+            'searchMessage' => '',
+            'destination' => null,
+            'targetFishOptions' => collect(),
+            'methodOptions' => collect(),
+            'waterTypeOptions' => collect(),
+            'alltargets' => collect(),
+            'guiding_waters' => collect(),
+            'guiding_methods' => collect(),
+            'targetFishCounts' => [],
+            'methodCounts' => [],
+            'waterTypeCounts' => [],
+            'durationCounts' => [],
+            'personCounts' => [],
+            'isMobile' => false,
+            'total' => $guidings->total(),
+            'filterCounts' => [],
+            'maxPrice' => 1000,
+            'overallMaxPrice' => 1000,
+        ]);
     }
 
     private function indexWithDirectQuery($request, $locale, $randomSeed, $destination)
