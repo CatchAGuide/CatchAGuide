@@ -6,15 +6,15 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css"/>
     <style>
         .fc .fc-button-primary {
-            background-color: var(--thm-primary);
-            border-color: var(--thm-primary);
+            background-color: #313041;
+            border-color: #313041;
         }
         .fc .fc-toolbar-title {
-            color: var(--thm-primary);
+            color: #313041;
         }
 
         a:hover {
-            color: var(--thm-primary);
+            color: #313041;
         }
         
         .fc-daygrid-event-dot {
@@ -23,7 +23,7 @@
             width: 0;
             height: 0;
             border: 4px solid #3788d8;
-            border: calc(var(--fc-daygrid-event-dot-width,8px)/ 2) solid  var(--thm-primary);
+            border: calc(var(--fc-daygrid-event-dot-width,8px)/ 2) solid #313041;
             border-radius: 4px;
             border-radius: calc(var(--fc-daygrid-event-dot-width,8px)/ 2);
         }
@@ -34,19 +34,21 @@
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            height: 100%;
-            min-height: 700px !important;
+            height: fit-content;
+            min-height: auto;
         }
         
         .calendar-panel {
             display: flex;
             flex-direction: column;
+            height: fit-content;
         }
         
         .calendar-container {
             flex: 1;
-            min-height: 550px !important;
+            min-height: 450px !important;
             position: relative;
+            margin-bottom: 0px;
         }
         
         /* Calendar Loading Overlay */
@@ -187,8 +189,16 @@
             color: white !important;
         }
         
-        /* Custom Event Color (when no bookings) */
+        /* Custom Event Color (when no bookings) - High Priority */
         .litepicker .day-item.custom-event {
+            background-color: #17a2b8 !important;
+            border: 2px solid #17a2b8 !important;
+            color: white !important;
+        }
+        
+        /* Override availability colors when custom event is present */
+        .litepicker .day-item.custom-event.tour-available,
+        .litepicker .day-item.custom-event.tour-blocked {
             background-color: #17a2b8 !important;
             border: 2px solid #17a2b8 !important;
             color: white !important;
@@ -216,11 +226,11 @@
         .litepicker .day-item.is-selected,
         .litepicker .day-item.is-start-date,
         .litepicker .day-item.is-end-date {
-            background-color: var(--thm-primary) !important;
-            color: white !important;
-            border: 2px solid var(--thm-primary) !important;
-            transform: scale(1.15) !important;
+            border: 3px solid #000 !important;
+            transform: scale(1.1) !important;
             z-index: 10 !important;
+            font-weight: bold !important;
+            box-shadow: 0 0 0 1px #000 !important;
         }
         
         /* Previous/Next month buttons */
@@ -297,6 +307,16 @@
             border-radius: 50%;
         }
         
+        .legend-available {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        
+        .legend-unavailable {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+        
         .legend-text {
             font-size: 13px;
             color: #6c757d;
@@ -333,7 +353,7 @@
         .tour-filter-icon-dropdown {
             width: 40px;
             height: 40px;
-            background: var(--thm-primary);
+            background: #313041;
             border-radius: 6px;
             display: flex;
             align-items: center;
@@ -367,7 +387,7 @@
         
         .tour-filter-price-dropdown {
             font-size: 12px;
-            color: var(--thm-primary);
+            color: #313041;
             font-weight: 600;
         }
         
@@ -377,7 +397,7 @@
         }
         
         .tour-filter-option.active {
-            background-color: rgba(232, 96, 76, 0.1);
+            background-color: rgba(49, 48, 65, 0.1);
         }
 
         /* Filter Controls */
@@ -388,7 +408,7 @@
         .filter-group .form-label {
             font-weight: 600;
             margin-bottom: 8px;
-            color: var(--thm-primary);
+            color: #313041;
         }
         
         .filter-buttons {
@@ -408,13 +428,13 @@
         }
         
         .filter-btn.active {
-            background: var(--thm-primary);
+            background: #313041;
             color: white;
-            border-color: var(--thm-primary);
+            border-color: #313041;
         }
         
         .filter-btn:hover {
-            background: var(--thm-primary);
+            background: #313041;
             color: white;
         }
         
@@ -485,10 +505,15 @@
         }
         
         .detail-panel-header {
-            background: linear-gradient(135deg, var(--thm-primary), #2c5aa0);
-            color: white;
+            background: linear-gradient(135deg, #313041, #2c5aa0);
+            color: white !important;
             padding: 20px;
             position: relative;
+        }
+        
+        .detail-panel-header h4,
+        .detail-panel-header p {
+            color: white !important;
         }
         
         .detail-panel-header::after {
@@ -509,14 +534,14 @@
             background: #f8f9fa;
             border-radius: 8px;
             padding: 15px;
-            border-left: 4px solid var(--thm-primary);
+            border-left: 4px solid #313041;
             margin-bottom: 20px;
             display: flex;
             flex-direction: column;
         }
 
         .detail-card h6 {
-            color: var(--thm-primary);
+            color: #313041;
             font-weight: 600;
             margin-bottom: 15px;
             display: flex;
@@ -542,7 +567,7 @@
         }
 
         .detail-card-content::-webkit-scrollbar-thumb {
-            background: var(--thm-primary);
+            background: #313041;
             border-radius: 3px;
         }
 
@@ -588,14 +613,15 @@
         .schedule-details small {
             display: block;
             margin-bottom: 5px;
-            color: #6c757d;
+            color: #495057 !important;
+            font-weight: 500;
         }
         
         .schedule-details i {
             width: 16px;
             text-align: center;
             margin-right: 8px;
-            color: var(--thm-primary);
+            color: #313041;
         }
         
         .status-badge {
@@ -754,7 +780,7 @@
 
 @section('profile-content')
 
-<div class="container" style="margin-bottom: 120px;">
+<div class="container" style="margin-bottom: 20px;">
     <!-- 3-Panel Layout -->
     <div class="row">
         <!-- Top Left Panel: Calendar -->
@@ -773,8 +799,8 @@
                 </div>
                 
                 <!-- Calendar Legend - Below Calendar -->
-                <div class="calendar-legend mt-3">
-                    <div class="legend-items">
+                <div class="calendar-legend mt-1">
+                    <div class="legend-items" id="calendarLegend">
                         <div class="legend-item">
                             <div class="legend-color legend-accepted"></div>
                             <span class="legend-text">@lang('profile.confirmed')</span>
@@ -795,6 +821,14 @@
                             <div class="legend-color legend-blocked"></div>
                             <span class="legend-text">@lang('profile.blocked')</span>
                         </div>
+                        <div class="legend-item" id="availableLegend" style="display: none;">
+                            <div class="legend-color legend-available"></div>
+                            <span class="legend-text">@lang('profile.available')</span>
+                        </div>
+                        <div class="legend-item" id="unavailableLegend" style="display: none;">
+                            <div class="legend-color legend-unavailable"></div>
+                            <span class="legend-text">@lang('profile.unavailable')</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -802,55 +836,57 @@
         
         <!-- Top Right Panel: Tour Filter -->
         <div class="col-md-4">
-            <div class="tour-filter-panel">
-                <h3 class="mb-3">@lang('profile.select-tour-to-filter')</h3>
-                
-                <!-- Tour Filter Dropdown -->
-                <div class="dropdown mb-3">
-                    <button class="btn btn-outline-primary dropdown-toggle w-100" type="button" id="tourFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <span id="selectedTourText">@lang('profile.all-tours')</span>
-                    </button>
-                    <ul class="dropdown-menu w-100" aria-labelledby="tourFilterDropdown" id="tourDropdownMenu">
-                        <!-- All Tours Option -->
-                        <li>
-                            <a class="dropdown-item tour-filter-option active" href="#" data-guiding-id="">
-                                <div class="tour-filter-card-dropdown">
-                                    <div class="tour-filter-icon-dropdown">
-                                        <i class="fas fa-list"></i>
-                                    </div>
-                                    <div class="tour-filter-info-dropdown">
-                                        <div class="tour-filter-title-dropdown">@lang('profile.all-tours')</div>
-                                        <small class="tour-filter-subtitle-dropdown">@lang('profile.show-all-events')</small>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        
-                        @foreach($userGuidings as $guiding)
+            <div class="tour-filter-panel d-flex flex-column">
+                <div class="flex-grow-1">
+                    <h3 class="mb-3">@lang('profile.select-tour-to-filter')</h3>
+                    
+                    <!-- Tour Filter Dropdown -->
+                    <div class="dropdown mb-3">
+                        <button class="btn btn-outline-primary dropdown-toggle w-100" type="button" id="tourFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span id="selectedTourText">@lang('profile.all-tours')</span>
+                        </button>
+                        <ul class="dropdown-menu w-100" aria-labelledby="tourFilterDropdown" id="tourDropdownMenu">
+                            <!-- All Tours Option -->
                             <li>
-                                <a class="dropdown-item tour-filter-option" href="#" data-guiding-id="{{ $guiding->id }}">
+                                <a class="dropdown-item tour-filter-option active" href="#" data-guiding-id="">
                                     <div class="tour-filter-card-dropdown">
-                                        <div class="tour-filter-image-dropdown">
-                                            @if(get_featured_image_link($guiding))
-                                                <img src="{{get_featured_image_link($guiding)}}" alt="{{ $guiding->title }}" class="tour-filter-thumbnail-dropdown">
-                                            @else
-                                                <img src="{{asset('images/placeholder_guide.webp')}}" alt="{{ $guiding->title }}" class="tour-filter-thumbnail-dropdown">
-                                            @endif
+                                        <div class="tour-filter-icon-dropdown">
+                                            <i class="fas fa-list"></i>
                                         </div>
                                         <div class="tour-filter-info-dropdown">
-                                            <div class="tour-filter-title-dropdown">{{ Str::limit($guiding->title, 25) }}</div>
-                                            <small class="tour-filter-location-dropdown">{{ Str::limit($guiding->location, 20) }}</small>
-                                            <small class="tour-filter-price-dropdown">{{ $guiding->getLowestPrice() }}€</small>
+                                            <div class="tour-filter-title-dropdown">@lang('profile.all-tours')</div>
+                                            <small class="tour-filter-subtitle-dropdown">@lang('profile.show-all-events')</small>
                                         </div>
                                     </div>
                                 </a>
                             </li>
-                        @endforeach
-                    </ul>
+                            
+                            @foreach($userGuidings as $guiding)
+                                <li>
+                                    <a class="dropdown-item tour-filter-option" href="#" data-guiding-id="{{ $guiding->id }}">
+                                        <div class="tour-filter-card-dropdown">
+                                            <div class="tour-filter-image-dropdown">
+                                                @if(get_featured_image_link($guiding))
+                                                    <img src="{{get_featured_image_link($guiding)}}" alt="{{ $guiding->title }}" class="tour-filter-thumbnail-dropdown">
+                                                @else
+                                                    <img src="{{asset('images/placeholder_guide.webp')}}" alt="{{ $guiding->title }}" class="tour-filter-thumbnail-dropdown">
+                                                @endif
+                                            </div>
+                                            <div class="tour-filter-info-dropdown">
+                                                <div class="tour-filter-title-dropdown">{{ Str::limit($guiding->title, 25) }}</div>
+                                                <small class="tour-filter-location-dropdown">{{ Str::limit($guiding->location, 20) }}</small>
+                                                <small class="tour-filter-price-dropdown">{{ $guiding->getLowestPrice() }}€</small>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
                 </div>
                 
                 <!-- Filter Controls -->
-                <div class="filter-controls">
+                {{-- <div class="filter-controls">
                     <div class="filter-group mb-3">
                         <label class="form-label">@lang('profile.filter-by-type'):</label>
                         <div class="filter-buttons">
@@ -872,16 +908,18 @@
                             <button class="filter-btn" data-status="rejected">@lang('profile.rejected')</button>
                         </div>
                     </div>
-                </div>
+                </div>--}}
                 
-                <!-- Quick Actions -->
-                <div class="quick-actions">
-                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addEventModal">
-                        <i class="fas fa-plus"></i> @lang('profile.add-event')
-                    </button>
-                    <button class="btn btn-outline-secondary btn-sm" onclick="refreshCalendar()">
-                        <i class="fas fa-sync"></i> @lang('profile.refresh')
-                    </button>
+                <!-- Quick Actions at Bottom -->
+                <div class="mt-auto">
+                    <div class="quick-actions">
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addEventModal">
+                            <i class="fas fa-plus"></i> @lang('profile.add-event')
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="refreshCalendar()">
+                            <i class="fas fa-sync"></i> @lang('profile.refresh')
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1142,9 +1180,9 @@
         }
 
         .tour-filter-card.active {
-            border-color: var(--thm-primary);
-            background: rgba(232, 96, 76, 0.05);
-            box-shadow: 0 2px 12px rgba(232, 96, 76, 0.2);
+            border-color: #313041;
+            background: rgba(49, 48, 65, 0.05);
+            box-shadow: 0 2px 12px rgba(49, 48, 65, 0.2);
         }
 
         .tour-filter-content {
@@ -1171,7 +1209,7 @@
         .tour-filter-icon {
             width: 45px;
             height: 45px;
-            background: var(--thm-primary);
+            background: #313041;
             border-radius: 6px;
             display: flex;
             align-items: center;
@@ -1208,7 +1246,7 @@
 
         .tour-filter-price {
             font-size: 11px;
-            color: var(--thm-primary);
+            color: #313041;
             font-weight: 600;
         }
 
@@ -1245,8 +1283,8 @@
 
         .tours-slider .owl-nav button:hover {
             background: white !important;
-            color: var(--thm-primary) !important;
-            border-color: var(--thm-primary) !important;
+            color: #313041 !important;
+            border-color: #313041 !important;
         }
 
         .tours-slider .owl-nav .owl-prev {
@@ -1273,9 +1311,55 @@
         }
 
         .tours-slider .owl-dot.active {
-            background: var(--thm-primary);
+            background: #313041;
             width: 20px;
             border-radius: 10px;
+        }
+        
+        /* Button Primary Styling */
+        .btn-primary {
+            background-color: #313041 !important;
+            border-color: #313041 !important;
+            color: white !important;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2a2938 !important;
+            border-color: #2a2938 !important;
+            color: white !important;
+        }
+        
+        .btn-primary:focus,
+        .btn-primary.focus {
+            background-color: #2a2938 !important;
+            border-color: #2a2938 !important;
+            box-shadow: 0 0 0 0.2rem rgba(49, 48, 65, 0.5) !important;
+        }
+        
+        .btn-primary:not(:disabled):not(.disabled):active,
+        .btn-primary:not(:disabled):not(.disabled).active {
+            background-color: #232230 !important;
+            border-color: #232230 !important;
+        }
+        
+        /* Tour Availability Colors */
+        .litepicker .day-item.tour-available {
+            background-color: #28a745 !important;
+            border: 2px solid #28a745 !important;
+            color: white !important;
+        }
+        
+        .litepicker .day-item.tour-blocked {
+            background-color: #dc3545 !important;
+            border: 2px solid #dc3545 !important;
+            color: white !important;
+        }
+        
+        /* Higher specificity for custom events to always override availability */
+        .litepicker .day-item.custom-event {
+            background-color: #17a2b8 !important;
+            border: 2px solid #17a2b8 !important;
+            color: white !important;
         }
 </style>
 @endsection
@@ -1506,13 +1590,71 @@
                 
                 allDayElements.forEach(dayEl => {
                     // Remove ALL possible color classes
-                    dayEl.classList.remove('booking-accepted', 'booking-pending', 'booking-rejected', 'booking-cancelled', 'custom-event', 'blocked-tour');
+                    dayEl.classList.remove('booking-accepted', 'booking-pending', 'booking-rejected', 'booking-cancelled', 'custom-event', 'blocked-tour', 'tour-available', 'tour-blocked');
                     // Reset to default white background
                     dayEl.style.backgroundColor = '';
                     dayEl.style.border = '';
                     dayEl.style.color = '';
                     dayEl.style.cursor = 'pointer';
                 });
+                
+                // Apply default availability colors if a specific tour is selected
+                // This will be overridden by specific events later
+                if (currentFilters.guiding_id !== '') {
+                    allDayElements.forEach(dayEl => {
+                        if (dayEl.textContent.trim() && /^\d+$/.test(dayEl.textContent.trim())) {
+                            const dayNumber = parseInt(dayEl.textContent.trim());
+                            const monthContainer = dayEl.closest('.month-item');
+                            
+                            if (monthContainer) {
+                                const monthHeader = monthContainer.querySelector('.month-item-header div');
+                                if (monthHeader) {
+                                    const headerText = monthHeader.textContent.trim();
+                                    
+                                    // Extract year and month from header
+                                    const yearMatch = headerText.match(/\d{4}/);
+                                    const year = yearMatch ? parseInt(yearMatch[0]) : new Date().getFullYear();
+                                    
+                                    // Map month names to numbers (for multiple languages)
+                                    const monthNames = {
+                                        'january': 0, 'januar': 0,
+                                        'february': 1, 'februar': 1,
+                                        'march': 2, 'märz': 2,
+                                        'april': 3,
+                                        'may': 4, 'mai': 4,
+                                        'june': 5, 'juni': 5,
+                                        'july': 6, 'juli': 6,
+                                        'august': 7,
+                                        'september': 8,
+                                        'october': 9, 'oktober': 9,
+                                        'november': 10,
+                                        'december': 11, 'dezember': 11
+                                    };
+                                    
+                                    let monthNumber = -1;
+                                    Object.keys(monthNames).forEach(monthName => {
+                                        if (headerText.toLowerCase().includes(monthName)) {
+                                            monthNumber = monthNames[monthName];
+                                        }
+                                    });
+                                    
+                                    if (monthNumber !== -1) {
+                                        const currentDate = new Date(year, monthNumber, dayNumber);
+                                        const today = new Date();
+                                        today.setHours(0, 0, 0, 0);
+                                        
+                                        // Apply default availability colors (will be overridden by events)
+                                        if (currentDate < today) {
+                                            dayEl.classList.add('tour-blocked');
+                                        } else {
+                                            dayEl.classList.add('tour-available');
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
                 
                 // Get all month containers for better date matching
                 const monthContainers = document.querySelectorAll('.month-item');
@@ -1621,18 +1763,20 @@
                     // Apply colors to found elements
                     foundDayElements.forEach((dayEl, index) => {
                         
-                        // Remove existing classes first
-                        dayEl.classList.remove('booking-accepted', 'booking-pending', 'booking-rejected', 'booking-cancelled', 'custom-event', 'blocked-tour');
-                        
                         // Categorize events
                         const bookings = events.filter(e => e.extendedProps && e.extendedProps.booking);
                         const blockedTours = events.filter(e => e.extendedProps && e.extendedProps.type && 
                             (e.extendedProps.type === 'tour_schedule' || e.extendedProps.type === 'vacation_schedule'));
                         const customEvents = events.filter(e => e.extendedProps && e.extendedProps.type === 'custom_schedule');
                         
+                        // Remove ALL classes first, then apply the correct one
+                        dayEl.classList.remove('booking-accepted', 'booking-pending', 'booking-rejected', 'booking-cancelled', 'custom-event', 'blocked-tour', 'tour-available', 'tour-blocked');
                         
-                        // Apply priority-based coloring
+                        // Apply priority-based coloring (these override availability colors)
+                        // Priority Order: 1. Bookings, 2. Custom Events, 3. Blocked Tours, 4. Availability
+                        
                         if (bookings.length > 0) {
+                            // HIGHEST PRIORITY: Bookings override everything
                             const statuses = bookings.map(b => b.extendedProps.booking.status);
                             
                             if (statuses.includes('accepted')) {
@@ -1645,11 +1789,36 @@
                                 dayEl.classList.add('booking-cancelled');
                             }
                         } else if (customEvents.length > 0) {
+                            // SECOND PRIORITY: Custom events override everything except bookings
+                            // Force remove availability classes and add custom event
+                            dayEl.classList.remove('tour-available', 'tour-blocked');
                             dayEl.classList.add('custom-event');
+
+                        } else {
+                            // Apply availability or blocked status based on tour selection and other events
+                            if (currentFilters.guiding_id !== '') {
+                                if (blockedTours.length > 0) {
+                                    dayEl.classList.add('tour-blocked');
+                                } else {
+                                    // Check if this element already has availability colors from the first pass
+                                    if (!dayEl.classList.contains('tour-available') && !dayEl.classList.contains('tour-blocked')) {
+                                        // Apply availability logic here if needed
+                                        const currentDate = new Date(dateKey);
+                                        const today = new Date();
+                                        today.setHours(0, 0, 0, 0);
+                                        
+                                        if (currentDate < today) {
+                                            dayEl.classList.add('tour-blocked');
+                                        } else {
+                                            dayEl.classList.add('tour-available');
+                                        }
+                                    }
+                                }
+                            }
                         }
                         
-                        // Add blocked tour indicator
-                        if (blockedTours.length > 0) {
+                        // Add blocked tour indicator (only if not viewing "all tours")
+                        if (blockedTours.length > 0 && currentFilters.guiding_id !== '') {
                             dayEl.classList.add('blocked-tour');
                         }
                         
@@ -1717,6 +1886,20 @@
                         this.querySelector('.tour-filter-title-dropdown').textContent : 
                         '@lang('profile.all-tours')';
                     document.getElementById('selectedTourText').textContent = selectedText;
+                    
+                    // Show/hide availability legend items
+                    const availableLegend = document.getElementById('availableLegend');
+                    const unavailableLegend = document.getElementById('unavailableLegend');
+                    
+                    if (guidingId) {
+                        // Show availability legend when a specific tour is selected
+                        availableLegend.style.display = 'flex';
+                        unavailableLegend.style.display = 'flex';
+                    } else {
+                        // Hide availability legend when "All Tours" is selected
+                        availableLegend.style.display = 'none';
+                        unavailableLegend.style.display = 'none';
+                    }
                     
                     // Refresh calendar
                     loadCalendarEvents();
