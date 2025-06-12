@@ -188,6 +188,10 @@ class GuidingsController extends Controller
             $allGuidings = $baseQuery->get();
             $guidings = $baseQuery->paginate(20);
             $guidings->appends($request->except('page'));
+            
+            // Pre-compute expensive view data to avoid N+1 queries and repeated function calls
+            $this->preComputeGuidingData($allGuidings);
+            $this->preComputeGuidingData($guidings->items());
         } else {
             // Ensure $guidings is always defined
             if (!isset($guidings)) {
@@ -399,6 +403,10 @@ class GuidingsController extends Controller
                 $allGuidings = $baseQuery->get();
                 $guidings = $baseQuery->paginate(20);
                 $guidings->appends($request->except('page'));
+                
+                // Pre-compute expensive view data to avoid N+1 queries and repeated function calls
+                $this->preComputeGuidingData($allGuidings);
+                $this->preComputeGuidingData($guidings->getCollection());
             }
         }
 
@@ -1208,6 +1216,38 @@ class GuidingsController extends Controller
         );
 
         return $description;
+    }
+
+    /**
+     * Pre-compute expensive view data to avoid N+1 queries and repeated function calls
+     */
+    private function preComputeGuidingData($guidings)
+    {
+        if (empty($guidings)) {
+            return;
+        }
+
+        foreach ($guidings as $guiding) {
+            // Pre-compute gallery images (avoid calling get_galleries_image_link multiple times)
+            $guiding->cached_gallery_images = get_galleries_image_link($guiding);
+            
+            // Pre-compute target fish names (avoid database queries in view)
+            $guiding->cached_target_fish_names = $guiding->getTargetFishNames();
+            
+            // Pre-compute inclusion names (avoid database queries in view)
+            $guiding->cached_inclusion_names = $guiding->getInclusionNames();
+            
+            // Pre-compute review count (avoid database queries in view)
+            $guiding->cached_review_count = $guiding->user->reviews->count();
+            
+            // Pre-compute average rating (avoid database queries in view)
+            $guiding->cached_average_rating = $guiding->user->average_rating();
+            
+            // Pre-compute boat type name (avoid database queries in view)
+            $guiding->cached_boat_type_name = $guiding->is_boat ? 
+                ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : 
+                __('guidings.shore');
+        }
     }
 
     /**
