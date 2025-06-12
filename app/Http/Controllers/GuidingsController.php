@@ -25,8 +25,8 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\GuidingRequestMail;
 use App\Mail\SearchRequestUserMail;
 use Illuminate\Support\Facades\Log;
-use App\Models\BlockedEvent;
 use App\Models\ExtrasPrice;
+use App\Services\CalendarScheduleService;
 use App\Models\BoatExtras;
 use App\Models\Destination;
 use App\Models\Review;
@@ -1167,35 +1167,13 @@ class GuidingsController extends Controller
                 $guiding->months = json_encode($selectedMonths);
             }
 
-            if ($request->input('is_update') == '1') {
-                BlockedEvent::where('guiding_id', $guiding->id)
-                    ->where('type', 'blockiert')
-                    ->delete();
-            }
-
-            foreach ($allMonths as $index => $month) {
-                if (!in_array($month, $selectedMonths ?? [])) {
-                    $year = date('Y');
-                    $monthNumber = str_pad($index + 1, 2, '0', STR_PAD_LEFT);
-                    $currentMonth = date('m');
-                    $year = date('Y');
-
-                    if ($monthNumber < $currentMonth) {
-                        $year++;
-                    }
-
-                    $blockedFrom = date('Y-m-d', strtotime("$year-$monthNumber-01"));
-                    $blockedTo = date('Y-m-t', strtotime($blockedFrom));
-
-                    BlockedEvent::create([
-                        'user_id' => $guiding->user_id,
-                        'type' => 'blockiert',
-                        'guiding_id' => $guiding->id,
-                        'from' => $blockedFrom,
-                        'due' => $blockedTo,
-                    ]);
-                }
-            }
+            // Generate complete calendar schedule
+            CalendarScheduleService::generateCompleteSchedule(
+                $guiding,
+                $selectedMonths,
+                $request->input('weekdays', []),
+                $request->input('is_update') == '1' // shouldCleanup
+            );
         }
 
         $guiding->weekday_availability = $request->input('weekday_availability', 'all_week');
@@ -1665,4 +1643,6 @@ class GuidingsController extends Controller
             ], 500);
         }
     }
+
+
 }

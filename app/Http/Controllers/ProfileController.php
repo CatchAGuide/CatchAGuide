@@ -314,7 +314,20 @@ class ProfileController extends Controller
 
     public function calendar()
     {
-        return view('pages.profile.calendar');
+        // Get user's guidings for the filter dropdown
+        $userGuidings = Guiding::where('user_id', auth()->id())
+            ->orderBy('title')
+            ->get();
+        
+        // Provide empty blocked_events array for now to avoid errors
+        // The main calendar functionality uses the /events API endpoint
+        // TODO: Fix blocked_events implementation later if needed for lockDays
+        $blocked_events = [];
+            
+        return view('pages.profile.calendar', [
+            'userGuidings' => $userGuidings,
+            'blocked_events' => $blocked_events
+        ]);
     }
 
     public function showBooking($bookingid)
