@@ -66,11 +66,14 @@ class GuidingsController extends Controller
     {
         $searchMessage = "";
         
-        // Get filtered guiding IDs using the fast filter service for checkbox filters
-        $checkboxFilteredIds = $this->filterService->getFilteredGuidingIds($request);
-        
         // Start with all active guidings if no checkbox filters, otherwise use filtered IDs
         $hasCheckboxFilters = $this->hasActiveCheckboxFilters($request);
+        
+        // Only call filter service if we actually have checkbox filters
+        $checkboxFilteredIds = [];
+        if ($hasCheckboxFilters) {
+            $checkboxFilteredIds = $this->filterService->getFilteredGuidingIds($request);
+        }
         
         if ($hasCheckboxFilters && empty($checkboxFilteredIds)) {
             // If checkbox filters are applied but no results, return empty
@@ -127,27 +130,8 @@ class GuidingsController extends Controller
                 
                 $searchMessage = $guidingFilter['message'];
                 
-                // Debug logging
-                \Log::info('Location Filter Debug', [
-                    'request_params' => [
-                        'city' => $request->get('city'),
-                        'country' => $request->get('country'),
-                        'region' => $request->get('region'),
-                        'target_fish' => $request->get('target_fish'),
-                        'methods' => $request->get('methods'),
-                        'water' => $request->get('water'),
-                        'duration_types' => $request->get('duration_types'),
-                        'num_persons' => $request->get('num_persons'),
-                        'price_min' => $request->get('price_min'),
-                        'price_max' => $request->get('price_max')
-                    ],
-                    'filter_result_count' => count($guidingFilter['ids']),
-                    'filter_ids' => $guidingFilter['ids'],
-                    'has_checkbox_filters' => $hasCheckboxFilters,
-                    'checkbox_filtered_ids_count' => $hasCheckboxFilters ? count($checkboxFilteredIds) : 'N/A',
-                    'checkbox_filtered_ids' => $hasCheckboxFilters ? $checkboxFilteredIds : 'N/A',
-                    'intersection' => $hasCheckboxFilters ? array_intersect($checkboxFilteredIds, $guidingFilter['ids']->toArray()) : 'N/A'
-                ]);
+                // Debug logging (remove in production)
+                // \Log::info('Location Filter Debug', [...]);
                 
                 // Apply location filter by restricting to location-filtered IDs
                 if (!empty($guidingFilter['ids'])) {
@@ -180,10 +164,25 @@ class GuidingsController extends Controller
             }
         }
 
-        // Get filter counts using the service
-        // Use the final result IDs for accurate counts when both checkbox and location filters are applied
-        $finalResultIds = $allGuidings->pluck('id')->toArray();
-        $filterCounts = $this->filterService->getFilterCounts($finalResultIds);
+        // Get filter counts - optimize based on whether we have checkbox filters
+        if ($hasCheckboxFilters) {
+            // Use the final result IDs for accurate counts when checkbox filters are applied
+            $finalResultIds = $allGuidings->pluck('id')->toArray();
+            $filterCounts = $this->filterService->getFilterCounts($finalResultIds);
+        } else {
+            // For location-only searches, use basic counts or skip entirely
+            $filterCounts = [
+                'targets' => [],
+                'methods' => [],
+                'water_types' => [],
+                'duration_types' => [
+                    'half_day' => 0,
+                    'full_day' => 0,
+                    'multi_day' => 0
+                ],
+                'person_ranges' => []
+            ];
+        }
         
         // Ensure all filter count arrays have default values to prevent undefined key errors
         $filterCounts = array_merge([
@@ -442,10 +441,6 @@ class GuidingsController extends Controller
 
         return 1000; // Default fallback
     }
-
-
-
-
 
     /**
      * Clean up request parameters before processing

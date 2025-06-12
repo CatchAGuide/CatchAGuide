@@ -515,8 +515,17 @@ class Guiding extends Model
      * @param int|null $radius Search radius in kilometers
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public static function locationFilter($city = null, $country = null, $region = null, ?int $radius = null, $placeLat = null, $placeLng = null)
+        public static function locationFilter($city = null, $country = null, $region = null, ?int $radius = null, $placeLat = null, $placeLng = null)
     {
+        // Create cache key for location search
+        $cacheKey = 'location_filter_' . md5(serialize([$city, $country, $region, $radius, $placeLat, $placeLng]));
+        
+        // Try to get from cache first (cache for 1 hour)
+        $cachedResult = \Cache::get($cacheKey);
+        if ($cachedResult) {
+            return $cachedResult;
+        }
+
         // Get standardized English names using the helper
         if ($city || $country) {
             $searchQuery = array_filter([$city, $country, $region], fn($val) => !empty($val));
@@ -534,7 +543,7 @@ class Guiding extends Model
             'message' => '',
             'ids' => []
         ];
-    
+        
         // Try direct database match based on standardized names
         $guidings = self::select('id')
             ->where(function($query) use ($locationParts) {
@@ -575,6 +584,10 @@ class Guiding extends Model
         if ($guidings->isNotEmpty()) {
             $returnData['ids'] = $guidings;
             $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel1') . ': $countReplace total');
+            
+            // Cache the result for 1 hour
+            \Cache::put($cacheKey, $returnData, 3600);
+            
             return $returnData;
         }
 
@@ -592,7 +605,7 @@ class Guiding extends Model
             }
         }
 
-        Log::info('guidings', ['guidings' => $guidings]);
+        // Log::info('guidings', ['guidings' => $guidings]); // Removed for performance
         
         if (!$coordinates) {
             return collect();
@@ -624,6 +637,10 @@ class Guiding extends Model
         if ($guidingsRadius->isNotEmpty()) {
             $returnData['ids'] = $guidingsRadius;
             $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel2'));
+            
+            // Cache the result for 1 hour
+            \Cache::put($cacheKey, $returnData, 3600);
+            
             return $returnData;
         }
 
@@ -641,6 +658,10 @@ class Guiding extends Model
             ->orderBy('distance')
             ->pluck('id');
         $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel3'));
+        
+        // Cache the result for 1 hour
+        \Cache::put($cacheKey, $returnData, 3600);
+        
         return $returnData;
     }
 
