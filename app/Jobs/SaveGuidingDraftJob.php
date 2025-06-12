@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Guiding;
-use App\Services\CalendarScheduleService;
+use App\Models\BlockedEvent;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -70,9 +70,6 @@ class SaveGuidingDraftJob implements ShouldQueue
 
             $guiding->save();
 
-            // Refresh the model to ensure we have the latest data including ID
-            $guiding->refresh();
-            
             // Handle seasonal blocking if needed
             $this->handleSeasonalBlocking($guiding);
 
@@ -160,26 +157,44 @@ class SaveGuidingDraftJob implements ShouldQueue
     }
 
     /**
-     * Handle seasonal blocking and calendar schedule generation
+     * Handle seasonal blocking
      */
     private function handleSeasonalBlocking(Guiding $guiding): void
     {
         if (!isset($this->guidingData['seasonal_trip'])) {
-            Log::info('SaveGuidingDraftJob: No seasonal_trip data, skipping calendar schedule generation');
             return;
         }
 
+        $allMonths = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
         $selectedMonths = $this->guidingData['months'] ?? [];
-        $selectedWeekdays = $this->guidingData['weekdays'] ?? [];
 
-        // Generate complete calendar schedule
-        CalendarScheduleService::generateCompleteSchedule(
-            $guiding,
-            $selectedMonths,
-            $selectedWeekdays,
-            $this->isUpdate // shouldCleanup
-        );
+        if ($this->isUpdate) {
+            BlockedEvent::where('guiding_id', $guiding->id)
+                ->where('type', 'blockiert')
+                ->delete();
+        }
+
+        foreach ($allMonths as $index => $month) {
+            if (!in_array($month, $selectedMonths)) {
+                $year = date('Y');
+                $monthNumber = str_pad($index + 1, 2, '0', STR_PAD_LEFT);
+                $currentMonth = date('m');
+
+                if ($monthNumber < $currentMonth) {
+                    $year++;
+                }
+
+                $blockedFrom = date('Y-m-d', strtotime("$year-$monthNumber-01"));
+                $blockedTo = date('Y-m-t', strtotime($blockedFrom));
+
+                BlockedEvent::create([
+                    'user_id' => $guiding->user_id,
+                    'type' => 'blockiert',
+                    'guiding_id' => $guiding->id,
+                    'from' => $blockedFrom,
+                    'due' => $blockedTo,
+                ]);
+            }
+        }
     }
-
-
 } 

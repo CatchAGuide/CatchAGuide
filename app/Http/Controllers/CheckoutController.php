@@ -3,9 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CheckoutRequest;
+use App\Models\BlockedEvent;
 use App\Models\Booking;
 use App\Models\Guiding;
+use App\Models\User;
+use App\Services\HelperService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use App\Jobs\SendCheckoutEmail;
 
 class CheckoutController extends Controller
 {
@@ -45,5 +50,18 @@ class CheckoutController extends Controller
         return view('pages.additional.thank_you', [
             'booking' => $booking
         ]);
+    }
+
+
+    private function releaseBookingDate ($bookingId)
+    {
+        $booking = Booking::find($bookingId);
+
+        $blockedevent = BlockedEvent::find($booking->blocked_event_id);
+        if($booking->user_id != auth()->user()->id) {
+            return false;
+        }
+        $blockedevent->delete();
+        return true;
     }
 }

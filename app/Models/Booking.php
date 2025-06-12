@@ -66,11 +66,6 @@ class Booking extends Model
         return $this->belongsTo(BlockedEvent::class);
     }
 
-    public function calendar_schedule(): BelongsTo
-    {
-        return $this->belongsTo(CalendarSchedule::class);
-    }
-
     /**
      * @return BelongsTo
      */
