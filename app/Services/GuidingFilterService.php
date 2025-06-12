@@ -13,7 +13,17 @@ class GuidingFilterService
 
     public function __construct()
     {
-        $this->loadFilterData();
+        // Don't load data in constructor - load it lazily when needed
+    }
+
+    /**
+     * Ensure filter data is loaded (lazy loading)
+     */
+    private function ensureDataLoaded()
+    {
+        if ($this->filterData === null) {
+            $this->loadFilterData();
+        }
     }
 
     /**
@@ -44,6 +54,8 @@ class GuidingFilterService
      */
     public function getFilteredGuidingIds($request)
     {
+        $this->ensureDataLoaded();
+        
         if (!$this->filterData) {
             return [];
         }
@@ -112,6 +124,8 @@ class GuidingFilterService
      */
     public function getFilterCounts($filteredIds = null)
     {
+        $this->ensureDataLoaded();
+        
         if (!$this->filterData) {
             return [
                 'targets' => [],
@@ -387,6 +401,7 @@ class GuidingFilterService
      */
     public function getMetadata()
     {
+        $this->ensureDataLoaded();
         return $this->filterData['metadata'] ?? [];
     }
 } 
