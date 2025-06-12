@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreBlockedEventRequest;
 use App\Http\Resources\EventResource;
-use App\Models\CalendarSchedule;
-use App\Models\Guiding;
+use App\Models\BlockedEvent;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -13,168 +13,119 @@ class EventsController extends Controller
 {
     public function index(Request $request)
     {
-        $query = CalendarSchedule::where('user_id', auth()->id())
-            ->with(['booking.user', 'guiding', 'vacation']);
-        
-        // Filter by guiding if provided
-        if ($request->has('guiding_id') && $request->guiding_id) {
-            $query->where('guiding_id', $request->guiding_id);
-        }
-        
-        // Filter by type if provided
-        if ($request->has('type') && $request->type) {
-            $query->where('type', $request->type);
-        }
-        
-        // Filter by status if provided
-        if ($request->has('status') && $request->status) {
-            $query->whereHas('booking', function($q) use ($request) {
-                $q->where('status', $request->status);
-            });
-        }
-        
-        // Filter by date range if provided
-        if ($request->has('start') && $request->has('end')) {
-            $query->whereBetween('date', [$request->start, $request->end]);
-        }
-        
-        $allSchedules = $query->get();
-        $events = EventResource::collection($allSchedules)->all();
-        
-        // Filter out null events (blocked entries that shouldn't be shown)
-        return array_values(array_filter($events, function($event) {
-            return $event !== null;
-        }));
+
+        $blockEvents = null;
+        $allblockeds = BlockedEvent::where('user_id', auth()->id())->get();
+
+        $blockedEvents = $this->blockedEvents($allblockeds);
+        return EventResource::collection($blockedEvents)->all();
+    }
+
+    public function blockedEvents($events){
+        $events = $events->map(function($event) {
+            $event->status = $event->getBookingStatus();
+
+            if(empty($event->status)){
+                if($event->type == 'blockiert'){
+                    $event->status = $event->type;
+                }
+                if($event->type == 'booking'){
+                    $event->status = 'Booked';
+                }
+            }
+            return $event;
+        });
+        return $events;
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'start' => 'required|date',
-            'end' => 'required|date|after_or_equal:start',
-            'type' => 'string|in:custom_schedule,vacation_schedule',
-            'note' => 'string|max:255',
-            'guiding_id' => 'nullable|exists:guidings,id',
-            'day' => 'array'
-        ]);
+
+        // $startdate = Carbon::parse($request->get('start'));
+        // $enddate = Carbon::parse($request->get('end'));
+        // $dayOfWeek = $request->get('day');
+
+        // $data = [];
+        // if($dayOfWeek != 'full'){
+        //     while ($startdate->lte($enddate)) {
+        //         if ($startdate->dayOfWeek == $dayOfWeek) {
+        //             $data[] = $startdate->toDateString();
+        //         }
+        //         $startdate->addDay(); // Move to the next day
+        //     }
+        // }
+
+        // $blockdate = "2023-09-11";
+
+        // $index = array_search($blockdate, $data);
+
+        // if ($index !== false) {
+        //     unset($data[$index]);
+        // }
+
 
         $start = Carbon::parse($request->start);
         $end = Carbon::parse($request->end);
-        $dayOfWeek = $request->get('day', []);
-        $type = $request->get('type', 'custom_schedule');
-        $note = $request->get('note', 'Custom blocked date');
 
-        // If specific days are selected, create entries for those days only
-        if (!empty($dayOfWeek)) {
+        $dayOfWeek = $request->get('day');
+
+
+        $data['user_id'] = auth()->id();
+        $data['type'] = 'blockiert';
+        $data['from'] = $start;
+        $data['due'] = $end;
+
+
+        if(is_array($dayOfWeek) && !empty($dayOfWeek)){
+
+
             foreach ($dayOfWeek as $day) {
                 $currentDate = $start->copy();
-                
+            
                 while ($currentDate->lte($end)) {
                     if ($currentDate->dayOfWeek == $day) {
-                        CalendarSchedule::create([
-                            'user_id' => auth()->id(),
-                            'type' => $type,
-                            'date' => $currentDate->format('Y-m-d'),
-                            'note' => $note,
-                            'guiding_id' => $request->guiding_id,
+                        BlockedEvent::create([
+                            'user_id' => $data['user_id'],
+                            'source' => 'global',
+                            'type' => 'blockiert',
+                            'from' => $currentDate->toDateString(),
+                            'due' => $currentDate->toDateString(),
                         ]);
                     }
+            
                     $currentDate->addDay();
                 }
             }
-        } else {
-            // Create entries for all days in the range
-            $currentDate = $start->copy();
-            while ($currentDate->lte($end)) {
-                CalendarSchedule::create([
-                    'user_id' => auth()->id(),
-                    'type' => $type,
-                    'date' => $currentDate->format('Y-m-d'),
-                    'note' => $note,
-                    'guiding_id' => $request->guiding_id,
-                ]);
-                $currentDate->addDay();
+
+        
+
+            return redirect()->back()->with('success', 'Die Blockade wurde erfolgreich angelegt!');
+        }else{
+
+            if($start->timestamp < $end->timestamp) {
+                $data['due'] = $end->addDay();
+                BlockedEvent::create($data);
+    
+                return redirect()->back()->with('success', 'Die Blockade wurde erfolgreich angelegt!');
             }
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Event created successfully!',
-        ]);
+        return redirect()->back()->with('error', 'Start darf nicht größer als das Ende sein!');
     }
 
-    /**
-     * Create a custom schedule entry
-     */
-    public function storeCustomSchedule(Request $request)
-    {
-        $request->validate([
-            'date' => 'required|date',
-            'note' => 'required|string|max:255',
-            'guiding_id' => 'nullable|exists:guidings,id',
-            'type' => 'required|string|in:custom_schedule,vacation_schedule'
-        ]);
+    public function getDateByDays(){
 
-        $schedule = CalendarSchedule::create([
-            'user_id' => auth()->id(),
-            'type' => $request->type,
-            'date' => $request->date,
-            'note' => $request->note,
-            'guiding_id' => $request->guiding_id,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Custom schedule created successfully!',
-            'data' => new EventResource($schedule)
-        ]);
     }
 
     public function delete($id)
     {
-        $schedule = CalendarSchedule::where('user_id', auth()->id())->where('id', $id)->first();
+        $blockedevent = BlockedEvent::where('id',$id)->where('user_id', auth()->id())->first();
 
-        if (!$schedule) {
-            return response()->json(['error' => 'Schedule not found'], 404);
+        if(!$blockedevent) {
+            abort(404);
         }
 
-        // Prevent deletion of booking-related schedules
-        if ($schedule->type === 'tour_request' && $schedule->booking_id) {
-            return response()->json(['error' => 'Cannot delete booking schedules'], 403);
-        }
-
-        $schedule->delete();
-        
-        if (request()->expectsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Schedule deleted successfully!'
-            ]);
-        }
-        
+        $blockedevent->delete();
         return back()->with('success', 'Die Blockade wurde erfolgreich gelöscht');
-    }
-
-    /**
-     * Get guidings for filter dropdown
-     */
-    public function getUserGuidings()
-    {
-        $guidings = Guiding::where('user_id', auth()->id())
-            ->select('id', 'title', 'location')
-            ->get();
-
-        return response()->json($guidings);
-    }
-
-    /**
-     * Legacy method - kept for backward compatibility
-     */
-    public function blockedEvents($events)
-    {
-        return $events->map(function($event) {
-            $event->status = $event->getBookingStatus();
-            return $event;
-        });
     }
 }

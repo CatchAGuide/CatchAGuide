@@ -26,7 +26,6 @@ use Illuminate\Support\Facades\Log;
 use App\Jobs\SendCheckoutEmail;
 use App\Models\UserInformation;
 use App\Models\UserGuest;
-use App\Models\CalendarSchedule;
 
 class Checkout extends Component
 {
@@ -422,7 +421,7 @@ class Checkout extends Component
             }
         } 
  
-        $blockedEvent = (new EventService())->createBlockedEvent($this->selectedTime, $this->selectedDate, $this->guiding, 'tour_request'); 
+        $blockedEvent = (new EventService())->createBlockedEvent($this->selectedTime, $this->selectedDate, $this->guiding); 
  
         $fee = (new HelperService())->calculateRates($this->guidingprice);
         $partnerFee = (new HelperService())->convertAmountToString($fee);
@@ -455,13 +454,6 @@ class Checkout extends Component
             'email' => $this->userData['email'],
             'token' => $this->generateBookingToken($blockedEvent->id),
         ]);
-
-        Log::info('Booking: ' . $booking->id);
-        Log::info('Blocked event: ' . $blockedEvent->id);
-        $updateSchedule = CalendarSchedule::find($blockedEvent->id);
-        Log::info('Update schedule: ' . $updateSchedule);
-        $updateSchedule->booking_id = $booking->id;
-        $updateSchedule->save();
 
         if (!app()->environment('local')) {
             SendCheckoutEmail::dispatch($booking, $user, $this->guiding, $this->guiding->user);

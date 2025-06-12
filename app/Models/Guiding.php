@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 use Illuminate\Support\Str;
 use App\Traits\MethodTraits;
-use Illuminate\Support\Facades\Log;
 use App\Traits\ModelImageTrait;
 
 use App\Models\GuidingInclussion;
@@ -101,7 +100,6 @@ class Guiding extends Model
         'prices',
         'pricing_extra',
         'months',
-        'weekdays',
         'seasonal_trip',
         'allowed_booking_advance',
         'booking_window',
@@ -451,22 +449,21 @@ class Guiding extends Model
 
     public function getBlockedEvents()
     {
-        $blocked_events = collect($this->user->calendar_schedules)
+        $blocked_events = collect($this->user->blocked_events)
             ->filter(function($blocked) {
                 return $blocked->guiding_id == $this->id || 
-                       $blocked->type === 'custom_schedule' || 
-                       $this->bookings()->where('blocked_event_id', $blocked->id)->exists();
+                       ($blocked->guiding_id === null && 
+                        $this->bookings()
+                            ->where('blocked_event_id', $blocked->id)
+                            ->exists());
             })
             ->map(function($blocked) {
                 return [
-                    "from" => date('Y-m-d', strtotime($blocked->date)),
-                    "due" => date('Y-m-d', strtotime($blocked->date)),
-                    "id" => $blocked->id
+                    "from" => date('Y-m-d', strtotime($blocked->from)),
+                    "due" => date('Y-m-d', strtotime($blocked->due))
                 ];
             })
             ->toArray();
-
-        // dd($blocked_events);
 
         $today = now();
 
@@ -515,17 +512,8 @@ class Guiding extends Model
      * @param int|null $radius Search radius in kilometers
      * @return \Illuminate\Database\Eloquent\Collection
      */
-        public static function locationFilter($city = null, $country = null, $region = null, ?int $radius = null, $placeLat = null, $placeLng = null)
+    public static function locationFilter($city = null, $country = null, $region = null, ?int $radius = null, $placeLat = null, $placeLng = null)
     {
-        // Create cache key for location search
-        $cacheKey = 'location_filter_' . md5(serialize([$city, $country, $region, $radius, $placeLat, $placeLng]));
-        
-        // Try to get from cache first (cache for 1 hour)
-        $cachedResult = \Cache::get($cacheKey);
-        if ($cachedResult) {
-            return $cachedResult;
-        }
-
         // Get standardized English names using the helper
         if ($city || $country) {
             $searchQuery = array_filter([$city, $country, $region], fn($val) => !empty($val));
@@ -580,14 +568,9 @@ class Guiding extends Model
             ->where('status', 1)
             ->pluck('id');
 
-
         if ($guidings->isNotEmpty()) {
             $returnData['ids'] = $guidings;
             $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel1') . ': $countReplace total');
-            
-            // Cache the result for 1 hour
-            \Cache::put($cacheKey, $returnData, 3600);
-            
             return $returnData;
         }
 
@@ -595,17 +578,9 @@ class Guiding extends Model
         if ($placeLat && $placeLng) {
             $coordinates = ['lat' => $placeLat, 'lng' => $placeLng];
         } else {
-            // Try to get coordinates from the location string
-            $locationString = implode(', ', array_filter([$city, $region, $country]));
-            $coordinates = self::getCoordinatesFromLocation($locationString);
-            
-            // If geocoding fails, use fallback coordinates (Munich, Germany)
-            if (!$coordinates) {
-                $coordinates = ['lat' => 48.1373, 'lng' => 11.5755];
-            }
+            // $coordinates = self::getCoordinatesFromLocation($locationParts['original']);
+            $coordinates = ['lat' => 48.1373, 'lng' => 11.5755];
         }
-
-        // Log::info('guidings', ['guidings' => $guidings]); // Removed for performance
         
         if (!$coordinates) {
             return collect();
@@ -637,10 +612,6 @@ class Guiding extends Model
         if ($guidingsRadius->isNotEmpty()) {
             $returnData['ids'] = $guidingsRadius;
             $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel2'));
-            
-            // Cache the result for 1 hour
-            \Cache::put($cacheKey, $returnData, 3600);
-            
             return $returnData;
         }
 
@@ -658,10 +629,6 @@ class Guiding extends Model
             ->orderBy('distance')
             ->pluck('id');
         $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel3'));
-        
-        // Cache the result for 1 hour
-        \Cache::put($cacheKey, $returnData, 3600);
-        
         return $returnData;
     }
 
