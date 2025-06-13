@@ -446,7 +446,7 @@ class Guiding extends Model
             return $price['person'] > 1 ? round($price['amount'] / $price['person']) : $price['amount'];
         }, $prices));
         
-        return round(min($singlePrice, $minPrice));
+        return round(min($singlePrice ?? PHP_FLOAT_MAX, $minPrice ?? PHP_FLOAT_MAX));
     }
 
     public function getBlockedEvents()
@@ -720,17 +720,19 @@ class Guiding extends Model
      * Get localized fishing method names
      * @return array
      */
-    public function getFishingMethodNames(): array
+    public function getFishingMethodNames($methodsMap = null): array
     {
         $methodIds = json_decode($this->fishing_methods) ?? [];
-        
         if (empty($methodIds)) {
             return [];
         }
-
-        return collect($methodIds)->map(function($item) {
+        return collect($methodIds)->map(function($item) use ($methodsMap) {
             if (is_numeric($item)) {
-                $method = Method::find($item);
+                if ($methodsMap && $methodsMap->has($item)) {
+                    $method = $methodsMap[$item];
+                } else {
+                    $method = Method::find($item);
+                }
                 if ($method && $method->name) {
                     return [
                         'id' => $method->id,
@@ -738,7 +740,6 @@ class Guiding extends Model
                     ];
                 }
             }
-            
             if ($item) {
                 return [
                     'id' => null,
@@ -749,22 +750,23 @@ class Guiding extends Model
         })->filter()->toArray();
     }
 
-
     /**
      * Get localized target fish names
      * @return array
      */
-    public function getTargetFishNames(): array
+    public function getTargetFishNames($targetsMap = null): array
     {
         $targetIds = json_decode($this->target_fish) ?? [];
-        
         if (empty($targetIds)) {
             return [];
         }
-
-        return collect($targetIds)->map(function($item) {
+        return collect($targetIds)->map(function($item) use ($targetsMap) {
             if (is_numeric($item)) {
-                $target = Target::find($item);
+                if ($targetsMap && $targetsMap->has($item)) {
+                    $target = $targetsMap[$item];
+                } else {
+                    $target = Target::find($item);
+                }
                 if ($target && $target->name) {
                     return [
                         'id' => $target->id,
@@ -772,7 +774,6 @@ class Guiding extends Model
                     ];
                 }
             }
-            
             if ($item) {
                 return [
                     'id' => null,
@@ -787,17 +788,19 @@ class Guiding extends Model
      * Get localized inclusion names
      * @return array
      */
-    public function getInclusionNames(): array
+    public function getInclusionNames($inclussionsMap = null): array
     {
         $inclusionIds = json_decode($this->inclusions) ?? [];
-        
         if (empty($inclusionIds)) {
             return [];
         }
-
-        return collect($inclusionIds)->map(function($item) {
+        return collect($inclusionIds)->map(function($item) use ($inclussionsMap) {
             if (is_numeric($item)) {
-                $inclusion = Inclussion::find($item);
+                if ($inclussionsMap && $inclussionsMap->has($item)) {
+                    $inclusion = $inclussionsMap[$item];
+                } else {
+                    $inclusion = Inclussion::find($item);
+                }
                 if ($inclusion && $inclusion->name) {
                     return [
                         'id' => $inclusion->id,
@@ -805,7 +808,6 @@ class Guiding extends Model
                     ];
                 }
             }
-            
             if ($item) {
                 return [
                     'id' => null,
@@ -820,17 +822,19 @@ class Guiding extends Model
      * Get localized water names
      * @return array
      */
-    public function getWaterNames(): array
+    public function getWaterNames($watersMap = null): array
     {
         $waterIds = json_decode($this->water_types) ?? [];
-        
         if (empty($waterIds)) {
             return [];
         }
-
-        return collect($waterIds)->map(function($item) {
+        return collect($waterIds)->map(function($item) use ($watersMap) {
             if (is_numeric($item)) {
-                $water = Water::find($item);
+                if ($watersMap && $watersMap->has($item)) {
+                    $water = $watersMap[$item];
+                } else {
+                    $water = Water::find($item);
+                }
                 if ($water && $water->name) {
                     return [
                         'id' => $water->id,
@@ -838,7 +842,6 @@ class Guiding extends Model
                     ];
                 }
             }
-            
             if ($item) {
                 return [
                     'id' => null,

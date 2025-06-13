@@ -321,7 +321,7 @@
                                                 <div class="">
                                                     <div class="tours-list__content__trait__text" >
                                                         @php
-                                                        $otherguideTargets = collect($otherguide->getTargetFishNames())->pluck('name')->toArray();
+                                                        $otherguideTargets = collect($otherguide->cached_target_fish_names ?? $otherguide->getTargetFishNames($targetsMap ?? null))->pluck('name')->toArray();
                                                         @endphp
                                                         
                                                         @if(!empty($otherguideTargets))

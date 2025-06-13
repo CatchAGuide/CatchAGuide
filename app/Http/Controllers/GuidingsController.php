@@ -192,9 +192,19 @@ class GuidingsController extends Controller
             $guidings = $baseQuery->paginate(20);
             $guidings->appends($request->except('page'));
             
-            // Pre-compute expensive view data to avoid N+1 queries and repeated function calls
-            $this->preComputeGuidingData($allGuidings);
-            $this->preComputeGuidingData($guidings->items());
+            // Batch fetch all needed related models for all guidings
+            $allTargetIds = $allGuidings->flatMap(function($g) { return json_decode($g->target_fish, true) ?: []; })->unique()->filter()->values();
+            $allMethodIds = $allGuidings->flatMap(function($g) { return json_decode($g->fishing_methods, true) ?: []; })->unique()->filter()->values();
+            $allWaterIds = $allGuidings->flatMap(function($g) { return json_decode($g->water_types, true) ?: []; })->unique()->filter()->values();
+            $allInclussionIds = $allGuidings->flatMap(function($g) { return json_decode($g->inclusions, true) ?: []; })->unique()->filter()->values();
+
+            $targetsMap = $allTargetIds->isNotEmpty() ? Target::whereIn('id', $allTargetIds)->get()->keyBy('id') : collect();
+            $methodsMap = $allMethodIds->isNotEmpty() ? Method::whereIn('id', $allMethodIds)->get()->keyBy('id') : collect();
+            $watersMap = $allWaterIds->isNotEmpty() ? Water::whereIn('id', $allWaterIds)->get()->keyBy('id') : collect();
+            $inclussionsMap = $allInclussionIds->isNotEmpty() ? Inclussion::whereIn('id', $allInclussionIds)->get()->keyBy('id') : collect();
+
+            $this->preComputeGuidingData($allGuidings, $targetsMap, $methodsMap, $watersMap, $inclussionsMap);
+            $this->preComputeGuidingData($guidings->items(), $targetsMap, $methodsMap, $watersMap, $inclussionsMap);
         } else {
             // Ensure $guidings is always defined
             if (!isset($guidings)) {
@@ -281,6 +291,10 @@ class GuidingsController extends Controller
             ],
             'maxPrice' => $overallMaxPrice,
             'overallMaxPrice' => $overallMaxPrice,
+            'targetsMap' => $targetsMap ?? collect(),
+            'methodsMap' => $methodsMap ?? collect(),
+            'watersMap' => $watersMap ?? collect(),
+            'inclussionsMap' => $inclussionsMap ?? collect(),
         ];
 
         // Handle AJAX requests
@@ -407,9 +421,19 @@ class GuidingsController extends Controller
                 $guidings = $baseQuery->paginate(20);
                 $guidings->appends($request->except('page'));
                 
-                // Pre-compute expensive view data to avoid N+1 queries and repeated function calls
-                $this->preComputeGuidingData($allGuidings);
-                $this->preComputeGuidingData($guidings->getCollection());
+                // Batch fetch all needed related models for all guidings
+                $allTargetIds = $allGuidings->flatMap(function($g) { return json_decode($g->target_fish, true) ?: []; })->unique()->filter()->values();
+                $allMethodIds = $allGuidings->flatMap(function($g) { return json_decode($g->fishing_methods, true) ?: []; })->unique()->filter()->values();
+                $allWaterIds = $allGuidings->flatMap(function($g) { return json_decode($g->water_types, true) ?: []; })->unique()->filter()->values();
+                $allInclussionIds = $allGuidings->flatMap(function($g) { return json_decode($g->inclusions, true) ?: []; })->unique()->filter()->values();
+
+                $targetsMap = $allTargetIds->isNotEmpty() ? Target::whereIn('id', $allTargetIds)->get()->keyBy('id') : collect();
+                $methodsMap = $allMethodIds->isNotEmpty() ? Method::whereIn('id', $allMethodIds)->get()->keyBy('id') : collect();
+                $watersMap = $allWaterIds->isNotEmpty() ? Water::whereIn('id', $allWaterIds)->get()->keyBy('id') : collect();
+                $inclussionsMap = $allInclussionIds->isNotEmpty() ? Inclussion::whereIn('id', $allInclussionIds)->get()->keyBy('id') : collect();
+
+                $this->preComputeGuidingData($allGuidings, $targetsMap, $methodsMap, $watersMap, $inclussionsMap);
+                $this->preComputeGuidingData($guidings->getCollection(), $targetsMap, $methodsMap, $watersMap, $inclussionsMap);
             }
         }
 
@@ -505,6 +529,10 @@ class GuidingsController extends Controller
             ],
             'maxPrice' => $overallMaxPrice,
             'overallMaxPrice' => $overallMaxPrice,
+            'targetsMap' => $targetsMap ?? collect(),
+            'methodsMap' => $methodsMap ?? collect(),
+            'watersMap' => $watersMap ?? collect(),
+            'inclussionsMap' => $inclussionsMap ?? collect(),
         ];
 
         // Handle AJAX requests
@@ -1224,30 +1252,22 @@ class GuidingsController extends Controller
     /**
      * Pre-compute expensive view data to avoid N+1 queries and repeated function calls
      */
-    private function preComputeGuidingData($guidings)
+    private function preComputeGuidingData($guidings, $targetsMap = null, $methodsMap = null, $watersMap = null, $inclussionsMap = null)
     {
         if (empty($guidings)) {
             return;
         }
-
         foreach ($guidings as $guiding) {
-            // Use raw paths for optimization
             $galleryImages = json_decode($guiding->gallery_images, true) ?? [];
             $optimizedImages = [];
             foreach ($galleryImages as $imagePath) {
                 $optimizedImages[] = $this->imageOptimizationService->getOptimizedThumbnail($imagePath);
             }
             $guiding->cached_gallery_images = $optimizedImages;
-
-            // Pre-compute target fish names (avoid database queries in view)
-            $guiding->cached_target_fish_names = $guiding->getTargetFishNames();
-            // Pre-compute inclusion names (avoid database queries in view)
-            $guiding->cached_inclusion_names = $guiding->getInclusionNames();
-            // Pre-compute review count (avoid database queries in view)
+            $guiding->cached_target_fish_names = $guiding->getTargetFishNames($targetsMap);
+            $guiding->cached_inclusion_names = $guiding->getInclusionNames($inclussionsMap);
             $guiding->cached_review_count = $guiding->user->reviews->count();
-            // Pre-compute average rating (avoid database queries in view)
             $guiding->cached_average_rating = $guiding->user->average_rating();
-            // Pre-compute boat type name (avoid database queries in view)
             $guiding->cached_boat_type_name = $guiding->is_boat ? 
                 ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : 
                 __('guidings.shore');
