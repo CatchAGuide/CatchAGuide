@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use App\Traits\MethodTraits;
 use Illuminate\Support\Facades\Log;
 use App\Traits\ModelImageTrait;
+use App\Traits\Cacheable;
 
 use App\Models\GuidingInclussion;
 use App\Models\GuidingExtras;
@@ -36,7 +37,7 @@ use App\Models\BoatExtras;
  */
 class Guiding extends Model
 {
-    use HasFactory, Geoly, ModelImageTrait;
+    use HasFactory, Geoly, ModelImageTrait, Cacheable;
 
     protected $fillable = [
         'title',

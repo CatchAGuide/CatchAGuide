@@ -126,7 +126,7 @@ class GuidingsController extends Controller
         $searchMessage = "";
         
         // Build base query without filter service
-        $baseQuery = Guiding::with(['boatType'])->where('status', 1);
+        $baseQuery = Guiding::with(['boatType', 'user.reviews'])->where('status', 1);
 
         // Handle destination filtering
         if ($request->has('from_destination')) {
@@ -345,12 +345,12 @@ class GuidingsController extends Controller
             // Build base query with minimal eager loading
             if ($hasCheckboxFilters) {
                 // Use filtered IDs from JSON service
-                $baseQuery = Guiding::with(['boatType'])
+                $baseQuery = Guiding::with(['boatType', 'user.reviews'])
                     ->whereIn('id', $checkboxFilteredIds)
                     ->where('status', 1);
             } else {
                 // No checkbox filters - get all active guidings
-                $baseQuery = Guiding::with(['boatType'])
+                $baseQuery = Guiding::with(['boatType', 'user.reviews'])
                     ->where('status', 1);
             }
 
