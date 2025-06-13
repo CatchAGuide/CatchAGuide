@@ -29,13 +29,23 @@ class ImageOptimizationService
 
     private function optimizeImage($imagePath, $width = null, $height = null)
     {
-        // Support both storage and public paths
+        $cacheDir = public_path('cache/guidings');
+        if (!file_exists($cacheDir)) {
+            mkdir($cacheDir, 0777, true);
+        }
+        $cacheFile = $cacheDir . '/' . md5($imagePath . $width . $height) . '.jpg';
+
+        // If cache file exists, just return its URL
+        if (file_exists($cacheFile)) {
+            return asset('cache/guidings/' . basename($cacheFile));
+        }
+
+        // Otherwise, generate and save it
         $fullPath = public_path($imagePath);
         if (!file_exists($fullPath)) {
-            // Try with leading slash removed (sometimes asset() returns with/without slash)
             $fullPath = public_path(ltrim($imagePath, '/'));
             if (!file_exists($fullPath)) {
-                return asset('images/placeholder_guide.jpg'); // fallback image
+                return asset('images/placeholder_guide.jpg');
             }
         }
 
@@ -48,16 +58,8 @@ class ImageOptimizationService
         }
 
         $image->encode('jpg', self::QUALITY);
-
-        // Save to a cache file in public/cache/guidings/
-        $cacheDir = public_path('cache/guidings');
-        if (!file_exists($cacheDir)) {
-            mkdir($cacheDir, 0777, true);
-        }
-        $cacheFile = $cacheDir . '/' . md5($imagePath . $width . $height) . '.jpg';
         $image->save($cacheFile);
 
-        // Return the public URL to the cached image
         return asset('cache/guidings/' . basename($cacheFile));
     }
 
