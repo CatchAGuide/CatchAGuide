@@ -13,7 +13,7 @@ class VacationsController extends Controller
 {
     public function index(Request $request)
     {
-        $countries = Destination::whereType('vacations')->get();
+        $countries = Destination::whereType('vacations')->where('language',app()->getLocale())->get();
         return view('pages.countries.vacations', compact('countries'));
     }
 
