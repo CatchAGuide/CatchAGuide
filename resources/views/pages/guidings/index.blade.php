@@ -616,12 +616,16 @@
                                                     <div id="carouselExampleControls-{{$guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
                                                         <div class="carousel-inner">
                                                             @php
-                                                                $galleryImages = $guiding->cached_gallery_images ?? get_galleries_image_link($guiding);
+                                                                $galleryImages = $guiding->cached_gallery_images ?? [];
                                                             @endphp
                                                             @if(count($galleryImages))
                                                                 @foreach($galleryImages as $index => $gallery_image_link)
                                                                     <div class="carousel-item @if($index == 0) active @endif">
-                                                                        <img  class="d-block" src="{{asset($gallery_image_link)}}">
+                                                                        <img class="d-block lazy" 
+                                                                             data-src="{{ $gallery_image_link }}"
+                                                                             src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                                                                             alt="{{ translate($guiding->title) }}"
+                                                                             loading="lazy">
                                                                     </div>
                                                                 @endforeach
                                                             @endif
@@ -1280,6 +1284,64 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             filterCounter.style.display = 'none';
         }
+    }
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Lazy loading for images
+    var lazyImages = [].slice.call(document.querySelectorAll("img.lazy"));
+
+    if ("IntersectionObserver" in window) {
+        let lazyImageObserver = new IntersectionObserver(function(entries, observer) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    let lazyImage = entry.target;
+                    lazyImage.src = lazyImage.dataset.src;
+                    lazyImage.classList.remove("lazy");
+                    lazyImageObserver.unobserve(lazyImage);
+                }
+            });
+        });
+
+        lazyImages.forEach(function(lazyImage) {
+            lazyImageObserver.observe(lazyImage);
+        });
+    } else {
+        // Fallback for browsers that don't support IntersectionObserver
+        let active = false;
+
+        const lazyLoad = function() {
+            if (active === false) {
+                active = true;
+
+                setTimeout(function() {
+                    lazyImages.forEach(function(lazyImage) {
+                        if ((lazyImage.getBoundingClientRect().top <= window.innerHeight && lazyImage.getBoundingClientRect().bottom >= 0) && getComputedStyle(lazyImage).display !== "none") {
+                            lazyImage.src = lazyImage.dataset.src;
+                            lazyImage.classList.remove("lazy");
+
+                            lazyImages = lazyImages.filter(function(image) {
+                                return image !== lazyImage;
+                            });
+
+                            if (lazyImages.length === 0) {
+                                document.removeEventListener("scroll", lazyLoad);
+                                window.removeEventListener("resize", lazyLoad);
+                                window.removeEventListener("orientationchange", lazyLoad);
+                            }
+                        }
+                    });
+
+                    active = false;
+                }, 200);
+            }
+        };
+
+        document.addEventListener("scroll", lazyLoad);
+        window.addEventListener("resize", lazyLoad);
+        window.addEventListener("orientationchange", lazyLoad);
     }
 });
 </script>

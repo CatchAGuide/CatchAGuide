@@ -32,13 +32,16 @@ use App\Models\Destination;
 use App\Models\Review;
 use Illuminate\Support\Facades\Cache;
 use App\Services\GuidingFilterService;
+use App\Services\ImageOptimizationService;
 
 class GuidingsController extends Controller
 {
     protected $filterService;
+    protected $imageOptimizationService;
 
     public function __construct()
     {
+        $this->imageOptimizationService = new ImageOptimizationService();
         // Don't instantiate filter service until needed
     }
 
@@ -1228,21 +1231,22 @@ class GuidingsController extends Controller
         }
 
         foreach ($guidings as $guiding) {
-            // Pre-compute gallery images (avoid calling get_galleries_image_link multiple times)
-            $guiding->cached_gallery_images = get_galleries_image_link($guiding);
-            
+            // Use raw paths for optimization
+            $galleryImages = json_decode($guiding->gallery_images, true) ?? [];
+            $optimizedImages = [];
+            foreach ($galleryImages as $imagePath) {
+                $optimizedImages[] = $this->imageOptimizationService->getOptimizedThumbnail($imagePath);
+            }
+            $guiding->cached_gallery_images = $optimizedImages;
+
             // Pre-compute target fish names (avoid database queries in view)
             $guiding->cached_target_fish_names = $guiding->getTargetFishNames();
-            
             // Pre-compute inclusion names (avoid database queries in view)
             $guiding->cached_inclusion_names = $guiding->getInclusionNames();
-            
             // Pre-compute review count (avoid database queries in view)
             $guiding->cached_review_count = $guiding->user->reviews->count();
-            
             // Pre-compute average rating (avoid database queries in view)
             $guiding->cached_average_rating = $guiding->user->average_rating();
-            
             // Pre-compute boat type name (avoid database queries in view)
             $guiding->cached_boat_type_name = $guiding->is_boat ? 
                 ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : 
