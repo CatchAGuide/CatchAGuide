@@ -515,8 +515,11 @@
             // Add each form parameter to URLSearchParams properly
             for (const [key, value] of formData.entries()) {
                 // Skip empty price values or default values
-                if ((key === 'price_min' && (value === '' || parseInt(value) === 50)) || 
-                    (key === 'price_max' && (value === '' || parseInt(value) === 1000))) {
+                const defaultMinPrice = 50;
+                const defaultMaxPrice = window.maxPrice > 1000 ? window.maxPrice : 1000;
+                
+                if ((key === 'price_min' && (value === '' || parseInt(value) === defaultMinPrice)) || 
+                    (key === 'price_max' && (value === '' || parseInt(value) === defaultMaxPrice))) {
                     continue;
                 }
                 // Handle array parameters correctly

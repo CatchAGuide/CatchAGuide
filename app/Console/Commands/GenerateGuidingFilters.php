@@ -9,6 +9,7 @@ use App\Models\Method;
 use App\Models\Water;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class GenerateGuidingFilters extends Command
 {
@@ -256,5 +257,35 @@ class GenerateGuidingFilters extends Command
         foreach ($filterMapping['price_ranges'] as $range => $guidingIds) {
             $filterMapping['metadata']['counts']['price_ranges'][$range] = count($guidingIds);
         }
+
+        // Add price range metadata for easier access
+        $maxPrice = 0;
+        foreach (array_keys($filterMapping['price_ranges']) as $range) {
+            if (strpos($range, '-') !== false) {
+                list($min, $max) = explode('-', $range);
+                if ((int)$max > $maxPrice) {
+                    $maxPrice = (int)$max;
+                }
+            }
+        }
+        
+        $filterMapping['metadata']['maxPrice'] = $maxPrice ?: 1000;
+        $filterMapping['metadata']['minPrice'] = 50;
+        
+        // Add some debug info
+        $this->info('Filter counts summary:');
+        $this->info('- Targets: ' . count(array_filter($filterMapping['metadata']['counts']['targets'])));
+        $this->info('- Methods: ' . count(array_filter($filterMapping['metadata']['counts']['methods'])));
+        $this->info('- Water Types: ' . count(array_filter($filterMapping['metadata']['counts']['water_types'])));
+        $this->info('- Duration Types: ' . count(array_filter($filterMapping['metadata']['counts']['duration_types'])));
+        $this->info('- Person Ranges: ' . count(array_filter($filterMapping['metadata']['counts']['person_ranges'])));
+        $this->info('- Price Ranges: ' . count(array_filter($filterMapping['metadata']['counts']['price_ranges'])));
+        
+        // Cache price ranges in a separate cache key for quick access
+        Cache::put('guiding_price_ranges', [
+            'maxPrice' => $maxPrice ?: 1000,
+            'minPrice' => 50,
+            'ranges' => array_keys($filterMapping['price_ranges'])
+        ], 7200); // 2 hours cache
     }
 } 

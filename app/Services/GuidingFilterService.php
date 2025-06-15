@@ -146,6 +146,11 @@ class GuidingFilterService
             return $this->filterData['metadata']['counts'] ?? [];
         }
 
+        // Ensure filteredIds is an array
+        if (!is_array($filteredIds)) {
+            $filteredIds = [];
+        }
+
         // Calculate counts based on filtered IDs
         $counts = [
             'targets' => [],
@@ -160,54 +165,66 @@ class GuidingFilterService
             'price_ranges' => []
         ];
 
+        // Process targets
         if (isset($this->filterData['targets'])) {
             foreach ($this->filterData['targets'] as $targetId => $guidingIds) {
                 $intersect = array_intersect($guidingIds, $filteredIds);
-                if (!empty($intersect)) {
-                    $counts['targets'][$targetId] = count($intersect);
+                $count = count($intersect);
+                if ($count > 0) {
+                    $counts['targets'][$targetId] = $count;
                 }
             }
         }
 
+        // Process methods
         if (isset($this->filterData['methods'])) {
             foreach ($this->filterData['methods'] as $methodId => $guidingIds) {
                 $intersect = array_intersect($guidingIds, $filteredIds);
-                if (!empty($intersect)) {
-                    $counts['methods'][$methodId] = count($intersect);
+                $count = count($intersect);
+                if ($count > 0) {
+                    $counts['methods'][$methodId] = $count;
                 }
             }
         }
 
+        // Process water types
         if (isset($this->filterData['water_types'])) {
             foreach ($this->filterData['water_types'] as $waterId => $guidingIds) {
                 $intersect = array_intersect($guidingIds, $filteredIds);
-                if (!empty($intersect)) {
-                    $counts['water_types'][$waterId] = count($intersect);
+                $count = count($intersect);
+                if ($count > 0) {
+                    $counts['water_types'][$waterId] = $count;
                 }
             }
         }
 
+        // Process duration types
         if (isset($this->filterData['duration_types'])) {
             foreach ($this->filterData['duration_types'] as $type => $guidingIds) {
                 $intersect = array_intersect($guidingIds, $filteredIds);
-                $counts['duration_types'][$type] = count($intersect);
+                $count = count($intersect);
+                $counts['duration_types'][$type] = $count;
             }
         }
 
+        // Process person ranges
         if (isset($this->filterData['person_ranges'])) {
             foreach ($this->filterData['person_ranges'] as $range => $guidingIds) {
                 $intersect = array_intersect($guidingIds, $filteredIds);
-                if (!empty($intersect)) {
-                    $counts['person_ranges'][$range] = count($intersect);
+                $count = count($intersect);
+                if ($count > 0) {
+                    $counts['person_ranges'][$range] = $count;
                 }
             }
         }
 
+        // Process price ranges
         if (isset($this->filterData['price_ranges'])) {
             foreach ($this->filterData['price_ranges'] as $range => $guidingIds) {
                 $intersect = array_intersect($guidingIds, $filteredIds);
-                if (!empty($intersect)) {
-                    $counts['price_ranges'][$range] = count($intersect);
+                $count = count($intersect);
+                if ($count > 0) {
+                    $counts['price_ranges'][$range] = $count;
                 }
             }
         }
@@ -215,41 +232,274 @@ class GuidingFilterService
         return $counts;
     }
 
-    private function getGuidingIdsForTargets($targetIds)
+    /**
+     * Get interactive filter counts for better user experience
+     * This method calculates what the counts would be if each filter was selected/deselected
+     */
+    public function getInteractiveFilterCounts($request, $currentResultIds = null)
     {
-        $allIds = [];
-        foreach ($targetIds as $targetId) {
-            if (isset($this->filterData['targets'][$targetId])) {
-                $allIds = array_merge($allIds, $this->filterData['targets'][$targetId]);
+        $this->ensureDataLoaded();
+        
+        if (!$this->filterData || empty($currentResultIds)) {
+            return $this->getFilterCounts($currentResultIds);
+        }
+
+        $interactiveCounts = [
+            'targets' => [],
+            'methods' => [],
+            'water_types' => [],
+            'duration_types' => [
+                'half_day' => 0,
+                'full_day' => 0,
+                'multi_day' => 0
+            ],
+            'person_ranges' => [],
+            'price_ranges' => []
+        ];
+
+        // Get currently active filters
+        $activeTargets = $request->get('target_fish', []);
+        $activeMethods = $request->get('methods', []);
+        $activeWaters = $request->get('water', []);
+        $activeDurations = $request->get('duration_types', []);
+        $activePersons = $request->get('num_persons', []);
+
+        // For each filter type, calculate what the counts would be with current filters
+        $this->calculateInteractiveTargetCounts($interactiveCounts, $currentResultIds, $activeTargets, $activeMethods, $activeWaters, $activeDurations, $activePersons, $request);
+        $this->calculateInteractiveMethodCounts($interactiveCounts, $currentResultIds, $activeTargets, $activeMethods, $activeWaters, $activeDurations, $activePersons, $request);
+        $this->calculateInteractiveWaterCounts($interactiveCounts, $currentResultIds, $activeTargets, $activeMethods, $activeWaters, $activeDurations, $activePersons, $request);
+        $this->calculateInteractiveDurationCounts($interactiveCounts, $currentResultIds, $activeTargets, $activeMethods, $activeWaters, $activeDurations, $activePersons, $request);
+        $this->calculateInteractivePersonCounts($interactiveCounts, $currentResultIds, $activeTargets, $activeMethods, $activeWaters, $activeDurations, $activePersons, $request);
+        $this->calculateInteractivePriceCounts($interactiveCounts, $currentResultIds, $activeTargets, $activeMethods, $activeWaters, $activeDurations, $activePersons, $request);
+
+        return $interactiveCounts;
+    }
+
+    private function calculateInteractiveTargetCounts(&$counts, $currentResultIds, $activeTargets, $activeMethods, $activeWaters, $activeDurations, $activePersons, $request)
+    {
+        if (!isset($this->filterData['targets'])) return;
+
+        foreach ($this->filterData['targets'] as $targetId => $guidingIds) {
+            // Calculate what results would be if this target was selected (ignoring current target filters)
+            $tempIds = $this->calculateFilteredIds($request, [$targetId], $activeMethods, $activeWaters, $activeDurations, $activePersons);
+            $intersect = array_intersect($tempIds, $currentResultIds);
+            
+            if (count($intersect) > 0) {
+                $counts['targets'][$targetId] = count($intersect);
             }
         }
-        return array_unique($allIds);
+    }
+
+    private function calculateInteractiveMethodCounts(&$counts, $currentResultIds, $activeTargets, $activeMethods, $activeWaters, $activeDurations, $activePersons, $request)
+    {
+        if (!isset($this->filterData['methods'])) return;
+
+        foreach ($this->filterData['methods'] as $methodId => $guidingIds) {
+            $tempIds = $this->calculateFilteredIds($request, $activeTargets, [$methodId], $activeWaters, $activeDurations, $activePersons);
+            $intersect = array_intersect($tempIds, $currentResultIds);
+            
+            if (count($intersect) > 0) {
+                $counts['methods'][$methodId] = count($intersect);
+            }
+        }
+    }
+
+    private function calculateInteractiveWaterCounts(&$counts, $currentResultIds, $activeTargets, $activeMethods, $activeWaters, $activeDurations, $activePersons, $request)
+    {
+        if (!isset($this->filterData['water_types'])) return;
+
+        foreach ($this->filterData['water_types'] as $waterId => $guidingIds) {
+            $tempIds = $this->calculateFilteredIds($request, $activeTargets, $activeMethods, [$waterId], $activeDurations, $activePersons);
+            $intersect = array_intersect($tempIds, $currentResultIds);
+            
+            if (count($intersect) > 0) {
+                $counts['water_types'][$waterId] = count($intersect);
+            }
+        }
+    }
+
+    private function calculateInteractiveDurationCounts(&$counts, $currentResultIds, $activeTargets, $activeMethods, $activeWaters, $activeDurations, $activePersons, $request)
+    {
+        if (!isset($this->filterData['duration_types'])) return;
+
+        foreach ($this->filterData['duration_types'] as $durationType => $guidingIds) {
+            $tempIds = $this->calculateFilteredIds($request, $activeTargets, $activeMethods, $activeWaters, [$durationType], $activePersons);
+            $intersect = array_intersect($tempIds, $currentResultIds);
+            
+            $counts['duration_types'][$durationType] = count($intersect);
+        }
+    }
+
+    private function calculateInteractivePersonCounts(&$counts, $currentResultIds, $activeTargets, $activeMethods, $activeWaters, $activeDurations, $activePersons, $request)
+    {
+        if (!isset($this->filterData['person_ranges'])) return;
+
+        foreach ($this->filterData['person_ranges'] as $personRange => $guidingIds) {
+            $tempIds = $this->calculateFilteredIds($request, $activeTargets, $activeMethods, $activeWaters, $activeDurations, [$personRange]);
+            $intersect = array_intersect($tempIds, $currentResultIds);
+            
+            if (count($intersect) > 0) {
+                $counts['person_ranges'][$personRange] = count($intersect);
+            }
+        }
+    }
+
+    private function calculateInteractivePriceCounts(&$counts, $currentResultIds, $activeTargets, $activeMethods, $activeWaters, $activeDurations, $activePersons, $request)
+    {
+        if (!isset($this->filterData['price_ranges'])) return;
+
+        foreach ($this->filterData['price_ranges'] as $priceRange => $guidingIds) {
+            // For price ranges, we need to consider the current price filter settings
+            $tempIds = $this->calculateFilteredIds($request, $activeTargets, $activeMethods, $activeWaters, $activeDurations, $activePersons, $priceRange);
+            $intersect = array_intersect($tempIds, $currentResultIds);
+            
+            if (count($intersect) > 0) {
+                $counts['price_ranges'][$priceRange] = count($intersect);
+            }
+        }
+    }
+
+    /**
+     * Calculate filtered IDs for specific filter combinations
+     */
+    private function calculateFilteredIds($request, $targetIds = [], $methodIds = [], $waterIds = [], $durationTypes = [], $personRanges = [], $priceRange = null)
+    {
+        $filteredIds = null;
+
+        // Apply target fish filter (AND logic for multiple selections)
+        if (!empty($targetIds)) {
+            $targetFilterIds = $this->getGuidingIdsForTargets($targetIds);
+            $filteredIds = $this->intersectIds($filteredIds, $targetFilterIds);
+        }
+
+        // Apply methods filter (AND logic for multiple selections)
+        if (!empty($methodIds)) {
+            $methodFilterIds = $this->getGuidingIdsForMethods($methodIds);
+            $filteredIds = $this->intersectIds($filteredIds, $methodFilterIds);
+        }
+
+        // Apply water types filter (AND logic for multiple selections)
+        if (!empty($waterIds)) {
+            $waterFilterIds = $this->getGuidingIdsForWaterTypes($waterIds);
+            $filteredIds = $this->intersectIds($filteredIds, $waterFilterIds);
+        }
+
+        // Apply duration types filter (OR logic for multiple selections)
+        if (!empty($durationTypes)) {
+            $durationFilterIds = $this->getGuidingIdsForDurationTypes($durationTypes);
+            $filteredIds = $this->intersectIds($filteredIds, $durationFilterIds);
+        }
+
+        // Apply person ranges filter (OR logic for multiple selections)
+        if (!empty($personRanges)) {
+            $personFilterIds = [];
+            foreach ($personRanges as $personRange) {
+                if (isset($this->filterData['person_ranges'][$personRange])) {
+                    $personFilterIds = array_merge($personFilterIds, $this->filterData['person_ranges'][$personRange]);
+                }
+            }
+            $filteredIds = $this->intersectIds($filteredIds, array_unique($personFilterIds));
+        }
+
+        // Apply price range filter
+        if ($priceRange && isset($this->filterData['price_ranges'][$priceRange])) {
+            $filteredIds = $this->intersectIds($filteredIds, $this->filterData['price_ranges'][$priceRange]);
+        } elseif ($this->hasPriceFilter($request)) {
+            $priceIds = $this->getGuidingIdsForPriceRange($request);
+            $filteredIds = $this->intersectIds($filteredIds, $priceIds);
+        }
+
+        return $filteredIds ?? [];
+    }
+
+    private function getGuidingIdsForTargets($targetIds)
+    {
+        if (empty($targetIds)) {
+            return [];
+        }
+
+        // For multiple target fish selections, use AND logic (intersection)
+        // Show only guidings that have ALL selected target fish
+        $resultIds = null;
+        
+        foreach ($targetIds as $targetId) {
+            if (isset($this->filterData['targets'][$targetId])) {
+                $currentIds = $this->filterData['targets'][$targetId];
+                
+                if ($resultIds === null) {
+                    // First iteration - set the initial result
+                    $resultIds = $currentIds;
+                } else {
+                    // Subsequent iterations - intersect with previous results
+                    $resultIds = array_intersect($resultIds, $currentIds);
+                }
+            } else {
+                // If any target fish has no guidings, result should be empty
+                return [];
+            }
+        }
+        
+        return $resultIds ?? [];
     }
 
     private function getGuidingIdsForMethods($methodIds)
     {
-        $allIds = [];
+        if (empty($methodIds)) {
+            return [];
+        }
+
+        // For multiple method selections, use AND logic (intersection)
+        // Show only guidings that have ALL selected methods
+        $resultIds = null;
+        
         foreach ($methodIds as $methodId) {
             if (isset($this->filterData['methods'][$methodId])) {
-                $allIds = array_merge($allIds, $this->filterData['methods'][$methodId]);
+                $currentIds = $this->filterData['methods'][$methodId];
+                
+                if ($resultIds === null) {
+                    $resultIds = $currentIds;
+                } else {
+                    $resultIds = array_intersect($resultIds, $currentIds);
+                }
+            } else {
+                return [];
             }
         }
-        return array_unique($allIds);
+        
+        return $resultIds ?? [];
     }
 
     private function getGuidingIdsForWaterTypes($waterIds)
     {
-        $allIds = [];
+        if (empty($waterIds)) {
+            return [];
+        }
+
+        // For multiple water type selections, use AND logic (intersection)
+        // Show only guidings that have ALL selected water types
+        $resultIds = null;
+        
         foreach ($waterIds as $waterId) {
             if (isset($this->filterData['water_types'][$waterId])) {
-                $allIds = array_merge($allIds, $this->filterData['water_types'][$waterId]);
+                $currentIds = $this->filterData['water_types'][$waterId];
+                
+                if ($resultIds === null) {
+                    $resultIds = $currentIds;
+                } else {
+                    $resultIds = array_intersect($resultIds, $currentIds);
+                }
+            } else {
+                return [];
             }
         }
-        return array_unique($allIds);
+        
+        return $resultIds ?? [];
     }
 
     private function getGuidingIdsForDurationTypes($durationTypes)
     {
+        // For duration types, OR logic makes more sense (half_day OR full_day OR multi_day)
+        // Keep the original logic here
         $allIds = [];
         foreach ($durationTypes as $durationType) {
             if (isset($this->filterData['duration_types'][$durationType])) {
@@ -303,8 +553,13 @@ class GuidingFilterService
         $defaultMinPrice = 50;
         $defaultMaxPrice = $this->getMaxPriceFromData();
         
-        return ($priceMin && $priceMin != $defaultMinPrice) || 
-               ($priceMax && $priceMax != $defaultMaxPrice);
+        // Check if price_min is set and different from default
+        $hasMinFilter = $priceMin && (int)$priceMin !== $defaultMinPrice && (int)$priceMin > 0;
+        
+        // Check if price_max is set and different from default
+        $hasMaxFilter = $priceMax && (int)$priceMax !== $defaultMaxPrice && (int)$priceMax < $defaultMaxPrice;
+        
+        return $hasMinFilter || $hasMaxFilter;
     }
 
     private function getMaxPriceFromData()

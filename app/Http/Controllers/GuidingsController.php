@@ -215,9 +215,15 @@ class GuidingsController extends Controller
             }
         }
 
-        // For direct queries without filters, get basic filter counts from the filter service
-        // This ensures filter options are shown on initial load
-        $filterCounts = $this->getFilterService()->getFilterCounts();
+        // Calculate filter counts based on current result set
+        if ($allGuidings->isNotEmpty()) {
+            // Use the current result IDs for accurate counts
+            $currentResultIds = $allGuidings->pluck('id')->toArray();
+            $filterCounts = $this->getFilterService()->getFilterCounts($currentResultIds);
+        } else {
+            // Get basic filter counts if no current results
+            $filterCounts = $this->getFilterService()->getFilterCounts();
+        }
         
         // Ensure all filter count arrays have default values to prevent undefined key errors
         $filterCounts = array_merge([
@@ -621,8 +627,13 @@ class GuidingsController extends Controller
         $defaultMinPrice = 50;
         $defaultMaxPrice = $this->getMaxPriceFromFilterData();
         
-        return ($priceMin && $priceMin != $defaultMinPrice) || 
-               ($priceMax && $priceMax != $defaultMaxPrice);
+        // Check if price_min is set and different from default
+        $hasMinFilter = $priceMin && (int)$priceMin !== $defaultMinPrice && (int)$priceMin > 0;
+        
+        // Check if price_max is set and different from default
+        $hasMaxFilter = $priceMax && (int)$priceMax !== $defaultMaxPrice && (int)$priceMax < $defaultMaxPrice;
+        
+        return $hasMinFilter || $hasMaxFilter;
     }
 
     private function applySorting($query, $request, $randomSeed)
@@ -741,20 +752,25 @@ class GuidingsController extends Controller
         
         // Get default values (use cached value for max price)
         $defaultMinPrice = 50;
-        $cacheKey = 'guiding_price_ranges';
-        $defaultMaxPrice = Cache::has($cacheKey) ? Cache::get($cacheKey)['maxPrice'] : 1000;
+        $defaultMaxPrice = $this->getMaxPriceFromFilterData();
         
         // Check and remove price parameters if they match defaults
         $modified = false;
         
-        if (isset($requestData['price_min']) && (int)$requestData['price_min'] === $defaultMinPrice) {
-            unset($requestData['price_min']);
-            $modified = true;
+        if (isset($requestData['price_min'])) {
+            $priceMin = (int)$requestData['price_min'];
+            if ($priceMin === $defaultMinPrice || $priceMin <= 0) {
+                unset($requestData['price_min']);
+                $modified = true;
+            }
         }
         
-        if (isset($requestData['price_max']) && (int)$requestData['price_max'] === $defaultMaxPrice) {
-            unset($requestData['price_max']);
-            $modified = true;
+        if (isset($requestData['price_max'])) {
+            $priceMax = (int)$requestData['price_max'];
+            if ($priceMax === $defaultMaxPrice || $priceMax >= $defaultMaxPrice) {
+                unset($requestData['price_max']);
+                $modified = true;
+            }
         }
         
         // Only replace if we actually modified something
