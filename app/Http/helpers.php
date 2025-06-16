@@ -230,10 +230,14 @@ if (!function_exists('getLocationDetails')) {
             $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.city')) = ?", [$searchString])
                   ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.city')) LIKE ?", ['%' . $searchString . '%'])
                   ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.country')) = ?", [$searchString])
-                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.country')) LIKE ?", ['%' . $searchString . '%']);
+                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.country')) LIKE ?", ['%' . $searchString . '%'])
+                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.region')) = ?", [$searchString])
+                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.region')) LIKE ?", ['%' . $searchString . '%']);
         })
         ->select('city', 'country', 'region')
         ->first();
+
+        Log::info('location', ['location' => $location]);
         
         if ($location) {
             if ($location->city || $location->country || $location->region) {
