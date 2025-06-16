@@ -29,7 +29,6 @@ use App\Models\GuidingBoatType;
 use App\Models\GuidingBoatDescription;
 use App\Models\GuidingBoatExtras;
 use App\Models\BoatExtras;
-use Illuminate\Support\Facades\Log;
 
 /**
  * @property string|null $target_fish
