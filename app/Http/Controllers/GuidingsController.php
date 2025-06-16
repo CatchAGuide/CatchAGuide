@@ -48,7 +48,6 @@ class GuidingsController extends Controller
             $randomSeed = rand();
             Session::put('random_seed', $randomSeed);
         }
-
         // Clean up request parameters before processing
         $cleanedRequest = $this->cleanRequestParameters($request);
         
