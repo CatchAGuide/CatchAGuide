@@ -537,8 +537,7 @@ class Guiding extends Model
         
         // Try direct database match based on standardized names
         $query = self::select('id')
-            ->where(function($query) use ($locationParts) {
-                // City conditions
+            ->where(function($query) use ($locationParts) {                // City conditions
                 if ($locationParts['city']) {
                     $query->where(function($q) use ($locationParts) {
                         $q->where('city', $locationParts['city']);
@@ -557,13 +556,19 @@ class Guiding extends Model
                         }
                     });
                 }
-                
-                // Region conditions
+                // Only check for region conditions
                 if ($locationParts['region']) {
                     $query->where(function($q) use ($locationParts) {
-                        $q->where('region', $locationParts['region']);
+                        $q->where(function($subQ) use ($locationParts) {
+                            $subQ->where('region', 'LIKE', '%' . $locationParts['region'] . '%')
+                                 ->orWhereRaw('? LIKE CONCAT("%", region, "%")', [$locationParts['region']]);
+                        });
+                        
                         if (isset($locationParts['region_en'])) {
-                            $q->orWhere('region', $locationParts['region_en']);
+                            $q->orWhere(function($subQ) use ($locationParts) {
+                                $subQ->where('region', 'LIKE', '%' . $locationParts['region_en'] . '%')
+                                     ->orWhereRaw('? LIKE CONCAT("%", region, "%")', [$locationParts['region_en']]);
+                            });
                         }
                     });
                 }
