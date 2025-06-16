@@ -6,6 +6,8 @@ use App\Models\BlockedEvent;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
+use App\Models\CalendarSchedule;
+use Illuminate\Support\Facades\Log;
 
 class EventService {
 
@@ -36,7 +38,7 @@ class EventService {
         $from = Carbon::parse($from);
         $due = Carbon::parse($due);
 
-        return BlockedEvent::create([
+        BlockedEvent::create([
             'from' => $from,
             'due' => $due,
             'source' => 'global',
@@ -44,6 +46,19 @@ class EventService {
             'user_id' => $guiding->user_id,
             'guiding_id' => $guiding->id ?? null
         ]);
+
+        $checkSchedule = CalendarSchedule::where('date', $date)->where('guiding_id', $guiding->id)->where('user_id', $guiding->user->id)->first();
+        if (!$checkSchedule) {
+            return CalendarSchedule::create([
+                'type' => $type,
+                'date' => $date,
+                'note' => 'Booking request',
+                'guiding_id' => $guiding->id,
+                'user_id' => $guiding->user->id
+            ]);
+        } else {
+            return $checkSchedule;
+        }
     }
 
     /**
