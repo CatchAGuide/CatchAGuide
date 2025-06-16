@@ -48,8 +48,7 @@ class GuidingsController extends Controller
             $randomSeed = rand();
             Session::put('random_seed', $randomSeed);
         }
-
-        Log::info($request->all());
+        
         // Clean up request parameters before processing
         $cleanedRequest = $this->cleanRequestParameters($request);
         
@@ -361,7 +360,6 @@ class GuidingsController extends Controller
         if(!empty($placeLat) && !empty($placeLng) && !empty($cleanedRequest->get('place'))){
             $title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
             $filter_title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ', ';
-            Log::info('locationFilter', ['city' => $cleanedRequest->get('city'), 'country' => $cleanedRequest->get('country'), 'region' => $cleanedRequest->get('region') ?? null, 'radius' => $radius, 'placeLat' => $placeLat, 'placeLng' => $placeLng]);
             $guidingFilter = Guiding::locationFilter($cleanedRequest->get('city'), $cleanedRequest->get('country'), $cleanedRequest->get('region') ?? null, $radius, $placeLat, $placeLng); 
             $searchMessage = $guidingFilter['message'];
             

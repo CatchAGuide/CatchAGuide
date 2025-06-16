@@ -221,6 +221,56 @@ if (!function_exists('getCoordinatesFromLocation')) {
     }
 }
 
+if (!function_exists('getLocationDetailsGoogle')) {
+    function getLocationDetailsGoogle($city = null, $country = null, $region = null): ? array 
+    {
+        $searchString = implode(', ', array_filter([$city, $country, $region], fn($val) => !empty($val)));
+        // First check in the locations table
+        $location = \App\Models\Location::where(function($query) use ($searchString) {
+            $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.city')) = ?", [$searchString])
+                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.city')) LIKE ?", ['%' . $searchString . '%'])
+                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.country')) = ?", [$searchString])
+                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.country')) LIKE ?", ['%' . $searchString . '%'])
+                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.region')) = ?", [$searchString])
+                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.region')) LIKE ?", ['%' . $searchString . '%']);
+        })
+        ->select('city', 'country', 'region')
+        ->first();
+        
+        if ($location) {
+            if ($location->city || $location->country || $location->region) {
+                return [
+                    'city' => $location->city,
+                    'country' => $location->country, 
+                    'region' => $location->region
+                ];
+            }
+        }
+
+        // If not found in DB, try to translate using Gemini and check again
+        try {
+            $requestTranslate = json_encode(['city' => $city, 'country' => $country, 'region' => $region]);
+            $translationService = new \App\Services\Translation\GeminiTranslationService();
+            
+            $translationPrompt = "Translate this location search to English: \"$requestTranslate\"\n\n";
+            $translationPrompt .= "Return only the translated location string in the same format. Examples:\n";
+            $translationPrompt .= "Only return the translated string, no explanation.";
+
+            $translatedString = $translationService->translate($translationPrompt);
+            $translatedString = json_decode($translatedString, true);
+            
+            return [
+                'city' => $translatedString['city'],
+                'country' => $translatedString['country'], 
+                'region' => $translatedString['region']
+            ];
+        } catch (\Exception $e) {
+            Log::error('Gemini translation error in getLocationDetailsGoogle: ' . $e->getMessage());
+        }
+
+        return null;
+    }
+}
 
 if (!function_exists('getLocationDetails')) {
     function getLocationDetails(string $searchString): ?array 
@@ -237,8 +287,6 @@ if (!function_exists('getLocationDetails')) {
         ->select('city', 'country', 'region')
         ->first();
 
-        Log::info('location', ['location' => $location]);
-        
         if ($location) {
             if ($location->city || $location->country || $location->region) {
                 return [
