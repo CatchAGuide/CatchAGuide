@@ -451,8 +451,6 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
-            console.log(latitude);
-            console.log(longitude);
             $.ajax({
                 type: "POST",
                 url: "{{ route('user.location') }}", // Use the named route
