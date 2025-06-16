@@ -29,6 +29,7 @@ use App\Models\GuidingBoatType;
 use App\Models\GuidingBoatDescription;
 use App\Models\GuidingBoatExtras;
 use App\Models\BoatExtras;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @property string|null $target_fish
@@ -531,14 +532,16 @@ class Guiding extends Model
         if ($city || $country) {
             $searchQuery = array_filter([$city, $country, $region], fn($val) => !empty($val));
             $searchString = implode(', ', $searchQuery);
+            Log::info('searchString', ['searchString' => $searchString]); 
             
-            $translated  = getLocationDetails($searchString);
+            $translated  = getLocationDetailsGoogle($city, $country, $region);
             if ($translated) {
                 $locationParts = ['city_en' => $translated['city'], 'country_en' => $translated['country'], 'region_en' => $translated['region']];
             }
         }
 
         $locationParts = array_merge(['city' => $city, 'country' => $country, 'region' => $region], $locationParts ?? []);
+        Log::info('locationParts', ['locationParts' => $locationParts]); 
 
         $returnData = [
             'message' => '',
@@ -546,9 +549,8 @@ class Guiding extends Model
         ];
         
         // Try direct database match based on standardized names
-        $guidings = self::select('id')
-            ->where(function($query) use ($locationParts) {
-                // City conditions
+        $query = self::select('id')
+            ->where(function($query) use ($locationParts) {                // City conditions
                 if ($locationParts['city']) {
                     $query->where(function($q) use ($locationParts) {
                         $q->where('city', $locationParts['city']);
@@ -567,19 +569,34 @@ class Guiding extends Model
                         }
                     });
                 }
-                
-                // Region conditions
+                // Only check for region conditions
                 if ($locationParts['region']) {
                     $query->where(function($q) use ($locationParts) {
-                        $q->where('region', $locationParts['region']);
+                        $q->where(function($subQ) use ($locationParts) {
+                            $subQ->where('region', 'LIKE', '%' . $locationParts['region'] . '%')
+                                 ->orWhereRaw('? LIKE CONCAT("%", region, "%")', [$locationParts['region']]);
+                        });
+                        
                         if (isset($locationParts['region_en'])) {
-                            $q->orWhere('region', $locationParts['region_en']);
+                            $q->orWhere(function($subQ) use ($locationParts) {
+                                $subQ->where('region', 'LIKE', '%' . $locationParts['region_en'] . '%')
+                                     ->orWhereRaw('? LIKE CONCAT("%", region, "%")', [$locationParts['region_en']]);
+                            });
                         }
                     });
                 }
             })
-            ->where('status', 1)
-            ->pluck('id');
+            ->where('status', 1);
+
+        // Log the SQL query for debugging
+        Log::info('Location filter SQL query:', [
+            'sql' => $query->toSql(),
+            'bindings' => $query->getBindings()
+        ]);
+
+        $guidings = $query->pluck('id');
+
+        Log::info('guidings', ['guidings' => $guidings]);
 
 
         if ($guidings->isNotEmpty()) {

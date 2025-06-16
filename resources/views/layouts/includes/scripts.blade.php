@@ -217,6 +217,9 @@
                     }
 
                     console.log(place);
+                    console.log(city);
+                    console.log(country);
+                    console.log(region);
 
                     document.getElementById(config.city).value = city;
                     document.getElementById(config.country).value = country;

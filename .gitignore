@@ -49,3 +49,4 @@ app/Http/Resources/GuidingResource.php
 app/Models/LocationBoundary.php
 database/migrations/2024_11_06_191646_add_spatial_index_to_guidings.php
 database/seeders/LocationBoundarySeeder.php
+storage/debugbar/
