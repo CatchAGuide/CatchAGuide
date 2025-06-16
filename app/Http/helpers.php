@@ -260,6 +260,7 @@ if (!function_exists('getLocationDetails')) {
                         'input' => $searchString,
                         'types' => '(regions)',  // This includes countries and administrative areas
                         'language' => 'en',
+                        'region' => 'us',  // Force English results by using US region
                         'key' => env('GOOGLE_MAPS_API_KEY')
                     ]
                 ]);
@@ -276,6 +277,7 @@ if (!function_exists('getLocationDetails')) {
                             'input' => $searchString,
                             'types' => '(cities)',
                             'language' => 'en',
+                            'region' => 'us',  // Force English results by using US region
                             'key' => env('GOOGLE_MAPS_API_KEY')
                         ]
                     ]);
@@ -292,6 +294,7 @@ if (!function_exists('getLocationDetails')) {
                         'query' => $searchString,
                         'type' => 'administrative_area_level_1',
                         'language' => 'en',
+                        'region' => 'us',  // Force English results by using US region
                         'key' => env('GOOGLE_MAPS_API_KEY')
                     ]
                 ]);
@@ -307,6 +310,7 @@ if (!function_exists('getLocationDetails')) {
                             'query' => $searchString,
                             'type' => 'locality',  // Focus on localities/cities
                             'language' => 'en',
+                            'region' => 'us',  // Force English results by using US region
                             'key' => env('GOOGLE_MAPS_API_KEY')
                         ]
                     ]);
@@ -322,6 +326,7 @@ if (!function_exists('getLocationDetails')) {
                                 'input' => $searchString,
                                 'types' => '(cities)',
                                 'language' => 'en',
+                                'region' => 'us',  // Force English results by using US region
                                 'key' => env('GOOGLE_MAPS_API_KEY')
                             ]
                         ]);
@@ -340,6 +345,7 @@ if (!function_exists('getLocationDetails')) {
                         'place_id' => $placeId,
                         'fields' => 'address_component',  // Removed invalid field
                         'language' => 'en',
+                        'region' => 'us',  // Force English results by using US region
                         'key' => env('GOOGLE_MAPS_API_KEY')
                     ]
                 ]);
