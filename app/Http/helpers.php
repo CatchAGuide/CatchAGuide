@@ -261,7 +261,7 @@ if (!function_exists('getLocationDetailsGoogle')) {
             
             return [
                 'city' => $translatedString['city'],
-                'country' => $translatedString['country'], 
+                'country' => $translatedString['country'],  
                 'region' => $translatedString['region']
             ];
         } catch (\Exception $e) {

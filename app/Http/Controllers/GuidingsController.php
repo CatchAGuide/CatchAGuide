@@ -362,7 +362,7 @@ class GuidingsController extends Controller
             $filter_title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ', ';
             $guidingFilter = Guiding::locationFilter($cleanedRequest->get('city'), $cleanedRequest->get('country'), $cleanedRequest->get('region') ?? null, $radius, $placeLat, $placeLng); 
             $searchMessage = $guidingFilter['message'];
-            Log::info('guidingFilter', ['guidingFilter' => $guidingFilter]);
+            Log::info('guidingFilter', ['guidingFilter' => $guidingFilter]); 
             
             // Add a subquery to order by the position in the filtered IDs array
             $orderByCase = 'CASE guidings.id ';

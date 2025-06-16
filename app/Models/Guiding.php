@@ -519,7 +519,7 @@ class Guiding extends Model
         if ($city || $country) {
             $searchQuery = array_filter([$city, $country, $region], fn($val) => !empty($val));
             $searchString = implode(', ', $searchQuery);
-            Log::info('searchString', ['searchString' => $searchString]);
+            Log::info('searchString', ['searchString' => $searchString]); 
             
             $translated  = getLocationDetailsGoogle($city, $country, $region);
             if ($translated) {
