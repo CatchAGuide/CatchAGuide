@@ -259,11 +259,15 @@ if (!function_exists('getLocationDetailsGoogle')) {
             $translatedString = $translationService->translate($translationPrompt);
             $translatedString = json_decode($translatedString, true);
             
-            return [
-                'city' => $translatedString['city'],
-                'country' => $translatedString['country'],  
-                'region' => $translatedString['region']
-            ];
+            if (isset($translatedString['city']) && isset($translatedString['country']) && isset($translatedString['region'])) {
+                return [
+                    'city' => $translatedString['city'],
+                    'country' => $translatedString['country'],  
+                    'region' => $translatedString['region']
+                ];
+            }else{
+                return null;
+            }
         } catch (\Exception $e) {
             Log::error('Gemini translation error in getLocationDetailsGoogle: ' . $e->getMessage());
         }

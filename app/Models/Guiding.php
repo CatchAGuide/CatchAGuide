@@ -29,6 +29,7 @@ use App\Models\GuidingBoatType;
 use App\Models\GuidingBoatDescription;
 use App\Models\GuidingBoatExtras;
 use App\Models\BoatExtras;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @property string|null $target_fish
@@ -596,7 +597,6 @@ class Guiding extends Model
         $guidings = $query->pluck('id');
 
         Log::info('guidings', ['guidings' => $guidings]);
-
 
         if ($guidings->isNotEmpty()) {
             $returnData['ids'] = $guidings;

@@ -379,7 +379,7 @@
                                             </div>
                                                 <div class="vacations-info-container"> 
                                                     <span class="fw-bold">{{translate('Boat Available')}}:</span>
-                                                    <span class="text-regular">{{ count($vacation->boats) > 0 ? translate('Available') : translate('Unavailable') }}</span>
+                                                    <span class="text-regular">{{ count($vacation->boats) || $vacation->has_boat > 0 ? translate('Available') : translate('Unavailable') }}</span>
                                                 </div>
                                                 <div class="vacations-info-container"> 
                                                     <span class="fw-bold">{{translate('Distance to the water')}}:</span>
