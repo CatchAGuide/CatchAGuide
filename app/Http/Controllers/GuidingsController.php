@@ -48,7 +48,7 @@ class GuidingsController extends Controller
             $randomSeed = rand();
             Session::put('random_seed', $randomSeed);
         }
-        
+
         // Clean up request parameters before processing
         $cleanedRequest = $this->cleanRequestParameters($request);
         
@@ -362,6 +362,7 @@ class GuidingsController extends Controller
             $filter_title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ', ';
             $guidingFilter = Guiding::locationFilter($cleanedRequest->get('city'), $cleanedRequest->get('country'), $cleanedRequest->get('region') ?? null, $radius, $placeLat, $placeLng); 
             $searchMessage = $guidingFilter['message'];
+            Log::info('guidingFilter', ['guidingFilter' => $guidingFilter]);
             
             // Add a subquery to order by the position in the filtered IDs array
             $orderByCase = 'CASE guidings.id ';
@@ -372,6 +373,7 @@ class GuidingsController extends Controller
             
             $filteredQuery->whereIn('guidings.id', $guidingFilter['ids'])
                   ->orderByRaw($orderByCase);
+            Log::info('filteredQuery', ['filteredQuery' => $filteredQuery->toSql(), 'bindings' => $filteredQuery->getBindings()]);
         }
 
         // 3. Get all filtered guidings (for counts and filter options)

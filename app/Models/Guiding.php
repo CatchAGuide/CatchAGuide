@@ -536,7 +536,7 @@ class Guiding extends Model
         ];
         
         // Try direct database match based on standardized names
-        $guidings = self::select('id')
+        $query = self::select('id')
             ->where(function($query) use ($locationParts) {
                 // City conditions
                 if ($locationParts['city']) {
@@ -568,8 +568,17 @@ class Guiding extends Model
                     });
                 }
             })
-            ->where('status', 1)
-            ->pluck('id');
+            ->where('status', 1);
+
+        // Log the SQL query for debugging
+        Log::info('Location filter SQL query:', [
+            'sql' => $query->toSql(),
+            'bindings' => $query->getBindings()
+        ]);
+
+        $guidings = $query->pluck('id');
+
+        Log::info('guidings', ['guidings' => $guidings]);
 
         if ($guidings->isNotEmpty()) {
             $returnData['ids'] = $guidings;
