@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
+use App\Traits\Cacheable;
 
 class Thread extends Model
 {
-    use HasSlug;
+    use HasSlug, Cacheable;
 
     protected $fillable = [
         'title',
