@@ -27,6 +27,7 @@ use App\Models\GuidingBoatType;
 use App\Models\GuidingBoatDescription;
 use App\Models\GuidingBoatExtras;
 use App\Models\BoatExtras;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @property string|null $target_fish
@@ -526,6 +527,7 @@ class Guiding extends Model
         }
 
         $locationParts = array_merge(['city' => $city, 'country' => $country, 'region' => $region], $locationParts ?? []);
+        Log::info('locationParts', ['locationParts' => $locationParts]);
 
         $returnData = [
             'message' => '',
