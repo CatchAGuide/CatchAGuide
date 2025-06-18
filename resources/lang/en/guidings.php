@@ -111,4 +111,8 @@ return [
     'night' => 'Night',
     
     'View_all_guidings' => 'View all guidings',
+    'results_found' => 'Results found',
+    'reset_filters' => 'Reset Filters',
+    'no_results' => 'No results found',
+    'try_different_filters' => 'Try different filters',
 ];  

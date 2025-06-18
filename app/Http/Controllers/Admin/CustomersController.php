@@ -50,14 +50,21 @@ class CustomersController extends Controller
         if ($request->hasFile('profile_image')) {
             $image = $request->file('profile_image');
             $imageName = time() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('uploads/profile_images'), $imageName);
             
-            // If there's an existing image, you might want to delete it
-            if ($customer->profile_image && file_exists(public_path('uploads/profile_images/' . $customer->profile_image))) {
-                unlink(public_path('uploads/profile_images/' . $customer->profile_image));
+            // Create directory if it doesn't exist
+            $uploadPath = public_path('uploads/profile_images');
+            if (!file_exists($uploadPath)) {
+                mkdir($uploadPath, 0755, true);
             }
             
-            $data['profile_image'] = $imageName;
+            $image->move($uploadPath, $imageName);
+            
+            // If there's an existing image, delete it
+            if ($customer->profil_image && file_exists(public_path('uploads/profile_images/' . $customer->profil_image))) {
+                unlink(public_path('uploads/profile_images/' . $customer->profil_image));
+            }
+            
+            $data['profil_image'] = $imageName;
         }
         
         // Update user data

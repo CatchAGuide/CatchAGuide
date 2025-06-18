@@ -38,7 +38,8 @@ class User extends Authenticatable
         'merchant_id',
         'language',
         'taxId',
-        'is_temp_password'
+        'is_temp_password',
+        'profil_image'
     ];
 
     /**
