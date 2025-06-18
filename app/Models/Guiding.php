@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Traits\MethodTraits;
-use Illuminate\Support\Facades\Log;
 use App\Traits\ModelImageTrait;
 use App\Traits\Cacheable;
 
@@ -29,7 +28,6 @@ use App\Models\GuidingBoatType;
 use App\Models\GuidingBoatDescription;
 use App\Models\GuidingBoatExtras;
 use App\Models\BoatExtras;
-use Illuminate\Support\Facades\Log;
 
 /**
  * @property string|null $target_fish
