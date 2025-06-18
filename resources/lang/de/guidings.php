@@ -110,4 +110,8 @@ return [
     'night' => 'Nacht',
 
     'View_all_guidings' => 'Alle Angeltouren ansehen',
+    'results_found' => 'Ergebnisse gefunden',
+    'reset_filters' => 'Filter zurücksetzen',
+    'no_results' => 'Keine Ergebnisse gefunden',
+    'try_different_filters' => 'Versuchen Sie andere Filter',
 ];  
