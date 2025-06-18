@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Traits\MethodTraits;
 use Illuminate\Support\Facades\Log;
@@ -538,6 +538,7 @@ class Guiding extends Model
             if ($translated) {
                 $locationParts = ['city_en' => $translated['city'], 'country_en' => $translated['country'], 'region_en' => $translated['region']];
             }
+            dd($locationParts);
         }
 
         $locationParts = array_merge(['city' => $city, 'country' => $country, 'region' => $region], $locationParts ?? []);

@@ -37,26 +37,33 @@
                                 <div class="row mb-4">
                                     <div class="col-md-6">
                                         <label for="profile_image">Profilbild auswählen</label>
-                                        <input type="file" class="form-control" id="profile_image" name="profile_image">
+                                        <input type="file" class="form-control" id="profile_image" name="profile_image" accept="image/*">
+                                        <small class="text-muted">Unterstützte Formate: JPG, PNG, GIF (max. 2MB)</small>
                                     </div>
                                     <div class="col-md-6">
-                                        @if($customer->profile_image)
-                                            <div class="text-center">
-                                                <label>Aktuelles Profilbild</label>
-                                                <div>
-                                                    <img src="{{ asset('uploads/profile_images/' . $customer->profile_image) }}" 
-                                                         alt="Profilbild" class="img-fluid rounded" style="max-height: 150px;">
-                                                </div>
+                                        <div id="image-preview-container" class="text-center">
+                                            <label id="current-image-label">
+                                                @if($customer->profil_image)
+                                                    Aktuelles Profilbild
+                                                @else
+                                                    Profilbild Vorschau
+                                                @endif
+                                            </label>
+                                            <div class="text-center mt-2">
+                                                @if($customer->profil_image)
+                                                    <img id="profile_preview" 
+                                                         src="{{ asset('/uploads/profile_images/' . $customer->profil_image) }}" 
+                                                         alt="Profilbild" class="img-thumbnail" style="max-height: 120px; max-width: 120px;">
+                                                @else
+                                                    <div id="profile_preview" class="d-inline-block p-3 border rounded" style="color: #6c757d;">
+                                                        <svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor">
+                                                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                                        </svg>
+                                                        <p class="mt-1 mb-0 small">Kein Bild</p>
+                                                    </div>
+                                                @endif
                                             </div>
-                                        @else
-                                            <div class="text-center">
-                                                <label>Kein Profilbild vorhanden</label>
-                                                <div>
-                                                    <img src="{{ asset('assets/images/default-profile.png') }}" 
-                                                         alt="Standard Profilbild" class="img-fluid rounded" style="max-height: 150px;">
-                                                </div>
-                                            </div>
-                                        @endif
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -262,6 +269,47 @@
                 $('#paypal_details').show();
             } else {
                 $('#paypal_details').hide();
+            }
+        });
+        
+        // Image preview functionality
+        $('#profile_image').change(function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file type
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                if (!validTypes.includes(file.type)) {
+                    alert('Bitte wählen Sie eine gültige Bilddatei aus (JPG, PNG, GIF).');
+                    this.value = '';
+                    return;
+                }
+                
+                // Validate file size (2MB = 2 * 1024 * 1024 bytes)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Die Datei ist zu groß. Bitte wählen Sie eine Datei unter 2MB aus.');
+                    this.value = '';
+                    return;
+                }
+                
+                // Create preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Update the label
+                    $('#current-image-label').text('Neue Profilbild Vorschau');
+                    
+                    // Replace the preview content
+                    $('#profile_preview').replaceWith('<img id="profile_preview" src="' + e.target.result + '" alt="Profilbild" class="img-thumbnail" style="max-height: 120px; max-width: 120px;">');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                // Reset to original image if no file selected
+                @if($customer->profil_image)
+                    $('#current-image-label').text('Aktuelles Profilbild');
+                    $('#profile_preview').replaceWith('<img id="profile_preview" src="{{ asset('/uploads/profile_images/' . $customer->profil_image) }}" alt="Profilbild" class="img-thumbnail" style="max-height: 120px; max-width: 120px;">');
+                @else
+                    $('#current-image-label').text('Profilbild Vorschau');
+                    $('#profile_preview').replaceWith('<div id="profile_preview" class="d-inline-block p-3 border rounded" style="color: #6c757d;"><svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><p class="mt-1 mb-0 small">Kein Bild</p></div>');
+                @endif
             }
         });
     });
