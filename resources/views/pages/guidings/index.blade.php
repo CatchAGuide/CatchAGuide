@@ -615,16 +615,23 @@
                                                 <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-0">
                                                     <div id="carouselExampleControls-{{$guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
                                                         <div class="carousel-inner">
-                                                            @if(count(get_galleries_image_link($guiding)))
-                                                                @foreach(get_galleries_image_link($guiding) as $index => $gallery_image_link)
+                                                            @php
+                                                                $galleryImages = $guiding->cached_gallery_images ?? [];
+                                                            @endphp
+                                                            @if(count($galleryImages))
+                                                                @foreach($galleryImages as $index => $gallery_image_link)
                                                                     <div class="carousel-item @if($index == 0) active @endif">
-                                                                        <img  class="d-block" src="{{asset($gallery_image_link)}}">
+                                                                        <img class="d-block lazy" 
+                                                                             data-src="{{ $gallery_image_link }}"
+                                                                             src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                                                                             alt="{{ translate($guiding->title) }}"
+                                                                             loading="lazy">
                                                                     </div>
                                                                 @endforeach
                                                             @endif
                                                         </div>
 
-                                                        @if(count(get_galleries_image_link($guiding)) > 1)
+                                                        @if(count($galleryImages) > 1)
                                                             <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls-{{$guiding->id}}" data-bs-slide="prev">
                                                                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                                                                 <span class="visually-hidden">Previous</span>
@@ -644,14 +651,17 @@
                                                                 <h5 class="fw-bolder text-truncate">{{ Str::limit(translate($guiding->title), 70) }}</h5>
                                                                 <span class="truncate"><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }}</span>                                      
                                                             </div>
-                                                            @if ($guiding->user->average_rating())
+                                                            @php
+                                                                $averageRating = $guiding->cached_average_rating ?? $guiding->user->average_rating();
+                                                                $reviewCount = $guiding->cached_review_count ?? $guiding->user->reviews->count();
+                                                            @endphp
+                                                            @if ($averageRating)
                                                                 <div class="ave-reviews-row">
                                                                     <div class="ratings-score">
-                                                                    <span class="rating-value">{{number_format($guiding->user->average_rating(), 1)}}</span>
+                                                                    <span class="rating-value">{{number_format($averageRating, 1)}}</span>
                                                                 </div>
                                                                     <span class="mb-1">
-                                                                        {{-- ({{$guiding->user->received_ratings->count()}} reviews) --}}
-                                                                        ({{$guiding->user->reviews->count()}} reviews)
+                                                                        ({{$reviewCount}} reviews)
                                                                     </span>
                                                                 </div>
                                                             @else
@@ -676,11 +686,12 @@
                                                                 <div class="">
                                                                     <div class="tours-list__content__trait__text" >
                                                                         @php
-                                                                        $guidingTargets = collect($guiding->getTargetFishNames())->pluck('name')->toArray();
+                                                                        $guidingTargets = $guiding->cached_target_fish_names ?? $guiding->getTargetFishNames($targetsMap ?? null);
+                                                                        $targetNames = collect($guidingTargets)->pluck('name')->toArray();
                                                                         @endphp
                                                                         
-                                                                        @if(!empty($guidingTargets))
-                                                                            {{ implode(', ', $guidingTargets) }}
+                                                                        @if(!empty($targetNames))
+                                                                            {{ implode(', ', $targetNames) }}
                                                                         @endif
                                                                     </div>
                                                                 </div>
@@ -689,19 +700,21 @@
                                                                 <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
                                                                 <div class="">
                                                                     <div class="tours-list__content__trait__text" >
-                                                                        {{$guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
+                                                                        {{ $guiding->cached_boat_type_name ?? ($guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')) }}
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                         <div class="inclusions-price">
                                                             <div class="guidings-inclusions-container">
-                                                                @if(!empty($guiding->getInclusionNames()))
+                                                                @php
+                                                                    $inclussions = $guiding->cached_inclusion_names ?? $guiding->getInclusionNames();
+                                                                @endphp
+                                                                @if(!empty($inclussions))
                                                                 <div class="guidings-included">
                                                                     <strong>@lang('guidings.Whats_Included')</strong>
                                                                     <div class="inclusions-list">
                                                                         @php
-                                                                            $inclussions = $guiding->getInclusionNames();
                                                                             $maxToShow = 3; // Maximum number of inclusions to display
                                                                         @endphp
 
@@ -812,7 +825,7 @@
                                                                     <div class="">
                                                                         <div class="tours-list__content__trait__text" >
                                                                             @php
-                                                                            $otherguideTargets = collect($otherguide->getTargetFishNames())->pluck('name')->toArray();
+                                                                            $otherguideTargets = collect($otherguide->cached_target_fish_names ?? $otherguide->getTargetFishNames($targetsMap ?? null))->pluck('name')->toArray();
                                                                             @endphp
                                                                             
                                                                             @if(!empty($otherguideTargets))
@@ -1271,6 +1284,64 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             filterCounter.style.display = 'none';
         }
+    }
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Lazy loading for images
+    var lazyImages = [].slice.call(document.querySelectorAll("img.lazy"));
+
+    if ("IntersectionObserver" in window) {
+        let lazyImageObserver = new IntersectionObserver(function(entries, observer) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    let lazyImage = entry.target;
+                    lazyImage.src = lazyImage.dataset.src;
+                    lazyImage.classList.remove("lazy");
+                    lazyImageObserver.unobserve(lazyImage);
+                }
+            });
+        });
+
+        lazyImages.forEach(function(lazyImage) {
+            lazyImageObserver.observe(lazyImage);
+        });
+    } else {
+        // Fallback for browsers that don't support IntersectionObserver
+        let active = false;
+
+        const lazyLoad = function() {
+            if (active === false) {
+                active = true;
+
+                setTimeout(function() {
+                    lazyImages.forEach(function(lazyImage) {
+                        if ((lazyImage.getBoundingClientRect().top <= window.innerHeight && lazyImage.getBoundingClientRect().bottom >= 0) && getComputedStyle(lazyImage).display !== "none") {
+                            lazyImage.src = lazyImage.dataset.src;
+                            lazyImage.classList.remove("lazy");
+
+                            lazyImages = lazyImages.filter(function(image) {
+                                return image !== lazyImage;
+                            });
+
+                            if (lazyImages.length === 0) {
+                                document.removeEventListener("scroll", lazyLoad);
+                                window.removeEventListener("resize", lazyLoad);
+                                window.removeEventListener("orientationchange", lazyLoad);
+                            }
+                        }
+                    });
+
+                    active = false;
+                }, 200);
+            }
+        };
+
+        document.addEventListener("scroll", lazyLoad);
+        window.addEventListener("resize", lazyLoad);
+        window.addEventListener("orientationchange", lazyLoad);
     }
 });
 </script>
