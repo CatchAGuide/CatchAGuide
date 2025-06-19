@@ -369,6 +369,31 @@ return [
     'total-extra' => 'Total Extra',
     'unavailable' => 'Unavailable',
     'available' => 'Available',
+    
+    // Modal translations
+    'block-calendar-dates' => 'Block Calendar Dates',
+    'create-custom-blocked-periods' => 'Create custom blocked periods in your calendar',
+    'how-to-block-dates' => 'How to block dates:',
+    'choose-single-day-or-range' => 'Choose to block a single day or a date range',
+    'select-future-dates-only' => 'Select future dates only (past dates are disabled)',
+    'add-notes-to-explain' => 'Add notes to explain why the dates are blocked',
+    'blocked-dates-appear-teal' => 'Blocked dates will appear in teal on your calendar',
+    'block-type' => 'Block Type',
+    'choose-how-to-block' => 'Choose how you want to block your calendar',
+    'single-day' => 'Single Day',
+    'block-one-specific-date' => 'Block one specific date',
+    'date-range' => 'Date Range',
+    'block-multiple-consecutive-dates' => 'Block multiple consecutive dates',
+    'select-date' => 'Select Date',
+    'choose-date-to-block' => 'Choose the date you want to block',
+    'choose-start-end-dates' => 'Choose the start and end dates for your blocked period',
+    'start-date' => 'Start Date',
+    'end-date' => 'End Date',
+    'notes' => 'Notes',
+    'add-description-why-blocked' => 'Add a description for why these dates are blocked (optional)',
+    'notes-placeholder' => 'e.g., Personal vacation, Equipment maintenance, Training workshop...',
+    'cancel' => 'Cancel',
+    'save-schedule' => 'Save Schedule',
 
 ];
 

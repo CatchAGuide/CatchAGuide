@@ -445,185 +445,178 @@
             flex-wrap: wrap;
         }
 
-        /* Detail Panel Updates */
-        .calendar-detail-panel {
+        /* Side Detail Panel Styles */
+        .side-detail-panel {
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             overflow: hidden;
-            transition: all 0.4s ease;
-            max-height: 200px;
-            opacity: 1;
+            transition: all 0.3s ease;
+            max-height: 500px;
         }
         
-        .calendar-detail-panel.show {
-            max-height: none;
-            opacity: 1;
-        }
-
-        .detail-content {
-            min-height: 200px;
-        }
-
-        .schedule-item {
-            background: #f8f9fa;
-            transition: all 0.2s ease;
-        }
-
-        .schedule-item:hover {
-            background: #e9ecef;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .schedule-details {
-            line-height: 1.6;
-        }
-
-        .schedule-details i {
-            width: 16px;
-            text-align: center;
-            margin-right: 5px;
-        }
-        
-        /* Detail Panel Styling */
-        .calendar-detail-panel {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            margin-top: 20px;
-            overflow: hidden;
-            transition: all 0.4s ease;
-            max-height: 0;
-            opacity: 0;
-        }
-        
-        .calendar-detail-panel.show {
-            max-height: 800px;
-            opacity: 1;
-        }
-        
-        .detail-panel-header {
+        .side-detail-panel .detail-panel-header {
             background: linear-gradient(135deg, #313041, #2c5aa0);
             color: white !important;
-            padding: 20px;
+            padding: 12px 15px;
             position: relative;
         }
         
-        .detail-panel-header h4,
-        .detail-panel-header p {
+        .side-detail-panel .detail-panel-header h5,
+        .side-detail-panel .detail-panel-header p {
             color: white !important;
+            margin: 0;
         }
         
-        .detail-panel-header::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #ffd700, #ff6b6b, #4ecdc4, #45b7d1);
-        }
-        
-        .detail-panel-body {
-            padding: 25px;
-        }
-        
-                .detail-card {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-            border-left: 4px solid #313041;
-            margin-bottom: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .detail-card h6 {
-            color: #313041;
+        .side-detail-panel .detail-panel-header h5 {
+            font-size: 16px;
             font-weight: 600;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-
-        .detail-card-content {
-            max-height: 300px;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding-right: 5px;
-        }
-
-        .detail-card-content::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .detail-card-content::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 3px;
-        }
-
-        .detail-card-content::-webkit-scrollbar-thumb {
-            background: #313041;
-            border-radius: 3px;
-        }
-
-        .detail-card-content::-webkit-scrollbar-thumb:hover {
-            background: #d63384;
         }
         
-        .close-panel-btn {
+        .side-detail-panel .detail-panel-header .close-panel-btn {
             position: absolute;
-            top: 15px;
-            right: 20px;
+            top: 8px;
+            right: 12px;
             background: none;
             border: none;
             color: white;
-            font-size: 24px;
+            font-size: 18px;
             cursor: pointer;
             transition: transform 0.2s ease;
         }
         
-        .close-panel-btn:hover {
+        .side-detail-panel .detail-panel-header .close-panel-btn:hover {
             transform: scale(1.2);
         }
         
-        .schedule-item {
+        .side-detail-panel .detail-panel-body {
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .side-detail-panel .detail-content {
+            min-height: auto;
+        }
+        
+        /* Horizontal Card Layout */
+        .side-detail-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .side-detail-card {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 12px;
+            border-left: 3px solid #313041;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .side-detail-card h6 {
+            color: #313041;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+        }
+        
+        .side-detail-card-content {
+            max-height: 150px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        .side-detail-card-content::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .side-detail-card-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 2px;
+        }
+        
+        .side-detail-card-content::-webkit-scrollbar-thumb {
+            background: #313041;
+            border-radius: 2px;
+        }
+        
+        .side-schedule-item {
             background: white;
             border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 10px;
             transition: all 0.2s ease;
         }
         
-        .schedule-item:hover {
+        .side-schedule-item:hover {
             background: #f8f9fa;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         
-        .schedule-details {
-            margin-top: 10px;
+        .side-schedule-item:last-child {
+            margin-bottom: 0;
         }
         
-        .schedule-details small {
+        .side-schedule-details {
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+        
+        .side-schedule-details small {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
             color: #495057 !important;
             font-weight: 500;
+            font-size: 11px;
         }
         
-        .schedule-details i {
-            width: 16px;
+        .side-schedule-details i {
+            width: 12px;
             text-align: center;
-            margin-right: 8px;
+            margin-right: 6px;
             color: #313041;
         }
         
+        .side-status-badge {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        /* Mobile adjustments for side panel */
+        @media screen and (max-width:767px) {
+            .side-detail-panel {
+                max-height: 300px;
+            }
+            
+            .side-detail-panel .detail-panel-body {
+                max-height: 250px;
+                padding: 10px;
+            }
+            
+            .side-detail-card {
+                padding: 8px;
+            }
+            
+            .side-detail-card-content {
+                max-height: 100px;
+            }
+            
+            .side-schedule-item {
+                padding: 8px;
+            }
+        }
+        
+        /* Status Badge Styles (still needed) */
         .status-badge {
             padding: 4px 12px;
             border-radius: 15px;
@@ -801,25 +794,21 @@
                 <!-- Calendar Legend - Below Calendar -->
                 <div class="calendar-legend mt-1">
                     <div class="legend-items" id="calendarLegend">
-                        <div class="legend-item">
+                        <div class="legend-item" id="confirmedLegend">
                             <div class="legend-color legend-accepted"></div>
                             <span class="legend-text">@lang('profile.confirmed')</span>
                         </div>
-                        <div class="legend-item">
+                        <div class="legend-item" id="pendingLegend">
                             <div class="legend-color legend-pending"></div>
                             <span class="legend-text">@lang('profile.pending')</span>
                         </div>
-                        <div class="legend-item">
+                        <div class="legend-item" id="rejectedLegend">
                             <div class="legend-color legend-rejected"></div>
                             <span class="legend-text">@lang('profile.rejected')</span>
                         </div>
-                        <div class="legend-item">
+                        <div class="legend-item" id="customLegend">
                             <div class="legend-color legend-custom"></div>
                             <span class="legend-text">@lang('profile.custom')</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color legend-blocked"></div>
-                            <span class="legend-text">@lang('profile.blocked')</span>
                         </div>
                         <div class="legend-item" id="availableLegend" style="display: none;">
                             <div class="legend-color legend-available"></div>
@@ -834,10 +823,11 @@
             </div>
         </div>
         
-        <!-- Top Right Panel: Tour Filter -->
+        <!-- Top Right Panel: Tour Filter & Details -->
         <div class="col-md-4">
             <div class="tour-filter-panel d-flex flex-column">
-                <div class="flex-grow-1">
+                <!-- Tour Filter Section -->
+                <div class="filter-section mb-3">
                     <h3 class="mb-3">@lang('profile.select-tour-to-filter')</h3>
                     
                     <!-- Tour Filter Dropdown -->
@@ -883,190 +873,152 @@
                             @endforeach
                         </ul>
                     </div>
+                    
+                    <!-- Quick Actions removed - Add Event button moved to detail panel -->
                 </div>
                 
-                <!-- Filter Controls -->
-                {{-- <div class="filter-controls">
-                    <div class="filter-group mb-3">
-                        <label class="form-label">@lang('profile.filter-by-type'):</label>
-                        <div class="filter-buttons">
-                            <button class="filter-btn active" data-type="">@lang('profile.all')</button>
-                            <button class="filter-btn" data-type="tour_request">@lang('profile.bookings')</button>
-                            <button class="filter-btn" data-type="tour_schedule">@lang('profile.blocked')</button>
-                            <button class="filter-btn" data-type="vacation_schedule">@lang('profile.vacation')</button>
-                            <button class="filter-btn" data-type="custom_schedule">@lang('profile.custom')</button>
+                <!-- Details Section -->
+                <div class="details-section flex-grow-1">
+                    <div id="sideDetailPanel" class="side-detail-panel" style="display: none;">
+                        <div class="detail-panel-header">
+                            <button class="close-panel-btn" onclick="closeSideDetailPanel()">&times;</button>
+                            <h5 id="sideDetailPanelTitle">Schedule for Date</h5>
+                            <p id="sideDetailPanelDate" class="mb-0 small"></p>
                         </div>
-                    </div>
-                    
-                    <div class="filter-group mb-3">
-                        <label class="form-label">@lang('profile.filter-by-status'):</label>
-                        <div class="filter-buttons">
-                            <button class="filter-btn active" data-status="">@lang('profile.all')</button>
-                            <button class="filter-btn" data-status="accepted">@lang('profile.confirmed')</button>
-                            <button class="filter-btn" data-status="pending">@lang('profile.pending')</button>
-                            <button class="filter-btn" data-status="cancelled">@lang('profile.cancelled')</button>
-                            <button class="filter-btn" data-status="rejected">@lang('profile.rejected')</button>
+                        <div class="detail-panel-body">
+                            <div id="sideDetailPanelContent" class="detail-content">
+                                <div class="text-center text-muted py-3">
+                                    <i class="fas fa-calendar-alt fa-2x mb-2"></i>
+                                    <p class="small">Click on a date to view details</p>
+                                </div>
+                            </div>
+                            <div class="detail-panel-actions mt-3 pt-2 border-top">
+                                <button class="btn btn-primary btn-sm w-100" data-bs-toggle="modal" data-bs-target="#addEventModal">
+                                    <i class="fas fa-plus"></i> @lang('profile.add-event')
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                </div>--}}
-                
-                <!-- Quick Actions at Bottom -->
-                <div class="mt-auto">
-                    <div class="quick-actions">
-                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addEventModal">
-                            <i class="fas fa-plus"></i> @lang('profile.add-event')
-                        </button>
-                        <button class="btn btn-outline-secondary btn-sm" onclick="refreshCalendar()">
-                            <i class="fas fa-sync"></i> @lang('profile.refresh')
-                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Bottom Panel: Details Display -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div id="detailPanel" class="calendar-detail-panel">
-                            <div class="detail-panel-header">
-                <button class="close-panel-btn" onclick="closeDetailPanel()">&times;</button>
-                    <h4 id="detailPanelTitle">Schedule for Date</h4>
-                    <p id="detailPanelDate" class="mb-0"></p>
-            </div>
-            <div class="detail-panel-body">
-                    <div id="detailPanelContent" class="detail-content">
-                        <div class="text-center text-muted py-5">
-                            <i class="fas fa-calendar-alt fa-3x mb-3"></i>
-                            <p>Click on a date to view schedule details</p>
-                </div>
-            </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
 </div>
 
-<!-- Add Blockade Modal -->
+<!-- Add Custom Schedule Modal -->
 <div class="modal fade" id="addEventModal" tabindex="-1" aria-labelledby="addEventModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addEventModalLabel">@lang('profile.add-calendar-event')</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content schedule-modal">
+            <div class="modal-header schedule-modal-header">
+                <div class="modal-header-content">
+                    <h4 class="modal-title" id="addEventModalLabel">
+                        <i class="fas fa-calendar-plus me-2"></i>
+                        @lang('profile.block-calendar-dates')
+                    </h4>
+                    <p class="modal-subtitle mb-0">@lang('profile.create-custom-blocked-periods')</p>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="addEventForm">
                 @csrf
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label for="addNewBeginInput">@lang('profile.beginning')</label>
-                                <input type="date" id="addNewBeginInput" class="form-control" name="start" required>
+                <div class="modal-body schedule-modal-body">
+                    <!-- Instructions -->
+                    <div class="instructions-card mb-4">
+                        <div class="d-flex align-items-start">
+                            <div class="instruction-icon">
+                                <i class="fas fa-info-circle"></i>
                             </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label for="addNewEndInput">@lang('profile.ending')</label>
-                                <input type="date" id="addNewEndInput" class="form-control" name="end" required>
-                            </div>
-                        </div>
-                        
-                        <div class="col-12 mt-3">
-                            <div class="form-group">
-                                <label for="eventType">@lang('profile.event-type')</label>
-                                <select id="eventType" class="form-select" name="type" required>
-                                    <option value="custom_schedule">@lang('profile.custom-event')</option>
-                                    <option value="vacation_schedule">@lang('profile.vacation')</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="col-12 mt-3">
-                            <div class="form-group">
-                                <label for="eventNote">@lang('profile.note')</label>
-                                <input type="text" id="eventNote" class="form-control" name="note" placeholder="@lang('profile.event-description')">
-                            </div>
-                        </div>
-                        
-                        <div class="col-12 mt-3">
-                            <div class="form-group">
-                                <label for="eventGuiding">@lang('profile.associate-with-tour') (@lang('profile.optional'))</label>
-                                <select id="eventGuiding" class="form-select" name="guiding_id">
-                                    <option value="">@lang('profile.no-tour')</option>
-                                    @foreach($userGuidings as $guiding)
-                                        <option value="{{ $guiding->id }}">{{ $guiding->title }} - {{ $guiding->location }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="col-12 my-3">
-                            <span class="color-primary">@lang('profile.block-by-weekday') (@lang('profile.optional'))</span>
-                            <div class="row mt-2">
-                                <div class="col-md-6">
-                                    <div class="form-check">
-                                        <label class="form-check-label">
-                                            <input type="checkbox" class="form-check-input" name="day[]" value="1">
-                                            @lang('message.monday')
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-check">
-                                        <label class="form-check-label">
-                                            <input type="checkbox" class="form-check-input" name="day[]" value="2">
-                                            @lang('message.tuesday')
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-check">
-                                        <label class="form-check-label">
-                                            <input type="checkbox" class="form-check-input" name="day[]" value="3">
-                                            @lang('message.wednesday')
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-check">
-                                        <label class="form-check-label">
-                                            <input type="checkbox" class="form-check-input" name="day[]" value="4">
-                                            @lang('message.thursday')
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-check">
-                                        <label class="form-check-label">
-                                            <input type="checkbox" class="form-check-input" name="day[]" value="5">
-                                            @lang('message.friday')
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-check">
-                                        <label class="form-check-label">
-                                            <input type="checkbox" class="form-check-input" name="day[]" value="6">
-                                            @lang('message.saturday')
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-check">
-                                        <label class="form-check-label">
-                                            <input type="checkbox" class="form-check-input" name="day[]" value="7">
-                                            @lang('message.sunday')
-                                        </label>
-                                    </div>
-                                </div>
+                            <div class="instruction-content">
+                                <h6>@lang('profile.how-to-block-dates')</h6>
+                                <ul class="instruction-list">
+                                    <li>@lang('profile.choose-single-day-or-range')</li>
+                                    <li>@lang('profile.select-future-dates-only')</li>
+                                    <li>@lang('profile.add-notes-to-explain')</li>
+                                    <li>@lang('profile.blocked-dates-appear-teal')</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Block Type Selection -->
+                    <div class="form-section mb-4">
+                        <label class="form-label-main">@lang('profile.block-type')</label>
+                        <p class="form-help-text">@lang('profile.choose-how-to-block')</p>
+                        
+                        <div class="custom-radio-group">
+                            <div class="custom-radio-option">
+                                <input type="radio" name="blockType" id="singleDay" value="single" checked>
+                                <label for="singleDay" class="custom-radio-label">
+                                    <div class="radio-icon">
+                                        <i class="fas fa-calendar-day"></i>
+                                    </div>
+                                    <div class="radio-content">
+                                        <span class="radio-title">@lang('profile.single-day')</span>
+                                        <span class="radio-description">@lang('profile.block-one-specific-date')</span>
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div class="custom-radio-option">
+                                <input type="radio" name="blockType" id="dateRange" value="range">
+                                <label for="dateRange" class="custom-radio-label">
+                                    <div class="radio-icon">
+                                        <i class="fas fa-calendar-week"></i>
+                                    </div>
+                                    <div class="radio-content">
+                                        <span class="radio-title">@lang('profile.date-range')</span>
+                                        <span class="radio-description">@lang('profile.block-multiple-consecutive-dates')</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Single Day Selection -->
+                    <div id="singleDaySection" class="form-section mb-4">
+                        <label for="singleDateInput" class="form-label-main">@lang('profile.select-date')</label>
+                        <p class="form-help-text">@lang('profile.choose-date-to-block')</p>
+                        <input type="date" id="singleDateInput" class="form-control form-control-modern" name="single_date" required>
+                    </div>
+                    
+                    <!-- Date Range Selection -->
+                    <div id="dateRangeSection" class="form-section mb-4" style="display: none;">
+                        <label class="form-label-main">@lang('profile.date-range')</label>
+                        <p class="form-help-text">@lang('profile.choose-start-end-dates')</p>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="addNewBeginInput" class="form-label-secondary">@lang('profile.start-date')</label>
+                                <input type="date" id="addNewBeginInput" class="form-control form-control-modern" name="start">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="addNewEndInput" class="form-label-secondary">@lang('profile.end-date')</label>
+                                <input type="date" id="addNewEndInput" class="form-control form-control-modern" name="end">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Notes Input -->
+                    <div class="form-section mb-4">
+                        <label for="eventNote" class="form-label-main">@lang('profile.notes')</label>
+                        <p class="form-help-text">@lang('profile.add-description-why-blocked')</p>
+                        <textarea 
+                            id="eventNote" 
+                            class="form-control form-control-modern" 
+                            name="note" 
+                            rows="4" 
+                            placeholder="@lang('profile.notes-placeholder')"
+                        ></textarea>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@lang('profile.interrupt')</button>
-                    <button type="submit" class="btn btn-primary">@lang('profile.saveComputer')</button>
+                <div class="modal-footer schedule-modal-footer">
+                    <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>@lang('profile.cancel')
+                    </button>
+                    <button type="submit" class="btn btn-save">
+                        <i class="fas fa-save me-2"></i>@lang('profile.save-schedule')
+                    </button>
                 </div>
             </form>
         </div>
@@ -1361,6 +1313,388 @@
             border: 2px solid #17a2b8 !important;
             color: white !important;
         }
+
+        /* Professional Modal Styles */
+        .schedule-modal .modal-content {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .schedule-modal-header {
+            background: linear-gradient(135deg, #313041 0%, #2c5aa0 100%);
+            color: white;
+            border: none;
+            padding: 24px 30px;
+            position: relative;
+        }
+
+        .modal-header-content h4 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+            color: white;
+        }
+
+        .modal-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+
+        .btn-close-white {
+            filter: invert(1) grayscale(100%) brightness(200%);
+            opacity: 0.8;
+        }
+
+        .btn-close-white:hover {
+            opacity: 1;
+        }
+
+        .schedule-modal-body {
+            padding: 30px;
+            background: #fafbfc;
+        }
+
+        /* Instructions Card */
+        .instructions-card {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            border: 1px solid #e1f5fe;
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .instructions-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #2196f3, #9c27b0);
+        }
+
+        .instruction-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #2196f3, #9c27b0);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+
+        .instruction-content h6 {
+            color: #1976d2;
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .instruction-list {
+            margin: 0;
+            padding-left: 16px;
+            color: #424242;
+            line-height: 1.6;
+        }
+
+        .instruction-list li {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .instruction-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Form Sections */
+        .form-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .form-section:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-label-main {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .form-label-secondary {
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .form-help-text {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .form-control-modern {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+
+        .form-control-modern:focus {
+            border-color: #313041;
+            box-shadow: 0 0 0 3px rgba(49, 48, 65, 0.1);
+            background: white;
+        }
+
+        /* Custom Radio Buttons */
+        .custom-radio-group {
+            display: flex;
+            flex-direction: row;
+            gap: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .custom-radio-group {
+                flex-direction: column;
+                gap: 12px;
+            }
+        }
+
+        .custom-radio-option {
+            position: relative;
+            flex: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .custom-radio-option {
+                flex: none;
+            }
+        }
+
+        .custom-radio-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .custom-radio-label {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            min-height: 80px;
+            height: 80px;
+        }
+
+        .custom-radio-label::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #313041, #2c5aa0);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .custom-radio-label > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        .custom-radio-option:hover .custom-radio-label {
+            border-color: #313041;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(49, 48, 65, 0.15);
+        }
+
+        .custom-radio-option input[type="radio"]:checked + .custom-radio-label {
+            border-color: #313041;
+            background: #313041;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(49, 48, 65, 0.25);
+        }
+
+        .custom-radio-option input[type="radio"]:checked + .custom-radio-label::before {
+            opacity: 1;
+        }
+
+        .radio-icon {
+            width: 50px;
+            height: 50px;
+            background: #f3f4f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            font-size: 18px;
+            color: #313041;
+            transition: all 0.3s ease;
+        }
+
+        .custom-radio-option input[type="radio"]:checked + .custom-radio-label .radio-icon {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .radio-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .radio-title {
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #1f2937;
+            transition: color 0.3s ease;
+        }
+
+        .custom-radio-option input[type="radio"]:checked + .custom-radio-label .radio-title {
+            color: white;
+        }
+
+        .radio-description {
+            display: block;
+            font-size: 13px;
+            color: #6b7280;
+            transition: color 0.3s ease;
+        }
+
+        .custom-radio-option input[type="radio"]:checked + .custom-radio-label .radio-description {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Modal Footer */
+        .schedule-modal-footer {
+            background: white;
+            border: none;
+            padding: 20px 30px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .btn-cancel {
+            background: #f3f4f6;
+            border: 2px solid #e5e7eb;
+            color: #374151;
+            font-weight: 500;
+            padding: 12px 24px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancel:hover {
+            background: #e5e7eb;
+            border-color: #d1d5db;
+            color: #1f2937;
+            transform: translateY(-1px);
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #313041, #2c5aa0);
+            border: 2px solid #313041;
+            color: white;
+            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(49, 48, 65, 0.3);
+        }
+
+        .btn-save:hover {
+            background: linear-gradient(135deg, #2a2938, #254a8a);
+            border-color: #2a2938;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(49, 48, 65, 0.4);
+        }
+
+        /* Mobile Responsiveness for Modal */
+        @media (max-width: 768px) {
+            .schedule-modal-header {
+                padding: 20px;
+            }
+
+            .schedule-modal-body {
+                padding: 20px;
+            }
+
+            .form-section {
+                padding: 20px;
+            }
+
+            .custom-radio-group {
+                gap: 10px;
+            }
+
+            .custom-radio-label {
+                padding: 14px 16px;
+                min-height: 70px;
+                height: 70px;
+            }
+
+            .radio-icon {
+                width: 45px;
+                height: 45px;
+                font-size: 16px;
+                margin-right: 12px;
+            }
+
+            .instructions-card {
+                padding: 16px;
+            }
+
+            .instruction-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 14px;
+            }
+
+            .schedule-modal-footer {
+                padding: 16px 20px;
+                flex-direction: column;
+            }
+
+            .btn-cancel,
+            .btn-save {
+                width: 100%;
+                justify-content: center;
+            }
+        }
 </style>
 @endsection
 
@@ -1398,6 +1732,9 @@
             
             // Load initial events
             loadCalendarEvents();
+            
+            // Initialize legend display
+            updateLegendDisplay();
         });
 
         function initializeCalendar() {
@@ -1545,19 +1882,49 @@
             const endDate = new Date();
             endDate.setMonth(endDate.getMonth() + 6); // Load 6 months forward
             
-            fetch('/events?' + new URLSearchParams({
+            const baseParams = {
                 start: startDate.toISOString().split('T')[0],
-                end: endDate.toISOString().split('T')[0],
-                ...currentFilters
-            }))
-            .then(response => {
-                return response.json();
-            })
-            .then(data => {
-                calendarEvents = {};
+                end: endDate.toISOString().split('T')[0]
+            };
+            
+            // If a specific tour is selected, we need to make two requests:
+            // 1. Get events for that specific tour
+            // 2. Get all custom schedule events (they should always be visible)
+            if (currentFilters.guiding_id) {
+                const tourEventsPromise = fetch('/events?' + new URLSearchParams({
+                    ...baseParams,
+                    ...currentFilters
+                }))
+                .then(response => response.json());
                 
-                if (Array.isArray(data)) {
-                    data.forEach(event => {
+                const customEventsPromise = fetch('/events?' + new URLSearchParams({
+                    ...baseParams,
+                    type: 'custom_schedule'
+                }))
+                .then(response => response.json());
+                
+                Promise.all([tourEventsPromise, customEventsPromise])
+                .then(([tourEvents, customEvents]) => {
+                    calendarEvents = {};
+                    
+                    // Combine events from both requests
+                    const allEvents = [];
+                    
+                    // Add tour-specific events
+                    if (Array.isArray(tourEvents)) {
+                        allEvents.push(...tourEvents);
+                    }
+                    
+                    // Add custom events (always included)
+                    if (Array.isArray(customEvents)) {
+                        // Filter out duplicates (in case custom events are associated with the selected tour)
+                        const existingEventIds = new Set(allEvents.map(e => e.id));
+                        const uniqueCustomEvents = customEvents.filter(e => !existingEventIds.has(e.id));
+                        allEvents.push(...uniqueCustomEvents);
+                    }
+                    
+                    // Process all events
+                    allEvents.forEach(event => {
                         const dateKey = event.start ? event.start.split('T')[0] : event.date;
                         if (dateKey) {
                             if (!calendarEvents[dateKey]) {
@@ -1566,15 +1933,42 @@
                             calendarEvents[dateKey].push(event);
                         }
                     });
-                } else {
-                    console.error('Events data is not an array:', data);
-                }
-                
-                updateCalendarDisplay();
-            })
-            .catch(error => {
-                console.error('Error loading calendar events:', error);
-            });
+                    
+                    updateCalendarDisplay();
+                })
+                .catch(error => {
+                    console.error('Error loading calendar events:', error);
+                });
+            } else {
+                // When showing all tours, make a single request with all filters
+                fetch('/events?' + new URLSearchParams({
+                    ...baseParams,
+                    ...currentFilters
+                }))
+                .then(response => response.json())
+                .then(data => {
+                    calendarEvents = {};
+                    
+                    if (Array.isArray(data)) {
+                        data.forEach(event => {
+                            const dateKey = event.start ? event.start.split('T')[0] : event.date;
+                            if (dateKey) {
+                                if (!calendarEvents[dateKey]) {
+                                    calendarEvents[dateKey] = [];
+                                }
+                                calendarEvents[dateKey].push(event);
+                            }
+                        });
+                    } else {
+                        console.error('Events data is not an array:', data);
+                    }
+                    
+                    updateCalendarDisplay();
+                })
+                .catch(error => {
+                    console.error('Error loading calendar events:', error);
+                });
+            }
         }
 
         function updateCalendarDisplay() {
@@ -1887,18 +2281,30 @@
                         '@lang('profile.all-tours')';
                     document.getElementById('selectedTourText').textContent = selectedText;
                     
-                    // Show/hide availability legend items
+                    // Show/hide legend items based on filter context
                     const availableLegend = document.getElementById('availableLegend');
                     const unavailableLegend = document.getElementById('unavailableLegend');
+                    const confirmedLegend = document.getElementById('confirmedLegend');
+                    const pendingLegend = document.getElementById('pendingLegend');
+                    const rejectedLegend = document.getElementById('rejectedLegend');
+                    const customLegend = document.getElementById('customLegend');
                     
                     if (guidingId) {
-                        // Show availability legend when a specific tour is selected
-                        availableLegend.style.display = 'flex';
-                        unavailableLegend.style.display = 'flex';
+                        // When a specific tour is selected, show availability states and hide booking states
+                        if (availableLegend) availableLegend.style.display = 'flex';
+                        if (unavailableLegend) unavailableLegend.style.display = 'flex';
+                        if (confirmedLegend) confirmedLegend.style.display = 'none';
+                        if (pendingLegend) pendingLegend.style.display = 'flex'; // Keep pending always visible
+                        if (rejectedLegend) rejectedLegend.style.display = 'none';
+                        if (customLegend) customLegend.style.display = 'flex'; // Keep custom as it can apply to tours
                     } else {
-                        // Hide availability legend when "All Tours" is selected
-                        availableLegend.style.display = 'none';
-                        unavailableLegend.style.display = 'none';
+                        // When showing all tours, show booking states and hide availability states
+                        if (availableLegend) availableLegend.style.display = 'none';
+                        if (unavailableLegend) unavailableLegend.style.display = 'none';
+                        if (confirmedLegend) confirmedLegend.style.display = 'flex';
+                        if (pendingLegend) pendingLegend.style.display = 'flex';
+                        if (rejectedLegend) rejectedLegend.style.display = 'flex';
+                        if (customLegend) customLegend.style.display = 'flex';
                     }
                     
                     // Refresh calendar
@@ -1912,12 +2318,39 @@
                 });
             });
         }
+        
+        function updateLegendDisplay() {
+            const availableLegend = document.getElementById('availableLegend');
+            const unavailableLegend = document.getElementById('unavailableLegend');
+            const confirmedLegend = document.getElementById('confirmedLegend');
+            const pendingLegend = document.getElementById('pendingLegend');
+            const rejectedLegend = document.getElementById('rejectedLegend');
+            const customLegend = document.getElementById('customLegend');
+            
+            if (currentFilters.guiding_id !== '') {
+                // When a specific tour is selected, show availability states and hide booking states
+                if (availableLegend) availableLegend.style.display = 'flex';
+                if (unavailableLegend) unavailableLegend.style.display = 'flex';
+                if (confirmedLegend) confirmedLegend.style.display = 'none';
+                if (pendingLegend) pendingLegend.style.display = 'flex'; // Keep pending always visible
+                if (rejectedLegend) rejectedLegend.style.display = 'none';
+                if (customLegend) customLegend.style.display = 'flex'; // Keep custom as it can apply to tours
+            } else {
+                // When showing all tours, show booking states and hide availability states
+                if (availableLegend) availableLegend.style.display = 'none';
+                if (unavailableLegend) unavailableLegend.style.display = 'none';
+                if (confirmedLegend) confirmedLegend.style.display = 'flex';
+                if (pendingLegend) pendingLegend.style.display = 'flex';
+                if (rejectedLegend) rejectedLegend.style.display = 'flex';
+                if (customLegend) customLegend.style.display = 'flex';
+            }
+        }
 
         function showDayDetails(dateStr) {            
-            const panel = document.getElementById('detailPanel');
-            const title = document.getElementById('detailPanelTitle');
-            const dateElement = document.getElementById('detailPanelDate');
-            const content = document.getElementById('detailPanelContent');
+            const panel = document.getElementById('sideDetailPanel');
+            const title = document.getElementById('sideDetailPanelTitle');
+            const dateElement = document.getElementById('sideDetailPanelDate');
+            const content = document.getElementById('sideDetailPanelContent');
             
             // Format date for display
             const date = new Date(dateStr);
@@ -1936,21 +2369,16 @@
             
             if (dayEvents.length === 0) {
                 content.innerHTML = `
-                    <div class="text-center text-muted py-4">
-                        <i class="fas fa-calendar-check fa-2x mb-3"></i>
-                        <p>No events scheduled for this date</p>
-                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addEventModal">
-                            <i class="fas fa-plus"></i> Add Event
-                        </button>
+                    <div class="text-center text-muted py-3">
+                        <i class="fas fa-calendar-check fa-2x mb-2"></i>
+                        <p class="small">No events scheduled for this date</p>
                     </div>
                 `;
             } else {
-                let contentHtml = '<div class="row">';
+                let contentHtml = '<div class="side-detail-cards">';
                 
                 // Group events by type
                 const bookings = dayEvents.filter(e => e.extendedProps && e.extendedProps.booking);
-                const blockedTours = dayEvents.filter(e => e.extendedProps && e.extendedProps.type && 
-                    (e.extendedProps.type === 'tour_schedule' || e.extendedProps.type === 'vacation_schedule'));
                 const customEvents = dayEvents.filter(e => e.extendedProps && e.extendedProps.type === 'custom_schedule');
                 const otherEvents = dayEvents.filter(e => !e.extendedProps || (!e.extendedProps.booking && 
                     e.extendedProps.type !== 'tour_schedule' && e.extendedProps.type !== 'vacation_schedule' && 
@@ -1959,10 +2387,9 @@
                 // Display bookings
                 if (bookings.length > 0) {
                     contentHtml += `
-                        <div class="col-md-6">
-                            <div class="detail-card">
-                                <h6><i class="fas fa-calendar-check"></i> Bookings (${bookings.length})</h6>
-                                <div class="detail-card-content">
+                        <div class="side-detail-card">
+                            <h6><i class="fas fa-calendar-check"></i> Bookings (${bookings.length})</h6>
+                            <div class="side-detail-card-content">
                     `;
                     
                     bookings.forEach(event => {
@@ -1971,72 +2398,32 @@
                         const guiding = event.extendedProps.guiding;
                         
                         contentHtml += `
-                            <div class="schedule-item">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h6 class="mb-1">${guiding ? guiding.title : 'Tour Booking'}</h6>
-                                    <span class="status-badge status-${booking.status}">${booking.status}</span>
+                            <div class="side-schedule-item">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <h6 class="mb-1 small">${guiding ? guiding.title : 'Tour Booking'}</h6>
+                                    <span class="side-status-badge status-${booking.status}">${booking.status}</span>
                                 </div>
-                                <div class="schedule-details">
+                                <div class="side-schedule-details">
                                     <small><i class="fas fa-user"></i> ${user ? user.firstname + ' ' + user.lastname : 'Guest User'}</small>
                                     <small><i class="fas fa-users"></i> ${booking.count_of_users} guests</small>
                                     <small><i class="fas fa-euro-sign"></i> ${booking.price}€</small>
                                 </div>
-                                <button class="btn btn-sm btn-outline-primary mt-2" onclick="showBookingDetails('${booking.id}')">
+                                <button class="btn btn-sm btn-outline-primary mt-1" onclick="showBookingDetails('${booking.id}')">
                                     View Details
                                 </button>
                             </div>
                         `;
                     });
                     
-                    contentHtml += '</div></div></div>';
-                }
-                
-                // Display blocked tours
-                if (blockedTours.length > 0) {
-                    contentHtml += `
-                        <div class="col-md-6">
-                            <div class="detail-card">
-                                <h6><i class="fas fa-ban"></i> Blocked Tours (${blockedTours.length})</h6>
-                                <div class="detail-card-content">
-                    `;
-                    
-                    blockedTours.forEach(event => {
-                        const type = getTypeLabel(event.extendedProps.type);
-                        const canDelete = event.extendedProps.canDelete;
-                        const guiding = event.extendedProps.guiding;
-                        
-                        contentHtml += `
-                            <div class="schedule-item">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h6 class="mb-1">${event.title || (guiding ? guiding.title : 'Blocked Tour')}</h6>
-                                    <span class="badge bg-warning">${type}</span>
-                                </div>
-                                <div class="schedule-details">
-                                    <small><i class="fas fa-clock"></i> ${event.extendedProps.date || dateStr}</small>
-                                    ${event.extendedProps.note ? `<small><i class="fas fa-note-sticky"></i> ${event.extendedProps.note}</small>` : ''}
-                                    ${guiding ? `
-                                        <small><i class="fas fa-map-marker-alt"></i> ${guiding.location}</small>
-                                        <small><i class="fas fa-fishing"></i> ${guiding.title}</small>
-                                        <small><i class="fas fa-users"></i> Max ${guiding.max_guests} guests</small>
-                                        <small><i class="fas fa-clock"></i> ${guiding.duration} hours</small>
-                                        <small><i class="fas fa-euro-sign"></i> From ${guiding.price}€</small>
-                                    ` : ''}
-                                </div>
-                                ${canDelete ? `<button class="btn btn-sm btn-outline-danger mt-2" onclick="deleteEvent('${event.extendedProps.scheduleId}')"><i class="fas fa-trash"></i> Delete</button>` : ''}
-                            </div>
-                        `;
-                    });
-                    
-                    contentHtml += '</div></div></div>';
+                    contentHtml += '</div></div>';
                 }
                 
                 // Display custom events
                 if (customEvents.length > 0) {
                     contentHtml += `
-                        <div class="col-md-6 mb-4">
-                            <div class="detail-card">
-                                <h6><i class="fas fa-calendar-plus text-info"></i> @lang('profile.custom-events') (${customEvents.length})</h6>
-                                <div class="detail-card-content">
+                        <div class="side-detail-card">
+                            <h6><i class="fas fa-calendar-plus text-info"></i> @lang('profile.custom-events') (${customEvents.length})</h6>
+                            <div class="side-detail-card-content">
                     `;
                     
                     customEvents.forEach(event => {
@@ -2044,32 +2431,29 @@
                         const canDelete = event.extendedProps.canDelete;
                         
                         contentHtml += `
-                            <div class="schedule-item mb-3 p-3 border rounded">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h6 class="mb-1">${event.title || 'Custom Event'}</h6>
-                                    <span class="badge bg-info">${type}</span>
+                            <div class="side-schedule-item">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <h6 class="mb-1 small">${event.title || 'Custom Event'}</h6>
+                                    <span class="badge bg-info small">${type}</span>
                                 </div>
-                                <div class="schedule-details">
-                                    <small class="text-muted d-block">
-                                        <i class="fas fa-clock"></i> ${event.extendedProps.date || dateStr}
-                                    </small>
-                                    ${event.extendedProps.note ? `<small class="text-muted d-block"><i class="fas fa-note-sticky"></i> ${event.extendedProps.note}</small>` : ''}
+                                <div class="side-schedule-details">
+                                    <small><i class="fas fa-clock"></i> ${event.extendedProps.date || dateStr}</small>
+                                    ${event.extendedProps.note ? `<small><i class="fas fa-note-sticky"></i> ${event.extendedProps.note}</small>` : ''}
                                 </div>
-                                ${canDelete ? `<button class="btn btn-sm btn-outline-danger mt-2" onclick="deleteEvent('${event.extendedProps.scheduleId}')"><i class="fas fa-trash"></i> @lang('profile.delete')</button>` : ''}
+                                ${canDelete ? `<button class="btn btn-sm btn-outline-danger mt-1" onclick="deleteEvent('${event.extendedProps.scheduleId}')"><i class="fas fa-trash"></i> Delete</button>` : ''}
                             </div>
                         `;
                     });
                     
-                    contentHtml += '</div></div></div>';
+                    contentHtml += '</div></div>';
                 }
                 
                 // Display other events if any
                 if (otherEvents.length > 0) {
                     contentHtml += `
-                        <div class="col-md-6 mb-4">
-                            <div class="detail-card">
-                                <h6><i class="fas fa-calendar text-secondary"></i> @lang('profile.other-events') (${otherEvents.length})</h6>
-                                <div class="detail-card-content">
+                        <div class="side-detail-card">
+                            <h6><i class="fas fa-calendar text-secondary"></i> @lang('profile.other-events') (${otherEvents.length})</h6>
+                            <div class="side-detail-card-content">
                     `;
                     
                     otherEvents.forEach(event => {
@@ -2077,23 +2461,21 @@
                         const canDelete = event.extendedProps ? event.extendedProps.canDelete : false;
                         
                         contentHtml += `
-                            <div class="schedule-item mb-3 p-3 border rounded">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h6 class="mb-1">${event.title || 'Event'}</h6>
-                                    <span class="badge bg-secondary">${type}</span>
+                            <div class="side-schedule-item">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <h6 class="mb-1 small">${event.title || 'Event'}</h6>
+                                    <span class="badge bg-secondary small">${type}</span>
                                 </div>
-                                <div class="schedule-details">
-                                    <small class="text-muted d-block">
-                                        <i class="fas fa-clock"></i> ${event.extendedProps ? event.extendedProps.date : dateStr}
-                                    </small>
-                                    ${event.extendedProps && event.extendedProps.note ? `<small class="text-muted d-block"><i class="fas fa-note-sticky"></i> ${event.extendedProps.note}</small>` : ''}
+                                <div class="side-schedule-details">
+                                    <small><i class="fas fa-clock"></i> ${event.extendedProps ? event.extendedProps.date : dateStr}</small>
+                                    ${event.extendedProps && event.extendedProps.note ? `<small><i class="fas fa-note-sticky"></i> ${event.extendedProps.note}</small>` : ''}
                                 </div>
-                                ${canDelete ? `<button class="btn btn-sm btn-outline-danger mt-2" onclick="deleteEvent('${event.extendedProps.scheduleId}')"><i class="fas fa-trash"></i> @lang('profile.delete')</button>` : ''}
+                                ${canDelete ? `<button class="btn btn-sm btn-outline-danger mt-1" onclick="deleteEvent('${event.extendedProps.scheduleId}')"><i class="fas fa-trash"></i> Delete</button>` : ''}
                             </div>
                         `;
                     });
                     
-                    contentHtml += '</div></div></div>';
+                    contentHtml += '</div></div>';
                 }
                 
                 contentHtml += '</div>';
@@ -2101,8 +2483,7 @@
             }
             
             // Show panel
-            panel.classList.add('show');
-            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            panel.style.display = 'block';
         }
 
         function showBookingDetails(bookingId) {
@@ -2194,58 +2575,88 @@
         }
 
         function initializeForms() {
-            // Auto-set end date when beginning date changes
+            // Get tomorrow's date as minimum date (disable past dates)
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+            
+            // Set minimum date for all date inputs
+            const singleDateInput = document.getElementById('singleDateInput');
             const beginInput = document.getElementById('addNewBeginInput');
             const endInput = document.getElementById('addNewEndInput');
             
-            beginInput.addEventListener('change', function() {
-                if (this.value) {
-                    // Create a date object from the selected beginning date
-                    const beginDate = new Date(this.value);
-                    // Add one day to get the next day
-                    const endDate = new Date(beginDate);
-                    endDate.setDate(beginDate.getDate() + 1);
-                    
-                    // Format the date as YYYY-MM-DD for the input
-                    const formattedEndDate = endDate.toISOString().split('T')[0];
-                    
-                    // Set the end date input
-                    endInput.value = formattedEndDate;
-                    
-                    // Set minimum date for end input to prevent selecting dates before beginning
-                    endInput.min = formattedEndDate;
+            singleDateInput.min = tomorrowStr;
+            beginInput.min = tomorrowStr;
+            endInput.min = tomorrowStr;
+            
+            // Handle radio button toggle
+            const singleDayRadio = document.getElementById('singleDay');
+            const dateRangeRadio = document.getElementById('dateRange');
+            const singleDaySection = document.getElementById('singleDaySection');
+            const dateRangeSection = document.getElementById('dateRangeSection');
+            
+            singleDayRadio.addEventListener('change', function() {
+                if (this.checked) {
+                    singleDaySection.style.display = 'block';
+                    dateRangeSection.style.display = 'none';
+                    singleDateInput.required = true;
+                    beginInput.required = false;
+                    endInput.required = false;
                 }
             });
             
-            // Also ensure end date can't be before beginning date
-            endInput.addEventListener('change', function() {
-                if (beginInput.value && this.value) {
-                    const beginDate = new Date(beginInput.value);
-                    const endDate = new Date(this.value);
+            dateRangeRadio.addEventListener('change', function() {
+                if (this.checked) {
+                    singleDaySection.style.display = 'none';
+                    dateRangeSection.style.display = 'block';
+                    singleDateInput.required = false;
+                    beginInput.required = true;
+                    endInput.required = true;
+                }
+            });
+            
+            // Auto-set end date when beginning date changes (for range mode)
+            beginInput.addEventListener('change', function() {
+                if (this.value) {
+                    // Set minimum date for end input to prevent selecting dates before beginning
+                    endInput.min = this.value;
                     
-                    if (endDate < beginDate) {
-                        // If end date is before begin date, reset to next day
-                        const nextDay = new Date(beginDate);
-                        nextDay.setDate(beginDate.getDate() + 1);
-                        this.value = nextDay.toISOString().split('T')[0];
-                        
-                        showAlert('warning', 'End date cannot be before the beginning date. Set to next day.');
+                    // If end date is not set or is before begin date, set it to begin date
+                    if (!endInput.value || endInput.value < this.value) {
+                        endInput.value = this.value;
                     }
                 }
             });
+            
+            // Ensure end date can't be before beginning date
+            endInput.addEventListener('change', function() {
+                if (beginInput.value && this.value && this.value < beginInput.value) {
+                    this.value = beginInput.value;
+                    showAlert('warning', 'End date cannot be before the start date.');
+                }
+            });
 
-            // Add event form
+            // Add event form submission
             document.getElementById('addEventForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 
                 const formData = new FormData(this);
-                const data = Object.fromEntries(formData.entries());
+                const data = {};
                 
-                // Handle multiple checkboxes for days
-                const days = formData.getAll('day[]');
-                if (days.length > 0) {
-                    data.day = days;
+                // Get the block type
+                const blockType = formData.get('blockType');
+                
+                if (blockType === 'single') {
+                    data.start = formData.get('single_date');
+                    data.end = formData.get('single_date');
+                } else {
+                    data.start = formData.get('start');
+                    data.end = formData.get('end');
                 }
+                
+                data.type = 'custom_schedule';
+                data.note = formData.get('note') || 'Custom blocked date';
 
                 fetch('{{ route("profile.calendar.store") }}', {
                     method: 'POST',
@@ -2258,19 +2669,24 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        $('#addEventModal').modal('hide');
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('addEventModal'));
+                        modal.hide();
                         loadCalendarEvents();
-                        showAlert('success', data.message);
+                        showAlert('success', data.message || 'Schedule created successfully!');
                         document.getElementById('addEventForm').reset();
-                        // Reset the min attribute when form is reset
+                        // Reset to single day mode
+                        singleDayRadio.checked = true;
+                        singleDaySection.style.display = 'block';
+                        dateRangeSection.style.display = 'none';
+                        // Reset min attributes
                         endInput.removeAttribute('min');
                     } else {
-                        showAlert('error', data.message || 'Error creating event');
+                        showAlert('error', data.message || 'Error creating schedule');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showAlert('error', 'Error creating event');
+                    showAlert('error', 'Error creating schedule');
                 });
             });
 
@@ -2283,9 +2699,14 @@
             });
         }
 
+        function closeSideDetailPanel() {
+            const panel = document.getElementById('sideDetailPanel');
+            panel.style.display = 'none';
+        }
+        
+        // Keep for backward compatibility
         function closeDetailPanel() {
-            const panel = document.getElementById('detailPanel');
-            panel.classList.remove('show');
+            closeSideDetailPanel();
         }
 
         function showBookingDetailPanel(extendedProps) {

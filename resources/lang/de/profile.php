@@ -369,6 +369,31 @@ return [
     'total-extra' => 'Gesamtextra',
     'unavailable' => 'Nicht verfügbar',
     'available' => 'Verfügbar',
+    
+    // Modal translations
+    'block-calendar-dates' => 'Kalenderdaten blockieren',
+    'create-custom-blocked-periods' => 'Benutzerdefinierte Sperrperioden erstellen',
+    'how-to-block-dates' => 'So blockieren Sie Daten:',
+    'choose-single-day-or-range' => 'Wählen Sie, ob Sie einen einzelnen Tag oder einen Datumsbereich blockieren möchten',
+    'select-future-dates-only' => 'Wählen Sie nur zukünftige Daten aus (vergangene Daten sind deaktiviert)',
+    'add-notes-to-explain' => 'Fügen Sie Notizen hinzu, um zu erklären, warum die Daten blockiert sind',
+    'blocked-dates-appear-teal' => 'Blockierte Daten werden türkis in Ihrem Kalender angezeigt',
+    'block-type' => 'Blockierungstyp',
+    'choose-how-to-block' => 'Wählen Sie, wie Sie Ihren Kalender blockieren möchten',
+    'single-day' => 'Einzelner Tag',
+    'block-one-specific-date' => 'Einen bestimmten Tag blockieren',
+    'date-range' => 'Datumsbereich',
+    'block-multiple-consecutive-dates' => 'Mehrere aufeinanderfolgende Daten blockieren',
+    'select-date' => 'Datum auswählen',
+    'choose-date-to-block' => 'Wählen Sie das Datum aus, das Sie blockieren möchten',
+    'choose-start-end-dates' => 'Wählen Sie das Start- und Enddatum für Ihren gesperrten Zeitraum',
+    'start-date' => 'Startdatum',
+    'end-date' => 'Enddatum',
+    'notes' => 'Notizen',
+    'add-description-why-blocked' => 'Fügen Sie eine Beschreibung hinzu, warum diese Daten blockiert sind (optional)',
+    'notes-placeholder' => 'z.B. Persönlicher Urlaub, Gerätewartung, Schulungsworkshop...',
+    'cancel' => 'Abbrechen',
+    'save-schedule' => 'Zeitplan speichern',
 
 ];
 
