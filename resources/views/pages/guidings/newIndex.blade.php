@@ -1095,14 +1095,16 @@
                             @endif
 
                             @if(!empty(json_decode($boatInformation) ))
-                                <strong class="subtitle-text">{{ translate('Boat') }}:</strong>
-                                <table class="table my-4">
-                                    <tbody>
-                                        @foreach($boatInformation as $key => $value)
-                                            <tr><th>{{ $value['name'] }}</th><td colspan="1">{{ translate($value['value']) }}</td></tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
+                                <div class="col-md-12">
+                                    <strong class="subtitle-text">{{ translate('Boat') }}:</strong>
+                                    <table class="table my-4">
+                                        <tbody>
+                                            @foreach($boatInformation as $key => $value)
+                                                <tr><th>{{ $value['name'] }}</th><td colspan="1">{{ translate($value['value']) }}</td></tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
                             @endif
                     
                             <!-- Boat Extras Section -->
@@ -1456,7 +1458,7 @@
                                                                 <div class="tours-list__content__trait__text" >
 
                                                                     @php
-                                                                    $guidingTargets = collect($guiding->getTargetFishNames())->pluck('name')->toArray();
+                                                                    $guidingTargets = collect($guiding->cached_target_fish_names ?? $guiding->getTargetFishNames($targetsMap ?? null))->pluck('name')->toArray();
                                                                     @endphp
                                                                     
                                                                     @if(!empty($guidingTargets))

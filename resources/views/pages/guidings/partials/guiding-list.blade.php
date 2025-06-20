@@ -101,8 +101,10 @@
             @php
                 $priceMin = request()->get('price_min');
                 $priceMax = request()->get('price_max');
-                $showPriceMin = isset($priceMin) && $priceMin != 50;
-                $showPriceMax = isset($priceMax) && $priceMax != 1000;
+                $defaultMinPrice = 50;
+                $defaultMaxPrice = isset($overallMaxPrice) ? $overallMaxPrice : 1000;
+                $showPriceMin = isset($priceMin) && $priceMin != $defaultMinPrice;
+                $showPriceMax = isset($priceMax) && $priceMax != $defaultMaxPrice;
             @endphp
             @if($showPriceMin || $showPriceMax)
                 <span class="badge bg-light text-dark border">
@@ -321,7 +323,7 @@
                                                 <div class="">
                                                     <div class="tours-list__content__trait__text" >
                                                         @php
-                                                        $otherguideTargets = collect($otherguide->getTargetFishNames())->pluck('name')->toArray();
+                                                        $otherguideTargets = collect($otherguide->cached_target_fish_names ?? $otherguide->getTargetFishNames($targetsMap ?? null))->pluck('name')->toArray();
                                                         @endphp
                                                         
                                                         @if(!empty($otherguideTargets))
