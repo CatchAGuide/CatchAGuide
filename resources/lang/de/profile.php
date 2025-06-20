@@ -62,6 +62,22 @@ return [
     'confpass' => 'Neues Passwort bestätigen',
     'save' => 'Speichern',
 
+    // Password & Security
+    'password_security' => 'Passwort & Sicherheit',
+    'update_password' => 'Passwort aktualisieren',
+    'password_updated' => 'Passwort erfolgreich aktualisiert!',
+    'password_tips' => 'Passwort-Sicherheitstipps:',
+    'password_tip_1' => 'Verwenden Sie mindestens 8 Zeichen mit einer Mischung aus Buchstaben, Zahlen und Symbolen',
+    'password_tip_2' => 'Vermeiden Sie persönliche Informationen wie Geburtstage oder Namen',
+    'password_tip_3' => 'Verwenden Sie keine Passwörter von anderen Konten',
+    'password_tip_4' => 'Erwägen Sie die Verwendung eines Passwort-Managers',
+    'account_security' => 'Konto-Sicherheit',
+    'two_factor_auth' => 'Zwei-Faktor-Authentifizierung',
+    'enable_2fa' => '2FA aktivieren',
+    'email_security' => 'E-Mail-Sicherheit',
+    'recent_activity' => 'Letzte Anmelde-Aktivität',
+    'coming_soon' => 'Bald verfügbar',
+
      /**
      *
      *  book by me

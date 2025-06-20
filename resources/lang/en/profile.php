@@ -63,6 +63,22 @@ return [
     'confpass' => 'Confirm new password',
     'save' => 'Save',
 
+    // Password & Security
+    'password_security' => 'Password & Security',
+    'update_password' => 'Update Password',
+    'password_updated' => 'Password updated successfully!',
+    'password_tips' => 'Password Security Tips:',
+    'password_tip_1' => 'Use at least 8 characters with a mix of letters, numbers, and symbols',
+    'password_tip_2' => 'Avoid using personal information like birthdays or names',
+    'password_tip_3' => 'Don\'t reuse passwords from other accounts',
+    'password_tip_4' => 'Consider using a password manager',
+    'account_security' => 'Account Security',
+    'two_factor_auth' => 'Two-Factor Authentication',
+    'enable_2fa' => 'Enable 2FA',
+    'email_security' => 'Email Security',
+    'recent_activity' => 'Recent Login Activity',
+    'coming_soon' => 'Coming Soon',
+
     /**
      *
      * 

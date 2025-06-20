@@ -773,7 +773,6 @@
 
 @section('profile-content')
 
-<div class="container" style="margin-bottom: 20px;">
     <!-- 3-Panel Layout -->
     <div class="row">
         <!-- Top Left Panel: Calendar -->
@@ -903,9 +902,6 @@
             </div>
         </div>
     </div>
-    
-
-</div>
 
 <!-- Add Custom Schedule Modal -->
 <div class="modal fade" id="addEventModal" tabindex="-1" aria-labelledby="addEventModalLabel" aria-hidden="true">

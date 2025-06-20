@@ -102,6 +102,8 @@ Route::post('/newguiding/save-draft', [GuidingsController::class, 'saveDraft'])-
 Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(function () {
     Route::get('/', [App\Http\Controllers\ProfileController::class, 'index'])->name('index');
     Route::get('/settings', [App\Http\Controllers\ProfileController::class, 'settings'])->name('settings');
+    Route::get('/password', [App\Http\Controllers\ProfileController::class, 'password'])->name('password');
+    Route::put('/password', [App\Http\Controllers\ProfileController::class, 'passwordUpdate'])->name('password.update');
     Route::get('/z', [App\Http\Controllers\ProfileController::class, 'abbuchen'])->name('abbuchen');
     Route::get('/becomeguide', [App\Http\Controllers\ProfileController::class, 'becomeguide'])->name('becomeguide');
     Route::put('/account', [App\Http\Controllers\ProfileController::class, 'accountUpdate'])->name('account');
@@ -112,11 +114,14 @@ Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(functi
     Route::get('/myguidings/deactivate/{guiding}', [App\Http\Controllers\ProfileController::class, 'deactivate'])->name('guiding.deactivate');
 
     Route::get('/bookings', [App\Http\Controllers\ProfileController::class, 'bookings'])->name('bookings');
+    Route::get('/bookings/load-more', [App\Http\Controllers\ProfileController::class, 'loadMoreBookings'])->name('bookings.load-more');
 
     Route::get('showbooking/{bookingid}', [App\Http\Controllers\ProfileController::class, 'showbooking'])->name('showbooking');
     Route::get('stornobooking/{bookingid}', [App\Http\Controllers\ProfileController::class, 'stornobooking'])->name('stornobooking');
 
-    Route::get('/guidebookings', [App\Http\Controllers\ProfileController::class, 'guidebookings'])->name('guidebookings');
+    Route::get('/guidebookings', function() {
+        return redirect()->route('profile.bookings');
+    })->name('guidebookings');
 
     Route::get('/guidebookings/accept/{booking}', [App\Http\Controllers\ProfileController::class, 'accept'])->name('guidebookings.accept');
     Route::get('/guidebookings/reject/{booking}', [App\Http\Controllers\ProfileController::class, 'reject'])->name('guidebookings.reject');
