@@ -137,9 +137,9 @@ class VacationsController extends Controller
     public function category(Request $request, $country)
     {
         $place_location = $country;
-        $query = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit']);
+        $query = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->where('language',app()->getLocale());
 
-        $country_row = Destination::whereSlug($country)->whereType('vacations')->first();
+        $country_row = Destination::whereSlug($country)->whereType('vacations')->where('language',app()->getLocale())->first();
         if (is_null($country_row)) {
             abort(404);
         }

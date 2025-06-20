@@ -110,7 +110,7 @@
             </div>
 
             @php
-                $countries = \App\Models\Destination::where('type', 'vacations')->pluck('name');
+                $countries = \App\Models\Destination::where('type', 'vacations')->where('language',app()->getLocale())->pluck('name');
             @endphp
 
             @php
