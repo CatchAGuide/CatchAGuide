@@ -122,7 +122,7 @@
                                     <select class="form-control form-select border-0" name="country" onchange="updateFormAction(this, 'global-search1')">
                                         <option value="">{{translate('Select Country')}}</option>
                                         @php
-                                            $countries = \App\Models\Destination::where('type', 'vacations')->pluck('name');
+                                            $countries = \App\Models\Destination::where('type', 'vacations')->where('language',app()->getLocale())->pluck('name');
                                         @endphp
                                         @foreach($countries as $country)
                                             <option value="{{ $country }}" 
