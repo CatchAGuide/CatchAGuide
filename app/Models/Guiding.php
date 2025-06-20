@@ -524,7 +524,6 @@ class Guiding extends Model
             if ($translated) {
                 $locationParts = ['city_en' => $translated['city'], 'country_en' => $translated['country'], 'region_en' => $translated['region']];
             }
-            dd($locationParts);
         }
 
         $locationParts = array_merge(['city' => $city, 'country' => $country, 'region' => $region], $locationParts ?? []);
