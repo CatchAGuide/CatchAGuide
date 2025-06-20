@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\RejectionRequest;
 use App\Models\Booking;
 use App\Models\BlockedEvent;
+use App\Models\CalendarSchedule;
 
 use App\Events\BookingStatusChanged;
 use App\Jobs\SendCheckoutEmail;
@@ -145,7 +146,7 @@ class BookingController extends Controller
 
         // Create a blocked event for the new date
         $eventService = new EventService();
-        $blockedEvent = $eventService->createBlockedEvent('00:00', $request->selectedDate, $guiding);
+        $blockedEvent = $eventService->createBlockedEvent('00:00', $request->selectedDate, $guiding, 'tour_request', $user);
 
         // Calculate the fee
         $helperService = new HelperService();
@@ -185,6 +186,10 @@ class BookingController extends Controller
             'token' => $this->generateBookingToken($blockedEvent->id),
             'parent_id' => $originalBooking->id, // Link to the original booking
         ]);
+
+        $updateSchedule = CalendarSchedule::find($blockedEvent->id);
+        $updateSchedule->booking_id = $newBooking->id;
+        $updateSchedule->save();
 
         // Send notification emails
         if (!app()->environment('local')) {

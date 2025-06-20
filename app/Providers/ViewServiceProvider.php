@@ -78,8 +78,10 @@ class ViewServiceProvider extends ServiceProvider
         });
 
         View::composer('*', function ($view) {
-            $allguidings = Guiding::orderBy('title','asc')->get();
-            $view->with('allguidings',$allguidings);
+            $allguidings = \Cache::remember('all_guidings', now()->addHours(1), function () {
+                return Guiding::orderBy('title','asc')->get();
+            });
+            $view->with('allguidings', $allguidings);
         });
 
         View::composer('*', function ($view) {
@@ -118,136 +120,150 @@ class ViewServiceProvider extends ServiceProvider
         });
 
         View::composer('*', function ($view) {
-            $activeFishing = Guiding::whereHas('fishingTypes',function($query){
-                $query->where('id',1);
-            })
-            ->where('status', 1)
-            ->inRandomOrder('123')
-            ->limit(6)
-            ->get();
-
-            $view->with('activeFishing', $activeFishing );
+            $activeFishing = Cache::remember('active_fishing', now()->addHours(1), function () {
+                return Guiding::whereHas('fishingTypes',function($query){
+                    $query->where('id',1);
+                })
+                ->where('status', 1)
+                ->inRandomOrder('123')
+                ->limit(6)
+                ->get();
+            });
+            $view->with('activeFishing', $activeFishing);
         });
 
         View::composer('*', function ($view) {
-            $seaFishing = Guiding::whereHas('guidingWaters', function ($query) {
-                $query->where('water_id', 2);
-            })
-            ->where('status', 1)
-            ->inRandomOrder()
-            ->limit(6)
-            ->get();
-
-            $view->with('seaFishing', $seaFishing );
+            $seaFishing = Cache::remember('sea_fishing', now()->addHours(1), function () {
+                return Guiding::whereHas('guidingWaters', function ($query) {
+                    $query->where('water_id', 2);
+                })
+                ->where('status', 1)
+                ->inRandomOrder()
+                ->limit(6)
+                ->get();
+            });
+            $view->with('seaFishing', $seaFishing);
         });
 
 
         View::composer('*', function ($view) {
-            $boatFishing = Guiding::whereHas('guidingMethods', function ($query) {
-                $query->where('method_id', 3);
-            })
-            ->where('status', 1)
-            ->inRandomOrder()
-            ->limit(6)
-            ->get();
-
-            $view->with('boatFishing', $boatFishing );
+            $boatFishing = Cache::remember('boat_fishing', now()->addHours(1), function () {
+                return Guiding::whereHas('guidingMethods', function ($query) {
+                    $query->where('method_id', 3);
+                })
+                ->where('status', 1)
+                ->inRandomOrder()
+                ->limit(6)
+                ->get();
+            });
+            $view->with('boatFishing', $boatFishing);
         });
 
         View::composer('*', function ($view) {
-            $familyAdventures = Guiding::where('max_guests','>=', 4)
-            ->where('status', 1)
-            ->inRandomOrder()
-            ->limit(6)
-            ->get();
-
+            $familyAdventures = Cache::remember('family_adventures', now()->addHours(1), function () {
+                return Guiding::where('max_guests','>=', 4)
+                ->where('status', 1)
+                ->inRandomOrder()
+                ->limit(6)
+                ->get();
+            });
             $view->with('familyAdventures', $familyAdventures);
         });
 
         View::composer('*', function ($view) {
-            $flyshings = Guiding::whereHas('guidingMethods', function ($query) {
-                $query->where('method_id', 4);
-            })
-            ->where('status', 1)
-            ->inRandomOrder()
-            ->limit(6)
-            ->get();
-
+            $flyshings = Cache::remember('flyshings', now()->addHours(1), function () {
+                return Guiding::whereHas('guidingMethods', function ($query) {
+                    $query->where('method_id', 4);
+                })
+                ->where('status', 1)
+                ->inRandomOrder()
+                ->limit(6)
+                ->get();
+            });
             $view->with('flyshings', $flyshings);
         });
 
 
         View::composer('*', function ($view) {
-            $shoreFishings = Guiding::whereHas('fishingFrom', function ($query) {
-                $query->where('id', 2);
-            })
-            ->where('status', 1)
-            ->inRandomOrder()
-            ->limit(6)
-            ->get();
-
-            $view->with('shoreFishings', $shoreFishings );
+            $shoreFishings = Cache::remember('shore_fishings', now()->addHours(1), function () {
+                return Guiding::whereHas('fishingFrom', function ($query) {
+                    $query->where('id', 2);
+                })
+                ->where('status', 1)
+                ->inRandomOrder()
+                ->limit(6)
+                ->get();
+            });
+            $view->with('shoreFishings', $shoreFishings);
         });
 
         View::composer('*', function ($view) {
-            $multidayfishings = Guiding::where('duration','>=', 24)
-            ->where('status', 1)
-            ->inRandomOrder()
-            ->limit(6)
-            ->get();
-
+            $multidayfishings = Cache::remember('multiday_fishings', now()->addHours(1), function () {
+                return Guiding::where('duration','>=', 24)
+                ->where('status', 1)
+                ->inRandomOrder()
+                ->limit(6)
+                ->get();
+            });
             $view->with('multidayfishings', $multidayfishings);
         });
 
         View::composer('*', function ($view) {
-            $filterRated = Rating::where('rating','>',1)->groupBy('guide_id')->pluck('guide_id');
-
-            $ratedGuidings = Guiding::whereIn('user_id', $filterRated)->limit(6)
-            ->get();
-
+            $ratedGuidings = Cache::remember('rated_guidings', now()->addMinutes(30), function () {
+                $filterRated = Rating::where('rating','>',1)->groupBy('guide_id')->pluck('guide_id');
+                return Guiding::whereIn('user_id', $filterRated)->limit(6)->get();
+            });
             $view->with('ratedGuidings', $ratedGuidings);
         });
 
         View::composer('*', function ($view) {
-            $latestThreads = Thread::where('language', app()->getLocale())->limit(3)->latest()->get();
+            $latestThreads = Cache::remember('latest_threads_' . app()->getLocale(), now()->addMinutes(15), function () {
+                return Thread::where('language', app()->getLocale())->limit(3)->latest()->get();
+            });
             $view->with('latestThreads', $latestThreads);
         });
 
         View::composer('*', function ($view) {
-            $bookedGuidings = Guiding::withCount('bookings')
-            ->where('status', 1)
-            ->orderBy('bookings_count', 'desc')
-            ->limit(8)
-            ->get();
+            $bookedGuidings = Cache::remember('booked_guidings', now()->addMinutes(30), function () {
+                return Guiding::withCount('bookings')
+                ->where('status', 1)
+                ->orderBy('bookings_count', 'desc')
+                ->limit(8)
+                ->get();
+            });
             $view->with('bookedGuidings', $bookedGuidings);
         });
 
         View::composer('*', function ($view) {
-            $newGuidings = Guiding::where('status', 1)->orderBy('created_at', 'desc')->where('status', 1)->limit(8)->get();
-
+            $newGuidings = Cache::remember('new_guidings', now()->addMinutes(15), function () {
+                return Guiding::where('status', 1)
+                    ->orderBy('created_at', 'desc')
+                    ->limit(8)
+                    ->get();
+            });
             $view->with('newGuidings', $newGuidings);
         });
 
         View::composer('*', function ($view) {
-            $faqs = Faq::all();
+            $faqs = Cache::remember('faqs', now()->addHours(24), function () {
+                return Faq::all();
+            });
             $view->with('faqs', $faqs);
         });
 
         View::composer('*', function ($view) {
             $locale = app()->getLocale();
             $host = request()->getHost();
-            if($locale == 'en'){
-                $url = env('APP_URL').'/'.request()->path();
-            }else{
-                $url = env('APP_URL').'/'.request()->path();
-            }
-
-            $attributes = PageAttribute::where('domain','=',$host)->where('uri',request()->path())->get();
-
-
-                $view->with('attributes', $attributes);
-
-
+            $path = request()->path();
+            $cacheKey = "page_attributes_{$host}_{$path}";
+            
+            $attributes = Cache::remember($cacheKey, now()->addHours(24), function () use ($host, $path) {
+                return PageAttribute::where('domain', '=', $host)
+                    ->where('uri', $path)
+                    ->get();
+            });
+            
+            $view->with('attributes', $attributes);
         });
 
 
