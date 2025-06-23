@@ -411,6 +411,12 @@ return [
     'cancel' => 'Cancel',
     'save-schedule' => 'Save Schedule',
 
+    'manage-your-schedule-and-availability' => 'Manage your schedule and availability',
+    'quick-actions' => 'Quick Actions',
+    'schedule-details' => 'Schedule Details',
+    'click-date-to-view-details' => 'Click on a date to view details',
+    'select-date-on-calendar-above' => 'Select a date on the calendar above to view details',
+    
 ];
 
 ?>

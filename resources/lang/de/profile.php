@@ -411,6 +411,11 @@ return [
     'cancel' => 'Abbrechen',
     'save-schedule' => 'Zeitplan speichern',
 
+    'manage-your-schedule-and-availability' => 'Verwalte Deinen Zeitplan und Deine Verfügbarkeit',
+    'quick-actions' => 'Schnelle Aktionen',
+    'schedule-details' => 'Zeitplandetails',
+    'click-date-to-view-details' => 'Klicke auf ein Datum, um Details anzuzeigen',
+    'select-date-on-calendar-above' => 'Wähle ein Datum im oberen Kalender, um Details anzuzeigen',
 ];
 
 ?>
