@@ -359,13 +359,35 @@
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     overflow: hidden;
+    max-height: 500px;
 }
 
 .detail-panel-header {
     background: linear-gradient(135deg, #313041, #2c5aa0);
-    color: white;
+    color: white !important;
     padding: 12px 15px;
     position: relative;
+}
+
+.detail-panel-header h5,
+.detail-panel-header p {
+    color: white !important;
+    margin: 0;
+}
+
+.detail-panel-header h5 {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.detail-panel-body {
+    padding: 15px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.detail-content {
+    min-height: auto;
 }
 
 .close-panel-btn {
@@ -376,6 +398,24 @@
     color: white;
     font-size: 18px;
     cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.close-panel-btn:hover {
+    transform: scale(1.2);
+}
+
+/* Detail Panel Content Styling */
+.side-detail-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.detail-panel-actions {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e9ecef;
 }
 
 /* Tour Filter Dropdown Styles */
@@ -434,6 +474,58 @@
 .tour-filter-option.active {
     background-color: rgba(49, 48, 65, 0.1);
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .calendar-panel, .tour-filter-panel {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .calendar-container {
+        min-height: 400px;
+    }
+    
+    .litepicker {
+        transform: scale(1) !important;
+        font-size: 14px !important;
+    }
+    
+    .litepicker .container__months {
+        flex-direction: column !important;
+    }
+    
+    .litepicker .container__months .month-item {
+        margin: 10px 0 !important;
+    }
+    
+    .litepicker .day-item {
+        width: 36px !important;
+        height: 36px !important;
+        line-height: 36px !important;
+        font-size: 14px !important;
+        margin: 1px !important;
+    }
+    
+    .litepicker .month-item-header {
+        font-size: 16px !important;
+        padding: 10px 0 !important;
+    }
+    
+    .legend-items {
+        gap: 8px;
+        justify-content: flex-start;
+    }
+    
+    .side-detail-panel {
+        max-height: 300px;
+    }
+    
+    .detail-panel-body {
+        max-height: 250px;
+        padding: 10px;
+    }
+}
 </style>
 
 @section('js_after')
@@ -451,7 +543,10 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeCalendar();
             initializeTourDropdown();
+            
+            // Load actual events from API
             loadCalendarEvents();
+            
             updateLegendDisplay();
         });
 
@@ -588,6 +683,8 @@
             }, 1000);
         }
 
+
+
         function loadCalendarEvents() {
             const startDate = new Date();
             startDate.setMonth(startDate.getMonth() - 6);
@@ -600,18 +697,28 @@
             };
             
             // If a specific tour is selected, make two requests
-            if (currentFilters.guiding_id) {
+            if (currentFilters.guiding_id && currentFilters.guiding_id !== '' && currentFilters.guiding_id !== null) {
                 const tourEventsPromise = fetch('/events?' + new URLSearchParams({
                     ...baseParams,
                     ...currentFilters
                 }))
-                .then(response => response.json());
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                });
                 
                 const customEventsPromise = fetch('/events?' + new URLSearchParams({
                     ...baseParams,
                     type: 'custom_schedule'
                 }))
-                .then(response => response.json());
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                });
                 
                 Promise.all([tourEventsPromise, customEventsPromise])
                 .then(([tourEvents, customEvents]) => {
@@ -629,25 +736,66 @@
                         allEvents.push(...uniqueCustomEvents);
                     }
                     
+                    // Process events and organize by date
                     allEvents.forEach(event => {
-                        const dateKey = event.start ? event.start.split('T')[0] : event.date;
-                        if (dateKey) {
-                            if (!calendarEvents[dateKey]) {
-                                calendarEvents[dateKey] = [];
+                        if (event && event !== null) {
+                            const dateKey = event.start ? event.start.split('T')[0] : (event.end ? event.end.split('T')[0] : null);
+                            if (dateKey) {
+                                if (!calendarEvents[dateKey]) {
+                                    calendarEvents[dateKey] = [];
+                                }
+                                calendarEvents[dateKey].push(event);
                             }
-                            calendarEvents[dateKey].push(event);
                         }
                     });
                     
+                    console.log('Loaded calendar events:', calendarEvents);
                     updateCalendarDisplay();
                 })
                 .catch(error => {
                     console.error('Error loading calendar events:', error);
+                    showAlert('error', 'Failed to load calendar events. Please check your connection.');
                 });
             } else {
-                // Mock events for demonstration (replace with actual API call)
-                calendarEvents = {};
-                updateCalendarDisplay();
+                // When showing all tours (default), load all events
+                fetch('/events?' + new URLSearchParams({
+                    ...baseParams,
+                    ...currentFilters
+                }))
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    calendarEvents = {};
+                    
+                    console.log('API Response:', data);
+                    
+                    if (Array.isArray(data)) {
+                        data.forEach(event => {
+                            if (event && event !== null) {
+                                const dateKey = event.start ? event.start.split('T')[0] : (event.end ? event.end.split('T')[0] : null);
+                                if (dateKey) {
+                                    if (!calendarEvents[dateKey]) {
+                                        calendarEvents[dateKey] = [];
+                                    }
+                                    calendarEvents[dateKey].push(event);
+                                }
+                            }
+                        });
+                    } else {
+                        console.error('Events data is not an array:', data);
+                    }
+                    
+                    console.log('Processed calendar events:', calendarEvents);
+                    updateCalendarDisplay();
+                })
+                .catch(error => {
+                    console.error('Error loading calendar events:', error);
+                    showAlert('error', 'Failed to load calendar events. Please check your connection.');
+                });
             }
         }
 
@@ -670,7 +818,7 @@
                 });
                 
                 // Apply default availability colors if a specific tour is selected
-                if (currentFilters.guiding_id !== '') {
+                if (currentFilters.guiding_id !== '' && currentFilters.guiding_id !== null && currentFilters.guiding_id !== undefined) {
                     allDayElements.forEach(dayEl => {
                         if (dayEl.textContent.trim() && /^\d+$/.test(dayEl.textContent.trim())) {
                             const dayNumber = parseInt(dayEl.textContent.trim());
@@ -841,7 +989,7 @@
                             dayEl.classList.remove('tour-available', 'tour-blocked');
                             dayEl.classList.add('custom-event');
                         } else {
-                            if (currentFilters.guiding_id !== '') {
+                            if (currentFilters.guiding_id !== '' && currentFilters.guiding_id !== null && currentFilters.guiding_id !== undefined) {
                                 if (blockedTours.length > 0) {
                                     dayEl.classList.add('tour-blocked');
                                 } else {
@@ -860,7 +1008,7 @@
                             }
                         }
                         
-                        if (blockedTours.length > 0 && currentFilters.guiding_id !== '') {
+                        if (blockedTours.length > 0 && currentFilters.guiding_id !== '' && currentFilters.guiding_id !== null && currentFilters.guiding_id !== undefined) {
                             dayEl.classList.add('blocked-tour');
                         }
                         
@@ -912,7 +1060,7 @@
             const rejectedLegend = document.getElementById('rejectedLegend');
             const customLegend = document.getElementById('customLegend');
             
-            if (currentFilters.guiding_id !== '') {
+            if (currentFilters.guiding_id !== '' && currentFilters.guiding_id !== null && currentFilters.guiding_id !== undefined) {
                 // When a specific tour is selected, show availability states
                 if (availableLegend) availableLegend.style.display = 'flex';
                 if (unavailableLegend) unavailableLegend.style.display = 'flex';
@@ -921,7 +1069,7 @@
                 if (rejectedLegend) rejectedLegend.style.display = 'none';
                 if (customLegend) customLegend.style.display = 'flex';
             } else {
-                // When showing all tours, show booking states
+                // When showing all tours (default), show booking states
                 if (availableLegend) availableLegend.style.display = 'none';
                 if (unavailableLegend) unavailableLegend.style.display = 'none';
                 if (confirmedLegend) confirmedLegend.style.display = 'flex';
@@ -1030,19 +1178,22 @@
         }
 
         function showAlert(type, message) {
+            // Create alert element
             const alertDiv = document.createElement('div');
             alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
             alertDiv.style.position = 'fixed';
             alertDiv.style.top = '20px';
             alertDiv.style.right = '20px';
             alertDiv.style.zIndex = '9999';
+            alertDiv.style.maxWidth = '400px';
             alertDiv.innerHTML = `
                 ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             `;
             
             document.body.appendChild(alertDiv);
             
+            // Auto-remove after 5 seconds
             setTimeout(() => {
                 if (alertDiv.parentNode) {
                     alertDiv.parentNode.removeChild(alertDiv);
