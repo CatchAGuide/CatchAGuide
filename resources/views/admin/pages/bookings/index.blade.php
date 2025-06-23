@@ -97,9 +97,18 @@
                                                         <a href="{{ route('booking.accept', $booking->token . '|' . auth()->user()->id) }}" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
                                                     @endif
 
-                                                    <a href="{{ route('admin.bookings.edit', $booking) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pen"></i></a>
-                                                    <a href="javascript:deleteResource('{{ route('admin.bookings.destroy', $booking, false) }}')" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></a>
-                                                    <a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="showEmailPreview({{ $booking->id }})"><i class="fa fa-envelope"></i></a>
+                                                                                        <a href="{{ route('admin.bookings.edit', $booking) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pen"></i></a>
+                                    <a href="javascript:deleteResource('{{ route('admin.bookings.destroy', $booking, false) }}')" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="showEmailPreview({{ $booking->id }})"><i class="fa fa-envelope"></i></a>
+                                    <button class="btn btn-sm btn-warning" onclick="showResendModal(
+                                        {{ $booking->id }}, 
+                                        {{ json_encode($booking->user ? ($booking->user->firstname . ' ' . $booking->user->lastname) : ($booking->firstname . ' ' . $booking->lastname)) }}, 
+                                        {{ json_encode($booking->email ?: ($booking->user ? $booking->user->email : '')) }}, 
+                                        {{ json_encode($booking->guiding->user->firstname . ' ' . $booking->guiding->user->lastname) }}, 
+                                        {{ json_encode($booking->guiding->user->email) }}
+                                    )">
+                                        <i class="fa fa-paper-plane"></i> Resend Emails
+                                    </button>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -307,7 +316,169 @@
         </div>
     </div>
 
+    <!-- Resend Email Confirmation Modal -->
+    <div class="modal fade" id="resendEmailModal" tabindex="-1" role="dialog" aria-labelledby="resendEmailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="resendEmailModalLabel">
+                        <i class="fa fa-paper-plane"></i> Resend Booking Request Emails
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fa fa-info-circle"></i>
+                        <strong>Confirmation Required</strong>
+                        <p class="mb-0">You are about to send booking request emails. This will send emails to both the guest and guide if they haven't been sent within the last 24 hours.</p>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card border-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0"><i class="fa fa-user"></i> Guest Information</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-1"><strong>Name:</strong></p>
+                                    <p class="text-muted" id="guest-name">-</p>
+                                    <p class="mb-1"><strong>Email:</strong></p>
+                                    <p class="text-muted" id="guest-email">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-success">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0"><i class="fa fa-user-tie"></i> Guide Information</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-1"><strong>Name:</strong></p>
+                                    <p class="text-muted" id="guide-name">-</p>
+                                    <p class="mb-1"><strong>Email:</strong></p>
+                                    <p class="text-muted" id="guide-email">-</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <p class="mb-2"><strong>Booking ID:</strong> <span id="booking-id-display" class="badge bg-secondary">-</span></p>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="confirmSend" required>
+                            <label class="form-check-label" for="confirmSend">
+                                I confirm that I want to send these booking request emails
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fa fa-times"></i> Cancel
+                    </button>
+                    <button type="button" class="btn btn-warning" id="confirmSendBtn" onclick="confirmSendEmails()" disabled>
+                        <i class="fa fa-paper-plane"></i> Send Emails
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        let currentBookingId = null;
+
+        function showResendModal(bookingId, guestName, guestEmail, guideName, guideEmail) {
+            currentBookingId = bookingId;
+            
+            // Populate modal with booking details
+            document.getElementById('booking-id-display').textContent = bookingId;
+            document.getElementById('guest-name').textContent = guestName || 'N/A';
+            document.getElementById('guest-email').textContent = guestEmail || 'N/A';
+            document.getElementById('guide-name').textContent = guideName || 'N/A';
+            document.getElementById('guide-email').textContent = guideEmail || 'N/A';
+            
+            // Reset confirmation checkbox
+            document.getElementById('confirmSend').checked = false;
+            document.getElementById('confirmSendBtn').disabled = true;
+            
+            // Show the modal
+            var modal = new bootstrap.Modal(document.getElementById('resendEmailModal'));
+            modal.show();
+        }
+
+        // Enable/disable send button based on checkbox
+        document.getElementById('confirmSend').addEventListener('change', function() {
+            document.getElementById('confirmSendBtn').disabled = !this.checked;
+        });
+
+        function confirmSendEmails() {
+            if (!document.getElementById('confirmSend').checked) {
+                alert('Please confirm by checking the checkbox');
+                return;
+            }
+
+            // Get CSRF token with error handling
+            const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+            if (!csrfTokenElement) {
+                console.error('CSRF token meta tag not found');
+                alert('Error: CSRF token not found. Please refresh the page and try again.');
+                return;
+            }
+
+            const csrfToken = csrfTokenElement.getAttribute('content');
+            if (!csrfToken) {
+                console.error('CSRF token content is empty');
+                alert('Error: CSRF token is empty. Please refresh the page and try again.');
+                return;
+            }
+
+            const confirmBtn = document.getElementById('confirmSendBtn');
+            const originalText = confirmBtn.innerHTML;
+            confirmBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Sending...';
+            confirmBtn.disabled = true;
+
+            fetch(`/admin/bookings/${currentBookingId}/send-booking-request-emails`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Show success message with details
+                    let message = '✅ Success!\n\n' + data.message;
+                    if (data.emails_sent > 0) {
+                        message += `\n\n📧 ${data.emails_sent} email(s) sent successfully`;
+                    }
+                    if (data.emails_skipped > 0) {
+                        message += `\n⚠️ ${data.emails_skipped} email(s) were already sent (within 24 hours)`;
+                    }
+                    alert(message);
+                    
+                    // Close the modal
+                    bootstrap.Modal.getInstance(document.getElementById('resendEmailModal')).hide();
+                } else {
+                    alert('❌ Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error sending emails:', error);
+                alert('❌ Error sending emails. Please check the console for details and try again.');
+            })
+            .finally(() => {
+                confirmBtn.innerHTML = originalText;
+                confirmBtn.disabled = false;
+            });
+        }
+
         function showEmailPreview(bookingId) {
             fetch(`/admin/bookings/${bookingId}/email-preview`)
                 .then(response => response.json())

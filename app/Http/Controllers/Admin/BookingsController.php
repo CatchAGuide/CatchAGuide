@@ -4,8 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\EmailLog;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\Guest\GuestBookingRequestMail;
+use App\Mail\Guide\GuideBookingRequestMail;
 
 class BookingsController extends Controller
 {
@@ -48,6 +52,93 @@ class BookingsController extends Controller
         $booking->delete();
         return redirect()->back();
     }
+
+    public function sendBookingRequestEmails(Booking $booking)
+    {
+        try {
+            // Validate booking has required relationships
+            if (!$booking->guiding) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Booking does not have associated guiding information.'
+                ], 400);
+            }
+            
+            if (!$booking->guiding->user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Booking guiding does not have associated guide user.'
+                ], 400);
+            }
+            
+            $user = $booking->user ?? (object)['firstname' => $booking->firstname, 'lastname' => $booking->lastname];
+            $guide = $booking->guiding->user;
+            $guiding = $booking->guiding;
+            
+            $guestEmail = $booking->email ?: ($user->email ?? null);
+            $guideEmail = $guide->email;
+            
+            // Validate we have email addresses
+            if (!$guestEmail) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No guest email address found for this booking.'
+                ], 400);
+            }
+            
+            if (!$guideEmail) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No guide email address found for this booking.'
+                ], 400);
+            }
+            
+            $emailsSent = [];
+            $emailsSkipped = [];
+            
+            // Check and send guest booking request email
+            $guestEmailLog = CheckEmailLog('guest_booking_request', 'booking_' . $booking->id, $guestEmail);
+            if (!$guestEmailLog) {
+                Mail::to($guestEmail)->send(new GuestBookingRequestMail($booking, $user, $guiding, $guide));
+                $emailsSent[] = 'Guest email sent to ' . $guestEmail;
+            } else {
+                $emailsSkipped[] = 'Guest email already sent to ' . $guestEmail;
+            }
+            
+            // Check and send guide booking request email
+            $guideEmailLog = CheckEmailLog('guide_booking_request', 'guide_' . $guide->id . '_booking_' . $booking->id, $guideEmail);
+            if (!$guideEmailLog) {
+                Mail::to($guideEmail)->send(new GuideBookingRequestMail($booking, $user, $guiding, $guide));
+                $emailsSent[] = 'Guide email sent to ' . $guideEmail;
+            } else {
+                $emailsSkipped[] = 'Guide email already sent to ' . $guideEmail;
+            }
+            
+            $message = '';
+            if (!empty($emailsSent)) {
+                $message .= 'Emails sent successfully: ' . implode(', ', $emailsSent) . '. ';
+            }
+            if (!empty($emailsSkipped)) {
+                $message .= 'Emails skipped (already sent): ' . implode(', ', $emailsSkipped) . '.';
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'emails_sent' => count($emailsSent),
+                'emails_skipped' => count($emailsSkipped)
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error sending booking request emails: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error sending emails: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+
 
     public function emailPreview(Booking $booking)
     {
