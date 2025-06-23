@@ -40,8 +40,14 @@ class ProfileController extends Controller
     public function settings()
     {
         return view('pages.profile.account',[
-            'user'=> auth()->user()
+            'user'=> auth()->user(),
+            'authUser' => auth()->user()
         ]);
+    }
+
+    public function password()
+    {
+        return view('pages.profile.password-security');
     }
 
     public function getbalance(Request $request)
@@ -101,38 +107,37 @@ class ProfileController extends Controller
 
         $user->update();
 
-
-        if($request->new_password){
-            if (!(Hash::check($request->get('current_password'), Auth::user()->password))) {
-                // The passwords matches
-                return redirect()->back()->with("error","Dein jetztiges Passwort stimmt nicht überein..");
-            }
-
-            if(strcmp($request->get('current_password'), $request->get('new_password')) == 0){
-                // Current password and new password same
-                return redirect()->back()->with("error","Dein neues Passwort darf nicht das selbe sein wie Dein aktuelles.");
-            }
-
-            $validatedData = $request->validate([
-                'current_password' => 'required',
-                'new_password' => 'required|string|min:8|confirmed',
-            ]);
-
-            //Change Password
-            $user = Auth::user();
-            $user->password = bcrypt($request->get('new_password'));
-            $user->save();
-        }
-
         if ($request->get('update_merchant')) {
             $compliance = $this->getMerchantStatus(auth()->user());
             return redirect($compliance->overview_url, 303);
         }
 
-
-
-
         return redirect()->route('profile.settings')->with(['message' => 'Erfolgreich gespeichert!']);
+    }
+
+    public function passwordUpdate(Request $request)
+    {
+        $user = Auth::user();
+
+        // Validate the password change request
+        if (!(Hash::check($request->get('current_password'), $user->password))) {
+            return redirect()->back()->with("error","Your current password does not match our records.");
+        }
+
+        if(strcmp($request->get('current_password'), $request->get('new_password')) == 0){
+            return redirect()->back()->with("error","Your new password cannot be the same as your current password.");
+        }
+
+        $validatedData = $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        // Change Password
+        $user->password = bcrypt($request->get('new_password'));
+        $user->save();
+
+        return redirect()->route('profile.password')->with(['message' => 'Password updated successfully!']);
     }
 
     public function becomeguide()
@@ -233,14 +238,79 @@ class ProfileController extends Controller
 
     public function bookings()
     {
+        // Get user's own bookings with pagination (5 items per page) - pending first
+        $bookings = Booking::with(['guiding', 'guiding.user', 'blocked_event'])
+            ->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
+            ->orderBy('created_at','desc')
+            ->where('user_id',auth()->user()->id)
+            ->paginate(5, ['*'], 'my_bookings');
+        
+        // Get guide bookings if user is a guide with pagination (5 items per page) - pending first
+        $guideBookings = null;
+        if(auth()->user()->is_guide) {
+            try {
+                $guideBookings = Booking::with(['guiding', 'user', 'blocked_event'])
+                    ->whereHas('guiding', function($query) {
+                        $query->where('user_id', auth()->user()->id);
+                    })
+                    ->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
+                    ->orderBy('created_at', 'desc')
+                    ->paginate(5, ['*'], 'guide_bookings');
+            } catch (\Exception $e) {
+                $guideBookings = null;
+            }
+        }
 
-     //   $this->getBookingStatus();
-        $bookings = Booking::orderBy('created_at','desc')->where('user_id',auth()->user()->id)->get();
-
+        // Handle AJAX requests for lazy loading
+        if (request()->ajax()) {
+            return view('pages.profile.partials.booking-cards', [
+                'bookings' => $bookings,
+                'guideBookings' => $guideBookings
+            ]);
+        }
 
         return view('pages.profile.bookings', [
-           'bookings' => $bookings
+           'bookings' => $bookings,
+           'guideBookings' => $guideBookings
         ]);
+    }
+
+    public function loadMoreBookings(Request $request)
+    {
+        $type = $request->get('type', 'my'); // 'my' or 'guide'
+        $page = $request->get('page', 1);
+        
+        if ($type === 'my') {
+            $bookings = Booking::with(['guiding', 'guiding.user', 'blocked_event'])
+                ->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
+                ->orderBy('created_at','desc')
+                ->where('user_id', auth()->user()->id)
+                ->paginate(5, ['*'], 'my_bookings', $page);
+            
+            return view('pages.profile.partials.booking-cards', [
+                'bookings' => $bookings,
+                'guideBookings' => collect(), // Empty collection
+                'loadMore' => true
+            ]);
+        } else {
+            if (!auth()->user()->is_guide) {
+                return response()->json(['error' => 'Not authorized'], 403);
+            }
+            
+            $guideBookings = Booking::with(['guiding', 'user', 'blocked_event'])
+                ->whereHas('guiding', function($query) {
+                    $query->where('user_id', auth()->user()->id);
+                })
+                ->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
+                ->orderBy('created_at', 'desc')
+                ->paginate(5, ['*'], 'guide_bookings', $page);
+            
+            return view('pages.profile.partials.booking-cards', [
+                'bookings' => collect(), // Empty collection
+                'guideBookings' => $guideBookings,
+                'loadMore' => true
+            ]);
+        }
     }
 
     public function review($guideid)
@@ -251,10 +321,8 @@ class ProfileController extends Controller
 
     public function guidebookings()
     {
-
-        return view('pages.profile.guidebookings', [
-            'bookings' => auth()->user()->bookings
-        ]);
+        // Redirect to the unified bookings page
+        return redirect()->route('profile.bookings');
     }
 
     public function accept(Booking $booking){
@@ -268,12 +336,14 @@ class ProfileController extends Controller
             $booking->save();
     
             $blockedevent = BlockedEvent::find($booking->blocked_event_id);
-            $blockedevent->type = 'booking';
-            $blockedevent->save();
+            if($blockedevent) {
+                $blockedevent->type = 'booking';
+                $blockedevent->save();
+            }
 
             event(new BookingStatusChanged($booking, 'accepted'));
 
-            return redirect()->route('profile.guidebookings')->with(['message' => 'Booking Accepted Successfully']);
+            return redirect()->route('profile.bookings')->with(['message' => 'Booking Accepted Successfully']);
         }
     }
     public function reject(Booking $booking){
@@ -314,7 +384,20 @@ class ProfileController extends Controller
 
     public function calendar()
     {
-        return view('pages.profile.calendar');
+        // Get user's guidings for the filter dropdown
+        $userGuidings = Guiding::where('user_id', auth()->id())
+            ->orderBy('title')
+            ->get();
+        
+        // Provide empty blocked_events array for now to avoid errors
+        // The main calendar functionality uses the /events API endpoint
+        // TODO: Fix blocked_events implementation later if needed for lockDays
+        $blocked_events = [];
+            
+        return view('pages.profile.calendar', [
+            'userGuidings' => $userGuidings,
+            'blocked_events' => $blocked_events
+        ]);
     }
 
     public function showBooking($bookingid)
