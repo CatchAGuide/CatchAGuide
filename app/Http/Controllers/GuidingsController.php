@@ -316,7 +316,7 @@ class GuidingsController extends Controller
                     'lng' => $guiding->lng
                 ];
             });
-            
+           
             return response()->json(array_merge($responseData, [
                 'html' => $view,
                 'guidings' => $guidingsData,

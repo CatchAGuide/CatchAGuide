@@ -11,6 +11,7 @@
     <meta name="author" content="Spruko Technologies Private Limited">
     <meta name="keywords" content="online catch guide" >
     <meta name="robots" content="INDEX,FOLLOW" >
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- FAVICON -->
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets/images/favicon.png') }}" />
