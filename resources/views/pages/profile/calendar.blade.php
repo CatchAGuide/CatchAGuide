@@ -475,6 +475,322 @@
     background-color: rgba(49, 48, 65, 0.1);
 }
 
+/* Professional Modal Styles */
+.schedule-modal .modal-content {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+
+.schedule-modal-header {
+    background: linear-gradient(135deg, #313041 0%, #2c5aa0 100%);
+    color: white;
+    border: none;
+    padding: 24px 30px;
+    position: relative;
+}
+
+.modal-header-content h4 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+    color: white;
+}
+
+.modal-subtitle {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-top: 4px;
+}
+
+.btn-close-white {
+    filter: invert(1) grayscale(100%) brightness(200%);
+    opacity: 0.8;
+}
+
+.btn-close-white:hover {
+    opacity: 1;
+}
+
+.schedule-modal-body {
+    padding: 30px;
+    background: #fafbfc;
+}
+
+/* Instructions Card */
+.instructions-card {
+    background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+    border: 1px solid #e1f5fe;
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.instructions-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #2196f3, #9c27b0);
+}
+
+.instruction-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #2196f3, #9c27b0);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+    margin-right: 16px;
+    flex-shrink: 0;
+}
+
+.instruction-content h6 {
+    color: #1976d2;
+    font-weight: 600;
+    margin-bottom: 12px;
+    font-size: 16px;
+}
+
+.instruction-list {
+    margin: 0;
+    padding-left: 16px;
+    color: #424242;
+    line-height: 1.6;
+}
+
+.instruction-list li {
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.instruction-list li:last-child {
+    margin-bottom: 0;
+}
+
+/* Form Sections */
+.form-section {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+}
+
+.form-section:hover {
+    border-color: #d1d5db;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.form-label-main {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.form-label-secondary {
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.form-help-text {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+.form-control-modern {
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background: #fafbfc;
+}
+
+.form-control-modern:focus {
+    border-color: #313041;
+    box-shadow: 0 0 0 3px rgba(49, 48, 65, 0.1);
+    background: white;
+}
+
+/* Custom Radio Buttons */
+.custom-radio-group {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+}
+
+.custom-radio-option {
+    position: relative;
+    flex: 1;
+}
+
+.custom-radio-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.custom-radio-label {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    min-height: 80px;
+    height: 80px;
+}
+
+.custom-radio-label::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #313041, #2c5aa0);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.custom-radio-label > * {
+    position: relative;
+    z-index: 2;
+}
+
+.custom-radio-option:hover .custom-radio-label {
+    border-color: #313041;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(49, 48, 65, 0.15);
+}
+
+.custom-radio-option input[type="radio"]:checked + .custom-radio-label {
+    border-color: #313041;
+    background: #313041;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(49, 48, 65, 0.25);
+}
+
+.custom-radio-option input[type="radio"]:checked + .custom-radio-label::before {
+    opacity: 1;
+}
+
+.radio-icon {
+    width: 50px;
+    height: 50px;
+    background: #f3f4f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16px;
+    font-size: 18px;
+    color: #313041;
+    transition: all 0.3s ease;
+}
+
+.custom-radio-option input[type="radio"]:checked + .custom-radio-label .radio-icon {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.radio-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.radio-title {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #1f2937;
+    transition: color 0.3s ease;
+}
+
+.custom-radio-option input[type="radio"]:checked + .custom-radio-label .radio-title {
+    color: white;
+}
+
+.radio-description {
+    display: block;
+    font-size: 13px;
+    color: #6b7280;
+    transition: color 0.3s ease;
+}
+
+.custom-radio-option input[type="radio"]:checked + .custom-radio-label .radio-description {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Modal Footer */
+.schedule-modal-footer {
+    background: white;
+    border: none;
+    padding: 20px 30px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.btn-cancel {
+    background: #f3f4f6;
+    border: 2px solid #e5e7eb;
+    color: #374151;
+    font-weight: 500;
+    padding: 12px 24px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+    background: #e5e7eb;
+    border-color: #d1d5db;
+    color: #1f2937;
+    transform: translateY(-1px);
+}
+
+.btn-save {
+    background: linear-gradient(135deg, #313041, #2c5aa0);
+    border: 2px solid #313041;
+    color: white;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(49, 48, 65, 0.3);
+}
+
+.btn-save:hover {
+    background: linear-gradient(135deg, #2a2938, #254a8a);
+    border-color: #2a2938;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(49, 48, 65, 0.4);
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
     .calendar-panel, .tour-filter-panel {
@@ -525,6 +841,62 @@
         max-height: 250px;
         padding: 10px;
     }
+    
+    /* Modal Mobile Responsiveness */
+    .schedule-modal-header {
+        padding: 20px;
+    }
+
+    .schedule-modal-body {
+        padding: 20px;
+    }
+
+    .form-section {
+        padding: 20px;
+    }
+
+    .custom-radio-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .custom-radio-option {
+        flex: none;
+    }
+
+    .custom-radio-label {
+        padding: 14px 16px;
+        min-height: 70px;
+        height: 70px;
+    }
+
+    .radio-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 16px;
+        margin-right: 12px;
+    }
+
+    .instructions-card {
+        padding: 16px;
+    }
+
+    .instruction-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+    }
+
+    .schedule-modal-footer {
+        padding: 16px 20px;
+        flex-direction: column;
+    }
+
+    .btn-cancel,
+    .btn-save {
+        width: 100%;
+        justify-content: center;
+    }
 }
 </style>
 
@@ -543,6 +915,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeCalendar();
             initializeTourDropdown();
+            initializeForms();
             
             // Load actual events from API
             loadCalendarEvents();
@@ -1177,6 +1550,165 @@
             return labels[type] || type;
         }
 
+        function initializeForms() {
+            // Get tomorrow's date as minimum date (disable past dates)
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+            
+            // Set minimum date for all date inputs
+            const singleDateInput = document.getElementById('singleDateInput');
+            const beginInput = document.getElementById('addNewBeginInput');
+            const endInput = document.getElementById('addNewEndInput');
+            
+            if (singleDateInput) singleDateInput.min = tomorrowStr;
+            if (beginInput) beginInput.min = tomorrowStr;
+            if (endInput) endInput.min = tomorrowStr;
+            
+            // Handle radio button toggle
+            const singleDayRadio = document.getElementById('singleDay');
+            const dateRangeRadio = document.getElementById('dateRange');
+            const singleDaySection = document.getElementById('singleDaySection');
+            const dateRangeSection = document.getElementById('dateRangeSection');
+            
+            if (singleDayRadio && dateRangeRadio && singleDaySection && dateRangeSection) {
+                singleDayRadio.addEventListener('change', function() {
+                    if (this.checked) {
+                        singleDaySection.style.display = 'block';
+                        dateRangeSection.style.display = 'none';
+                        if (singleDateInput) singleDateInput.required = true;
+                        if (beginInput) beginInput.required = false;
+                        if (endInput) endInput.required = false;
+                    }
+                });
+                
+                dateRangeRadio.addEventListener('change', function() {
+                    if (this.checked) {
+                        singleDaySection.style.display = 'none';
+                        dateRangeSection.style.display = 'block';
+                        if (singleDateInput) singleDateInput.required = false;
+                        if (beginInput) beginInput.required = true;
+                        if (endInput) endInput.required = true;
+                    }
+                });
+            }
+            
+            // Auto-set end date when beginning date changes (for range mode)
+            if (beginInput && endInput) {
+                beginInput.addEventListener('change', function() {
+                    if (this.value) {
+                        // Set minimum date for end input to prevent selecting dates before beginning
+                        endInput.min = this.value;
+                        
+                        // If end date is not set or is before begin date, set it to begin date
+                        if (!endInput.value || endInput.value < this.value) {
+                            endInput.value = this.value;
+                        }
+                    }
+                });
+                
+                // Ensure end date can't be before beginning date
+                endInput.addEventListener('change', function() {
+                    if (beginInput.value && this.value && this.value < beginInput.value) {
+                        this.value = beginInput.value;
+                        showAlert('warning', 'End date cannot be before the start date.');
+                    }
+                });
+            }
+
+            // Add event form submission
+            const addEventForm = document.getElementById('addEventForm');
+            if (addEventForm) {
+                addEventForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(this);
+                    const data = {};
+                    
+                    // Get the block type
+                    const blockType = formData.get('blockType');
+                    
+                    if (blockType === 'single') {
+                        data.start = formData.get('single_date');
+                        data.end = formData.get('single_date');
+                    } else {
+                        data.start = formData.get('start');
+                        data.end = formData.get('end');
+                    }
+                    
+                    data.type = 'custom_schedule';
+                    data.note = formData.get('note') || 'Custom blocked date';
+
+                    fetch('{{ route("profile.calendar.store") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('addEventModal'));
+                            if (modal) modal.hide();
+                            loadCalendarEvents();
+                            showAlert('success', data.message || 'Schedule created successfully!');
+                            document.getElementById('addEventForm').reset();
+                            // Reset to single day mode
+                            if (singleDayRadio) singleDayRadio.checked = true;
+                            if (singleDaySection) singleDaySection.style.display = 'block';
+                            if (dateRangeSection) dateRangeSection.style.display = 'none';
+                            // Reset min attributes
+                            if (endInput) endInput.removeAttribute('min');
+                        } else {
+                            showAlert('error', data.message || 'Error creating schedule');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('error', 'Error creating schedule');
+                    });
+                });
+            }
+
+            // Delete confirmation
+            const confirmDeleteBtn = document.getElementById('confirmDelete');
+            if (confirmDeleteBtn) {
+                confirmDeleteBtn.addEventListener('click', function() {
+                    const eventId = this.dataset.eventId;
+                    if (eventId) {
+                        deleteEvent(eventId);
+                    }
+                });
+            }
+        }
+
+        function deleteEvent(eventId) {
+            fetch(`{{ url('/profile/calendar/delete') }}/${eventId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteEventModal'));
+                    if (deleteModal) deleteModal.hide();
+                    loadCalendarEvents();
+                    showAlert('success', data.message);
+                } else {
+                    showAlert('error', data.error || 'Error deleting event');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Error deleting event');
+            });
+        }
+
         function showAlert(type, message) {
             // Create alert element
             const alertDiv = document.createElement('div');
@@ -1202,5 +1734,191 @@
         }
     </script>
 @endsection
+
+<!-- Add Custom Schedule Modal -->
+<div class="modal fade" id="addEventModal" tabindex="-1" aria-labelledby="addEventModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content schedule-modal">
+            <div class="modal-header schedule-modal-header">
+                <div class="modal-header-content">
+                    <h4 class="modal-title" id="addEventModalLabel">
+                        <i class="fas fa-calendar-plus me-2"></i>
+                        @lang('profile.block-calendar-dates')
+                    </h4>
+                    <p class="modal-subtitle mb-0">@lang('profile.create-custom-blocked-periods')</p>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addEventForm">
+                @csrf
+                <div class="modal-body schedule-modal-body">
+                    <!-- Instructions -->
+                    <div class="instructions-card mb-4">
+                        <div class="d-flex align-items-start">
+                            <div class="instruction-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="instruction-content">
+                                <h6>@lang('profile.how-to-block-dates')</h6>
+                                <ul class="instruction-list">
+                                    <li>@lang('profile.choose-single-day-or-range')</li>
+                                    <li>@lang('profile.select-future-dates-only')</li>
+                                    <li>@lang('profile.add-notes-to-explain')</li>
+                                    <li>@lang('profile.blocked-dates-appear-teal')</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Block Type Selection -->
+                    <div class="form-section mb-4">
+                        <label class="form-label-main">@lang('profile.block-type')</label>
+                        <p class="form-help-text">@lang('profile.choose-how-to-block')</p>
+                        
+                        <div class="custom-radio-group">
+                            <div class="custom-radio-option">
+                                <input type="radio" name="blockType" id="singleDay" value="single" checked>
+                                <label for="singleDay" class="custom-radio-label">
+                                    <div class="radio-icon">
+                                        <i class="fas fa-calendar-day"></i>
+                                    </div>
+                                    <div class="radio-content">
+                                        <span class="radio-title">@lang('profile.single-day')</span>
+                                        <span class="radio-description">@lang('profile.block-one-specific-date')</span>
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div class="custom-radio-option">
+                                <input type="radio" name="blockType" id="dateRange" value="range">
+                                <label for="dateRange" class="custom-radio-label">
+                                    <div class="radio-icon">
+                                        <i class="fas fa-calendar-week"></i>
+                                    </div>
+                                    <div class="radio-content">
+                                        <span class="radio-title">@lang('profile.date-range')</span>
+                                        <span class="radio-description">@lang('profile.block-multiple-consecutive-dates')</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Single Day Selection -->
+                    <div id="singleDaySection" class="form-section mb-4">
+                        <label for="singleDateInput" class="form-label-main">@lang('profile.select-date')</label>
+                        <p class="form-help-text">@lang('profile.choose-date-to-block')</p>
+                        <input type="date" id="singleDateInput" class="form-control form-control-modern" name="single_date" required>
+                    </div>
+                    
+                    <!-- Date Range Selection -->
+                    <div id="dateRangeSection" class="form-section mb-4" style="display: none;">
+                        <label class="form-label-main">@lang('profile.date-range')</label>
+                        <p class="form-help-text">@lang('profile.choose-start-end-dates')</p>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="addNewBeginInput" class="form-label-secondary">@lang('profile.start-date')</label>
+                                <input type="date" id="addNewBeginInput" class="form-control form-control-modern" name="start">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="addNewEndInput" class="form-label-secondary">@lang('profile.end-date')</label>
+                                <input type="date" id="addNewEndInput" class="form-control form-control-modern" name="end">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Notes Input -->
+                    <div class="form-section mb-4">
+                        <label for="eventNote" class="form-label-main">@lang('profile.notes')</label>
+                        <p class="form-help-text">@lang('profile.add-description-why-blocked')</p>
+                        <textarea 
+                            id="eventNote" 
+                            class="form-control form-control-modern" 
+                            name="note" 
+                            rows="4" 
+                            placeholder="@lang('profile.notes-placeholder')"
+                        ></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer schedule-modal-footer">
+                    <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>@lang('profile.cancel')
+                    </button>
+                    <button type="submit" class="btn btn-save">
+                        <i class="fas fa-save me-2"></i>@lang('profile.save-schedule')
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Event Modal -->
+<div class="modal fade" id="deleteEventModal" tabindex="-1" aria-labelledby="deleteEventModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteEventModalLabel">@lang('profile.clearBtn')</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12">
+                        @lang('profile.clearMsg')
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@lang('profile.interrupt')</button>
+                <button type="button" id="confirmDelete" class="btn btn-danger">@lang('profile.clearBD')</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Booking Detail Modal -->
+<div class="modal fade" id="bookingDetailModal" tabindex="-1" aria-labelledby="bookingDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-white">@lang('message.booking-overview')</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="card border-0">
+                <div class="card-body mx-4">
+                    <div id="bookingDetails">
+                        <!-- Content will be populated by JavaScript -->
+                    </div>
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">@lang('profile.close')</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event Detail Modal -->
+<div class="modal fade" id="eventDetailModal" tabindex="-1" aria-labelledby="eventDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-white">@lang('profile.event-details')</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="card border-0">
+                <div class="card-body mx-4">
+                    <div id="eventDetails">
+                        <!-- Content will be populated by JavaScript -->
+                    </div>
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">@lang('profile.close')</button>
+                        <button type="button" id="deleteEventBtn" class="btn btn-danger ms-2" style="display: none;">@lang('profile.delete')</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 
