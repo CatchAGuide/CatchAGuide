@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Cacheable;
 
 class GuidingBoatType extends Model
 {
-    use HasFactory;
+    use HasFactory, Cacheable;
 
     protected $fillable = ['name', 'name_en'];
     protected $table = 'guiding_boat_types';

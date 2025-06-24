@@ -11,10 +11,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Traits\Cacheable;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, Cacheable;
 
     /**
      * The attributes that are mass assignable.
@@ -132,7 +133,8 @@ class User extends Authenticatable
 
     public function average_rating()
     {
-        $reviews = Review::where('guide_id', $this->id)->with('booking', 'booking.user')->get();
+        // Use already eager-loaded reviews if available
+        $reviews = $this->relationLoaded('reviews') ? $this->reviews : Review::where('guide_id', $this->id)->with('booking', 'booking.user')->get();
         $reviews_count = $reviews->count();
 
         // Calculate average scores
@@ -140,18 +142,6 @@ class User extends Authenticatable
         $average_guide_score = $reviews_count > 0 ? $reviews->avg('guide_score') : 0;
         $average_region_water_score = $reviews_count > 0 ? $reviews->avg('region_water_score') : 0;
         $average_grandtotal_score = $reviews_count > 0 ? $reviews->avg('grandtotal_score') : 0;
-
-        // $count = 0;
-        // $amount = 0;
-        // $return = 0;
-        // if(count($this->received_ratings) > 0) {
-        //     foreach($this->received_ratings as $rating) {
-        //         $amount += $rating->rating;
-        //         $count++;
-        //     }
-        //     $return = $amount / $count;
-        // }
-
 
         return $average_grandtotal_score;
     }
@@ -174,6 +164,11 @@ class User extends Authenticatable
     public function blocked_events(): HasMany
     {
         return $this->hasMany(BlockedEvent::class);
+    }
+
+    public function calendar_schedules(): HasMany
+    {
+        return $this->hasMany(CalendarSchedule::class);
     }
 
     /**
