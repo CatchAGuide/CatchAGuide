@@ -123,9 +123,6 @@ class AdminCategoryCityController extends Controller
             // Add translation after creating the city
             $this->translate($country, $request);
 
-            // Add translation after creating the city
-            $this->translate($country);
-
             DB::commit();
 
             return redirect()->back()->with('success', 'City Successfully Added!');
@@ -346,7 +343,7 @@ class AdminCategoryCityController extends Controller
         ];
         
 
-        if ($request->has('fish_chart')) {
+        if ($request && $request->has('fish_chart')) {
             $fishChartTexts = [];
             foreach ($request->fish_chart as $index => $chart) {
                 $fishChartTexts[$index] = $chart['fish'];
@@ -355,7 +352,7 @@ class AdminCategoryCityController extends Controller
             $texts['fish_chart'] = $fishChartTexts;
         }
 
-        if ($request->has('fish_size_limit')) {
+        if ($request && $request->has('fish_size_limit')) {
             $fishSizeLimitTexts = [];
             foreach ($request->fish_size_limit as $index => $limit) {
                 $fishSizeLimitTexts[$index] = $limit['fish'];
@@ -364,7 +361,7 @@ class AdminCategoryCityController extends Controller
             $texts['fish_size_limit'] = $fishSizeLimitTexts;
         }
 
-        if ($request->has('fish_time_limit')) {
+        if ($request && $request->has('fish_time_limit')) {
             $fishTimeLimitTexts = [];
             foreach ($request->fish_time_limit as $index => $limit) {
                 $fishTimeLimitTexts[$index] = $limit['fish'];
@@ -373,7 +370,7 @@ class AdminCategoryCityController extends Controller
             $texts['fish_time_limit'] = $fishTimeLimitTexts;
         }
 
-        if ($request->has('faq')) {
+        if ($request && $request->has('faq')) {
             $faqTexts = [];
             foreach ($request->faq as $index => $faq) {
                 $faqTexts["question_$index"] = $faq['question'];
