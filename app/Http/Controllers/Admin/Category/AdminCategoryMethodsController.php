@@ -66,7 +66,7 @@ class AdminCategoryMethodsController extends Controller
                 $data['thumbnail_path'] = $webp_path;
             }
 
-            $categoryPage = CategoryPage::where('source_id', $id)->first();
+            $categoryPage = CategoryPage::where('source_id', $id)->where('type', 'Methods')->first();
             $isCreate = false;
 
             if ($categoryPage) {
