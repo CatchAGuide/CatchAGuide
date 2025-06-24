@@ -20,7 +20,7 @@ class DestinationCountryController extends Controller
 {
     public function index()
     {
-        $countries = Destination::whereType('country')->get();
+        $countries = Destination::whereType('country')->where('language', app()->getLocale())->get();
         return view('pages.countries.index', compact('countries'));
     }
 
@@ -29,6 +29,7 @@ class DestinationCountryController extends Controller
         // Validate existence of parent records first
         $country_row = Destination::whereSlug($country)
             ->whereType('country')
+            ->where('language', app()->getLocale())
             ->firstOrFail(); // Use firstOrFail instead of first()
 
         $region_row = null;
@@ -38,6 +39,7 @@ class DestinationCountryController extends Controller
             $region_row = Destination::whereSlug($region)
                 ->whereType('region')
                 ->whereCountryId($country_row->id)
+                ->where('language', app()->getLocale())
                 ->firstOrFail();
         }
 
@@ -46,6 +48,7 @@ class DestinationCountryController extends Controller
                 ->whereType('city')
                 ->whereCountryId($country_row->id)
                 ->whereRegionId($region_row->id)
+                ->where('language', app()->getLocale())
                 ->firstOrFail();
         }
 
@@ -62,8 +65,8 @@ class DestinationCountryController extends Controller
 
         $row_data = $query->firstOrFail();
 
-        $regions = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->whereType('region')->whereCountryId($row_data->id)->get();
-        $cities = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->whereType('city')->whereCountryId($row_data->id)->get();
+        $regions = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->whereType('region')->whereCountryId($row_data->id)->where('language', app()->getLocale())->get();
+        $cities = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->whereType('city')->whereCountryId($row_data->id)->where('language', app()->getLocale())->get();
 
         $faq = $row_data->faq;
         $fish_chart = $row_data->fish_chart;
