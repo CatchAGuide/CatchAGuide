@@ -518,7 +518,6 @@ class Guiding extends Model
         if ($city || $country) {
             $searchQuery = array_filter([$city, $country, $region], fn($val) => !empty($val));
             $searchString = implode(', ', $searchQuery);
-            Log::info('searchString', ['searchString' => $searchString]); 
             
             $translated  = getLocationDetailsGoogle($city, $country, $region);
             if ($translated) {
@@ -527,7 +526,6 @@ class Guiding extends Model
         }
 
         $locationParts = array_merge(['city' => $city, 'country' => $country, 'region' => $region], $locationParts ?? []);
-        Log::info('locationParts', ['locationParts' => $locationParts]); 
 
         $returnData = [
             'message' => '',
@@ -574,15 +572,8 @@ class Guiding extends Model
             })
             ->where('status', 1);
 
-        // Log the SQL query for debugging
-        Log::info('Location filter SQL query:', [
-            'sql' => $query->toSql(),
-            'bindings' => $query->getBindings()
-        ]);
 
         $guidings = $query->pluck('id');
-
-        Log::info('guidings', ['guidings' => $guidings]);
 
         if ($guidings->isNotEmpty()) {
             $returnData['ids'] = $guidings;
