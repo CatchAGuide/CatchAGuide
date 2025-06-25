@@ -1214,7 +1214,7 @@
     .modal-backdrop {
         /* display: none !important; */
         opacity: 0.5 !important;
-        z-index: 10 !important;
+        z-index: -3;
     }
     
     .modal-dialog {
