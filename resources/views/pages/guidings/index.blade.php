@@ -1102,12 +1102,17 @@
 
                 markers.push(marker);
 
+                // Construct thumbnail path similar to PHP version
+                const thumbnailPath = guiding.thumbnail_path ? 
+                    `{{ asset('') }}${guiding.thumbnail_path}` : 
+                    '{{ asset('images/placeholder_guide.jpg') }}';
+
                 const infowindow = new google.maps.InfoWindow({
                     content: `
                         <div class="card p-0 border-0" style="width: 200px; overflow: hidden;">
                             <div class="card-body border-0 p-0">
                                 <div class="d-flex">
-                                    <img src="${guiding.thumbnail || '/images/placeholder_guide.jpg'}" alt="${guiding.title}" style="width: 100%; height: 150px; object-fit: cover;">
+                                    <img src="${thumbnailPath}" alt="${guiding.title}" style="width: 100%; height: 150px; object-fit: cover;">
                                 </div>
                                 <div class="p-2">
                                     <a class="text-decoration-none" href="/guidings/${guiding.id}/${guiding.slug}">
@@ -1233,24 +1238,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (values.length > 0) {
                     activeFilterCount += values.length;
                 }
-            });
-
-            // Check price range separately
-            const defaultMinPrice = 50;
-            const defaultMaxPrice = {{ isset($overallMaxPrice) ? $overallMaxPrice : 1000 }}; // Use the actual max price from controller
-            const priceMin = parseInt(urlParams.get('price_min'));
-            const priceMax = parseInt(urlParams.get('price_max'));
-            
-            if (priceMin && priceMin !== defaultMinPrice) activeFilterCount++;
-            if (priceMax && priceMax !== defaultMaxPrice) activeFilterCount++;
-
-            // Update the counter
-            const filterCounter = document.getElementById('active-filter-counter');
-            if (activeFilterCount > 0) {
-                filterCounter.textContent = activeFilterCount;
-                filterCounter.style.display = 'inline-block';
-            } else {
-                filterCounter.style.display = 'none';
             }
         });
 
