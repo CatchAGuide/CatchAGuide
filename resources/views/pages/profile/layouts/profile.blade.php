@@ -314,14 +314,6 @@
                                             <span>Password & Security</span>
                                         </a>
                                     </li>
-                                    @if(!Auth::user()->is_guide)
-                                    <li class="nav-item">
-                                        <a href="{{ route('profile.becomeguide') }}" class="nav-link {{ Request::routeIs('profile.becomeguide') ? 'active' : '' }}">
-                                            <i class="fas fa-certificate"></i>
-                                            <span>Become a Guide</span>
-                                        </a>
-                                    </li>
-                                    @endif
                                 </ul>
                             </div>
 
@@ -361,6 +353,21 @@
                                         <a href="{{ route('profile.newguiding') }}" class="nav-link highlight {{ Request::routeIs('profile.newguiding') ? 'active' : '' }}">
                                             <i class="fas fa-plus-circle"></i>
                                             <span>Create New Guiding</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            @endif
+
+                            @if(!Auth::user()->is_guide)
+                            <!-- Become a Guide Section -->
+                            <div class="nav-section">
+                                <h6 class="nav-section-title">Upgrade</h6>
+                                <ul class="nav-list">
+                                    <li class="nav-item">
+                                        <a href="{{ route('profile.becomeguide') }}" class="nav-link highlight {{ Request::routeIs('profile.becomeguide') ? 'active' : '' }}">
+                                            <i class="fas fa-certificate"></i>
+                                            <span>Become a Guide</span>
                                         </a>
                                     </li>
                                 </ul>

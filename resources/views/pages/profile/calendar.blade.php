@@ -1460,9 +1460,9 @@
             
             const date = new Date(dateStr);
             const formattedDate = date.toLocaleDateString('{{app()->getLocale()}}', {
-                weekday: 'long',
+                weekday: 'short',
                 year: 'numeric',
-                month: 'long',
+                month: 'short',
                 day: 'numeric'
             });
             

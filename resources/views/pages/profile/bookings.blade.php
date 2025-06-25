@@ -45,6 +45,23 @@
             text-align: center;
         }
         
+        .profile-bookings-container .stat-item.clickable-stat {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .profile-bookings-container .stat-item.clickable-stat:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .profile-bookings-container .stat-item.clickable-stat.active {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
         .profile-bookings-container .stat-number {
             font-size: 2rem;
             font-weight: bold;
@@ -55,7 +72,6 @@
             font-size: 0.9rem;
             opacity: 0.8;
         }
-        
         .profile-bookings-container .booking-filters {
             background: white;
             border-radius: 12px;
@@ -564,24 +580,81 @@
         <p class="mb-0 mt-2 text-white">Manage your fishing trip bookings and guide requests</p>
         
         <div class="stats">
-            <div class="stat-item">
-                <span class="stat-number">{{ $bookings->where('status', 'accepted')->count() }}</span>
-                <span class="stat-label">My Confirmed</span>
+            @php
+                // Calculate all statistics
+                $allMyBookings = auth()->user()->bookings;
+                $allGuideBookings = collect();
+                if(auth()->user()->is_guide) {
+                    try {
+                        $allGuideBookings = \App\Models\Booking::whereHas('guiding', function($query) {
+                            $query->where('user_id', auth()->user()->id);
+                        })->get();
+                    } catch (\Exception $e) {
+                        $allGuideBookings = collect();
+                    }
+                }
+                
+                $totalBookings = $allMyBookings->count() + $allGuideBookings->count();
+                $pendingRequests = $allMyBookings->where('status', 'pending')->count() + $allGuideBookings->where('status', 'pending')->count();
+                $confirmedBookings = $allMyBookings->where('status', 'accepted')->count() + $allGuideBookings->where('status', 'accepted')->count();
+                $cancelledBookings = $allMyBookings->where('status', 'cancelled')->count() + $allGuideBookings->where('status', 'cancelled')->count();
+                $rejectedBookings = $allMyBookings->where('status', 'rejected')->count() + $allGuideBookings->where('status', 'rejected')->count();
+                
+                // Calculate completed bookings (accepted and past book_date)
+                $completedBookings = 0;
+                foreach($allMyBookings->where('status', 'accepted') as $booking) {
+                    $bookDate = null;
+                    if($booking->calendar_schedule && $booking->calendar_schedule->date) {
+                        $bookDate = \Carbon\Carbon::parse($booking->calendar_schedule->date);
+                    } elseif($booking->blocked_event && $booking->blocked_event->from) {
+                        $bookDate = \Carbon\Carbon::parse($booking->blocked_event->from);
+                    }
+                    if($bookDate && $bookDate->isPast()) {
+                        $completedBookings++;
+                    }
+                }
+                foreach($allGuideBookings->where('status', 'accepted') as $booking) {
+                    $bookDate = null;
+                    if($booking->calendar_schedule && $booking->calendar_schedule->date) {
+                        $bookDate = \Carbon\Carbon::parse($booking->calendar_schedule->date);
+                    } elseif($booking->blocked_event && $booking->blocked_event->from) {
+                        $bookDate = \Carbon\Carbon::parse($booking->blocked_event->from);
+                    }
+                    if($bookDate && $bookDate->isPast()) {
+                        $completedBookings++;
+                    }
+                }
+            @endphp
+            
+            <div class="stat-item clickable-stat" data-filter="all">
+                <span class="stat-number">{{ $totalBookings }}</span>
+                <span class="stat-label">Total Bookings</span>
             </div>
-            @if(auth()->user()->is_guide && $guideBookings)
-            <div class="stat-item">
-                <span class="stat-number">{{ $guideBookings ? $guideBookings->where('status', 'pending')->count() : 0 }}</span>
+            <div class="stat-item clickable-stat" data-filter="pending">
+                <span class="stat-number">{{ $pendingRequests }}</span>
                 <span class="stat-label">Pending Requests</span>
             </div>
-            @endif
-            <div class="stat-item">
-                <span class="stat-number">{{ $bookings->total() + (auth()->user()->is_guide && $guideBookings && method_exists($guideBookings, 'total') ? $guideBookings->total() : 0) }}</span>
-                <span class="stat-label">Total</span>
+            <div class="stat-item clickable-stat" data-filter="accepted">
+                <span class="stat-number">{{ $confirmedBookings }}</span>
+                <span class="stat-label">My Confirmed</span>
+            </div>
+            <div class="stat-item clickable-stat" data-filter="cancelled">
+                <span class="stat-number">{{ $cancelledBookings }}</span>
+                <span class="stat-label">Cancelled</span>
+            </div>
+            <div class="stat-item clickable-stat" data-filter="rejected">
+                <span class="stat-number">{{ $rejectedBookings }}</span>
+                <span class="stat-label">Rejected</span>
+            </div>
+            <div class="stat-item clickable-stat" data-filter="completed">
+                <span class="stat-number">{{ $completedBookings }}</span>
+                <span class="stat-label">Completed</span>
             </div>
         </div>
     </div>
 
-    <!-- Filters Section -->
+    <!-- Filters Section (Only for Guides) -->
+    @if(auth()->user()->is_guide)
     <div class="booking-filters">
         <div class="filter-tabs">
             <button class="filter-tab active" data-filter="all">
@@ -590,24 +663,24 @@
             <button class="filter-tab" data-filter="my-booking">
                 <i class="fas fa-user"></i> My Bookings
             </button>
-            @if(auth()->user()->is_guide)
             <button class="filter-tab" data-filter="guide-booking">
                 <i class="fas fa-fish"></i> Guide Bookings
             </button>
-            @endif
         </div>
         
         <div class="search-filters">
             <input type="text" class="search-input" id="searchInput" placeholder="Search by guiding name, location, or customer...">
             <select class="status-filter" id="statusFilter">
                 <option value="">All Statuses</option>
-                <option value="accepted">Accepted</option>
-                <option value="pending">Pending</option>
+                <option value="pending">Pending Requests</option>
+                <option value="accepted">My Confirmed</option>
                 <option value="cancelled">Cancelled</option>
                 <option value="rejected">Rejected</option>
+                <option value="completed">Completed</option>
             </select>
         </div>
     </div>
+    @endif
 
     <!-- Bookings Container -->
     <div class="bookings-container" id="bookingsContainer" 
@@ -616,12 +689,24 @@
         @if($bookings && $bookings->count() > 0)
             <!-- My Bookings -->
             @foreach($bookings as $index => $booking)
-                <div class="booking-card my-booking" data-type="my-booking" data-status="{{ $booking->status }}" data-search="{{ strtolower($booking->guiding->title ?? 'untitled') }} {{ strtolower($booking->guiding->location ?? '') }}">
+                <div class="booking-card my-booking" data-type="my-booking" data-status="{{ $booking->status }}" 
+                     data-completed="{{ 
+                        $booking->status == 'accepted' && 
+                        (
+                            ($booking->calendar_schedule && \Carbon\Carbon::parse($booking->calendar_schedule->date)->isPast()) ||
+                            ($booking->blocked_event && \Carbon\Carbon::parse($booking->blocked_event->from)->isPast())
+                        ) ? 'true' : 'false' 
+                     }}"
+                     data-search="{{ strtolower($booking->guiding->title ?? 'untitled') }} {{ strtolower($booking->guiding->location ?? '') }}">
                     <div class="booking-header">
                         <div style="flex: 1;">
                             <div class="booking-type my-booking">
                                 <i class="fas fa-user"></i>
                                 My Booking
+                            </div>
+                            <div class="booking-id-tag">
+                                <i class="fas fa-hashtag"></i>
+                                <strong>ID: {{ $booking->id }}</strong>
                             </div>
                             <h3 class="booking-title">{{ $booking->guiding->title ?? 'Untitled Guiding' }}</h3>
                             <p class="booking-subtitle">📍 {{ $booking->guiding->location ?? 'Location not specified' }}</p>
@@ -637,13 +722,37 @@
                         <div class="booking-details">
                             <div class="detail-item">
                                 <div class="detail-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="detail-content">
+                                    <h6>Booked Date</h6>
+                                    <p>{{ $booking->created_at->format('D, M j, Y') }}</p>
+                                </div>
+                            </div>
+
+                            @if($booking->status == 'cancelled')
+                                <div class="detail-item">
+                                    <div class="detail-icon">
+                                        <i class="fas fa-times-circle"></i>
+                                    </div>
+                                    <div class="detail-content">
+                                        <h6>Cancelled Date</h6>
+                                        <p>{{ $booking->updated_at->format('D, M j, Y') }}</p>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <div class="detail-item">
+                                <div class="detail-icon">
                                     <i class="fas fa-calendar"></i>
                                 </div>
                                 <div class="detail-content">
-                                    <h6>Date</h6>
+                                    <h6>Trip Date</h6>
                                     <p>
-                                        @if($booking->blocked_event)
-                                            {{ \Carbon\Carbon::parse($booking->blocked_event->from)->format('M d, Y') }}
+                                        @if($booking->calendar_schedule)
+                                            {{ \Carbon\Carbon::parse($booking->calendar_schedule->date)->format('D, M j, Y') }}
+                                        @elseif($booking->blocked_event)
+                                            {{ \Carbon\Carbon::parse($booking->blocked_event->from)->format('D, M j, Y') }}
                                         @else
                                             <span class="text-danger">Cancelled</span>
                                         @endif
@@ -695,7 +804,7 @@
                                 @endif
                                 
                                 <button class="btn-action btn-info" data-bs-toggle="modal" data-bs-target="#contactModal{{ $index }}">
-                                    <i class="fas fa-envelope"></i> Contact
+                                    <i class="fas fa-envelope"></i> Contact Guide
                                 </button>
                             @elseif($booking->status == 'pending')
                                 <span class="btn-action btn-secondary">
@@ -749,15 +858,27 @@
         <!-- Guide Bookings -->
         @if(auth()->user()->is_guide && $guideBookings && method_exists($guideBookings, 'count') && $guideBookings->count() > 0)
             @foreach($guideBookings as $gIndex => $booking)
-                <div class="booking-card guide-booking" data-type="guide-booking" data-status="{{ $booking->status }}" data-search="{{ strtolower($booking->guiding->title ?? 'untitled') }} {{ strtolower($booking->user->full_name ?? '') }}">
+                <div class="booking-card guide-booking" data-type="guide-booking" data-status="{{ $booking->status }}" 
+                     data-completed="{{ 
+                        $booking->status == 'accepted' && 
+                        (
+                            ($booking->calendar_schedule && \Carbon\Carbon::parse($booking->calendar_schedule->date)->isPast()) ||
+                            ($booking->blocked_event && \Carbon\Carbon::parse($booking->blocked_event->from)->isPast())
+                        ) ? 'true' : 'false' 
+                     }}"
+                     data-search="{{ strtolower($booking->guiding->title ?? 'untitled') }} {{ strtolower($booking->guiding->location ?? '') }}">
                     <div class="booking-header">
                         <div style="flex: 1;">
                             <div class="booking-type guide-booking">
                                 <i class="fas fa-fish"></i>
                                 Guide Booking
                             </div>
+                            <div class="booking-id-tag">
+                                <i class="fas fa-hashtag"></i>
+                                <strong>ID: {{ $booking->id }}</strong>
+                            </div>
                             <h3 class="booking-title">{{ $booking->guiding->title ?? 'Untitled Guiding' }}</h3>
-                            <p class="booking-subtitle">👤 Booking from {{ $booking->user->full_name ?? 'Unknown Customer' }}</p>
+                            <p class="booking-subtitle">📍 {{ $booking->guiding->location ?? 'Location not specified' }}</p>
                         </div>
                         <div class="booking-status">
                             <span class="status-badge status-{{ $booking->status }}">
@@ -770,13 +891,37 @@
                         <div class="booking-details">
                             <div class="detail-item">
                                 <div class="detail-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="detail-content">
+                                    <h6>Booked Date</h6>
+                                    <p>{{ $booking->created_at->format('D, M j, Y') }}</p>
+                                </div>
+                            </div>
+
+                            @if($booking->status == 'cancelled')
+                                <div class="detail-item">
+                                    <div class="detail-icon">
+                                        <i class="fas fa-times-circle"></i>
+                                    </div>
+                                    <div class="detail-content">
+                                        <h6>Cancelled Date</h6>
+                                        <p>{{ $booking->updated_at->format('D, M j, Y') }}</p>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <div class="detail-item">
+                                <div class="detail-icon">
                                     <i class="fas fa-calendar"></i>
                                 </div>
                                 <div class="detail-content">
-                                    <h6>Date</h6>
+                                    <h6>Trip Date</h6>
                                     <p>
-                                        @if($booking->blocked_event)
-                                            {{ \Carbon\Carbon::parse($booking->blocked_event->from)->format('M d, Y') }}
+                                        @if($booking->calendar_schedule)
+                                            {{ \Carbon\Carbon::parse($booking->calendar_schedule->date)->format('D, M j, Y') }}
+                                        @elseif($booking->blocked_event)
+                                            {{ \Carbon\Carbon::parse($booking->blocked_event->from)->format('D, M j, Y') }}
                                         @else
                                             <span class="text-danger">Not Available</span>
                                         @endif
@@ -902,6 +1047,7 @@
             const searchInput = document.getElementById('searchInput');
             const statusFilter = document.getElementById('statusFilter');
             const loadMoreBtn = document.getElementById('loadMoreBtn');
+            const clickableStats = document.querySelectorAll('.profile-bookings-container .clickable-stat');
             let myBookingsPage = {{ $bookings->currentPage() }};
             let guideBookingsPage = {{ $guideBookings && method_exists($guideBookings, 'currentPage') ? $guideBookings->currentPage() : 1 }};
             let hasMoreMyBookings = {{ $bookings->hasMorePages() ? 'true' : 'false' }};
@@ -925,6 +1071,7 @@
                 bookingCards.forEach(card => {
                     const cardType = card.dataset.type;
                     const cardStatus = card.dataset.status;
+                    const cardCompleted = card.dataset.completed === 'true';
                     const cardSearch = card.dataset.search || '';
 
                     let showCard = true;
@@ -940,8 +1087,18 @@
                     }
 
                     // Status filter
-                    if (statusValue && cardStatus !== statusValue) {
-                        showCard = false;
+                    if (statusValue) {
+                        if (statusValue === 'completed') {
+                            // Show only completed bookings (accepted and past date)
+                            if (!cardCompleted) {
+                                showCard = false;
+                            }
+                        } else {
+                            // Regular status filter
+                            if (cardStatus !== statusValue) {
+                                showCard = false;
+                            }
+                        }
                     }
 
                     if (showCard) {
@@ -970,6 +1127,29 @@
                 }
             }
 
+            // Clickable stats functionality
+            clickableStats.forEach(stat => {
+                stat.addEventListener('click', function() {
+                    const filterValue = this.dataset.filter;
+                    
+                    // Update visual state
+                    clickableStats.forEach(s => s.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update status filter dropdown
+                    if (statusFilter) {
+                        if (filterValue === 'all') {
+                            statusFilter.value = '';
+                        } else {
+                            statusFilter.value = filterValue;
+                        }
+                    }
+                    
+                    // Apply filter
+                    filterBookings();
+                });
+            });
+
             // Tab click handlers
             filterTabs.forEach(tab => {
                 tab.addEventListener('click', function() {
@@ -986,7 +1166,17 @@
 
             // Status filter handler
             if (statusFilter) {
-                statusFilter.addEventListener('change', filterBookings);
+                statusFilter.addEventListener('change', function() {
+                    // Update clickable stats visual state
+                    clickableStats.forEach(s => s.classList.remove('active'));
+                    const matchingStat = document.querySelector(`.clickable-stat[data-filter="${this.value}"]`) || 
+                                       document.querySelector('.clickable-stat[data-filter="all"]');
+                    if (matchingStat) {
+                        matchingStat.classList.add('active');
+                    }
+                    
+                    filterBookings();
+                });
             }
 
             // Load more functionality
@@ -1063,6 +1253,12 @@
                         spinner.style.display = 'none';
                     });
                 });
+            }
+
+            // Initialize with "Total Bookings" active
+            const totalStat = document.querySelector('.clickable-stat[data-filter="all"]');
+            if (totalStat) {
+                totalStat.classList.add('active');
             }
         });
     </script>
