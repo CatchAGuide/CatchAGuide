@@ -28,7 +28,33 @@ class AdminCategoryCountryController extends Controller
 
     public function index()
     {
-        $rows = Destination::whereType('country')->paginate(25);
+        // Get all countries and group by countrycode (or name if countrycode is null), preferring German language first
+        $allCountries = Destination::whereType('country')->get();
+        
+        // Group by countrycode (or slug if countrycode is null) and get the preferred language version
+        $uniqueCountries = $allCountries->groupBy(function ($country) {
+            // Group by countrycode if available, otherwise by slug to handle same countries with different names
+            return $country->countrycode ?: $country->slug;
+        })->map(function ($countries) {
+            // Sort by language preference: German first, then English, then others
+            return $countries->sortBy(function ($country) {
+                return $country->language === 'de' ? 1 : ($country->language === 'en' ? 2 : 3);
+            })->first();
+        })->values();
+
+        // Convert to paginated collection
+        $page = request()->get('page', 1);
+        $perPage = 25;
+        $offset = ($page - 1) * $perPage;
+        
+        $rows = new \Illuminate\Pagination\LengthAwarePaginator(
+            $uniqueCountries->slice($offset, $perPage),
+            $uniqueCountries->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url(), 'pageName' => 'page']
+        );
+        
         $data = compact('rows');
         return view('admin.pages.category.country', $data);
     }

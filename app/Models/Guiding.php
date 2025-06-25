@@ -587,15 +587,7 @@ class Guiding extends Model
             })
             ->where('status', 1);
 
-        // Log the SQL query for debugging
-        Log::info('Location filter SQL query:', [
-            'sql' => $query->toSql(),
-            'bindings' => $query->getBindings()
-        ]);
-
         $guidings = $query->pluck('id');
-
-        Log::info('guidings', ['guidings' => $guidings]);
 
         if ($guidings->isNotEmpty()) {
             $returnData['ids'] = $guidings;
