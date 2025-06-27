@@ -224,6 +224,17 @@
         .col-4 a:hover {
             color: var(--thm-primary);
         }
+
+        /* Guest user styles */
+        .guest-nav {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .btn-primary.btn-sm {
+            font-size: 0.875rem;
+            padding: 8px 16px;
+        }
     </style>
 @stop
 
@@ -231,6 +242,7 @@
     <div class="profile-dashboard">
         <div class="container profile-wrapper">
             <!--Page Header Start-->
+            @auth
             @if(!Request::routeIs('ratings.show') && !Request::routeIs('ratings.notified') && !Request::routeIs('ratings.review'))
                 <div class="container mb-4">
                     <section class="page-header">
@@ -254,6 +266,7 @@
                     </section>
                 </div>
             @endif
+            @endauth
             <!--Page Header End-->
 
             <div class="row">
@@ -261,6 +274,7 @@
                 <div class="col-lg-3 col-md-4 profile-sidebar">
                     <div class="sidebar-wrapper">
                         <!-- User Welcome Section -->
+                        @auth
                         <div class="user-welcome-card">
                             <a href="{{ route('profile.index') }}">
                                 <div class="user-avatar">
@@ -284,8 +298,24 @@
                                 </div>
                             </a>
                         </div>
+                        @else
+                        <div class="user-welcome-card">
+                            <div class="user-avatar">
+                                <div class="avatar-placeholder">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            </div>
+                            <div class="user-info">
+                                <h4>Guest User</h4>
+                                <p class="user-type">
+                                    <span class="badge badge-secondary"><i class="fas fa-user"></i> Guest</span>
+                                </p>
+                            </div>
+                        </div>
+                        @endauth
 
                         <!-- Navigation Menu -->
+                        @auth
                         <nav class="profile-nav">
                             <div class="nav-section">
                                 <ul class="nav-list">
@@ -374,6 +404,18 @@
                             </div>
                             @endif
                         </nav>
+                        @else
+                        <nav class="profile-nav">
+                            <div class="nav-section">
+                                <div class="guest-nav">
+                                    <p class="text-muted mb-3">Please log in to access your profile</p>
+                                    <a href="{{ route('login') }}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-sign-in-alt"></i> Login
+                                    </a>
+                                </div>
+                            </div>
+                        </nav>
+                        @endauth
                     </div>
                 </div>
 

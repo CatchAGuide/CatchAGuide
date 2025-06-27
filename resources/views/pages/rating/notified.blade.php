@@ -1,6 +1,8 @@
-@extends('pages.profile.layouts.profile')
+@extends('layouts.app-v2-1')
 
-@section('profile-content')
+@section('title', __('Thank you for your feedback!'))
+
+@section('content')
 <div class="container my-5">
     <div class="row justify-content-center">
         <div class="col-md-8">

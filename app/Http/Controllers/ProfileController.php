@@ -239,7 +239,7 @@ class ProfileController extends Controller
     public function bookings()
     {
         // Get user's own bookings with pagination (5 items per page) - pending first
-        $bookings = Booking::with(['guiding', 'guiding.user', 'blocked_event'])
+        $bookings = Booking::with(['guiding', 'guiding.user', 'blocked_event', 'calendar_schedule'])
             ->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
             ->orderBy('created_at','desc')
             ->where('user_id',auth()->user()->id)
@@ -249,7 +249,7 @@ class ProfileController extends Controller
         $guideBookings = null;
         if(auth()->user()->is_guide) {
             try {
-                $guideBookings = Booking::with(['guiding', 'user', 'blocked_event'])
+                $guideBookings = Booking::with(['guiding', 'user', 'blocked_event', 'calendar_schedule'])
                     ->whereHas('guiding', function($query) {
                         $query->where('user_id', auth()->user()->id);
                     })
@@ -281,7 +281,7 @@ class ProfileController extends Controller
         $page = $request->get('page', 1);
         
         if ($type === 'my') {
-            $bookings = Booking::with(['guiding', 'guiding.user', 'blocked_event'])
+            $bookings = Booking::with(['guiding', 'guiding.user', 'blocked_event', 'calendar_schedule'])
                 ->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
                 ->orderBy('created_at','desc')
                 ->where('user_id', auth()->user()->id)
@@ -297,7 +297,7 @@ class ProfileController extends Controller
                 return response()->json(['error' => 'Not authorized'], 403);
             }
             
-            $guideBookings = Booking::with(['guiding', 'user', 'blocked_event'])
+            $guideBookings = Booking::with(['guiding', 'user', 'blocked_event', 'calendar_schedule'])
                 ->whereHas('guiding', function($query) {
                     $query->where('user_id', auth()->user()->id);
                 })

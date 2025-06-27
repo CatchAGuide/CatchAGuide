@@ -86,13 +86,17 @@ class Booking extends Model
 
     public function isBookingOver()
     {
-        if($this->blocked_event){
-            if($this->blocked_event->from < Carbon::now())
-            {
-                return true;
-            }
+        // Check calendar_schedule first (new system)
+        if($this->calendar_schedule){
+            return Carbon::parse($this->calendar_schedule->date)->isPast();
         }
-      
+        
+        // Fallback to blocked_event (old system)
+        if($this->blocked_event){
+            return Carbon::parse($this->blocked_event->from)->isPast();
+        }
+        
+        return false;
     }
 
     public function getGuideSalary(): float
@@ -129,5 +133,58 @@ class Booking extends Model
 
     public function employee(): BelongsTo{
         return $this->belongsTo(Employee::class, 'last_employee_id');
+    }
+
+    /**
+     * Check if this booking can be reviewed by the current user
+     * 
+     * @return bool
+     */
+    public function canBeReviewed(): bool
+    {
+        // Check if booking is over
+        if (!$this->isBookingOver()) {
+            return false;
+        }
+
+        // Check if already marked as reviewed
+        if ($this->is_reviewed) {
+            return false;
+        }
+
+        // Check if a review already exists for this booking
+        $existingReview = Review::where('booking_id', $this->id)
+            ->where('user_id', auth()->id())
+            ->exists();
+
+        if ($existingReview) {
+            return false;
+        }
+
+        // Check if user has already rated this guide for this booking using the old rating system
+        $existingRating = Rating::where('user_id', auth()->id())
+            ->where('guide_id', $this->guiding->user_id)
+            ->exists();
+
+        if ($existingRating) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if this booking has been reviewed
+     * 
+     * @return bool
+     */
+    public function hasBeenReviewed(): bool
+    {
+        if ($this->is_reviewed) {
+            return true;
+        }
+
+        // Also check if a review exists in the reviews table
+        return Review::where('booking_id', $this->id)->exists();
     }
 }

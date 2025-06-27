@@ -567,11 +567,145 @@
             font-size: 12px;
             margin-top: 8px;
         }
+
+        /* Clickable status badge styles */
+        .profile-bookings-container .status-badge.clickable {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            background: inherit;
+            font-size: inherit;
+            font-weight: inherit;
+            text-transform: inherit;
+            letter-spacing: inherit;
+        }
+
+        .profile-bookings-container .status-badge.clickable:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .profile-bookings-container .status-badge.clickable.status-cancelled:hover {
+            background: #e8bfc2;
+            border-color: #d1414a;
+        }
+
+        .profile-bookings-container .status-badge.clickable.status-rejected:hover {
+            background: #e8bfc2;
+            border-color: #d1414a;
+        }
+
+        /* Rejection details modal styles */
+        .rejection-details-modal .modal-header {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white !important;
+            border-bottom: none;
+        }
+
+        .rejection-details-modal .modal-header .modal-title {
+            color: white !important;
+        }
+
+        .rejection-details-modal .modal-header .btn-close {
+            filter: invert(1);
+        }
+
+        .rejection-details-modal .rejection-content {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .rejection-details-modal .alternative-dates {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .rejection-details-modal .reschedule-info {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        /* Booking Details Modal Styles */
+        .profile-bookings-container .booking-details-modal .modal-header {
+            background: linear-gradient(135deg, #313041, #252238);
+            color: white !important;
+            border-bottom: none;
+        }
+
+        .profile-bookings-container .booking-details-modal .modal-header .modal-title {
+            color: white !important;
+            font-weight: 600;
+        }
+
+        .profile-bookings-container .booking-details-modal .modal-header .btn-close {
+            filter: invert(1);
+        }
+
+        .profile-bookings-container .booking-details-modal .detail-row {
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .profile-bookings-container .booking-details-modal .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .profile-bookings-container .booking-details-modal .detail-row strong {
+            color: #313041;
+            font-weight: 600;
+        }
+
+        .profile-bookings-container .booking-details-modal h6 {
+            color: #313041;
+            font-weight: 700;
+            border-bottom: 2px solid #313041;
+            padding-bottom: 0.5rem;
+        }
+
+        .profile-bookings-container .booking-details-modal .modal-footer {
+            border-top: 1px solid #dee2e6;
+            background: #f8f9fa;
+        }
     </style>
 
     <!-- Wrap entire content in scoped container -->
     <div class="profile-bookings-container">
         <!-- Header Section -->
+        <!-- TEST BUTTON - Remove after testing -->
+        <div style="margin-bottom: 20px;">
+            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#testModal">
+                🧪 Test Modal (Remove after testing)
+            </button>
+        </div>
+        
+        <!-- Test Modal -->
+        <div class="modal fade" id="testModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">✅ Modal Functionality Works!</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <p>If you can see this modal, then the functionality is working correctly!</p>
+                        <p>The rejection/cancellation modals should work the same way.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="bookings-header">
         <h1 class="mb-0 text-white">
             <i class="fas fa-calendar-check"></i>
@@ -712,9 +846,19 @@
                             <p class="booking-subtitle">📍 {{ $booking->guiding->location ?? 'Location not specified' }}</p>
                         </div>
                         <div class="booking-status">
-                            <span class="status-badge status-{{ $booking->status }}">
-                                {{ ucfirst(translate($booking->status)) }}
-                            </span>
+                            @if(in_array($booking->status, ['cancelled', 'rejected', 'storniert']) && $booking->additional_information)
+                                <button class="status-badge status-{{ $booking->status }} clickable" 
+                                        data-toggle="modal" 
+                                        data-target="#rejectionModal{{ $index }}"
+                                        title="Click to see details">
+                                    {{ ucfirst(translate($booking->status)) }}
+                                    <i class="fas fa-info-circle ms-1"></i>
+                                </button>
+                            @else
+                                <span class="status-badge status-{{ $booking->status }}">
+                                    {{ ucfirst(translate($booking->status)) }}
+                                </span>
+                            @endif
                         </div>
                     </div>
                     
@@ -792,13 +936,14 @@
                         </div>
                         
                         <div class="booking-actions">
+                            <!-- View Details button for all statuses -->
+                            <button class="btn-action btn-primary" data-bs-toggle="modal" data-bs-target="#detailsModal{{ $index }}">
+                                <i class="fas fa-eye"></i> View Details
+                            </button>
+
                             @if($booking->status == 'accepted')
-                                <a href="{{ route('profile.showbooking', $booking->id) }}" class="btn-action btn-primary">
-                                    <i class="fas fa-eye"></i> View Details
-                                </a>
-                                
                                 @if($booking->isBookingOver() && !auth()->user()->hasratet($booking->user_id))
-                                    <a href="{{ route('ratings.show', $booking->id) }}" class="btn-action btn-warning">
+                                    <a href="{{ route('ratings.show', ['token' => $booking->token]) }}" class="btn-action btn-warning" target="_blank">
                                         <i class="fas fa-star"></i> Rate Guide
                                     </a>
                                 @endif
@@ -814,24 +959,147 @@
                                 <span class="btn-action btn-secondary">
                                     <i class="fas fa-info-circle"></i> {{ ucfirst($booking->status) }}
                                 </span>
-                                @if($booking->status == 'rejected' && $booking->additional_information)
-                                    <div class="rejection-message mt-2">
-                                        <small><strong>Rejection Reason:</strong> {{ $booking->additional_information }}</small>
-                                    </div>
-                                @endif
                             @endif
                         </div>
                     </div>
                 </div>
 
+                <!-- Details Modal for My Bookings -->
+                <div class="modal fade booking-details-modal" id="detailsModal{{ $index }}" tabindex="-1">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">
+                                        <i class="fas fa-file-alt"></i> Booking Confirmation Details - Reference #{{ $booking->id }}
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6 class="fw-bold mb-3"><i class="fas fa-fish"></i> Fishing Experience Details</h6>
+                                            <div class="detail-row">
+                                                <strong>Experience Title:</strong> {{ $booking->guiding->title ?? 'N/A' }}
+                                            </div>
+                                            <div class="detail-row">
+                                                <strong>Fishing Location:</strong> {{ $booking->guiding->location ?? 'N/A' }}
+                                            </div>
+                                            <div class="detail-row">
+                                                <strong>Experience Duration:</strong> {{ $booking->guiding->duration ?? 'N/A' }} hours
+                                            </div>
+                                            <div class="detail-row">
+                                                <strong>Fishing Type:</strong> {{ $booking->guiding->type_of_fishing ?? 'N/A' }}
+                                            </div>
+                                            @if($booking->guiding->description)
+                                                <div class="detail-row">
+                                                    <strong>Experience Description:</strong> 
+                                                    <p class="mt-1 text-muted">{{ Str::limit($booking->guiding->description, 200) }}</p>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6 class="fw-bold mb-3"><i class="fas fa-calendar-check"></i> Reservation Summary</h6>
+                                            <div class="detail-row">
+                                                <strong>Reservation Date:</strong> {{ $booking->created_at->format('l, F j, Y \a\t g:i A') }}
+                                            </div>
+                                            <div class="detail-row">
+                                                <strong>Scheduled Date:</strong> 
+                                                @if($booking->calendar_schedule)
+                                                    {{ \Carbon\Carbon::parse($booking->calendar_schedule->date)->format('l, F j, Y') }}
+                                                @elseif($booking->blocked_event)
+                                                    {{ \Carbon\Carbon::parse($booking->blocked_event->from)->format('l, F j, Y') }}
+                                                @else
+                                                    <span class="text-danger">Date Not Available</span>
+                                                @endif
+                                            </div>
+                                            <div class="detail-row">
+                                                <strong>Party Size:</strong> {{ $booking->count_of_users ?? 1 }} {{ ($booking->count_of_users ?? 1) == 1 ? 'Guest' : 'Guests' }}
+                                            </div>
+                                            <div class="detail-row">
+                                                <strong>Booking Status:</strong> 
+                                                <span class="badge bg-{{ $booking->status == 'accepted' ? 'success' : ($booking->status == 'pending' ? 'warning' : ($booking->status == 'cancelled' ? 'secondary' : 'danger')) }}">{{ ucfirst($booking->status) }}</span>
+                                            </div>
+                                            @if($booking->status == 'cancelled' && $booking->additional_information)
+                                                <div class="detail-row">
+                                                    <strong>Cancellation Reason:</strong> 
+                                                    <p class="mt-1 text-danger">{{ $booking->additional_information }}</p>
+                                                </div>
+                                            @endif
+                                            @if($booking->status == 'rejected' && $booking->additional_information)
+                                                <div class="detail-row">
+                                                    <strong>Rejection Reason:</strong> 
+                                                    <p class="mt-1 text-danger">{{ $booking->additional_information }}</p>
+                                                </div>
+                                            @endif
+                                            <div class="detail-row">
+                                                <strong>Total Amount:</strong> <span class="text-success fw-bold">€{{ number_format($booking->price, 2) }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <hr class="my-4">
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6 class="fw-bold mb-3"><i class="fas fa-user-tie"></i> Professional Guide Information</h6>
+                                            <div class="detail-row">
+                                                <strong>Name:</strong> {{ $booking->guiding->user->full_name ?? 'N/A' }}
+                                            </div>
+                                            <div class="detail-row">
+                                                <strong>Email:</strong> {{ $booking->guiding->user->email ?? 'N/A' }}
+                                            </div>
+                                            @if($booking->guiding->user->phone)
+                                                <div class="detail-row">
+                                                    <strong>Phone:</strong> {{ $booking->guiding->user->phone }}
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="col-md-6">
+                                            @if($booking->extras)
+                                                <h6 class="fw-bold mb-3"><i class="fas fa-plus-circle"></i> Additional Services</h6>
+                                                @php
+                                                    $extras = is_string($booking->extras) ? unserialize($booking->extras) : $booking->extras;
+                                                @endphp
+                                                @if(is_array($extras) && count($extras) > 0)
+                                                    @foreach($extras as $extra)
+                                                        <div class="detail-row">
+                                                            <strong>{{ $extra['name'] ?? 'Additional Service' }}:</strong> €{{ number_format($extra['price'] ?? 0, 2) }}
+                                                        </div>
+                                                    @endforeach
+                                                    <div class="detail-row">
+                                                        <strong>Total Additional Services:</strong> <span class="text-info">€{{ number_format($booking->total_extra_price ?? 0, 2) }}</span>
+                                                    </div>
+                                                @else
+                                                    <p class="text-muted">No additional services selected</p>
+                                                @endif
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    @if($booking->status == 'accepted')
+                                        @if($booking->canBeReviewed())
+                                            <a href="{{ route('ratings.show', ['token' => $booking->token]) }}" class="btn btn-warning">
+                                                <i class="fas fa-star"></i> Rate Professional Guide
+                                            </a>
+                                        @endif
+                                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#contactModal{{ $index }}" data-bs-dismiss="modal">
+                                            <i class="fas fa-envelope"></i> Contact Professional Guide
+                                        </button>
+                                    @endif
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 <!-- Contact Modal for My Bookings -->
-                @if($booking->status == 'accepted')
-                    <div class="modal fade contact-modal" id="contactModal{{ $index }}" tabindex="-1">
+                <div class="modal fade contact-modal" id="contactModal{{ $index }}" tabindex="-1">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h5 class="modal-title">
-                                        <i class="fas fa-address-book"></i> Contact Guide
+                                        <i class="fas fa-address-book"></i> Professional Guide Contact
                                     </h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
@@ -846,6 +1114,98 @@
                                     @endif
                                 </div>
                                 <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                <!-- Rejection Details Modal for My Bookings -->
+                @if(in_array($booking->status, ['cancelled', 'rejected', 'storniert']) && $booking->additional_information)
+                    <div class="modal fade rejection-details-modal" id="rejectionModal{{ $index }}" tabindex="-1">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">
+                                        <i class="fas fa-exclamation-triangle"></i> 
+                                        {{ ucfirst($booking->status) }} Details - Booking #{{ $booking->id }}
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="rejection-content">
+                                        <h6><i class="fas fa-info-circle"></i> {{ $booking->status == 'cancelled' ? 'Cancellation' : 'Rejection' }} Reason</h6>
+                                        <p class="mb-0">{{ $booking->additional_information }}</p>
+                                    </div>
+
+                                    @if($booking->status == 'rejected')
+                                        {{-- Check for alternative dates or reschedule information --}}
+                                        @php
+                                            // Look for alternative dates in the booking or related records
+                                            $alternativeDates = [];
+                                            $rescheduleInfo = null;
+                                            
+                                            // You may need to adjust these based on your database structure
+                                            // Check if there are any alternative dates suggested
+                                            if($booking->alternative_dates) {
+                                                $alternativeDates = is_string($booking->alternative_dates) ? 
+                                                    json_decode($booking->alternative_dates, true) : 
+                                                    $booking->alternative_dates;
+                                            }
+                                            
+                                            // Check if booking was rescheduled
+                                            if($booking->rescheduled_from_id) {
+                                                $originalBooking = \App\Models\Booking::find($booking->rescheduled_from_id);
+                                                $rescheduleInfo = $originalBooking;
+                                            }
+                                        @endphp
+
+                                        @if(!empty($alternativeDates))
+                                            <div class="alternative-dates">
+                                                <h6><i class="fas fa-calendar-alt"></i> Suggested Alternative Dates</h6>
+                                                <ul class="list-unstyled">
+                                                    @foreach($alternativeDates as $altDate)
+                                                        <li><i class="fas fa-calendar"></i> {{ \Carbon\Carbon::parse($altDate)->format('l, F j, Y') }}</li>
+                                                    @endforeach
+                                                </ul>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-info-circle"></i> 
+                                                    You can contact the guide to book one of these alternative dates.
+                                                </small>
+                                            </div>
+                                        @endif
+
+                                        @if($rescheduleInfo)
+                                            <div class="reschedule-info">
+                                                <h6><i class="fas fa-sync-alt"></i> Reschedule Information</h6>
+                                                <p><strong>Original Booking Date:</strong> 
+                                                    @if($rescheduleInfo->calendar_schedule)
+                                                        {{ \Carbon\Carbon::parse($rescheduleInfo->calendar_schedule->date)->format('l, F j, Y') }}
+                                                    @elseif($rescheduleInfo->blocked_event)
+                                                        {{ \Carbon\Carbon::parse($rescheduleInfo->blocked_event->from)->format('l, F j, Y') }}
+                                                    @else
+                                                        Not available
+                                                    @endif
+                                                </p>
+                                                <p><strong>Reschedule Reason:</strong> {{ $rescheduleInfo->additional_information ?? 'No reason provided' }}</p>
+                                            </div>
+                                        @endif
+                                    @endif
+
+                                    @if($booking->status == 'cancelled')
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle"></i>
+                                            <strong>What happens next?</strong> 
+                                            If you paid for this booking, any applicable refunds will be processed according to our cancellation policy.
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="modal-footer">
+                                    @if($booking->status == 'rejected' && $booking->guiding->user)
+                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#contactModal{{ $index }}" data-dismiss="modal">
+                                            <i class="fas fa-envelope"></i> Contact Guide
+                                        </button>
+                                    @endif
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                 </div>
                             </div>
@@ -881,9 +1241,19 @@
                             <p class="booking-subtitle">📍 {{ $booking->guiding->location ?? 'Location not specified' }}</p>
                         </div>
                         <div class="booking-status">
-                            <span class="status-badge status-{{ $booking->status }}">
-                                {{ ucfirst(translate($booking->status)) }}
-                            </span>
+                            @if(in_array($booking->status, ['cancelled', 'rejected', 'storniert']) && $booking->additional_information)
+                                <button class="status-badge status-{{ $booking->status }} clickable" 
+                                        data-toggle="modal" 
+                                        data-target="#guideRejectionModal{{ $gIndex }}"
+                                        title="Click to see details">
+                                    {{ ucfirst(translate($booking->status)) }}
+                                    <i class="fas fa-info-circle ms-1"></i>
+                                </button>
+                            @else
+                                <span class="status-badge status-{{ $booking->status }}">
+                                    {{ ucfirst(translate($booking->status)) }}
+                                </span>
+                            @endif
                         </div>
                     </div>
                     
@@ -961,6 +1331,11 @@
                         </div>
                         
                         <div class="booking-actions">
+                            <!-- View Details button for all statuses -->
+                            <button class="btn-action btn-primary" data-bs-toggle="modal" data-bs-target="#guideDetailsModal{{ $gIndex }}">
+                                <i class="fas fa-eye"></i> View Details
+                            </button>
+
                             @if($booking->status == 'pending')
                                 <a href="{{ route('profile.guidebookings.accept', $booking) }}" class="btn-action btn-success">
                                     <i class="fas fa-check"></i> Accept
@@ -976,24 +1351,142 @@
                                 <span class="btn-action btn-secondary">
                                     <i class="fas fa-info-circle"></i> {{ ucfirst($booking->status) }}
                                 </span>
-                                @if($booking->status == 'rejected' && $booking->additional_information)
-                                    <div class="rejection-message mt-2">
-                                        <small><strong>Rejection Reason:</strong> {{ $booking->additional_information }}</small>
-                                    </div>
-                                @endif
                             @endif
                         </div>
                     </div>
                 </div>
 
+                <!-- Details Modal for Guide Bookings -->
+                <div class="modal fade booking-details-modal" id="guideDetailsModal{{ $gIndex }}" tabindex="-1">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">
+                                        <i class="fas fa-file-alt"></i> Guide Service Details - Reference #{{ $booking->id }}
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6 class="fw-bold mb-3"><i class="fas fa-fish"></i> Service Details</h6>
+                                            <div class="detail-row">
+                                                <strong>Experience Title:</strong> {{ $booking->guiding->title ?? 'N/A' }}
+                                            </div>
+                                            <div class="detail-row">
+                                                <strong>Service Location:</strong> {{ $booking->guiding->location ?? 'N/A' }}
+                                            </div>
+                                            <div class="detail-row">
+                                                <strong>Service Duration:</strong> {{ $booking->guiding->duration ?? 'N/A' }} hours
+                                            </div>
+                                            <div class="detail-row">
+                                                <strong>Fishing Type:</strong> {{ $booking->guiding->type_of_fishing ?? 'N/A' }}
+                                            </div>
+                                            @if($booking->guiding->description)
+                                                <div class="detail-row">
+                                                    <strong>Service Description:</strong> 
+                                                    <p class="mt-1 text-muted">{{ Str::limit($booking->guiding->description, 200) }}</p>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6 class="fw-bold mb-3"><i class="fas fa-calendar-check"></i> Booking Summary</h6>
+                                            <div class="detail-row">
+                                                <strong>Booking Date:</strong> {{ $booking->created_at->format('l, F j, Y \a\t g:i A') }}
+                                            </div>
+                                            <div class="detail-row">
+                                                <strong>Service Date:</strong> 
+                                                @if($booking->calendar_schedule)
+                                                    {{ \Carbon\Carbon::parse($booking->calendar_schedule->date)->format('l, F j, Y') }}
+                                                @elseif($booking->blocked_event)
+                                                    {{ \Carbon\Carbon::parse($booking->blocked_event->from)->format('l, F j, Y') }}
+                                                @else
+                                                    <span class="text-danger">Date Not Available</span>
+                                                @endif
+                                            </div>
+                                            <div class="detail-row">
+                                                <strong>Party Size:</strong> {{ $booking->count_of_users ?? 1 }} {{ ($booking->count_of_users ?? 1) == 1 ? 'Guest' : 'Guests' }}
+                                            </div>
+                                            <div class="detail-row">
+                                                <strong>Booking Status:</strong> 
+                                                <span class="badge bg-{{ $booking->status == 'accepted' ? 'success' : ($booking->status == 'pending' ? 'warning' : ($booking->status == 'cancelled' ? 'secondary' : 'danger')) }}">{{ ucfirst($booking->status) }}</span>
+                                            </div>
+                                            @if($booking->status == 'cancelled' && $booking->additional_information)
+                                                <div class="detail-row">
+                                                    <strong>Cancellation Reason:</strong> 
+                                                    <p class="mt-1 text-danger">{{ $booking->additional_information }}</p>
+                                                </div>
+                                            @endif
+                                            @if($booking->status == 'rejected' && $booking->additional_information)
+                                                <div class="detail-row">
+                                                    <strong>Rejection Reason:</strong> 
+                                                    <p class="mt-1 text-danger">{{ $booking->additional_information }}</p>
+                                                </div>
+                                            @endif
+                                            <div class="detail-row">
+                                                <strong>Service Fee:</strong> <span class="text-success fw-bold">€{{ number_format($booking->price, 2) }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <hr class="my-4">
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6 class="fw-bold mb-3"><i class="fas fa-user"></i> Client Information</h6>
+                                            <div class="detail-row">
+                                                <strong>Client Name:</strong> {{ $booking->user->full_name ?? 'N/A' }}
+                                            </div>
+                                            <div class="detail-row">
+                                                <strong>Contact Email:</strong> {{ $booking->user->email ?? 'N/A' }}
+                                            </div>
+                                            @if($booking->phone)
+                                                <div class="detail-row">
+                                                    <strong>Contact Phone:</strong> {{ $booking->phone }}
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="col-md-6">
+                                            @if($booking->extras)
+                                                <h6 class="fw-bold mb-3"><i class="fas fa-plus-circle"></i> Additional Services</h6>
+                                                @php
+                                                    $extras = is_string($booking->extras) ? unserialize($booking->extras) : $booking->extras;
+                                                @endphp
+                                                @if(is_array($extras) && count($extras) > 0)
+                                                    @foreach($extras as $extra)
+                                                        <div class="detail-row">
+                                                            <strong>{{ $extra['name'] ?? 'Additional Service' }}:</strong> €{{ number_format($extra['price'] ?? 0, 2) }}
+                                                        </div>
+                                                    @endforeach
+                                                    <div class="detail-row">
+                                                        <strong>Total Additional Services:</strong> <span class="text-info">€{{ number_format($booking->total_extra_price ?? 0, 2) }}</span>
+                                                    </div>
+                                                @else
+                                                    <p class="text-muted">No additional services selected</p>
+                                                @endif
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    @if($booking->status == 'accepted')
+                                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#guideContactModal{{ $gIndex }}" data-bs-dismiss="modal">
+                                            <i class="fas fa-envelope"></i> Contact Client
+                                        </button>
+                                    @endif
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 <!-- Contact Modal for Guide Bookings -->
-                @if($booking->status == 'accepted')
-                    <div class="modal fade contact-modal" id="guideContactModal{{ $gIndex }}" tabindex="-1">
+                <div class="modal fade contact-modal" id="guideContactModal{{ $gIndex }}" tabindex="-1">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h5 class="modal-title">
-                                        <i class="fas fa-address-book"></i> Contact Customer
+                                        <i class="fas fa-address-book"></i> Client Contact Information
                                     </h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
@@ -1008,6 +1501,97 @@
                                     @endif
                                 </div>
                                 <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                <!-- Rejection Details Modal for Guide Bookings -->
+                @if(in_array($booking->status, ['cancelled', 'rejected', 'storniert']) && $booking->additional_information)
+                    <div class="modal fade rejection-details-modal" id="guideRejectionModal{{ $gIndex }}" tabindex="-1">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">
+                                        <i class="fas fa-exclamation-triangle"></i> 
+                                        {{ ucfirst($booking->status) }} Details - Booking #{{ $booking->id }}
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="rejection-content">
+                                        <h6><i class="fas fa-info-circle"></i> {{ $booking->status == 'cancelled' ? 'Cancellation' : 'Rejection' }} Reason</h6>
+                                        <p class="mb-0">{{ $booking->additional_information }}</p>
+                                    </div>
+
+                                    @if($booking->status == 'rejected')
+                                        {{-- Check for alternative dates or reschedule information --}}
+                                        @php
+                                            // Look for alternative dates in the booking or related records
+                                            $alternativeDates = [];
+                                            $rescheduleInfo = null;
+                                            
+                                            // Check if there are any alternative dates suggested
+                                            if($booking->alternative_dates) {
+                                                $alternativeDates = is_string($booking->alternative_dates) ? 
+                                                    json_decode($booking->alternative_dates, true) : 
+                                                    $booking->alternative_dates;
+                                            }
+                                            
+                                            // Check if booking was rescheduled
+                                            if($booking->rescheduled_from_id) {
+                                                $originalBooking = \App\Models\Booking::find($booking->rescheduled_from_id);
+                                                $rescheduleInfo = $originalBooking;
+                                            }
+                                        @endphp
+
+                                        @if(!empty($alternativeDates))
+                                            <div class="alternative-dates">
+                                                <h6><i class="fas fa-calendar-alt"></i> Suggested Alternative Dates</h6>
+                                                <ul class="list-unstyled">
+                                                    @foreach($alternativeDates as $altDate)
+                                                        <li><i class="fas fa-calendar"></i> {{ \Carbon\Carbon::parse($altDate)->format('l, F j, Y') }}</li>
+                                                    @endforeach
+                                                </ul>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-info-circle"></i> 
+                                                    These alternative dates were suggested to the client.
+                                                </small>
+                                            </div>
+                                        @endif
+
+                                        @if($rescheduleInfo)
+                                            <div class="reschedule-info">
+                                                <h6><i class="fas fa-sync-alt"></i> Reschedule Information</h6>
+                                                <p><strong>Original Booking Date:</strong> 
+                                                    @if($rescheduleInfo->calendar_schedule)
+                                                        {{ \Carbon\Carbon::parse($rescheduleInfo->calendar_schedule->date)->format('l, F j, Y') }}
+                                                    @elseif($rescheduleInfo->blocked_event)
+                                                        {{ \Carbon\Carbon::parse($rescheduleInfo->blocked_event->from)->format('l, F j, Y') }}
+                                                    @else
+                                                        Not available
+                                                    @endif
+                                                </p>
+                                                <p><strong>Reschedule Reason:</strong> {{ $rescheduleInfo->additional_information ?? 'No reason provided' }}</p>
+                                            </div>
+                                        @endif
+                                    @endif
+
+                                    @if($booking->status == 'cancelled')
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle"></i>
+                                            <strong>Booking Cancelled:</strong> 
+                                            The client has cancelled this booking. Any payments made will be handled according to your cancellation policy.
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="modal-footer">
+                                    @if($booking->user)
+                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#guideContactModal{{ $gIndex }}" data-dismiss="modal">
+                                            <i class="fas fa-envelope"></i> Contact Client
+                                        </button>
+                                    @endif
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                 </div>
                             </div>
