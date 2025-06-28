@@ -10,8 +10,17 @@
 
 @section('profile-content')
 
+    <!-- Header Section -->
+    <div class="calendar-header">
+        <h1 class="mb-0 text-white">
+            <i class="fas fa-calendar-alt"></i>
+            @lang('profile.calendar')
+        </h1>
+        <p class="mb-0 mt-2 text-white">Manage your availability and schedule for fishing trips</p>
+    </div>
+
     <!-- Bottom Row: Tour Filter (Left) and Details (Right) -->
-    <div class="row mt-4">
+    <div class="row mt-4 mb-4">
         <!-- Tour Filter Panel -->
         <div class="col-md-6">
             <div class="tour-filter-panel">
@@ -19,7 +28,7 @@
                 
                 <!-- Tour Filter Dropdown -->
                 <div class="dropdown mb-3">
-                    <button class="btn btn-outline-primary dropdown-toggle w-100" type="button" id="tourFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="btn btn-outline-secondary dropdown-toggle w-100 tour-filter-btn" type="button" id="tourFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                         <span id="selectedTourText">@lang('profile.all-tours')</span>
                     </button>
                     <ul class="dropdown-menu w-100" aria-labelledby="tourFilterDropdown" id="tourDropdownMenu">
@@ -89,7 +98,7 @@
     </div>
 
     <!-- Calendar Layout -->
-    <div class="row">
+    <div class="row mt-4">
         <!-- Calendar Panel -->
         <div class="col-12">
             <div class="calendar-panel">
@@ -143,6 +152,155 @@
 
 <style>
 /* Essential Calendar Styles - Inline to avoid css_after conflicts */
+
+/* Calendar Header Styles */
+.calendar-header {
+    background: linear-gradient(135deg, #313041, #252238);
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 30px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.calendar-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+    opacity: 0.5;
+    animation: calendar-float 20s infinite linear;
+}
+
+@keyframes calendar-float {
+    0% { transform: translateX(-100px) translateY(-100px); }
+    100% { transform: translateX(100px) translateY(100px); }
+}
+
+.calendar-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    position: relative;
+    z-index: 2;
+}
+
+.calendar-header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    position: relative;
+    z-index: 2;
+}
+
+.calendar-header i {
+    margin-right: 10px;
+}
+
+/* Tour Filter Button Styles */
+.tour-filter-btn {
+    background: white !important;
+    border: 2px solid #e9ecef !important;
+    color: #495057 !important;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.tour-filter-btn:hover,
+.tour-filter-btn:focus,
+.tour-filter-btn:active,
+.tour-filter-btn.show {
+    background: #f8f9fa !important;
+    border-color: #313041 !important;
+    color: #313041 !important;
+    box-shadow: 0 0 0 0.2rem rgba(49, 48, 65, 0.1) !important;
+}
+
+/* Scrollable Dropdown Menu */
+.dropdown-menu {
+    max-height: 300px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    border: 1px solid #e9ecef !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+    padding: 8px 0 !important;
+}
+
+/* Custom Scrollbar for Dropdown */
+.dropdown-menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.dropdown-menu::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Dropdown Item Styling */
+.dropdown-menu .dropdown-item {
+    padding: 8px 16px !important;
+    transition: all 0.2s ease !important;
+    border-radius: 6px !important;
+    margin: 2px 8px !important;
+    border: none !important;
+}
+
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu .dropdown-item:focus {
+    background-color: #f8f9fa !important;
+    color: #313041 !important;
+}
+
+.dropdown-menu .dropdown-item.active {
+    background-color: #313041 !important;
+    color: white !important;
+}
+
+/* Custom Event Actions */
+.custom-event-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.custom-event-actions .btn {
+    padding: 4px 8px;
+    font-size: 12px;
+    line-height: 1;
+    border-radius: 4px;
+}
+
+.custom-event-actions .btn-outline-primary {
+    border-color: #0d6efd;
+    color: #0d6efd;
+}
+
+.custom-event-actions .btn-outline-primary:hover {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.custom-event-actions .btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+.custom-event-actions .btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
 .calendar-panel, .tour-filter-panel {
     background: white;
     padding: 20px;
@@ -772,30 +930,47 @@
 }
 
 .btn-save {
-    background: linear-gradient(135deg, #313041, #2c5aa0);
-    border: 2px solid #313041;
-    color: white;
-    font-weight: 600;
+    background: linear-gradient(135deg, #313041, #2c5aa0) !important;
+    border: 2px solid #313041 !important;
+    color: white !important;
+    font-weight: 600 !important;
     padding: 12px 24px;
     border-radius: 10px;
     transition: all 0.3s ease;
     box-shadow: 0 4px 12px rgba(49, 48, 65, 0.3);
 }
 
-.btn-save:hover {
-    background: linear-gradient(135deg, #2a2938, #254a8a);
-    border-color: #2a2938;
-    color: white;
+.btn-save:hover,
+.btn-save:focus,
+.btn-save:active {
+    background: linear-gradient(135deg, #2a2938, #254a8a) !important;
+    border-color: #2a2938 !important;
+    color: white !important;
     transform: translateY(-1px);
     box-shadow: 0 6px 16px rgba(49, 48, 65, 0.4);
 }
 
+.btn-save:disabled {
+    background: #6c757d !important;
+    border-color: #6c757d !important;
+    color: white !important;
+    opacity: 0.8 !important;
+    transform: none !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+}
+
 /* Mobile Responsiveness */
-@media (max-width: 768px) {
-    .calendar-panel, .tour-filter-panel {
-        padding: 15px;
-        margin-bottom: 20px;
-    }
+    @media (max-width: 768px) {
+        .calendar-panel, .tour-filter-panel {
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        /* Mobile Dropdown Adjustments */
+        .dropdown-menu {
+            max-height: 250px !important;
+        }
     
     .calendar-container {
         min-height: 400px;
@@ -1514,13 +1689,26 @@
                 if (customEvents.length > 0) {
                     contentHtml += `<div class="mb-3"><h6><i class="fas fa-calendar-plus text-info"></i> Custom Events (${customEvents.length})</h6>`;
                     customEvents.forEach(event => {
+                        const eventId = event.id || event.extendedProps?.id;
                         contentHtml += `
                             <div class="border rounded p-2 mb-2">
-                                <small class="fw-bold">${event.title || 'Custom Event'}</small><br>
-                                <small class="text-muted">
-                                    <i class="fas fa-clock"></i> ${event.extendedProps.date || dateStr}<br>
-                                    ${event.extendedProps.note ? `<i class="fas fa-note-sticky"></i> ${event.extendedProps.note}` : ''}
-                                </small>
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <small class="fw-bold">${event.title || 'Custom Event'}</small><br>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock"></i> ${event.extendedProps.date || dateStr}<br>
+                                            ${event.extendedProps.note ? `<i class="fas fa-note-sticky"></i> ${event.extendedProps.note}` : ''}
+                                        </small>
+                                    </div>
+                                    <div class="custom-event-actions">
+                                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editCustomEvent('${eventId}', '${dateStr}', '${(event.extendedProps.note || '').replace(/'/g, "\\'")}')">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteCustomEvent('${eventId}', '${dateStr}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         `;
                     });
@@ -1616,11 +1804,21 @@
                 });
             }
 
-            // Add event form submission
+            // Add/Edit event form submission
             const addEventForm = document.getElementById('addEventForm');
             if (addEventForm) {
                 addEventForm.addEventListener('submit', function(e) {
                     e.preventDefault();
+                    
+                    // Get save button and show loading state
+                    const saveBtn = document.querySelector('.btn-save');
+                    const originalText = saveBtn.innerHTML;
+                    const modal = document.getElementById('addEventModal');
+                    const isEditMode = modal.dataset.editMode === 'true';
+                    const eventId = modal.dataset.editEventId;
+                    
+                    saveBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>${isEditMode ? 'Updating...' : 'Saving...'}`;
+                    saveBtn.disabled = true;
                     
                     const formData = new FormData(this);
                     const data = {};
@@ -1631,16 +1829,28 @@
                     if (blockType === 'single') {
                         data.start = formData.get('single_date');
                         data.end = formData.get('single_date');
+                        if (isEditMode) {
+                            data.date = formData.get('single_date');
+                        }
                     } else {
                         data.start = formData.get('start');
                         data.end = formData.get('end');
+                        if (isEditMode) {
+                            data.date = formData.get('start');
+                        }
                     }
                     
                     data.type = 'custom_schedule';
                     data.note = formData.get('note') || 'Custom blocked date';
 
-                    fetch('{{ route("profile.calendar.store") }}', {
-                        method: 'POST',
+                    // Determine URL and method based on mode
+                    const url = isEditMode 
+                        ? `{{ url('/profile/calendar/update') }}/${eventId}`
+                        : '{{ route("profile.calendar.store") }}';
+                    const method = isEditMode ? 'PUT' : 'POST';
+
+                    fetch(url, {
+                        method: method,
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -1650,24 +1860,33 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            const modal = bootstrap.Modal.getInstance(document.getElementById('addEventModal'));
-                            if (modal) modal.hide();
+                            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('addEventModal'));
+                            if (modalInstance) modalInstance.hide();
                             loadCalendarEvents();
-                            showAlert('success', data.message || 'Schedule created successfully!');
-                            document.getElementById('addEventForm').reset();
-                            // Reset to single day mode
-                            if (singleDayRadio) singleDayRadio.checked = true;
-                            if (singleDaySection) singleDaySection.style.display = 'block';
-                            if (dateRangeSection) dateRangeSection.style.display = 'none';
-                            // Reset min attributes
-                            if (endInput) endInput.removeAttribute('min');
+                            
+                            // Auto-refresh the details panel if a date is currently selected
+                            if (selectedDate) {
+                                setTimeout(() => {
+                                    showDayDetails(selectedDate);
+                                }, 1000); // Wait for calendar events to load
+                            }
+                            
+                            const message = isEditMode ? 'Schedule updated successfully!' : 'Schedule created successfully!';
+                            showAlert('success', data.message || message);
                         } else {
-                            showAlert('error', data.message || 'Error creating schedule');
+                            const message = isEditMode ? 'Error updating schedule' : 'Error creating schedule';
+                            showAlert('error', data.message || message);
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        showAlert('error', 'Error creating schedule');
+                        const message = isEditMode ? 'Error updating schedule' : 'Error creating schedule';
+                        showAlert('error', message);
+                    })
+                    .finally(() => {
+                        // Reset button state
+                        saveBtn.innerHTML = originalText;
+                        saveBtn.disabled = false;
                     });
                 });
             }
@@ -1677,19 +1896,109 @@
             if (confirmDeleteBtn) {
                 confirmDeleteBtn.addEventListener('click', function() {
                     const eventId = this.dataset.eventId;
+                    const dateStr = this.dataset.dateStr;
                     if (eventId) {
-                        deleteEvent(eventId);
+                        deleteEvent(eventId, dateStr);
                     }
+                });
+            }
+
+
+
+            // Pre-populate modal with selected date when modal opens (only for new events)
+            const addEventModal = document.getElementById('addEventModal');
+            if (addEventModal) {
+                addEventModal.addEventListener('show.bs.modal', function() {
+                    // Don't auto-populate if in edit mode
+                    if (this.dataset.editMode === 'true') {
+                        return;
+                    }
+                    
+                    if (selectedDate) {
+                        // Check if selected date is valid (future date)
+                        const today = new Date();
+                        const tomorrow = new Date(today);
+                        tomorrow.setDate(today.getDate() + 1);
+                        const tomorrowStr = tomorrow.toISOString().split('T')[0];
+                        
+                        // Only pre-populate if selected date is today or future
+                        const selectedDateObj = new Date(selectedDate);
+                        const todayObj = new Date();
+                        todayObj.setHours(0, 0, 0, 0);
+                        selectedDateObj.setHours(0, 0, 0, 0);
+                        
+                        if (selectedDateObj >= todayObj) {
+                            // Pre-populate single date input
+                            const singleDateInput = document.getElementById('singleDateInput');
+                            if (singleDateInput) {
+                                singleDateInput.value = selectedDate;
+                            }
+
+                            // Pre-populate date range inputs with the selected date
+                            const beginInput = document.getElementById('addNewBeginInput');
+                            const endInput = document.getElementById('addNewEndInput');
+                            if (beginInput) {
+                                beginInput.value = selectedDate;
+                                // Update minimum date for end input
+                                endInput.min = selectedDate;
+                            }
+                            if (endInput) {
+                                endInput.value = selectedDate;
+                            }
+
+                            console.log('Modal opened with pre-selected date:', selectedDate);
+                        } else {
+                            console.log('Selected date is in the past, not pre-populating:', selectedDate);
+                        }
+                    }
+                });
+
+                // Clear form when modal is hidden
+                addEventModal.addEventListener('hidden.bs.modal', function() {
+                    // Reset form
+                    const form = document.getElementById('addEventForm');
+                    if (form) {
+                        form.reset();
+                    }
+                    
+                    // Reset edit mode
+                    this.dataset.editMode = 'false';
+                    this.dataset.editEventId = '';
+                    
+                    // Reset modal title and button text
+                    const modalTitle = document.getElementById('addEventModalLabel');
+                    const saveBtn = this.querySelector('.btn-save');
+                    modalTitle.innerHTML = '<i class="fas fa-calendar-plus me-2"></i>@lang('profile.block-calendar-dates')';
+                    saveBtn.innerHTML = '<i class="fas fa-save me-2"></i>@lang('profile.save-schedule')';
+                    
+                    // Reset to single day mode
+                    const singleDayRadio = document.getElementById('singleDay');
+                    const dateRangeRadio = document.getElementById('dateRange');
+                    const singleDaySection = document.getElementById('singleDaySection');
+                    const dateRangeSection = document.getElementById('dateRangeSection');
+                    
+                    if (singleDayRadio) singleDayRadio.checked = true;
+                    if (singleDaySection) singleDaySection.style.display = 'block';
+                    if (dateRangeSection) dateRangeSection.style.display = 'none';
+                    
+                    // Reset min attributes
+                    const endInput = document.getElementById('addNewEndInput');
+                    if (endInput) endInput.removeAttribute('min');
+                    
+                    console.log('Modal closed, form reset');
                 });
             }
         }
 
-        function deleteEvent(eventId) {
+        function deleteEvent(eventId, dateStr = null) {
+            // Use POST with _method override for better Laravel compatibility
+            const formData = new FormData();
+            formData.append('_method', 'DELETE');
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+            
             fetch(`{{ url('/profile/calendar/delete') }}/${eventId}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
+                method: 'POST',
+                body: formData
             })
             .then(response => response.json())
             .then(data => {
@@ -1697,15 +2006,74 @@
                     const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteEventModal'));
                     if (deleteModal) deleteModal.hide();
                     loadCalendarEvents();
-                    showAlert('success', data.message);
+                    
+                    // Auto-refresh the details panel if we have a date or selected date
+                    const refreshDate = dateStr || selectedDate;
+                    if (refreshDate) {
+                        setTimeout(() => {
+                            showDayDetails(refreshDate);
+                        }, 1000);
+                    }
+                    
+                    showAlert('success', data.message || 'Schedule deleted successfully!');
                 } else {
-                    showAlert('error', data.error || 'Error deleting event');
+                    showAlert('error', data.error || data.message || 'Error deleting event');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
                 showAlert('error', 'Error deleting event');
             });
+        }
+
+        function editCustomEvent(eventId, dateStr, note) {
+            // Set up add modal for editing
+            const addModal = document.getElementById('addEventModal');
+            const modalTitle = document.getElementById('addEventModalLabel');
+            const saveBtn = addModal.querySelector('.btn-save');
+            
+            // Change modal title and button text for editing
+            modalTitle.innerHTML = '<i class="fas fa-edit me-2"></i>Edit Custom Schedule';
+            saveBtn.innerHTML = '<i class="fas fa-save me-2"></i>Update Schedule';
+            
+            // Store edit data
+            addModal.dataset.editMode = 'true';
+            addModal.dataset.editEventId = eventId;
+            
+            // Pre-populate the form with existing data
+            const singleDateInput = document.getElementById('singleDateInput');
+            const noteInput = document.getElementById('eventNote');
+            
+            if (singleDateInput) singleDateInput.value = dateStr;
+            if (noteInput) noteInput.value = note;
+            
+            // Ensure single day mode is selected
+            const singleDayRadio = document.getElementById('singleDay');
+            const singleDaySection = document.getElementById('singleDaySection');
+            const dateRangeSection = document.getElementById('dateRangeSection');
+            
+            if (singleDayRadio) singleDayRadio.checked = true;
+            if (singleDaySection) singleDaySection.style.display = 'block';
+            if (dateRangeSection) dateRangeSection.style.display = 'none';
+
+            // Show the modal
+            const modal = new bootstrap.Modal(addModal);
+            modal.show();
+        }
+
+        function deleteCustomEvent(eventId, dateStr) {
+            // Set up delete modal with event data
+            const deleteModal = document.getElementById('deleteEventModal');
+            const confirmDeleteBtn = document.getElementById('confirmDelete');
+
+            if (confirmDeleteBtn) {
+                confirmDeleteBtn.dataset.eventId = eventId;
+                confirmDeleteBtn.dataset.dateStr = dateStr;
+            }
+
+            // Show the modal
+            const modal = new bootstrap.Modal(deleteModal);
+            modal.show();
         }
 
         function showAlert(type, message) {
@@ -1852,24 +2220,32 @@
     </div>
 </div>
 
+
+
 <!-- Delete Event Modal -->
 <div class="modal fade" id="deleteEventModal" tabindex="-1" aria-labelledby="deleteEventModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteEventModalLabel">@lang('profile.clearBtn')</h5>
+                <h5 class="modal-title" id="deleteEventModalLabel">
+                    <i class="fas fa-trash me-2"></i>Delete Custom Schedule
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="row">
-                    <div class="col-12">
-                        @lang('profile.clearMsg')
-                    </div>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Are you sure?</strong>
                 </div>
+                <p>This will permanently delete this custom blocked date from your calendar. This action cannot be undone.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@lang('profile.interrupt')</button>
-                <button type="button" id="confirmDelete" class="btn btn-danger">@lang('profile.clearBD')</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </button>
+                <button type="button" id="confirmDelete" class="btn btn-danger">
+                    <i class="fas fa-trash me-2"></i>Delete Schedule
+                </button>
             </div>
         </div>
     </div>
