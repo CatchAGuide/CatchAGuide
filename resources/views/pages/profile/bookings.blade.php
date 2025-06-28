@@ -568,32 +568,7 @@
             margin-top: 8px;
         }
 
-        /* Clickable status badge styles */
-        .profile-bookings-container .status-badge.clickable {
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-            background: inherit;
-            font-size: inherit;
-            font-weight: inherit;
-            text-transform: inherit;
-            letter-spacing: inherit;
-        }
 
-        .profile-bookings-container .status-badge.clickable:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-
-        .profile-bookings-container .status-badge.clickable.status-cancelled:hover {
-            background: #e8bfc2;
-            border-color: #d1414a;
-        }
-
-        .profile-bookings-container .status-badge.clickable.status-rejected:hover {
-            background: #e8bfc2;
-            border-color: #d1414a;
-        }
 
         /* Rejection details modal styles */
         .rejection-details-modal .modal-header {
@@ -680,32 +655,6 @@
     <!-- Wrap entire content in scoped container -->
     <div class="profile-bookings-container">
         <!-- Header Section -->
-        <!-- TEST BUTTON - Remove after testing -->
-        <div style="margin-bottom: 20px;">
-            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#testModal">
-                🧪 Test Modal (Remove after testing)
-            </button>
-        </div>
-        
-        <!-- Test Modal -->
-        <div class="modal fade" id="testModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">✅ Modal Functionality Works!</h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <p>If you can see this modal, then the functionality is working correctly!</p>
-                        <p>The rejection/cancellation modals should work the same way.</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div class="bookings-header">
         <h1 class="mb-0 text-white">
             <i class="fas fa-calendar-check"></i>
@@ -846,19 +795,9 @@
                             <p class="booking-subtitle">📍 {{ $booking->guiding->location ?? 'Location not specified' }}</p>
                         </div>
                         <div class="booking-status">
-                            @if(in_array($booking->status, ['cancelled', 'rejected', 'storniert']) && $booking->additional_information)
-                                <button class="status-badge status-{{ $booking->status }} clickable" 
-                                        data-toggle="modal" 
-                                        data-target="#rejectionModal{{ $index }}"
-                                        title="Click to see details">
-                                    {{ ucfirst(translate($booking->status)) }}
-                                    <i class="fas fa-info-circle ms-1"></i>
-                                </button>
-                            @else
-                                <span class="status-badge status-{{ $booking->status }}">
-                                    {{ ucfirst(translate($booking->status)) }}
-                                </span>
-                            @endif
+                            <span class="status-badge status-{{ $booking->status }}">
+                                {{ ucfirst(translate($booking->status)) }}
+                            </span>
                         </div>
                     </div>
                     
@@ -955,6 +894,10 @@
                                 <span class="btn-action btn-secondary">
                                     <i class="fas fa-clock"></i> Waiting for Response
                                 </span>
+                            @elseif(in_array($booking->status, ['cancelled', 'rejected', 'storniert']) && $booking->additional_information)
+                                <button class="btn-action btn-danger" data-bs-toggle="modal" data-bs-target="#rejectionModal{{ $index }}">
+                                    <i class="fas fa-exclamation-triangle"></i> {{ $booking->status == 'cancelled' ? 'Cancellation' : 'Rejection' }} Details
+                                </button>
                             @else
                                 <span class="btn-action btn-secondary">
                                     <i class="fas fa-info-circle"></i> {{ ucfirst($booking->status) }}
@@ -972,7 +915,7 @@
                                     <h5 class="modal-title">
                                         <i class="fas fa-file-alt"></i> Booking Confirmation Details - Reference #{{ $booking->id }}
                                     </h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
                                     <div class="row">
@@ -1101,7 +1044,7 @@
                                     <h5 class="modal-title">
                                         <i class="fas fa-address-book"></i> Professional Guide Contact
                                     </h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
                                     <div class="contact-info">
@@ -1130,7 +1073,7 @@
                                         <i class="fas fa-exclamation-triangle"></i> 
                                         {{ ucfirst($booking->status) }} Details - Booking #{{ $booking->id }}
                                     </h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
                                     <div class="rejection-content">
@@ -1202,7 +1145,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     @if($booking->status == 'rejected' && $booking->guiding->user)
-                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#contactModal{{ $index }}" data-dismiss="modal">
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#contactModal{{ $index }}" data-bs-dismiss="modal">
                                             <i class="fas fa-envelope"></i> Contact Guide
                                         </button>
                                     @endif
@@ -1241,19 +1184,9 @@
                             <p class="booking-subtitle">📍 {{ $booking->guiding->location ?? 'Location not specified' }}</p>
                         </div>
                         <div class="booking-status">
-                            @if(in_array($booking->status, ['cancelled', 'rejected', 'storniert']) && $booking->additional_information)
-                                <button class="status-badge status-{{ $booking->status }} clickable" 
-                                        data-toggle="modal" 
-                                        data-target="#guideRejectionModal{{ $gIndex }}"
-                                        title="Click to see details">
-                                    {{ ucfirst(translate($booking->status)) }}
-                                    <i class="fas fa-info-circle ms-1"></i>
-                                </button>
-                            @else
-                                <span class="status-badge status-{{ $booking->status }}">
-                                    {{ ucfirst(translate($booking->status)) }}
-                                </span>
-                            @endif
+                            <span class="status-badge status-{{ $booking->status }}">
+                                {{ ucfirst(translate($booking->status)) }}
+                            </span>
                         </div>
                     </div>
                     
@@ -1347,6 +1280,10 @@
                                 <button class="btn-action btn-info" data-bs-toggle="modal" data-bs-target="#guideContactModal{{ $gIndex }}">
                                     <i class="fas fa-envelope"></i> Contact Customer
                                 </button>
+                            @elseif(in_array($booking->status, ['cancelled', 'rejected', 'storniert']) && $booking->additional_information)
+                                <button class="btn-action btn-danger" data-bs-toggle="modal" data-bs-target="#guideRejectionModal{{ $gIndex }}">
+                                    <i class="fas fa-exclamation-triangle"></i> {{ $booking->status == 'cancelled' ? 'Cancellation' : 'Rejection' }} Details
+                                </button>
                             @else
                                 <span class="btn-action btn-secondary">
                                     <i class="fas fa-info-circle"></i> {{ ucfirst($booking->status) }}
@@ -1364,7 +1301,7 @@
                                     <h5 class="modal-title">
                                         <i class="fas fa-file-alt"></i> Guide Service Details - Reference #{{ $booking->id }}
                                     </h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
                                     <div class="row">
@@ -1488,7 +1425,7 @@
                                     <h5 class="modal-title">
                                         <i class="fas fa-address-book"></i> Client Contact Information
                                     </h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
                                     <div class="contact-info">
@@ -1517,7 +1454,7 @@
                                         <i class="fas fa-exclamation-triangle"></i> 
                                         {{ ucfirst($booking->status) }} Details - Booking #{{ $booking->id }}
                                     </h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
                                     <div class="rejection-content">
@@ -1588,7 +1525,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     @if($booking->user)
-                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#guideContactModal{{ $gIndex }}" data-dismiss="modal">
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#guideContactModal{{ $gIndex }}" data-bs-dismiss="modal">
                                             <i class="fas fa-envelope"></i> Contact Client
                                         </button>
                                     @endif

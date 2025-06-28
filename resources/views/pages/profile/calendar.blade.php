@@ -10,56 +10,6 @@
 
 @section('profile-content')
 
-    <!-- Calendar Layout -->
-    <div class="row">
-        <!-- Calendar Panel -->
-        <div class="col-12">
-            <div class="calendar-panel">
-                <!-- Calendar Container -->
-                <div class="calendar-container">
-                    <div id="lite-datepicker"></div>
-                    <!-- Loading Overlay -->
-                    <div id="calendarLoadingOverlay" class="calendar-loading-overlay">
-                        <div class="calendar-loading-spinner">
-                            <div class="spinner"></div>
-                            <div class="loading-text">Applying calendar colors...</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Calendar Legend - Below Calendar -->
-                <div class="calendar-legend mt-1">
-                    <div class="legend-items" id="calendarLegend">
-                        <div class="legend-item" id="confirmedLegend">
-                            <div class="legend-color legend-accepted"></div>
-                            <span class="legend-text">@lang('profile.confirmed')</span>
-                        </div>
-                        <div class="legend-item" id="pendingLegend">
-                            <div class="legend-color legend-pending"></div>
-                            <span class="legend-text">@lang('profile.pending')</span>
-                        </div>
-                        <div class="legend-item" id="rejectedLegend">
-                            <div class="legend-color legend-rejected"></div>
-                            <span class="legend-text">@lang('profile.rejected')</span>
-                        </div>
-                        <div class="legend-item" id="customLegend">
-                            <div class="legend-color legend-custom"></div>
-                            <span class="legend-text">@lang('profile.custom')</span>
-                        </div>
-                        <div class="legend-item" id="availableLegend" style="display: none;">
-                            <div class="legend-color legend-available"></div>
-                            <span class="legend-text">@lang('profile.available')</span>
-                        </div>
-                        <div class="legend-item" id="unavailableLegend" style="display: none;">
-                            <div class="legend-color legend-unavailable"></div>
-                            <span class="legend-text">@lang('profile.unavailable')</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Bottom Row: Tour Filter (Left) and Details (Right) -->
     <div class="row mt-4">
         <!-- Tour Filter Panel -->
@@ -138,6 +88,55 @@
         </div>
     </div>
 
+    <!-- Calendar Layout -->
+    <div class="row">
+        <!-- Calendar Panel -->
+        <div class="col-12">
+            <div class="calendar-panel">
+                <!-- Calendar Container -->
+                <div class="calendar-container">
+                    <div id="lite-datepicker"></div>
+                    <!-- Loading Overlay -->
+                    <div id="calendarLoadingOverlay" class="calendar-loading-overlay">
+                        <div class="calendar-loading-spinner">
+                            <div class="spinner"></div>
+                            <div class="loading-text">Applying calendar colors...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Calendar Legend - Below Calendar -->
+                <div class="calendar-legend mt-1">
+                    <div class="legend-items" id="calendarLegend">
+                        <div class="legend-item" id="confirmedLegend">
+                            <div class="legend-color legend-accepted"></div>
+                            <span class="legend-text">@lang('profile.confirmed')</span>
+                        </div>
+                        <div class="legend-item" id="pendingLegend">
+                            <div class="legend-color legend-pending"></div>
+                            <span class="legend-text">@lang('profile.pending')</span>
+                        </div>
+                        <div class="legend-item" id="rejectedLegend">
+                            <div class="legend-color legend-rejected"></div>
+                            <span class="legend-text">@lang('profile.rejected')</span>
+                        </div>
+                        <div class="legend-item" id="customLegend">
+                            <div class="legend-color legend-custom"></div>
+                            <span class="legend-text">@lang('profile.custom')</span>
+                        </div>
+                        <div class="legend-item" id="availableLegend" style="display: none;">
+                            <div class="legend-color legend-available"></div>
+                            <span class="legend-text">@lang('profile.available')</span>
+                        </div>
+                        <div class="legend-item" id="unavailableLegend" style="display: none;">
+                            <div class="legend-color legend-unavailable"></div>
+                            <span class="legend-text">@lang('profile.unavailable')</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 @endsection
