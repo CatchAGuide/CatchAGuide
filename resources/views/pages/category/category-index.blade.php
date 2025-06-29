@@ -314,7 +314,7 @@
                         @foreach($favories as $fav)
                             <div class="item">
                                 <div class="col-sm-12">
-                                    <a href="{{ route($route, ['slug' => $fav->slug]) }}">
+                                    <a href="{{ route('category.targets', ['type' => $type, 'slug' => $fav->slug]) }}">
                                         <div class="card">
                                             <div class="card-img">
                                                 <img src="{{ $fav->getThumbnailPath() }}" class="dimg-fluid" alt="{{ $fav->language->title }}">
@@ -337,7 +337,7 @@
                         @foreach($allTargets as $targets)
                             <div class="col-md-4 my-1">
                                 <div class="trending-card">
-                                    <a href="{{ route($route, ['slug' => $targets->slug]) }}"> 
+                                    <a href="{{ route('category.targets', ['type' => $type, 'slug' => $targets->slug]) }}"> 
                                         <div class="trending-card-wrapper">
                                             <img alt="{{$targets->language->title}}" class="trending-card-background" src="{{asset($targets->thumbnail_path ?? 'images/placeholder_guide.jpg')}}">
 

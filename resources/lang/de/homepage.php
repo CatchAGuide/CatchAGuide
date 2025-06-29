@@ -63,6 +63,9 @@ return [
     'targetfish-title' => 'Beliebteste Zielfische',
     'targetfish-message' => 'Wähle deine bevorzugten Zielfisch',
 
+    'methods-title' => 'Beliebteste Angelmethoden',
+    'methods-message' => 'Wähle deine bevorzugte Angelmethode',
+
     'targetfish-pike' => 'Hecht',
     'targetfish-perch' => 'Barsch',
     'targetfish-zander' => 'Zander',

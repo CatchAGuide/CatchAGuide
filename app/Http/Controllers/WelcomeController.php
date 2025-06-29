@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Guiding;
 use App\Models\Target;
+use App\Models\Method;
 use App\Models\Thread;
 use App\Models\Booking;
 use App\Models\CategoryPage;
@@ -20,31 +21,18 @@ class WelcomeController extends Controller
     public function index()
     {
         $language = app()->getLocale();
-        // if (Cache::has('homepage_data_' . app()->getLocale())) {
-        //     // If cached, retrieve the data from the cache for the current locale
-        //     $data = Cache::get('homepage_data_' . app()->getLocale());
-        // } else {
-        //     // If not cached, fetch the data from the database for the current locale and cache it
-        //     $mostBookedGuidings = Guiding::withCount('bookings')
-        //         ->where('status', 1)
-        //         ->orderBy('bookings_count', 'desc')
-        //         ->take(5)
-        //         ->get();
+        $allCategoryPages = CategoryPage::orderBy('name', 'asc')
+            ->whereIn('type', ['Targets', 'Methods'])
+            ->where('is_favorite', 1)
+            ->get();
         
-        //     $data = [
-        //         'recent_guidings' => Guiding::where('status', 1)->orderBy('created_at', 'desc')->limit(8)->get(),
-        //         'most_booked_guidings' => $mostBookedGuidings,
-        //         'threads' => Thread::orderBy('id', 'desc')->where('language', app()->getLocale())->limit(5)->get(),
-        //         'targets' => Target::orderBy('name', 'asc')->get()
-        //     ];
+        // Filter for Targets
+        $CategoryPage = $allCategoryPages->where('type', 'Targets');
         
-        //     // Cache the data for 5 minutes (adjust the cache duration as needed)
-        //     Cache::put('homepage_data_' . app()->getLocale(), $data, 3600);
-        // }
-        // return view('pages.index', $data);
-        $CategoryPage = CategoryPage::orderBy('name', 'asc')->whereType('Targets')->whereIsFavorite(1)->get();
+        // Filter for Methods
+        $CategoryPageMethods = $allCategoryPages->where('type', 'Methods');
 
-        return view('pages.newhome-latest', compact('CategoryPage'));
+        return view('pages.newhome-latest', compact('CategoryPage', 'CategoryPageMethods'));
     }
     
     public function getUserLocation(Request $request)

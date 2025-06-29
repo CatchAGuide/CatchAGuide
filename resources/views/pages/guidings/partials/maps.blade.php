@@ -36,13 +36,11 @@
                 <div class="card-body border-0 p-0">
                     <div class="d-flex">
                         @php
-                            // if (file_exists(public_path($guiding->thumbnail_path))) {
-                                $thumbnailPath = asset($guiding->thumbnail_path);
-                            // } else {
-                            //     $thumbnailPath = asset('images/placeholder_guide.jpg');
-                            // }
+                            $thumbnailSrc = ($guiding->thumbnail_path && file_exists_cached($guiding->thumbnail_path)) 
+                                ? asset($guiding->thumbnail_path) 
+                                : asset('images/placeholder_guide.jpg');
                         @endphp
-                        <img src="{{$thumbnailPath}}" alt="{{translate($guiding->title)}}" style="width: 100%; height: 150px; object-fit: cover;">
+                        <img src="{{ $thumbnailSrc }}" alt="{{translate($guiding->title)}}" style="width: 100%; height: 150px; object-fit: cover;">
                     </div>
                     <div class="p-2">
                         <a class="text-decoration-none" href="{{route('guidings.show',[$guiding->id,$guiding->slug])}}">

@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Target;
+use App\Models\Method;
 
 class CategoryPage extends Model
 {
@@ -14,7 +16,8 @@ class CategoryPage extends Model
         'type', 
         'name', 
         'slug', 
-        'thumbnail_path'
+        'thumbnail_path',
+        'is_favorite'
     ];
 
     public function language($languageCode = null)
@@ -66,6 +69,7 @@ class CategoryPage extends Model
         // Map types to model classes
         $typeToModel = [
             'Targets' => Target::class,
+            'Methods' => Method::class,
             // Add other mappings as needed
         ];
         

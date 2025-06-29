@@ -11,63 +11,62 @@ use App\Models\ModelImage;
 
 trait ModelImageTrait
 {
-
-    public function images(){
+    public function images()
+    {
         return $this->morphMany(ModelImage::class, 'model');
     }
 
-    public function getImageUrl($imageName='image', $imageSize = 'thumb'){
-
-        if(!($this->id>0)){
-            return;
+    public function getImageUrl($imageName = 'image', $imageSize = 'thumb')
+    {
+        if (!($this->id > 0)) {
+            return null;
         }
 
-        $image = $this->images->where('image_name',$imageName)->where('image_size',$imageSize)->first();
+        $image = $this->images->where('image_name', $imageName)->where('image_size', $imageSize)->first();
 
-        if($image && strlen($image->image_url)){
+        if ($image && $image->image_url !== null && $image->image_url !== '') {
             return $image->image_url;
         }
 
         $imageUrl = app('asset')->getThumbnail($this, $imageName, $imageSize);
 
-        if(strlen($imageUrl)){
+        if ($imageUrl !== null && $imageUrl !== '') {
             $this->saveImage(url($imageUrl), $imageName, $imageSize);
             return $imageUrl;
         }
-
 
         // save empty
         $this->saveImage('', $imageName, $imageSize);
 
         // return empty
-        return;
+        return null;
     }
 
-    public function saveImage($imageUrl, $imageName='image', $imageSize = 'thumb'){
-
+    public function saveImage($imageUrl, $imageName = 'image', $imageSize = 'thumb')
+    {
         return ModelImage::updateOrCreate([
             'model_id' => $this->id,
             'model_type' => get_class($this),
             'image_name' => $imageName,
             'image_size' => $imageSize
-        ],[
+        ], [
             'image_url' => $imageUrl,
-            'image_exists' => strlen($imageUrl) ? 1 : 0
+            'image_exists' => ($imageUrl !== null && $imageUrl !== '') ? 1 : 0
         ]);
     }
 
-
-    public function hasImage($imageName='image'){
-
-        // problematic
-        if(!($this->id>0)){
+    public function hasImage($imageName = 'image')
+    {
+        if (!($this->id > 0)) {
             return false;
         }
 
-        $image = $this->images->where('image_name',$imageName)->first();
+        $image = $this->images->where('image_name', $imageName)->first();
 
-        if($image && strlen($image->image_url)){
-            return $image->image_exists==1;
+        if ($image && $image->image_url !== null && $image->image_url !== '') {
+            return $image->image_exists == 1;
         }
+
+        return false;
     }
 }

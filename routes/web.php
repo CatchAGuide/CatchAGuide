@@ -48,6 +48,7 @@ use App\Http\Controllers\VacationBookingController;
 use App\Http\Controllers\CategoryTargetFishController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Category\DestinationCountryController;
+use App\Http\Controllers\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -102,6 +103,8 @@ Route::post('/newguiding/save-draft', [GuidingsController::class, 'saveDraft'])-
 Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(function () {
     Route::get('/', [App\Http\Controllers\ProfileController::class, 'index'])->name('index');
     Route::get('/settings', [App\Http\Controllers\ProfileController::class, 'settings'])->name('settings');
+    Route::get('/password', [App\Http\Controllers\ProfileController::class, 'password'])->name('password');
+    Route::put('/password', [App\Http\Controllers\ProfileController::class, 'passwordUpdate'])->name('password.update');
     Route::get('/z', [App\Http\Controllers\ProfileController::class, 'abbuchen'])->name('abbuchen');
     Route::get('/becomeguide', [App\Http\Controllers\ProfileController::class, 'becomeguide'])->name('becomeguide');
     Route::put('/account', [App\Http\Controllers\ProfileController::class, 'accountUpdate'])->name('account');
@@ -112,11 +115,14 @@ Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(functi
     Route::get('/myguidings/deactivate/{guiding}', [App\Http\Controllers\ProfileController::class, 'deactivate'])->name('guiding.deactivate');
 
     Route::get('/bookings', [App\Http\Controllers\ProfileController::class, 'bookings'])->name('bookings');
+    Route::get('/bookings/load-more', [App\Http\Controllers\ProfileController::class, 'loadMoreBookings'])->name('bookings.load-more');
 
     Route::get('showbooking/{bookingid}', [App\Http\Controllers\ProfileController::class, 'showbooking'])->name('showbooking');
     Route::get('stornobooking/{bookingid}', [App\Http\Controllers\ProfileController::class, 'stornobooking'])->name('stornobooking');
 
-    Route::get('/guidebookings', [App\Http\Controllers\ProfileController::class, 'guidebookings'])->name('guidebookings');
+    Route::get('/guidebookings', function() {
+        return redirect()->route('profile.bookings');
+    })->name('guidebookings');
 
     Route::get('/guidebookings/accept/{booking}', [App\Http\Controllers\ProfileController::class, 'accept'])->name('guidebookings.accept');
     Route::get('/guidebookings/reject/{booking}', [App\Http\Controllers\ProfileController::class, 'reject'])->name('guidebookings.reject');
@@ -124,9 +130,14 @@ Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(functi
     Route::get('/newguiding', [App\Http\Controllers\ProfileController::class, 'newguiding'])->name('newguiding');
 
     Route::get('/payments', [App\Http\Controllers\ProfileController::class, 'payments'])->name('payments');
+    Route::put('/payments', [App\Http\Controllers\ProfileController::class, 'paymentsUpdate'])->name('payments.update');
     Route::get('/calendar', [App\Http\Controllers\ProfileController::class, 'calendar'])->name('calendar');
     Route::post('/calendar/store', [\App\Http\Controllers\Api\EventsController::class, 'store'])->name('calendar.store');
+    Route::post('/calendar/custom', [\App\Http\Controllers\Api\EventsController::class, 'storeCustomSchedule'])->name('calendar.store.custom');
+    Route::put('/calendar/update/{id}', [\App\Http\Controllers\Api\EventsController::class, 'update'])->name('calendar.update');
     Route::get('/calendar/delete/{id}', [\App\Http\Controllers\Api\EventsController::class, 'delete'])->name('calendar.delete');
+    Route::delete('/calendar/delete/{id}', [\App\Http\Controllers\Api\EventsController::class, 'delete'])->name('calendar.delete.ajax');
+    Route::get('/calendar/guidings', [\App\Http\Controllers\Api\EventsController::class, 'getUserGuidings'])->name('calendar.guidings');
     Route::post('/getbalance', [App\Http\Controllers\ProfileController::class, 'getbalance'])->name('getbalance');
 
     Route::get('process-merchant-status', [App\Http\Controllers\ProfileController::class, 'processMerchantStatus'])->name('processmerchantstatus');
@@ -217,8 +228,8 @@ Route::get('destination', [DestinationCountryController::class, 'index'])->name(
 Route::get('destinationen', [DestinationCountryController::class, 'index'])->name('destination_de');
 Route::get('destination/{country}/{region?}/{city?}', [DestinationCountryController::class, 'country'])->name('destination.country');
 
-Route::get('category/target-fish/', [CategoryTargetFishController::class, 'index'])->name('target-fish.index');
-Route::get('category/target-fish/{slug}', [CategoryTargetFishController::class, 'targets'])->name('target-fish.targets');
+Route::get('category-page/{type}/', [CategoryController::class, 'index'])->name('category.types');
+Route::get('category-page/{type}/{slug}', [CategoryController::class, 'targets'])->name('category.targets');
 
 Route::post('sendcontact', [\App\Http\Controllers\ZoisController::class, 'sendcontact'])->name('sendcontactmail');
 Route::post('sendnewsletter', [\App\Http\Controllers\ZoisController::class, 'sendnewsletter'])->name('sendnewsletter');

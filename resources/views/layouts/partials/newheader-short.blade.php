@@ -19,10 +19,10 @@
                         <i class="fas fa-question-circle"></i>
                     </a>
                     <div class="nav-link language-selector">
-                        <form action="{{ route('language.switch') }}" method="POST" class="d-flex align-items-center">
+                        <form action="{{ route('language.switch') }}" method="POST" class="d-flex align-items-center" id="desktop-language-form">
                             @csrf
                             <i class="fas fa-map-signs me-2"></i>
-                            <select name="language" class="selectpicker header-language-select" data-width="fit" onchange="this.form.submit()">
+                            <select name="language" class="selectpicker header-language-select" data-width="fit" onchange="handleLanguageSwitch(this, 'desktop-language-form')">
                                 @foreach (config('app.locales') as $key => $locale)
                                     <option value="{{ $locale }}" 
                                             data-content='<span class="fi fi-{{$key}}"></span>' 
@@ -1133,19 +1133,19 @@ input[type=number] {
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form action="{{ route('language.switch') }}" method="POST">
+                <form action="{{ route('language.switch') }}" method="POST" id="mobile-language-form">
                     @csrf
                     <div class="list-group">
                         @foreach (config('app.locales') as $key => $locale)
-                            <button type="submit" 
-                                    name="language" 
-                                    value="{{ $locale }}" 
+                            <button type="button" 
+                                    onclick="handleMobileLanguageSwitch('{{ $locale }}')"
                                     class="list-group-item list-group-item-action d-flex align-items-center {{ app()->getLocale() == $locale ? 'active' : '' }}">
                                 <span class="fi fi-{{$key}} me-2"></span>
                                 {{ strtoupper($locale) }}
                             </button>
                         @endforeach
                     </div>
+                    <input type="hidden" name="language" id="selected-language" value="">
                 </form>
             </div>
         </div>
@@ -1296,5 +1296,58 @@ function validateSearch(event, inputId) {
     }
 
     return true;
+}
+
+function handleLanguageSwitch(selectElement, formId) {
+    const form = document.getElementById(formId);
+    const selectedLanguage = selectElement.value;
+    
+    // Add the current clean URL as a hidden input
+    const currentUrl = window.location.pathname;
+    
+    // Remove existing redirect_url input if any
+    const existingInput = form.querySelector('input[name="redirect_url"]');
+    if (existingInput) {
+        existingInput.remove();
+    }
+    
+    // Add clean URL as redirect target
+    const redirectInput = document.createElement('input');
+    redirectInput.type = 'hidden';
+    redirectInput.name = 'redirect_url';
+    redirectInput.value = currentUrl;
+    form.appendChild(redirectInput);
+    
+    form.submit();
+}
+
+function handleMobileLanguageSwitch(language) {
+    const form = document.getElementById('mobile-language-form');
+    const languageInput = document.getElementById('selected-language');
+    const currentUrl = window.location.pathname;
+    
+    // Set the selected language
+    languageInput.value = language;
+    
+    // Remove existing redirect_url input if any
+    const existingInput = form.querySelector('input[name="redirect_url"]');
+    if (existingInput) {
+        existingInput.remove();
+    }
+    
+    // Add clean URL as redirect target
+    const redirectInput = document.createElement('input');
+    redirectInput.type = 'hidden';
+    redirectInput.name = 'redirect_url';
+    redirectInput.value = currentUrl;
+    form.appendChild(redirectInput);
+    
+    // Close the modal before submitting
+    const languageModal = bootstrap.Modal.getInstance(document.getElementById('languageModal'));
+    if (languageModal) {
+        languageModal.hide();
+    }
+    
+    form.submit();
 }
 </script>

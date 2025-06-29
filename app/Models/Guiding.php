@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Traits\MethodTraits;
 use App\Traits\ModelImageTrait;
+use App\Traits\Cacheable;
 
 use App\Models\GuidingInclussion;
 use App\Models\GuidingExtras;
@@ -35,7 +36,7 @@ use App\Models\BoatExtras;
  */
 class Guiding extends Model
 {
-    use HasFactory, Geoly, ModelImageTrait;
+    use HasFactory, Geoly, ModelImageTrait, Cacheable;
 
     protected $fillable = [
         'title',
@@ -100,6 +101,7 @@ class Guiding extends Model
         'prices',
         'pricing_extra',
         'months',
+        'weekdays',
         'seasonal_trip',
         'allowed_booking_advance',
         'booking_window',
@@ -444,26 +446,27 @@ class Guiding extends Model
             return $price['person'] > 1 ? round($price['amount'] / $price['person']) : $price['amount'];
         }, $prices));
         
-        return round(min($singlePrice, $minPrice));
+        return round(min($singlePrice ?? PHP_FLOAT_MAX, $minPrice ?? PHP_FLOAT_MAX));
     }
 
     public function getBlockedEvents()
     {
-        $blocked_events = collect($this->user->blocked_events)
+        $blocked_events = collect($this->user->calendar_schedules)
             ->filter(function($blocked) {
                 return $blocked->guiding_id == $this->id || 
-                       ($blocked->guiding_id === null && 
-                        $this->bookings()
-                            ->where('blocked_event_id', $blocked->id)
-                            ->exists());
+                       $blocked->type === 'custom_schedule' || 
+                       $this->bookings()->where('blocked_event_id', $blocked->id)->exists();
             })
             ->map(function($blocked) {
                 return [
-                    "from" => date('Y-m-d', strtotime($blocked->from)),
-                    "due" => date('Y-m-d', strtotime($blocked->due))
+                    "from" => date('Y-m-d', strtotime($blocked->date)),
+                    "due" => date('Y-m-d', strtotime($blocked->date)),
+                    "id" => $blocked->id
                 ];
             })
             ->toArray();
+
+        // dd($blocked_events);
 
         $today = now();
 
@@ -512,12 +515,22 @@ class Guiding extends Model
      * @param int|null $radius Search radius in kilometers
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public static function locationFilter($city = null, $country = null, $region = null, ?int $radius = null, $placeLat = null, $placeLng = null)
+        public static function locationFilter($city = null, $country = null, $region = null, ?int $radius = null, $placeLat = null, $placeLng = null)
     {
+        // Create cache key for location search
+        $cacheKey = 'location_filter_' . md5(serialize([$city, $country, $region, $radius, $placeLat, $placeLng]));
+        
+        // Try to get from cache first (cache for 1 hour)
+        $cachedResult = \Cache::get($cacheKey);
+        if ($cachedResult) {
+            return $cachedResult;
+        }
+
         // Get standardized English names using the helper
         if ($city || $country) {
             $searchQuery = array_filter([$city, $country, $region], fn($val) => !empty($val));
             $searchString = implode(', ', $searchQuery);
+            Log::info('searchString', ['searchString' => $searchString]); 
             
             $translated  = getLocationDetailsGoogle($city, $country, $region);
             if ($translated) {
@@ -526,6 +539,7 @@ class Guiding extends Model
         }
 
         $locationParts = array_merge(['city' => $city, 'country' => $country, 'region' => $region], $locationParts ?? []);
+        Log::info('locationParts', ['locationParts' => $locationParts]); 
 
         $returnData = [
             'message' => '',
@@ -572,22 +586,45 @@ class Guiding extends Model
             })
             ->where('status', 1);
 
-
         $guidings = $query->pluck('id');
 
         if ($guidings->isNotEmpty()) {
             $returnData['ids'] = $guidings;
             $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel1') . ': $countReplace total');
+            
+            // Cache the result for 1 hour
+            \Cache::put($cacheKey, $returnData, 3600);
+            
             return $returnData;
         }
 
         // If no direct matches, use geocoding
-        if ($placeLat && $placeLng) {
-            $coordinates = ['lat' => $placeLat, 'lng' => $placeLng];
+        if ($placeLat && $placeLng && is_numeric($placeLat) && is_numeric($placeLng)) {
+            // Validate coordinate ranges (basic sanity check)
+            $lat = (float) $placeLat;
+            $lng = (float) $placeLng;
+            if ($lat >= -90 && $lat <= 90 && $lng >= -180 && $lng <= 180) {
+                $coordinates = ['lat' => $lat, 'lng' => $lng];
+            } else {
+                Log::warning('Invalid coordinates provided', ['lat' => $placeLat, 'lng' => $placeLng]);
+                $coordinates = null;
+            }
         } else {
-            // $coordinates = self::getCoordinatesFromLocation($locationParts['original']);
-            $coordinates = ['lat' => 48.1373, 'lng' => 11.5755];
+            $coordinates = null;
         }
+        
+        // If no valid coordinates provided, try geocoding
+        if (!$coordinates) {
+            $locationString = implode(', ', array_filter([$city, $region, $country]));
+            $coordinates = self::getCoordinatesFromLocation($locationString);
+            
+            // If geocoding fails, use fallback coordinates (Munich, Germany)
+            if (!$coordinates) {
+                $coordinates = ['lat' => 48.1373, 'lng' => 11.5755];
+            }
+        }
+
+        // Log::info('guidings', ['guidings' => $guidings]); // Removed for performance
         
         if (!$coordinates) {
             return collect();
@@ -595,47 +632,102 @@ class Guiding extends Model
 
         // Try radius search
         $searchRadius = $radius ?? 200;
-        $guidingsRadius = self::select('id')
-            ->selectRaw("ST_Distance_Sphere(
-                point(lng, lat),
-                point(?, ?)
-            ) as distance", [
-                $coordinates['lng'],
-                $coordinates['lat']
-            ])
-            ->whereRaw("ST_Distance_Sphere(
-                point(lng, lat),
-                point(?, ?)
-            ) <= ?", [
-                $coordinates['lng'],
-                $coordinates['lat'],
-                $searchRadius * 1000
-            ])
-            ->where('status', 1)
-            ->orderByRaw('CASE WHEN distance IS NULL THEN 1 ELSE 0 END')
-            ->orderBy('distance')  // Sort by distance ascending
-            ->pluck('id');
+        try {
+            $guidingsRadius = self::select('id')
+                ->selectRaw("ST_Distance_Sphere(
+                    point(lng, lat),
+                    point(?, ?)
+                ) as distance", [
+                    $coordinates['lng'],
+                    $coordinates['lat']
+                ])
+                ->whereRaw("ST_Distance_Sphere(
+                    point(lng, lat),
+                    point(?, ?)
+                ) <= ?", [
+                    $coordinates['lng'],
+                    $coordinates['lat'],
+                    $searchRadius * 1000
+                ])
+                ->where('status', 1)
+                ->whereNotNull('lat')
+                ->whereNotNull('lng')
+                ->where('lat', '!=', 0)
+                ->where('lng', '!=', 0)
+                ->orderByRaw('CASE WHEN distance IS NULL THEN 1 ELSE 0 END')
+                ->orderBy('distance')  // Sort by distance ascending
+                ->limit(100) // Reasonable limit for radius search
+                ->pluck('id');
+        } catch (\Exception $e) {
+            Log::error('Radius search failed in locationFilter', [
+                'error' => $e->getMessage(),
+                'coordinates' => $coordinates,
+                'radius' => $searchRadius
+            ]);
+            $guidingsRadius = collect(); // Empty collection on error
+        }
 
         if ($guidingsRadius->isNotEmpty()) {
             $returnData['ids'] = $guidingsRadius;
             $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel2'));
+            
+            // Cache the result for 1 hour
+            \Cache::put($cacheKey, $returnData, 3600);
+            
             return $returnData;
         }
 
-        // If still no results, find nearest guiding
-        $returnData['ids'] = self::select('id')
-            ->selectRaw("ST_Distance_Sphere(
-                point(lng, lat),
-                point(?, ?)
-            ) as distance", [
-                $coordinates['lng'],
-                $coordinates['lat']
-            ])
-            ->where('status', 1)
-            ->orderByRaw('CASE WHEN distance IS NULL THEN 1 ELSE 0 END')
-            ->orderBy('distance')
-            ->pluck('id');
+        // If still no results, find nearest guidings (limited to reasonable number)
+        try {
+            $returnData['ids'] = self::select('id')
+                ->selectRaw("ST_Distance_Sphere(
+                    point(lng, lat),
+                    point(?, ?)
+                ) as distance", [
+                    $coordinates['lng'],
+                    $coordinates['lat']
+                ])
+                ->where('status', 1)
+                ->whereNotNull('lat')
+                ->whereNotNull('lng')
+                ->where('lat', '!=', 0)
+                ->where('lng', '!=', 0)
+                ->orderByRaw('CASE WHEN distance IS NULL THEN 1 ELSE 0 END')
+                ->orderBy('distance')
+                ->limit(50) // Limit to 50 nearest guidings
+                ->pluck('id');
+        } catch (\Exception $e) {
+            Log::error('Distance calculation failed in locationFilter', [
+                'error' => $e->getMessage(),
+                'coordinates' => $coordinates,
+                'city' => $city,
+                'country' => $country
+            ]);
+            
+            // Fallback: return recent guidings if distance calculation fails
+            $returnData['ids'] = self::where('status', 1)
+                ->whereNotNull('lat')
+                ->whereNotNull('lng')
+                ->orderBy('created_at', 'desc')
+                ->limit(20)
+                ->pluck('id');
+        }
+        
         $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel3'));
+        
+        // Final safety check: if we still have no results, return the most recent guidings
+        if (empty($returnData['ids'])) {
+            Log::warning('All location search methods failed, returning recent guidings as last resort');
+            $returnData['ids'] = self::where('status', 1)
+                ->orderBy('created_at', 'desc')
+                ->limit(20)
+                ->pluck('id');
+            $returnData['message'] = 'Showing recent guidings';
+        }
+        
+        // Cache the result for 1 hour
+        \Cache::put($cacheKey, $returnData, 3600);
+        
         return $returnData;
     }
 
@@ -694,17 +786,19 @@ class Guiding extends Model
      * Get localized fishing method names
      * @return array
      */
-    public function getFishingMethodNames(): array
+    public function getFishingMethodNames($methodsMap = null): array
     {
         $methodIds = json_decode($this->fishing_methods) ?? [];
-        
         if (empty($methodIds)) {
             return [];
         }
-
-        return collect($methodIds)->map(function($item) {
+        return collect($methodIds)->map(function($item) use ($methodsMap) {
             if (is_numeric($item)) {
-                $method = Method::find($item);
+                if ($methodsMap && $methodsMap->has($item)) {
+                    $method = $methodsMap[$item];
+                } else {
+                    $method = Method::find($item);
+                }
                 if ($method && $method->name) {
                     return [
                         'id' => $method->id,
@@ -712,7 +806,6 @@ class Guiding extends Model
                     ];
                 }
             }
-            
             if ($item) {
                 return [
                     'id' => null,
@@ -723,22 +816,23 @@ class Guiding extends Model
         })->filter()->toArray();
     }
 
-
     /**
      * Get localized target fish names
      * @return array
      */
-    public function getTargetFishNames(): array
+    public function getTargetFishNames($targetsMap = null): array
     {
         $targetIds = json_decode($this->target_fish) ?? [];
-        
         if (empty($targetIds)) {
             return [];
         }
-
-        return collect($targetIds)->map(function($item) {
+        return collect($targetIds)->map(function($item) use ($targetsMap) {
             if (is_numeric($item)) {
-                $target = Target::find($item);
+                if ($targetsMap && $targetsMap->has($item)) {
+                    $target = $targetsMap[$item];
+                } else {
+                    $target = Target::find($item);
+                }
                 if ($target && $target->name) {
                     return [
                         'id' => $target->id,
@@ -746,7 +840,6 @@ class Guiding extends Model
                     ];
                 }
             }
-            
             if ($item) {
                 return [
                     'id' => null,
@@ -761,17 +854,19 @@ class Guiding extends Model
      * Get localized inclusion names
      * @return array
      */
-    public function getInclusionNames(): array
+    public function getInclusionNames($inclussionsMap = null): array
     {
         $inclusionIds = json_decode($this->inclusions) ?? [];
-        
         if (empty($inclusionIds)) {
             return [];
         }
-
-        return collect($inclusionIds)->map(function($item) {
+        return collect($inclusionIds)->map(function($item) use ($inclussionsMap) {
             if (is_numeric($item)) {
-                $inclusion = Inclussion::find($item);
+                if ($inclussionsMap && $inclussionsMap->has($item)) {
+                    $inclusion = $inclussionsMap[$item];
+                } else {
+                    $inclusion = Inclussion::find($item);
+                }
                 if ($inclusion && $inclusion->name) {
                     return [
                         'id' => $inclusion->id,
@@ -779,7 +874,6 @@ class Guiding extends Model
                     ];
                 }
             }
-            
             if ($item) {
                 return [
                     'id' => null,
@@ -794,17 +888,19 @@ class Guiding extends Model
      * Get localized water names
      * @return array
      */
-    public function getWaterNames(): array
+    public function getWaterNames($watersMap = null): array
     {
         $waterIds = json_decode($this->water_types) ?? [];
-        
         if (empty($waterIds)) {
             return [];
         }
-
-        return collect($waterIds)->map(function($item) {
+        return collect($waterIds)->map(function($item) use ($watersMap) {
             if (is_numeric($item)) {
-                $water = Water::find($item);
+                if ($watersMap && $watersMap->has($item)) {
+                    $water = $watersMap[$item];
+                } else {
+                    $water = Water::find($item);
+                }
                 if ($water && $water->name) {
                     return [
                         'id' => $water->id,
@@ -812,7 +908,6 @@ class Guiding extends Model
                     ];
                 }
             }
-            
             if ($item) {
                 return [
                     'id' => null,

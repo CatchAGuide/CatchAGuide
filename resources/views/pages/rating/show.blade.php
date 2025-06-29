@@ -1,6 +1,8 @@
-@extends('pages.profile.layouts.profile')
+@extends('layouts.app-v2-1')
 
-@section('profile-content')
+@section('title', __('guidings.rating_title'))
+
+@section('content')
     <div class="container py-4">
         <div class="rating-wrapper shadow-lg">
             <div class="rating-header">
