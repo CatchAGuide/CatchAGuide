@@ -130,6 +130,46 @@ class EventsController extends Controller
         ]);
     }
 
+    /**
+     * Update an existing custom schedule entry
+     */
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'date' => 'required|date',
+            'note' => 'string|max:255',
+            'type' => 'string|in:custom_schedule,vacation_schedule'
+        ]);
+
+        $schedule = CalendarSchedule::where('user_id', auth()->id())->where('id', $id)->first();
+
+        if (!$schedule) {
+            return response()->json(['error' => 'Schedule not found'], 404);
+        }
+
+        // Prevent updating of booking-related schedules
+        if ($schedule->type === 'tour_request' && $schedule->booking_id) {
+            return response()->json(['error' => 'Cannot update booking schedules'], 403);
+        }
+
+        // Only allow updating custom schedules
+        if (!in_array($schedule->type, ['custom_schedule', 'vacation_schedule'])) {
+            return response()->json(['error' => 'Cannot update this type of schedule'], 403);
+        }
+
+        $schedule->update([
+            'date' => $request->date,
+            'note' => $request->note ?? $schedule->note,
+            'type' => $request->type ?? $schedule->type,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Schedule updated successfully!',
+            'data' => new EventResource($schedule)
+        ]);
+    }
+
     public function delete($id)
     {
         $schedule = CalendarSchedule::where('user_id', auth()->id())->where('id', $id)->first();
@@ -145,7 +185,8 @@ class EventsController extends Controller
 
         $schedule->delete();
         
-        if (request()->expectsJson()) {
+        // Always return JSON for API requests or when request expects JSON
+        if (request()->expectsJson() || request()->ajax() || request()->wantsJson() || request()->is('*/calendar/delete/*')) {
             return response()->json([
                 'success' => true,
                 'message' => 'Schedule deleted successfully!'

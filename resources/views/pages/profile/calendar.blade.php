@@ -484,6 +484,33 @@
     z-index: 5 !important;
 }
 
+.litepicker .day-item.is-today {
+    border: 3px solid #fd7e14 !important;
+    box-shadow: 0 0 0 2px rgba(253, 126, 20, 0.2) !important;
+    font-weight: bold !important;
+    position: relative !important;
+}
+
+.litepicker .day-item.is-today::before {
+    content: '';
+    position: absolute !important;
+    top: -2px !important;
+    left: -2px !important;
+    right: -2px !important;
+    bottom: -2px !important;
+    border: 2px solid #fd7e14 !important;
+    border-radius: 8px !important;
+    opacity: 0.5 !important;
+    z-index: -1 !important;
+    animation: pulse-today 2s infinite !important;
+}
+
+@keyframes pulse-today {
+    0% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.02); }
+    100% { opacity: 0.5; transform: scale(1); }
+}
+
 .litepicker .day-item.is-selected,
 .litepicker .day-item.is-start-date,
 .litepicker .day-item.is-end-date {
@@ -491,6 +518,14 @@
     transform: scale(1.1) !important;
     z-index: 10 !important;
     font-weight: bold !important;
+    box-shadow: 0 0 0 1px #000 !important;
+}
+
+/* Ensure selected state takes priority over today */
+.litepicker .day-item.is-today.is-selected,
+.litepicker .day-item.is-today.is-start-date,
+.litepicker .day-item.is-today.is-end-date {
+    border: 3px solid #000 !important;
     box-shadow: 0 0 0 1px #000 !important;
 }
 
@@ -1998,6 +2033,10 @@
             
             fetch(`{{ url('/profile/calendar/delete') }}/${eventId}`, {
                 method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
                 body: formData
             })
             .then(response => response.json())

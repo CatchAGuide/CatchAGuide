@@ -132,6 +132,7 @@ Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(functi
     Route::get('/calendar', [App\Http\Controllers\ProfileController::class, 'calendar'])->name('calendar');
     Route::post('/calendar/store', [\App\Http\Controllers\Api\EventsController::class, 'store'])->name('calendar.store');
     Route::post('/calendar/custom', [\App\Http\Controllers\Api\EventsController::class, 'storeCustomSchedule'])->name('calendar.store.custom');
+    Route::put('/calendar/update/{id}', [\App\Http\Controllers\Api\EventsController::class, 'update'])->name('calendar.update');
     Route::get('/calendar/delete/{id}', [\App\Http\Controllers\Api\EventsController::class, 'delete'])->name('calendar.delete');
     Route::delete('/calendar/delete/{id}', [\App\Http\Controllers\Api\EventsController::class, 'delete'])->name('calendar.delete.ajax');
     Route::get('/calendar/guidings', [\App\Http\Controllers\Api\EventsController::class, 'getUserGuidings'])->name('calendar.guidings');
