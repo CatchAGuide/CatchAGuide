@@ -390,7 +390,7 @@
     @endif
 
     <!-- Transaction History Section -->
-    <div class="table-section">
+    {{-- <div class="table-section">
         <h3 class="section-title">
             <i class="fas fa-history"></i> Transaction History
         </h3>
@@ -432,7 +432,7 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </div> --}}
 
     <!-- Floating Save Button -->
     @if(auth()->user()->is_guide)

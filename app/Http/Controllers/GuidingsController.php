@@ -16,6 +16,7 @@ use App\Models\GuidingBoatDescription;
 use App\Models\GuidingAdditionalInformation;
 use App\Models\GuidingRequirements;
 use App\Models\GuidingRecommendations;
+use App\Traits\GuidingFilterOptimization;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -36,21 +37,11 @@ use App\Services\ImageOptimizationService;
 
 class GuidingsController extends Controller
 {
-    protected $filterService;
-    protected $imageOptimizationService;
+    use GuidingFilterOptimization;
 
     public function __construct()
     {
-        $this->imageOptimizationService = new ImageOptimizationService();
-        // Don't instantiate filter service until needed
-    }
-
-    private function getFilterService()
-    {
-        if (!$this->filterService) {
-            $this->filterService = new GuidingFilterService();
-        }
-        return $this->filterService;
+        $this->initializeOptimizationServices();
     }
 
     public function index(Request $request)
@@ -58,12 +49,9 @@ class GuidingsController extends Controller
         $locale = Config::get('app.locale');
         $destination = null;
 
-        // Get or generate a random seed and store it in the session
-        $randomSeed = Session::get('random_seed');
-        if (!$randomSeed) {
-            $randomSeed = rand();
-            Session::put('random_seed', $randomSeed);
-        }
+        // Get random seed
+        $randomSeed = $this->getRandomSeed();
+        
         // Clean up request parameters before processing
         $cleanedRequest = $this->cleanRequestParameters($request);
         
@@ -241,9 +229,9 @@ class GuidingsController extends Controller
         $otherguidings = [];
         if($allGuidings->isEmpty() || count($allGuidings) <= 3){
             if($request->has('placeLat') && $request->has('placeLng') && !empty($request->get('placeLat')) && !empty($request->get('placeLng')) ){
-                $otherguidings = $this->otherGuidingsBasedByLocation($request->get('placeLat'), $request->get('placeLng'), $allGuidings);
+                $otherguidings = $this->getOtherGuidingsBasedByLocation($request->get('placeLat'), $request->get('placeLng'), $allGuidings);
             } else {
-                $otherguidings = $this->otherGuidings();
+                $otherguidings = $this->getOtherGuidings();
             }
         }
 
@@ -394,9 +382,6 @@ class GuidingsController extends Controller
                 
                 $searchMessage = $guidingFilter['message'];
                 
-                // Debug logging (remove in production)
-                // \Log::info('Location Filter Debug', [...]);
-                
                 // Apply location filter by restricting to location-filtered IDs
                 if (!empty($guidingFilter['ids'])) {
                     $baseQuery->whereIn('id', $guidingFilter['ids']);
@@ -479,9 +464,9 @@ class GuidingsController extends Controller
         $otherguidings = [];
         if($allGuidings->isEmpty() || count($allGuidings) <= 3){
             if($request->has('placeLat') && $request->has('placeLng') && !empty($request->get('placeLat')) && !empty($request->get('placeLng')) ){
-                $otherguidings = $this->otherGuidingsBasedByLocation($request->get('placeLat'), $request->get('placeLng'), $allGuidings);
+                $otherguidings = $this->getOtherGuidingsBasedByLocation($request->get('placeLat'), $request->get('placeLng'), $allGuidings);
             } else {
-                $otherguidings = $this->otherGuidings();
+                $otherguidings = $this->getOtherGuidings();
             }
         }
 
@@ -564,222 +549,13 @@ class GuidingsController extends Controller
         return view('pages.guidings.index', $responseData);
     }
 
-    private function hasLocationFilter($request)
-    {
-        // Check for coordinate-based location search (from map/autocomplete)
-        $hasCoordinateSearch = !empty($request->get('placeLat')) && 
-                              !empty($request->get('placeLng')) && 
-                              !empty($request->get('place'));
-        
-        // Check for text-based location search (from header search)
-        $hasTextSearch = !empty($request->get('city')) || 
-                        !empty($request->get('country')) || 
-                        !empty($request->get('region'));
-        
-        return $hasCoordinateSearch || $hasTextSearch;
+    public function otherGuidings(){
+        return $this->getOtherGuidings();
     }
 
-    private function hasActiveCheckboxFilters($request)
+    public function otherGuidingsBasedByLocation($latitude, $longitude, $allGuidings)
     {
-        // Check target_fish - ignore if null or empty array
-        $targetFish = $request->get('target_fish');
-        if ($targetFish && is_array($targetFish) && !empty(array_filter($targetFish))) {
-            return true;
-        }
-        
-        // Check methods
-        $methods = $request->get('methods');
-        if ($methods && is_array($methods) && !empty(array_filter($methods))) {
-            return true;
-        }
-        
-        // Check water types
-        $water = $request->get('water');
-        if ($water && is_array($water) && !empty(array_filter($water))) {
-            return true;
-        }
-        
-        // Check duration types
-        $durationTypes = $request->get('duration_types');
-        if ($durationTypes && is_array($durationTypes) && !empty(array_filter($durationTypes))) {
-            return true;
-        }
-        
-        // Check number of persons
-        $numPersons = $request->get('num_persons');
-        if ($numPersons && is_array($numPersons) && !empty(array_filter($numPersons))) {
-            return true;
-        }
-        
-        // Check price filters
-        if ($this->hasPriceFilter($request)) {
-            return true;
-        }
-        
-        return false;
-    }
-
-    private function hasPriceFilter($request)
-    {
-        $priceMin = $request->get('price_min');
-        $priceMax = $request->get('price_max');
-        $defaultMinPrice = 50;
-        $defaultMaxPrice = $this->getMaxPriceFromFilterData();
-        
-        // Check if price_min is set and different from default
-        $hasMinFilter = $priceMin && (int)$priceMin !== $defaultMinPrice && (int)$priceMin > 0;
-        
-        // Check if price_max is set and different from default
-        $hasMaxFilter = $priceMax && (int)$priceMax !== $defaultMaxPrice && (int)$priceMax < $defaultMaxPrice;
-        
-        return $hasMinFilter || $hasMaxFilter;
-    }
-
-    private function applySorting($query, $request, $randomSeed)
-    {
-        $hasOnlyPageParam = count(array_diff(array_keys($request->all()), ['page'])) === 0;
-        $isFirstPage = !$request->has('page') || $request->get('page') == 1;
-
-        if ($hasOnlyPageParam && $isFirstPage) {
-            $query->orderByRaw("RAND($randomSeed)");
-        } else {
-            if ($request->has('sortby') && !empty($request->get('sortby'))) {
-                switch ($request->get('sortby')) {
-                    case 'newest':
-                        $query->orderBy('created_at', 'desc');
-                        break;
-                    case 'price-asc':
-                        $query->orderBy('price', 'asc');
-                        break;
-                    case 'price-desc':
-                        $query->orderBy('price', 'desc');
-                        break;
-                    case 'long-duration':
-                        $query->orderBy('duration', 'desc');
-                        break;
-                    case 'short-duration':
-                        $query->orderBy('duration', 'asc');
-                        break;
-                    default:
-                        $query->orderBy('price', 'asc');
-                }
-            } else {
-                $query->orderBy('price', 'asc');
-            }
-        }
-    }
-
-    private function buildTitleAndFilterTitle($request, $locale, $targetFishOptions, $methodOptions, $waterTypeOptions)
-    {
-        $title = '';
-        $filter_title = '';
-
-        if($request->has('page')){
-            $title .= __('guidings.Page') . ' ' . $request->page . ' - ';
-        }
-
-        // Apply method filters
-        if($request->has('methods') && !empty($request->get('methods'))){
-            $requestMethods = array_filter($request->get('methods'));
-            if(count($requestMethods)){
-                $title .= __('guidings.Method') . ' (';
-                $filter_title .= __('guidings.Method') . ' (';
-                $title_row = '';
-                foreach ($methodOptions as $row) {
-                    if (in_array($row->id, $requestMethods)) {
-                        $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
-                    }
-                }
-                $title .= substr($title_row, 0, -2);
-                $title .= '), ';
-                $filter_title .= substr($title_row, 0, -2);
-                $filter_title .= '), ';
-            }
-        }
-
-        // Apply other filters similarly...
-        // (shortened for brevity, but you'd add water, target_fish, etc.)
-
-        $filter_title = substr($filter_title, 0, -2);
-
-        return [
-            'title' => $title,
-            'filter_title' => $filter_title
-        ];
-    }
-
-    private function getMaxPriceFromFilterData()
-    {
-        // Use cached value if available to avoid loading filter service
-        $cacheKey = 'guiding_price_ranges';
-        if (Cache::has($cacheKey)) {
-            return Cache::get($cacheKey)['maxPrice'];
-        }
-
-        // Only load filter service if cache miss
-        $metadata = $this->getFilterService()->getMetadata();
-        
-        if (isset($metadata['counts']['price_ranges'])) {
-            $maxPrice = 0;
-            foreach (array_keys($metadata['counts']['price_ranges']) as $range) {
-                if (strpos($range, '-') !== false) {
-                    list($min, $max) = explode('-', $range);
-                    if ((int)$max > $maxPrice) {
-                        $maxPrice = (int)$max;
-                    }
-                }
-            }
-            return $maxPrice ?: 1000;
-        }
-
-        return 1000; // Default fallback
-    }
-
-    /**
-     * Clean up request parameters before processing
-     */
-    private function cleanRequestParameters(Request $request)
-    {
-        // Only process if price parameters exist
-        if (!$request->has('price_min') && !$request->has('price_max')) {
-            return $request; // Return original request if no price parameters
-        }
-        
-        // Clone the request only if we need to modify it
-        $cleanedRequest = clone $request;
-        $requestData = $cleanedRequest->all();
-        
-        // Get default values (use cached value for max price)
-        $defaultMinPrice = 50;
-        $defaultMaxPrice = $this->getMaxPriceFromFilterData();
-        
-        // Check and remove price parameters if they match defaults
-        $modified = false;
-        
-        if (isset($requestData['price_min'])) {
-            $priceMin = (int)$requestData['price_min'];
-            if ($priceMin === $defaultMinPrice || $priceMin <= 0) {
-                unset($requestData['price_min']);
-                $modified = true;
-            }
-        }
-        
-        if (isset($requestData['price_max'])) {
-            $priceMax = (int)$requestData['price_max'];
-            if ($priceMax === $defaultMaxPrice || $priceMax >= $defaultMaxPrice) {
-                unset($requestData['price_max']);
-                $modified = true;
-            }
-        }
-        
-        // Only replace if we actually modified something
-        if ($modified) {
-            $cleanedRequest->replace($requestData);
-            return $cleanedRequest;
-        }
-        
-        // Return original request if no changes needed
-        return $request;
+        return $this->getOtherGuidingsBasedByLocation($latitude, $longitude, $allGuidings);
     }
 
     public function newShow($id, $slug, Request $request)
@@ -867,47 +643,6 @@ class GuidingsController extends Controller
         ]);
     }
 
-    public function otherGuidings(){
-        // Cache random guidings for 30 minutes to improve performance
-        $cacheKey = 'other_guidings_random';
-        
-        return Cache::remember($cacheKey, 1800, function() {
-            return Guiding::inRandomOrder('1234')->where('status',1)->limit(10)->get();
-        });
-    }
-
-    public function otherGuidingsBasedByLocation($latitude, $longitude, $allGuidings)
-    {
-        // Get IDs of guidings that are already in allGuidings
-        $existingGuidingIds = $allGuidings->pluck('id')->toArray();
-
-        // Calculate distance using ST_Distance_Sphere and filter within 200km radius
-        $nearestListings = Guiding::select(['guidings.*'])
-            ->selectRaw("ST_Distance_Sphere(
-                point(lng, lat),
-                point(?, ?)
-            ) as distance", [
-                $longitude,
-                $latitude
-            ])
-            ->whereRaw("ST_Distance_Sphere(
-                point(lng, lat),
-                point(?, ?)
-            ) <= ?", [
-                $longitude,
-                $latitude,
-                200 * 1000 // 200km converted to meters
-            ])
-            ->whereNotIn('id', $existingGuidingIds) // Exclude existing guidings
-            ->where('status', 1)
-            ->orderByRaw('CASE WHEN distance IS NULL THEN 1 ELSE 0 END')
-            ->orderBy('distance') // Sort by nearest first
-            ->limit(10)
-            ->get();
-
-        return $nearestListings;
-    }
-    
     public function guidingsStore(StoreNewGuidingRequest $request)
     {
         try {

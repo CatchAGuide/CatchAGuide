@@ -1265,8 +1265,6 @@
             }, 1000);
         }
 
-
-
         function loadCalendarEvents() {
             const startDate = new Date();
             startDate.setMonth(startDate.getMonth() - 6);
@@ -1292,8 +1290,7 @@
                 });
                 
                 const customEventsPromise = fetch('/events?' + new URLSearchParams({
-                    ...baseParams,
-                    type: 'custom_schedule'
+                    ...baseParams
                 }))
                 .then(response => {
                     if (!response.ok) {
@@ -1557,9 +1554,13 @@
                         
                         if (bookings.length > 0) {
                             const statuses = bookings.map(b => b.extendedProps.booking.status);
-                            
+
                             if (statuses.includes('accepted')) {
                                 dayEl.classList.add('booking-accepted');
+
+                                if (currentFilters.guiding_id !== '' && currentFilters.guiding_id !== null && currentFilters.guiding_id !== undefined) {
+                                    dayEl.classList.add('booking-rejected');
+                                }
                             } else if (statuses.includes('pending')) {
                                 dayEl.classList.add('booking-pending');
                             } else if (statuses.includes('rejected')) {
@@ -1704,19 +1705,43 @@
                         const user = event.extendedProps.user;
                         const guiding = event.extendedProps.guiding;
                         
-                        contentHtml += `
-                            <div class="border rounded p-2 mb-2">
-                                <div class="d-flex justify-content-between align-items-start mb-1">
-                                    <small class="fw-bold">${guiding ? guiding.title : 'Tour Booking'}</small>
-                                    <span class="status-badge status-${booking.status}">${booking.status}</span>
+                         contentHtml += `
+                    <div class="border rounded p-2 mb-2">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex align-items-center">
+                                <small class="fw-bold me-2">${guiding ? guiding.title : 'Tour Booking'}</small>
+                                <div class="booking-id-tag me-2">
+                                    <i class="fas fa-hashtag"></i>
+                                    <strong>ID: ${booking.id}</strong>
                                 </div>
-                                <small class="text-muted d-block">
-                                    <i class="fas fa-user"></i> ${user ? user.firstname + ' ' + user.lastname : 'Guest User'}<br>
-                                    <i class="fas fa-users"></i> ${booking.count_of_users} guests<br>
-                                    <i class="fas fa-euro-sign"></i> ${booking.price}€
-                                </small>
                             </div>
-                        `;
+                            <span class="status-badge status-${booking.status} text-uppercase">${booking.status}</span>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted d-block">
+                                <i class="fas fa-user me-1"></i> ${user ? user.firstname + ' ' + user.lastname : 'Guest User'}
+                            </small>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-users me-1"></i> ${booking.count_of_users} guests
+                            </small>
+                            <small class="text-muted">
+                                <i class="fas fa-euro-sign me-1"></i> ${booking.price}€
+                            </small>
+                        </div>
+                        ${booking.status === 'pending' && {{ auth()->user()->is_guide }} ? `
+                            <div class="d-flex justify-content-end mt-2">
+                                <button class="btn btn-sm btn-success me-2" onclick="window.location.href='/profile/guidebookings/accept/${booking.id}'">
+                                    <i class="fas fa-check"></i> Accept
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="window.location.href='/profile/guidebookings/reject/${booking.id}'">
+                                    <i class="fas fa-times"></i> Reject
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
                     });
                     contentHtml += '</div>';
                 }

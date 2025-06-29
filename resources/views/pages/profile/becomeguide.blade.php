@@ -13,7 +13,7 @@
         <p class="mb-0 mt-2 text-white">{{translate('Join our community of professional fishing guides')}}</p>
     </div>
 
-    @if(Auth::user()->is_guide === 0)
+    {{-- @if(Auth::user()->is_guide === 0)
         <div class="alert alert-info border-0 mb-4" role="alert">
             <div class="d-flex align-items-center">
                 <i class="fas fa-info-circle me-3 text-primary"></i>
@@ -23,7 +23,7 @@
                 </div>
             </div>
         </div>
-    @endif
+    @endif --}}
 
     @if ($errors->any())
         <div class="alert alert-danger border-0 mb-4">

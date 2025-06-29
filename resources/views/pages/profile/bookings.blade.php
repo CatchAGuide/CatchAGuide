@@ -650,6 +650,40 @@
             border-top: 1px solid #dee2e6;
             background: #f8f9fa;
         }
+
+        /* Price Calculation Styles */
+        .price-calculation-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .price-calculation-section .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .price-calculation-section .additional-services {
+            background: #fff;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 10px 0;
+        }
+        
+        .price-calculation-section .border-top {
+            border-color: #dee2e6 !important;
+        }
+        
+        .price-calculation-section .text-info {
+            color: #0dcaf0 !important;
+        }
+        
+        .price-calculation-section .text-success {
+            color: #198754 !important;
+        }
     </style>
 
     <!-- Wrap entire content in scoped container -->
@@ -682,6 +716,7 @@
                 $confirmedBookings = $allMyBookings->where('status', 'accepted')->count() + $allGuideBookings->where('status', 'accepted')->count();
                 $cancelledBookings = $allMyBookings->where('status', 'cancelled')->count() + $allGuideBookings->where('status', 'cancelled')->count();
                 $rejectedBookings = $allMyBookings->where('status', 'rejected')->count() + $allGuideBookings->where('status', 'rejected')->count();
+                $cancelledRejectedBookings = $cancelledBookings + $rejectedBookings; // Combined for regular users
                 
                 // Calculate completed bookings (accepted and past book_date)
                 $completedBookings = 0;
@@ -717,28 +752,44 @@
                 <span class="stat-number">{{ $pendingRequests }}</span>
                 <span class="stat-label">Pending Requests</span>
             </div>
-            <div class="stat-item clickable-stat" data-filter="accepted">
-                <span class="stat-number">{{ $confirmedBookings }}</span>
-                <span class="stat-label">My Confirmed</span>
-            </div>
-            <div class="stat-item clickable-stat" data-filter="cancelled">
-                <span class="stat-number">{{ $cancelledBookings }}</span>
-                <span class="stat-label">Cancelled</span>
-            </div>
-            <div class="stat-item clickable-stat" data-filter="rejected">
-                <span class="stat-number">{{ $rejectedBookings }}</span>
-                <span class="stat-label">Rejected</span>
-            </div>
-            <div class="stat-item clickable-stat" data-filter="completed">
-                <span class="stat-number">{{ $completedBookings }}</span>
-                <span class="stat-label">Completed</span>
-            </div>
+            @if(auth()->user()->is_guide)
+                <div class="stat-item clickable-stat" data-filter="accepted">
+                    <span class="stat-number">{{ $confirmedBookings }}</span>
+                    <span class="stat-label">My Confirmed</span>
+                </div>
+                <div class="stat-item clickable-stat" data-filter="cancelled">
+                    <span class="stat-number">{{ $cancelledBookings }}</span>
+                    <span class="stat-label">Cancelled</span>
+                </div>
+                <div class="stat-item clickable-stat" data-filter="rejected">
+                    <span class="stat-number">{{ $rejectedBookings }}</span>
+                    <span class="stat-label">Rejected</span>
+                </div>
+                <div class="stat-item clickable-stat" data-filter="completed">
+                    <span class="stat-number">{{ $completedBookings }}</span>
+                    <span class="stat-label">Completed</span>
+                </div>
+            @else
+                <!-- Regular User Stats - Show simplified stats -->
+                <div class="stat-item clickable-stat" data-filter="accepted">
+                    <span class="stat-number">{{ $confirmedBookings }}</span>
+                    <span class="stat-label">Confirmed</span>
+                </div>
+                <div class="stat-item clickable-stat" data-filter="cancelled-rejected">
+                    <span class="stat-number">{{ $cancelledRejectedBookings }}</span>
+                    <span class="stat-label">Cancelled/Rejected</span>
+                </div>
+                <div class="stat-item clickable-stat" data-filter="completed">
+                    <span class="stat-number">{{ $completedBookings }}</span>
+                    <span class="stat-label">Past Bookings</span>
+                </div>
+            @endif
         </div>
     </div>
 
-    <!-- Filters Section (Only for Guides) -->
-    @if(auth()->user()->is_guide)
+    <!-- Filters Section -->
     <div class="booking-filters">
+        @if(auth()->user()->is_guide)
         <div class="filter-tabs">
             <button class="filter-tab active" data-filter="all">
                 <i class="fas fa-list"></i> All Bookings
@@ -750,20 +801,25 @@
                 <i class="fas fa-fish"></i> Guide Bookings
             </button>
         </div>
+        @endif
         
         <div class="search-filters">
-            <input type="text" class="search-input" id="searchInput" placeholder="Search by guiding name, location, or customer...">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search by guiding name, location, or guide...">
             <select class="status-filter" id="statusFilter">
                 <option value="">All Statuses</option>
+                <option value="accepted">Confirmed</option>
                 <option value="pending">Pending Requests</option>
-                <option value="accepted">My Confirmed</option>
-                <option value="cancelled">Cancelled</option>
-                <option value="rejected">Rejected</option>
+                @if(auth()->user()->is_guide)
+                    <option value="cancelled">Cancelled</option>
+                    <option value="rejected">Rejected</option>
+                @else
+                    <option value="accepted">Confirmed</option>
+                    <option value="cancelled-rejected">Cancelled/Rejected</option>
+                @endif
                 <option value="completed">Completed</option>
             </select>
         </div>
     </div>
-    @endif
 
     <!-- Bookings Container -->
     <div class="bookings-container" id="bookingsContainer" 
@@ -808,7 +864,7 @@
                                     <i class="fas fa-clock"></i>
                                 </div>
                                 <div class="detail-content">
-                                    <h6>Booked Date</h6>
+                                    <h6>Requested at</h6>
                                     <p>{{ $booking->created_at->format('D, M j, Y') }}</p>
                                 </div>
                             </div>
@@ -881,7 +937,7 @@
                             </button>
 
                             @if($booking->status == 'accepted')
-                                @if($booking->isBookingOver() && !auth()->user()->hasratet($booking->user_id))
+                                @if($booking->isBookingOver() && !auth()->user()->hasratet($booking->user_id) && !$booking->is_reviewed)
                                     <a href="{{ route('ratings.show', ['token' => $booking->token]) }}" class="btn-action btn-warning" target="_blank">
                                         <i class="fas fa-star"></i> Rate Guide
                                     </a>
@@ -894,14 +950,10 @@
                                 <span class="btn-action btn-secondary">
                                     <i class="fas fa-clock"></i> Waiting for Response
                                 </span>
-                            @elseif(in_array($booking->status, ['cancelled', 'rejected', 'storniert']) && $booking->additional_information)
-                                <button class="btn-action btn-danger" data-bs-toggle="modal" data-bs-target="#rejectionModal{{ $index }}">
+                            @elseif(in_array($booking->status, ['cancelled', 'rejected', 'storniert']))
+                                <button class="btn-action btn-danger" data-bs-toggle="modal" data-bs-target="#rejectionModal{{ $index }}" 
                                     <i class="fas fa-exclamation-triangle"></i> {{ $booking->status == 'cancelled' ? 'Cancellation' : 'Rejection' }} Details
                                 </button>
-                            @else
-                                <span class="btn-action btn-secondary">
-                                    <i class="fas fa-info-circle"></i> {{ ucfirst($booking->status) }}
-                                </span>
                             @endif
                         </div>
                     </div>
@@ -974,8 +1026,36 @@
                                                     <p class="mt-1 text-danger">{{ $booking->additional_information }}</p>
                                                 </div>
                                             @endif
-                                            <div class="detail-row">
-                                                <strong>Total Amount:</strong> <span class="text-success fw-bold">€{{ number_format($booking->price, 2) }}</span>
+                                            <div class="price-calculation-section">
+                                                <h6 class="fw-bold mb-3"><i class="fas fa-calculator"></i> Price Breakdown</h6>
+                                                <div class="detail-row">
+                                                    <strong>Base Service Fee:</strong> 
+                                                    <span class="text-success">€{{ number_format($booking->price - ($booking->total_extra_price ?? 0), 2) }}</span>
+                                                </div>
+                                                
+                                                @if($booking->extras)
+                                                    @php
+                                                        $extras = is_string($booking->extras) ? unserialize($booking->extras) : $booking->extras;
+                                                    @endphp
+                                                    @if(is_array($extras) && count($extras) > 0)
+                                                        <div class="additional-services mt-2">
+                                                            <strong>Additional Services:</strong>
+                                                            <div class="ms-3 mt-2">
+                                                                @foreach($extras as $extra)
+                                                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                                                        <span>+ {{ $extra['name'] ?? 'Additional Service' }}</span>
+                                                                        <span class="text-info">€{{ number_format($extra['price'] ?? 0, 2) }}</span>
+                                                                    </div>
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                @endif
+                                                
+                                                <div class="detail-row border-top pt-2 mt-2">
+                                                    <strong>Total Price:</strong> 
+                                                    <span class="text-success fw-bold">€{{ number_format($booking->price, 2) }}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -984,36 +1064,18 @@
                                     
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <h6 class="fw-bold mb-3"><i class="fas fa-user-tie"></i> Professional Guide Information</h6>
+                                            <h6 class="fw-bold mb-3"><i class="fas fa-user-tie"></i> Guide Information</h6>
                                             <div class="detail-row">
                                                 <strong>Name:</strong> {{ $booking->guiding->user->full_name ?? 'N/A' }}
                                             </div>
-                                            <div class="detail-row">
-                                                <strong>Email:</strong> {{ $booking->guiding->user->email ?? 'N/A' }}
-                                            </div>
-                                            @if($booking->guiding->user->phone)
+                                            @if(!in_array($booking->status, ['cancelled', 'pending', 'rejected']))
                                                 <div class="detail-row">
-                                                    <strong>Phone:</strong> {{ $booking->guiding->user->phone }}
+                                                    <strong>Email:</strong> {{ $booking->guiding->user->email ?? 'N/A' }}
                                                 </div>
-                                            @endif
-                                        </div>
-                                        <div class="col-md-6">
-                                            @if($booking->extras)
-                                                <h6 class="fw-bold mb-3"><i class="fas fa-plus-circle"></i> Additional Services</h6>
-                                                @php
-                                                    $extras = is_string($booking->extras) ? unserialize($booking->extras) : $booking->extras;
-                                                @endphp
-                                                @if(is_array($extras) && count($extras) > 0)
-                                                    @foreach($extras as $extra)
-                                                        <div class="detail-row">
-                                                            <strong>{{ $extra['name'] ?? 'Additional Service' }}:</strong> €{{ number_format($extra['price'] ?? 0, 2) }}
-                                                        </div>
-                                                    @endforeach
+                                                @if($booking->guiding->user->phone)
                                                     <div class="detail-row">
-                                                        <strong>Total Additional Services:</strong> <span class="text-info">€{{ number_format($booking->total_extra_price ?? 0, 2) }}</span>
+                                                        <strong>Phone:</strong> {{ $booking->guiding->user->phone }}
                                                     </div>
-                                                @else
-                                                    <p class="text-muted">No additional services selected</p>
                                                 @endif
                                             @endif
                                         </div>
@@ -1023,12 +1085,9 @@
                                     @if($booking->status == 'accepted')
                                         @if($booking->canBeReviewed())
                                             <a href="{{ route('ratings.show', ['token' => $booking->token]) }}" class="btn btn-warning">
-                                                <i class="fas fa-star"></i> Rate Professional Guide
+                                                <i class="fas fa-star"></i> Rate Guide
                                             </a>
                                         @endif
-                                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#contactModal{{ $index }}" data-bs-dismiss="modal">
-                                            <i class="fas fa-envelope"></i> Contact Professional Guide
-                                        </button>
                                     @endif
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                 </div>
@@ -1042,7 +1101,7 @@
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h5 class="modal-title">
-                                        <i class="fas fa-address-book"></i> Professional Guide Contact
+                                        <i class="fas fa-address-book"></i> Guide Contact
                                     </h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
@@ -1064,7 +1123,7 @@
                     </div>
 
                 <!-- Rejection Details Modal for My Bookings -->
-                @if(in_array($booking->status, ['cancelled', 'rejected', 'storniert']) && $booking->additional_information)
+                @if(in_array($booking->status, ['cancelled', 'rejected', 'storniert']))
                     <div class="modal fade rejection-details-modal" id="rejectionModal{{ $index }}" tabindex="-1">
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content">
@@ -1078,7 +1137,7 @@
                                 <div class="modal-body">
                                     <div class="rejection-content">
                                         <h6><i class="fas fa-info-circle"></i> {{ $booking->status == 'cancelled' ? 'Cancellation' : 'Rejection' }} Reason</h6>
-                                        <p class="mb-0">{{ $booking->additional_information }}</p>
+                                        <p class="mb-0">{{ $booking->additional_information ?? __('emails.guest_booking_request_expired_text_2') }}</p>
                                     </div>
 
                                     @if($booking->status == 'rejected')
@@ -1135,19 +1194,19 @@
                                         @endif
                                     @endif
 
-                                    @if($booking->status == 'cancelled')
+                                    @if($booking->status == 'cancelled' || $booking->status == 'rejected')
                                         <div class="alert alert-info">
                                             <i class="fas fa-info-circle"></i>
                                             <strong>What happens next?</strong> 
-                                            If you paid for this booking, any applicable refunds will be processed according to our cancellation policy.
+                                            {{ __('emails.guest_booking_request_expired_text_3') }}
                                         </div>
                                     @endif
                                 </div>
                                 <div class="modal-footer">
-                                    @if($booking->status == 'rejected' && $booking->guiding->user)
-                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#contactModal{{ $index }}" data-bs-dismiss="modal">
-                                            <i class="fas fa-envelope"></i> Contact Guide
-                                        </button>
+                                    @if($booking->status == 'rejected' || $booking->status == 'cancelled' && $booking->guiding->user)
+                                        <a href="{{ route('additional.contact') }}" class="btn btn-primary">
+                                            <i class="fas fa-envelope"></i> Contact Us
+                                        </a>
                                     @endif
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                 </div>
@@ -1280,14 +1339,10 @@
                                 <button class="btn-action btn-info" data-bs-toggle="modal" data-bs-target="#guideContactModal{{ $gIndex }}">
                                     <i class="fas fa-envelope"></i> Contact Customer
                                 </button>
-                            @elseif(in_array($booking->status, ['cancelled', 'rejected', 'storniert']) && $booking->additional_information)
+                            @elseif(in_array($booking->status, ['cancelled', 'rejected', 'storniert']))
                                 <button class="btn-action btn-danger" data-bs-toggle="modal" data-bs-target="#guideRejectionModal{{ $gIndex }}">
                                     <i class="fas fa-exclamation-triangle"></i> {{ $booking->status == 'cancelled' ? 'Cancellation' : 'Rejection' }} Details
                                 </button>
-                            @else
-                                <span class="btn-action btn-secondary">
-                                    <i class="fas fa-info-circle"></i> {{ ucfirst($booking->status) }}
-                                </span>
                             @endif
                         </div>
                     </div>
@@ -1329,9 +1384,6 @@
                                         <div class="col-md-6">
                                             <h6 class="fw-bold mb-3"><i class="fas fa-calendar-check"></i> Booking Summary</h6>
                                             <div class="detail-row">
-                                                <strong>Booking Date:</strong> {{ $booking->created_at->format('l, F j, Y \a\t g:i A') }}
-                                            </div>
-                                            <div class="detail-row">
                                                 <strong>Service Date:</strong> 
                                                 @if($booking->calendar_schedule)
                                                     {{ \Carbon\Carbon::parse($booking->calendar_schedule->date)->format('l, F j, Y') }}
@@ -1348,20 +1400,36 @@
                                                 <strong>Booking Status:</strong> 
                                                 <span class="badge bg-{{ $booking->status == 'accepted' ? 'success' : ($booking->status == 'pending' ? 'warning' : ($booking->status == 'cancelled' ? 'secondary' : 'danger')) }}">{{ ucfirst($booking->status) }}</span>
                                             </div>
-                                            @if($booking->status == 'cancelled' && $booking->additional_information)
+                                            @if($booking->additional_information)
                                                 <div class="detail-row">
-                                                    <strong>Cancellation Reason:</strong> 
+                                                    <strong>@if($booking->status == 'cancelled') Cancellation Reason: @else Rejection Reason: @endif</strong> 
                                                     <p class="mt-1 text-danger">{{ $booking->additional_information }}</p>
                                                 </div>
                                             @endif
-                                            @if($booking->status == 'rejected' && $booking->additional_information)
-                                                <div class="detail-row">
-                                                    <strong>Rejection Reason:</strong> 
-                                                    <p class="mt-1 text-danger">{{ $booking->additional_information }}</p>
-                                                </div>
-                                            @endif
+
                                             <div class="detail-row">
-                                                <strong>Service Fee:</strong> <span class="text-success fw-bold">€{{ number_format($booking->price, 2) }}</span>
+                                                <strong>Base Service Fee:</strong> <span class="text-success">€{{ number_format($booking->price - ($booking->total_extra_price ?? 0), 2) }}</span>
+                                            </div>
+                                            @if($booking->extras)
+                                                @php
+                                                    $extras = is_string($booking->extras) ? unserialize($booking->extras) : $booking->extras;
+                                                @endphp
+                                                @if(is_array($extras) && count($extras) > 0)
+                                                    <div class="detail-row">
+                                                        <strong>Additional Services:</strong>
+                                                        <div class="ms-3 mt-2">
+                                                            @foreach($extras as $extra)
+                                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                                    <span>+ {{ $extra['extra_name'] ?? 'Additional Service' }}</span>
+                                                                    <span class="text-success">€{{ number_format($extra['extra_total_price'] ?? 0, 2) }}</span>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                            @endif
+                                            <div class="detail-row border-top pt-2 mt-2">
+                                                <strong>Total Price:</strong> <span class="text-success fw-bold">€{{ number_format($booking->price, 2) }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -1374,32 +1442,14 @@
                                             <div class="detail-row">
                                                 <strong>Client Name:</strong> {{ $booking->user->full_name ?? 'N/A' }}
                                             </div>
-                                            <div class="detail-row">
-                                                <strong>Contact Email:</strong> {{ $booking->user->email ?? 'N/A' }}
-                                            </div>
-                                            @if($booking->phone)
+                                            @if (!in_array($booking->status, ['cancelled', 'pending', 'rejected']))
                                                 <div class="detail-row">
-                                                    <strong>Contact Phone:</strong> {{ $booking->phone }}
+                                                    <strong>Contact Email:</strong> {{ $booking->user->email ?? 'N/A' }}
                                                 </div>
-                                            @endif
-                                        </div>
-                                        <div class="col-md-6">
-                                            @if($booking->extras)
-                                                <h6 class="fw-bold mb-3"><i class="fas fa-plus-circle"></i> Additional Services</h6>
-                                                @php
-                                                    $extras = is_string($booking->extras) ? unserialize($booking->extras) : $booking->extras;
-                                                @endphp
-                                                @if(is_array($extras) && count($extras) > 0)
-                                                    @foreach($extras as $extra)
-                                                        <div class="detail-row">
-                                                            <strong>{{ $extra['name'] ?? 'Additional Service' }}:</strong> €{{ number_format($extra['price'] ?? 0, 2) }}
-                                                        </div>
-                                                    @endforeach
+                                                @if($booking->phone)
                                                     <div class="detail-row">
-                                                        <strong>Total Additional Services:</strong> <span class="text-info">€{{ number_format($booking->total_extra_price ?? 0, 2) }}</span>
+                                                        <strong>Contact Phone:</strong> {{ $booking->phone }}
                                                     </div>
-                                                @else
-                                                    <p class="text-muted">No additional services selected</p>
                                                 @endif
                                             @endif
                                         </div>
@@ -1445,7 +1495,7 @@
                     </div>
 
                 <!-- Rejection Details Modal for Guide Bookings -->
-                @if(in_array($booking->status, ['cancelled', 'rejected', 'storniert']) && $booking->additional_information)
+                @if(in_array($booking->status, ['cancelled', 'rejected', 'storniert']))
                     <div class="modal fade rejection-details-modal" id="guideRejectionModal{{ $gIndex }}" tabindex="-1">
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content">
@@ -1459,7 +1509,7 @@
                                 <div class="modal-body">
                                     <div class="rejection-content">
                                         <h6><i class="fas fa-info-circle"></i> {{ $booking->status == 'cancelled' ? 'Cancellation' : 'Rejection' }} Reason</h6>
-                                        <p class="mb-0">{{ $booking->additional_information }}</p>
+                                        <p class="mb-0">{{ $booking->additional_information ?? __('emails.guest_booking_request_expired_text_2') }}</p>
                                     </div>
 
                                     @if($booking->status == 'rejected')
@@ -1519,15 +1569,15 @@
                                         <div class="alert alert-info">
                                             <i class="fas fa-info-circle"></i>
                                             <strong>Booking Cancelled:</strong> 
-                                            The client has cancelled this booking. Any payments made will be handled according to your cancellation policy.
+                                            {{ __('emails.guest_booking_request_expired_text_3') }}
                                         </div>
                                     @endif
                                 </div>
                                 <div class="modal-footer">
                                     @if($booking->user)
-                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#guideContactModal{{ $gIndex }}" data-bs-dismiss="modal">
-                                            <i class="fas fa-envelope"></i> Contact Client
-                                        </button>
+                                        <a href="{{ route('additional.contact') }}" class="btn btn-primary">
+                                            <i class="fas fa-envelope"></i> Contact Us
+                                        </a>
                                     @endif
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                 </div>
@@ -1582,9 +1632,8 @@
             // Filter functionality
             function filterBookings() {
                 const activeTab = document.querySelector('.profile-bookings-container .filter-tab.active');
-                if (!activeTab) return;
-                
-                const activeFilter = activeTab.dataset.filter;
+                // For regular users without tabs, default to 'all'
+                const activeFilter = activeTab ? activeTab.dataset.filter : 'all';
                 const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
                 const statusValue = statusFilter ? statusFilter.value : '';
                 const bookingCards = getBookingCards();
@@ -1597,8 +1646,8 @@
 
                     let showCard = true;
 
-                    // Type filter
-                    if (activeFilter !== 'all' && cardType !== activeFilter) {
+                    // Type filter (only apply if we have tabs - for guides)
+                    if (activeTab && activeFilter !== 'all' && cardType !== activeFilter) {
                         showCard = false;
                     }
 
@@ -1612,6 +1661,11 @@
                         if (statusValue === 'completed') {
                             // Show only completed bookings (accepted and past date)
                             if (!cardCompleted) {
+                                showCard = false;
+                            }
+                        } else if (statusValue === 'cancelled-rejected') {
+                            // Show both cancelled and rejected bookings
+                            if (cardStatus !== 'cancelled' && cardStatus !== 'rejected') {
                                 showCard = false;
                             }
                         } else {
@@ -1666,6 +1720,18 @@
                         }
                     }
                     
+                    // For regular users without tabs, we need to ensure the filter works
+                    // Update filter tabs if they exist (for guides)
+                    const filterTabs = document.querySelectorAll('.profile-bookings-container .filter-tab');
+                    if (filterTabs.length > 0) {
+                        // Guide user - use existing tab logic
+                        const allTab = document.querySelector('.profile-bookings-container .filter-tab[data-filter="all"]');
+                        if (allTab) {
+                            filterTabs.forEach(t => t.classList.remove('active'));
+                            allTab.classList.add('active');
+                        }
+                    }
+                    
                     // Apply filter
                     filterBookings();
                 });
@@ -1694,6 +1760,16 @@
                                        document.querySelector('.clickable-stat[data-filter="all"]');
                     if (matchingStat) {
                         matchingStat.classList.add('active');
+                    }
+                    
+                    // For guides with tabs, ensure "All Bookings" tab is active when filtering by status
+                    const filterTabs = document.querySelectorAll('.profile-bookings-container .filter-tab');
+                    if (filterTabs.length > 0) {
+                        const allTab = document.querySelector('.profile-bookings-container .filter-tab[data-filter="all"]');
+                        if (allTab) {
+                            filterTabs.forEach(t => t.classList.remove('active'));
+                            allTab.classList.add('active');
+                        }
                     }
                     
                     filterBookings();
@@ -1780,6 +1856,13 @@
             const totalStat = document.querySelector('.clickable-stat[data-filter="all"]');
             if (totalStat) {
                 totalStat.classList.add('active');
+            }
+            
+            // For regular users without tabs, run initial filter to show all bookings
+            const hasFilterTabs = document.querySelectorAll('.profile-bookings-container .filter-tab').length > 0;
+            if (!hasFilterTabs) {
+                // Regular user - run initial filter
+                filterBookings();
             }
         });
     </script>

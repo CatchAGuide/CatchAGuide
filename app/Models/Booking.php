@@ -68,7 +68,7 @@ class Booking extends Model
 
     public function calendar_schedule(): BelongsTo
     {
-        return $this->belongsTo(CalendarSchedule::class);
+        return $this->belongsTo(CalendarSchedule::class, 'blocked_event_id');
     }
 
     /**
@@ -88,12 +88,12 @@ class Booking extends Model
     {
         // Check calendar_schedule first (new system)
         if($this->calendar_schedule){
-            return Carbon::parse($this->calendar_schedule->date)->isPast();
+            return Carbon::parse($this->calendar_schedule->date)->addDay()->isPast();
         }
         
         // Fallback to blocked_event (old system)
         if($this->blocked_event){
-            return Carbon::parse($this->blocked_event->from)->isPast();
+            return Carbon::parse($this->blocked_event->from)->addDay()->isPast();
         }
         
         return false;

@@ -8,6 +8,8 @@ use App\Models\Guiding;
 use App\Models\Method;
 use App\Models\Target;
 use App\Models\Water;
+use App\Models\Inclussion;
+use App\Traits\GuidingFilterOptimization;
 use Config;
 use DB;
 use GuzzleHttp\Client;
@@ -16,8 +18,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Spatie\Geocoder\Geocoder;
 use Illuminate\Support\Facades\Log;
+
 class DestinationCountryController extends Controller
 {
+    use GuidingFilterOptimization;
+
     public function index()
     {
         $countries = Destination::whereType('country')->whereLanguage(app()->getLocale())->get();
@@ -30,7 +35,7 @@ class DestinationCountryController extends Controller
         $country_row = Destination::whereSlug($country)
             ->whereType('country')
             ->whereLanguage(app()->getLocale())
-            ->firstOrFail(); // Use firstOrFail instead of first()
+            ->firstOrFail();
 
         $region_row = null;
         $city_row = null;
@@ -52,7 +57,7 @@ class DestinationCountryController extends Controller
                 ->firstOrFail();
         }
 
-        $place_location = $country;
+        // Get destination data
         $query = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit']);
 
         if ($city_row) {
@@ -64,9 +69,17 @@ class DestinationCountryController extends Controller
         }
 
         $row_data = $query->firstOrFail();
-
-        $regions = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->whereType('region')->whereCountryId($row_data->id)->whereLanguage(app()->getLocale())->get();
-        $cities = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->whereType('city')->whereCountryId($row_data->id)->whereLanguage(app()->getLocale())->get();
+        $regions = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])
+            ->whereType('region')
+            ->whereCountryId($row_data->id)
+            ->whereLanguage(app()->getLocale())
+            ->get();
+        
+        $cities = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])
+            ->whereType('city')
+            ->whereCountryId($row_data->id)
+            ->whereLanguage(app()->getLocale())
+            ->get();
 
         $faq = $row_data->faq;
         $fish_chart = $row_data->fish_chart;
@@ -74,162 +87,114 @@ class DestinationCountryController extends Controller
         $fish_time_limit = $row_data->fish_time_limit;
 
         $locale = Config::get('app.locale');
-        $searchMessage = "";
-        $title = '';
-        $filter_title = '';
         $destination = null;
 
-        // Get or generate a random seed and store it in the session
-        $randomSeed = Session::get('random_seed');
-        if (!$randomSeed) {
-            $randomSeed = rand();
-            Session::put('random_seed', $randomSeed);
-        }
+        // Get random seed
+        $randomSeed = $this->getRandomSeed();
 
         // Clean up request parameters before processing
         $cleanedRequest = $this->cleanRequestParameters($request);
         
-        // Eager load relationships to avoid N+1 problem
-        $baseQuery = Guiding::with(['target_fish', 'methods', 'water_types', 'boatType'])
-            ->select(['*', DB::raw('(
-                WITH price_per_person AS (
-                    SELECT 
-                        CASE 
-                            WHEN JSON_VALID(prices) THEN (
-                                SELECT MIN(
-                                    CASE 
-                                        WHEN person > 1 THEN CAST(amount AS DECIMAL(10,2)) / person
-                                        ELSE CAST(amount AS DECIMAL(10,2))
-                                    END
-                                )
-                                FROM JSON_TABLE(
-                                    prices,
-                                    "$[*]" COLUMNS(
-                                        person INT PATH "$.person",
-                                        amount DECIMAL(10,2) PATH "$.amount"
-                                    )
-                                ) as price_data
-                            )
-                            ELSE price
-                        END as lowest_pp
-                )
-                SELECT COALESCE(lowest_pp, price) 
-                FROM price_per_person
-            ) AS lowest_price')])->where('status',1)->whereNotNull('lat')->whereNotNull('lng');
-        
-        // Use caching for price ranges
-        $cacheKey = 'guiding_price_ranges';
-        $cacheDuration = 60 * 24; // Cache for 24 hours
-
-        if (Cache::has($cacheKey)) {
-            $priceRangeData = Cache::get($cacheKey);
-            $priceRanges = $priceRangeData['ranges'];
-            $overallMaxPrice = $priceRangeData['maxPrice'];
-        } else {
-            // Optimize max price query
-            $maxPriceResult = DB::table('guidings')
-                ->selectRaw('MAX(
-                    CASE 
-                        WHEN JSON_VALID(prices) THEN (
-                            SELECT MIN(
-                                CASE 
-                                    WHEN person > 1 THEN CAST(amount AS DECIMAL(10,2)) / person
-                                    ELSE CAST(amount AS DECIMAL(10,2))
-                                END
-                            )
-                            FROM JSON_TABLE(
-                                prices,
-                                "$[*]" COLUMNS(
-                                    person INT PATH "$.person",
-                                    amount DECIMAL(10,2) PATH "$.amount"
-                                )
-                            ) as price_data
-                        )
-                        ELSE price
-                    END
-                ) as max_price')
-                ->where('status', 1)
-                ->first();
-
-            $overallMaxPrice = ceil(($maxPriceResult->max_price ?? 5000) / 50) * 50;
-            
-            // Define price ranges
-            $priceRanges = [];
-            $minPrice = 50;
-            $step = 50;
-            
-            for ($i = $minPrice; $i <= $overallMaxPrice; $i += $step) {
-                $rangeEnd = min($i + $step, $overallMaxPrice);
-                $priceRanges[] = [
-                    'min' => $i,
-                    'max' => $rangeEnd,
-                    'range' => "€{$i}-€{$rangeEnd}",
-                    'count' => 0
-                ];
-            }
-            
-            // Count guidings in each price range
-            $priceResults = DB::table('guidings')
-                ->select('id', DB::raw('
-                    CASE 
-                        WHEN JSON_VALID(prices) THEN (
-                            SELECT MIN(
-                                CASE 
-                                    WHEN person > 1 THEN CAST(amount AS DECIMAL(10,2)) / person
-                                    ELSE CAST(amount AS DECIMAL(10,2))
-                                END
-                            )
-                            FROM JSON_TABLE(
-                                prices,
-                                "$[*]" COLUMNS(
-                                    person INT PATH "$.person",
-                                    amount DECIMAL(10,2) PATH "$.amount"
-                                )
-                            ) as price_data
-                        )
-                        ELSE price
-                    END as lowest_price
-                '))
-                ->where('status', 1)
-                ->get();
-            
-            foreach ($priceResults as $guiding) {
-                $price = $guiding->lowest_price;
-                if ($price >= $minPrice && $price <= $overallMaxPrice) {
-                    foreach ($priceRanges as &$range) {
-                        if ($price >= $range['min'] && $price < $range['max']) {
-                            $range['count']++;
-                            break;
-                        }
-                    }
-                }
-            }
-            
-            // Cache the results
-            Cache::put($cacheKey, [
-                'ranges' => $priceRanges,
-                'maxPrice' => $overallMaxPrice
-            ], $cacheDuration);
+        // Emergency fallback for staging environment
+        if (app()->environment('staging') && config('app.simple_mode', false)) {
+            return $this->countrySimpleMode($cleanedRequest, $locale, $randomSeed, $destination, $row_data, $regions, $cities, $faq, $fish_chart, $fish_size_limit, $fish_time_limit);
         }
         
-        // 2. Apply filters to the query
-        $filteredQuery = clone $baseQuery;
+        // Check if we actually need the filter service
+        $hasCheckboxFilters = $this->hasActiveCheckboxFilters($cleanedRequest);
         
-        // If coming from destination page, get the destination context
-        if ($cleanedRequest->has('from_destination')) {
-            $destination = Destination::where('id', $cleanedRequest->input('destination_id'))->first();
+        if ($hasCheckboxFilters) {
+            // Use filter service for checkbox filters
+            return $this->countryWithFilterService($cleanedRequest, $locale, $randomSeed, $destination, $row_data, $regions, $cities, $faq, $fish_chart, $fish_size_limit, $fish_time_limit, $country_row, $region_row, $city_row);
+        } else {
+            // Use direct database queries for location-only or no-filter searches
+            return $this->countryWithDirectQuery($cleanedRequest, $locale, $randomSeed, $destination, $row_data, $regions, $cities, $faq, $fish_chart, $fish_size_limit, $fish_time_limit, $country_row, $region_row, $city_row);
+        }
+    }
+
+    private function countrySimpleMode($request, $locale, $randomSeed, $destination, $row_data, $regions, $cities, $faq, $fish_chart, $fish_size_limit, $fish_time_limit)
+    {
+        // Ultra-simple mode for staging performance issues
+        $guidings = Guiding::where('status', 1)
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+        
+        $guidings->appends($request->except('page'));
+        
+        return view('pages.category.country', [
+            'guidings_total' => $guidings->total(),
+            'row_data' => $row_data,
+            'regions' => $regions,
+            'cities' => $cities,
+            'faq' => $faq,
+            'fish_chart' => $fish_chart,
+            'fish_size_limit' => $fish_size_limit,
+            'fish_time_limit' => $fish_time_limit,
+            'title' => 'All Guidings',
+            'filter_title' => '',
+            'guidings' => $guidings,
+            'radius' => null,
+            'allGuidings' => $guidings->getCollection(),
+            'searchMessage' => '',
+            'otherguidings' => collect(),
+            'alltargets' => collect(),
+            'guiding_waters' => collect(),
+            'guiding_methods' => collect(),
+            'destination' => null,
+            'targetFishOptions' => collect(),
+            'methodOptions' => collect(),
+            'waterTypeOptions' => collect(),
+            'targetFishCounts' => [],
+            'methodCounts' => [],
+            'waterTypeCounts' => [],
+            'durationCounts' => [],
+            'personCounts' => [],
+            'isMobile' => false,
+            'total' => $guidings->total(),
+            'filterCounts' => [],
+            'maxPrice' => 1000,
+            'overallMaxPrice' => 1000,
+        ]);
+    }
+
+    private function countryWithDirectQuery($request, $locale, $randomSeed, $destination, $row_data, $regions, $cities, $faq, $fish_chart, $fish_size_limit, $fish_time_limit, $country_row, $region_row, $city_row)
+    {
+        $searchMessage = "";
+        
+        // Build base query with location pre-filtering (this is the key difference from GuidingsController)
+        $baseQuery = Guiding::with(['boatType', 'user.reviews'])->where('status', 1);
+        
+        // Apply destination-based location filtering FIRST
+        $this->applyDestinationLocationFilter($baseQuery, $country_row, $region_row, $city_row);
+        
+        // Debug: Log the destination filtering
+        if (config('app.debug')) {
+            $testCount = Guiding::where('status', 1)->count();
+            Log::info('Destination filtering applied', [
+                'total_active_guidings' => $testCount,
+                'country' => $country_row ? $country_row->name : null,
+                'region' => $region_row ? $region_row->name : null,
+                'city' => $city_row ? $city_row->name : null,
+                'sql' => $baseQuery->toSql(),
+                'bindings' => $baseQuery->getBindings()
+            ]);
+        }
+
+        // Handle destination filtering from request
+        if ($request->has('from_destination')) {
+            $destination = Destination::where('id', $request->input('destination_id'))->first();
             
             if ($destination) {
                 switch ($destination->type) {
                     case 'country':
-                        $filteredQuery->where('country', $destination->name);
+                        $baseQuery->where('country', $destination->name);
                         break;
                     case 'region':
-                        $filteredQuery->where('region', $destination->name)
+                        $baseQuery->where('region', $destination->name)
                               ->where('country', $destination->country_name);
                         break;
                     case 'city':
-                        $filteredQuery->where('city', $destination->name)
+                        $baseQuery->where('city', $destination->name)
                               ->where('region', $destination->region_name)
                               ->where('country', $destination->country_name);
                         break;
@@ -237,308 +202,386 @@ class DestinationCountryController extends Controller
             }
         }
 
-        // Apply sorting
-        $hasOnlyPageParam = count(array_diff(array_keys($cleanedRequest->all()), ['page'])) === 0;
-        $isFirstPage = !$cleanedRequest->has('page') || $cleanedRequest->get('page') == 1;
-
-        if ($hasOnlyPageParam && $isFirstPage) {
-            $filteredQuery->orderByRaw("RAND($randomSeed)");
+        // Apply additional location filtering if present
+        if ($this->hasAdditionalLocationFilter($request)) {
+            $additionalFilter = $this->applyAdditionalLocationFilter($request);
+            $searchMessage = $additionalFilter['message'];
+            
+            if (!empty($additionalFilter['ids'])) {
+                $baseQuery->whereIn('id', $additionalFilter['ids']);
+                
+                // Add location-based ordering
+                $orderByCase = 'CASE id ';
+                foreach($additionalFilter['ids'] as $position => $id) {
+                    $orderByCase .= "WHEN $id THEN $position ";
+                }
+                $orderByCase .= 'ELSE ' . count($additionalFilter['ids']) . ' END';
+                $baseQuery->orderByRaw($orderByCase);
+            } else {
+                // No location matches found, return empty results
+                $allGuidings = collect();
+                $guidings = new \Illuminate\Pagination\LengthAwarePaginator(
+                    collect(), 0, 20, 1, 
+                    ['path' => request()->url(), 'pageName' => 'page']
+                );
+            }
         } else {
-            // Default ordering for all other cases
-            if ($cleanedRequest->has('sortby') && !empty($cleanedRequest->get('sortby'))) {
-                switch ($cleanedRequest->get('sortby')) {
-                    case 'newest':
-                        $filteredQuery->orderBy('created_at', 'desc');
-                        break;
-                    case 'price-asc':
-                        $filteredQuery->orderBy('lowest_price', 'asc');
-                        break;
-                    case 'price-desc':
-                        $filteredQuery->orderBy('lowest_price', 'desc');
-                        break;
-                    case 'long-duration':
-                        $filteredQuery->orderBy('duration', 'desc');
-                        break;
-                    case 'short-duration':
-                        $filteredQuery->orderBy('duration', 'asc');
-                        break;
-                    default:
-                        // Default to sorting by lowest price if no valid sort option is provided
-                        $filteredQuery->orderBy('lowest_price', 'asc');
-                }
-            } else {
-                // Default to sorting by lowest price if no sort option is provided
-                $filteredQuery->orderBy('lowest_price', 'asc');
+            $this->applySorting($baseQuery, $request, $randomSeed);
+        }
+
+        // Execute queries if we haven't already set empty results
+        if (!isset($allGuidings)) {
+            $allGuidings = $baseQuery->get();
+            $guidings = $baseQuery->paginate(20);
+            $guidings->appends($request->except('page'));
+            
+            // Batch fetch all needed related models for all guidings
+            $allTargetIds = $allGuidings->flatMap(function($g) { return json_decode($g->target_fish, true) ?: []; })->unique()->filter()->values();
+            $allMethodIds = $allGuidings->flatMap(function($g) { return json_decode($g->fishing_methods, true) ?: []; })->unique()->filter()->values();
+            $allWaterIds = $allGuidings->flatMap(function($g) { return json_decode($g->water_types, true) ?: []; })->unique()->filter()->values();
+            $allInclussionIds = $allGuidings->flatMap(function($g) { return json_decode($g->inclusions, true) ?: []; })->unique()->filter()->values();
+
+            $targetsMap = $allTargetIds->isNotEmpty() ? Target::whereIn('id', $allTargetIds)->get()->keyBy('id') : collect();
+            $methodsMap = $allMethodIds->isNotEmpty() ? Method::whereIn('id', $allMethodIds)->get()->keyBy('id') : collect();
+            $watersMap = $allWaterIds->isNotEmpty() ? Water::whereIn('id', $allWaterIds)->get()->keyBy('id') : collect();
+            $inclussionsMap = $allInclussionIds->isNotEmpty() ? Inclussion::whereIn('id', $allInclussionIds)->get()->keyBy('id') : collect();
+
+            $this->preComputeGuidingData($allGuidings, $targetsMap, $methodsMap, $watersMap, $inclussionsMap);
+            $this->preComputeGuidingData($guidings->items(), $targetsMap, $methodsMap, $watersMap, $inclussionsMap);
+        } else {
+            // Ensure $guidings is always defined
+            if (!isset($guidings)) {
+                $guidings = new \Illuminate\Pagination\LengthAwarePaginator(
+                    collect(), 0, 20, 1, 
+                    ['path' => request()->url(), 'pageName' => 'page']
+                );
             }
+        }
+
+        // Calculate filter counts based on current result set
+        if ($allGuidings->isNotEmpty()) {
+            $currentResultIds = $allGuidings->pluck('id')->toArray();
+            $filterCounts = $this->getFilterService()->getFilterCounts($currentResultIds);
+        } else {
+            $filterCounts = $this->getFilterService()->getFilterCounts();
         }
         
-        // Apply title and filter title
-        if($cleanedRequest->has('page')){
-            $title .= __('guidings.Page') . ' ' . $cleanedRequest->page . ' - ';
-        }
+        // Ensure all filter count arrays have default values
+        $filterCounts = array_merge([
+            'targets' => [],
+            'methods' => [],
+            'water_types' => [],
+            'duration_types' => [
+                'half_day' => 0,
+                'full_day' => 0,
+                'multi_day' => 0
+            ],
+            'person_ranges' => []
+        ], $filterCounts);
 
-        // Apply method filters
-        if($cleanedRequest->has('methods') && !empty($cleanedRequest->get('methods'))){
-            $requestMethods = array_filter($cleanedRequest->get('methods'));
-
-            if(count($requestMethods)) {
-                $title .= __('guidings.Method') . ' (';
-                $filter_title .= __('guidings.Method') . ' (';
-                $method_rows = Method::whereIn('id', $cleanedRequest->methods)->get();
-                $title_row = '';
-                foreach ($method_rows as $row) {
-                    $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
-                }
-                $title .= substr($title_row, 0, -2);
-                $title .= '), ';
-                $filter_title .= substr($title_row, 0, -2);
-                $filter_title .= '), ';
-
-                $filteredQuery->where(function($query) use ($requestMethods) {
-                    foreach($requestMethods as $methodId) {
-                        $query->whereJsonContains('fishing_methods', (int)$methodId);
-                    }
-                });
-            }
-        }
-
-        // Apply water filters
-        if($cleanedRequest->has('water') && !empty($cleanedRequest->get('water'))){
-            $requestWater = array_filter($cleanedRequest->get('water'));
-
-            if(count($requestWater)){
-                $title .= __('guidings.Water') . ' (';
-                $filter_title .= __('guidings.Water') . ' (';
-                $method_rows = Water::whereIn('id', $cleanedRequest->water)->get();
-                $title_row = '';
-                foreach ($method_rows as $row) {
-                    $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
-                }
-                $title .= substr($title_row, 0, -2);
-                $title .= ') | ';
-                $filter_title .= substr($title_row, 0, -2);
-                $filter_title .= '), ';
-
-                $filteredQuery->where(function($query) use ($requestWater) {
-                    foreach($requestWater as $waterId) {
-                        $query->whereJsonContains('water_types', (int)$waterId);
-                    }
-                });
-            }
-        }
-
-        // Apply target fish filters
-        if($cleanedRequest->has('target_fish')){
-            $requestFish = array_filter($cleanedRequest->target_fish);
-
-            if(count($requestFish)){
-                $title .= __('guidings.Target_Fish') . ' (';
-                $filter_title .= __('guidings.Target_Fish') . ' (';
-                $method_rows = Target::whereIn('id', $requestFish)->get();
-                $title_row = '';
-                foreach ($method_rows as $row) {
-                    $title_row .= (($locale == 'en')? $row->name_en : $row->name) . ', ';
-                }
-                $title .= substr($title_row, 0, -2);
-                $title .= ') | ';
-                $filter_title .= substr($title_row, 0, -2);
-                $filter_title .= '), ';
-
-                $filteredQuery->where(function($query) use ($requestFish) {
-                    foreach($requestFish as $fishId) {
-                        $query->whereJsonContains('target_fish', (int)$fishId);
-                    }
-                });
-            }
-        }
-
-        // Apply price filters
-        if(($cleanedRequest->has('price_min') && $cleanedRequest->get('price_min') !== "") && ($cleanedRequest->has('price_max') && $cleanedRequest->get('price_max') !== "")){
-            // if ($minPrice != $request->get('price_min') || $overallMaxPrice != $request->get('price_max')){
-                $min_price = $cleanedRequest->get('price_min');
-                $max_price = $cleanedRequest->get('price_max');
-
-                $title .= 'Price ' . $min_price . '€ - ' . $max_price . '€ | ';
-                $filter_title .= 'Price ' . $min_price . '€ - ' . $max_price . '€, ';
-
-                // Use the lowest_price field we calculated in the main query
-                $filteredQuery->havingRaw('lowest_price >= ? AND lowest_price <= ?', [$min_price, $max_price]);
-            // }
-        }
-
-        // Apply duration filters
-        if ($cleanedRequest->has('duration_types') && !empty($cleanedRequest->get('duration_types'))) {
-            $filteredQuery->whereIn('duration_type', $cleanedRequest->get('duration_types'));
-        }
-
-        // Apply person filters
-        if($cleanedRequest->has('num_persons')){
-            $title .= __('guidings.Number of People') . ' ' . $cleanedRequest->get('num_persons') . ' | ';
-            $filter_title .= __('guidings.Number of People') . ' ' . $cleanedRequest->get('num_persons') . ', ';
-            
-            // For single selection, we just need to check if the guiding supports at least this many people
-            $minPersons = $cleanedRequest->get('num_persons');
-            $filteredQuery->where('max_guests', '>=', $minPersons);
-        }
-        
-        // Apply radius filters
-        $radius = null; // Radius in miles
-        if($cleanedRequest->has('radius')){
-            $title .= __('guidings.Radius') . ' ' . $cleanedRequest->radius . 'km | ';
-            $filter_title .= __('guidings.Radius') . ' ' . $cleanedRequest->radius . 'km, ';
-            $radius = $cleanedRequest->get('radius');
-        }
-
-        // Set default values if $filterData is null
-        $filterData = json_decode($row_data->filters, true);
-        $placeLat = $filterData['placeLat'] ?? null;
-        $placeLng = $filterData['placeLng'] ?? null;
-        $city = $filterData['city'] ?? null;
-        $country = $filterData['country'] ?? null;
-        $region = $filterData['region'] ?? null;
-
-        if(!empty($placeLat) && !empty($placeLng)){
-            $title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
-            $filter_title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ', ';
-            $guidingFilter = Guiding::locationFilter($city, $country, $region, $radius, $placeLat, $placeLng);
-            $searchMessage = $guidingFilter['message'];
-            
-            // Add a subquery to order by the position in the filtered IDs array
-            $orderByCase = 'CASE guidings.id ';
-            foreach($guidingFilter['ids'] as $position => $id) {
-                $orderByCase .= "WHEN $id THEN $position ";
-            }
-            $orderByCase .= 'ELSE ' . count($guidingFilter['ids']) . ' END';
-            
-            $filteredQuery->whereIn('guidings.id', $guidingFilter['ids'])
-                  ->orderByRaw($orderByCase);
-        }
-
-        
-        // 3. Get all filtered guidings (for counts and filter options)
-        $allGuidings = $filteredQuery->get();
-        
-        // 4. Extract available filter options from filtered results
-        $availableTargetFish = collect();
-        $availableMethods = collect();
-        $availableWaterTypes = collect();
-        $durationCounts = [
-            'multi_day' => 0,
-            'half_day' => 0,
-            'full_day' => 0
-        ];
-        $targetFishCounts = [];
-        $methodCounts = [];
-        $waterTypeCounts = [];
-        $personCounts = [];
-
-        foreach ($allGuidings as $guiding) {
-            // For target fish
-            $targetFish = json_decode($guiding->target_fish, true) ?? [];
-            $availableTargetFish = $availableTargetFish->concat($targetFish)->unique();
-            foreach ($targetFish as $fishId) {
-                $targetFishCounts[$fishId] = ($targetFishCounts[$fishId] ?? 0) + 1;
-            }
-            
-            // For methods
-            $methods = json_decode($guiding->fishing_methods, true) ?? [];
-            $availableMethods = $availableMethods->concat($methods)->unique();
-            foreach ($methods as $methodId) {
-                $methodCounts[$methodId] = ($methodCounts[$methodId] ?? 0) + 1;
-            }
-            
-            // For water types
-            $waterTypes = json_decode($guiding->water_types, true) ?? [];
-            $availableWaterTypes = $availableWaterTypes->concat($waterTypes)->unique();
-            foreach ($waterTypes as $waterId) {
-                $waterTypeCounts[$waterId] = ($waterTypeCounts[$waterId] ?? 0) + 1;
-            }
-
-            // Count durations
-            if (isset($guiding->duration_type)) {
-                $durationCounts[$guiding->duration_type] = ($durationCounts[$guiding->duration_type] ?? 0) + 1;
-            }
-            
-            // Count persons
-            if (isset($guiding->max_guests)) {
-                // Count all guidings that support at least this number of persons
-                for ($i = 1; $i <= min(8, $guiding->max_guests); $i++) {
-                    $personCounts[$i] = ($personCounts[$i] ?? 0) + 1;
-                }
-            }
-        }
-
-        // Sort person counts
-        ksort($personCounts);
-        
-        // Get the models for these IDs, only including items with counts > 0
-        $targetFishOptions = Target::whereIn('id', array_keys(array_filter($targetFishCounts)))->get();
-        $methodOptions = Method::whereIn('id', array_keys(array_filter($methodCounts)))->get();
-        $waterTypeOptions = Water::whereIn('id', array_keys(array_filter($waterTypeCounts)))->get();
-
-        // 5. Get other guidings if needed
+        // Get other guidings if needed
         $otherguidings = [];
-        if($allGuidings->isEmpty() || count($allGuidings) <= 10){
-            if($cleanedRequest->has('placeLat') && $cleanedRequest->has('placeLng') && !empty($cleanedRequest->get('placeLat')) && !empty($cleanedRequest->get('placeLng')) ){
-                $latitude = $cleanedRequest->get('placeLat');
-                $longitude = $cleanedRequest->get('placeLng');
-                $otherguidings = $this->otherGuidingsBasedByLocation($latitude, $longitude, $allGuidings);
+        if($allGuidings->isEmpty() || count($allGuidings) <= 3){
+            if($request->has('placeLat') && $request->has('placeLng') && !empty($request->get('placeLat')) && !empty($request->get('placeLng')) ){
+                $otherguidings = $this->getOtherGuidingsBasedByLocation($request->get('placeLat'), $request->get('placeLng'), $allGuidings);
             } else {
-                $otherguidings = $this->otherGuidings();
+                $otherguidings = $this->getOtherGuidings();
             }
         }
 
-        // 6. Get paginated results
-        $guidings = $filteredQuery->paginate(20);
-        $guidings->appends(request()->except('page'));
+        // Get filter options for display
+        $targetFishOptions = Target::whereIn('id', array_keys($filterCounts['targets'] ?? []))->get();
+        $methodOptions = Method::whereIn('id', array_keys($filterCounts['methods'] ?? []))->get();
+        $waterTypeOptions = Water::whereIn('id', array_keys($filterCounts['water_types'] ?? []))->get();
 
-        // Finalize filter title
-        $filter_title = substr($filter_title, 0, -2);
+        // Build title and filter title
+        $titleData = $this->buildTitleAndFilterTitle($request, $locale, $targetFishOptions, $methodOptions, $waterTypeOptions);
 
         // Get all options for filters
         $alltargets = Target::select('id', 'name', 'name_en')->orderBy('name')->get();
         $guiding_waters = Water::select('id', 'name', 'name_en')->orderBy('name')->get();
         $guiding_methods = Method::select('id', 'name', 'name_en')->orderBy('name')->get();
 
-        // Check if mobile
-        $isMobile = $cleanedRequest->get('ismobile') == 'true' || app('agent')->isMobile();
+        $isMobile = $request->get('ismobile') == 'true' || app('agent')->isMobile();
+        $overallMaxPrice = $this->getMaxPriceFromFilterData();
 
-        // Ensure personCounts is always an array
-        if (empty($personCounts)) {
-            $personCounts = [];
+        $responseData = [
+            'guidings_total' => is_object($guidings) ? $guidings->total() : count($guidings),
+            'row_data' => $row_data,
+            'regions' => $regions,
+            'cities' => $cities,
+            'faq' => $faq,
+            'fish_chart' => $fish_chart,
+            'fish_size_limit' => $fish_size_limit,
+            'fish_time_limit' => $fish_time_limit,
+            'title' => $titleData['title'],
+            'filter_title' => $titleData['filter_title'],
+            'guidings' => $guidings,
+            'radius' => $request->get('radius'),
+            'allGuidings' => $allGuidings,
+            'searchMessage' => $searchMessage ?? '',
+            'otherguidings' => $otherguidings,
+            'alltargets' => $alltargets,
+            'guiding_waters' => $guiding_waters,
+            'guiding_methods' => $guiding_methods,
+            'destination' => $destination,
+            'targetFishOptions' => $targetFishOptions,
+            'methodOptions' => $methodOptions,
+            'waterTypeOptions' => $waterTypeOptions,
+            'targetFishCounts' => $filterCounts['targets'] ?? [],
+            'methodCounts' => $filterCounts['methods'] ?? [],
+            'waterTypeCounts' => $filterCounts['water_types'] ?? [],
+            'durationCounts' => $filterCounts['duration_types'] ?? [],
+            'personCounts' => $filterCounts['person_ranges'] ?? [],
+            'isMobile' => $isMobile,
+            'total' => is_object($guidings) ? $guidings->total() : count($guidings),
+            'filterCounts' => [
+                'targetFish' => $filterCounts['targets'] ?? [],
+                'methods' => $filterCounts['methods'] ?? [],
+                'waters' => $filterCounts['water_types'] ?? [],
+                'durations' => $filterCounts['duration_types'] ?? [],
+                'persons' => $filterCounts['person_ranges'] ?? []
+            ],
+            'maxPrice' => $overallMaxPrice,
+            'overallMaxPrice' => $overallMaxPrice,
+            'targetsMap' => $targetsMap ?? collect(),
+            'methodsMap' => $methodsMap ?? collect(),
+            'watersMap' => $watersMap ?? collect(),
+            'inclussionsMap' => $inclussionsMap ?? collect(),
+        ];
+
+        // Handle AJAX requests
+        if ($request->ajax()) {
+            $view = view('pages.guidings.partials.guiding-list', $responseData)->render();
+            
+            $guidingsData = $allGuidings->map(function($guiding) {
+                return [
+                    'id' => $guiding->id,
+                    'slug' => $guiding->slug,
+                    'title' => $guiding->title,
+                    'location' => $guiding->location,
+                    'lat' => $guiding->lat,
+                    'lng' => $guiding->lng
+                ];
+            });
+           
+            return response()->json(array_merge($responseData, [
+                'html' => $view,
+                'guidings' => $guidingsData,
+            ]));
+        }
+
+        return view('pages.category.country', $responseData);
+    }
+
+    private function countryWithFilterService($request, $locale, $randomSeed, $destination, $row_data, $regions, $cities, $faq, $fish_chart, $fish_size_limit, $fish_time_limit, $country_row, $region_row, $city_row)
+    {
+        $searchMessage = "";
+        
+        // Start with location-filtered guidings (this is different from GuidingsController)
+        $locationFilteredIds = $this->getLocationFilteredIds($country_row, $region_row, $city_row);
+        
+        // Debug: Log the location filtering results
+        if (config('app.debug')) {
+            Log::info('Location filtered IDs', [
+                'country' => $country_row ? $country_row->name : null,
+                'region' => $region_row ? $region_row->name : null,
+                'city' => $city_row ? $city_row->name : null,
+                'location_filtered_count' => count($locationFilteredIds),
+                'location_filtered_ids' => $locationFilteredIds
+            ]);
         }
         
+        // Get checkbox filter results and intersect with location filter
+        $checkboxFilteredIds = $this->getFilterService()->getFilteredGuidingIds($request);
+        $finalFilteredIds = array_intersect($locationFilteredIds, $checkboxFilteredIds);
+        
+        // Debug: Log the final filtering results
+        if (config('app.debug')) {
+            Log::info('Final filtered IDs', [
+                'checkbox_filtered_count' => count($checkboxFilteredIds),
+                'final_filtered_count' => count($finalFilteredIds),
+                'final_filtered_ids' => $finalFilteredIds
+            ]);
+        }
+        
+        if (empty($finalFilteredIds)) {
+            // If no results after filtering, return empty
+            $guidings = new \Illuminate\Pagination\LengthAwarePaginator(
+                collect(), 0, 20, 1, 
+                ['path' => request()->url(), 'pageName' => 'page']
+            );
+            $allGuidings = collect();
+        } else {
+            // Build base query with filtered IDs
+            $baseQuery = Guiding::with(['boatType', 'user.reviews'])
+                ->whereIn('id', $finalFilteredIds)
+                ->where('status', 1);
+
+            // Handle destination filtering from request
+            if ($request->has('from_destination')) {
+                $destination = Destination::where('id', $request->input('destination_id'))->first();
+                
+                if ($destination) {
+                    switch ($destination->type) {
+                        case 'country':
+                            $baseQuery->where('country', $destination->name);
+                            break;
+                        case 'region':
+                            $baseQuery->where('region', $destination->name)
+                                  ->where('country', $destination->country_name);
+                            break;
+                        case 'city':
+                            $baseQuery->where('city', $destination->name)
+                                  ->where('region', $destination->region_name)
+                                  ->where('country', $destination->country_name);
+                            break;
+                    }
+                }
+            }
+
+            // Apply additional location filtering if present
+            if ($this->hasAdditionalLocationFilter($request)) {
+                $additionalFilter = $this->applyAdditionalLocationFilter($request);
+                $searchMessage = $additionalFilter['message'];
+                
+                if (!empty($additionalFilter['ids'])) {
+                    $baseQuery->whereIn('id', $additionalFilter['ids']);
+                    
+                    // Add location-based ordering
+                    $orderByCase = 'CASE id ';
+                    foreach($additionalFilter['ids'] as $position => $id) {
+                        $orderByCase .= "WHEN $id THEN $position ";
+                    }
+                    $orderByCase .= 'ELSE ' . count($additionalFilter['ids']) . ' END';
+                    $baseQuery->orderByRaw($orderByCase);
+                } else {
+                    // No location matches found, return empty results
+                    $allGuidings = collect();
+                    $guidings = new \Illuminate\Pagination\LengthAwarePaginator(
+                        collect(), 0, 20, 1, 
+                        ['path' => request()->url(), 'pageName' => 'page']
+                    );
+                }
+            } else {
+                $this->applySorting($baseQuery, $request, $randomSeed);
+            }
+
+            // Only execute queries if we haven't already set empty results
+            if (!isset($allGuidings)) {
+                $allGuidings = $baseQuery->get();
+                $guidings = $baseQuery->paginate(20);
+                $guidings->appends($request->except('page'));
+                
+                // Batch fetch all needed related models for all guidings
+                $allTargetIds = $allGuidings->flatMap(function($g) { return json_decode($g->target_fish, true) ?: []; })->unique()->filter()->values();
+                $allMethodIds = $allGuidings->flatMap(function($g) { return json_decode($g->fishing_methods, true) ?: []; })->unique()->filter()->values();
+                $allWaterIds = $allGuidings->flatMap(function($g) { return json_decode($g->water_types, true) ?: []; })->unique()->filter()->values();
+                $allInclussionIds = $allGuidings->flatMap(function($g) { return json_decode($g->inclusions, true) ?: []; })->unique()->filter()->values();
+
+                $targetsMap = $allTargetIds->isNotEmpty() ? Target::whereIn('id', $allTargetIds)->get()->keyBy('id') : collect();
+                $methodsMap = $allMethodIds->isNotEmpty() ? Method::whereIn('id', $allMethodIds)->get()->keyBy('id') : collect();
+                $watersMap = $allWaterIds->isNotEmpty() ? Water::whereIn('id', $allWaterIds)->get()->keyBy('id') : collect();
+                $inclussionsMap = $allInclussionIds->isNotEmpty() ? Inclussion::whereIn('id', $allInclussionIds)->get()->keyBy('id') : collect();
+
+                $this->preComputeGuidingData($allGuidings, $targetsMap, $methodsMap, $watersMap, $inclussionsMap);
+                $this->preComputeGuidingData($guidings->getCollection(), $targetsMap, $methodsMap, $watersMap, $inclussionsMap);
+            }
+        }
+
+        // Get filter counts - use the final result IDs for accurate counts
+        $finalResultIds = $allGuidings->pluck('id')->toArray();
+        $filterCounts = $this->getFilterService()->getFilterCounts($finalResultIds);
+        
+        // Ensure all filter count arrays have default values
+        $filterCounts = array_merge([
+            'targets' => [],
+            'methods' => [],
+            'water_types' => [],
+            'duration_types' => [
+                'half_day' => 0,
+                'full_day' => 0,
+                'multi_day' => 0
+            ],
+            'person_ranges' => []
+        ], $filterCounts);
+
+        // Get other guidings if needed
+        $otherguidings = [];
+        if($allGuidings->isEmpty() || count($allGuidings) <= 3){
+            if($request->has('placeLat') && $request->has('placeLng') && !empty($request->get('placeLat')) && !empty($request->get('placeLng')) ){
+                $otherguidings = $this->getOtherGuidingsBasedByLocation($request->get('placeLat'), $request->get('placeLng'), $allGuidings);
+            } else {
+                $otherguidings = $this->getOtherGuidings();
+            }
+        }
+
+        // Get filter options for display
+        $targetFishOptions = Target::whereIn('id', array_keys($filterCounts['targets'] ?? []))->get();
+        $methodOptions = Method::whereIn('id', array_keys($filterCounts['methods'] ?? []))->get();
+        $waterTypeOptions = Water::whereIn('id', array_keys($filterCounts['water_types'] ?? []))->get();
+
+        // Build title and filter title
+        $titleData = $this->buildTitleAndFilterTitle($request, $locale, $targetFishOptions, $methodOptions, $waterTypeOptions);
+
+        // Get all options for filters
+        $alltargets = Target::select('id', 'name', 'name_en')->orderBy('name')->get();
+        $guiding_waters = Water::select('id', 'name', 'name_en')->orderBy('name')->get();
+        $guiding_methods = Method::select('id', 'name', 'name_en')->orderBy('name')->get();
+
+        $isMobile = $request->get('ismobile') == 'true' || app('agent')->isMobile();
+        $overallMaxPrice = $this->getMaxPriceFromFilterData();
+
+        $responseData = [
+            'guidings_total' => is_object($guidings) ? $guidings->total() : count($guidings),
+            'row_data' => $row_data,
+            'regions' => $regions,
+            'cities' => $cities,
+            'faq' => $faq,
+            'fish_chart' => $fish_chart,
+            'fish_size_limit' => $fish_size_limit,
+            'fish_time_limit' => $fish_time_limit,
+            'title' => $titleData['title'],
+            'filter_title' => $titleData['filter_title'],
+            'guidings' => $guidings,
+            'radius' => $request->get('radius'),
+            'allGuidings' => $allGuidings,
+            'searchMessage' => $searchMessage ?? '',
+            'otherguidings' => $otherguidings,
+            'alltargets' => $alltargets,
+            'guiding_waters' => $guiding_waters,
+            'guiding_methods' => $guiding_methods,
+            'destination' => $destination,
+            'targetFishOptions' => $targetFishOptions,
+            'methodOptions' => $methodOptions,
+            'waterTypeOptions' => $waterTypeOptions,
+            'targetFishCounts' => $filterCounts['targets'] ?? [],
+            'methodCounts' => $filterCounts['methods'] ?? [],
+            'waterTypeCounts' => $filterCounts['water_types'] ?? [],
+            'durationCounts' => $filterCounts['duration_types'] ?? [],
+            'personCounts' => $filterCounts['person_ranges'] ?? [],
+            'isMobile' => $isMobile,
+            'total' => is_object($guidings) ? $guidings->total() : count($guidings),
+            'filterCounts' => [
+                'targetFish' => $filterCounts['targets'] ?? [],
+                'methods' => $filterCounts['methods'] ?? [],
+                'waters' => $filterCounts['water_types'] ?? [],
+                'durations' => $filterCounts['duration_types'] ?? [],
+                'persons' => $filterCounts['person_ranges'] ?? []
+            ],
+            'maxPrice' => $overallMaxPrice,
+            'overallMaxPrice' => $overallMaxPrice,
+            'targetsMap' => $targetsMap ?? collect(),
+            'methodsMap' => $methodsMap ?? collect(),
+            'watersMap' => $watersMap ?? collect(),
+            'inclussionsMap' => $inclussionsMap ?? collect(),
+        ];
+
         // Handle AJAX requests
-        if ($cleanedRequest->ajax()) {
-            Log::info('AJAX request received'); 
-            $view = view('pages.guidings.partials.guiding-list', [
-                'title' => $title,
-                'filter_title' => $filter_title,
-                'guidings' => $guidings,
-                'radius' => $radius,
-                'allGuidings' => $allGuidings,
-                'searchMessage' => $searchMessage,
-                'otherguidings' => $otherguidings,
-                'alltargets' => $alltargets,
-                'guiding_waters' => $guiding_waters,
-                'guiding_methods' => $guiding_methods,
-                'destination' => $destination,
-                'targetFishOptions' => $targetFishOptions,
-                'methodOptions' => $methodOptions,
-                'waterTypeOptions' => $waterTypeOptions,
-                'targetFishCounts' => $targetFishCounts,
-                'methodCounts' => $methodCounts,
-                'waterTypeCounts' => $waterTypeCounts,
-                'durationCounts' => $durationCounts,
-                'personCounts' => $personCounts,
-                'isMobile' => $isMobile,
-                // 'priceHistogramData' => $priceHistogramData,
-                'maxPrice' => $overallMaxPrice,
-                'overallMaxPrice' => $overallMaxPrice,
-            ])->render();
+        if ($request->ajax()) {
+            $view = view('pages.guidings.partials.guiding-list', $responseData)->render();
             
-            // Add guiding data for map updates
-            $guidingsData = $guidings->map(function($guiding) {
+            $guidingsData = $allGuidings->map(function($guiding) {
                 return [
                     'id' => $guiding->id,
                     'slug' => $guiding->slug,
@@ -549,85 +592,109 @@ class DestinationCountryController extends Controller
                 ];
             });
             
-            return response()->json([
+            return response()->json(array_merge($responseData, [
                 'html' => $view,
                 'guidings' => $guidingsData,
-                'allGuidings' => $allGuidings,
-                'searchMessage' => $searchMessage,
-                'isMobile' => $isMobile,
-                'total' => $guidings->total(),
-                'filterCounts' => [
-                    'targetFish' => $targetFishCounts,
-                    'methods' => $methodCounts,
-                    'waters' => $waterTypeCounts,
-                    'durations' => $durationCounts,
-                    'persons' => $personCounts
-                ],
-                // 'priceHistogramData' => $priceHistogramData,
-                'maxPrice' => $overallMaxPrice,
-                'overallMaxPrice' => $overallMaxPrice,
-            ]);
+            ]));
         }
 
-        // Return full view for non-AJAX requests
-        return view('pages.category.country', [ 
-            'guidings_total' => $filteredQuery->count(),
-            'row_data' => $row_data,
-            'regions' => $regions,
-            'cities' => $cities,
-            'faq' => $faq,
-            'fish_chart' => $fish_chart,
-            'fish_size_limit' => $fish_size_limit,
-            'fish_time_limit' => $fish_time_limit,
-            'title' => $title,
-            'filter_title' => $filter_title,
-            'guidings' => $guidings,
-            'radius' => $radius,
-            'allGuidings' => $allGuidings,
-            'searchMessage' => $searchMessage,
-            'otherguidings' => $otherguidings,
-            'alltargets' => $alltargets,
-            'guiding_waters' => $guiding_waters,
-            'guiding_methods' => $guiding_methods,
-            'destination' => $destination,
-            'targetFishOptions' => $targetFishOptions,
-            'methodOptions' => $methodOptions,
-            'waterTypeOptions' => $waterTypeOptions,
-            'targetFishCounts' => $targetFishCounts,
-            'methodCounts' => $methodCounts,
-            'waterTypeCounts' => $waterTypeCounts,
-            'durationCounts' => $durationCounts,
-            'personCounts' => $personCounts,
-            'isMobile' => $isMobile,
-            'total' => $guidings->total(),
-            'filterCounts' => [
-                'targetFish' => $targetFishCounts,
-                'methods' => $methodCounts,
-                'waters' => $waterTypeCounts,
-                'durations' => $durationCounts,
-                'persons' => $personCounts
-            ],
-            // 'priceHistogramData' => $priceHistogramData,
-            'maxPrice' => $overallMaxPrice,
-            'overallMaxPrice' => $overallMaxPrice,
-        ]);
+        return view('pages.category.country', $responseData);
+    }
+
+    /**
+     * Apply destination-based location filtering to query
+     */
+    private function applyDestinationLocationFilter($query, $country_row, $region_row, $city_row)
+    {
+        if ($city_row) {
+            // For city filtering, we need the actual parent names
+            $region_name = $region_row ? $region_row->name : null;
+            $country_name = $country_row ? $country_row->name : null;
+            
+            // Use case-insensitive matching for better coverage
+            $query->whereRaw('LOWER(city) = LOWER(?)', [$city_row->name]);
+            if ($region_name && $region_name !== 'N/A') {
+                $query->whereRaw('LOWER(region) = LOWER(?)', [$region_name]);
+            }
+            if ($country_name && $country_name !== 'N/A') {
+                $query->whereRaw('LOWER(country) = LOWER(?)', [$country_name]);
+            }
+        } elseif ($region_row) {
+            // For region filtering
+            $country_name = $country_row ? $country_row->name : null;
+            
+            $query->whereRaw('LOWER(region) = LOWER(?)', [$region_row->name]);
+            if ($country_name && $country_name !== 'N/A') {
+                $query->whereRaw('LOWER(country) = LOWER(?)', [$country_name]);
+            }
+        } else {
+            // For country filtering
+            $query->whereRaw('LOWER(country) = LOWER(?)', [$country_row->name]);
+        }
+    }
+
+    /**
+     * Get location-filtered IDs for filter service approach
+     */
+    private function getLocationFilteredIds($country_row, $region_row, $city_row)
+    {
+        $query = Guiding::where('status', 1);
+        $this->applyDestinationLocationFilter($query, $country_row, $region_row, $city_row);
+        return $query->pluck('id')->toArray();
+    }
+
+    /**
+     * Check if request has additional location filters beyond URL params
+     */
+    private function hasAdditionalLocationFilter($request)
+    {
+        // Check for coordinate-based location search (from map/autocomplete)
+        $hasCoordinateSearch = !empty($request->get('placeLat')) && 
+                              !empty($request->get('placeLng'));
+        
+        return $hasCoordinateSearch;
+    }
+
+    /**
+     * Apply additional location filtering
+     */
+    private function applyAdditionalLocationFilter($request)
+    {
+        $filterData = [];
+        
+        // Get filter data from the destination if available
+        if ($request->has('placeLat') && $request->has('placeLng')) {
+            $filterData = [
+                'placeLat' => $request->get('placeLat'),
+                'placeLng' => $request->get('placeLng'),
+                'city' => $request->get('city', ''),
+                'country' => $request->get('country', ''),
+                'region' => $request->get('region', ''),
+            ];
+        }
+
+        $placeLat = $filterData['placeLat'] ?? null;
+        $placeLng = $filterData['placeLng'] ?? null;
+        $city = $filterData['city'] ?? null;
+        $country = $filterData['country'] ?? null;
+        $region = $filterData['region'] ?? null;
+        $radius = $request->get('radius');
+
+        if (!empty($placeLat) && !empty($placeLng)) {
+            return Guiding::locationFilter($city, $country, $region, $radius, $placeLat, $placeLng);
+        }
+
+        return ['ids' => [], 'message' => ''];
     }
 
     public function otherGuidings(){
-        $otherguidings = Guiding::inRandomOrder('1234')->where('status',1)->limit(10)->get();
-
-        return $otherguidings;
+        return $this->getOtherGuidings();
     }
 
-    public function otherGuidingsBasedByLocation($latitude,$longitude){
-        $nearestlisting = Guiding::select(['guidings.*']) // Include necessary attributes here
-        ->selectRaw("(6371 * acos(cos(radians($latitude)) * cos(radians(lat)) * cos(radians(lng) - radians($longitude)) + sin(radians($latitude)) * sin(radians(lat)))) AS distance")
-        ->orderBy('distance')
-        ->where('status',1)
-        ->limit(10)
-        ->get();
-
-        return $nearestlisting;
+    public function otherGuidingsBasedByLocation($latitude, $longitude){
+        // This method signature is different from trait, so we keep this wrapper
+        $allGuidings = collect(); // Empty collection since we don't have existing guidings context
+        return $this->getOtherGuidingsBasedByLocation($latitude, $longitude, $allGuidings);
     }
 
     public function getCoordinates($country, $region=null, $city=null)
@@ -636,7 +703,6 @@ class DestinationCountryController extends Controller
         $geocoder = new Geocoder($client);
 
         $geocoder->setApiKey(env('GOOGLE_MAPS_API_KEY'));
-
         $geocoder->setCountry($country);
 
         $address = $country;
@@ -651,7 +717,6 @@ class DestinationCountryController extends Controller
 
         return $coordinates;
     }
-    
 
     /**
      * Clean up request parameters before processing
