@@ -56,17 +56,20 @@ class SendGuideTourReminders extends Command
             
             // Send the reminder email
             app()->setLocale($language);
-            Mail::send('mails.guide.guide_reminder', [
-                'guide' => $guide,
-                'booking' => $booking,
-                'guideName' => $guide->name,
-                'language' => $language,
-                'type' => $type,
-                'target' => $target,
-            ], function ($message) use ($guide) {
-                $message->to($guide->email)
-                    ->subject(__('emails.guide_reminder_to_respond_24hrs_title'));
-            });
+            
+            if (!CheckEmailLog('guide_reminder', 'booking_' . $booking->id, $booking->user->email)) {
+                Mail::send('mails.guide.guide_reminder', [
+                    'guide' => $guide,
+                    'booking' => $booking,
+                    'guideName' => $guide->name,
+                    'language' => $language,
+                    'type' => $type,
+                    'target' => $target,
+                ], function ($message) use ($guide) {
+                    $message->to($guide->email)
+                        ->subject(__('emails.guide_reminder_to_respond_24hrs_title'));
+                });
+            }
             
             // Log the email
             $this->info("Sent guide reminder email to {$guide->email} for booking #{$booking->id} in {$language}");

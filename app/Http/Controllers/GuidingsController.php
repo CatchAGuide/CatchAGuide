@@ -51,7 +51,7 @@ class GuidingsController extends Controller
 
         // Get random seed
         $randomSeed = $this->getRandomSeed();
-        
+       
         // Clean up request parameters before processing
         $cleanedRequest = $this->cleanRequestParameters($request);
         
@@ -289,7 +289,6 @@ class GuidingsController extends Controller
             'watersMap' => $watersMap ?? collect(),
             'inclussionsMap' => $inclussionsMap ?? collect(),
         ];
-
         // Handle AJAX requests
         if ($request->ajax()) {
             $view = view('pages.guidings.partials.guiding-list', $responseData)->render();
