@@ -63,6 +63,9 @@ return [
     'targetfish-title' => 'Most popular target fishes',
     'targetfish-message' => 'Choose your target species',
 
+    'methods-title' => 'Most popular fishing methods',
+    'methods-message' => 'Choose your preferred fishing method',
+
     'targetfish-pike' => 'Pike',
     'targetfish-perch' => 'Perch',
     'targetfish-zander' => 'Zander',

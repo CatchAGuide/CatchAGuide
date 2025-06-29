@@ -48,6 +48,7 @@ use App\Http\Controllers\VacationBookingController;
 use App\Http\Controllers\CategoryTargetFishController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Category\DestinationCountryController;
+use App\Http\Controllers\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -227,8 +228,8 @@ Route::get('destination', [DestinationCountryController::class, 'index'])->name(
 Route::get('destinationen', [DestinationCountryController::class, 'index'])->name('destination_de');
 Route::get('destination/{country}/{region?}/{city?}', [DestinationCountryController::class, 'country'])->name('destination.country');
 
-Route::get('category/target-fish/', [CategoryTargetFishController::class, 'index'])->name('target-fish.index');
-Route::get('category/target-fish/{slug}', [CategoryTargetFishController::class, 'targets'])->name('target-fish.targets');
+Route::get('category-page/{type}/', [CategoryController::class, 'index'])->name('category.types');
+Route::get('category-page/{type}/{slug}', [CategoryController::class, 'targets'])->name('category.targets');
 
 Route::post('sendcontact', [\App\Http\Controllers\ZoisController::class, 'sendcontact'])->name('sendcontactmail');
 Route::post('sendnewsletter', [\App\Http\Controllers\ZoisController::class, 'sendnewsletter'])->name('sendnewsletter');

@@ -1448,9 +1448,9 @@
                 @if(!$agent->ismobile())
                 <div>
                     @if(app()->getLocale() == 'de')
-                        <a href="{{ route('target-fish.index') }}" class="color-primary fw-light">Alle Zielfische ansehen</a>
+                        <a href="{{ route('category.types', ['type' => 'targets']) }}" class="color-primary fw-light">Alle Zielfische ansehen</a>
                     @else
-                        <a href="{{ route('target-fish.index') }}" class="color-primary fw-light">See all target fish</a>
+                        <a href="{{ route('category.types', ['type' => 'targets']) }}" class="color-primary fw-light">See all target fish</a>
                     @endif
                 </div>
                 @endif
@@ -1462,7 +1462,7 @@
         <div class="methods-custom-owl owl-carousel owl-theme">
             @foreach($CategoryPage as $category)
                 <div class="item">
-                    <a href="{{ route('target-fish.targets', ['slug' => $category->slug]) }}">
+                    <a href="{{ route('category.targets', ['type' => 'targets', 'slug' => $category->slug]) }}">
                         <div class="card">
                             <div class="row g-0">
                                 <div class="col-5">
@@ -1481,16 +1481,84 @@
         </div>
         <div class="p-1 d-flex justify-content-end">
             @if(app()->getLocale() == 'de')
-                <a href="{{ route('target-fish.index') }}" class="color-primary fw-light">Alle Zielfische ansehen</a>
+                <a href="{{ route('category.types', ['type' => 'targets']) }}" class="color-primary fw-light">Alle Zielfische ansehen</a>
             @else
-                <a href="{{ route('target-fish.index') }}" class="color-primary fw-light">See all target fish</a>
+                <a href="{{ route('category.types', ['type' => 'targets']) }}" class="color-primary fw-light">See all target fish</a>
             @endif
         </div>
         @else
             <div class="row">
                 @foreach($CategoryPage as $category)
                     <div class="my-1 col-md-4">
-                        <a href="{{ route('target-fish.targets', ['slug' => $category->slug]) }}">
+                        <a href="{{ route('category.targets', ['type' => 'targets', 'slug' => $category->slug]) }}">
+                            <div class="flex-row card align-items-center">
+                                <img class="card-img-left example-card-img-responsive img-top" src="{{asset($category->thumbnail_path ?? 'images/placeholder_guide.jpg')}}" style="width:150px;height:100px"/>
+                                <div class="card-body">
+                                <h5 class="card-title">{{$category->source->name}}</h5>
+                                
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+    </div>
+</section>
+
+<section class="py-1 my-5 topmethods">
+    <div class="container my-4">
+        <div class="my-2 section-title">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h2 class="h4 text-dark fw-bolder">@lang('homepage.methods-title')</h2>
+                </div>
+                @if(!$agent->ismobile())
+                <div>
+                    @if(app()->getLocale() == 'de')
+                        <a href="{{ route('category.types', ['type' => 'methods']) }}" class="color-primary fw-light">Alle Methoden ansehen</a>
+                    @else
+                        <a href="{{ route('category.types', ['type' => 'methods']) }}" class="color-primary fw-light">See all methods</a>
+                    @endif
+                </div>
+                @endif
+            </div>
+            
+            <p class="fw-light">@lang('homepage.methods-message')</p>
+        </div>
+        @if($agent->ismobile())
+        <div class="methods-custom-owl owl-carousel owl-theme">
+            @foreach($CategoryPageMethods as $category)
+                <div class="item">
+                    <a href="{{ route('category.targets', ['type' => 'methods', 'slug' => $category->slug]) }}">
+                        <div class="card">
+                            <div class="row g-0">
+                                <div class="col-5">
+                                    <img class="img-fluid rounded-start img-top" src="{{asset($category->thumbnail_path ?? 'images/placeholder_guide.jpg')}}" style="height:100px; object-fit:cover;" alt="{{$category->source->name}}">
+                                </div>
+                                <div class="col-7">
+                                    <div class="card-body py-2 px-3 d-flex align-items-center h-100">
+                                        <h5 class="card-title mb-0">{{$category->source->name}}</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            @endforeach
+        </div>
+        <div class="p-1 d-flex justify-content-end">
+            @if(app()->getLocale() == 'de')
+                <a href="{{ route('category.types', ['type' => 'methods']) }}" class="color-primary fw-light">Alle Methoden ansehen</a>
+            @else
+                <a href="{{ route('category.types', ['type' => 'methods']) }}" class="color-primary fw-light">See all methods</a>
+            @endif
+        </div>
+        @else
+            <div class="row">
+                @foreach($CategoryPageMethods as $category)
+                    <div class="my-1 col-md-4">
+                        <a href="{{ route('category.types', ['type' => 'methods', 'slug' => $category->slug]) }}">
                             <div class="flex-row card align-items-center">
                                 <img class="card-img-left example-card-img-responsive img-top" src="{{asset($category->thumbnail_path ?? 'images/placeholder_guide.jpg')}}" style="width:150px;height:100px"/>
                                 <div class="card-body">
@@ -1641,8 +1709,6 @@
         placeholder: '@lang('message.target-fish')',
         width: 'resolve', // need to override the changed default
     });
-
-    
 
     @foreach($alltargets as $target)
     var targetname = '{{$target->name}}';
