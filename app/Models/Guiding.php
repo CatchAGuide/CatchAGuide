@@ -536,7 +536,6 @@ class Guiding extends Model
             if ($translated) {
                 $locationParts = ['city_en' => $translated['city'], 'country_en' => $translated['country'], 'region_en' => $translated['region']];
             }
-            dd($locationParts);
         }
 
         $locationParts = array_merge(['city' => $city, 'country' => $country, 'region' => $region], $locationParts ?? []);
@@ -600,10 +599,22 @@ class Guiding extends Model
         }
 
         // If no direct matches, use geocoding
-        if ($placeLat && $placeLng) {
-            $coordinates = ['lat' => $placeLat, 'lng' => $placeLng];
+        if ($placeLat && $placeLng && is_numeric($placeLat) && is_numeric($placeLng)) {
+            // Validate coordinate ranges (basic sanity check)
+            $lat = (float) $placeLat;
+            $lng = (float) $placeLng;
+            if ($lat >= -90 && $lat <= 90 && $lng >= -180 && $lng <= 180) {
+                $coordinates = ['lat' => $lat, 'lng' => $lng];
+            } else {
+                Log::warning('Invalid coordinates provided', ['lat' => $placeLat, 'lng' => $placeLng]);
+                $coordinates = null;
+            }
         } else {
-            // Try to get coordinates from the location string
+            $coordinates = null;
+        }
+        
+        // If no valid coordinates provided, try geocoding
+        if (!$coordinates) {
             $locationString = implode(', ', array_filter([$city, $region, $country]));
             $coordinates = self::getCoordinatesFromLocation($locationString);
             
@@ -621,26 +632,40 @@ class Guiding extends Model
 
         // Try radius search
         $searchRadius = $radius ?? 200;
-        $guidingsRadius = self::select('id')
-            ->selectRaw("ST_Distance_Sphere(
-                point(lng, lat),
-                point(?, ?)
-            ) as distance", [
-                $coordinates['lng'],
-                $coordinates['lat']
-            ])
-            ->whereRaw("ST_Distance_Sphere(
-                point(lng, lat),
-                point(?, ?)
-            ) <= ?", [
-                $coordinates['lng'],
-                $coordinates['lat'],
-                $searchRadius * 1000
-            ])
-            ->where('status', 1)
-            ->orderByRaw('CASE WHEN distance IS NULL THEN 1 ELSE 0 END')
-            ->orderBy('distance')  // Sort by distance ascending
-            ->pluck('id');
+        try {
+            $guidingsRadius = self::select('id')
+                ->selectRaw("ST_Distance_Sphere(
+                    point(lng, lat),
+                    point(?, ?)
+                ) as distance", [
+                    $coordinates['lng'],
+                    $coordinates['lat']
+                ])
+                ->whereRaw("ST_Distance_Sphere(
+                    point(lng, lat),
+                    point(?, ?)
+                ) <= ?", [
+                    $coordinates['lng'],
+                    $coordinates['lat'],
+                    $searchRadius * 1000
+                ])
+                ->where('status', 1)
+                ->whereNotNull('lat')
+                ->whereNotNull('lng')
+                ->where('lat', '!=', 0)
+                ->where('lng', '!=', 0)
+                ->orderByRaw('CASE WHEN distance IS NULL THEN 1 ELSE 0 END')
+                ->orderBy('distance')  // Sort by distance ascending
+                ->limit(100) // Reasonable limit for radius search
+                ->pluck('id');
+        } catch (\Exception $e) {
+            Log::error('Radius search failed in locationFilter', [
+                'error' => $e->getMessage(),
+                'coordinates' => $coordinates,
+                'radius' => $searchRadius
+            ]);
+            $guidingsRadius = collect(); // Empty collection on error
+        }
 
         if ($guidingsRadius->isNotEmpty()) {
             $returnData['ids'] = $guidingsRadius;
@@ -652,20 +677,53 @@ class Guiding extends Model
             return $returnData;
         }
 
-        // If still no results, find nearest guiding
-        $returnData['ids'] = self::select('id')
-            ->selectRaw("ST_Distance_Sphere(
-                point(lng, lat),
-                point(?, ?)
-            ) as distance", [
-                $coordinates['lng'],
-                $coordinates['lat']
-            ])
-            ->where('status', 1)
-            ->orderByRaw('CASE WHEN distance IS NULL THEN 1 ELSE 0 END')
-            ->orderBy('distance')
-            ->pluck('id');
+        // If still no results, find nearest guidings (limited to reasonable number)
+        try {
+            $returnData['ids'] = self::select('id')
+                ->selectRaw("ST_Distance_Sphere(
+                    point(lng, lat),
+                    point(?, ?)
+                ) as distance", [
+                    $coordinates['lng'],
+                    $coordinates['lat']
+                ])
+                ->where('status', 1)
+                ->whereNotNull('lat')
+                ->whereNotNull('lng')
+                ->where('lat', '!=', 0)
+                ->where('lng', '!=', 0)
+                ->orderByRaw('CASE WHEN distance IS NULL THEN 1 ELSE 0 END')
+                ->orderBy('distance')
+                ->limit(50) // Limit to 50 nearest guidings
+                ->pluck('id');
+        } catch (\Exception $e) {
+            Log::error('Distance calculation failed in locationFilter', [
+                'error' => $e->getMessage(),
+                'coordinates' => $coordinates,
+                'city' => $city,
+                'country' => $country
+            ]);
+            
+            // Fallback: return recent guidings if distance calculation fails
+            $returnData['ids'] = self::where('status', 1)
+                ->whereNotNull('lat')
+                ->whereNotNull('lng')
+                ->orderBy('created_at', 'desc')
+                ->limit(20)
+                ->pluck('id');
+        }
+        
         $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel3'));
+        
+        // Final safety check: if we still have no results, return the most recent guidings
+        if (empty($returnData['ids'])) {
+            Log::warning('All location search methods failed, returning recent guidings as last resort');
+            $returnData['ids'] = self::where('status', 1)
+                ->orderBy('created_at', 'desc')
+                ->limit(20)
+                ->pluck('id');
+            $returnData['message'] = 'Showing recent guidings';
+        }
         
         // Cache the result for 1 hour
         \Cache::put($cacheKey, $returnData, 3600);
