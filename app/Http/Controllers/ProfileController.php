@@ -81,11 +81,6 @@ class ProfileController extends Controller
             $user->profil_image = $imageName;
         }
 
-        $user->bar_allowed = $request->bar_allowed;
-        $user->banktransfer_allowed = $request->banktransfer_allowed;
-        $user->paypal_allowed = $request->paypal_allowed;
-        $user->banktransferdetails = $request->banktransferdetails;
-        $user->paypaldetails = $request->paypaldetails;
         $user->number_of_guides = $request->numguides;
 
 
@@ -372,9 +367,46 @@ class ProfileController extends Controller
 
     public function payments()
     {
+        $intent = null;
+        
+        // Check if user has Stripe setup intent capability (Laravel Cashier)
+        if (method_exists(auth()->user(), 'createSetupIntent')) {
+            try {
+                $intent = auth()->user()->createSetupIntent();
+            } catch (\Exception $e) {
+                // If Stripe is not configured or has issues, continue without intent
+                $intent = null;
+            }
+        }
+        
         return view('pages.profile.payments', [
-            'intent' => auth()->user()->createSetupIntent()
+            'intent' => $intent
         ]);
+    }
+
+    public function paymentsUpdate(Request $request)
+    {
+        // Validate payment method data
+        $validatedData = $request->validate([
+            'bar_allowed' => 'nullable|boolean',
+            'banktransfer_allowed' => 'nullable|boolean',
+            'paypal_allowed' => 'nullable|boolean',
+            'banktransferdetails' => 'nullable|string',
+            'paypaldetails' => 'nullable|string',
+        ]);
+        
+        $user = auth()->user();
+        
+        // Update payment method preferences
+        $user->bar_allowed = $request->boolean('bar_allowed', false);
+        $user->banktransfer_allowed = $request->boolean('banktransfer_allowed', false);
+        $user->paypal_allowed = $request->boolean('paypal_allowed', false);
+        $user->banktransferdetails = $request->banktransferdetails;
+        $user->paypaldetails = $request->paypaldetails;
+        
+        $user->save();
+
+        return redirect()->route('profile.payments')->with(['message' => 'Payment methods updated successfully!']);
     }
 
     public function abbuchen()

@@ -344,6 +344,12 @@
                                             <span>Password & Security</span>
                                         </a>
                                     </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('profile.payments') }}" class="nav-link {{ Request::routeIs('profile.payments') ? 'active' : '' }}">
+                                            <i class="fas fa-credit-card"></i>
+                                            <span>Payment Information</span>
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
 

@@ -3,6 +3,49 @@
 
 @section('profile-content')
     <style>
+        /* Header Section Styling */
+        .security-header {
+            background: linear-gradient(135deg, #313041, #252238);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .security-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+            opacity: 0.5;
+            animation: float 20s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateX(-100px) translateY(-100px); }
+            100% { transform: translateX(100px) translateY(100px); }
+        }
+        
+        .security-header h1 {
+            color: white !important;
+            font-weight: 700;
+            margin-bottom: 0;
+            z-index: 1;
+            position: relative;
+        }
+        
+        .security-header p {
+            color: white !important;
+            opacity: 0.9;
+            z-index: 1;
+            position: relative;
+        }
+
         .security-section {
             background: #f8f9fa;
             border-radius: 8px;
@@ -220,6 +263,15 @@
             <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
         </div>
     @endif
+
+    <!-- Header Section -->
+    <div class="security-header">
+        <h1 class="mb-0 text-white">
+            <i class="fas fa-shield-alt"></i>
+            Password & Security
+        </h1>
+        <p class="mb-0 mt-2 text-white">Secure your account with strong authentication settings</p>
+    </div>
 
     <!-- Password Change Section -->
     <div class="security-section">

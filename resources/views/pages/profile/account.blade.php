@@ -49,13 +49,21 @@
             margin-bottom: 30px;
         }
         
+        #imagePreviewContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
         .current-image {
             width: 150px;
             height: 150px;
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid #313041;
-            margin-bottom: 15px;
+            display: block;
+            margin: 0 auto;
         }
         
         .btn-primary {
@@ -86,15 +94,7 @@
             color: #f8f9fa;
         }
         
-        .payment-checkbox {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .payment-checkbox input {
-            margin-right: 10px;
-        }
+
         
         .helper-text {
             font-size: 0.85rem;
@@ -107,6 +107,90 @@
             border-color: #2196f3;
             color: #1976d2;
         }
+        
+        /* Header Section Styling */
+        .account-header {
+            background: linear-gradient(135deg, #313041, #252238);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .account-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+            opacity: 0.5;
+            animation: float 20s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateX(-100px) translateY(-100px); }
+            100% { transform: translateX(100px) translateY(100px); }
+        }
+        
+        .account-header h1 {
+            color: white !important;
+            font-weight: 700;
+            margin-bottom: 0;
+            z-index: 1;
+            position: relative;
+        }
+        
+        .account-header p {
+            color: white !important;
+            opacity: 0.9;
+            z-index: 1;
+            position: relative;
+        }
+        
+        /* Floating Save Button */
+        .floating-save-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            background-color: #e8604c;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 25px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(232, 96, 76, 0.3);
+            transition: all 0.3s ease;
+            display: none;
+        }
+        
+        .floating-save-btn:hover {
+            background-color: #d54e37;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(232, 96, 76, 0.4);
+        }
+        
+        .floating-save-btn.show {
+            display: block;
+            animation: slideInUp 0.3s ease-out;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+
     </style>
 
     @if($errors->any())
@@ -125,7 +209,16 @@
         </div>
     @endif
 
-    <form action="{{route('profile.account')}}" method="POST" enctype="multipart/form-data">
+    <!-- Header Section -->
+    <div class="account-header">
+        <h1 class="mb-0 text-white">
+            <i class="fas fa-user-edit"></i>
+            Personal Details
+        </h1>
+        <p class="mb-0 mt-2 text-white">Manage your profile information and account settings</p>
+    </div>
+
+    <form action="{{route('profile.account')}}" method="POST" enctype="multipart/form-data" id="profileForm">
         @csrf
         @method('PUT')
         
@@ -133,12 +226,17 @@
         <div class="profile-section">
             <h3 class="section-title">@lang('profile.DPselect')</h3>
             <div class="profile-image-section">
-                @if(Auth::user()->profil_image)
-                    <img src="{{asset('images/'. Auth::user()->profil_image)}}" 
-                         alt="Profile Image" class="current-image">
-                @endif
+                <div id="imagePreviewContainer">
+                    @if(Auth::user()->profil_image)
+                        <img src="{{asset('images/'. Auth::user()->profil_image)}}" 
+                             alt="Profile Image" class="current-image" id="profileImagePreview">
+                    @else
+                        <img src="" alt="Profile Image" class="current-image" id="profileImagePreview" style="display: none;">
+                    @endif
+                </div>
                 <div>
                     <input type="file" class="form-control" id="image" name="image" accept="image/*" />
+                    <small class="helper-text mt-2">Select an image to see preview before saving</small>
                 </div>
             </div>
         </div>
@@ -240,11 +338,6 @@
             </div>
         </div>
 
-        <!-- Hidden fields for payment methods -->
-        <input type="hidden" name="paypal_allowed" value="0">
-        <input type="hidden" name="banktransfer_allowed" value="0">
-        <input type="hidden" name="bar_allowed" value="0">
-
         @if(auth()->user()->is_guide)
             <!-- Guide Information Section -->
             <div class="profile-section guide-section">
@@ -284,49 +377,7 @@
                 </div>
             </div>
 
-            <!-- Payment Methods Section -->
-            <div class="profile-section guide-section">
-                <h3 class="section-title">@lang('profile.possiblepayment')</h3>
-                <div class="alert alert-info">
-                    <small>@lang('profile.possiblepaymentmsg')</small>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="payment-checkbox">
-                            <input class="form-check-input" {{auth()->user()->bar_allowed ? 'checked' : ''}} 
-                                   type="checkbox" value="1" id="bar_allowed" name="bar_allowed">
-                            <label class="form-check-label" for="bar_allowed">@lang('profile.barOnSite')</label>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="payment-checkbox">
-                            <input class="form-check-input" {{auth()->user()->banktransfer_allowed ? 'checked' : ''}} 
-                                   onclick="displayBankDetails()" type="checkbox" value="1" id="banktransfer_allowed" name="banktransfer_allowed">
-                            <label class="form-check-label" for="banktransfer_allowed">@lang('profile.transfer')</label>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="payment-checkbox">
-                            <input class="form-check-input" {{auth()->user()->paypal_allowed == 1 ? 'checked' : ''}} 
-                                   onclick="displayPaypalDetails()" type="checkbox" value="1" id="paypal_allowed" name="paypal_allowed">
-                            <label class="form-check-label" for="paypal_allowed">@lang('profile.paypal')</label>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-group" style="display: {{auth()->user()->banktransfer_allowed ? 'block' : 'none'}};" id="banktransferdetails">
-                    <label class="form-label" for="banktransferdetails">@lang('profile.bankdetails')</label>
-                    <textarea class="form-control" placeholder="IBAN" name="banktransferdetails" rows="2">{{auth()->user()->banktransferdetails}}</textarea>
-                    <small class="helper-text">@lang('profile.bankdetailsmsg')</small>
-                </div>
-                
-                <div class="form-group" style="display: {{auth()->user()->paypal_allowed ? 'block' : 'none'}};" id="paypaldetails">
-                    <label class="form-label" for="paypaldetails">@lang('profile.paypaladd')</label>
-                    <textarea class="form-control" placeholder="Paypal" name="paypaldetails" rows="2">{{auth()->user()->paypaldetails}}</textarea>
-                    <small class="helper-text">@lang('profile.paypalmsg')</small>
-                </div>
-            </div>
+
         @endif
 
         <div class="text-center">
@@ -335,30 +386,94 @@
             </button>
         </div>
     </form>
+    
+    <!-- Floating Save Button -->
+    <button type="button" class="floating-save-btn" id="floatingSaveBtn" onclick="document.getElementById('profileForm').submit();">
+        <i class="fas fa-save"></i> Save Changes
+    </button>
 @endsection
 
 @section('js_after')
     <script>
-        function displayBankDetails() {
-            var banktransferCheckBox = document.getElementById('banktransfer_allowed');
-            var banktransferDetails = document.getElementById('banktransferdetails');
 
-            if(banktransferCheckBox.checked === true) {
-                banktransferDetails.style.display = 'block';
+        // Image preview functionality
+        document.getElementById('image').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('profileImagePreview');
+            
+            if (file) {
+                // Check if the file is an image
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                    };
+                    
+                    reader.readAsDataURL(file);
+                } else {
+                    alert('Please select a valid image file.');
+                    event.target.value = ''; // Clear the file input
+                }
             } else {
-                banktransferDetails.style.display = 'none';
+                // If no file selected, hide preview or show original image
+                @if(Auth::user()->profil_image)
+                    preview.src = "{{asset('images/'. Auth::user()->profil_image)}}";
+                    preview.style.display = 'block';
+                @else
+                    preview.style.display = 'none';
+                @endif
+            }
+            
+            // Show floating save button when image is changed
+            showFloatingSaveButton();
+        });
+
+        // Floating Save Button functionality
+        let formChanged = false;
+        const floatingSaveBtn = document.getElementById('floatingSaveBtn');
+        
+        function showFloatingSaveButton() {
+            if (!formChanged) {
+                formChanged = true;
+                floatingSaveBtn.classList.add('show');
             }
         }
-
-        function displayPaypalDetails() {
-            var paypaltransferCheckBox = document.getElementById('paypal_allowed');
-            var paypaltransferDetails = document.getElementById('paypaldetails');
-
-            if(paypaltransferCheckBox.checked === true) {
-                paypaltransferDetails.style.display = 'block';
-            } else {
-                paypaltransferDetails.style.display = 'none';
+        
+        // Show floating button when any form field changes
+        const formInputs = document.querySelectorAll('#profileForm input, #profileForm textarea, #profileForm select');
+        formInputs.forEach(input => {
+            input.addEventListener('input', showFloatingSaveButton);
+            input.addEventListener('change', showFloatingSaveButton);
+        });
+        
+        // Show floating button on checkbox changes
+        const checkboxes = document.querySelectorAll('#profileForm input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', showFloatingSaveButton);
+        });
+        
+        // Hide floating button on form submit
+        document.getElementById('profileForm').addEventListener('submit', function() {
+            floatingSaveBtn.classList.remove('show');
+        });
+        
+        // Show floating button on scroll (alternative trigger)
+        let ticking = false;
+        function updateFloatingButton() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollTop > 300 && formChanged) {
+                floatingSaveBtn.classList.add('show');
             }
+            ticking = false;
         }
+        
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                requestAnimationFrame(updateFloatingButton);
+                ticking = true;
+            }
+        });
     </script>
 @endsection
