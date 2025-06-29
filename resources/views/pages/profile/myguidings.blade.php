@@ -30,17 +30,63 @@
         display: none !important;
     }
     
-    /* Create a simple title instead */
+    /* Header Section - copied from bookings.blade.php */
+    .guidings-header {
+        background: linear-gradient(135deg, #313041, #252238);
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .guidings-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+        opacity: 0.5;
+        animation: float 20s infinite linear;
+    }
+    
+    @keyframes float {
+        0% { transform: translateX(-100px) translateY(-100px); }
+        100% { transform: translateX(100px) translateY(100px); }
+    }
+    
+    .guidings-header h1 {
+        color: white;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .guidings-header p {
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 0;
+        font-size: 1.1rem;
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Create a simple title instead - keeping as fallback */
     .simple-page-title {
         background: white;
-        padding: 20px 0;
-        margin-bottom: 20px;
+        padding: 15px 0;
+        margin-bottom: 15px;
         border-bottom: 2px solid #e9ecef;
+        display: none; /* Hide since we're using the new header */
     }
     
     .simple-page-title h2 {
         color: #313041;
-        font-size: 1.8rem;
+        font-size: 1.6rem;
         font-weight: 700;
         margin: 0;
     }
@@ -59,9 +105,9 @@
     
     .guiding-row {
         background: white;
-        border-radius: 10px;
-        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
-        margin-bottom: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        margin-bottom: 12px;
         overflow: hidden;
         transition: all 0.3s ease;
         border: 1px solid #f0f0f0;
@@ -69,7 +115,7 @@
     
     .guiding-row:hover {
         transform: translateY(-1px);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
     
     .guiding-row.draft {
@@ -78,20 +124,35 @@
     }
     
     .carousel.slide img {
-        height: 200px;
+        height: 140px;
         width: 100%;
         object-fit: cover;
+        object-position: center center;
         border-radius: 0;
+        display: block;
     }
     
     .carousel-inner {
         border-radius: 0;
         overflow: hidden;
-        height: 200px;
+        height: 140px;
+    }
+    
+    .carousel-item {
+        height: 140px;
+        overflow: hidden;
+    }
+    
+    .carousel-item img {
+        height: 140px;
+        width: 100%;
+        object-fit: cover;
+        object-position: center center;
+        display: block;
     }
     
     .carousel.slide {
-        height: 200px;
+        height: 140px;
         border-radius: 0;
     }
     
@@ -99,8 +160,8 @@
     .carousel .carousel-control-prev {
         top: 50%;
         transform: translateY(-50%);
-        width: 35px;
-        height: 35px;
+        width: 30px;
+        height: 30px;
         background: rgba(49, 48, 65, 0.8);
         border-radius: 50%;
         opacity: 0;
@@ -113,40 +174,40 @@
     }
     
     .carousel .carousel-control-next {
-        right: 10px;
+        right: 8px;
     }
     
     .carousel .carousel-control-prev {
-        left: 10px;
+        left: 8px;
     }
     
     .carousel-control-prev-icon,
     .carousel-control-next-icon {
-        width: 14px;
-        height: 14px;
+        width: 12px;
+        height: 12px;
     }
     
     .draft-badge {
         background: #e74c3c !important;
         color: #ffffff !important;
-        font-size: 0.85rem;
-        padding: 6px 12px;
+        font-size: 0.75rem;
+        padding: 4px 8px;
         font-weight: 600;
-        box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+        box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        border-radius: 20px;
+        border-radius: 15px;
     }
     
     .guiding-content {
-        padding: 24px;
+        padding: 16px;
     }
     
     .guiding-title {
-        font-size: 1.3rem;
+        font-size: 1.1rem;
         font-weight: 700;
         color: #313041;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
         line-height: 1.3;
     }
     
@@ -162,52 +223,54 @@
     
     .location-text {
         color: #666;
-        font-size: 0.95rem;
-        margin-bottom: 15px;
+        font-size: 0.85rem;
+        margin-bottom: 10px;
         display: flex;
         align-items: center;
     }
     
     .location-text i {
         color: #e8604c;
-        margin-right: 8px;
+        margin-right: 6px;
     }
     
     .detail-row {
         display: flex;
         align-items: center;
-        margin-bottom: 10px;
-        font-size: 0.9rem;
+        margin-bottom: 6px;
+        font-size: 0.8rem;
         color: #555;
     }
     
     .detail-row img {
-        margin-right: 10px;
+        margin-right: 8px;
         opacity: 0.8;
+        width: 14px;
+        height: 14px;
     }
     
     .inclusions-section {
-        margin-top: 20px;
+        margin-top: 12px;
     }
     
     .inclusions-title {
         font-weight: 600;
         color: #313041;
-        margin-bottom: 12px;
-        font-size: 1rem;
+        margin-bottom: 8px;
+        font-size: 0.85rem;
     }
     
     .inclusions-flex {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
+        gap: 6px;
     }
     
     .inclusion-tag {
         background: #f8f9fa;
-        padding: 5px 10px;
-        border-radius: 15px;
-        font-size: 0.85rem;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
         color: #555;
         border: 1px solid #e9ecef;
         display: inline-flex;
@@ -216,8 +279,8 @@
     
     .inclusion-tag i {
         color: #28a745;
-        margin-right: 5px;
-        font-size: 0.8rem;
+        margin-right: 4px;
+        font-size: 0.7rem;
     }
     
     .more-inclusions {
@@ -228,15 +291,15 @@
     }
     
     .actions-column {
-        padding: 20px;
+        padding: 16px;
         background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f4 100%);
         border-left: 1px solid #e9ecef;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        min-height: 200px;
+        min-height: 140px;
         position: relative;
-        gap: 12px;
+        gap: 8px;
     }
     
     .guiding-row.draft .actions-column {
@@ -244,13 +307,13 @@
     }
     
     .action-btn {
-        padding: 10px 14px;
-        border-radius: 7px;
+        padding: 8px 12px;
+        border-radius: 6px;
         font-weight: 600;
         text-decoration: none;
         text-align: center;
         transition: all 0.3s ease;
-        font-size: 0.85rem;
+        font-size: 0.75rem;
         margin-bottom: 0;
         display: flex;
         align-items: center;
@@ -259,15 +322,15 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        min-height: 40px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        min-height: 32px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     }
     
     .btn-outline-primary {
         color: white;
         border: 2px solid #313041;
         background: #313041;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
     
     .btn-outline-primary:hover {
@@ -275,14 +338,14 @@
         border-color: #252238;
         color: white;
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        box-shadow: 0 3px 8px rgba(0,0,0,0.12);
     }
     
     .btn-outline-success {
         color: white;
         border: 2px solid #28a745;
         background: #28a745;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
     
     .btn-outline-success:hover {
@@ -290,14 +353,14 @@
         border-color: #218838;
         color: white;
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        box-shadow: 0 3px 8px rgba(0,0,0,0.12);
     }
     
     .btn-outline-danger {
         color: white;
         border: 2px solid #dc3545;
         background: #dc3545;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
     
     .btn-outline-danger:hover {
@@ -305,17 +368,17 @@
         border-color: #c82333;
         color: white;
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        box-shadow: 0 3px 8px rgba(0,0,0,0.12);
     }
     
     .price-badge {
         background: linear-gradient(135deg, #e8604c, #d54e37);
         color: white;
-        padding: 8px 12px;
-        border-radius: 8px 0 8px 0;
+        padding: 6px 10px;
+        border-radius: 6px 0 6px 0;
         font-weight: 700;
-        font-size: 0.9rem;
-        box-shadow: 0 3px 10px rgba(232, 96, 76, 0.4);
+        font-size: 0.8rem;
+        box-shadow: 0 2px 6px rgba(232, 96, 76, 0.3);
         position: absolute;
         top: 0;
         right: 0;
@@ -324,36 +387,37 @@
     
     .empty-state {
         text-align: center;
-        padding: 60px 20px;
+        padding: 50px 20px;
         background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        border-radius: 10px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
     }
     
     .empty-state i {
-        font-size: 3.5rem;
+        font-size: 3rem;
         color: #e8604c;
-        margin-bottom: 20px;
+        margin-bottom: 18px;
     }
     
     .empty-state h4 {
         color: #313041;
-        margin-bottom: 15px;
+        margin-bottom: 12px;
         font-weight: 700;
+        font-size: 1.3rem;
     }
     
     .empty-state b {
         color: #666;
-        font-size: 1.1rem;
+        font-size: 1rem;
         display: block;
-        margin-bottom: 25px;
+        margin-bottom: 20px;
     }
     
     .thm-btn {
         background: linear-gradient(135deg, #e8604c, #d54e37);
         color: white;
-        padding: 12px 25px;
-        border-radius: 25px;
+        padding: 10px 20px;
+        border-radius: 20px;
         text-decoration: none;
         font-weight: 600;
         transition: all 0.3s ease;
@@ -363,64 +427,101 @@
     .thm-btn:hover {
         background: linear-gradient(135deg, #d54e37, #c44232);
         transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(232, 96, 76, 0.3);
+        box-shadow: 0 4px 12px rgba(232, 96, 76, 0.3);
         color: white;
     }
     
     .pagination-container {
         display: flex;
         justify-content: center;
-        margin-top: 30px;
+        margin-top: 25px;
     }
     
     @media (max-width: 768px) {
         .guiding-content {
-            padding: 18px;
+            padding: 14px;
         }
         
         .actions-column {
-            padding: 18px;
+            padding: 14px;
             border-left: none;
             border-top: 1px solid #e9ecef;
             flex-direction: row;
-            gap: 12px;
+            gap: 8px;
             min-height: auto;
         }
         
         .action-btn {
-            font-size: 0.8rem;
-            padding: 10px 12px;
+            font-size: 0.7rem;
+            padding: 8px 10px;
             flex: 1;
-            min-height: 38px;
+            min-height: 30px;
         }
         
         .price-badge {
             position: absolute;
             top: 0;
             right: 0;
-            border-radius: 8px 0 8px 0;
-            font-size: 0.85rem;
-            padding: 8px 12px;
+            border-radius: 6px 0 6px 0;
+            font-size: 0.75rem;
+            padding: 6px 10px;
         }
         
         .detail-row {
-            margin-bottom: 8px;
+            margin-bottom: 5px;
         }
         
-        .page-header {
+        .simple-page-title {
+            padding: 12px 0;
+        }
+        
+        .simple-page-title h2 {
+            font-size: 1.4rem;
+        }
+        
+        .carousel.slide img,
+        .carousel-inner,
+        .carousel.slide {
+            height: 120px;
+        }
+        
+        .carousel-item {
+            height: 120px;
+        }
+        
+        .carousel-item img {
+            height: 120px;
+            width: 100%;
+            object-fit: cover;
+            object-position: center center;
+        }
+        
+        .actions-column {
+            min-height: 120px;
+        }
+        
+        .guidings-header {
             padding: 20px;
         }
         
-        .page-header h2 {
-            font-size: 1.5rem;
+        .guidings-header h1 {
+            font-size: 1.6rem;
+        }
+        
+        .guidings-header p {
+            font-size: 1rem;
         }
     }
 </style>
 
 <div class="guidings-container">
-    <!-- Simple Page Title -->
-    <div class="simple-page-title">
-        <h2><i class="fas fa-fish me-3"></i>@lang('profile.myGuides')</h2>
+    <!-- Header Section -->
+    <div class="guidings-header">
+        <h1 class="mb-0 text-white">
+            <i class="fas fa-fish"></i>
+            @lang('profile.myGuides')
+        </h1>
+        <p class="mb-0 mt-2 text-white">Manage your fishing guide experiences and track their performance</p>
     </div>
 
     <div class="row">
