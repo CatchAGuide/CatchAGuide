@@ -1239,127 +1239,70 @@
     </div>
 </section>
 
-
-<section class="py-1 my-5 topfishingtypes">
+<section class="py-1 my-5 topmethods">
     <div class="container my-4">
         <div class="my-2 section-title">
-            <h2 class="h4 text-dark fw-bolder">@lang('homepage.fishingtype-title')</h2>
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h2 class="h4 text-dark fw-bolder">@lang('homepage.methods-title')</h2>
+                </div>
+                @if(!$agent->ismobile())
+                <div>
+                    @if(app()->getLocale() == 'de')
+                        <a href="{{ route('category.types', ['type' => 'methods']) }}" class="color-primary fw-light">@lang('homepage.fishingtype-title')</a>
+                    @else
+                        <a href="{{ route('category.types', ['type' => 'methods']) }}" class="color-primary fw-light">See all methods</a>
+                    @endif
+                </div>
+                @endif
+            </div>
+            
             <p class="fw-light">@lang('homepage.fishingtype-message')</p>
         </div>
         @if($agent->ismobile())
         <div class="methods-custom-owl owl-carousel owl-theme">
-            <div class="item">
-                <a href="/guidings?methods[]=3">
-                    <div class="flex-row card align-items-center">
-                        <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/15_bank_fishing.webp')}}"  style="width:150px;height:100px"/>
-                        <div class="card-body">
-                          <h5 class="card-title">@lang('homepage.fishingtype-bank')</h5>
+            @foreach($CategoryPageMethods as $category)
+                <div class="item">
+                    <a href="{{ route('category.targets', ['type' => 'methods', 'slug' => $category->slug]) }}">
+                        <div class="card">
+                            <div class="row g-0">
+                                <div class="col-5">
+                                    <img class="img-fluid rounded-start img-top" src="{{asset($category->thumbnail_path ?? 'images/placeholder_guide.jpg')}}" style="height:100px; object-fit:cover;" alt="{{$category->source->name}}">
+                                </div>
+                                <div class="col-7">
+                                    <div class="card-body py-2 px-3 d-flex align-items-center h-100">
+                                        <h5 class="card-title mb-0">{{$category->source->name}}</h5>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </a>
-            </div>
-            <div class="item">
-                <a href="/guidings?methods[]=16">
-                    <div class="flex-row card align-items-center">
-                        <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/13_boatfishing.webp')}}"  style="width:150px;height:100px"/>
-                        <div class="card-body">
-                        <h5 class="card-title">@lang('homepage.fishingtype-boat')</h5>
-                        
-                        </div>
-                    </div>
-                </a> 
-            </div>
-            <div class="item">
-                <a href="/guidings?methods[]=7">
-                    <div class="flex-row card align-items-center">
-                        <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/14_seafishing.webp')}}"  style="width:150px;height:100px"/>
-                        <div class="card-body">
-                          <h5 class="card-title">@lang('homepage.fishingtype-sea')</h5>
-                          
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="item">
-                <a href="/guidings?methods[]=1">
-                    <div class="flex-row card align-items-center">
-                        <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/02_flyfishing.webp')}}"  style="width:150px;height:100px"/>
-                        <div class="card-body">
-                        <h5 class="card-title">@lang('homepage.fishingtype-fly')</h5>
-                        
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="item">
-                <a href="/guidings?methods[]=2">
-                    <div class="flex-row card align-items-center">
-                        <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/08_shorefishing.webp')}}"  style="width:150px;height:100px"/>
-                        <div class="card-body">
-                          <h5 class="card-title">@lang('homepage.fishingtype-shore')</h5>
-                        </div>
-                    </div>
-                </a>
-            </div>
+                    </a>
+                </div>
+            @endforeach
+        </div>
+        <div class="p-1 d-flex justify-content-end">
+            @if(app()->getLocale() == 'de')
+                <a href="{{ route('category.types', ['type' => 'methods']) }}" class="color-primary fw-light">Alle Methoden ansehen</a>
+            @else
+                <a href="{{ route('category.types', ['type' => 'methods']) }}" class="color-primary fw-light">See all methods</a>
+            @endif
         </div>
         @else
-        <div class="row">
-            <div class="my-1 col-md-4">
-                <a href="/guidings?methods[]=3">
-                <div class="flex-row card align-items-center">
-                    <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/15_bank_fishing.webp')}}"  style="width:150px;height:100px"/>
-                    <div class="card-body">
-                      <h5 class="card-title">@lang('homepage.fishingtype-bank')</h5>
-                      
+            <div class="row">
+                @foreach($CategoryPageMethods as $category)
+                    <div class="my-1 col-md-4">
+                        <a href="{{ route('category.types', ['type' => 'methods', 'slug' => $category->slug]) }}">
+                            <div class="flex-row card align-items-center">
+                                <img class="card-img-left example-card-img-responsive img-top" src="{{asset($category->thumbnail_path ?? 'images/placeholder_guide.jpg')}}" style="width:150px;height:100px"/>
+                                <div class="card-body">
+                                <h5 class="card-title">{{$category->source->name}}</h5>
+                                
+                                </div>
+                            </div>
+                        </a>
                     </div>
-                </div>
-                </a>
+                @endforeach
             </div>
-            <div class="my-1 col-md-4">
-                <a href="/guidings?methods[]=16">
-                    <div class="flex-row card align-items-center">
-                        <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/13_boatfishing.webp')}}"  style="width:150px;height:100px"/>
-                        <div class="card-body">
-                        <h5 class="card-title">@lang('homepage.fishingtype-boat')</h5>
-                        
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="my-1 col-md-4">
-                <a href="/guidings?methods[]=7">
-                    <div class="flex-row card align-items-center">
-                        <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/14_seafishing.webp')}}"  style="width:150px;height:100px"/>
-                        <div class="card-body">
-                          <h5 class="card-title">@lang('homepage.fishingtype-sea')</h5>
-                          
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="my-1 col-md-4">
-                <a href="/guidings?methods[]=1">
-                    <div class="flex-row card align-items-center">
-                        <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/02_flyfishing.webp')}}"  style="width:150px;height:100px"/>
-                        <div class="card-body">
-                        <h5 class="card-title">@lang('homepage.fishingtype-fly')</h5>
-                        
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="my-1 col-md-4">
-                <a href="/guidings?methods[]=2">
-                    <div class="flex-row card align-items-center">
-                        <img class="card-img-left example-card-img-responsive img-top" src="{{asset('assets/2024/08_shorefishing.webp')}}"  style="width:150px;height:100px"/>
-                        <div class="card-body">
-                            <h5 class="card-title">@lang('homepage.fishingtype-shore')</h5>
-                          
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
         @endif
     </div>
 </section>
@@ -1491,74 +1434,6 @@
                 @foreach($CategoryPage as $category)
                     <div class="my-1 col-md-4">
                         <a href="{{ route('category.targets', ['type' => 'targets', 'slug' => $category->slug]) }}">
-                            <div class="flex-row card align-items-center">
-                                <img class="card-img-left example-card-img-responsive img-top" src="{{asset($category->thumbnail_path ?? 'images/placeholder_guide.jpg')}}" style="width:150px;height:100px"/>
-                                <div class="card-body">
-                                <h5 class="card-title">{{$category->source->name}}</h5>
-                                
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                @endforeach
-            </div>
-        @endif
-    </div>
-</section>
-
-<section class="py-1 my-5 topmethods">
-    <div class="container my-4">
-        <div class="my-2 section-title">
-            <div class="d-flex justify-content-between">
-                <div>
-                    <h2 class="h4 text-dark fw-bolder">@lang('homepage.methods-title')</h2>
-                </div>
-                @if(!$agent->ismobile())
-                <div>
-                    @if(app()->getLocale() == 'de')
-                        <a href="{{ route('category.types', ['type' => 'methods']) }}" class="color-primary fw-light">Alle Methoden ansehen</a>
-                    @else
-                        <a href="{{ route('category.types', ['type' => 'methods']) }}" class="color-primary fw-light">See all methods</a>
-                    @endif
-                </div>
-                @endif
-            </div>
-            
-            <p class="fw-light">@lang('homepage.methods-message')</p>
-        </div>
-        @if($agent->ismobile())
-        <div class="methods-custom-owl owl-carousel owl-theme">
-            @foreach($CategoryPageMethods as $category)
-                <div class="item">
-                    <a href="{{ route('category.targets', ['type' => 'methods', 'slug' => $category->slug]) }}">
-                        <div class="card">
-                            <div class="row g-0">
-                                <div class="col-5">
-                                    <img class="img-fluid rounded-start img-top" src="{{asset($category->thumbnail_path ?? 'images/placeholder_guide.jpg')}}" style="height:100px; object-fit:cover;" alt="{{$category->source->name}}">
-                                </div>
-                                <div class="col-7">
-                                    <div class="card-body py-2 px-3 d-flex align-items-center h-100">
-                                        <h5 class="card-title mb-0">{{$category->source->name}}</h5>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            @endforeach
-        </div>
-        <div class="p-1 d-flex justify-content-end">
-            @if(app()->getLocale() == 'de')
-                <a href="{{ route('category.types', ['type' => 'methods']) }}" class="color-primary fw-light">Alle Methoden ansehen</a>
-            @else
-                <a href="{{ route('category.types', ['type' => 'methods']) }}" class="color-primary fw-light">See all methods</a>
-            @endif
-        </div>
-        @else
-            <div class="row">
-                @foreach($CategoryPageMethods as $category)
-                    <div class="my-1 col-md-4">
-                        <a href="{{ route('category.types', ['type' => 'methods', 'slug' => $category->slug]) }}">
                             <div class="flex-row card align-items-center">
                                 <img class="card-img-left example-card-img-responsive img-top" src="{{asset($category->thumbnail_path ?? 'images/placeholder_guide.jpg')}}" style="width:150px;height:100px"/>
                                 <div class="card-body">

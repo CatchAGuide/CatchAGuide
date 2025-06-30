@@ -1,12 +1,12 @@
 @extends('layouts.app-v2')
 
 @section('title', $title)
-@section('header_title', __('category.title'))
-@section('header_sub_title', __('category.sub_title'))
+@section('header_title', __('category.' . $type . '.title'))
+@section('header_sub_title', __('category.' . $type . '.sub_title'))
 
 @section('share_tags')
-    <meta property="og:title" content="{{__('category.title')}}" />
-    <meta property="og:description" content="{{__('category.introduction')}}" />
+    <meta property="og:title" content="{{__('category.' . $type . '.title')}}" />
+    <meta property="og:description" content="{{__('category.' . $type . '.introduction')}}" />
 @endsection
 
 @section('custom_style')

@@ -114,7 +114,7 @@
             padding-bottom: 45px!important;
         }
         #global-search {
-            padding: 10px;
+            /* padding: 10px; */
         }
         #global-search input,
         #global-search select,
