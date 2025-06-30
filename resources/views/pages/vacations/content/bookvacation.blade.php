@@ -1214,17 +1214,15 @@
     .modal-backdrop {
         /* display: none !important; */
         opacity: 0.5 !important;
-        z-index: -3;
-    }
-    
-    .modal-dialog {
-        z-index: 1052;
+        z-index: 2;
+        @media (max-width: 768px) {
+            z-index: 1;
+        }
     }
     
     .modal-content {
         background: white;
         position: relative;
-        z-index: 1053;
     }
     
     .modal-body {
@@ -1553,7 +1551,7 @@
 
     /* Update modal z-index hierarchy */
     .modal {
-        z-index: 1050;
+        z-index: 3;
     }
 
     #checkoutModal {

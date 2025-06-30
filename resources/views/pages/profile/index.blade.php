@@ -158,11 +158,7 @@
                         </h6>
                         <p class="activity-item-meta">
                             <span class="profile-date-display">
-                                @if($booking->calendar_schedule)
-                                    {{ \Carbon\Carbon::parse($booking->calendar_schedule->date)->format('D, M j, Y') }}
-                                @else
-                                    {{ $booking->created_at->format('D, M j, Y') }}
-                                @endif
+                                {{ \Carbon\Carbon::parse($booking->book_date)->format('D, M j, Y') }}
                             </span>
                             •
                             <span class="profile-status-badge status-{{ $booking->status }}">{{ ucfirst($booking->status) }}</span>

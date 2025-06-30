@@ -84,6 +84,9 @@
         #carousel-cities .carousel-inner .carousel-item-prev {
           transform: translateX(-25%);
         }
+        .country-content-fix {
+            margin-top: 90px !important; /* Ensure this margin is applied */
+        }
     }
 
     #carousel-regions .carousel-inner .carousel-item-end,
@@ -543,66 +546,88 @@
 @endsection
 
 @section('content')
-    <div class="container" id="destination">
-    <div class="container">
-        <section class="page-header">
-            <div class="page-header__bottom breadcrumb-container guiding">
-                <div class="page-header__bottom-inner">
-                    <ul class="thm-breadcrumb list-unstyled">
-                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                        @if($row_data->type == 'country')
-                                <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
-                            
-                            @elseif($row_data->type == 'region')
-                                <li><a href="{{ route('destination.country', ['country' => $row_data->country_slug]) }}">
-                                    {{ translate('Fishing Destinations in ')}} {{ $row_data->country_name }}
-                                </a></li>
-                                <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>  
-                                <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
-                            
-                            @elseif($row_data->type == 'city')
-                                <li><a href="{{ route('destination.country', ['country' => $row_data->country_slug]) }}">
-                                    {{ translate('Fishing Destinations in ')}} {{ $row_data->country_name }}
-                                </a></li>
+    <div class="country-content-fix">
+        <div class="container" id="destination">
+            <div class="container">
+                <section class="page-header">
+                    <div class="page-header__bottom breadcrumb-container guiding">
+                        <div class="page-header__bottom-inner">
+                            <ul class="thm-breadcrumb list-unstyled">
+                                <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                                 <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                                <li><a href="{{ route('destination.country', ['country' => $row_data->country_slug, 'region' => $row_data->region_slug]) }}">
-                                    {{ translate('Fishing Destinations in ')}} {{ $row_data->region_name }}
-                                </a></li>
-                                <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                                <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
-                            @endif
-                    </ul>
-                </div>
+                                @if($row_data->type == 'country')
+                                        <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
+                                    
+                                    @elseif($row_data->type == 'region')
+                                        <li><a href="{{ route('destination.country', ['country' => $row_data->country_slug]) }}">
+                                            {{ translate('Fishing Destinations in ')}} {{ $row_data->country_name }}
+                                        </a></li>
+                                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>  
+                                        <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
+                                    
+                                    @elseif($row_data->type == 'city')
+                                        <li><a href="{{ route('destination.country', ['country' => $row_data->country_slug]) }}">
+                                            {{ translate('Fishing Destinations in ')}} {{ $row_data->country_name }}
+                                        </a></li>
+                                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                                        <li><a href="{{ route('destination.country', ['country' => $row_data->country_slug, 'region' => $row_data->region_slug]) }}">
+                                            {{ translate('Fishing Destinations in ')}} {{ $row_data->region_name }}
+                                        </a></li>
+                                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                                        <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
+                                    @endif
+                            </ul>
+                        </div>
+                    </div>
+                </section>
             </div>
-        </section>
-    </div>
-        <div class="container">
-            <div class="col-12">
-                <div id="page-main-intro" class="mb-3">
-                    <div class="page-main-intro-text mb-1">{!! translate(nl2br($row_data->introduction)) !!}</div>
-                    <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a></p>
-                </div>
-                @php
-                $region_count = $regions->count();
-                $city_count = $cities->count();
-                $region_counter = 0;
-                $city_counter = 0;
-                @endphp
+            <div class="container">
+                <div class="col-12">
+                    <div id="page-main-intro" class="mb-3">
+                        <div class="page-main-intro-text mb-1">{!! translate(nl2br($row_data->introduction)) !!}</div>
+                        <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a></p>
+                    </div>
+                    @php
+                    $region_count = $regions->count();
+                    $city_count = $cities->count();
+                    $region_counter = 0;
+                    $city_counter = 0;
+                    @endphp
 
-                @if($region_count > 0)
-                    <h5 class="mb-2">@lang('destination.all_region')</h5>
-                    <div id="carousel-regions" class="owl-carousel owl-theme mb-4">
-                        @foreach($regions as $region)
+                    @if($region_count > 0)
+                        <h5 class="mb-2">@lang('destination.all_region')</h5>
+                        <div id="carousel-regions" class="owl-carousel owl-theme mb-4">
+                            @foreach($regions as $region)
+                                <div class="item">
+                                    <div class="col-sm-12">
+                                        <a href="{{ route('destination.country', ['country' => $region->country_slug, 'region' => $region->slug]) }}">
+                                            <div class="card">
+                                                <div class="card-img">
+                                                    <img src="{{ $region->getThumbnailPath() }}" class="dimg-fluid" alt="Image Not Available">
+                                                </div>
+                                                <div class="card-img-overlay">
+                                                    <h5>{{ $region->name }}</h5>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                    @if($city_count > 0)
+                    <h5 class="mb-2">@lang('destination.all_cities')</h5>
+                    <div id="carousel-cities" class="owl-carousel owl-theme mb-4">
+                        @foreach($cities as $city)
                             <div class="item">
-                                <div class="col-sm-12">
-                                    <a href="{{ route('destination.country', ['country' => $region->country_slug, 'region' => $region->slug]) }}">
+                                <div class="col-sm-12 col-lgs-3">
+                                    <a href="{{ route('destination.country', ['country' => $city->country_slug, 'region' => $city->region_slug, 'city' => $city->slug]) }}">
                                         <div class="card">
                                             <div class="card-img">
-                                                <img src="{{ $region->getThumbnailPath() }}" class="dimg-fluid" alt="Image Not Available">
+                                                <img src="{{ $city->getThumbnailPath() }}" class="dimg-fluid" alt="Image Not Available">
                                             </div>
                                             <div class="card-img-overlay">
-                                                <h5>{{ $region->name }}</h5>
+                                                <h5>{{ $city->name }}</h5>
                                             </div>
                                         </div>
                                     </a>
@@ -610,292 +635,272 @@
                             </div>
                         @endforeach
                     </div>
-                @endif
-                @if($city_count > 0)
-                <h5 class="mb-2">@lang('destination.all_cities')</h5>
-                <div id="carousel-cities" class="owl-carousel owl-theme mb-4">
-                    @foreach($cities as $city)
-                        <div class="item">
-                            <div class="col-sm-12 col-lgs-3">
-                                <a href="{{ route('destination.country', ['country' => $city->country_slug, 'region' => $city->region_slug, 'city' => $city->slug]) }}">
-                                    <div class="card">
-                                        <div class="card-img">
-                                            <img src="{{ $city->getThumbnailPath() }}" class="dimg-fluid" alt="Image Not Available">
-                                        </div>
-                                        <div class="card-img-overlay">
-                                            <h5>{{ $city->name }}</h5>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
+                    @endif
+                    <h5 class="mb-2">{{ translate('Fishing tours in ' . $row_data->name) }}</h5>
+                    <div class="row mb-5">
+
+                        <div id="filterCard" class="col-sm-12 col-lg-3">        
+                            <div class="card mb-2 d-none d-sm-block">
+                                <div id="map-placeholder">
+                                    <a class="btn btn-primary" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)">@lang('destination.show_on_map')</a>
+                                </div>
+                            </div>            
+                            @include('pages.guidings.includes.filters', ['formAction' => route('guidings.index')])
                         </div>
-                    @endforeach
-                </div>
-                @endif
-                <h5 class="mb-2">{{ translate('Fishing tours in ' . $row_data->name) }}</h5>
-                <div class="row mb-5">
+                        <div class="col-sm-12 col-lg-9 country-listing-item">
+                            @foreach($guidings as $guiding)
+                            <div class="row m-0 mb-2 guiding-list-item">
+                                <div class="tours-list__right col-md-12">
+                                    <div class="row p-2 border shadow-sm bg-white rounded">
+                                        <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-0">
+                                            <div id="carouselExampleControls-{{$guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
+                                                <div class="carousel-inner">
+                                                    @if(count(get_galleries_image_link($guiding)))
+                                                        @foreach(get_galleries_image_link($guiding) as $index => $gallery_image_link)
+                                                            <div class="carousel-item @if($index == 0) active @endif">
+                                                                <img  class="carousel-image" src="{{asset($gallery_image_link)}}">
+                                                            </div>
+                                                        @endforeach
+                                                    @endif
+                                                </div>
 
-                    <div id="filterCard" class="col-sm-12 col-lg-3">        
-                        <div class="card mb-2 d-none d-sm-block">
-                            <div id="map-placeholder">
-                                <a class="btn btn-primary" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)">@lang('destination.show_on_map')</a>
-                            </div>
-                        </div>            
-                        @include('pages.guidings.includes.filters', ['formAction' => route('guidings.index')])
-                    </div>
-                    <div class="col-sm-12 col-lg-9 country-listing-item">
-                        @foreach($guidings as $guiding)
-                        <div class="row m-0 mb-2 guiding-list-item">
-                            <div class="tours-list__right col-md-12">
-                                <div class="row p-2 border shadow-sm bg-white rounded">
-                                    <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-0">
-                                        <div id="carouselExampleControls-{{$guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
-                                            <div class="carousel-inner">
-                                                @if(count(get_galleries_image_link($guiding)))
-                                                    @foreach(get_galleries_image_link($guiding) as $index => $gallery_image_link)
-                                                        <div class="carousel-item @if($index == 0) active @endif">
-                                                            <img  class="carousel-image" src="{{asset($gallery_image_link)}}">
-                                                        </div>
-                                                    @endforeach
+                                                @if(count(get_galleries_image_link($guiding)) > 1)
+                                                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls-{{$guiding->id}}" data-bs-slide="prev">
+                                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                                        <span class="visually-hidden">Previous</span>
+                                                    </button>
+                                                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls-{{$guiding->id}}" data-bs-slide="next">
+                                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                                        <span class="visually-hidden">Next</span>
+                                                    </button>
                                                 @endif
                                             </div>
-
-                                            @if(count(get_galleries_image_link($guiding)) > 1)
-                                                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls-{{$guiding->id}}" data-bs-slide="prev">
-                                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                                    <span class="visually-hidden">Previous</span>
-                                                </button>
-                                                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls-{{$guiding->id}}" data-bs-slide="next">
-                                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                                    <span class="visually-hidden">Next</span>
-                                                </button>
-                                            @endif
                                         </div>
-                                    </div>
-                                    <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 p-md-3 mt-md-1">
-                                    <a href="{{ route('guidings.show', ['id' => $guiding->id, 'slug' => $guiding->slug, 'from_destination' => true, 'destination_id' => $row_data->id]) }}">
-                                            <div class="guidings-item">
-                                                <div class="guidings-item-title">
-                                                    @if(!$agent->ismobile())
-                                                    <h5 class="fw-bolder text-truncate">{{translate($guiding->title)}}</h5>
-                                                    @endif
-                                                    @if($agent->ismobile())
-                                                        <h5 class="fw-bolder text-truncate">{{ translate(Str::limit($guiding->title, 45)) }}</h5>
-                                                    @endif
-                                                    <span><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }} </span>                                      
-                                                </div>
-                                                @if ($guiding->user->average_rating())
-                                                <div class="ave-reviews-row">
-                                                    <div class="ratings-score">
-                                                    <span class="rating-value">{{number_format($guiding->user->average_rating(), 1)}}</span>
-                                                </div> 
-                                                    <span class="mb-1">
-                                                        {{-- ({{$guiding->user->received_ratings->count()}} reviews) --}}
-                                                        ({{$guiding->user->reviews->count()}} reviews)
-                                                    </span>
-                                                </div>
-                                                @else
-                                                <div class="no-reviews"><span>@lang('guidings.no_reviews')</span></div>
-                                                @endif
-                                            </div>
-                                            <div class="guidings-item-icon">
-                                                <div class="guidings-icon-container"> 
-                                                            <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
-                                                        <div class="">
-                                                            {{ $guiding->duration }} @if($guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
-                                                        </div>
-                                                </div>
-                                                <div class="guidings-icon-container"> 
-                                                        <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" />
-                                                        <div class="">
-                                                        {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
-                                                        </div>
-                                                </div>
-                                                <div class="guidings-icon-container"> 
-                                                            <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
-                                                        <div class="">
-                                                            <div class="tours-list__content__trait__text" >
-                                                                @php
-                                                                $guidingTargets = collect($guiding->getTargetFishNames())->pluck('name')->toArray();
-                                                                @endphp
-                                                                
-                                                                @if(!empty($guidingTargets))
-                                                                    {{ implode(', ', $guidingTargets) }}
-                                                                @endif
-                                                            </div>
-                                                        
-                                                        </div>
-                                                </div>
-                                                <div class="guidings-icon-container">
-                                                            <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
-                                                        <div class="">
-                                                            <div class="tours-list__content__trait__text" >
-                                                            {{$guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
-                                                            </div>
-                                                        
-                                                        </div>
-                                                </div>
-                                            </div>
-                                            <div class="inclusions-price">
-                                                    <div class="guidings-inclusions-container">
-                                                        @if(!empty($guiding->getInclusionNames()))
-                                                        <div class="guidings-included">
-                                                            <strong>@lang('guidings.Whats_Included')</strong>
-                                                            <div class="inclusions-list">
-                                                                @php
-                                                                    $inclusions = $guiding->getInclusionNames();
-                                                                    $maxToShow = 3; // Maximum number of inclusions to display
-                                                                @endphp
-
-                                                                @foreach ($inclusions as $index => $inclusion)
-                                                                    @if ($index < $maxToShow)
-                                                                        <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclusion['name'] }}</span>
-                                                                    @endif
-                                                                @endforeach
-
-                                                                @if (count($inclusions) > $maxToShow)
-                                                                    <span class="inclusion-item">+{{ count($inclusions) - $maxToShow }} more</span>
-                                                                @endif
-                                                            </div>
-                                                        </div>
+                                        <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 p-md-3 mt-md-1">
+                                        <a href="{{ route('guidings.show', ['id' => $guiding->id, 'slug' => $guiding->slug, 'from_destination' => true, 'destination_id' => $row_data->id]) }}">
+                                                <div class="guidings-item">
+                                                    <div class="guidings-item-title">
+                                                        @if(!$agent->ismobile())
+                                                        <h5 class="fw-bolder text-truncate">{{translate($guiding->title)}}</h5>
                                                         @endif
+                                                        @if($agent->ismobile())
+                                                            <h5 class="fw-bolder text-truncate">{{ translate(Str::limit($guiding->title, 45)) }}</h5>
+                                                        @endif
+                                                        <span><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }} </span>                                      
                                                     </div>
-                                                    <div class="guiding-item-price">
-                                                        <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$guiding->getLowestPrice()}}€ p.P.</span></h5>
-                                                        <div class="d-none d-flex flex-column mt-4">
+                                                    @if ($guiding->user->average_rating())
+                                                    <div class="ave-reviews-row">
+                                                        <div class="ratings-score">
+                                                        <span class="rating-value">{{number_format($guiding->user->average_rating(), 1)}}</span>
+                                                    </div> 
+                                                        <span class="mb-1">
+                                                            {{-- ({{$guiding->user->received_ratings->count()}} reviews) --}}
+                                                            ({{$guiding->user->reviews->count()}} reviews)
+                                                        </span>
+                                                    </div>
+                                                    @else
+                                                    <div class="no-reviews"><span>@lang('guidings.no_reviews')</span></div>
+                                                    @endif
+                                                </div>
+                                                <div class="guidings-item-icon">
+                                                    <div class="guidings-icon-container"> 
+                                                                <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
+                                                            <div class="">
+                                                                {{ $guiding->duration }} @if($guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
+                                                            </div>
+                                                    </div>
+                                                    <div class="guidings-icon-container"> 
+                                                            <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" />
+                                                            <div class="">
+                                                            {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
+                                                            </div>
+                                                    </div>
+                                                    <div class="guidings-icon-container"> 
+                                                                <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
+                                                            <div class="">
+                                                                <div class="tours-list__content__trait__text" >
+                                                                    @php
+                                                                    $guidingTargets = collect($guiding->getTargetFishNames())->pluck('name')->toArray();
+                                                                    @endphp
+                                                                    
+                                                                    @if(!empty($guidingTargets))
+                                                                        {{ implode(', ', $guidingTargets) }}
+                                                                    @endif
+                                                                </div>
+                                                            
+                                                            </div>
+                                                    </div>
+                                                    <div class="guidings-icon-container">
+                                                                <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
+                                                            <div class="">
+                                                                <div class="tours-list__content__trait__text" >
+                                                                {{$guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
+                                                                </div>
+                                                            
+                                                            </div>
+                                                    </div>
+                                                </div>
+                                                <div class="inclusions-price">
+                                                        <div class="guidings-inclusions-container">
+                                                            @if(!empty($guiding->getInclusionNames()))
+                                                            <div class="guidings-included">
+                                                                <strong>@lang('guidings.Whats_Included')</strong>
+                                                                <div class="inclusions-list">
+                                                                    @php
+                                                                        $inclusions = $guiding->getInclusionNames();
+                                                                        $maxToShow = 3; // Maximum number of inclusions to display
+                                                                    @endphp
+
+                                                                    @foreach ($inclusions as $index => $inclusion)
+                                                                        @if ($index < $maxToShow)
+                                                                            <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclusion['name'] }}</span>
+                                                                        @endif
+                                                                    @endforeach
+
+                                                                    @if (count($inclusions) > $maxToShow)
+                                                                        <span class="inclusion-item">+{{ count($inclusions) - $maxToShow }} more</span>
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                            @endif
                                                         </div>
-                                                    </div>
-                                            </div>    
-                                    </a>
-                                </div>
+                                                        <div class="guiding-item-price">
+                                                            <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$guiding->getLowestPrice()}}€ p.P.</span></h5>
+                                                            <div class="d-none d-flex flex-column mt-4">
+                                                            </div>
+                                                        </div>
+                                                </div>    
+                                        </a>
+                                    </div>
+                                    </div>
                                 </div>
                             </div>
+                            @endforeach
+                            {!! $guidings->links('vendor.pagination.default') !!}
                         </div>
-                        @endforeach
-                        {!! $guidings->links('vendor.pagination.default') !!}
                     </div>
-                </div>
 
-                <div class="mb-3">{!! translate($row_data->content) !!}</div>
+                    <div class="mb-3">{!! translate($row_data->content) !!}</div>
 
-                @if($row_data->fish_avail_title != '' && $row_data->fish_avail_intro != '')
-                    <h2 class="mb-2 mt-5">{{ translate($row_data->fish_avail_title) }}</h2>
-                    <p>{!! translate($row_data->fish_avail_intro) !!}</p>
-                    @if($fish_chart->count() > 0)
-                    <div class="table-responsive">
-                        <table class="table table-bordered " id="fish_chart_table">
-                            <thead>
-                                <tr>
-                                    <th width="28%">@lang('destination.fish')</th>
-                                    <th width="6%" class="text-center">{{ translate('Jan') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Feb') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Mar') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Apr') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('May') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Jun') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Jul') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Aug') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Sep') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Oct') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Nov') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Dec') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($fish_chart as $row)
-                                <tr>
-                                    <td>{{ $row->fish }}</td>
-                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->jan) }}"></td>
-                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->feb) }}"></td>
-                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->mar) }}"></td>
-                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->apr) }}"></td>
-                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->may) }}"></td>
-                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->jun) }}"></td>
-                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->jul) }}"></td>
-                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->aug) }}"></td>
-                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->sep) }}"></td>
-                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->oct) }}"></td>
-                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->nov) }}"></td>
-                                    <td class="text-center" style="background-color: {{ $row->bg_color($row->dec) }}"></td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                    @if($row_data->fish_avail_title != '' && $row_data->fish_avail_intro != '')
+                        <h2 class="mb-2 mt-5">{{ translate($row_data->fish_avail_title) }}</h2>
+                        <p>{!! translate($row_data->fish_avail_intro) !!}</p>
+                        @if($fish_chart->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table table-bordered " id="fish_chart_table">
+                                <thead>
+                                    <tr>
+                                        <th width="28%">@lang('destination.fish')</th>
+                                        <th width="6%" class="text-center">{{ translate('Jan') }}</th>
+                                        <th width="6%" class="text-center">{{ translate('Feb') }}</th>
+                                        <th width="6%" class="text-center">{{ translate('Mar') }}</th>
+                                        <th width="6%" class="text-center">{{ translate('Apr') }}</th>
+                                        <th width="6%" class="text-center">{{ translate('May') }}</th>
+                                        <th width="6%" class="text-center">{{ translate('Jun') }}</th>
+                                        <th width="6%" class="text-center">{{ translate('Jul') }}</th>
+                                        <th width="6%" class="text-center">{{ translate('Aug') }}</th>
+                                        <th width="6%" class="text-center">{{ translate('Sep') }}</th>
+                                        <th width="6%" class="text-center">{{ translate('Oct') }}</th>
+                                        <th width="6%" class="text-center">{{ translate('Nov') }}</th>
+                                        <th width="6%" class="text-center">{{ translate('Dec') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($fish_chart as $row)
+                                    <tr>
+                                        <td>{{ $row->fish }}</td>
+                                        <td class="text-center" style="background-color: {{ $row->bg_color($row->jan) }}"></td>
+                                        <td class="text-center" style="background-color: {{ $row->bg_color($row->feb) }}"></td>
+                                        <td class="text-center" style="background-color: {{ $row->bg_color($row->mar) }}"></td>
+                                        <td class="text-center" style="background-color: {{ $row->bg_color($row->apr) }}"></td>
+                                        <td class="text-center" style="background-color: {{ $row->bg_color($row->may) }}"></td>
+                                        <td class="text-center" style="background-color: {{ $row->bg_color($row->jun) }}"></td>
+                                        <td class="text-center" style="background-color: {{ $row->bg_color($row->jul) }}"></td>
+                                        <td class="text-center" style="background-color: {{ $row->bg_color($row->aug) }}"></td>
+                                        <td class="text-center" style="background-color: {{ $row->bg_color($row->sep) }}"></td>
+                                        <td class="text-center" style="background-color: {{ $row->bg_color($row->oct) }}"></td>
+                                        <td class="text-center" style="background-color: {{ $row->bg_color($row->nov) }}"></td>
+                                        <td class="text-center" style="background-color: {{ $row->bg_color($row->dec) }}"></td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        @endif
                     @endif
-                @endif
 
-                <div class="row">
-                    @if($row_data->size_limit_title != '' && $row_data->size_limit_intro != '')
-                    <div class="col-sm-12 col-md-12 col-lg-12 mt-5">
-                        <h2>{{ translate($row_data->size_limit_title) }}</h2>
-                        <p>{!! translate($row_data->size_limit_intro) !!}</p>
-                        @if(!empty($fish_size_limit))
-                        <table class="table table-bordered table-striped" id="fish_size_limit_table">
-                            <thead>
-                                <tr>
-                                    <th width="20%">@lang('destination.fish')</th>
-                                    <th width="80%">{{ translate('Size Limit') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                    <div class="row">
+                        @if($row_data->size_limit_title != '' && $row_data->size_limit_intro != '')
+                        <div class="col-sm-12 col-md-12 col-lg-12 mt-5">
+                            <h2>{{ translate($row_data->size_limit_title) }}</h2>
+                            <p>{!! translate($row_data->size_limit_intro) !!}</p>
                             @if(!empty($fish_size_limit))
-                                @foreach($fish_size_limit as $row)
-                                <tr>
-                                    <td>{{ translate($row->fish) }}</td>
-                                    <td>{{ translate($row->data) }}</td>
-                                </tr>
-                                @endforeach
+                            <table class="table table-bordered table-striped" id="fish_size_limit_table">
+                                <thead>
+                                    <tr>
+                                        <th width="20%">@lang('destination.fish')</th>
+                                        <th width="80%">{{ translate('Size Limit') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                @if(!empty($fish_size_limit))
+                                    @foreach($fish_size_limit as $row)
+                                    <tr>
+                                        <td>{{ translate($row->fish) }}</td>
+                                        <td>{{ translate($row->data) }}</td>
+                                    </tr>
+                                    @endforeach
+                                @endif
+                                </tbody>
+                            </table>
                             @endif
-                            </tbody>
-                        </table>
+                        </div>
                         @endif
-                    </div>
-                    @endif
-                    @if($row_data->time_limit_title != '' && $row_data->time_limit_intro != '')
-                    <div class="col-sm-12 col-md-12 col-lg-12 mt-5">
-                        <h2>{{ translate($row_data->time_limit_title) }}</h2>
-                        <p>{!! translate($row_data->time_limit_intro) !!}</p>
-                        @if(!empty($fish_time_limit))
-                        <table class="table table-bordered table-striped" id="fish_time_limit_table">
-                            <thead>
-                                <tr>
-                                    <th width="20%">@lang('destination.fish')</th>
-                                    <th width="80%">{{ translate('Time Limit') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                        @if($row_data->time_limit_title != '' && $row_data->time_limit_intro != '')
+                        <div class="col-sm-12 col-md-12 col-lg-12 mt-5">
+                            <h2>{{ translate($row_data->time_limit_title) }}</h2>
+                            <p>{!! translate($row_data->time_limit_intro) !!}</p>
                             @if(!empty($fish_time_limit))
-                                @foreach($fish_time_limit as $row)
-                                <tr>
-                                    <td>{{ translate($row->fish) }}</td>
-                                    <td>{{ translate($row->data) }}</td>
-                                </tr>
-                                @endforeach
+                            <table class="table table-bordered table-striped" id="fish_time_limit_table">
+                                <thead>
+                                    <tr>
+                                        <th width="20%">@lang('destination.fish')</th>
+                                        <th width="80%">{{ translate('Time Limit') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                @if(!empty($fish_time_limit))
+                                    @foreach($fish_time_limit as $row)
+                                    <tr>
+                                        <td>{{ translate($row->fish) }}</td>
+                                        <td>{{ translate($row->data) }}</td>
+                                    </tr>
+                                    @endforeach
+                                @endif
+                                </tbody>
+                            </table>
                             @endif
-                            </tbody>
-                        </table>
+                        </div>
                         @endif
                     </div>
+                    @if($row_data->faq_title != '' && $faq->count() > 0)
+                    <h2 class="mb-3 mt-5">{{ translate($row_data->faq_title) }}</h2>
+                        <div class="accordion mb-5" id="faq">
+                            @foreach($faq as $row)
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ $row->id }}" aria-expanded="true" aria-controls="faq{{ $row->id }}">{{ translate($row->question) }}</button>
+                                    </h2>
+                                    <div class="accordion-collapse collapse" id="faq{{ $row->id }}" data-bs-parent="#faq">
+                                        <div class="accordion-body ">{{ translate($row->answer) }}</div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
                     @endif
                 </div>
-                @if($row_data->faq_title != '' && $faq->count() > 0)
-                <h2 class="mb-3 mt-5">{{ translate($row_data->faq_title) }}</h2>
-                    <div class="accordion mb-5" id="faq">
-                        @foreach($faq as $row)
-                            <div class="accordion-item">
-                                <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ $row->id }}" aria-expanded="true" aria-controls="faq{{ $row->id }}">{{ translate($row->question) }}</button>
-                                </h2>
-                                <div class="accordion-collapse collapse" id="faq{{ $row->id }}" data-bs-parent="#faq">
-                                    <div class="accordion-body ">{{ translate($row->answer) }}</div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
+                @include('pages.guidings.includes.filters-mobile', ['formAction' => route('guidings.index')])
             </div>
-            @include('pages.guidings.includes.filters-mobile', ['formAction' => route('guidings.index')])
         </div>
     </div>
     <!--News One End-->

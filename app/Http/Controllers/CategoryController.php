@@ -32,8 +32,8 @@ class CategoryController extends Controller
             return $item->is_favorite === true || $item->is_favorite === 1;
         });
         
-        $introduction = __('category.introduction');
-        $title = __('category.title');
+        $introduction = __('category.' . $type . '.introduction');
+        $title = __('category.' . $type . '.title');
 
         $data = compact('favories', 'allTargets', 'introduction', 'title', 'type');
         return view('pages.category.category-index', $data);
