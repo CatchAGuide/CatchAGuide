@@ -33,7 +33,8 @@ class Kernel extends ConsoleKernel
                 ->everyTwoHours()
                 ->withoutOverlapping()
                 ->runInBackground();
-//         $schedule->command('migrate:calendar-schedule --months=24 --cleanup')->daily();
+                
+        $schedule->command('generate:sitemap')->daily()->runInBackground();
     }
 
     /**

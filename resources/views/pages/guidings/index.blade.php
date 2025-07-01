@@ -1,10 +1,48 @@
 @extends('layouts.app-v2-1')
 
-@section('title', translate(substr($title, 0, -3)))
-@section('description', translate($title))
+@php
+    // Generate SEO-friendly title and description
+    $baseTitle = translate('Alle Guidings');
+    $filteredTitle = '';
+    
+    // Add location to title if present
+    if (isset($place) && !empty($place)) {
+        $filteredTitle = translate('Alle Guidings bei ') . $place;
+    } else {
+        $filteredTitle = $baseTitle;
+    }
+    
+    // Add filter information to title if present
+    $activeFilters = [];
+    if (request()->has('target_fish')) $activeFilters[] = translate('Target Fish');
+    if (request()->has('methods')) $activeFilters[] = translate('Fishing Methods');
+    if (request()->has('water')) $activeFilters[] = translate('Water Types');
+    if (request()->has('duration_types')) $activeFilters[] = translate('Duration');
+    if (request()->has('num_persons')) $activeFilters[] = translate('Group Size');
+    
+    if (!empty($activeFilters)) {
+        $filteredTitle .= ' - ' . implode(', ', $activeFilters);
+    }
+    
+    // Generate description
+    $description = translate('Find and book guided fishing trips online. Browse through our selection of professional fishing guides and tours.');
+    if (isset($place) && !empty($place)) {
+        $description = translate('Find guided fishing trips in ') . $place . translate('. Book professional fishing guides and tours online.');
+    }
+@endphp
 
-@section('header_title', ((ucwords(isset($place)) ? translate('Alle Guidings bei ') . $place : translate('Alle Guidings'))))
+@section('title', $filteredTitle)
+@section('description', $description)
+
+@section('header_title', $filteredTitle)
 @section('header_sub_title', '')
+
+<!-- Meta robots for filtered pages -->
+@if(request()->has('target_fish') || request()->has('methods') || request()->has('water') || request()->has('duration_types') || request()->has('num_persons') || request()->has('price_min') || request()->has('price_max'))
+    @section('meta_robots')
+    <meta name="robots" content="NOINDEX, FOLLOW" />
+    @endsection
+@endif
 
 @stack('guidingListingStyles')
 @section('css_after')
@@ -419,6 +457,41 @@
 @endsection
 @section('custom_style')
 @include('layouts.schema.listings')
+
+<!-- Structured Data for Search Results -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "{{ $filteredTitle }}",
+    "description": "{{ $description }}",
+    "url": "{{ request()->url() }}",
+    "numberOfItems": {{ $guidings->total() }},
+    "itemListElement": [
+        @foreach($guidings as $index => $guiding)
+        {
+            "@type": "ListItem",
+            "position": {{ ($guidings->currentPage() - 1) * $guidings->perPage() + $index + 1 }},
+            "item": {
+                "@type": "TouristAttraction",
+                "name": "{{ translate($guiding->title) }}",
+                "description": "{{ translate($guiding->excerpt ?? '') }}",
+                "url": "{{ route('guidings.show', [$guiding->id, $guiding->slug]) }}",
+                "location": {
+                    "@type": "Place",
+                    "name": "{{ $guiding->location }}"
+                },
+                "offers": {
+                    "@type": "Offer",
+                    "price": "{{ $guiding->getLowestPrice() }}",
+                    "priceCurrency": "EUR"
+                }
+            }
+        }@if(!$loop->last),@endif
+        @endforeach
+    ]
+}
+</script>
 @endsection
 @section('content')
     <div class="container">
@@ -743,7 +816,21 @@
                                         </div>
                                     </div>
                                     @endforeach
-                                    {!! $guidings->links('vendor.pagination.default') !!}
+                                    
+                                    <!-- Pagination with SEO meta tags -->
+                                    @if($guidings->hasPages())
+                                        <div class="pagination-wrapper">
+                                            {!! $guidings->links('vendor.pagination.default') !!}
+                                            
+                                            <!-- Add pagination meta tags -->
+                                            @if($guidings->previousPageUrl())
+                                                <link rel="prev" href="{{ $guidings->previousPageUrl() }}" />
+                                            @endif
+                                            @if($guidings->nextPageUrl())
+                                                <link rel="next" href="{{ $guidings->nextPageUrl() }}" />
+                                            @endif
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>

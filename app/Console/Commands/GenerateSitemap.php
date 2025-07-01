@@ -13,6 +13,7 @@ use Illuminate\Filesystem\Filesystem;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
 use Spatie\Sitemap\SitemapIndex;
+use App\Models\Vacation;
 
 class GenerateSitemap extends Command
 {
@@ -21,16 +22,18 @@ class GenerateSitemap extends Command
      *
      * @var string
      */
-    protected $signature = 'generate:sitemap';
+    protected $signature = 'generate:sitemap {--lang=all : Generate sitemap for specific language (en/de) or all}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Generate sitemap.xml';
+    protected $description = 'Generate sitemap.xml for the website';
 
     protected $pages = [];
+    protected $languages = ['en', 'de'];
+    protected $urls = [];
 
     /**
      * Create a new command instance.
@@ -42,182 +45,242 @@ class GenerateSitemap extends Command
         parent::__construct();
     }
 
-    public function handle(){
-
-        $this->info('Start...');
-        $url = url('/');
-        $english = ENV('EN_APP_URL');
-        $german = ENV('DE_APP_URL');
+    public function handle()
+    {
+        $this->info('Starting sitemap generation...');
         
-        $sitemap_listing_en = $this->listing($english, 'en');
-        $sitemap_magazine_en = $this->magazine($english, 'en');
-        //$sitemap_category_en = $this->categories($english, 'en');
-        $sitemap_en = $this->sitemap($english, 'en');
-
-        $sitemap_listing_de = $this->listing($german, 'de');
-        $sitemap_magazine_de = $this->magazine($german, 'de');
-        //$sitemap_category_de = $this->categories($german, 'de');
-        $sitemap_de = $this->sitemap($german, 'de');
-
-        $this->info('Sitemap Indexing...');
-
-        $en_arr = [
-            $english . '/sitemaps' . $sitemap_listing_en, 
-            $english . '/sitemaps' . $sitemap_magazine_en, 
-            //$english . '/sitemaps' . $sitemap_category_en, 
-            $english . '/sitemaps/sitemap_en.xml'
+        $targetLang = $this->option('lang');
+        $languages = $targetLang === 'all' ? $this->languages : [$targetLang];
+        
+        // Get URLs from environment
+        $this->urls = [
+            'en' => env('EN_APP_URL'),
+            'de' => env('DE_APP_URL')
         ];
-        $this->sitemap_index($english, 'en', $en_arr);
 
-        $de_arr = [
-            $german . '/sitemaps' . $sitemap_listing_de, 
-            $german . '/sitemaps' . $sitemap_magazine_de, 
-            //$german . '/sitemaps' . $sitemap_category_de, 
-            $german . '/sitemaps/sitemap_de.xml'
-        ];
-        $this->sitemap_index($german, 'de', $en_arr);
+        foreach ($languages as $lang) {
+            if (!isset($this->urls[$lang])) {
+                $this->error("URL not configured for language: {$lang}");
+                continue;
+            }
+            
+            $this->info("Generating sitemaps for {$lang}...");
+            $this->generateLanguageSitemaps($lang);
+        }
 
-        /*
-        $sitemap = SitemapIndex::create()
-        ->add($english . '/sitemaps' . $sitemap_listing_en)
-        ->add($english . '/sitemaps' . $sitemap_magazine_en)
-        ->add($english . '/sitemaps' . $sitemap_category_en)
-        ->add($english . '/sitemaps/sitemap_en.xml')
-        ->writeToFile(public_path('/sitemaps/sitemap_index_en.xml'));
-
-        $sitemap = SitemapIndex::create()
-        ->add($german . '/sitemaps' . $sitemap_listing_de)
-        ->add($german . '/sitemaps' . $sitemap_magazine_de)
-        ->add($german . '/sitemaps' . $sitemap_category_de)
-        ->add($german . '/sitemaps/sitemap_de.xml')
-        ->writeToFile(public_path('/sitemaps/sitemap_index_de.xml'));
-        */
-
-        $this->info('Done SitemapIndex');
+        $this->info('Sitemap generation completed successfully!');
     }
 
-    public function sitemap_index($url, $lang, $list)
+    protected function generateLanguageSitemaps($lang)
     {
-        $xml = '<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+        $url = $this->urls[$lang];
+        
+        // Generate individual sitemaps
+        $sitemap_listing = $this->generateListingSitemap($url, $lang);
+        $sitemap_magazine = $this->generateMagazineSitemap($url, $lang);
+        $sitemap_vacation = $this->generateVacationSitemap($url, $lang);
+        $sitemap_main = $this->generateMainSitemap($url, $lang);
 
-        foreach ($list as $item) {
-            $xml .= '<sitemap>' .
-                    '<loc>' . $item . '</loc>' .
-                    '</sitemap>' ;
+        // Create sitemap index
+        $sitemapUrls = [
+            $url . '/sitemaps' . $sitemap_listing,
+            $url . '/sitemaps' . $sitemap_magazine,
+            $url . '/sitemaps' . $sitemap_vacation,
+            $url . '/sitemaps' . $sitemap_main
+        ];
+        
+        $this->generateSitemapIndex($url, $lang, $sitemapUrls);
+    }
+
+    protected function generateSitemapIndex($url, $lang, $sitemapUrls)
+    {
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $xml .= '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+
+        foreach ($sitemapUrls as $sitemapUrl) {
+            $xml .= "\t" . '<sitemap>' . "\n";
+            $xml .= "\t\t" . '<loc>' . $sitemapUrl . '</loc>' . "\n";
+            $xml .= "\t\t" . '<lastmod>' . Carbon::now()->toISOString() . '</lastmod>' . "\n";
+            $xml .= "\t" . '</sitemap>' . "\n";
         }
+        
         $xml .= '</sitemapindex>';
 
-        $file_path = '/sitemap_index_' . $lang . '.xml';
-        Storage::disk('sitemaps')->put($file_path, $xml);
+        $filePath = '/sitemap_index_' . $lang . '.xml';
+        Storage::disk('sitemaps')->put($filePath, $xml);
 
-        $this->info('Done Generating Sitemap Index ' . strtoupper($lang));
+        $this->info("✓ Generated sitemap index for {$lang}");
+        
+        return $filePath;
+    }
 
-        return $file_path;
+    protected function generateListingSitemap($url, $lang)
+    {
+        $url .= '/guidings';
+        
+        // Get guidings with language-specific filtering if needed
+        $guidings = $this->getGuidingsForLanguage($lang);
+        
+        $xml = $this->generateSitemapHeader();
+        
+        foreach ($guidings as $guiding) {
+            $sUrl = $url . '/' . $guiding->id . '/' . $guiding->slug;
+            $xml .= $this->generateUrlEntry($sUrl, 'monthly', 0.7);
+        }
+        
+        $xml .= '</urlset>' . "\n";
+
+        $filePath = '/sitemap_listing_' . $lang . '.xml';
+        Storage::disk('sitemaps')->put($filePath, $xml);
+
+        $this->info("✓ Generated listing sitemap for {$lang} with " . count($guidings) . " entries");
+        
+        return $filePath;
+    }
+
+    protected function generateMagazineSitemap($url, $lang)
+    {
+        $url .= '/fishing-magazine';
+        
+        $threads = Thread::where('language', $lang)->get();
+        
+        $xml = $this->generateSitemapHeader();
+        
+        foreach ($threads as $thread) {
+            $sUrl = $url . '/' . $thread->slug;
+            $xml .= $this->generateUrlEntry($sUrl, 'monthly', 0.6);
+        }
+        
+        $xml .= '</urlset>' . "\n";
+
+        $filePath = '/sitemap_fishing_magazine_' . $lang . '.xml';
+        Storage::disk('sitemaps')->put($filePath, $xml);
+
+        $this->info("✓ Generated magazine sitemap for {$lang} with " . count($threads) . " entries");
+        
+        return $filePath;
+    }
+
+    protected function generateMainSitemap($url, $lang)
+    {
+        $uris = [
+            '/' => ['priority' => 1.0, 'changefreq' => 'weekly'],
+            '/contact' => ['priority' => 0.5, 'changefreq' => 'monthly'],
+            '/guidings' => ['priority' => 0.9, 'changefreq' => 'weekly'],
+            '/login' => ['priority' => 0.3, 'changefreq' => 'monthly'],
+            '/imprint' => ['priority' => 0.3, 'changefreq' => 'yearly'],
+            '/data-protection' => ['priority' => 0.3, 'changefreq' => 'yearly'],
+            '/agb' => ['priority' => 0.3, 'changefreq' => 'yearly'],
+            '/faq' => ['priority' => 0.6, 'changefreq' => 'monthly'],
+            '/about-us' => ['priority' => 0.7, 'changefreq' => 'monthly'],
+            '/vacation-rentals' => ['priority' => 0.7, 'changefreq' => 'monthly']
+        ];
+
+        $xml = $this->generateSitemapHeader();
+        
+        foreach ($uris as $uri => $settings) {
+            $sUrl = $url . $uri;
+            $xml .= $this->generateUrlEntry($sUrl, $settings['changefreq'], $settings['priority']);
+        }
+        
+        $xml .= '</urlset>';
+
+        $filePath = '/sitemap_' . $lang . '.xml';
+        Storage::disk('sitemaps')->put($filePath, $xml);
+
+        $this->info("✓ Generated main sitemap for {$lang}");
+        
+        return $filePath;
+    }
+
+    protected function generateVacationSitemap($url, $lang)
+    {
+        $url .= '/vacations';
+        $vacations = Vacation::where('status', 1)
+            ->whereNotNull('slug')
+            ->where('slug', '!=', '')
+            ->get();
+        $xml = $this->generateSitemapHeader();
+        foreach ($vacations as $vacation) {
+            $sUrl = $url . '/' . $vacation->slug;
+            $xml .= $this->generateUrlEntry($sUrl, 'monthly', 0.7);
+        }
+        $xml .= '</urlset>' . "\n";
+        $filePath = '/sitemap_vacations_' . $lang . '.xml';
+        \Storage::disk('sitemaps')->put($filePath, $xml);
+        $this->info("✓ Generated vacation rentals sitemap for {$lang} with " . count($vacations) . " entries");
+        return $filePath;
+    }
+
+    protected function getGuidingsForLanguage($lang)
+    {
+        // If guidings have language-specific content, filter by language
+        // For now, we'll get all active guidings since they might be multilingual
+        return Guiding::where('status', 1)
+            ->whereNotNull('slug')
+            ->where('slug', '!=', '')
+            ->get();
+    }
+
+    protected function generateSitemapHeader()
+    {
+        return '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
+               '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" ' .
+               'xmlns:xhtml="http://www.w3.org/1999/xhtml" ' .
+               'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" ' .
+               'xmlns:video="http://www.google.com/schemas/sitemap-video/1.1" ' .
+               'xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">' . "\n";
+    }
+
+    protected function generateUrlEntry($url, $changefreq, $priority)
+    {
+        return "\t" . '<url>' . "\n" .
+               "\t\t" . '<loc>' . htmlspecialchars($url) . '</loc>' . "\n" .
+               "\t\t" . '<changefreq>' . $changefreq . '</changefreq>' . "\n" .
+               "\t\t" . '<priority>' . $priority . '</priority>' . "\n" .
+               "\t\t" . '<lastmod>' . Carbon::now()->toISOString() . '</lastmod>' . "\n" .
+               "\t" . '</url>' . "\n";
+    }
+
+    // Legacy methods for backward compatibility
+    public function sitemap_index($url, $lang, $list)
+    {
+        return $this->generateSitemapIndex($url, $lang, $list);
     }
 
     public function listing($url, $lang)
     {
-        $url .= '/guidings';
-        $xml = '<?xml version="1.0" encoding="UTF-8"?>' ."\n". '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">' ."\n";
-        $guidings = Guiding::where('status', 1)->get();
-
-        foreach ($guidings as $row) {
-            $sUrl = $url . '/' . $row->id . '/' . $row->slug;
-            $xml .= "\t".'<url>' ."\n" .
-                    "\t\t".'<loc>' . $sUrl . '</loc>' ."\n" .
-                    "\t\t".'<changefreq>monthly</changefreq>' ."\n" .
-                    "\t\t".'<priority>0.5</priority>' ."\n" .
-                    "\t".'</url>' ."\n" ;
-        }
-        $xml .= '</urlset>' ."\n";
-
-        $file_path = '/sitemap_listing_' . $lang . '.xml';
-        Storage::disk('sitemaps')->put($file_path, $xml);
-
-        $this->info('Done Generating Sitemap Listing ' . strtoupper($lang));
-
-        return $file_path;
+        return $this->generateListingSitemap($url, $lang);
     }
 
     public function magazine($url, $lang)
     {
-        $url .= '/fishing-magazine';
-        $xml = '<?xml version="1.0" encoding="UTF-8"?>' ."\n". '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">' ."\n";
-        $guidings = Thread::where('language', $lang)->get();
-
-        foreach ($guidings as $row) {
-            $sUrl = $url . '/' . $row->slug;
-            $xml .= "\t".'<url>' ."\n" .
-                    "\t\t".'<loc>' . $sUrl . '</loc>' ."\n" .
-                    "\t\t".'<changefreq>monthly</changefreq>' ."\n" .
-                    "\t\t".'<priority>0.5</priority>' ."\n" .
-                    "\t".'</url>' ."\n" ;
-        }
-        $xml .= '</urlset>' ."\n";
-
-        $file_path = '/sitemap_fishing_magazine_' . $lang . '.xml';
-        Storage::disk('sitemaps')->put($file_path, $xml);
-
-        $this->info('Done Generating Sitemap Magazine ' . strtoupper($lang));
-
-        return $file_path;
-    }
-
-    public function categories($url, $lang)
-    {
-        $xml = '<?xml version="1.0" encoding="UTF-8"?>' ."\n". '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">' ."\n";
-        $rows = GuideThread::get();
-        //$sitemap = Sitemap::create();
-
-        foreach ($rows as $row) {
-            $sUrl = $url . '/' . $row->slug;
-            $xml .= "\t".'<url>' ."\n" .
-                    "\t\t".'<loc>' . $sUrl . '</loc>' ."\n" .
-                    "\t\t".'<changefreq>monthly</changefreq>' ."\n" .
-                    "\t\t".'<priority>0.5</priority>' ."\n" .
-                    "\t".'</url>' ."\n" ;
-        }
-        $xml .= '</urlset>' ."\n";
-
-        $file_path = '/sitemap_category_' . $lang . '.xml';
-        Storage::disk('sitemaps')->put($file_path, $xml);
-
-        $this->info('Done Generating Sitemap Category ' . strtoupper($lang));
-
-        return $file_path;
+        return $this->generateMagazineSitemap($url, $lang);
     }
 
     public function sitemap($url, $lang)
     {
-        $xml = '<?xml version="1.0" encoding="UTF-8"?>'.
-                '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">';
-        $uris = [
-            '/',
-            '/contact',
-            '/guidings',
-            '/login',
-            '/imprint',
-            '/data-protection',
-            '/agb',
-            '/faq',
-            '/about-us'
-        ];
+        return $this->generateMainSitemap($url, $lang);
+    }
 
-        foreach ($uris as $uri) {
-            $xml .= '<url>'.
-                        '<loc>' . $url . '' . $uri . '</loc>'.
-                        '<changefreq>monthly</changefreq>'.
-                        '<priority>0.5</priority>'.
-                    '</url>';
+    public function categories($url, $lang)
+    {
+        $xml = $this->generateSitemapHeader();
+        $rows = GuideThread::get();
+
+        foreach ($rows as $row) {
+            $sUrl = $url . '/' . $row->slug;
+            $xml .= $this->generateUrlEntry($sUrl, 'monthly', 0.5);
         }
+        
+        $xml .= '</urlset>' . "\n";
 
-            $xml .= '</urlset>';
-        $file_path = '/sitemap_' . $lang . '.xml';
-        Storage::disk('sitemaps')->put($file_path, $xml);
+        $filePath = '/sitemap_category_' . $lang . '.xml';
+        Storage::disk('sitemaps')->put($filePath, $xml);
 
-        $this->info('Done Generating Sitemap '.strtoupper($lang));
+        $this->info("✓ Generated category sitemap for {$lang}");
 
-        return $file_path;
+        return $filePath;
     }
 
     public function sitemap_old($url, $lang)
@@ -264,11 +327,11 @@ class GenerateSitemap extends Command
                 ->setPriority(0.5)
             );
 
-        $file_path = public_path('/sitemaps/sitemap_' . $lang . '.xml');
-        $sitemap->writeTofile($file_path);
+        $filePath = public_path('/sitemaps/sitemap_' . $lang . '.xml');
+        $sitemap->writeToFile($filePath);
 
-        $this->info('Done Generating Sitemap '.strtoupper($lang));
+        $this->info('Done Generating Sitemap ' . strtoupper($lang));
 
-        return $file_path;
+        return $filePath;
     }
 }

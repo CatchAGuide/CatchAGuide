@@ -17,9 +17,9 @@ class VacationsController extends Controller
         return view('pages.countries.vacations', compact('countries'));
     }
 
-    public function show($id)
+    public function show($slug)
     {
-        $vacation = Vacation::where('id',$id)->where('status',1)->with('accommodations', 'boats', 'packages', 'guidings')->first();
+        $vacation = Vacation::where('slug',$slug)->orWhere('id',$slug)->where('status',1)->with('accommodations', 'boats', 'packages', 'guidings')->first();
         
         if (!$vacation) {
             abort(404);
