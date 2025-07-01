@@ -210,7 +210,8 @@ Route::get('guidings/{slug?}', [GuidingsController::class, 'redirectToNewFormat'
 Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'newShow'])->name('guidings.show');
 Route::post('newguidings', [GuidingsController::class, 'guidingsStore'])->name('guidings.store');
 
-Route::resource('vacations', VacationsController::class);
+Route::resource('vacations', VacationsController::class)->except('show');
+Route::get('vacations/{slug}', [VacationsController::class, 'show'])->name('vacations.show');
 Route::post('/vacation-booking', [VacationBookingController::class, 'store'])
     ->name('vacation.booking.store')
     ->middleware('web');
