@@ -1204,6 +1204,7 @@
 
                 const thumbnailPath = guiding.thumbnail_path ? 
                     `{{ asset('') }}${guiding.thumbnail_path}` : 
+                    `{{ asset('') }}${guiding.gallery_images[0]}` : 
                     '{{ asset('images/placeholder_guide.jpg') }}';
 
                 const infowindow = new google.maps.InfoWindow({
