@@ -1,9 +1,8 @@
-@extends('layouts.app-v2-1')
+@extends('layouts.app-v2')
 
-
-    @section('title', __('destination.title'))
-    @section('header_title', __('destination.header_title'))
-    @section('header_sub_title', __('destination.header_sub_title'))
+@section('title', __('destination.title'))
+@section('header_title', __('destination.header_title'))
+@section('header_sub_title', __('destination.header_sub_title'))
 
 @section('custom_style')
     <style>
