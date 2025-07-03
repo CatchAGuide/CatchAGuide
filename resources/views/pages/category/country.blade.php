@@ -4,6 +4,7 @@
 @section('description', translate($row_data->introduction))
 @section('header_title', translate($row_data->title))
 @section('header_sub_title', translate($row_data->sub_title))
+@section('description', translate($row_data->sub_title))
 
 @section('share_tags')
     <meta property="og:title" content="{{translate($row_data->title)}}" />

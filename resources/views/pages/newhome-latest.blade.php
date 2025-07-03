@@ -5,6 +5,7 @@
 @else
     @section('title','Geführte Angeltouren finden & online buchen')
 @endif
+@section('description',__('homepage.header-message'))
 
 @section('share_tags')
     <meta property="og:title" content="{{__('homepage.header-title')}}" />

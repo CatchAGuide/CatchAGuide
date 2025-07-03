@@ -3,6 +3,7 @@
 @section('title', __('destination.title'))
 @section('header_title', __('destination.header_title'))
 @section('header_sub_title', __('destination.header_sub_title'))
+@section('description', __('destination.header_sub_title'))
 
 @section('custom_style')
     <style>

@@ -3,6 +3,7 @@
 @section('title', $title)
 @section('header_title', __('category.' . $type . '.title'))
 @section('header_sub_title', __('category.' . $type . '.sub_title'))
+@section('description', __('category.' . $type . '.sub_title'))
 
 @section('share_tags')
     <meta property="og:title" content="{{__('category.' . $type . '.title')}}" />
