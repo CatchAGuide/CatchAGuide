@@ -1,4 +1,4 @@
-@extends('layouts.app-v2')
+@extends('layouts.app-v2-1')
 
 @section('title', __('destination.title'))
 @section('header_title', __('destination.header_title'))
