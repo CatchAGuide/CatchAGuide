@@ -2,6 +2,10 @@
 
 @section('title',  ucwords(translate('Impressum')))
 
+@section('meta_robots')
+    <meta name="robots" content="noindex, nofollow">
+@endsection
+
 @section('content')
     <!--Page Header Start-->
     <div class="container">

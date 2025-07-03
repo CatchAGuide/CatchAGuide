@@ -6,7 +6,7 @@
     @section('title',$guiding->title)
 @endif
 
-@section('description',translate($guiding->desc_course_of_action ?? ""))
+@section('description',translate($guiding->desc_course_of_action ?? $guiding->title))
 
 @section('share_tags')
     <meta property="og:title" content="{{translate($guiding->title)}}" />

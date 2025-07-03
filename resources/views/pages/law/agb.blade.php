@@ -1,6 +1,9 @@
 @extends('layouts.app-v2-1')
 
 @section('title', ucwords(translate('Allgemeine Geschäftsbedingungen')))
+@section('meta_robots')
+    <meta name="robots" content="noindex, nofollow">
+@endsection
 
 @section('content')
 <div class="container">

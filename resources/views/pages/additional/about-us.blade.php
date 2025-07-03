@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', ucwords(translate('Über Uns')))
+@section('description', translate('about-us.ourGoalMsg'))
 
 @section('content')
     <style>

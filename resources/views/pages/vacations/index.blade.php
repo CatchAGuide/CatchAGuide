@@ -8,6 +8,7 @@
 @section('share_tags')
     <meta property="og:title" content="{{translate($row_data->title)}}" />
     <meta property="og:description" content="{{translate($row_data->introduction ?? "")}}" />
+    <meta name="description" content="{{translate($row_data->sub_title ?? $row_data->introduction)}}">
     
     @if(isset($row_data->thumbnail_path) && file_exists(public_path(str_replace(asset(''), '', asset($row_data->thumbnail_path)))))
         <meta property="og:image" content="{{asset($row_data->thumbnail_path)}}"/>

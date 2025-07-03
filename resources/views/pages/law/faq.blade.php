@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'FAQ')
+@section('description',translate('Frequently Asked Questions for Catch A Guide'))
 
 @section('content')
 <div class="container">
