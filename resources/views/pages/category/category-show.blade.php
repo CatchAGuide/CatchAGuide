@@ -1,4 +1,4 @@
-@extends('layouts.app-v2-1')
+@extends('layouts.app-v2')
 
 @section('title', $row_data->language->title)
 @section('description', $row_data->language->introduction)
