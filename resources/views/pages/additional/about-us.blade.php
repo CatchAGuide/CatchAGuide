@@ -1,7 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.app-v2')
 
 @section('title', ucwords(translate('Über Uns')))
-@section('description', translate('about-us.ourGoalMsg'))
+@section('description', translate(__('about-us.ourGoalMsg')))
 
 @section('content')
     <style>
