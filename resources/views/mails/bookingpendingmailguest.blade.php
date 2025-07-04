@@ -46,12 +46,7 @@
                                         <tbody>
                                         <tr>
                                             <th scope="row" width="150">
-                                                @if($booking->blocked_event)
-                                                    {{ Carbon\Carbon::parse($booking->blocked_event->from)->format('d.m.Y') }}
-                                                @else
-                                                    -storniert-
-                                                @endif
-
+                                            {{ Carbon\Carbon::parse($booking->book_date)->format('d.m.Y') }}
                                             </th>
                                             <td width="100" align="center">{{$booking->count_of_users}}</td>
                                             <td width="100" align="center">

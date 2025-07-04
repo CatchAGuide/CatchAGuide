@@ -60,11 +60,7 @@
                                                 <td>{{ two($booking->price - $booking->cag_percent) }} €</td>
                                                 <td>{{ two($booking->cag_percent) }} €</td>
                                                 <td>
-                                                    @if($booking->blocked_event)
-                                                        {{ \Carbon\Carbon::parse($booking->blocked_event->due)->format('d.m.Y') }}
-                                                    @else
-                                                        -storniert-
-                                                    @endif
+                                                    {{ \Carbon\Carbon::parse($booking->book_date)->format('d.m.Y') }}
                                                 </td>
                                                 <td>{{ $booking->transaction_id }}</td>
                                                 <td>
