@@ -1,4 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.app-v2')
+@section('share_tags')
+    <meta name="robots" content="noindex, nofollow">
+@endsection
 @section('css_after')
 
 <style>

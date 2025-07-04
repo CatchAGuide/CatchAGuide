@@ -3,6 +3,7 @@
 @section('title', __('vacations.title'))
 @section('header_title', __('vacations.header_title'))
 @section('header_sub_title', __('vacations.header_sub_title'))
+@section('description', __('vacations.header_sub_title'))
 
 @section('custom_style')
     <style>
