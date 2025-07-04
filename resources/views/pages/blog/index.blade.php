@@ -1,7 +1,7 @@
 @extends('layouts.app-v2-1')
 
 @section('title', __('message.magazine_meta_title'))
-@section('description',__('message.magazine_meta_description'))
+@section('description',__('message.magazine_meta_description') . ' - ' . request()->segment(count(request()->segments())))
 
 @section('header_title', __('message.Magazine'))
 @section('header_sub_title', __('message.Magazine_subtitle'))
