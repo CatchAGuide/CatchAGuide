@@ -5,14 +5,13 @@ namespace App\Console\Commands;
 use App\Models\GuideThread;
 use App\Models\Guiding;
 use App\Models\Thread;
+use App\Models\CategoryPage;
+use App\Models\Destination;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\File;
-use Illuminate\Filesystem\Filesystem;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
-use Spatie\Sitemap\SitemapIndex;
 use App\Models\Vacation;
 
 class GenerateSitemap extends Command
@@ -79,6 +78,8 @@ class GenerateSitemap extends Command
         $sitemap_listing = $this->generateListingSitemap($url, $lang);
         $sitemap_magazine = $this->generateMagazineSitemap($url, $lang);
         $sitemap_vacation = $this->generateVacationSitemap($url, $lang);
+        $sitemap_category = $this->generateCategorySitemap($url, $lang);
+        $sitemap_destination = $this->generateDestinationSitemap($url, $lang);
         $sitemap_main = $this->generateMainSitemap($url, $lang);
 
         // Create sitemap index
@@ -86,10 +87,94 @@ class GenerateSitemap extends Command
             $url . '/sitemaps' . $sitemap_listing,
             $url . '/sitemaps' . $sitemap_magazine,
             $url . '/sitemaps' . $sitemap_vacation,
+            $url . '/sitemaps' . $sitemap_category,
+            $url . '/sitemaps' . $sitemap_destination,
             $url . '/sitemaps' . $sitemap_main
         ];
         
         $this->generateSitemapIndex($url, $lang, $sitemapUrls);
+    }
+
+    protected function generateCategorySitemap($url, $lang)
+    {
+        $categoryPages = CategoryPage::whereNotNull('slug')
+            ->where('slug', '!=', '')
+            ->get();
+        
+        $xml = $this->generateSitemapHeader();
+        
+        foreach ($categoryPages as $categoryPage) {
+            // Generate URL based on category page type and slug
+            $sUrl = $url . '/category-page/' . strtolower($categoryPage->type) . '/' . $categoryPage->slug;
+            $xml .= $this->generateUrlEntry($sUrl, 'monthly', 0.6);
+        }
+        
+        $xml .= '</urlset>' . "\n";
+
+        $filePath = '/sitemap_categories_' . $lang . '.xml';
+        Storage::disk('sitemaps')->put($filePath, $xml);
+
+        $this->info("✓ Generated category sitemap for {$lang} with " . count($categoryPages) . " entries");
+        
+        return $filePath;
+    }
+
+    protected function generateDestinationSitemap($url, $lang)
+    {
+        // Get destinations filtered by language
+        $destinations = Destination::where('language', $lang)
+            ->whereNotNull('slug')
+            ->where('slug', '!=', '')
+            ->get();
+        
+        $xml = $this->generateSitemapHeader();
+        
+        foreach ($destinations as $destination) {
+            $sUrl = $this->buildDestinationUrl($url, $destination);
+            if ($sUrl) {
+                $xml .= $this->generateUrlEntry($sUrl, 'monthly', 0.7);
+            }
+        }
+        
+        $xml .= '</urlset>' . "\n";
+
+        $filePath = '/sitemap_destinations_' . $lang . '.xml';
+        Storage::disk('sitemaps')->put($filePath, $xml);
+
+        $this->info("✓ Generated destination sitemap for {$lang} with " . count($destinations) . " entries");
+        
+        return $filePath;
+    }
+
+    protected function buildDestinationUrl($baseUrl, $destination)
+    {
+        // Build URL based on destination type and hierarchy
+        $url = $baseUrl . '/destination';
+        
+        try {
+            if ($destination->type === 'country') {
+                return $url . '/' . $destination->slug;
+            } elseif ($destination->type === 'region') {
+                // Use the accessor method to get country slug
+                $countrySlug = $destination->country_slug;
+                if ($countrySlug && $countrySlug !== 'N/A') {
+                    return $url . '/' . $countrySlug . '/' . $destination->slug;
+                }
+            } elseif ($destination->type === 'city') {
+                // Use the accessor methods to get parent slugs
+                $countrySlug = $destination->country_slug;
+                $regionSlug = $destination->region_slug;
+                if ($countrySlug && $countrySlug !== 'N/A' && $regionSlug && $regionSlug !== 'N/A') {
+                    return $url . '/' . $countrySlug . '/' . $regionSlug . '/' . $destination->slug;
+                }
+            }
+        } catch (\Exception $e) {
+            // Log error but continue with fallback
+            \Log::warning("Error building destination URL for {$destination->id}: " . $e->getMessage());
+        }
+        
+        // Fallback for destinations that don't follow the hierarchy
+        return $url . '/' . $destination->slug;
     }
 
     protected function generateSitemapIndex($url, $lang, $sitemapUrls)
