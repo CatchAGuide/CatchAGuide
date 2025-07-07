@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-v2')
 
 @section('title', translate($thread->title))
 @section('description', translate($thread->excerpt))

@@ -27,10 +27,10 @@
         @foreach($attributes as $attribute)
             @if($attribute->meta_type == 'title')
             <!-- 1 -->
-                <title>{{$attribute->content}} - {{ config('app.name') }}</title>
+                <title>{{$attribute->content}}</title>
             @else
             <!-- 2 -->
-                <title>@yield('title', 'Bitte Title setzen') - {{ config('app.name') }}</title>
+                <title>@yield('title', 'Bitte Title setzen')</title>
             @endif
             
             @if($attribute->meta_type == 'description')
@@ -47,7 +47,7 @@
             <title>Guidings - {{ config('app.name') }}</title>
             <meta name="description" content="{{ config('app.name') }} Guidings">
             @else
-            <title>@yield('title', 'Bitte Title setzen') - {{ config('app.name') }}</title>
+            <title>@yield('title', 'Bitte Title setzen')</title>
             <meta name="description" content="{{ config('app.name') }} - @yield('description')">
             <meta name="keywords" content="{{ config('app.name') }} - @yield('keywords')">
             @endif
@@ -61,7 +61,7 @@
             @endphp
 
             @if(is_null($page_title))
-            <title>@yield('title', 'Bitte Title setzen') - {{ config('app.name') }} </title>
+            <title>@yield('title', 'Bitte Title setzen')</title>
             @else
             <title>@yield('title', 'Bitte Title setzen') - {{ $page_title->content }}</title>
             @endif
