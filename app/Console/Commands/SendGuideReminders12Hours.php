@@ -4,8 +4,6 @@ namespace App\Console\Commands;
 
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Mail;
-
 
 use App\Models\Booking;
 use App\Mail\GuideReminder12Hours;
@@ -42,18 +40,23 @@ class SendGuideReminders12Hours extends Command
             ->get();
 
         $count = 0;
+        $skipped = 0;
+        
         foreach ($bookingsToRemind as $booking) {
-            // Send reminder email to guide
+            // Send reminder email to guide using the mailable's built-in duplicate check
             $guide = $booking->guiding->user;
             
-            // Create a mailable class for the 12-hour reminder
-            app()->setLocale($guide?->language ?? app()->getLocale());
-            Mail::send(new GuideReminder12Hours($booking, $guide));
-            
-            $count++;
+            // Use the mailable's sendReminder method which includes duplicate checking
+            if (GuideReminder12Hours::sendReminder($booking, $guide)) {
+                $this->info("Sent 12-hour guide reminder email to {$guide->email} for booking #{$booking->id}");
+                $count++;
+            } else {
+                $this->info("Skipping duplicate 12-hour reminder for booking #{$booking->id} to {$guide->email}");
+                $skipped++;
+            }
         }
 
-        $this->info("Sent {$count} 12-hour reminders to guides.");
+        $this->info("Sent {$count} 12-hour reminders to guides. Skipped {$skipped} duplicates.");
         return 0;
     }
 } 
