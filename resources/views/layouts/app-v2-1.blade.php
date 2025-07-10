@@ -29,11 +29,9 @@
     @if(count($attributes))
         @foreach($attributes as $attribute)
             @if($attribute->meta_type == 'title')
-            <!-- 1 -->
                 <title>{{$attribute->content}}</title>
             @else
-            <!-- 2 -->
-                <title>@yield('title', 'Bitte Title setzen')/title>
+                <title>@yield('title', 'Bitte Title setzen')</title>
             @endif
             
             @if($attribute->meta_type == 'description')

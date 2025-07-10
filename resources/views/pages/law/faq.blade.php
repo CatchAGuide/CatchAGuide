@@ -42,6 +42,8 @@
     </section> -->
     <!--Page Header End-->
     <div class="container my-3">
+        <h1>Frequently Asked Questions</h1>
+        <br>
         <div class="accordion" id="accordionExample">
             @foreach($faqs as $faq)
                 <div class="accordion-item">

@@ -258,7 +258,7 @@ class GenerateSitemap extends Command
             '/agb' => ['priority' => 0.3, 'changefreq' => 'yearly'],
             '/faq' => ['priority' => 0.6, 'changefreq' => 'monthly'],
             '/about-us' => ['priority' => 0.7, 'changefreq' => 'monthly'],
-            '/vacation-rentals' => ['priority' => 0.7, 'changefreq' => 'monthly']
+            '/vacations' => ['priority' => 0.7, 'changefreq' => 'monthly']
         ];
 
         $xml = $this->generateSitemapHeader();
