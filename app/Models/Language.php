@@ -15,7 +15,13 @@ class Language extends Model
         'sub_title', 
         'introduction', 
         'content', 
-        'faq_title'
+        'faq_title',
+        'json_data',
+        'type'
+    ];
+
+    protected $casts = [
+        'json_data' => 'array'
     ];
 
     public function categoryPage()

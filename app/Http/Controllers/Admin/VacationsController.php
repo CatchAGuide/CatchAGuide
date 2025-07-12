@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Vacation;
 use App\Models\VacationBooking;
+use App\Services\AdminChangeTracker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -211,22 +212,22 @@ class VacationsController extends Controller
             
             // Parse dynamic fields for each relation
             $data['accommodations'] = $vacation->accommodations->map(function($item) {
-                $item->dynamic_fields = json_decode($item->dynamic_fields, true);
+                $item->dynamic_fields = is_string($item->dynamic_fields) ? json_decode($item->dynamic_fields, true) : $item->dynamic_fields;
                 return $item;
             });
             
             $data['boats'] = $vacation->boats->map(function($item) {
-                $item->dynamic_fields = json_decode($item->dynamic_fields, true);
+                $item->dynamic_fields = is_string($item->dynamic_fields) ? json_decode($item->dynamic_fields, true) : $item->dynamic_fields;
                 return $item;
             });
             
             $data['packages'] = $vacation->packages->map(function($item) {
-                $item->dynamic_fields = json_decode($item->dynamic_fields, true);
+                $item->dynamic_fields = is_string($item->dynamic_fields) ? json_decode($item->dynamic_fields, true) : $item->dynamic_fields;
                 return $item;
             });
             
             $data['guidings'] = $vacation->guidings->map(function($item) {
-                $item->dynamic_fields = json_decode($item->dynamic_fields, true);
+                $item->dynamic_fields = is_string($item->dynamic_fields) ? json_decode($item->dynamic_fields, true) : $item->dynamic_fields;
                 return $item;
             });
 
@@ -268,6 +269,10 @@ class VacationsController extends Controller
             DB::beginTransaction();
 
             try {
+                // Track changes before updating
+                $changeTracker = new AdminChangeTracker();
+                $changeTracker->trackVacationChanges($vacation, $formattedData);
+                
                 // Update the vacation
                 $vacation->update($formattedData);
 
