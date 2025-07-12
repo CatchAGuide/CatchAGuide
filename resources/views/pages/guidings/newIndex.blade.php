@@ -1441,41 +1441,39 @@
                                                 </div>
                                                 <div class="guidings-item-icon">
                                                     <div class="guidings-icon-container"> 
-                                                                <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
-                                                            <div class="">
-                                                                {{ $other_guiding->duration }} @if($other_guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
-                                                            </div>
+                                                        <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
+                                                        <div class="">
+                                                            {{ $other_guiding->duration }} @if($other_guiding->duration_type == "multi_day") {{translate('days')}} @elseif($other_guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
+                                                        </div>
                                                     </div>
                                                     <div class="guidings-icon-container"> 
-                                                            <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" />
-                                                            <div class="">
-                                                            {{ $other_guiding->max_guests }} @if($other_guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
-                                                            </div>
+                                                        <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" />
+                                                        <div class="">
+                                                        {{ $other_guiding->max_guests }} @if($other_guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
+                                                        </div>
                                                     </div>
                                                     <div class="guidings-icon-container"> 
-                                                                <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
-                                                            <div class="">
-                                                                <div class="tours-list__content__trait__text" >
+                                                        <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
+                                                        <div class="">
+                                                            <div class="tours-list__content__trait__text" >
 
-                                                                    @php
-                                                                    $guidingTargets = collect($guiding->cached_target_fish_names ?? $guiding->getTargetFishNames($targetsMap ?? null))->pluck('name')->toArray();
-                                                                    @endphp
-                                                                    
-                                                                    @if(!empty($guidingTargets))
-                                                                        {{ implode(', ', $guidingTargets) }}
-                                                                    @endif
-                                                                </div>
-                                                            
+                                                                @php
+                                                                $guidingTargets = collect($guiding->cached_target_fish_names ?? $guiding->getTargetFishNames($targetsMap ?? null))->pluck('name')->toArray();
+                                                                @endphp
+                                                                
+                                                                @if(!empty($guidingTargets))
+                                                                    {{ implode(', ', $guidingTargets) }}
+                                                                @endif
                                                             </div>
+                                                        </div>
                                                     </div>
                                                     <div class="guidings-icon-container">
-                                                                <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
-                                                            <div class="">
-                                                                <div class="tours-list__content__trait__text" >
-                                                                    {{$other_guiding->is_boat ? ($other_guiding->boatType && $other_guiding->boatType->name !== null ? $other_guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
-                                                                </div>
-                                                            
+                                                        <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
+                                                        <div class="">
+                                                            <div class="tours-list__content__trait__text" >
+                                                                {{$other_guiding->is_boat ? ($other_guiding->boatType && $other_guiding->boatType->name !== null ? $other_guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
                                                             </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div class="inclusions-price">

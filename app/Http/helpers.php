@@ -69,7 +69,7 @@ if (!function_exists('getLocalizedValue')) {
 }
 
 if (!function_exists('media_upload')) {
-    function media_upload($file, $directory = 'uploads', $filename = null, $quality = 75)
+    function media_upload($file, $directory = 'uploads', $filename = null, $quality = 75, $id = null)
     {
         if (filter_var($file, FILTER_VALIDATE_URL)) {
             
@@ -107,7 +107,7 @@ if (!function_exists('media_upload')) {
 
         // Hash the filename
         $hashedName = md5(pathinfo($filename, PATHINFO_FILENAME) . time());
-        $webpImageName = $hashedName . '.webp';
+        $webpImageName = $hashedName . ($id ? '_' . $id : '') . '.webp';
         $webpImage = $image->encode('webp', $quality);
         
         $webp_path = $directory . '/' . $webpImageName;

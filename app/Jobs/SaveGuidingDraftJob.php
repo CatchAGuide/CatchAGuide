@@ -66,7 +66,7 @@ class SaveGuidingDraftJob implements ShouldQueue
             }
 
             $guiding->is_newguiding = 1;
-            $guiding->status = 2; // Draft status
+            // $guiding->status = 2; // Draft status
 
             $guiding->save();
 
