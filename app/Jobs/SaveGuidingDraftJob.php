@@ -41,8 +41,10 @@ class SaveGuidingDraftJob implements ShouldQueue
             DB::beginTransaction();
 
             // Find or create guiding
+            $originalStatus = null;
             if ($this->isUpdate && $this->guidingId) {
                 $guiding = Guiding::findOrFail($this->guidingId);
+                $originalStatus = $guiding->status;
             } else {
                 $guiding = Guiding::where('user_id', $this->userId)
                     ->where('status', 2)
@@ -66,7 +68,17 @@ class SaveGuidingDraftJob implements ShouldQueue
             }
 
             $guiding->is_newguiding = 1;
-            // $guiding->status = 2; // Draft status
+            
+            // Smart status management - preserve status for published/disabled guidings
+            $originalStatus = $this->guidingData['original_status'] ?? null;
+            
+            if ($this->isUpdate && ((int)$originalStatus === 1 || (int)$originalStatus === 0)) {
+                // Preserve original status if it was published (1) or disabled (0)
+                $guiding->status = $originalStatus;
+            } else {
+                // Set to draft for new guidings or guidings that were already drafts
+                $guiding->status = 2;
+            }
 
             $guiding->save();
 

@@ -1921,7 +1921,8 @@
             }
             // --- END FIX ---
 
-            fetch(window.saveDraftUrl, {
+            // Use synchronous saving for step progression to avoid status timing issues
+            fetch(window.saveDraftSyncUrl, {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -1960,6 +1961,7 @@
     }
     
     window.saveDraftUrl = "{{ route('profile.newguiding.save-draft') }}";
+    window.saveDraftSyncUrl = "{{ route('profile.newguiding.save-draft-sync') }}";
 </script>
 
 @endpush

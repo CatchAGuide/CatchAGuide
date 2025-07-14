@@ -1068,4 +1068,22 @@ class Guiding extends Model
             return $result;
         });
     }
+
+    /**
+     * Helper methods for status checking
+     */
+    public function isPublished(): bool
+    {
+        return $this->status == 1;
+    }
+
+    public function isDraft(): bool
+    {
+        return $this->status == 2;
+    }
+
+    public function isDisabled(): bool
+    {
+        return $this->status == 0;
+    }
 }

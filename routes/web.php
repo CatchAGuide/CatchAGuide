@@ -99,6 +99,7 @@ Route::post('/upload/{guiding?}', [FileUploadController::class, 'upload'])->name
 
 Route::post('/newguiding', [GuidingsController::class, 'guidingsStore'])->name('profile.newguiding.store');
 Route::post('/newguiding/save-draft', [GuidingsController::class, 'saveDraft'])->name('profile.newguiding.save-draft');
+Route::post('/newguiding/save-draft-sync', [GuidingsController::class, 'saveDraftSync'])->name('profile.newguiding.save-draft-sync');
 
 Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(function () {
     Route::get('/', [App\Http\Controllers\ProfileController::class, 'index'])->name('index');
