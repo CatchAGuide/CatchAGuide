@@ -19,13 +19,23 @@ class VacationsController extends Controller
 
     public function show($slug)
     {
-        $vacation = Vacation::where('slug',$slug)->orWhere('id',$slug)->where('status',1)->with('accommodations', 'boats', 'packages', 'guidings')->first();
+        $vacation = Vacation::where('slug',$slug)->orWhere('id',$slug)->where('status',1)->with('accommodations', 'boats', 'packages', 'guidings', 'extras')->first();
         
         if (!$vacation) {
             abort(404);
         }
 
-        $vacation->gallery = json_decode($vacation->gallery, true);
+        // Get translated vacation data
+        $translatedVacation = $vacation->getTranslatedData();
+        
+        // Get translated relations
+        $translatedAccommodations = $vacation->getTranslatedAccommodations();
+        $translatedBoats = $vacation->getTranslatedBoats();
+        $translatedPackages = $vacation->getTranslatedPackages();
+        $translatedGuidings = $vacation->getTranslatedGuidings();
+        $translatedExtras = $vacation->getTranslatedExtras();
+
+        $vacation->gallery = is_string($vacation->gallery) ? json_decode($vacation->gallery, true) : $vacation->gallery;
         
         // Calculate minimum guests across all services
         $minGuests = PHP_INT_MAX; // Start with maximum possible value
@@ -66,7 +76,7 @@ class VacationsController extends Controller
             ->limit(10)
             ->get()
             ->map(function($vacation) {
-                $vacation->gallery = json_decode($vacation->gallery, true);
+                $vacation->gallery = is_string($vacation->gallery) ? json_decode($vacation->gallery, true) : $vacation->gallery;
                 return $vacation;
             });
 
@@ -75,7 +85,17 @@ class VacationsController extends Controller
         $destination = Destination::find($destinationId);
         session()->forget('vacation_destination_id');
             
-        return view('pages.vacations.show', compact('vacation', 'sameCountries', 'destination'));
+        return view('pages.vacations.show', compact(
+            'vacation', 
+            'sameCountries', 
+            'destination',
+            'translatedVacation',
+            'translatedAccommodations',
+            'translatedBoats',
+            'translatedPackages',
+            'translatedGuidings',
+            'translatedExtras'
+        ));
     }
 
     private function otherVacations(){
@@ -122,7 +142,7 @@ class VacationsController extends Controller
     private function extractPricesFromDynamicFields($items)
     {
         return $items->flatMap(function($item) {
-            $fields = json_decode($item->dynamic_fields, true);
+            $fields = is_string($item->dynamic_fields) ? json_decode($item->dynamic_fields, true) : $item->dynamic_fields;
             return $fields['prices'] ?? [];
         })->filter();
     }

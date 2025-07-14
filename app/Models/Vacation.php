@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 
 use Akuechler\Geoly;
 use App\Traits\ModelImageTrait;
@@ -53,7 +54,26 @@ class Vacation extends Model
         'guiding_price',
         'additional_services',
         'included_services',
-        'status'
+        'status',
+        'language',
+        'content_updated_at'
+    ];
+
+    protected $casts = [
+        'gallery' => 'array',
+        'best_travel_times' => 'array',
+        'target_fish' => 'array',
+        'travel_options' => 'array',
+        'included_services' => 'array',
+        'additional_services' => 'array',
+        'amenities' => 'array',
+        'equipment' => 'array',
+        'content_updated_at' => 'datetime',
+        'has_boat' => 'boolean',
+        'has_guiding' => 'boolean',
+        'pets_allowed' => 'boolean',
+        'smoking_allowed' => 'boolean',
+        'disability_friendly' => 'boolean'
     ];
 
     public function accommodations(): HasMany
@@ -87,6 +107,216 @@ class Vacation extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(VacationBooking::class);
+    }
+
+    /**
+     * Get translations for this vacation
+     */
+    public function translations(): HasMany
+    {
+        return $this->hasMany(Language::class, 'source_id')->where('type', 'vacations');
+    }
+
+    /**
+     * Get translation for specific language
+     */
+    public function getTranslation(string $language): ?Language
+    {
+        return $this->translations()->where('language', $language)->first();
+    }
+
+    /**
+     * Get translated field value
+     */
+    public function getTranslatedField(string $field, string $language = null): string
+    {
+        $language = $language ?: app()->getLocale();
+        
+        // Return original if same language
+        if ($this->language === $language) {
+            $value = $this->$field;
+            
+            // Handle array fields
+            if (is_array($value)) {
+                return implode(', ', $value);
+            }
+            
+            return $value ?? '';
+        }
+        
+        // Get translation
+        $translation = $this->getTranslation($language);
+        if (!$translation || !$translation->json_data) {
+            return $this->$field ?? '';
+        }
+        
+        $translatedData = json_decode($translation->json_data, true);
+        $translatedValue = $translatedData[$field] ?? $this->$field;
+        
+        // Handle array fields
+        if (is_array($translatedValue)) {
+            return implode(', ', $translatedValue);
+        }
+        
+        return $translatedValue ?? '';
+    }
+
+    /**
+     * Check if vacation has translation for language
+     */
+    public function hasTranslation(string $language): bool
+    {
+        if ($this->language === $language) {
+            return true;
+        }
+        
+        return $this->translations()->where('language', $language)->exists();
+    }
+
+    /**
+     * Get all translated data for the vacation in a specific language
+     * Returns an object with both original and translated values
+     */
+    public function getTranslatedData(string $language = null): object
+    {
+        $language = $language ?: app()->getLocale();
+        
+        // If same language, return original data
+        if ($this->language === $language) {
+            return (object) $this->toArray();
+        }
+        
+        $cacheKey = 'vacation_full_translation_' . $this->id . '_' . $language;
+        
+        return Cache::remember($cacheKey, 3600, function() use ($language) {
+            $translation = $this->getTranslation($language);
+            $originalData = $this->toArray();
+            
+            if (!$translation || !$translation->json_data) {
+                return (object) $originalData;
+            }
+            
+            $translatedData = json_decode($translation->json_data, true);
+            
+            // Merge original data with translated data
+            $result = $originalData;
+            foreach ($translatedData as $field => $value) {
+                if (isset($result[$field])) {
+                    $result[$field] = $value;
+                }
+            }
+            
+            return (object) $result;
+        });
+    }
+
+    /**
+     * Get translated accommodations
+     */
+    public function getTranslatedAccommodations(string $language = null): \Illuminate\Database\Eloquent\Collection
+    {
+        $language = $language ?: app()->getLocale();
+        
+        return $this->accommodations->map(function($accommodation) use ($language) {
+            return $this->getTranslatedRelationItem($accommodation, 'accommodation', $language);
+        });
+    }
+
+    /**
+     * Get translated boats
+     */
+    public function getTranslatedBoats(string $language = null): \Illuminate\Database\Eloquent\Collection
+    {
+        $language = $language ?: app()->getLocale();
+        
+        return $this->boats->map(function($boat) use ($language) {
+            return $this->getTranslatedRelationItem($boat, 'boat', $language);
+        });
+    }
+
+    /**
+     * Get translated packages
+     */
+    public function getTranslatedPackages(string $language = null): \Illuminate\Database\Eloquent\Collection
+    {
+        $language = $language ?: app()->getLocale();
+        
+        return $this->packages->map(function($package) use ($language) {
+            return $this->getTranslatedRelationItem($package, 'package', $language);
+        });
+    }
+
+    /**
+     * Get translated guidings
+     */
+    public function getTranslatedGuidings(string $language = null): \Illuminate\Database\Eloquent\Collection
+    {
+        $language = $language ?: app()->getLocale();
+        
+        return $this->guidings->map(function($guiding) use ($language) {
+            return $this->getTranslatedRelationItem($guiding, 'guiding', $language);
+        });
+    }
+
+    /**
+     * Get translated extras
+     */
+    public function getTranslatedExtras(string $language = null): \Illuminate\Database\Eloquent\Collection
+    {
+        $language = $language ?: app()->getLocale();
+        
+        return $this->extras->map(function($extra) use ($language) {
+            return $this->getTranslatedRelationItem($extra, 'extra', $language);
+        });
+    }
+
+    /**
+     * Helper method to get translated relation item
+     */
+    private function getTranslatedRelationItem($item, string $relationType, string $language): object
+    {
+        if ($this->language === $language) {
+            return $item;
+        }
+        
+        $cacheKey = 'vacation_relation_translation_' . $item->id . '_' . $relationType . '_' . $language;
+        
+        return Cache::remember($cacheKey, 3600, function() use ($item, $relationType, $language) {
+            $translation = Language::where([
+                'source_id' => $item->id,
+                'type' => 'vacation_' . $relationType,
+                'language' => $language
+            ])->first();
+            
+            if (!$translation || !$translation->json_data) {
+                return $item;
+            }
+            
+            $translatedData = json_decode($translation->json_data, true);
+            $result = $item->toArray();
+            
+            // Update title and description from translation
+            if (isset($translatedData['title'])) {
+                $result['title'] = $translatedData['title'];
+            }
+            if (isset($translatedData['description'])) {
+                $result['description'] = $translatedData['description'];
+            }
+            
+            // Update dynamic fields
+            foreach ($translatedData as $key => $value) {
+                if (strpos($key, 'dynamic_') === 0) {
+                    $fieldName = substr($key, 8); // Remove 'dynamic_' prefix
+                    if ($result['dynamic_fields']) {
+                        $dynamicFields = is_string($result['dynamic_fields']) ? json_decode($result['dynamic_fields'], true) : $result['dynamic_fields'];
+                        $dynamicFields[$fieldName] = $value;
+                        $result['dynamic_fields'] = json_encode($dynamicFields);
+                    }
+                }
+            }
+            
+            return (object) $result;
+        });
     }
 
     public static function locationFilter(string $city = null, string $country = null, ?int $radius = null, $placeLat = null, $placeLng = null )
@@ -214,7 +444,7 @@ class Vacation extends Model
     public function getLowestPrice(): float
     {
         $lowestPackagePrice = $this->packages->map(function ($package) {
-            $dynamicFields = json_decode($package->dynamic_fields, true);
+            $dynamicFields = is_string($package->dynamic_fields) ? json_decode($package->dynamic_fields, true) : $package->dynamic_fields;
             if (!isset($dynamicFields['prices']) || empty($dynamicFields['prices'])) {
                 return PHP_FLOAT_MAX;
             }
@@ -231,7 +461,7 @@ class Vacation extends Model
         })->min();
 
         $lowestAccommodationPrice = $this->accommodations->map(function ($accommodation) {
-            $dynamicFields = json_decode($accommodation->dynamic_fields, true);
+            $dynamicFields = is_string($accommodation->dynamic_fields) ? json_decode($accommodation->dynamic_fields, true) : $accommodation->dynamic_fields;
             if (!isset($dynamicFields['prices']) || empty($dynamicFields['prices'])) {
                 return PHP_FLOAT_MAX;
             }
@@ -265,4 +495,6 @@ class Vacation extends Model
         return $this->accommodations->sum('capacity');
 
     }
+
+
 }

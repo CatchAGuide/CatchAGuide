@@ -42,6 +42,59 @@ if (! function_exists('translate')) {
     }
 }
 
+if (! function_exists('translateVacationField')) {
+    /**
+     * Get translated field from vacation data with fallback to original
+     * @param object $translatedVacation - The translated vacation object from controller
+     * @param object $originalVacation - The original vacation model
+     * @param string $field - The field name to get
+     * @return string|array
+     */
+    function translateVacationField($translatedVacation, $originalVacation, string $field)
+    {
+        // Try to get from translated data first
+        if (isset($translatedVacation->$field) && !empty($translatedVacation->$field)) {
+            $value = $translatedVacation->$field;
+        } else {
+            // Fallback to original
+            $value = $originalVacation->$field;
+        }
+        
+        // Handle JSON arrays
+        if (is_string($value) && (strpos($value, '[') === 0 || strpos($value, '{') === 0)) {
+            $decoded = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                return $decoded;
+            }
+        }
+        
+        return $value ?? '';
+    }
+}
+
+if (! function_exists('formatVacationArray')) {
+    /**
+     * Format array values for display (e.g., target fish, travel times)
+     * @param array|string $value
+     * @return string
+     */
+    function formatVacationArray($value): string
+    {
+        if (is_array($value)) {
+            return implode(', ', $value);
+        }
+        
+        if (is_string($value) && (strpos($value, '[') === 0 || strpos($value, '{') === 0)) {
+            $decoded = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return implode(', ', $decoded);
+            }
+        }
+        
+        return (string) $value;
+    }
+}
+
 if (! function_exists('get_link')) {
     function get_link($model)
     {
@@ -88,9 +141,21 @@ if (! function_exists('get_galleries_image_link')) {
 
         // Get gallery images based on type
         if($type == 0){
-            $galleries = json_decode($model->gallery_images, true);
+            $galleries = $model->gallery_images;
+            if (is_string($galleries)) {
+                $galleries = json_decode($galleries, true);
+            }
+            if (!is_array($galleries)) {
+                $galleries = [];
+            }
         }else{
-            $galleries = json_decode($model->gallery, true);
+            $galleries = $model->gallery;
+            if (is_string($galleries)) {
+                $galleries = json_decode($galleries, true);
+            }
+            if (!is_array($galleries)) {
+                $galleries = [];
+            }
         }
 
         // Add gallery images, avoiding duplicates (with cached file checks)

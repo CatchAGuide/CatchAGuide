@@ -41,7 +41,7 @@ class TranslationHelper
 
         $prompt = "Translate the following text in this JSON object field {$forTranslate} from {$fromLanguageName} to {$toLanguageName} while keeping the JSON structure and keys as return/response";
 
-        $translated = self::$translator->translate($prompt, $fromLanguage, $toLanguage);
+        $translated = self::$translator->translate($prompt);
 
         $translated = preg_replace('/^```json\s*|\s*```\s*$/m', '', $translated); // Remove markdown code blocks
         
@@ -105,7 +105,7 @@ class TranslationHelper
                    {$jsonContent}";
 
         try {
-            $translatedJson = self::$translator->translate($prompt, $fromLanguage, $toLanguage);
+            $translatedJson = self::$translator->translate($prompt);
             
             // Clean the response by removing Markdown code block markers if present
             $translatedJson = preg_replace('/^```json\s*|\s*```\s*$/m', '', $translatedJson);

@@ -1,16 +1,12 @@
 @extends('layouts.app-v2-1')
 
-@if(app()->getLocale() == 'en')
-    @section('title',translate($vacation->title))
-@else
-    @section('title',$vacation->title)
-@endif
+@section('title', $translatedVacation->title)
 
 @section('description',$vacation->description)
 
 @section('share_tags')
-    <meta property="og:title" content="{{translate($vacation->title)}}" />
-    <meta property="og:description" content="{{translate($vacation->description ?? "")}}" />
+    <meta property="og:title" content="{{$translatedVacation->title}}" />
+    <meta property="og:description" content="{{$translatedVacation->description ?? ""}}" />
     
     @if(isset($vacation->gallery) && is_array($vacation->gallery) && !empty($vacation->gallery[0]) && file_exists(public_path(str_replace(asset(''), '', asset($vacation->gallery[0])))))
         <meta property="og:image" content="{{asset($vacation->gallery[0])}}"/>
@@ -232,7 +228,7 @@
                             ]) }}">{{ translate('Vacations in') }} {{ $destination->name }}</a></li>
                              <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                         @endif
-                        <li class="active">{{ translate($vacation->title) }}</li>
+                        <li class="active">{{ $translatedVacation->title }}</li>
                     </ul>
                 </div>
             </div>
@@ -272,7 +268,7 @@
             <div class="title-left-container">
                 <div class="col-24 col mb-1 guiding-title">
                     <h1>
-                        {{ translate($vacation->title) }}
+                        {{ $translatedVacation->title }}
                     </h1>
                     <a class="btn" href="#" role="button"><i data-lucide="share-2"></i></a>
                 </div>
@@ -475,7 +471,7 @@
                             <span>{{ translate('Beschreibung')}}</span>
                         </div>
                         <span class="text-wrapper">
-                            {!! translate($vacation->surroundings_description) !!}
+                            {!! $translatedVacation->surroundings_description !!}
                         </span>
                     </div>
                     @endif
@@ -486,7 +482,7 @@
                             <span>{{ translate('Best travel times')}}</span>
                         </div>
                         <p class="text-wrapper">
-                           {!! translate(implode(', ', json_decode($vacation->best_travel_times))) !!}
+                            {!! is_array($translatedVacation->best_travel_times) ? implode(', ', $translatedVacation->best_travel_times) : $translatedVacation->best_travel_times !!}
                         </p>
                     </div>
                     @endif
@@ -496,7 +492,7 @@
                             <span>{{ translate('Target fish') }}</span>
                         </div>
                         <p class="text-wrapper">
-                        {!! translate(implode(', ', json_decode($vacation->target_fish))) !!}
+                            {!! is_array($translatedVacation->target_fish) ? implode(', ', $translatedVacation->target_fish) : $translatedVacation->target_fish !!}
                         </p>
                     </div>
                     @endif
@@ -507,16 +503,16 @@
                         <ol class="px-3">
                             <li class="mx-4">
                                 <strong class="subtitle-text">@lang('vacations.round_trip'):</strong>
-                                {{ translate($vacation->travel_included)}}
+                                {{ $translatedVacation->travel_included }}
                             </li>
                             <li class="mx-4">
                             @if(!empty($vacation->travel_options))
                                 <div class="tab-category mb-4">
                                     <strong class="subtitle-text">@lang('vacations.travel_recommendation'):</strong>
                                     <div class="row">
-                                        @foreach (json_decode($vacation->travel_options) as $travel_option)
+                                    @foreach ((is_array($translatedVacation->travel_options) ? $translatedVacation->travel_options : []) as $travel_option)
                                             <div class="col-12 text-start">
-                                                - {{translate($travel_option)}}
+                                                - {{ $travel_option }}
                                             </div>
                                         @endforeach
                                     </div>
@@ -532,22 +528,22 @@
                     <div class="row mx-4">
                         <table class="table">
                             <tbody>
-                                @if(!empty($vacation->airport_distance))
+                                @if(!empty($translatedVacation->airport_distance))
                                 <tr>
                                     <td><strong>@lang('vacations.nearest_airport')</strong></td>
-                                    <td>{{translate($vacation->airport_distance)}}</td>
+                                    <td>{{ $translatedVacation->airport_distance }}</td>
                                 </tr>
                                 @endif
-                                @if(!empty($vacation->water_distance))
+                                @if(!empty($translatedVacation->water_distance))
                                 <tr>
                                     <td><strong>@lang('vacations.distance_water')</strong></td>
-                                    <td>{{translate($vacation->water_distance)}}</td>
+                                    <td>{{ $translatedVacation->water_distance }}</td>
                                 </tr>
                                 @endif
-                                @if(!empty($vacation->shopping_distance))
+                                @if(!empty($translatedVacation->shopping_distance))
                                 <tr>
                                     <td><strong>@lang('vacations.distance_shoping')</strong></td>
-                                    <td>{{translate($vacation->shopping_distance)}}</td>
+                                    <td>{{ $translatedVacation->shopping_distance }}</td>
                                 </tr>
                                 @endif
                                 @if(!empty($vacation->pets_allowed))
@@ -647,19 +643,19 @@
                     @php
                         $sections = [
                             'accommodation' => [
-                                'items' => $vacation->accommodations ?? [],
+                                'items' => $translatedAccommodations ?? [],
                                 'title' => translate('Accommodation')
                             ],
                             'boat' => [
-                                'items' => $vacation->boats ?? [],
+                                'items' => $translatedBoats ?? [],
                                 'title' => translate('Mietboot')
                             ],
                             'package' => [
-                                'items' => $vacation->packages ?? [],
+                                'items' => $translatedPackages ?? [],
                                 'title' => translate('Komplettpaket')
                             ],
                             'guiding' => [
-                                'items' => $vacation->guidings ?? [],
+                                'items' => $translatedGuidings ?? [],
                                 'title' => 'Guiding'
                             ]
                         ];
@@ -677,12 +673,12 @@
                                         <div class="row">
                                             <!-- Description Column -->
                                             <div class="col-12 col-lg-7 mb-3 mb-lg-0 tab-item">
-                                                <h6 class="card-title mb-3">{{ !empty($item->title) ? translate($item->title) : translate($sectionKey . ' ' . ($itemIndex + 1)) }}</h6>
+                                                <h6 class="card-title mb-3">{{ !empty($item->title) ? $item->title : translate($sectionKey . ' ' . ($itemIndex + 1)) }}</h6>
                                                 <span class="text-wrapper">
-                                                    {!! translate($item->description) !!}
+                                                    {!! $item->description !!}
                                                 </span>
                                                 <!-- Other Details Row -->
-                                                @php $dynamicFields = json_decode($item->dynamic_fields) @endphp
+                                                @php $dynamicFields = $item->dynamic_fields @endphp
                                                 <div class="row mt-4">
                                                     @foreach($dynamicFields as $field => $value)
                                                         @if($field !== 'prices')
@@ -727,7 +723,7 @@
     
                                             <!-- Pricing Column -->
                                             <div class="col-12 col-lg-5">
-                                                @php $dynamicFields = json_decode($item->dynamic_fields) @endphp
+                                                @php $dynamicFields = $item->dynamic_fields @endphp
                                                 @foreach($dynamicFields as $field => $value)
                                                     @if($field === 'prices')
                                                         <div class="mb-3">
@@ -792,22 +788,22 @@
                 @php
                     $sections = [
                         'accommodation' => [
-                            'items' => $vacation->accommodations,
+                            'items' => $translatedAccommodations,
                             'title' => translate('Accommodation'),
                             'lang' => 'accommodations',
                         ],
                         'boat' => [
-                            'items' => $vacation->boats,
+                            'items' => $translatedBoats,
                             'title' => translate('Mietboot'),
                             'lang' => 'boats',
                         ],
                         'package' => [
-                            'items' => $vacation->packages,
+                            'items' => $translatedPackages,
                             'title' => translate('Komplettpaket'),
                             'lang' => 'package',
                         ],
                         'guiding' => [
-                            'items' => $vacation->guidings,
+                            'items' => $translatedGuidings,
                             'title' => 'Guiding',
                             'lang' => 'guidings',
                         ]
@@ -832,19 +828,19 @@
                             class="accordion-collapse collapse {{ $sectionKey === $activeTab ? 'show' : '' }}" 
                             aria-labelledby="heading{{ $sectionKey }}" 
                             data-bs-parent="#guidings-accordion">
-                            <div class="accordion-body">
+                                                            <div class="accordion-body">
                                 @foreach($section['items'] as $itemIndex => $item)
                                     <div class="card h-100 shadow mb-4">
                                         <div class="card-body">
                                             <div class="row">
                                                 <!-- Description Column -->
                                                 <div class="col-12 col-lg-7 mb-3 mb-lg-0 tab-item">
-                                                    <h6 class="card-title mb-3">{{ !empty($item->title) ? translate($item->title) : translate($sectionKey . ' ' . ($itemIndex + 1)) }}</h6>
+                                                    <h6 class="card-title mb-3">{{ !empty($item->title) ? $item->title : translate($sectionKey . ' ' . ($itemIndex + 1)) }}</h6>
                                                     <span class="text-wrapper">
-                                                        {!! translate($item->description) !!}
+                                                        {!! $item->description !!}
                                                     </span>
                                                     <!-- Other Details Row -->
-                                                    @php $dynamicFields = json_decode($item->dynamic_fields) @endphp
+                                                    @php $dynamicFields = $item->dynamic_fields @endphp
                                             <div class="row mt-4">
                                                 @foreach($dynamicFields as $field => $value)
                                                     @if($field !== 'prices')
@@ -889,7 +885,7 @@
 
                                                 <!-- Pricing Column -->
                                                 <div class="col-12 col-lg-5">
-                                                    @php $dynamicFields = json_decode($item->dynamic_fields) @endphp
+                                                    @php $dynamicFields = $item->dynamic_fields @endphp
                                                     @foreach($dynamicFields as $field => $value)
                                                         @if($field === 'prices')
                                                             <div class="mb-3">
@@ -930,21 +926,21 @@
             </div>
 
             <!-- Description Section -->
-            @if ( ($vacation->included_services && !empty(json_decode($vacation->included_services))) || ($vacation->extras && count($vacation->extras) > 0))
+            @if ( ($translatedVacation->included_services && !empty($translatedVacation->included_services)) || ($translatedExtras && count($translatedExtras) > 0))
 
             <div class="description-container inclusions card p-3 mb-5">
                 <div class="description-list">
-                    @if ($vacation->included_services && !empty(json_decode(translate($vacation->included_services))))
+                    @if ($translatedVacation->included_services && !empty($translatedVacation->included_services))
                         <div class="description-item">
                             <div class="header-container">
                                 <span>@lang('vacations.included_services')</span>
                             </div>
                             <p class="text-wrapper">
-                                {!! translate(implode(', ', json_decode($vacation->included_services))) !!}
+                                {!! is_array($translatedVacation->included_services) ? implode(', ', $translatedVacation->included_services) : $translatedVacation->included_services !!}
                             </p>
                         </div>
                     @endif
-                    @if ($vacation->extras && count($vacation->extras) > 0)
+                    @if ($translatedExtras && count($translatedExtras) > 0)
                         <div class="description-item">
                             <div class="header-container">
                                 <span>{{ translate('Extras')}}</span>
@@ -960,9 +956,9 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach($vacation->extras as $itemIndex => $item)
+                                        @foreach($translatedExtras as $itemIndex => $item)
                                             <tr> 
-                                                <td>{{ translate($item->description) }}</td>
+                                                <td>{{ $item->description }}</td>
                                                 <td>€ {{ $item->price }}</td>
                                                 <!-- <td style="text-transform: capitalize; min-width:100px !important">{{ translate(str_replace('_', ' ', $item->type)) }}</td> -->
                                                 <td style="text-transform: capitalize; min-width:100px !important">  @lang('vacations.' . $item->type)</td>
@@ -994,7 +990,7 @@
     <section class="tour-details-two mb-5 p-0">
         <div class="container">
             <div class="tour-details-two__related-tours {{$agent->ismobile() ? 'text-center' : ''}}">
-                <h3 class="tour-details-two__title">{{ translate('Other Vacations in' . $vacation->country) }}</h3>
+                <h3 class="tour-details-two__title">{{ translate('Other Vacations in' . $translatedVacation->country) }}</h3>
                 <div class="popular-tours__carousel owl-theme owl-carousel">
                     @foreach($sameCountries as $same_country)
                 

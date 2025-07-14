@@ -392,7 +392,7 @@
                                                 <span class="fw-bold">{{translate('Target Fish')}}:</span>
                                                 <div class="d-flex">
                                                     @php
-                                                        $target_fish = json_decode($vacation->target_fish);
+                                                        $target_fish = $vacation->target_fish;
                                                     @endphp
                                                     <ul class="list-unstyled mb-0 d-flex">
                                                         {{ translate(\Str::limit(implode(', ', $target_fish), limit:50 )) }}
