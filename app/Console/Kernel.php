@@ -35,6 +35,12 @@ class Kernel extends ConsoleKernel
                 ->runInBackground();
                 
         $schedule->command('generate:sitemap')->daily()->runInBackground();
+        
+        // Process vacation translations for admin changes daily (defaults to EN and DE languages)
+        $schedule->command('vacation:translate --admin-changes --relations')
+                ->daily()
+                ->withoutOverlapping()
+                ->runInBackground();
     }
 
     /**

@@ -43,5 +43,51 @@
             "instructions": "Answers should be clear and helpful",
             "prompt": "Translate this FAQ answer. Maintain accuracy of information and keep the explanatory tone."
         }
+    },
+    "vacations": {
+        "instructions": "This content is for fishing vacation packages. Maintain professional tourism tone while preserving fishing-specific terminology and location details.",
+        "title": {
+            "instructions": "Keep vacation titles appealing and descriptive for tourism marketing",
+            "prompt": "Translate this vacation package title. Keep it appealing and descriptive for tourism marketing."
+        },
+        "location": {
+            "instructions": "Preserve location names and geographic accuracy",
+            "prompt": "Translate this location description. Preserve geographic accuracy and local place names."
+        },
+        "surroundings_description": {
+            "instructions": "Maintain descriptive and appealing tone for tourism content",
+            "prompt": "Translate this vacation surroundings description. Maintain the appealing tourism tone and descriptive details."
+        },
+        "best_travel_times": {
+            "instructions": "Keep seasonal information accurate and clear",
+            "prompt": "Translate these travel time recommendations. Keep seasonal information accurate."
+        },
+        "target_fish": {
+            "instructions": "Use proper local fish species names",
+            "prompt": "Translate these fish species names. Use proper local fishing terminology and species names."
+        },
+        "travel_included": {
+            "instructions": "Maintain clarity about what is included in the package",
+            "prompt": "Translate this travel inclusion information. Maintain clarity about package contents."
+        },
+        "included_services": {
+            "instructions": "Be clear and specific about services included",
+            "prompt": "Translate these included services. Be clear and specific about what's provided."
+        },
+        "additional_services": {
+            "instructions": "Clearly describe optional services available",
+            "prompt": "Translate these additional services. Clearly describe optional services available."
+        }
+    },
+    "vacation_relations": {
+        "instructions": "This content is for vacation components like accommodations, boats, packages, and guidings. Maintain technical accuracy while being appealing to tourists.",
+        "title": {
+            "instructions": "Keep component titles descriptive and appealing",
+            "prompt": "Translate this vacation component title. Keep it descriptive and appealing."
+        },
+        "description": {
+            "instructions": "Maintain detailed descriptions while being engaging",
+            "prompt": "Translate this vacation component description. Maintain detail while being engaging for tourists."
+        }
     }
 } 

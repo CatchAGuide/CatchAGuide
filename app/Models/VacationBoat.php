@@ -12,6 +12,10 @@ class VacationBoat extends Model
 
     protected $fillable = ['vacation_id', 'title', 'description', 'capacity', 'price', 'dynamic_fields'];
 
+    protected $casts = [
+        'dynamic_fields' => 'array'
+    ];
+
     public function vacation(): BelongsTo
     {
         return $this->belongsTo(Vacation::class);
