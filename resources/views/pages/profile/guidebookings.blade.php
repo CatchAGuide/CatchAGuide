@@ -68,7 +68,9 @@
                 <td>{{ $booking->user->full_name }}</td>
                 <td>{{ $booking->guiding->title }}</td>
                 <td>
-                    @if($booking->blocked_event)    
+                    @if($booking->calendar_schedule)    
+                        {{ \Carbon\Carbon::parse($booking->calendar_schedule->date)->format('F j, Y') }}
+                    @elseif($booking->blocked_event)    
                         {{ \Carbon\Carbon::parse($booking->blocked_event->from)->format('F j, Y') }}
                     @else
                     <span class="badge badge-pill badge-danger">@lang('profile.bwm-notavailable')</span>

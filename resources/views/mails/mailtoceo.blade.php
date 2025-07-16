@@ -27,7 +27,7 @@
                                 <td style="padding: 20px 0 0 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
                                     Hallo, es wurde ein neues Guiding gebucht!<br>
                                     Das Guiding findet am
-                                    {{ Carbon\Carbon::parse($booking->blocked_event->from)->format('d.m.Y') }}
+                                    {{ $booking->getFormattedBookingDate('d.m.Y') }}
                                     statt. <br> <br>
                                     Infos zum Guiding: <br>
                                     <h3>{{$guiding->title}}</h3>
@@ -44,11 +44,7 @@
                                         <tbody>
                                         <tr>
                                             <th scope="row" width="150">
-                                                @if($booking->blocked_event)
-                                                    {{ Carbon\Carbon::parse($booking->blocked_event->from)->format('d.m.Y') }}
-                                                @else
-                                                    -storniert-
-                                                @endif
+                                                {{ $booking->getFormattedBookingDate('d.m.Y') }}
 
                                             </th>
                                             <td width="100" align="center">{{$booking->count_of_users}}</td>

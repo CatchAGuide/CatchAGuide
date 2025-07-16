@@ -35,7 +35,7 @@
                                     </ul>
                                     <h3>Infos zum gebuchten Guiding:</h3>
                                     <ul>
-                                        <li>Termin: {{ Carbon\Carbon::parse($booking->blocked_event->from)->format('d-m-Y') }}</li>
+                                        <li>Termin: {{ $booking->getFormattedBookingDate('d-m-Y') }}</li>
                                         <li>Guiding: {{$guiding->title}}</li>
                                         <li>Personenanzahl: {{$booking->count_of_users}} Gäste</li>
                                         <li>Guiding-Preis: {{two($booking->price)}} €</li>

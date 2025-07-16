@@ -1,14 +1,14 @@
-@extends('layouts.app-v2-1')
+@extends('layouts.app-v2')
 
-@section('title', translate($row_data->title))
-@section('description', translate($row_data->introduction))
-@section('header_title', translate($row_data->title))
-@section('header_sub_title', translate($row_data->sub_title))
+@section('title', $row_data->title)
+@section('description', $row_data->introduction)
+@section('header_title', $row_data->title)
+@section('header_sub_title', $row_data->sub_title)
 
 @section('share_tags')
-    <meta property="og:title" content="{{translate($row_data->title)}}" />
-    <meta property="og:description" content="{{translate($row_data->introduction ?? "")}}" />
-    <meta name="description" content="{{translate($row_data->sub_title ?? $row_data->introduction)}}">
+    <meta property="og:title" content="{{$row_data->title}}" />
+    <meta property="og:description" content="{{$row_data->introduction ?? ""}}" />
+    <meta name="description" content="{{$row_data->sub_title ?? $row_data->introduction}}">
     
     @if(isset($row_data->thumbnail_path) && file_exists(public_path(str_replace(asset(''), '', asset($row_data->thumbnail_path)))))
         <meta property="og:image" content="{{asset($row_data->thumbnail_path)}}"/>

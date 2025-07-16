@@ -1104,18 +1104,20 @@ class GuidingsController extends Controller
                     continue;
                 }
                 $index = $index + $imageCount;
-                $webp_path = media_upload($image, 'guidings-images', $guiding->slug. "-". $index . "-" . time());
+                $webp_path = media_upload($image, 'guidings-images', $guiding->slug. "-". $index . "-" . time(), 75, $guiding->id);
                 $galeryImages[] = $webp_path;
             }
         }
 
-        // Set the primary image if available
-        foreach($galeryImages as $index => $image) {
-            if($index == $request->input('primaryImage', 0)) {
-                $guiding->thumbnail_path = $image;
+        // Set the primary image if available, only if $galeryImages is not null or empty
+        if (!empty($galeryImages)) {
+            foreach($galeryImages as $index => $image) {
+                if($index == $request->input('primaryImage', 0)) {
+                    $guiding->thumbnail_path = $image;
+                }
             }
+            $guiding->gallery_images = json_encode($galeryImages);
         }
-        $guiding->gallery_images = json_encode($galeryImages);
 
         // Step 2: Boat and fishing info
         $guiding->is_boat = $request->has('type_of_fishing') ? ($request->input('type_of_fishing') == 'boat' ? 1 : 0) : 0;
