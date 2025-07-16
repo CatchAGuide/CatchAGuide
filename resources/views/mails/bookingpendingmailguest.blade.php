@@ -29,7 +29,7 @@
                                     Hallo  {{$user->firstname}}, <br><br>
                                     vielen Dank für Deine Buchung über Catch A Guide!<br>
                                     Deine Guiding findet am
-                                    {{ Carbon\Carbon::parse($booking->blocked_event->from)->format('d.m.Y') }}
+                                    {{ $booking->getFormattedBookingDate('d.m.Y') }}
                                     statt. Bitte trete mit Deinem Guide in Kontakt, um Dein Guiding zu planen.<br> <br>
                                     Infos zum Guiding: <br>
                                     <h3>{{$guiding->title}}</h3>
