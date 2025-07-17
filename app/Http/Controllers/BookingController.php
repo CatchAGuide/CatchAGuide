@@ -46,8 +46,10 @@ class BookingController extends Controller
         $booking->save();
 
         $blockedevent = BlockedEvent::find($booking->blocked_event_id);
-        $blockedevent->type = 'booking';
-        $blockedevent->save();
+        if ($blockedevent) {
+            $blockedevent->type = 'booking';
+            $blockedevent->save();
+        }
 
         event(new BookingStatusChanged($booking, 'accepted'));
 
