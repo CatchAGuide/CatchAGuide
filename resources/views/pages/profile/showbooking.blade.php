@@ -203,16 +203,18 @@
                                 {{$booking->count_of_users}}
                             </div>
                         </div>
-                        <div class="px-2 py-1 d-flex">
-                            <div class="col-8">@lang('message.booking-date'):</div>
-                            <div class="ml-auto">
-                                @if($booking->blocked_event)
-                                {{date('d-m-Y', strtotime($booking->blocked_event->from))}}
-                                @else
-                                    -storniert-
-                                @endif
+                                                    <div class="px-2 py-1 d-flex">
+                                <div class="col-8">@lang('message.booking-date'):</div>
+                                <div class="ml-auto">
+                                    @if($booking->calendar_schedule)
+                                        {{date('d-m-Y', strtotime($booking->calendar_schedule->date))}}
+                                    @elseif($booking->blocked_event)
+                                        {{date('d-m-Y', strtotime($booking->blocked_event->from))}}
+                                    @else
+                                        -storniert-
+                                    @endif
+                                </div>
                             </div>
-                        </div>
                         <div class="px-4 mx-3"></div>
                         <div class="px-2 py-1 d-flex">
                             <div class="col-8">@lang('message.guiding-price'):</div>
@@ -238,8 +240,8 @@
         
 
             {{-- @if(!$authUser->is_guide)
-                @if($booking->blocked_event)
-                    @if(\Carbon\Carbon::now() < $booking->blocked_event->from && $booking->status != "storniert")
+                @if($booking->calendar_schedule || $booking->blocked_event)
+                    @if(\Carbon\Carbon::now() < ($booking->getBookingDate() ?? \Carbon\Carbon::now()) && $booking->status != "storniert")
                         <a href="{{route('profile.stornobooking', $booking->id)}}">
                             <button class="thm-btn">JETZT STORNIEREN</button>
                         </a>

@@ -15,7 +15,7 @@ return [
     'lname' => "Dein Nachname*",
     'email' => "Deine Email*",
     'pass' => "Dein Passwort*",
-    'rpass' => "Passwort wiederholen*",
+    'rpass' => "Neues Passwort*",
     'agree' => 'Ich akzeptiere die AGB und Datenschutzbestimmungen.*',
 
     //forgaot pass word

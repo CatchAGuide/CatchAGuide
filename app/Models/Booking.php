@@ -104,6 +104,29 @@ class Booking extends Model
         return $this->price - $this->cag_percent;
     }
 
+    public function getBookingDate()
+    {
+        if ($this->calendar_schedule) {
+            return Carbon::parse($this->calendar_schedule->date);
+        }
+        
+        if ($this->blocked_event) {
+            return Carbon::parse($this->blocked_event->from);
+        }
+        
+        if ($this->book_date) {
+            return Carbon::parse($this->book_date);
+        }
+        
+        return null;
+    }
+
+    public function getFormattedBookingDate($format = 'F j, Y')
+    {
+        $date = $this->getBookingDate();
+        return $date ? $date->format($format) : null;
+    }
+
     public function sendBookingConfirmationMail($phoneFromUser)
     {
         Mail::send(new BookingConfirmationMail($this->guiding, $this->guiding->user, $this->user, $this, $phoneFromUser));

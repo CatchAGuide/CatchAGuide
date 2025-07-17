@@ -28,7 +28,7 @@
                                     @lang('mailing.hello') {{$user->firstname}}, <br><br>
                                     @lang('mailing.thankBooking')<br>
                                     @lang('mailing.guidingTakePlace')
-                                    {{ Carbon\Carbon::parse($booking->blocked_event->from)->format('d.m.Y') }}
+                                    {{ $booking->getFormattedBookingDate('d.m.Y') }}
                                     @lang('mailing.contactYourGuide')<br> <br>
                                     @lang('mailing.infoBooking'): <br>
                                     <h3>{{ $guiding->title ? translate($guiding->title) : null }}</h3>
@@ -45,11 +45,7 @@
                                         <tbody>
                                         <tr>
                                             <th scope="row" width="150">
-                                                @if($booking->blocked_event)
-                                                    {{ Carbon\Carbon::parse($booking->blocked_event->from)->format('d-m-Y') }}
-                                                @else
-                                                    @lang('mailing.cancel')
-                                                @endif
+                                                {{ $booking->getFormattedBookingDate('d-m-Y') }}
 
                                             </th>
                                             <td width="100" align="center">{{$booking->count_of_users}}</td>

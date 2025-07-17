@@ -380,9 +380,10 @@
         font-size: 0.8rem;
         box-shadow: 0 2px 6px rgba(232, 96, 76, 0.3);
         position: absolute;
-        top: 0;
-        right: 0;
+        bottom: 13px;
+        right: 15px;
         z-index: 10;
+        transform: translateY(50%);
     }
     
     .empty-state {
@@ -460,11 +461,10 @@
         
         .price-badge {
             position: absolute;
-            top: 0;
-            right: 0;
             border-radius: 6px 0 6px 0;
             font-size: 0.75rem;
             padding: 6px 10px;
+            transform: translateY(50%);
         }
         
         .detail-row {
