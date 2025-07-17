@@ -38,6 +38,20 @@ use App\Services\ImageOptimizationService;
 class GuidingsController extends Controller
 {
     use GuidingFilterOptimization;
+    
+    /**
+     * Guiding Status Values:
+     * 0 = Disabled (manually disabled by user via profile page)
+     * 1 = Active/Published (completed and live)
+     * 2 = Draft (not completed or work in progress)
+     * 
+     * Status Logic:
+     * - New guidings start as draft (2)
+     * - When completed, they become published (1)
+     * - Status 0 or 1 guidings NEVER become draft (2) when edited
+     * - Only guidings that were never published can be in draft status
+     * - Manual disable/enable toggles between 0 and 1
+     */
 
     public function __construct()
     {
@@ -653,6 +667,9 @@ class GuidingsController extends Controller
                 ? Guiding::findOrFail($request->input('guiding_id'))
                 : new Guiding(['user_id' => auth()->id()]);
 
+            // Store original status for updates
+            $originalStatus = $isUpdate ? $guiding->status : null;
+
             $this->fillGuidingFromRequest($guiding, $request, $isDraft);
 
             // Slug generation (always for new, or if title/location changed)
@@ -667,7 +684,20 @@ class GuidingsController extends Controller
             }
 
             $guiding->is_newguiding = 1;
-            $guiding->status = $isDraft ? 2 : 0;
+            
+            // Smart status management
+            if ($isDraft) {
+                // Preserve status if it was ever published (1) or disabled (0)
+                // Only set to draft (2) if it's new or was already a draft
+                if ($isUpdate && ((int)$originalStatus === 1 || (int)$originalStatus === 0)) {
+                    $guiding->status = $originalStatus; // Keep original status (0 or 1)
+                } else {
+                    $guiding->status = 2; // New guiding or was already draft
+                }
+            } else {
+                // Final submission - set to published
+                $guiding->status = 1;
+            }
 
             $guiding->save();
             DB::commit();
@@ -696,6 +726,13 @@ class GuidingsController extends Controller
             
             $isUpdate = $request->input('is_update') == '1';
             $guidingId = $isUpdate ? $request->input('guiding_id') : null;
+            
+            // Add original status to guiding data for the job to use
+            if ($isUpdate && $guidingId) {
+                $existingGuiding = Guiding::find($guidingId);
+                $originalStatus = $existingGuiding ? $existingGuiding->status : null;
+                $guidingData['original_status'] = $originalStatus;
+            }
             
             // Dispatch the job for database operations
             \App\Jobs\SaveGuidingDraftJob::dispatch(
@@ -1653,9 +1690,18 @@ class GuidingsController extends Controller
             // Handle file uploads first
             $processedData = $this->processFileUploads($request);
 
+            $isUpdate = $request->input('is_update') == '1';
+            $originalStatus = null;
+
             // Try to find an existing draft for this user and (optionally) title/location
-            if ($request->input('is_update') == '1' && $request->input('guiding_id')) {
+            if ($isUpdate && $request->input('guiding_id')) {
                 $guiding = Guiding::findOrFail($request->input('guiding_id'));
+                $originalStatus = $guiding->status;
+                Log::info('SaveDraftSync: Found existing guiding', [
+                    'guiding_id' => $guiding->id,
+                    'original_status' => $originalStatus,
+                    'is_update' => $isUpdate
+                ]);
             } else {
                 $guiding = Guiding::where('user_id', auth()->id())
                     ->where('status', 2)
@@ -1667,6 +1713,12 @@ class GuidingsController extends Controller
 
                 if (!$guiding) {
                     $guiding = new Guiding(['user_id' => auth()->id()]);
+                    Log::info('SaveDraftSync: Creating new guiding');
+                } else {
+                    Log::info('SaveDraftSync: Found existing draft guiding', [
+                        'guiding_id' => $guiding->id,
+                        'status' => $guiding->status
+                    ]);
                 }
             }
 
@@ -1674,15 +1726,39 @@ class GuidingsController extends Controller
             $this->fillGuidingFromRequest($guiding, $request, true);
 
             // Slug generation (always for new, or if title/location changed)
-            if ($request->input('is_update') !== '1') {
+            if (!$isUpdate) {
                 $guiding->slug = slugify($guiding->title . "-in-" . $guiding->location);
             }
 
             $guiding->is_newguiding = 1;
-            $guiding->status = 2;
+            
+            // Smart status management for drafts
+            if ($isUpdate && ((int)$originalStatus === 1 || (int)$originalStatus === 0)) {
+                // Preserve original status if it was published (1) or disabled (0)
+                $guiding->status = $originalStatus;
+                Log::info('SaveDraftSync: Preserving original status', [
+                    'guiding_id' => $guiding->id,
+                    'original_status' => $originalStatus,
+                    'preserved_status' => $guiding->status
+                ]);
+            } else {
+                // Set to draft for new guidings or guidings that were already drafts
+                $guiding->status = 2;
+                Log::info('SaveDraftSync: Setting to draft status', [
+                    'guiding_id' => $guiding->id,
+                    'original_status' => $originalStatus,
+                    'new_status' => $guiding->status,
+                    'reason' => $isUpdate ? 'was already draft (status 2)' : 'new guiding'
+                ]);
+            }
 
             $guiding->save();
             DB::commit();
+
+            Log::info('SaveDraftSync: Successfully saved', [
+                'guiding_id' => $guiding->id,
+                'final_status' => $guiding->status
+            ]);
 
             return response()->json([
                 'success' => true,
