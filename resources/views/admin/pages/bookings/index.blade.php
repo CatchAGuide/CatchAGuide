@@ -90,21 +90,22 @@
                                                 </td>
                                                 <td>
                                                     @if($booking->status == 'pending')
-                                                        <a href="{{ route('booking.accept', $booking->token . '|' . auth()->user()->id) }}" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
+                                                        <a href="{{ route('booking.accept', $booking->token) }}" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
+                                                        <a href="{{ route('booking.reject', $booking->token) }}" class="btn btn-sm btn-danger"><i class="fa fa-times-circle"></i></a>
                                                     @endif
 
-                                                                                        <a href="{{ route('admin.bookings.edit', $booking) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pen"></i></a>
-                                    <a href="javascript:deleteResource('{{ route('admin.bookings.destroy', $booking, false) }}')" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></a>
-                                    <a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="showEmailPreview({{ $booking->id }})"><i class="fa fa-envelope"></i></a>
-                                    <button class="btn btn-sm btn-warning" onclick="showResendModal(
-                                        {{ $booking->id }}, 
-                                        {{ json_encode($booking->user ? ($booking->user->firstname . ' ' . $booking->user->lastname) : ($booking->firstname . ' ' . $booking->lastname)) }}, 
-                                        {{ json_encode($booking->email ?: ($booking->user ? $booking->user->email : '')) }}, 
-                                        {{ json_encode($booking->guiding->user->firstname . ' ' . $booking->guiding->user->lastname) }}, 
-                                        {{ json_encode($booking->guiding->user->email) }}
-                                    )">
-                                        <i class="fa fa-paper-plane"></i> Resend Emails
-                                    </button>
+                                                    <a href="javascript:void(0)" class="btn btn-sm btn-secondary" onclick="showEditBookingModal({{ $booking->id }})"><i class="fa fa-pen"></i></a>
+                                                    <a href="javascript:deleteResource('{{ route('admin.bookings.destroy', $booking, false) }}')" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></a>
+                                                    <a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="showEmailPreview({{ $booking->id }})"><i class="fa fa-envelope"></i></a>
+                                                    <button class="btn btn-sm btn-warning" onclick="showResendModal(
+                                                        {{ $booking->id }}, 
+                                                        {{ json_encode($booking->user ? ($booking->user->firstname . ' ' . $booking->user->lastname) : ($booking->firstname . ' ' . $booking->lastname)) }}, 
+                                                        {{ json_encode($booking->email ?: ($booking->user ? $booking->user->email : '')) }}, 
+                                                        {{ json_encode($booking->guiding->user->firstname . ' ' . $booking->guiding->user->lastname) }}, 
+                                                        {{ json_encode($booking->guiding->user->email) }}
+                                                    )">
+                                                        <i class="fa fa-paper-plane"></i> Resend Emails
+                                                    </button>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -380,6 +381,44 @@
         </div>
     </div>
 
+    <!-- Edit Booking Modal -->
+    <div class="modal fade" id="editBookingModal" tabindex="-1" role="dialog" aria-labelledby="editBookingModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editBookingModalLabel">Edit Booking</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editBookingForm">
+                        <input type="hidden" id="edit-booking-id" name="id">
+                        <div class="mb-3">
+                            <label for="edit-booking-email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="edit-booking-email" name="email">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-booking-phone" class="form-label">Phone</label>
+                            <input type="text" class="form-control" id="edit-booking-phone" name="phone">
+                        </div>
+                        <div class="mb-3" id="edit-booking-status-group" style="display:none;">
+                            <label for="edit-booking-status" class="form-label">Status</label>
+                            <select class="form-control" id="edit-booking-status" name="status">
+                                <option value="pending">Pending</option>
+                                <option value="accepted">Accepted</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveBookingBtn" onclick="saveBookingEdit()">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentBookingId = null;
 
@@ -594,6 +633,68 @@
                     console.error('Error loading email previews:', error);
                     alert('Failed to load email previews');
                 });
+        }
+
+        function showEditBookingModal(bookingId) {
+            fetch(`/admin/bookings/${bookingId}/edit`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('edit-booking-id').value = data.id;
+                    document.getElementById('edit-booking-email').value = data.email || '';
+                    document.getElementById('edit-booking-phone').value = data.phone || '';
+                    document.getElementById('edit-booking-status').value = data.status;
+                    if (data.allowed_status_edit) {
+                        document.getElementById('edit-booking-status-group').style.display = '';
+                    } else {
+                        document.getElementById('edit-booking-status-group').style.display = 'none';
+                    }
+                    var modal = new bootstrap.Modal(document.getElementById('editBookingModal'));
+                    modal.show();
+                })
+                .catch(error => {
+                    alert('Failed to load booking data.');
+                });
+        }
+
+        function saveBookingEdit() {
+            const bookingId = document.getElementById('edit-booking-id').value;
+            const email = document.getElementById('edit-booking-email').value;
+            const phone = document.getElementById('edit-booking-phone').value;
+            const statusGroup = document.getElementById('edit-booking-status-group');
+            let status = undefined;
+            if (statusGroup.style.display !== 'none') {
+                status = document.getElementById('edit-booking-status').value;
+            }
+            const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+            if (!csrfTokenElement) {
+                alert('CSRF token not found.');
+                return;
+            }
+            const csrfToken = csrfTokenElement.getAttribute('content');
+            const payload = { email, phone };
+            if (typeof status !== 'undefined') payload.status = status;
+            fetch(`/admin/bookings/${bookingId}`, {
+                method: 'PUT',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Booking updated successfully.');
+                    // Optionally update the table row here
+                    location.reload(); // For simplicity, reload the page
+                } else {
+                    alert('Failed to update booking: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                alert('Error updating booking.');
+            });
         }
     </script>
 @endsection
