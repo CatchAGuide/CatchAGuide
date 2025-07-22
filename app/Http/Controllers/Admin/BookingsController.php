@@ -39,12 +39,51 @@ class BookingsController extends Controller
 
     public function edit(Booking $booking)
     {
-
+        // Only return the necessary fields for editing
+        return response()->json([
+            'id' => $booking->id,
+            'email' => $booking->email,
+            'phone' => $booking->phone,
+            'status' => $booking->status,
+            'allowed_status_edit' => in_array($booking->status, ['cancelled', 'rejected']),
+        ]);
     }
 
     public function update(Request $request, Booking $booking)
     {
-        //
+        $data = $request->validate([
+            'email' => 'nullable|email',
+            'phone' => 'nullable|string|max:255',
+            'status' => 'nullable|string|in:pending,accepted,rejected,cancelled',
+        ]);
+
+        $updated = false;
+        if (isset($data['email'])) {
+            $booking->email = $data['email'];
+            $updated = true;
+        }
+        if (isset($data['phone'])) {
+            $booking->phone = $data['phone'];
+            $updated = true;
+        }
+        // Only allow status change if initial status is cancelled or rejected
+        if (isset($data['status']) && in_array($booking->status, ['cancelled', 'rejected'])) {
+            $booking->status = $data['status'];
+            $updated = true;
+        }
+        if ($updated) {
+            $booking->save();
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Booking updated successfully.',
+            'booking' => [
+                'id' => $booking->id,
+                'email' => $booking->email,
+                'phone' => $booking->phone,
+                'status' => $booking->status,
+            ]
+        ]);
     }
 
     public function destroy(Booking $booking)
