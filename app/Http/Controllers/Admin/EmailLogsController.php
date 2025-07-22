@@ -9,7 +9,7 @@ class EmailLogsController extends Controller
 {
     public function index()
     {
-        $emailLogs = EmailLog::all();
+        $emailLogs = EmailLog::orderBy('created_at', 'desc')->get();
         return view('admin.pages.email.index', compact('emailLogs'));
     }
 }
