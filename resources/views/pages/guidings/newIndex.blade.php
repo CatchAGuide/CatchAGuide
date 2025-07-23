@@ -1,16 +1,11 @@
 @extends('layouts.app-v2-1')
 
-@if(app()->getLocale() == 'en')
-    @section('title',translate($guiding->title))
-@else
-    @section('title',$guiding->title)
-@endif
-
-@section('description',translate($guiding->desc_course_of_action ?? $guiding->title))
+@section('title',$guiding->title)
+@section('description',$guiding->desc_course_of_action ?? $guiding->title)
 
 @section('share_tags')
-    <meta property="og:title" content="{{translate($guiding->title)}}" />
-    <meta property="og:description" content="{{translate($guiding->desc_course_of_action ?? "")}}" />
+    <meta property="og:title" content="{{$guiding->title}}" />
+    <meta property="og:description" content="{{$guiding->desc_course_of_action ?? ""}}" />
     @if(file_exists(public_path(str_replace(asset(''), '', asset($guiding->thumbnail_path)))))
         <meta property="og:image" content="{{asset($guiding->thumbnail_path)}}"/>
     @endif
@@ -356,7 +351,7 @@
                         <li><a href="{{ route('guidings.index') }}">@lang('message.Guiding')</a></li>
                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                         <li class="active">
-                            {{translate($guiding->title)}}
+                            {{$guiding->title}}
                         </li>
                     </ul>
                 </div>
@@ -371,7 +366,7 @@
             <div class="title-left-container">
                 <div class="col-24 col mb-1 guiding-title">
                     <h1>
-                    {{ translate($guiding->title) }}
+                    {{ $guiding->title }}
                     </h1>
                     <a class="btn" href="#" role="button"><i data-lucide="share-2"></i></a>
                 </div>
@@ -384,7 +379,7 @@
                         </div>
                         <div class="location-map">
                             <a href="#map" class="fs-6 text-decoration-none text-muted">
-                                <span class="text-primary">{{translate('Show on map')}}</span>
+                                <span class="text-primary">@lang('guidings.show_on_map')</span>
                             </a>
 
                         </div>
@@ -410,7 +405,7 @@
                     <a class="btn" href="#" role="button"><i data-lucide="share-2"></i></a>
                     <a href="#book-now" class="btn btn-orange">@lang('message.reservation')</a>
                 </div>
-                <span>{{translate('Best price guarantee')}}</span>
+                <span>@lang('guidings.Best_price_guarantee')</span>
                 </div>
         </div>
         </div>
@@ -421,14 +416,14 @@
                     <img data-bs-toggle="modal" data-bs-target="#galleryModal" src="{{asset($guiding->thumbnail_path)}}" class="img-fluid" alt="Main Image">
                 @else
                     <div class="text-center p-4">
-                        <p>{{ translate('No image found') }}</p>
+                        <p>@lang('guidings.No_image_found')</p>
                     </div>
                 @endif
             </div>
             <div class="right-images">
                 <div class="gallery">
                   @php
-                    $galleryImages = json_decode($guiding->gallery_images,true);
+                    $galleryImages = decode_if_json($guiding->gallery_images,true);
                     $thumbnailPath = $guiding->thumbnail_path;
                     $finalImages = [];
                     $overallImages = [];
@@ -486,7 +481,7 @@
                 </div>
                 <div class="gallery-mobile">
                     @php
-                    $galleryImages = json_decode($guiding->gallery_images ?? '[]');
+                    $galleryImages = decode_if_json($guiding->gallery_images ?? '[]');
                     $thumbnailPath = $guiding->thumbnail_path;
                     $finalImages = [];
                     $overallImages = [];
@@ -556,7 +551,7 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="galleryModalLabel">{{ translate('Tour Gallery') }}</h5>
+                        <h5 class="modal-title" id="galleryModalLabel">@lang('guidings.Tour_Gallery')</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -598,7 +593,7 @@
             <p class="mb-0">{{ __('guidings.'.$guiding->duration_type) }} : <strong>{{$guiding->duration}} {{ $guiding->duration_type == 'multi_day' ? __('guidings.days') : __('guidings.hours') }}</strong></p>                    </div>
         <div class="info-item">
             <i class="fas fa-users"></i>
-            <p class="mb-0">{{translate('Number of guests:')}} <strong>{{$guiding->max_guests}}</strong></p>
+            <p class="mb-0">@lang('guidings.Number_of_guests') <strong>{{$guiding->max_guests}}</strong></p>
         </div>
     </div>
     
@@ -612,17 +607,17 @@
                         <span>@lang('guidings.Course_Action')</span>
                     </div>
                     <p class="text-wrapper">
-                        {!! translate($guiding->desc_course_of_action) !!}
+                        {!! $guiding->desc_course_of_action !!}
                     </p>
                 </div>
             @endif
             @if ($guiding->desc_tour_unique)
                 <div class="description-item">
                     <div class="header-container">
-                        <span>{{ translate('Tour Highlights') }}</span>
+                        <span>@lang('guidings.Tour_Highlights')</span>
                     </div>
                     <p class="text-wrapper">
-                        {!! translate($guiding->desc_tour_unique) !!}
+                        {!! $guiding->desc_tour_unique !!}
                     </p>
                 </div>
             @endif
@@ -637,14 +632,14 @@
                         
                         @if($guiding->desc_departure_time)
                             <div class="time-boxes mb-2 d-flex">
-                                @foreach(json_decode($guiding->desc_departure_time) as $time)
+                                @foreach(decode_if_json($guiding->desc_departure_time) as $time)
                                     <small class="badge border border-secondary text-secondary me-1">{{ __('guidings.'.$time) }}</small>
                                 @endforeach
                             </div>
                         @endif
 
                         @if($guiding->desc_starting_time)
-                            <p>{!! translate($guiding->desc_starting_time) !!}</p>
+                            <p>{!! $guiding->desc_starting_time !!}</p>
                         @endif
                     </div>
                 @endif
@@ -654,7 +649,7 @@
                         <div class="header-container">
                             <span> @lang('guidings.Meeting_Point')</span>
                         </div>
-                        <p>{!! translate($guiding->desc_meeting_point) !!}</p>
+                        <p>{!! $guiding->desc_meeting_point !!}</p>
                     </div>
                 @endif
             </div>
@@ -663,16 +658,16 @@
             
     @if($agent->ismobile())
         <div class="contact-card card p-3 mb-4">
-            <h5 class="contact-card__title">{{ translate('Contact us') }}</h5>
+            <h5 class="contact-card__title">@lang('guidings.Contact_us')</h5>
             <div class="contact-card__content">
-                <p class="">{{ translate('Do you have questions about this fishing tour? Our team is here to help!') }}</p>
+                <p class="">@lang('guidings.Do_you_have_questions_about_this_fishing_tour?')</p>
                 <div class="">
                     <div class="contact-info">
                         <i class="fas fa-phone-alt me-2"></i>
                         <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>
                     </div>
                     <a href="#" class="btn btn-outline-orange" data-bs-toggle="modal" data-bs-target="#contactModal">
-                        {{ translate('Contact Form') }}
+                        @lang('guidings.Contact_Form')
                         <i class="fas fa-arrow-right ms-2"></i>
                     </a>
                 </div>
@@ -687,11 +682,11 @@
     <div class="tabs-container mb-5">
         <div class="nav nav-tabs" id="guiding-tab" role="tablist">
             <button class="nav-link active" id="nav-fishing-tab" data-bs-toggle="tab" data-bs-target="#fishing" type="button" role="tab" aria-controls="nav-fishing" aria-selected="true">@lang('guidings.Tour_Info')</button>
-            @if(!empty( json_decode($guiding->inclusions)))
+            @if(!empty( decode_if_json($guiding->inclusions)))
                 <button class="nav-link" id="nav-include-tab" data-bs-toggle="tab" data-bs-target="#include" type="button" role="tab" aria-controls="nav-include" aria-selected="false">@lang('guidings.Inclusions')</button>
             @endif
             
-            @if ($guiding->is_boat && (!empty(json_decode($boatInformation)) || !empty(json_decode($guiding->boat_extras)) || (!empty($guiding->additional_information) && $guiding->additional_information !== null && $guiding->additional_information !== '')))
+            @if ($guiding->is_boat && (!empty(decode_if_json($boatInformation)) || !empty(decode_if_json($guiding->boat_extras)) || (!empty($guiding->additional_information) && $guiding->additional_information !== null && $guiding->additional_information !== '')))
                 <button class="nav-link" id="nav-boat-tab" data-bs-toggle="tab" data-bs-target="#boat" type="button" role="tab" aria-controls="nav-boat" aria-selected="false">@lang('guidings.Boat_Details')</button>
             @endif
             <button class="nav-link" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab" aria-controls="nav-info" aria-selected="false">@lang('guidings.Additional_Info')</button>
@@ -703,7 +698,7 @@
             <div class="tab-pane fade" id="include" role="tabpanel" aria-labelledby="nav-include-tab">
                 <div class="row card tab-card h-100 shadow m-0 p-2">
                     <div class="col-6">
-                        @if(!empty( json_decode($guiding->inclusions)))
+                        @if(!empty( decode_if_json($guiding->inclusions)))
                             <div class="row">
                                 <strong class="mb-2 subtitle-text">@lang('guidings.Inclusions')</strong>
                                 @foreach ($guiding->getInclusionNames() as $index => $inclusion)
@@ -714,20 +709,20 @@
                             </div>
                         @endif
                     </div>
-                    @if(!empty(json_decode($guiding->pricing_extra)) && !empty( json_decode($guiding->inclusions)))
+                    @if(!empty(decode_if_json($guiding->pricing_extra)) && !empty( decode_if_json($guiding->inclusions)))
                     <hr >
                     @endif
                     <div class="col-6">
-                        @if(!empty(json_decode($guiding->pricing_extra)))
+                        @if(!empty(decode_if_json($guiding->pricing_extra)))
                             <div class="row">
                                 <strong class="mb-2 subtitle-text">@lang('guidings.Additional_Extra')</strong>
                                 <div class="alert alert-secondary p-2 mb-3 d-flex align-items-center">
                                     <i class="fas fa-info-circle me-2"></i>
                                     <small>{{ __('newguidings.pricing_extra_info_text') }}</small>
                                 </div>
-                                @foreach (json_decode($guiding->pricing_extra) as $pricing_extras)
+                                @foreach (decode_if_json($guiding->pricing_extra) as $pricing_extras)
                                     <div class="mb-2">
-                                        <strong>{{translate($pricing_extras->name)}}:</strong> 
+                                        <strong>{{$pricing_extras->name}}:</strong> 
                                         <span>{{$pricing_extras->price}}€ p.P</span>
                                     </div>
                                 @endforeach
@@ -757,7 +752,7 @@
                         </div>
                     @else
                     <!-- Fish Section -->
-                        <p class="mb-4">{{ translate('No fish specified') }}</p>
+                        <p class="mb-4">@lang('guidings.No_fish_specified')</p>
                     @endif
                     <!-- Methods Section -->
                     @if(!empty($guiding->fishing_methods))
@@ -775,7 +770,7 @@
                             </div>
                         </div>
                     @else
-                        <p class="mb-4">{{ translate('No methods specified') }}</p>
+                        <p class="mb-4">@lang('guidings.No_methods_specified')</p>
                     @endif
                 
                     <!-- Water Types Section -->
@@ -794,31 +789,31 @@
                             </div>
                         </div>
                     @else
-                        <p class="mb-4">{{ translate('No water types specified') }}</p>
+                        <p class="mb-4">@lang('guidings.No_water_types_specified')</p>
                     @endif
                 </div>
             </div>
 
-            @if ($guiding->is_boat && (!empty(json_decode($boatInformation)) || !empty(json_decode($guiding->boat_extras)) || (!empty($guiding->additional_information) && $guiding->additional_information !== null && $guiding->additional_information !== '')))
+            @if ($guiding->is_boat && (!empty(decode_if_json($boatInformation)) || !empty(decode_if_json($guiding->boat_extras)) || (!empty($guiding->additional_information) && $guiding->additional_information !== null && $guiding->additional_information !== '')))
             <div class="tab-pane fade" id="boat" role="tabpanel" aria-labelledby="nav-boat-tab">
                 <div class="row card tab-card h-100 shadow m-0 p-2">
                     @if(!empty($guiding->additional_information))
                         <div class="col-md-12">
-                            <strong class="subtitle-text">{{translate('Other boat information')}}</strong>
+                            <strong class="subtitle-text">@lang('guidings.Other_boat_information')</strong>
                             <p>{{$guiding->additional_information}}</p>
                         </div>
                     @endif
 
-                    @if(!empty(json_decode($boatInformation)))
+                    @if(!empty(decode_if_json($boatInformation)))
                         <div class="col-md-12">
-                            <strong class="subtitle-text">{{translate('Boat')}}</strong>
+                            <strong class="subtitle-text">@lang('guidings.Boat')</strong>
                             <!-- Boat Information as a Table -->
                             <table class="table ">
                                 <tbody>
                                     @foreach($boatInformation as $key => $value)
                                     <tr>
                                         <th>{{$value['name']}}</th>
-                                        <td colspan="1">{{ translate($value['value']) }}</td>
+                                        <td colspan="1">{{ $value['value'] }}</td>
                                     </tr>
                                     @endforeach
                                 </tbody>
@@ -826,7 +821,7 @@
                         </div>
                     @endif
 
-                    @if(!empty(json_decode( $guiding->boat_extras)))
+                    @if(!empty(decode_if_json( $guiding->boat_extras)))
                     <div class="col-md-6">
                         @if($guiding->boat_extras != null || $guiding->boat_extras != '' || $guiding->boat_extras != '[]')
                             <strong class="subtitle-text">@lang('guidings.Boat_Extras'):</strong>
@@ -859,7 +854,7 @@
                                     <div class="col-12 text-start">
                                         <ul>
                                             <li>
-                                                <strong>{{ $requirement['name'] }}:</strong> {{ translate($requirement['value']) ?? '' }}
+                                                <strong>{{ $requirement['name'] }}:</strong> {{ $requirement['value'] ?? '' }}
                                             </li>
                                         </ul>
                                     </div>
@@ -884,7 +879,7 @@
                                     <div class="col-12 text-start">
                                         <ul>
                                             <li>
-                                                <strong>{{ $other['name'] }}:</strong> {{ translate($other['value']) ?? '' }}
+                                                <strong>{{ $other['name'] }}:</strong> {{ $other['value'] ?? '' }}
                                             </li>
                                         </ul>
                                     </div>
@@ -908,7 +903,7 @@
                                     <div class="col-12 text-start">
                                         <ul>
                                             <li>
-                                                <strong>{{ $recommendation['name'] }}:</strong> {{ translate($recommendation['value']) ?? '' }}
+                                                <strong>{{ $recommendation['name'] }}:</strong> {{ $recommendation['value'] ?? '' }}
                                             </li>
                                         </ul>
                                     </div>
@@ -925,21 +920,21 @@
                         @if(!empty($guiding->style_of_fishing))
                             <div class="col-md-6">
                                 <strong class="subtitle-text">@lang('guidings.Style_Fishing'):</strong> 
-                                <span class="">{{ translate($guiding->style_of_fishing) }}</span>
+                                <span class="">{{ $guiding->style_of_fishing }}</span>
                             </div>
                         @endif
                         @if(!empty($guiding->tour_type))
                             <div class="col-md-6">
                                 <div>
                                     <strong class="subtitle-text">@lang('guidings.Tour_Type'):</strong> 
-                                    <span class="">{{ translate($guiding->tour_type) }}</span>
+                                    <span class="">{{ $guiding->tour_type }}</span>
                                 </div>
                             </div>
                         @endif
                     </div>
     
                     @if(empty($guiding->experience_level) && empty($guiding->tour_type) && empty($guiding->style_of_fishing))
-                        <p>{{ translate('No information specified') }}</p>
+                        <p>{{ 'No information specified' }}</p>
                     @endif
                 </div>
             </div>
@@ -950,7 +945,7 @@
     <div class="accordion mb-5" id="guidings-accordion">
 
         <!-- What's Included Accordion -->
-        @if(!empty(json_decode($guiding->pricing_extra)) || !empty( json_decode($guiding->inclusions)))
+        @if(!empty(decode_if_json($guiding->pricing_extra)) || !empty( decode_if_json($guiding->inclusions)))
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingInclude">
                     <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInclude" aria-expanded="true" aria-controls="collapseInclude">
@@ -961,7 +956,7 @@
                     <div class="accordion-body">
                         <div class="row card tab-card h-100 shadow m-0 p-2">
                             <div class="col-12 mb-4">
-                                @if(!empty(json_decode( $guiding->inclusions)))
+                                @if(!empty(decode_if_json( $guiding->inclusions)))
                                     @php
                                         $inclussions = $guiding->getInclusionNames();
                                         $maxToShow = 3; // Maximum number of inclusions to display
@@ -977,21 +972,21 @@
                                 @endif
                             </div>
 
-                            @if(!empty(json_decode($guiding->pricing_extra)) && !empty( json_decode($guiding->inclusions)))
+                            @if(!empty(decode_if_json($guiding->pricing_extra)) && !empty( decode_if_json($guiding->inclusions)))
                             <hr >
                             @endif
 
                             <div class="col-12">
-                                @if(!empty(json_decode($guiding->pricing_extra)))
+                                @if(!empty(decode_if_json($guiding->pricing_extra)))
                                     <div class="row">
                                         <strong class="mb-2 subtitle-text">@lang('guidings.Additional_Extra')</strong>
                                         <div class="alert alert-info p-2 mb-3 d-flex align-items-center">
                                             <i class="fas fa-info-circle me-2"></i>
-                                            <small>{{ translate('These extras can be added during booking') }}</small>
+                                            <small>{{ __('guidings.These_extras_can_be_added_during_booking') }}</small>
                                         </div>
-                                        @foreach (json_decode($guiding->pricing_extra) as $pricing_extras)
+                                        @foreach (decode_if_json($guiding->pricing_extra) as $pricing_extras)
                                             <div class="mb-2">
-                                                <strong>{{translate($pricing_extras->name)}}:</strong> 
+                                                <strong>{{$pricing_extras->name}}:</strong> 
                                                 <span>{{$pricing_extras->price}}€ p.P</span>
                                             </div>
                                         @endforeach
@@ -1008,11 +1003,11 @@
         @if(!empty($guiding->target_fish) || !empty($guiding->fishing_methods) || !empty($guiding->water_types))
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingFishing">
-                    <button class="accordion-button {{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFishing" aria-expanded="{{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) ? 'true' : 'false' }}" aria-controls="collapseFishing">
+                    <button class="accordion-button {{ empty(decode_if_json($guiding->pricing_extra)) && empty(decode_if_json($guiding->inclusions)) ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFishing" aria-expanded="{{ empty(decode_if_json($guiding->pricing_extra)) && empty(decode_if_json($guiding->inclusions)) ? 'true' : 'false' }}" aria-controls="collapseFishing">
                         @lang('guidings.Tour_Info')
                     </button>
                 </h2>
-                <div id="collapseFishing" class="accordion-collapse collapse {{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) ? 'show' : '' }}" aria-labelledby="headingFishing" data-bs-parent="#guidings-accordion">
+                <div id="collapseFishing" class="accordion-collapse collapse {{ empty(decode_if_json($guiding->pricing_extra)) && empty(decode_if_json($guiding->inclusions)) ? 'show' : '' }}" aria-labelledby="headingFishing" data-bs-parent="#guidings-accordion">
                     <div class="accordion-body">
                         <div class="row card tab-card h-100 shadow m-0 p-2">
                             @if(!empty($guiding->target_fish))
@@ -1030,7 +1025,7 @@
                                     </div>
                                 </div>
                             @else
-                                <p class="mb-4">{{ translate('No fish specified') }}</p>
+                                <p class="mb-4">{{ __('guidings.No_fish_specified') }}</p>
                             @endif
 
                             <!-- Methods Section -->
@@ -1049,7 +1044,7 @@
                                     </div>
                                 </div>
                             @else
-                                <p class="mb-4">{{ translate('No methods specified') }}</p>
+                                <p class="mb-4">{{ __('guidings.No_methods_specified') }}</p>
                             @endif
 
                             <!-- Water Types Section -->
@@ -1068,7 +1063,7 @@
                                     </div>
                                 </div>
                             @else
-                                <p class="mb-4">No water types specified</p>
+                                <p class="mb-4">{{ __('guidings.No_water_types_specified') }}</p>
                             @endif
                         </div>
                     </div>
@@ -1076,31 +1071,31 @@
             </div>
         @endif
 
-        @if ($guiding->is_boat && (!empty(json_decode($boatInformation)) || !empty(json_decode($guiding->boat_extras)) || (!empty($guiding->additional_information) && $guiding->additional_information !== null && $guiding->additional_information !== '')))
+        @if ($guiding->is_boat && (!empty(decode_if_json($boatInformation)) || !empty(decode_if_json($guiding->boat_extras)) || (!empty($guiding->additional_information) && $guiding->additional_information !== null && $guiding->additional_information !== '')))
         <!-- Boat Information Accordion -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingBoat">
-                    <button class="accordion-button {{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBoat" aria-expanded="{{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) ? 'true' : 'false' }}" aria-controls="collapseBoat">
+                    <button class="accordion-button {{ empty(decode_if_json($guiding->pricing_extra)) && empty(decode_if_json($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBoat" aria-expanded="{{ empty(decode_if_json($guiding->pricing_extra)) && empty(decode_if_json($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) ? 'true' : 'false' }}" aria-controls="collapseBoat">
                     @lang('guidings.Boat_Details')
                     </button>
                 </h2>
-                <div id="collapseBoat" class="accordion-collapse collapse {{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) ? 'show' : '' }}" aria-labelledby="headingBoat" data-bs-parent="#guidings-accordion">
+                <div id="collapseBoat" class="accordion-collapse collapse {{ empty(decode_if_json($guiding->pricing_extra)) && empty(decode_if_json($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) ? 'show' : '' }}" aria-labelledby="headingBoat" data-bs-parent="#guidings-accordion">
                     <div class="accordion-body">
                         <div class="row card tab-card h-100 shadow m-0 p-3">
                             @if(!empty($guiding->additional_information))
                                 <div class="col-md-12">
-                                    <strong class="subtitle-text">{{translate('Other boat information')}}</strong>
+                                    <strong class="subtitle-text">@lang('guidings.Other_boat_information')</strong>
                                     <p>{{$guiding->additional_information}}</p>
                                 </div>
                             @endif
 
-                            @if(!empty(json_decode($boatInformation) ))
+                            @if(!empty(decode_if_json($boatInformation) ))
                                 <div class="col-md-12">
-                                    <strong class="subtitle-text">{{ translate('Boat') }}:</strong>
+                                    <strong class="subtitle-text">@lang('guidings.Boat')</strong>
                                     <table class="table my-4">
                                         <tbody>
                                             @foreach($boatInformation as $key => $value)
-                                                <tr><th>{{ $value['name'] }}</th><td colspan="1">{{ translate($value['value']) }}</td></tr>
+                                                <tr><th>{{ $value['name'] }}</th><td colspan="1">{{ $value['value'] }}</td></tr>
                                             @endforeach
                                         </tbody>
                                     </table>
@@ -1108,7 +1103,7 @@
                             @endif
                     
                             <!-- Boat Extras Section -->
-                            @if(!empty(json_decode( $guiding->boat_extras)))
+                            @if(!empty(decode_if_json( $guiding->boat_extras)))
                                 <strong class="subtitle-text">@lang('guidings.Boat_Extras'):</strong>
                                 <ul>
                                     @foreach($guiding->getBoatExtras() as $extra)
@@ -1123,22 +1118,22 @@
         @endif
         <!-- Important Information Accordion -->
 
-        @if(!empty(json_decode( $guiding->requirements)) || !empty($guiding->other_information) || !empty($guiding->recommendations) || !empty($guiding->style_of_fishing) || !empty($guiding->tour_type))
+        @if(!empty(decode_if_json( $guiding->requirements)) || !empty($guiding->other_information) || !empty($guiding->recommendations) || !empty($guiding->style_of_fishing) || !empty($guiding->tour_type))
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingInfo">
-                    <button class="accordion-button {{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) && !$guiding->is_boat ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInfo" aria-expanded="{{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) && !$guiding->is_boat ? 'true' : 'false' }}" aria-controls="collapseInfo">
+                    <button class="accordion-button {{ empty(decode_if_json($guiding->pricing_extra)) && empty(decode_if_json($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) && !$guiding->is_boat ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInfo" aria-expanded="{{ empty(decode_if_json($guiding->pricing_extra)) && empty(decode_if_json($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) && !$guiding->is_boat ? 'true' : 'false' }}" aria-controls="collapseInfo">
                     @lang('guidings.Additional_Info')
                     </button>
                 </h2>
-                <div id="collapseInfo" class="accordion-collapse collapse {{ empty(json_decode($guiding->pricing_extra)) && empty(json_decode($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) && !$guiding->is_boat ? 'show' : '' }}" aria-labelledby="headingInfo" data-bs-parent="#guidings-accordion">
+                <div id="collapseInfo" class="accordion-collapse collapse {{ empty(decode_if_json($guiding->pricing_extra)) && empty(decode_if_json($guiding->inclusions)) && empty($guiding->target_fish) && empty($guiding->fishing_methods) && empty($guiding->water_types) && !$guiding->is_boat ? 'show' : '' }}" aria-labelledby="headingInfo" data-bs-parent="#guidings-accordion">
                     <div class="accordion-body">
                         <div class="row card tab-card h-100 shadow m-0 p-3">
                             <!-- Requirements Section -->
-                            @if(!empty(json_decode( $guiding->requirements)))
+                            @if(!empty(decode_if_json( $guiding->requirements)))
                                 <strong class="subtitle-text">@lang('guidings.Requirements')</strong>
                                 <ul>
                                     @foreach ($guiding->getRequirementsAttribute() as $requirements)
-                                        <li><span>{{ $requirements['name'] }}:</span> {{ translate($requirements['value']) ?? '' }}</li>
+                                        <li><span>{{ $requirements['name'] }}:</span> {{ $requirements['value'] ?? '' }}</li>
                                     @endforeach
                                 </ul>
                                 <hr/>
@@ -1148,7 +1143,7 @@
                                 <strong class="subtitle-text">@lang('guidings.Other_Info')</strong>
                                 <ul>
                                     @foreach ($guiding->getOtherInformationAttribute() as $otherIndex => $other)
-                                        <li><span>{{ $other['name'] }}:</span> {{ translate($other['value']) ?? '' }}</li>
+                                        <li><span>{{ $other['name'] }}:</span> {{ $other['value'] ?? '' }}</li>
                                     @endforeach
                                 </ul>
                                 <hr/>
@@ -1158,7 +1153,7 @@
                                 <strong class="subtitle-text">@lang('guidings.Reco_Prep')</strong>
                                 <ul>
                                     @foreach ($guiding->getRecommendationsAttribute() as $recIndex => $recommendations)
-                                        <li><span>{{ $recommendations['name'] }}:</span> {{ translate($recommendations['value']) ?? '' }}</li>
+                                        <li><span>{{ $recommendations['name'] }}:</span> {{ $recommendations['value'] ?? '' }}</li>
                                     @endforeach
                                 </ul>
                                 <hr/>
@@ -1167,14 +1162,14 @@
                                 <div class="col-md-6">
                                     @if(!empty($guiding->style_of_fishing))
                                             <strong class="subtitle-text">@lang('guidings.Style_Fishing'):</strong> 
-                                            <span class="">{{ translate($guiding->style_of_fishing) }}</span>
+                                            <span class="">{{ $guiding->style_of_fishing }}</span>
                                     @endif
                                 </div>
                                 <div class="col-md-6">
                                     @if(!empty($guiding->tour_type))
                                         <div>
                                             <strong class="subtitle-text">@lang('guidings.Tour_Type'):</strong> 
-                                            <span class="">{{ translate($guiding->tour_type) }}</span>
+                                            <span class="">{{ $guiding->tour_type }}</span>
                                         </div>
                                     @endif
                                 </div>
@@ -1252,7 +1247,7 @@
                                     <i class="fa fa-check"></i>
                                 </div>
                                 <div class="text">
-                                    <p><b>{{ translate('Lieblingsfisch') }}:</b>{{ translate($guiding->user->information['favorite_fish']) }}
+                                    <p><b>{{ __('guidings.Favorite_fish') }}:</b> {{ $guiding->user->information['favorite_fish'] }}
                                     </p>
                                 </div>
                             </li>
@@ -1262,7 +1257,7 @@
                                 </div>
                                 <div class="text">
                                     <p>
-                                        <b>{{ translate('Sprachen') }}:</b> {{ translate($guiding->user->information['languages']) }}
+                                        <b>{{ __('guidings.Languages') }}:</b> {{ $guiding->user->information['languages'] }}
                                     </p>
                                 </div>
                             </li>
@@ -1272,17 +1267,17 @@
                                 </div>
                                 <div class="text">
                                     <p>
-                                        <b>{{ translate('Angelt seit') }}:</b> {{ $guiding->user->information['fishing_start_year'] }}
+                                        <b>{{ __('guidings.Fishing_since') }}:</b> {{ $guiding->user->information['fishing_start_year'] }}
                                     </p>
                                 </div>
                             </li>
                         </ul>
 
-                        <p class="js-trigger-more-text"><b>{{ translate('Über mich') }}:</b>
+                        <p class="js-trigger-more-text"><b>{{ __('guidings.About_me') }}:</b>
                             {!! translate($guiding->aboutme()[0]) !!}
                             {!! translate($guiding->aboutme()[1]) !!}
                         </p>
-                        <button class="thm-btn js-btn-more-text" onclick="moreOrLessFunction(this)">{{ translate('Mehr') }} </button>
+                        <button class="thm-btn js-btn-more-text" onclick="moreOrLessFunction(this)">{{ __('guidings.More') }} </button>
                     </div>
 
 
@@ -1367,9 +1362,9 @@
                             </p>
                         </div>
                         <div class="comment-content">
-                            <p class="description">{{ translate($review->comment) }}</p>
-                            <small class="see-more text-orange">{{ translate('See More') }}</small>
-                            <small class="show-less text-orange">{{ translate('Show Less') }}</small>
+                            <p class="description">{{ $review->comment }}</p>
+                            <small class="see-more text-orange">{{ __('guidings.See_More') }}</small>
+                            <small class="show-less text-orange">{{ __('guidings.Show_Less') }}</small>
                         </div>
                     </div>
                 </div>
@@ -1427,7 +1422,7 @@
                                                 <!-- Existing content structure -->
                                                 <div class="guidings-item">
                                                     <div class="guidings-item-title">
-                                                        <h5 class="fw-bolder text-truncate">{{translate($other_guiding->title)}}</h5>
+                                                        <h5 class="fw-bolder text-truncate">{{$other_guiding->title}}</h5>
                                                         <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ $other_guiding->location }}</span>                                      
                                                     </div>
                                                     @if ($other_guiding->user->average_rating())
@@ -1443,13 +1438,13 @@
                                                     <div class="guidings-icon-container"> 
                                                         <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
                                                         <div class="">
-                                                            {{ $other_guiding->duration }} @if($other_guiding->duration_type == "multi_day") {{translate('days')}} @elseif($other_guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
+                                                            {{ $other_guiding->duration }} @if($other_guiding->duration_type == "multi_day") {{__('guidings.days')}} @elseif($other_guiding->duration != 1) {{__('guidings.hours')}} @else {{__('guidings.hour')}} @endif
                                                         </div>
                                                     </div>
                                                     <div class="guidings-icon-container"> 
                                                         <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" />
                                                         <div class="">
-                                                        {{ $other_guiding->max_guests }} @if($other_guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
+                                                        {{ $other_guiding->max_guests }} @if($other_guiding->max_guests != 1) {{__('guidings.persons')}} @else {{__('guidings.person')}} @endif
                                                         </div>
                                                     </div>
                                                     <div class="guidings-icon-container"> 
@@ -1541,12 +1536,12 @@
                         </div>
 
                         <div class="text-center desktop-view">
-                            <button id="showMoreBtn" class="btn btn-orange mt-3 text-center">{{ translate('Show More') }}</button>
+                            <button id="showMoreBtn" class="btn btn-orange mt-3 text-center">{{ __('guidings.See_More') }}</button>
                         </div>
                         
                         <div class="text-center mobile-view">
                             <a href="{{ route('guidings.index', ['guide_id' => $guiding->user->id]) }}" class="btn btn-outline-secondary mt-3">
-                                {{ translate('View all from') }} {{ $guiding->user->firstname }}
+                                {{ __('guidings.View_all_from') }} {{ $guiding->user->firstname }}
                             </a>
                         </div>
                     </div>
@@ -1942,11 +1937,11 @@ function moreOrLessFunction(e) {
     if (!expanded) {
         expanded = true;
         moreText.classList.add('expand-text');
-        e.innerHTML = '{{translate("Weniger")}}';
+        e.innerHTML = '{{__("guidings.Less")}}';
     } else {
         expanded = false;
         moreText.classList.remove('expand-text');
-        e.innerHTML = '{{translate("Mehr")}}';
+        e.innerHTML = '{{__("guidings.More")}}';
     }
 }
 

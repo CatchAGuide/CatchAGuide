@@ -34,6 +34,7 @@ use App\Models\Review;
 use Illuminate\Support\Facades\Cache;
 use App\Services\GuidingFilterService;
 use App\Services\ImageOptimizationService;
+use App\Services\Translation\GuidingTranslationService;
 
 class GuidingsController extends Controller
 {
@@ -640,6 +641,16 @@ class GuidingsController extends Controller
             ->where('status', 1)
             ->limit(10)
             ->get();
+
+        // Translation logic
+        $locale = app()->getLocale();
+        if ($guiding->language !== $locale) {
+            $translationService = new GuidingTranslationService();
+            $translated = $translationService->getTranslatedGuiding($guiding, $locale);
+            if ($translated) {
+                $guiding->translated = $translated;
+            }
+        }
 
         return view('pages.guidings.newIndex', [
             'guiding' => $guiding,

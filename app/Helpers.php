@@ -272,3 +272,13 @@ if (!function_exists('CheckEmailLog')) {
         return false;
     }
 }
+
+if (!function_exists('decode_if_json')) {
+    function decode_if_json($value)
+    {
+        if (is_string($value) && (strpos($value, '[') === 0 || strpos($value, '{') === 0)) {
+            return json_decode($value, true) ?? $value;
+        }
+        return $value ?? [];
+    }
+}
