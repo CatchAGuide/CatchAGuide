@@ -79,6 +79,20 @@ return [
     'recent_activity' => 'Recent Login Activity',
     'coming_soon' => 'Coming Soon',
 
+    // Third-Party Integrations
+    'third_party_integrations' => 'Third-Party Integrations',
+    'third_party_integrations_description' => 'Connect your accounts with external services to enhance your experience and automate calendar management.',
+    'calendly_title' => 'Calendly',
+    'calendly_description' => 'Calendar scheduling & automation',
+    'status_connected' => 'Connected',
+    'status_disconnected' => 'Disconnected',
+    'calendly_benefit_1' => 'Automatic calendar sync',
+    'calendly_benefit_2' => 'ICS file generation for bookings',
+    'calendly_benefit_3' => 'Real-time event updates',
+    'sync_now' => 'Sync Now',
+    'disconnect' => 'Disconnect',
+    'connect_calendly' => 'Connect Calendly',
+
     /**
      *
      * 

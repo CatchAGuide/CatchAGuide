@@ -95,6 +95,12 @@ return [
     'guest_booking_request_accepted_text_4' => 'If you have any questions or need assistance during the process, we are here as a neutral third party and will be happy to help in any situation.',
     'guest_booking_request_accepted_text_5' => 'Thank you for using our platform. We wish you a fantastic fishing experience and hope you enjoy the adventure ahead!',
 
+    // Calendar Integration
+    'calendar_integration_title' => 'Calendar Integration',
+    'calendar_integration_text' => 'We\'ve attached a calendar file (.ics) to this email. You can import this into your calendar application to automatically add this fishing trip to your schedule.',
+    'calendar_supported_apps' => 'Supported applications:',
+    'calendar_apps_list' => 'Google Calendar, Apple Calendar, Outlook, and most other calendar apps',
+
     'guest_booking_request_cancelled_title' => 'Update on Your Catch A Guide Booking Request!',
     'guest_booking_request_cancelled_text_1' => 'We\'re writing to inform you that <b>[Guide Name]</b> has declined your booking request for <b>[Date]</b> at <b>[Location]</b>. We understand this can be disappointing, and we apologize for any inconvenience.',
     'guest_booking_request_cancelled_text_2' => 'Here is the message provided by',

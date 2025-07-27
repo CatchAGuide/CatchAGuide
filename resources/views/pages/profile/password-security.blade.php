@@ -240,6 +240,156 @@
             font-family: monospace;
             word-break: break-all;
         }
+        
+        /* Integration Cards Styling */
+        .integration-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            height: 100%;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .integration-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .integration-card.coming-soon {
+            opacity: 0.7;
+            background: #f8f9fa;
+        }
+        
+        .coming-soon-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            z-index: 1;
+        }
+        
+        .integration-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 12px;
+        }
+        
+        .integration-logo {
+            flex-shrink: 0;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        
+        .integration-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .integration-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #313041;
+            margin: 0 0 4px 0;
+        }
+        
+        .integration-description {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin: 0;
+        }
+        
+        .integration-status {
+            flex-shrink: 0;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .status-badge.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-badge.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-badge.disabled {
+            background: #e2e3e5;
+            color: #6c757d;
+        }
+        
+        .integration-content {
+            margin-bottom: 16px;
+        }
+        
+        .integration-benefits {
+            font-size: 0.85rem;
+            color: #495057;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .integration-benefits:last-child {
+            margin-bottom: 0;
+        }
+        
+        .integration-actions {
+            margin-top: auto;
+        }
+        
+        .integration-actions .btn {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .integration-actions .btn-group {
+            gap: 4px;
+        }
+        
+        .integration-actions .btn-group .btn {
+            flex: 1;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .integration-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 8px;
+            }
+            
+            .integration-status {
+                align-self: center;
+            }
+            
+            .integration-actions .btn-group {
+                flex-direction: column;
+            }
+        }
     </style>
 
     @if($errors->any())
@@ -373,6 +523,247 @@
         </div>
     </div>
 
+    <!-- Third-Party Integrations Section -->
+    <div class="security-section">
+        <h3 class="section-title">
+            <i class="fas fa-plug"></i>
+            @lang('profile.third_party_integrations')
+        </h3>
+        <p class="text-muted mb-4">@lang('profile.third_party_integrations_description')</p>
+        
+        <div class="row">
+            <!-- Calendly Integration -->
+            <div class="col-lg-6 col-md-12 mb-4">
+                <div class="integration-card" data-integration="calendly">
+                    <div class="integration-header">
+                        <div class="integration-logo">
+                            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="32" height="32" rx="6" fill="#006BFF"/>
+                                <path d="M8 12H24V20H8V12ZM10 14V18H22V14H10Z" fill="white"/>
+                                <path d="M12 16H20V17H12V16Z" fill="white"/>
+                            </svg>
+                        </div>
+                        <div class="integration-info">
+                            <h5 class="integration-title">@lang('profile.calendly_title')</h5>
+                            <p class="integration-description">@lang('profile.calendly_description')</p>
+                        </div>
+                        <div class="integration-status">
+                            @php
+                                try {
+                                    $calendlyService = app(\App\Services\CalendlyService::class);
+                                    $hasCalendlyConnection = $calendlyService->hasActiveConnection(auth()->id());
+                                } catch (\Exception $e) {
+                                    $hasCalendlyConnection = false;
+                                }
+                            @endphp
+                            
+                            @if($hasCalendlyConnection)
+                                <span class="status-badge connected">
+                                    <i class="fas fa-check-circle"></i>
+                                    @lang('profile.status_connected')
+                                </span>
+                            @else
+                                <span class="status-badge disconnected">
+                                    <i class="fas fa-circle"></i>
+                                    @lang('profile.status_disconnected')
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                    
+                    <div class="integration-content">
+                        <p class="integration-benefits">
+                            <i class="fas fa-check text-success me-2"></i>
+                            @lang('profile.calendly_benefit_1')
+                        </p>
+                        <p class="integration-benefits">
+                            <i class="fas fa-check text-success me-2"></i>
+                            @lang('profile.calendly_benefit_2')
+                        </p>
+                        <p class="integration-benefits">
+                            <i class="fas fa-check text-success me-2"></i>
+                            @lang('profile.calendly_benefit_3')
+                        </p>
+                    </div>
+                    
+                    <div class="integration-actions">
+                        @if($hasCalendlyConnection)
+                            <div class="btn-group w-100" role="group">
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="syncCalendly()">
+                                    <i class="fas fa-sync"></i>
+                                    @lang('profile.sync_now')
+                                </button>
+                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="disconnectCalendly()">
+                                    <i class="fas fa-unlink"></i>
+                                    @lang('profile.disconnect')
+                                </button>
+                            </div>
+                        @else
+                            <a href="{{ route('oauth.calendly') }}" class="btn btn-primary w-100">
+                                <i class="fab fa-calendly me-2"></i>
+                                @lang('profile.connect_calendly')
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Google Calendar Integration (Coming Soon) -->
+            {{-- <div class="col-lg-6 col-md-12 mb-4">
+                <div class="integration-card coming-soon">
+                    <div class="coming-soon-badge">Coming Soon</div>
+                    <div class="integration-header">
+                        <div class="integration-logo">
+                            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="32" height="32" rx="6" fill="#4285F4"/>
+                                <path d="M8 8H24V24H8V8ZM10 10V22H22V10H10Z" fill="white"/>
+                                <path d="M12 12H20V14H12V12Z" fill="white"/>
+                                <path d="M12 16H20V18H12V16Z" fill="white"/>
+                                <path d="M12 20H16V22H12V20Z" fill="white"/>
+                            </svg>
+                        </div>
+                        <div class="integration-info">
+                            <h5 class="integration-title">Google Calendar</h5>
+                            <p class="integration-description">Direct calendar integration</p>
+                        </div>
+                        <div class="integration-status">
+                            <span class="status-badge disabled">
+                                <i class="fas fa-clock"></i>
+                                Soon
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="integration-content">
+                        <p class="integration-benefits">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Direct calendar sync
+                        </p>
+                        <p class="integration-benefits">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Two-way event management
+                        </p>
+                        <p class="integration-benefits">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Availability management
+                        </p>
+                    </div>
+                    
+                    <div class="integration-actions">
+                        <button class="btn btn-secondary w-100" disabled>
+                            <i class="fab fa-google me-2"></i>
+                            Coming Soon
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+                        {{-- Future Integrations (Commented out for future use)
+            
+            <!-- Outlook Calendar Integration (Coming Soon) -->
+            <div class="col-lg-6 col-md-12 mb-4">
+                <div class="integration-card coming-soon">
+                    <div class="coming-soon-badge">Coming Soon</div>
+                    <div class="integration-header">
+                        <div class="integration-logo">
+                            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="32" height="32" rx="6" fill="#0078D4"/>
+                                <path d="M8 8H24V24H8V8ZM10 10V22H22V10H10Z" fill="white"/>
+                                <path d="M12 12H20V14H12V12Z" fill="white"/>
+                                <path d="M12 16H20V18H12V16Z" fill="white"/>
+                                <path d="M12 20H16V22H12V20Z" fill="white"/>
+                            </svg>
+                        </div>
+                        <div class="integration-info">
+                            <h5 class="integration-title">Outlook Calendar</h5>
+                            <p class="integration-description">Microsoft calendar sync</p>
+                        </div>
+                        <div class="integration-status">
+                            <span class="status-badge disabled">
+                                <i class="fas fa-clock"></i>
+                                Soon
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="integration-content">
+                        <p class="integration-benefits">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Outlook calendar sync
+                        </p>
+                        <p class="integration-benefits">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Exchange integration
+                        </p>
+                        <p class="integration-benefits">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Office 365 support
+                        </p>
+                    </div>
+                    
+                    <div class="integration-actions">
+                        <button class="btn btn-secondary w-100" disabled>
+                            <i class="fab fa-microsoft me-2"></i>
+                            Coming Soon
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Apple Calendar Integration (Coming Soon) -->
+            <div class="col-lg-6 col-md-12 mb-4">
+                <div class="integration-card coming-soon">
+                    <div class="coming-soon-badge">Coming Soon</div>
+                    <div class="integration-header">
+                        <div class="integration-logo">
+                            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="32" height="32" rx="6" fill="#000000"/>
+                                <path d="M8 8H24V24H8V8ZM10 10V22H22V10H10Z" fill="white"/>
+                                <path d="M12 12H20V14H12V12Z" fill="white"/>
+                                <path d="M12 16H20V18H12V16Z" fill="white"/>
+                                <path d="M12 20H16V22H12V20Z" fill="white"/>
+                            </svg>
+                        </div>
+                        <div class="integration-info">
+                            <h5 class="integration-title">Apple Calendar</h5>
+                            <p class="integration-description">iCloud calendar sync</p>
+                        </div>
+                        <div class="integration-status">
+                            <span class="status-badge disabled">
+                                <i class="fas fa-clock"></i>
+                                Soon
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="integration-content">
+                        <p class="integration-benefits">
+                            <i class="fas fa-check text-success me-2"></i>
+                            iCloud calendar sync
+                        </p>
+                        <p class="integration-benefits">
+                            <i class="fas fa-check text-success me-2"></i>
+                            macOS & iOS integration
+                        </p>
+                        <p class="integration-benefits">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Family sharing support
+                        </p>
+                    </div>
+                    
+                    <div class="integration-actions">
+                        <button class="btn btn-secondary w-100" disabled>
+                            <i class="fab fa-apple me-2"></i>
+                            Coming Soon
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            --}}--}}
+        </div>
+    </div>
+
 @endsection
 
 @section('js_after')
@@ -436,5 +827,116 @@
                 }
             }
         });
+        
+        // Calendly Integration Functions
+        function syncCalendly() {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
+            button.disabled = true;
+            
+            fetch('{{ route("oauth.calendly.sync") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', data.message + ' (' + data.event_count + ' events synced)');
+                } else {
+                    showAlert('error', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Failed to sync Calendly events. Please try again.');
+            })
+            .finally(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+        
+        function disconnectCalendly() {
+            if (!confirm('Are you sure you want to disconnect your Calendly account? This will remove the integration.')) {
+                return;
+            }
+            
+            const button = event.target;
+            const originalText = button.innerHTML;
+            
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Disconnecting...';
+            button.disabled = true;
+            
+            fetch('{{ route("oauth.calendly.disconnect") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', data.message);
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showAlert('error', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Failed to disconnect Calendly account. Please try again.');
+            })
+            .finally(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+        
+        function showAlert(type, message) {
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            const alertHtml = `
+                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            // Insert alert at the top of the page
+            const header = document.querySelector('.security-header');
+            header.insertAdjacentHTML('afterend', alertHtml);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                const alert = document.querySelector('.alert');
+                if (alert) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+        
+        // Add loading states to integration cards
+        function setIntegrationLoading(integrationType, isLoading) {
+            const card = document.querySelector(`[data-integration="${integrationType}"]`);
+            if (card) {
+                const actions = card.querySelector('.integration-actions');
+                if (isLoading) {
+                    actions.innerHTML = `
+                        <button class="btn btn-secondary w-100" disabled>
+                            <i class="fas fa-spinner fa-spin me-2"></i>
+                            Processing...
+                        </button>
+                    `;
+                }
+            }
+        }
     </script>
 @endsection 

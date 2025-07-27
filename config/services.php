@@ -36,4 +36,11 @@ return [
         'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta/models'),
     ],
 
+    'calendly' => [
+        'client_id' => env('CALENDLY_CLIENT_ID'),
+        'client_secret' => env('CALENDLY_CLIENT_SECRET'),
+        'redirect_uri' => env('CALENDLY_REDIRECT_URI'),
+        'webhook_signing_key' => env('CALENDLY_WEBHOOK_SIGNING_KEY'),
+    ],
+
 ];

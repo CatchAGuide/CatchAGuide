@@ -90,6 +90,12 @@ return [
     'guest_booking_request_accepted_text_3' => 'Zusammenfassung der Buchung:',
     'guest_booking_request_accepted_text_4' => 'Wenn Du Fragen hast oder Unterstützung während des Prozesses benötigst, sind wir als neutraler Dritter da und helfen gerne in jeder Situation.',
     'guest_booking_request_accepted_text_5' => 'Danke, dass Du unsere Plattform nutzt. Wir wünschen Dir eine fantastische Angeltour und hoffen, dass Du das bevorstehende Abenteuer genießt!',
+
+    // Calendar Integration
+    'calendar_integration_title' => 'Kalender-Integration',
+    'calendar_integration_text' => 'Wir haben eine Kalenderdatei (.ics) an diese E-Mail angehängt. Du kannst diese in Deine Kalenderanwendung importieren, um diese Angeltour automatisch zu Deinem Zeitplan hinzuzufügen.',
+    'calendar_supported_apps' => 'Unterstützte Anwendungen:',
+    'calendar_apps_list' => 'Google Kalender, Apple Kalender, Outlook und die meisten anderen Kalender-Apps',
     
     'guest_booking_request_cancelled_title' => 'Update zu Deiner Catch A Guide Buchungsanfrage!',
     'guest_booking_request_cancelled_text_1' => 'Wir möchten Dich informieren, dass [Guide Name] Deine Buchungsanfrage für den [Date] am [Location] abgelehnt hat. Wir verstehen, dass dies enttäuschend sein kann, und entschuldigen uns für eventuelle Unannehmlichkeiten.',

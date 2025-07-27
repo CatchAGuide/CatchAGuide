@@ -49,6 +49,23 @@
                 <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
                     @lang('emails.guest_booking_request_accepted_text_4') 
                 </p>
+                
+                @if($icsContent)
+                <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; margin: 20px 0; font-family: 'Morrison', sans-serif;">
+                    <h4 style="color: #313041; margin-bottom: 10px; font-family: 'Morrison', sans-serif;">
+                        <i class="fas fa-calendar-alt" style="margin-right: 8px;"></i>
+                        @lang('emails.calendar_integration_title', ['default' => 'Calendar Integration'])
+                    </h4>
+                    <p style="font-size: 14px; margin-bottom: 10px; font-family: 'Morrison', sans-serif;">
+                        @lang('emails.calendar_integration_text', ['default' => 'We\'ve attached a calendar file (.ics) to this email. You can import this into your calendar application to automatically add this fishing trip to your schedule.'])
+                    </p>
+                    <p style="font-size: 13px; color: #6c757d; margin-bottom: 0; font-family: 'Morrison', sans-serif;">
+                        <strong>@lang('emails.calendar_supported_apps', ['default' => 'Supported applications:'])</strong> 
+                        @lang('emails.calendar_apps_list', ['default' => 'Google Calendar, Apple Calendar, Outlook, and most other calendar apps'])
+                    </p>
+                </div>
+                @endif
+                
                 <div style="text-align: center; margin-top: 2rem; font-family: 'Morrison', sans-serif;">
                     <a class="btn-theme" style="background-color: #e8604c; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px; font-family: 'Morrison', sans-serif; display: inline-block;" href="{{route('additional.contact')}}" target="_blank">@lang('emails.contact_us')</a>
                 </div>

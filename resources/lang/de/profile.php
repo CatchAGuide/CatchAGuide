@@ -78,6 +78,20 @@ return [
     'recent_activity' => 'Letzte Anmelde-Aktivität',
     'coming_soon' => 'Bald verfügbar',
 
+    // Third-Party Integrations
+    'third_party_integrations' => 'Drittanbieter-Integrationen',
+    'third_party_integrations_description' => 'Verbinden Sie Ihre Konten mit externen Diensten, um Ihre Erfahrung zu verbessern und die Kalenderverwaltung zu automatisieren.',
+    'calendly_title' => 'Calendly',
+    'calendly_description' => 'Kalenderplanung & Automatisierung',
+    'status_connected' => 'Verbunden',
+    'status_disconnected' => 'Nicht verbunden',
+    'calendly_benefit_1' => 'Automatische Kalendersynchronisation',
+    'calendly_benefit_2' => 'ICS-Datei-Generierung für Buchungen',
+    'calendly_benefit_3' => 'Echtzeit-Ereignisaktualisierungen',
+    'sync_now' => 'Jetzt synchronisieren',
+    'disconnect' => 'Trennen',
+    'connect_calendly' => 'Calendly verbinden',
+
      /**
      *
      *  book by me

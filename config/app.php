@@ -182,6 +182,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\AgentServiceProvider::class,
         App\Providers\ViewServiceProvider::class,
+        App\Providers\CalendlyServiceProvider::class,
 
         Spatie\Geocoder\GeocoderServiceProvider::class,
     ],
