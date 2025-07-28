@@ -52,7 +52,7 @@ class OAuthController extends Controller
                 'expected_state' => $state,
                 'received_state' => $request->get('state')
             ]);
-            return redirect()->route('password')->with('error', 'OAuth authentication failed. Please try again.');
+            return redirect()->route('profile.password')->with('error', 'OAuth authentication failed. Please try again.');
         }
         
         // Clear the state from session
@@ -65,20 +65,20 @@ class OAuthController extends Controller
                 'error' => $request->get('error'),
                 'error_description' => $request->get('error_description')
             ]);
-            return redirect()->route('password')->with('error', 'OAuth authentication failed. Please try again.');
+            return redirect()->route('profile.password')->with('error', 'OAuth authentication failed. Please try again.');
         }
         
         try {
             // Exchange code for token
             $tokenData = $this->calendlyService->exchangeCodeForToken($code);
             if (!$tokenData) {
-                return redirect()->route('password')->with('error', 'Failed to authenticate with Calendly. Please try again.');
+                return redirect()->route('profile.password')->with('error', 'Failed to authenticate with Calendly. Please try again.');
             }
             
             // Get user profile from Calendly
             $profile = $this->calendlyService->getUserProfile($tokenData['access_token']);
             if (!$profile) {
-                return redirect()->route('password')->with('error', 'Failed to retrieve your Calendly profile. Please try again.');
+                return redirect()->route('profile.password')->with('error', 'Failed to retrieve your Calendly profile. Please try again.');
             }
             
             // Store the token
@@ -94,7 +94,7 @@ class OAuthController extends Controller
             );
             
             if (!$token) {
-                return redirect()->route('password')->with('error', 'Failed to save your Calendly connection. Please try again.');
+                return redirect()->route('profile.password')->with('error', 'Failed to save your Calendly connection. Please try again.');
             }
             
             Log::info('Calendly OAuth successful', [
@@ -102,7 +102,7 @@ class OAuthController extends Controller
                 'calendly_email' => $profile['resource']['email'] ?? null
             ]);
             
-            return redirect()->route('password')->with('success', 'Your Calendly account has been successfully connected!');
+            return redirect()->route('profile.password')->with('success', 'Your Calendly account has been successfully connected!');
             
         } catch (\Exception $e) {
             Log::error('Calendly OAuth callback exception', [
@@ -111,7 +111,7 @@ class OAuthController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
             
-            return redirect()->route('password')->with('error', 'An error occurred while connecting your Calendly account. Please try again.');
+            return redirect()->route('profile.password')->with('error', 'An error occurred while connecting your Calendly account. Please try again.');
         }
     }
     
