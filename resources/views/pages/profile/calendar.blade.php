@@ -342,11 +342,20 @@
                             <label for="ical_feed_url" class="form-label">@lang('profile.ical_feed_url') <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <input type="url" class="form-control" id="ical_feed_url" name="feed_url" required>
-                                <button type="button" class="btn btn-outline-secondary" onclick="validateICalUrl()">
+                                <button type="button" class="btn btn-outline-secondary" id="validateUrlBtn" onclick="validateICalUrl()">
                                     <i class="fas fa-check"></i> @lang('profile.validate_url')
                                 </button>
                             </div>
                             <div id="urlValidationResult" class="mt-2"></div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="sync_type" class="form-label">@lang('profile.sync_type') <span class="text-danger">*</span></label>
+                            <select class="form-select" id="sync_type" name="sync_type" required>
+                                <option value="all_events">@lang('profile.all_events')</option>
+                                <option value="bookings_only">@lang('profile.bookings_only')</option>
+                            </select>
+                            <div class="form-text">@lang('profile.sync_type_help')</div>
                         </div>
                         
                         <div class="alert alert-info">
@@ -1105,17 +1114,37 @@
 
         // Validate iCal URL
         function validateICalUrl() {
+            console.log('validateICalUrl function called'); // Debug log
+            
             const url = document.getElementById('ical_feed_url').value.trim();
             const button = document.getElementById('validateUrlBtn');
             const resultDiv = document.getElementById('urlValidationResult');
+            
+            console.log('URL:', url); // Debug log
+            console.log('Button:', button); // Debug log
+            console.log('Result div:', resultDiv); // Debug log
             
             if (!url) {
                 showAlert('error', 'Please enter a URL to validate');
                 return;
             }
             
+            if (!button) {
+                console.error('Validate button not found!');
+                showAlert('error', 'Validate button not found');
+                return;
+            }
+            
+            if (!resultDiv) {
+                console.error('Result div not found!');
+                showAlert('error', 'Result div not found');
+                return;
+            }
+            
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validating...';
+            
+            console.log('Making fetch request to:', '{{ route("ical-feeds.validate-url") }}'); // Debug log
             
             fetch('{{ route("ical-feeds.validate-url") }}', {
                 method: 'POST',
@@ -1125,8 +1154,12 @@
                 },
                 body: JSON.stringify({ url: url })
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Response status:', response.status); // Debug log
+                return response.json();
+            })
             .then(data => {
+                console.log('Response data:', data); // Debug log
                 if (data.success) {
                     resultDiv.innerHTML = `
                         <div class="alert alert-success">
@@ -1134,6 +1167,12 @@
                         </div>
                     `;
                     resultDiv.style.display = 'block';
+                    
+                    // Show the save button when validation is successful
+                    const saveBtn = document.getElementById('saveICalBtn');
+                    if (saveBtn) {
+                        saveBtn.style.display = 'inline-block';
+                    }
                 } else {
                     resultDiv.innerHTML = `
                         <div class="alert alert-danger">
@@ -1141,6 +1180,12 @@
                         </div>
                     `;
                     resultDiv.style.display = 'block';
+                    
+                    // Hide the save button when validation fails
+                    const saveBtn = document.getElementById('saveICalBtn');
+                    if (saveBtn) {
+                        saveBtn.style.display = 'none';
+                    }
                 }
             })
             .catch(error => {
