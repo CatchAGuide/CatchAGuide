@@ -84,7 +84,7 @@ class ICalGeneratorService
         
         // Get bookings as guide
         $guideBookings = Booking::whereIn('guiding_id', $guidingIds)
-            ->with(['user', 'guiding'])
+            ->with(['user', 'guiding', 'calendar_schedule'])
             ->get();
         
         foreach ($guideBookings as $booking) {
@@ -93,12 +93,17 @@ class ICalGeneratorService
                 continue;
             }
             
+            // Get booking date from calendar_schedule if available, otherwise use book_date
+            $bookingDate = $booking->calendar_schedule 
+                ? Carbon::parse($booking->calendar_schedule->date)
+                : Carbon::parse($booking->book_date);
+            
             $events[] = [
                 'uid' => "booking_{$booking->id}@catchaguide.com",
                 'summary' => "Fishing Trip: {$booking->user->firstname} {$booking->user->lastname}",
                 'description' => "Fishing trip with {$booking->count_of_users} person(s)",
-                'start_time' => Carbon::parse($booking->book_date),
-                'end_time' => Carbon::parse($booking->book_date)->addHours($booking->guiding->duration ?? 4),
+                'start_time' => $bookingDate,
+                'end_time' => $bookingDate->copy()->addHours($booking->guiding->duration ?? 4),
                 'location' => $booking->guiding->location ?? 'TBD',
                 'status' => $booking->status,
                 'type' => 'booking'
@@ -107,7 +112,7 @@ class ICalGeneratorService
         
         // Get bookings as client
         $clientBookings = Booking::where('user_id', $user->id)
-            ->with(['guiding', 'guiding.user'])
+            ->with(['guiding', 'guiding.user', 'calendar_schedule'])
             ->get();
             
         foreach ($clientBookings as $booking) {
@@ -116,12 +121,17 @@ class ICalGeneratorService
                 continue;
             }
             
+            // Get booking date from calendar_schedule if available, otherwise use book_date
+            $bookingDate = $booking->calendar_schedule 
+                ? Carbon::parse($booking->calendar_schedule->date)
+                : Carbon::parse($booking->book_date);
+            
             $events[] = [
                 'uid' => "client_booking_{$booking->id}@catchaguide.com",
                 'summary' => "Fishing Trip with {$booking->guiding->user->firstname} {$booking->guiding->user->lastname}",
                 'description' => "Fishing trip for {$booking->count_of_users} person(s)",
-                'start_time' => Carbon::parse($booking->book_date),
-                'end_time' => Carbon::parse($booking->book_date)->addHours($booking->guiding->duration ?? 4),
+                'start_time' => $bookingDate,
+                'end_time' => $bookingDate->copy()->addHours($booking->guiding->duration ?? 4),
                 'location' => $booking->guiding->location ?? 'TBD',
                 'status' => $booking->status,
                 'type' => 'client_booking'
@@ -217,7 +227,7 @@ class ICalGeneratorService
     /**
      * Generate iCal event content
      */
-    private function generateEventContent(array $event, UserICalFeed $feed): string
+    private function generateEventContent(array $event, ?UserICalFeed $feed = null): string
     {
         $content = "BEGIN:VEVENT\r\n";
         $content .= "UID:{$event['uid']}\r\n";
@@ -290,5 +300,146 @@ class ICalGeneratorService
             'feed_token' => UserICalFeed::generateFeedToken(),
             'otp_secret' => UserICalFeed::generateOTPSecret(),
         ]);
+    }
+
+    /**
+     * Generate ICS content for a single booking
+     */
+    public function generateSingleBookingICS(Booking $booking): string
+    {
+        try {
+            $user = $booking->user;
+            $guiding = $booking->guiding;
+            $guide = $guiding->user;
+            
+            // Validate required data
+            if (!$user || !$guiding || !$guide) {
+                return '';
+            }
+            
+            // Get booking date from calendar_schedule if available, otherwise use book_date
+            $bookingDate = $booking->calendar_schedule 
+                ? Carbon::parse($booking->calendar_schedule->date)
+                : Carbon::parse($booking->book_date);
+            
+            // Create event data using calendar_schedule information
+            $event = [
+                'uid' => "booking_{$booking->id}@catchaguide.com",
+                'summary' => "Fishing Trip: {$guiding->title}",
+                'description' => "Fishing trip with {$guide->firstname} {$guide->lastname}\\nLocation: {$guiding->location}\\nNumber of guests: {$booking->count_of_users}\\nPrice: " . number_format($booking->price, 2, ',', '.') . " €\\nContact: {$guide->phone} | {$guide->email}",
+                'start_time' => $bookingDate,
+                'end_time' => $bookingDate->copy()->addHours($guiding->duration ?? 4),
+                'location' => $guiding->location ?? 'TBD',
+                'status' => $booking->status,
+                'type' => 'booking'
+            ];
+            
+            // Generate ICS content using existing methods
+            $icalContent = "BEGIN:VCALENDAR\r\n";
+            $icalContent .= "VERSION:2.0\r\n";
+            $icalContent .= "PRODID:-//CatchAGuide//Calendar//EN\r\n";
+            $icalContent .= "CALSCALE:GREGORIAN\r\n";
+            $icalContent .= "METHOD:PUBLISH\r\n";
+            $icalContent .= "X-WR-CALNAME:Fishing Trip - {$guiding->title}\r\n";
+            $icalContent .= "X-WR-CALDESC:Fishing trip with {$guide->firstname} {$guide->lastname}\r\n";
+            
+            // Generate event content using existing method
+            $icalContent .= $this->generateEventContent($event, null); // Pass null as feed is not needed for single event
+            
+            $icalContent .= "END:VCALENDAR\r\n";
+            
+            return $icalContent;
+            
+        } catch (\Exception $e) {
+            Log::error('Failed to generate single booking ICS', [
+                'booking_id' => $booking->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return '';
+        }
+    }
+
+    /**
+     * Get or create iCal feed for a booking (for either user or guide)
+     * 
+     * @param Booking $booking
+     * @param bool $forGuide Whether this is for the guide (true) or user (false)
+     * @return UserICalFeed|null
+     */
+    public function getOrCreateUserICalFeedForBooking(Booking $booking, bool $forGuide = false): ?UserICalFeed
+    {
+        // Determine which user to get the feed for
+        $user = $forGuide ? $booking->guiding?->user : $booking->user;
+        
+        if (!$user) {
+            $userType = $forGuide ? 'guide' : 'user';
+            Log::warning("No {$userType} found for booking", ['booking_id' => $booking->id]);
+            return null;
+        }
+        
+        // For guest users (UserGuest model), skip feed creation
+        if (!$forGuide && $booking->is_guest) {
+            Log::info('Guest user detected - skipping iCal feed creation', [
+                'booking_id' => $booking->id,
+                'user_type' => get_class($user)
+            ]);
+            return null;
+        }
+        
+        $userType = $forGuide ? 'guide' : 'user';
+        Log::info("Getting iCal feed for {$userType}", [
+            'user_id' => $user->id,
+            'booking_id' => $booking->id,
+            'user_type' => get_class($user)
+        ]);
+        
+        // Always try to find existing active feed first (reuse existing feeds)
+        $existingFeed = UserICalFeed::where('user_id', $user->id)
+            ->where('feed_type', 'bookings_only')
+            ->where('is_active', true)
+            ->first();
+            
+        if ($existingFeed) {
+            Log::info("Reusing existing iCal feed for {$userType}", ['feed_id' => $existingFeed->id]);
+            return $existingFeed;
+        }
+        
+        // Only create new feed if no existing feed found
+        try {
+            $feedName = $forGuide ? 'My Fishing Tours' : 'My Fishing Trips';
+            $feed = $this->createUserFeed($user, [
+                'name' => $feedName,
+                'feed_type' => 'bookings_only',
+                'expires_at' => null // No expiration
+            ]);
+            
+            Log::info("Created new iCal feed for {$userType} (first time)", ['feed_id' => $feed->id]);
+            return $feed;
+        } catch (\Exception $e) {
+            // Log error but don't fail the email
+            Log::error("Failed to create iCal feed for {$userType}", [
+                'user_id' => $user->id,
+                'booking_id' => $booking->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return null;
+        }
+    }
+
+    /**
+     * Generate ICS content and get/create feed for a booking in one call
+     * 
+     * @param Booking $booking
+     * @param bool $forGuide Whether this is for the guide (true) or user (false)
+     * @return array ['icsContent' => string, 'userICalFeed' => UserICalFeed|null]
+     */
+    public function generateBookingICSAndFeed(Booking $booking, bool $forGuide = false): array
+    {
+        return [
+            'icsContent' => $this->generateSingleBookingICS($booking),
+            'userICalFeed' => $this->getOrCreateUserICalFeedForBooking($booking, $forGuide)
+        ];
     }
 } 

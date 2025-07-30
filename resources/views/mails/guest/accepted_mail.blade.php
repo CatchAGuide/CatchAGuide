@@ -45,27 +45,39 @@
                 </div>
             </div>
 
+            <div class="order-details" style="border: 1px solid rgb(132, 132, 132); padding: 10px; border-radius: 12px; font-family: 'Morrison', sans-serif;">
+                <h4 style="font-family: 'Morrison', sans-serif;">📅 {{ __('emails.calendar_add_to_calendar') }}</h4>
+                <div style="margin-top: 10px; font-family: 'Morrison', sans-serif;">
+                    <p style="font-size: 14px; font-family: 'Morrison', sans-serif; margin-bottom: 10px;">
+                        {{ __('emails.calendar_add_to_calendar_text') }}
+                    </p>
+                    <ul style="font-size: 14px; font-family: 'Morrison', sans-serif; margin-bottom: 15px;">
+                        <li>{{ __('emails.calendar_download_ics') }}</li>
+                        @if(isset($userICalFeed) && $userICalFeed)
+                        <li>{{ __('emails.calendar_subscribe_feed') }}</li>
+                        @endif
+                    </ul>
+                    @if(isset($userICalFeed) && $userICalFeed)
+                    <div style="text-align: center; margin-top: 15px;">
+                        <a class="btn-theme" style="background-color: #e8604c; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; font-family: 'Morrison', sans-serif; display: inline-block; margin-right: 10px;" href="{{ $userICalFeed->getFeedUrl() }}" target="_blank">📅 {{ __('emails.calendar_subscribe_feed_button') }}</a>
+                        <a class="btn-theme" style="background-color: #e8604c; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; font-family: 'Morrison', sans-serif; display: inline-block;" href="{{ $userICalFeed->getSecureFeedUrl() }}" target="_blank">🔒 {{ __('emails.calendar_secure_feed_button') }}</a>
+                    </div>
+                    <p style="font-size: 12px; font-family: 'Morrison', sans-serif; margin-top: 10px; color: #6c757d;">
+                        <strong>{{ __('emails.calendar_feed_url') }}</strong> {{ $userICalFeed->getFeedUrl() }}<br>
+                        <strong>{{ __('emails.calendar_secure_feed_url') }}</strong> {{ $userICalFeed->getSecureFeedUrl() }}
+                    </p>
+                    @else
+                    <p style="font-size: 12px; font-family: 'Morrison', sans-serif; margin-top: 10px; color: #6c757d;">
+                        <em>{{ __('emails.calendar_guest_user_note') }}</em>
+                    </p>
+                    @endif
+                </div>
+            </div>
+
             <div style="margin-top: 20px; font-family: 'Morrison', sans-serif;">
                 <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
                     @lang('emails.guest_booking_request_accepted_text_4') 
                 </p>
-                
-                @if($icsContent)
-                <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; margin: 20px 0; font-family: 'Morrison', sans-serif;">
-                    <h4 style="color: #313041; margin-bottom: 10px; font-family: 'Morrison', sans-serif;">
-                        <i class="fas fa-calendar-alt" style="margin-right: 8px;"></i>
-                        @lang('emails.calendar_integration_title', ['default' => 'Calendar Integration'])
-                    </h4>
-                    <p style="font-size: 14px; margin-bottom: 10px; font-family: 'Morrison', sans-serif;">
-                        @lang('emails.calendar_integration_text', ['default' => 'We\'ve attached a calendar file (.ics) to this email. You can import this into your calendar application to automatically add this fishing trip to your schedule.'])
-                    </p>
-                    <p style="font-size: 13px; color: #6c757d; margin-bottom: 0; font-family: 'Morrison', sans-serif;">
-                        <strong>@lang('emails.calendar_supported_apps', ['default' => 'Supported applications:'])</strong> 
-                        @lang('emails.calendar_apps_list', ['default' => 'Google Calendar, Apple Calendar, Outlook, and most other calendar apps'])
-                    </p>
-                </div>
-                @endif
-                
                 <div style="text-align: center; margin-top: 2rem; font-family: 'Morrison', sans-serif;">
                     <a class="btn-theme" style="background-color: #e8604c; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px; font-family: 'Morrison', sans-serif; display: inline-block;" href="{{route('additional.contact')}}" target="_blank">@lang('emails.contact_us')</a>
                 </div>
