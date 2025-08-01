@@ -186,7 +186,7 @@ class Checkout extends Component
             'postal' => ($user->information->postal ?? ''),
             'city' => ($user->information->city ?? ''),
             'country' => ($user->information->country ?? 'Deutschland'),
-            'countryCode' => '+49',
+            'countryCode' => ($user->phone_country_code ?? '+49'),
             'phone' => ($user->phone ?? ''),
             'email' => ($user->email ?? ''),
             'createAccount' => false,
