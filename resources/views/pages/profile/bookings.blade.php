@@ -1074,7 +1074,7 @@
                                                 </div>
                                                 @if($booking->guiding->user->phone)
                                                     <div class="detail-row">
-                                                        <strong>Phone:</strong> {{ $booking->guiding->user->phone }}
+                                                        <strong>Phone:</strong> {{ $booking->guiding->user->phone_country_code }} {{ $booking->guiding->user->phone }}
                                                     </div>
                                                 @endif
                                             @endif
@@ -1111,7 +1111,7 @@
                                     </div>
                                     @if($booking->guiding->user->phone)
                                         <div class="contact-info">
-                                            <strong>Phone:</strong> {{ $booking->guiding->user->phone }}
+                                            <strong>Phone:</strong> {{ $booking->guiding->user->phone_country_code }} {{ $booking->guiding->user->phone }}
                                         </div>
                                     @endif
                                 </div>
