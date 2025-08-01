@@ -27,6 +27,7 @@ class User extends Authenticatable
         'lastname',
         'email',
         'phone',
+        'phone_country_code',
         'password',
         'is_active',
         'is_guide',
@@ -217,5 +218,19 @@ class User extends Authenticatable
             return false;
         }
         return true;
+    }
+
+    /**
+     * Get the full phone number with country code
+     * 
+     * @return string
+     */
+    public function getFullPhoneNumber(): string
+    {
+        if ($this->phone_country_code && $this->phone) {
+            return $this->phone_country_code . ' ' . $this->phone;
+        }
+        
+        return $this->phone ?? '';
     }
 }

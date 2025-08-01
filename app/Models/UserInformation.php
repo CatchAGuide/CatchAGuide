@@ -12,6 +12,7 @@ class UserInformation extends Model
     protected $fillable = [
         'birthday',
         'phone',
+        'phone_country_code',
         'address',
         'address_number',
         'postal',
@@ -37,4 +38,17 @@ class UserInformation extends Model
         return $this->hasOne(User::class);
     }
 
+    /**
+     * Get the full phone number with country code
+     * 
+     * @return string
+     */
+    public function getFullPhoneNumber(): string
+    {
+        if ($this->phone_country_code && $this->phone) {
+            return $this->phone_country_code . ' ' . $this->phone;
+        }
+        
+        return $this->phone ?? '';
+    }
 }

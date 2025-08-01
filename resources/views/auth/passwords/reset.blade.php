@@ -117,14 +117,14 @@
                 <div class="col-md-8 login-form-2">
 
 
-                    <h1 class="h2" style="color: #FFFFFF">{{ __('Passwort zurücksetzen') }}</h1>
+                    <h1 class="h2" style="color: #FFFFFF">{{ __('global.Reset Password') }}</h1>
 
                         <form method="POST" action="{{ route('password.update') }}">
                             @csrf
                             <input type="hidden" name="token" value="{{ $token }}">
                             <div class="row mb-3">
                                 <label for="email"
-                                       class="col-md-4 col-form-label text-md-end">{{ __('E-Mail Addresse') }}</label>
+                                       class="col-md-4 col-form-label text-md-end">{{ __('global.E-Mail Address') }}</label>
                                 <div class="col-md-6">
                                     <input id="email" type="email"
                                            class="form-control @error('email') is-invalid @enderror" name="email"
@@ -138,7 +138,7 @@
                             </div>
                             <div class="row mb-3">
                                 <label for="password"
-                                       class="col-md-4 col-form-label text-md-end">{{ __('Passwort') }}</label>
+                                       class="col-md-4 col-form-label text-md-end">{{ __('global.Password') }}</label>
                                 <div class="col-md-6">
                                     <input id="password" type="password"
                                            class="form-control @error('password') is-invalid @enderror" name="password"
@@ -153,7 +153,7 @@
                             </div>
                             <div class="row mb-3">
                                 <label for="password-confirm"
-                                       class="col-md-4 col-form-label text-md-end">{{ __('Neues Passwort') }}</label>
+                                       class="col-md-4 col-form-label text-md-end">{{ __('global.New Password') }}</label>
 
                                 <div class="col-md-6">
                                     <input id="password-confirm" type="password" class="form-control"
@@ -164,7 +164,7 @@
                             <div class="row mb-0">
                                 <div class="col-md-6 offset-md-4">
                                     <button type="submit" class="btnSubmit">
-                                        {{ __('Passwort zurücksetzen') }}
+                                        {{ __('global.Set New Password') }}
                                     </button>
                                 </div>
                             </div>
