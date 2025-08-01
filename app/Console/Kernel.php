@@ -15,11 +15,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('bookings:send-guide-reminders')->hourly();
         $schedule->command('update:booking-status')->hourly();
         $schedule->command('bookings:send-guest-reviews')->hourly();
         $schedule->command('bookings:send-guest-tour-reminders')->hourly();
-        // $schedule->command('bookings:send-guide-upcoming-tour-reminders')->hourly();
+        // $schedule->command('bookings:send-guide-reminders')->hourly();
         // $schedule->command('bookings:send-guide-reminders-12hrs')->hourly();
       
         // Generate guiding filter mappings every hour
@@ -34,6 +33,13 @@ class Kernel extends ConsoleKernel
                 ->withoutOverlapping()
                 ->runInBackground();
                 
+        // Clean up guiding images weekly on Sundays at 3 AM
+        // $schedule->command('guidings:cleanup-images --db-only --backup')
+        //         ->weeklyOn(0, '03:00')
+        //         ->withoutOverlapping()
+        //         ->runInBackground()
+        //         ->appendOutputTo(storage_path('logs/image-cleanup.log'));
+                
         $schedule->command('generate:sitemap')->daily()->runInBackground();
         
         // Process vacation translations for admin changes daily (defaults to EN and DE languages)
@@ -41,6 +47,11 @@ class Kernel extends ConsoleKernel
                 ->daily()
                 ->withoutOverlapping()
                 ->runInBackground();
+
+        $schedule->command('guiding:translate --detect-language')
+                        ->daily()
+                        ->withoutOverlapping()
+                        ->runInBackground();
     }
 
     /**

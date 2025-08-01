@@ -13,7 +13,7 @@ class AddLanguageToBooking extends Migration
      */
     public function up()
     {
-        Schema::table('booking', function (Blueprint $table) {
+        Schema::table('bookings', function (Blueprint $table) {
             $table->string('language')->nullable()->after('phone_country_code');
         });
     }
@@ -25,7 +25,7 @@ class AddLanguageToBooking extends Migration
      */
     public function down()
     {
-        Schema::table('booking', function (Blueprint $table) {
+        Schema::table('bookings', function (Blueprint $table) {
             $table->dropColumn('language');
         });
     }
