@@ -174,6 +174,22 @@ class User extends Authenticatable
     /**
      * @return HasMany
      */
+    public function icalFeeds(): HasMany
+    {
+        return $this->hasMany(ICalFeed::class);
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function userIcalFeeds(): HasMany
+    {
+        return $this->hasMany(UserICalFeed::class);
+    }
+
+    /**
+     * @return HasMany
+     */
     public function wishlist_items(): HasMany
     {
         return $this->hasMany(WishlistItem::class);

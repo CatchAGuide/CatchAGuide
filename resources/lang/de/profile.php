@@ -78,6 +78,67 @@ return [
     'recent_activity' => 'Letzte Anmelde-Aktivität',
     'coming_soon' => 'Bald verfügbar',
 
+    // Third-Party Integrations
+    'third_party_integrations' => 'Drittanbieter-Integrationen',
+    'third_party_integrations_description' => 'Verbinden Sie Ihre Konten mit externen Diensten, um Ihre Erfahrung zu verbessern und die Kalenderverwaltung zu automatisieren.',
+    'status_connected' => 'Verbunden',
+    'status_disconnected' => 'Nicht verbunden',
+    'sync_now' => 'Jetzt synchronisieren',
+    'disconnect' => 'Trennen',
+
+    // iCal Integration
+    'ical_title' => 'iCal Feed Integration',
+    'ical_description' => 'Externe Kalenderfeeds importieren',
+    'ical_benefit_1' => 'Ereignisse aus externen Kalendern importieren',
+    'ical_benefit_2' => 'Nur Buchungen oder alle Ereignisse filtern',
+    'ical_benefit_3' => 'Automatische periodische Synchronisation',
+    'add_ical_feed' => 'iCal-Feed hinzufügen',
+    'manage_ical_feeds' => 'iCal-Feeds verwalten',
+    'ical_feed_name' => 'Feed-Name',
+    'ical_feed_url' => 'iCal-Feed-URL',
+    'sync_type' => 'Synchronisationstyp',
+    'sync_type_help' => 'Wählen Sie, welche Art von Ereignissen aus diesem Feed importiert werden sollen',
+    'all_events' => 'Alle Ereignisse',
+    'bookings_only' => 'Nur Buchungen',
+    'validate_url' => 'URL validieren',
+    'add_feed' => 'Feed hinzufügen',
+    'edit_feed' => 'Feed bearbeiten',
+    'delete_feed' => 'Feed löschen',
+    'feed_added_successfully' => 'iCal-Feed erfolgreich hinzugefügt',
+    'feed_updated_successfully' => 'iCal-Feed erfolgreich aktualisiert',
+    'feed_deleted_successfully' => 'iCal-Feed erfolgreich gelöscht',
+    'feed_synced_successfully' => 'iCal-Feed erfolgreich synchronisiert',
+    'url_validation_success' => 'Gültige iCal-Feed-URL',
+    'url_validation_error' => 'Ungültige iCal-Feed-URL',
+    'no_feeds_configured' => 'Keine iCal-Feeds konfiguriert',
+    'last_sync' => 'Letzte Synchronisation',
+    'never_synced' => 'Nie synchronisiert',
+    'sync_failed' => 'Synchronisation fehlgeschlagen',
+    'events_synced' => 'Ereignisse synchronisiert',
+    'feed_status' => 'Feed-Status',
+    
+    // Generate iCal Feed
+    'generate_ical_title' => 'iCal-Feed generieren',
+    'generate_ical_description' => 'Erstellen Sie Ihre eigene iCal-Feed-URL mit OTP-Sicherheit',
+    'generate_ical_benefit_1' => 'Generieren Sie sichere iCal-Feed-URLs für externe Kalender',
+    'generate_ical_benefit_2' => 'OTP-basierte Sicherheit für Feed-Zugriff',
+    'generate_ical_benefit_3' => 'Teilen Sie Ihren Kalender sicher mit anderen',
+    'generate_new_feed' => 'Neuen Feed generieren',
+    'manage_feeds' => 'Feeds verwalten',
+    'active_feeds' => 'Aktive Feeds',
+    'no_feeds' => 'Keine Feeds',
+    
+    // Generate iCal Modal
+    'generate_new_ical_feed' => 'Neuen iCal-Feed generieren',
+    'feed_name_help' => 'Geben Sie einen beschreibenden Namen für Ihren iCal-Feed ein',
+    'feed_type_help' => 'Wählen Sie, welche Art von Ereignissen in den Feed aufgenommen werden sollen',
+    'custom_schedule' => 'Benutzerdefinierter Zeitplan',
+    'expires_at' => 'Läuft ab am',
+    'expires_at_help' => 'Optional: Legen Sie fest, wann dieser Feed ablaufen soll (leer lassen für kein Ablaufdatum)',
+    'generate_feed' => 'Feed generieren',
+    'manage_user_ical_feeds' => 'Ihre iCal-Feeds verwalten',
+    'close' => 'Schließen',
+
      /**
      *
      *  book by me
@@ -416,6 +477,19 @@ return [
     'schedule-details' => 'Zeitplandetails',
     'click-date-to-view-details' => 'Klicke auf ein Datum, um Details anzuzeigen',
     'select-date-on-calendar-above' => 'Wähle ein Datum im oberen Kalender, um Details anzuzeigen',
+    
+    // Calendar Integrations
+    'calendar_integrations' => 'Kalender-Integrationen',
+    'ical_import_title' => 'Externen Kalender importieren',
+    'ical_import_description' => 'Externe iCal-Feeds verbinden, um Ereignisse zu importieren',
+    'ical_import_benefit_1' => 'Ereignisse aus externen Kalenderanwendungen importieren',
+    'ical_import_benefit_2' => 'Nur Buchungen oder alle Ereignisse filtern',
+    'ical_import_benefit_3' => 'Automatische periodische Synchronisation',
+    'ical_export_title' => 'Ihren Kalender teilen',
+    'ical_export_description' => 'iCal-Feeds generieren, um Ihren Kalender zu teilen',
+    'ical_export_benefit_1' => 'Sichere iCal-Feed-URLs für externe Kalender generieren',
+    'ical_export_benefit_2' => 'OTP-basierte Sicherheit für Feed-Zugriff',
+    'ical_export_benefit_3' => 'Teilen Sie Ihren Kalender sicher mit anderen',
 ];
 
 ?>

@@ -2,12 +2,6 @@
 
 @section('title', __('profile.calendar'))
 
-
-
-
-
-
-
 @section('profile-content')
 
     <!-- Header Section -->
@@ -146,7 +140,337 @@
             </div>
         </div>
     </div>
+    
+    <!-- iCal Integration Section -->
+    <div class="row mt-4 mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i>
+                        @lang('profile.calendar_integrations')
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <p class="text-muted mb-3">Manage your calendar integrations - import external feeds and share your calendar</p>
+                        
+                        <div class="d-flex justify-content-center gap-3 flex-wrap">
+                            <!-- Import Button -->
+                            <button type="button" class="btn btn-outline-primary" onclick="showICalImportModal()">
+                                <i class="fas fa-download me-2"></i>
+                                Import External Calendar
+                            </button>
+                            
+                            <!-- Export Button -->
+                            <button type="button" class="btn btn-outline-success" onclick="showGenerateICalModal()">
+                                <i class="fas fa-share-alt me-2"></i>
+                                Share Your Calendar
+                            </button>
+                            
+                            <!-- Manage Feeds Button -->
+                            <button type="button" class="btn btn-outline-info" onclick="showUnifiedICalModal()">
+                                <i class="fas fa-list me-2"></i>
+                                Manage All Feeds
+                            </button>
+                            
+                            <!-- Sync All Button -->
+                            <button type="button" class="btn btn-primary" onclick="syncAllIntegrations()">
+                                <i class="fas fa-sync me-2"></i>
+                                Sync All
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Status Summary -->
+                    <div class="row text-center">
+                        <div class="col-md-6">
+                            <div class="border rounded p-3">
+                                <h6 class="text-primary">
+                                    <i class="fas fa-download me-2"></i>
+                                    Import Status
+                                </h6>
+                                <div class="d-flex justify-content-center gap-3">
+                                    <span class="badge bg-success">
+                                        Active: <span id="importCount">0</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border rounded p-3">
+                                <h6 class="text-success">
+                                    <i class="fas fa-share-alt me-2"></i>
+                                    Export Status
+                                </h6>
+                                <div class="d-flex justify-content-center gap-3">
+                                    <span class="badge bg-info">
+                                        Active: <span id="exportCount">0</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Unified iCal Management Modal -->
+    <div class="modal fade" id="unifiedICalModal" tabindex="-1" aria-labelledby="unifiedICalModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="unifiedICalModalLabel">
+                        <i class="fas fa-calendar-alt me-2"></i>
+                        Manage iCal Feeds
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Tab Navigation -->
+                    <ul class="nav nav-tabs" id="iCalTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="import-tab" data-bs-toggle="tab" data-bs-target="#import-tab-pane" type="button" role="tab" aria-controls="import-tab-pane" aria-selected="true">
+                                <i class="fas fa-download me-2"></i>
+                                Import Feeds
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="export-tab" data-bs-toggle="tab" data-bs-target="#export-tab-pane" type="button" role="tab" aria-controls="export-tab-pane" aria-selected="false">
+                                <i class="fas fa-share-alt me-2"></i>
+                                Export Feeds
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="iCalTabsContent">
+                        <!-- Import Tab -->
+                        <div class="tab-pane fade show active" id="import-tab-pane" role="tabpanel" aria-labelledby="import-tab" tabindex="0">
+                            <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
+                                <h6 class="mb-0">Imported iCal Feeds</h6>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="showICalImportModal()">
+                                    <i class="fas fa-plus me-1"></i> Add New Feed
+                                </button>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="importFeedsTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>URL</th>
+                                            <th>Last Sync</th>
+                                            <th>Events</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="importFeedsTableBody">
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted py-4">
+                                                <i class="fas fa-calendar-plus fa-2x mb-2"></i>
+                                                <p>No import feeds configured yet</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Export Tab -->
+                        <div class="tab-pane fade" id="export-tab-pane" role="tabpanel" aria-labelledby="export-tab" tabindex="0">
+                            <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
+                                <h6 class="mb-0">Generated iCal Feeds</h6>
+                                <button type="button" class="btn btn-success btn-sm" onclick="showGenerateICalModal()">
+                                    <i class="fas fa-plus me-1"></i> Generate New Feed
+                                </button>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="exportFeedsTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Type</th>
+                                            <th>Public URL</th>
+                                            <th>Current OTP</th>
+                                            <th>Expires</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="exportFeedsTableBody">
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted py-4">
+                                                <i class="fas fa-calendar-plus fa-2x mb-2"></i>
+                                                <p>No export feeds generated yet</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="syncAllIntegrations()">
+                        <i class="fas fa-sync me-1"></i> Sync All
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- iCal Import Modal -->
+    <div class="modal fade" id="icalImportModal" tabindex="-1" aria-labelledby="icalImportModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="icalImportModalLabel">@lang('profile.add_ical_feed')</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="icalImportForm">
+                        <div class="mb-3">
+                            <label for="ical_feed_name" class="form-label">@lang('profile.ical_feed_name') <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="ical_feed_name" name="name" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="ical_feed_url" class="form-label">@lang('profile.ical_feed_url') <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="url" class="form-control" id="ical_feed_url" name="feed_url" required>
+                                <button type="button" class="btn btn-outline-secondary" id="validateUrlBtn" onclick="validateICalUrl()">
+                                    <i class="fas fa-check"></i> @lang('profile.validate_url')
+                                </button>
+                            </div>
+                            <div id="urlValidationResult" class="mt-2"></div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="sync_type" class="form-label">@lang('profile.sync_type') <span class="text-danger">*</span></label>
+                            <select class="form-select" id="sync_type" name="sync_type" required>
+                                <option value="all_events">@lang('profile.all_events')</option>
+                                <option value="bookings_only">@lang('profile.bookings_only')</option>
+                            </select>
+                            <div class="form-text">@lang('profile.sync_type_help')</div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>@lang('profile.ical_import_title'):</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>@lang('profile.ical_import_benefit_1')</li>
+                                <li>@lang('profile.ical_import_benefit_2')</li>
+                                <li>@lang('profile.ical_import_benefit_3')</li>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@lang('profile.cancel')</button>
+                    <button type="button" class="btn btn-primary" id="saveICalBtn" onclick="saveICalFeed()" style="display: none;">
+                        <i class="fas fa-save"></i> @lang('profile.add_feed')
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- iCal Feeds List Modal -->
+    <div class="modal fade" id="icalFeedsListModal" tabindex="-1" aria-labelledby="icalFeedsListModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="icalFeedsListModalLabel">@lang('profile.manage_ical_feeds')</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="icalFeedsList">
+                        <div class="text-center">
+                            <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
+                            <p class="mt-2">Loading feeds...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@lang('profile.close')</button>
+                    <button type="button" class="btn btn-primary" onclick="openICalImportModal()">
+                        <i class="fas fa-plus"></i> @lang('profile.add_ical_feed')
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generate iCal Feed Modal -->
+    <div class="modal fade" id="generateICalModal" tabindex="-1" aria-labelledby="generateICalModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="generateICalModalLabel">@lang('profile.generate_new_ical_feed')</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="generateICalForm">
+                        <div class="mb-3">
+                            <label for="feed_name" class="form-label">@lang('profile.feed_name') *</label>
+                            <input type="text" class="form-control" id="feed_name" name="name" required>
+                            <div class="form-text">@lang('profile.feed_name_help')</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="feed_type" class="form-label">@lang('profile.feed_type') *</label>
+                            <select class="form-select" id="feed_type" name="feed_type" required>
+                                <option value="bookings_only">@lang('profile.bookings_only')</option>
+                                <option value="all_events">@lang('profile.all_events')</option>
+                                <option value="custom_schedule">@lang('profile.custom_schedule')</option>
+                            </select>
+                            <div class="form-text">@lang('profile.feed_type_help')</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="expires_at" class="form-label">@lang('profile.expires_at')</label>
+                            <input type="datetime-local" class="form-control" id="expires_at" name="expires_at">
+                            <div class="form-text">@lang('profile.expires_at_help')</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@lang('profile.cancel')</button>
+                    <button type="button" class="btn btn-primary" onclick="generateICalFeed()">
+                        <i class="fas fa-plus"></i> @lang('profile.generate_feed')
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User iCal Feeds List Modal -->
+    <div class="modal fade" id="userICalFeedsListModal" tabindex="-1" aria-labelledby="userICalFeedsListModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userICalFeedsListModalLabel">@lang('profile.manage_user_ical_feeds')</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="userICalFeedsList">
+                        <div class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@lang('profile.close')</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -199,6 +523,115 @@
     margin-right: 10px;
 }
 
+/* Integration Cards Styling */
+.integration-card {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.integration-section {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 16px;
+    height: 100%;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.integration-section:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.integration-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    gap: 12px;
+}
+
+.integration-logo {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+.integration-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.integration-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #212529;
+}
+
+.integration-description {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+.integration-status {
+    flex-shrink: 0;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-badge.connected {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.status-badge.disconnected {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.integration-content {
+    margin-bottom: 16px;
+}
+
+.integration-benefits {
+    font-size: 0.875rem;
+    color: #495057;
+    margin-bottom: 8px;
+}
+
+.integration-benefits:last-child {
+    margin-bottom: 0;
+}
+
+.integration-actions {
+    margin-top: auto;
+}
+
+.btn-group .btn {
+    flex: 1;
+}
+
 /* Tour Filter Button Styles */
 .tour-filter-btn {
     background: white !important;
@@ -218,89 +651,7 @@
     box-shadow: 0 0 0 0.2rem rgba(49, 48, 65, 0.1) !important;
 }
 
-/* Scrollable Dropdown Menu */
-.dropdown-menu {
-    max-height: 300px !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    border: 1px solid #e9ecef !important;
-    border-radius: 8px !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-    padding: 8px 0 !important;
-}
-
-/* Custom Scrollbar for Dropdown */
-.dropdown-menu::-webkit-scrollbar {
-    width: 6px;
-}
-
-.dropdown-menu::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.dropdown-menu::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
-}
-
-.dropdown-menu::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-}
-
-/* Dropdown Item Styling */
-.dropdown-menu .dropdown-item {
-    padding: 8px 16px !important;
-    transition: all 0.2s ease !important;
-    border-radius: 6px !important;
-    margin: 2px 8px !important;
-    border: none !important;
-}
-
-.dropdown-menu .dropdown-item:hover,
-.dropdown-menu .dropdown-item:focus {
-    background-color: #f8f9fa !important;
-    color: #313041 !important;
-}
-
-.dropdown-menu .dropdown-item.active {
-    background-color: #313041 !important;
-    color: white !important;
-}
-
-/* Custom Event Actions */
-.custom-event-actions {
-    display: flex;
-    gap: 5px;
-}
-
-.custom-event-actions .btn {
-    padding: 4px 8px;
-    font-size: 12px;
-    line-height: 1;
-    border-radius: 4px;
-}
-
-.custom-event-actions .btn-outline-primary {
-    border-color: #0d6efd;
-    color: #0d6efd;
-}
-
-.custom-event-actions .btn-outline-primary:hover {
-    background-color: #0d6efd;
-    color: white;
-}
-
-.custom-event-actions .btn-outline-danger {
-    border-color: #dc3545;
-    color: #dc3545;
-}
-
-.custom-event-actions .btn-outline-danger:hover {
-    background-color: #dc3545;
-    color: white;
-}
-
+/* Calendar Panel Styles */
 .calendar-panel, .tour-filter-panel {
     background: white;
     padding: 20px;
@@ -371,6 +722,79 @@
 .legend-custom { background: #17a2b8; border-color: #17a2b8; }
 .legend-available { background: #28a745; border-color: #28a745; }
 .legend-unavailable { background: #dc3545; border-color: #dc3545; }
+
+/* Side Detail Panel */
+.side-detail-panel {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+    max-height: 500px;
+}
+
+.detail-panel-header {
+    background: linear-gradient(135deg, #313041, #2c5aa0);
+    color: white !important;
+    padding: 12px 15px;
+    position: relative;
+}
+
+.detail-panel-header h5,
+.detail-panel-header p {
+    color: white !important;
+    margin: 0;
+}
+
+.detail-panel-header h5 {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.detail-panel-body {
+    padding: 15px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.close-panel-btn {
+    position: absolute;
+    top: 8px; right: 12px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.close-panel-btn:hover {
+    transform: scale(1.2);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .calendar-panel, .tour-filter-panel {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .calendar-container {
+        min-height: 400px;
+    }
+    
+    .integration-section {
+        margin-bottom: 20px;
+    }
+    
+    .side-detail-panel {
+        max-height: 300px;
+    }
+    
+    .detail-panel-body {
+        max-height: 250px;
+        padding: 10px;
+    }
+}
 
 /* Litepicker Calendar Day Styling */
 .litepicker {
@@ -546,70 +970,6 @@
 .status-vacation { background: #6f42c1; color: white; }
 .status-custom { background: #20c997; color: white; }
 
-.side-detail-panel {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    overflow: hidden;
-    max-height: 500px;
-}
-
-.detail-panel-header {
-    background: linear-gradient(135deg, #313041, #2c5aa0);
-    color: white !important;
-    padding: 12px 15px;
-    position: relative;
-}
-
-.detail-panel-header h5,
-.detail-panel-header p {
-    color: white !important;
-    margin: 0;
-}
-
-.detail-panel-header h5 {
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.detail-panel-body {
-    padding: 15px;
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-.detail-content {
-    min-height: auto;
-}
-
-.close-panel-btn {
-    position: absolute;
-    top: 8px; right: 12px;
-    background: none;
-    border: none;
-    color: white;
-    font-size: 18px;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-}
-
-.close-panel-btn:hover {
-    transform: scale(1.2);
-}
-
-/* Detail Panel Content Styling */
-.side-detail-cards {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.detail-panel-actions {
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid #e9ecef;
-}
-
 /* Tour Filter Dropdown Styles */
 .tour-filter-card-dropdown {
     display: flex;
@@ -667,444 +1027,78 @@
     background-color: rgba(49, 48, 65, 0.1);
 }
 
-/* Professional Modal Styles */
-.schedule-modal .modal-content {
-    border: none;
-    border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-    overflow: hidden;
+/* Scrollable Dropdown Menu */
+.dropdown-menu {
+    max-height: 300px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    border: 1px solid #e9ecef !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+    padding: 8px 0 !important;
 }
 
-.schedule-modal-header {
-    background: linear-gradient(135deg, #313041 0%, #2c5aa0 100%);
-    color: white;
-    border: none;
-    padding: 24px 30px;
-    position: relative;
+/* Custom Scrollbar for Dropdown */
+.dropdown-menu::-webkit-scrollbar {
+    width: 6px;
 }
 
-.modal-header-content h4 {
-    font-size: 22px;
-    font-weight: 700;
-    margin: 0;
-    color: white;
+.dropdown-menu::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
 }
 
-.modal-subtitle {
-    font-size: 14px;
-    opacity: 0.9;
-    margin-top: 4px;
+.dropdown-menu::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
 }
 
-.btn-close-white {
-    filter: invert(1) grayscale(100%) brightness(200%);
-    opacity: 0.8;
+.dropdown-menu::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
 }
 
-.btn-close-white:hover {
-    opacity: 1;
+/* Dropdown Item Styling */
+.dropdown-menu .dropdown-item {
+    padding: 8px 16px !important;
+    transition: all 0.2s ease !important;
+    border-radius: 6px !important;
+    margin: 2px 8px !important;
+    border: none !important;
 }
 
-.schedule-modal-body {
-    padding: 30px;
-    background: #fafbfc;
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu .dropdown-item:focus {
+    background-color: #f8f9fa !important;
+    color: #313041 !important;
 }
 
-/* Instructions Card */
-.instructions-card {
-    background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-    border: 1px solid #e1f5fe;
-    border-radius: 12px;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
+.dropdown-menu .dropdown-item.active {
+    background-color: #313041 !important;
+    color: white !important;
 }
 
-.instructions-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #2196f3, #9c27b0);
-}
-
-.instruction-icon {
+/* Integration Icons */
+.integration-icon {
     width: 40px;
     height: 40px;
-    background: linear-gradient(135deg, #2196f3, #9c27b0);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 16px;
-    margin-right: 16px;
-    flex-shrink: 0;
-}
-
-.instruction-content h6 {
-    color: #1976d2;
-    font-weight: 600;
-    margin-bottom: 12px;
-    font-size: 16px;
-}
-
-.instruction-list {
-    margin: 0;
-    padding-left: 16px;
-    color: #424242;
-    line-height: 1.6;
-}
-
-.instruction-list li {
-    margin-bottom: 8px;
-    font-size: 14px;
-}
-
-.instruction-list li:last-child {
-    margin-bottom: 0;
-}
-
-/* Form Sections */
-.form-section {
-    background: white;
-    border-radius: 12px;
-    padding: 24px;
-    border: 1px solid #e5e7eb;
-    transition: all 0.3s ease;
-}
-
-.form-section:hover {
-    border-color: #d1d5db;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.form-label-main {
-    font-size: 16px;
-    font-weight: 600;
-    color: #1f2937;
-    margin-bottom: 6px;
-    display: block;
-}
-
-.form-label-secondary {
-    font-size: 14px;
-    font-weight: 500;
-    color: #374151;
-    margin-bottom: 6px;
-    display: block;
-}
-
-.form-help-text {
-    font-size: 13px;
-    color: #6b7280;
-    margin-bottom: 16px;
-    line-height: 1.5;
-}
-
-.form-control-modern {
-    border: 2px solid #e5e7eb;
     border-radius: 8px;
-    padding: 12px 16px;
-    font-size: 14px;
-    transition: all 0.3s ease;
-    background: #fafbfc;
-}
-
-.form-control-modern:focus {
-    border-color: #313041;
-    box-shadow: 0 0 0 3px rgba(49, 48, 65, 0.1);
-    background: white;
-}
-
-/* Custom Radio Buttons */
-.custom-radio-group {
-    display: flex;
-    flex-direction: row;
-    gap: 15px;
-}
-
-.custom-radio-option {
-    position: relative;
-    flex: 1;
-}
-
-.custom-radio-option input[type="radio"] {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-}
-
-.custom-radio-label {
-    display: flex;
-    align-items: center;
-    padding: 16px 20px;
-    background: white;
-    border: 2px solid #e5e7eb;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    min-height: 80px;
-    height: 80px;
-}
-
-.custom-radio-label::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, #313041, #2c5aa0);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.custom-radio-label > * {
-    position: relative;
-    z-index: 2;
-}
-
-.custom-radio-option:hover .custom-radio-label {
-    border-color: #313041;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(49, 48, 65, 0.15);
-}
-
-.custom-radio-option input[type="radio"]:checked + .custom-radio-label {
-    border-color: #313041;
-    background: #313041;
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(49, 48, 65, 0.25);
-}
-
-.custom-radio-option input[type="radio"]:checked + .custom-radio-label::before {
-    opacity: 1;
-}
-
-.radio-icon {
-    width: 50px;
-    height: 50px;
-    background: #f3f4f6;
-    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 16px;
     font-size: 18px;
-    color: #313041;
-    transition: all 0.3s ease;
 }
 
-.custom-radio-option input[type="radio"]:checked + .custom-radio-label .radio-icon {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
+/* Unified Integration Card */
+.card-body .row .col-md-6:first-child {
+    border-right: 1px solid #dee2e6;
 }
 
-.radio-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.radio-title {
-    display: block;
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 4px;
-    color: #1f2937;
-    transition: color 0.3s ease;
-}
-
-.custom-radio-option input[type="radio"]:checked + .custom-radio-label .radio-title {
-    color: white;
-}
-
-.radio-description {
-    display: block;
-    font-size: 13px;
-    color: #6b7280;
-    transition: color 0.3s ease;
-}
-
-.custom-radio-option input[type="radio"]:checked + .custom-radio-label .radio-description {
-    color: rgba(255, 255, 255, 0.8);
-}
-
-/* Modal Footer */
-.schedule-modal-footer {
-    background: white;
-    border: none;
-    padding: 20px 30px;
-    display: flex;
-    gap: 12px;
-    justify-content: flex-end;
-}
-
-.btn-cancel {
-    background: #f3f4f6;
-    border: 2px solid #e5e7eb;
-    color: #374151;
-    font-weight: 500;
-    padding: 12px 24px;
-    border-radius: 10px;
-    transition: all 0.3s ease;
-}
-
-.btn-cancel:hover {
-    background: #e5e7eb;
-    border-color: #d1d5db;
-    color: #1f2937;
-    transform: translateY(-1px);
-}
-
-.btn-save {
-    background: linear-gradient(135deg, #313041, #2c5aa0) !important;
-    border: 2px solid #313041 !important;
-    color: white !important;
-    font-weight: 600 !important;
-    padding: 12px 24px;
-    border-radius: 10px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(49, 48, 65, 0.3);
-}
-
-.btn-save:hover,
-.btn-save:focus,
-.btn-save:active {
-    background: linear-gradient(135deg, #2a2938, #254a8a) !important;
-    border-color: #2a2938 !important;
-    color: white !important;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(49, 48, 65, 0.4);
-}
-
-.btn-save:disabled {
-    background: #6c757d !important;
-    border-color: #6c757d !important;
-    color: white !important;
-    opacity: 0.8 !important;
-    transform: none !important;
-    cursor: not-allowed !important;
-    box-shadow: none !important;
-}
-
-/* Mobile Responsiveness */
-    @media (max-width: 768px) {
-        .calendar-panel, .tour-filter-panel {
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-        
-        /* Mobile Dropdown Adjustments */
-        .dropdown-menu {
-            max-height: 250px !important;
-        }
-    
-    .calendar-container {
-        min-height: 400px;
-    }
-    
-    .litepicker {
-        transform: scale(1) !important;
-        font-size: 14px !important;
-    }
-    
-    .litepicker .container__months {
-        flex-direction: column !important;
-    }
-    
-    .litepicker .container__months .month-item {
-        margin: 10px 0 !important;
-    }
-    
-    .litepicker .day-item {
-        width: 36px !important;
-        height: 36px !important;
-        line-height: 36px !important;
-        font-size: 14px !important;
-        margin: 1px !important;
-    }
-    
-    .litepicker .month-item-header {
-        font-size: 16px !important;
-        padding: 10px 0 !important;
-    }
-    
-    .legend-items {
-        gap: 8px;
-        justify-content: flex-start;
-    }
-    
-    .side-detail-panel {
-        max-height: 300px;
-    }
-    
-    .detail-panel-body {
-        max-height: 250px;
-        padding: 10px;
-    }
-    
-    /* Modal Mobile Responsiveness */
-    .schedule-modal-header {
-        padding: 20px;
-    }
-
-    .schedule-modal-body {
-        padding: 20px;
-    }
-
-    .form-section {
-        padding: 20px;
-    }
-
-    .custom-radio-group {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .custom-radio-option {
-        flex: none;
-    }
-
-    .custom-radio-label {
-        padding: 14px 16px;
-        min-height: 70px;
-        height: 70px;
-    }
-
-    .radio-icon {
-        width: 45px;
-        height: 45px;
-        font-size: 16px;
-        margin-right: 12px;
-    }
-
-    .instructions-card {
-        padding: 16px;
-    }
-
-    .instruction-icon {
-        width: 35px;
-        height: 35px;
-        font-size: 14px;
-    }
-
-    .schedule-modal-footer {
-        padding: 16px 20px;
-        flex-direction: column;
-    }
-
-    .btn-cancel,
-    .btn-save {
-        width: 100%;
-        justify-content: center;
+@media (max-width: 768px) {
+    .card-body .row .col-md-6:first-child {
+        border-right: none;
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
     }
 }
 </style>
@@ -1112,6 +1106,666 @@
 @section('js_after')
     <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
     <script>
+        // iCal Integration Functions
+        function openICalImportModal() {
+            const modal = new bootstrap.Modal(document.getElementById('icalImportModal'));
+            modal.show();
+        }
+
+        // Validate iCal URL
+        function validateICalUrl() {
+            console.log('validateICalUrl function called'); // Debug log
+            
+            const url = document.getElementById('ical_feed_url').value.trim();
+            const button = document.getElementById('validateUrlBtn');
+            const resultDiv = document.getElementById('urlValidationResult');
+            
+            console.log('URL:', url); // Debug log
+            console.log('Button:', button); // Debug log
+            console.log('Result div:', resultDiv); // Debug log
+            
+            if (!url) {
+                showAlert('error', 'Please enter a URL to validate');
+                return;
+            }
+            
+            if (!button) {
+                console.error('Validate button not found!');
+                showAlert('error', 'Validate button not found');
+                return;
+            }
+            
+            if (!resultDiv) {
+                console.error('Result div not found!');
+                showAlert('error', 'Result div not found');
+                return;
+            }
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validating...';
+            
+            console.log('Making fetch request to:', '{{ route("ical-feeds.validate-url") }}'); // Debug log
+            
+            fetch('{{ route("ical-feeds.validate-url") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ url: url })
+            })
+            .then(response => {
+                console.log('Response status:', response.status); // Debug log
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data); // Debug log
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i> ${data.message}
+                        </div>
+                    `;
+                    resultDiv.style.display = 'block';
+                    
+                    // Show the save button when validation is successful
+                    const saveBtn = document.getElementById('saveICalBtn');
+                    if (saveBtn) {
+                        saveBtn.style.display = 'inline-block';
+                    }
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle"></i> ${data.message}
+                        </div>
+                    `;
+                    resultDiv.style.display = 'block';
+                    
+                    // Hide the save button when validation fails
+                    const saveBtn = document.getElementById('saveICalBtn');
+                    if (saveBtn) {
+                        saveBtn.style.display = 'none';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i> Failed to validate URL. Please try again.
+                    </div>
+                `;
+                resultDiv.style.display = 'block';
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-check"></i> Validate URL';
+            });
+        }
+
+        // Add iCal Feed
+        function addICalFeed() {
+            const name = document.getElementById('ical_feed_name').value.trim();
+            const url = document.getElementById('ical_feed_url').value.trim();
+            
+            if (!name || !url) {
+                showAlert('error', 'Please fill in all required fields');
+                return;
+            }
+            
+            const button = document.getElementById('addFeedBtn');
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+            
+            fetch('{{ route("ical-feeds.store") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    name: name,
+                    url: url
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', data.message);
+                    $('#icalImportModal').modal('hide');
+                    loadICalFeeds();
+                    // Reset form
+                    document.getElementById('ical_feed_name').value = '';
+                    document.getElementById('ical_feed_url').value = '';
+                    document.getElementById('urlValidationResult').style.display = 'none';
+                } else {
+                    showAlert('error', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Failed to add iCal feed. Please try again.');
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-plus"></i> Add Feed';
+            });
+        }
+
+        // Sync all iCal feeds
+        function syncAllICalFeeds() {
+            const button = document.getElementById('syncAllFeedsBtn');
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
+            
+            fetch('{{ route("ical-feeds.sync-all") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', data.message);
+                    loadICalFeeds();
+                } else {
+                    showAlert('error', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Failed to sync feeds. Please try again.');
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-sync"></i> Sync All';
+            });
+        }
+
+        // Load iCal feeds
+        function loadICalFeeds() {
+            // Show the modal first
+            $('#icalFeedsListModal').modal('show');
+            
+            // Then load the feeds
+            fetch('{{ route("ical-feeds.index") }}', {
+                method: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const feedsList = document.getElementById('icalFeedsList');
+                if (data.feeds && data.feeds.length > 0) {
+                    feedsList.innerHTML = data.feeds.map(feed => `
+                        <div class="feed-item border rounded p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">${feed.name}</h6>
+                                    <small class="text-muted d-block mb-2">${feed.url}</small>
+                                    <div class="d-flex gap-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock"></i> Last sync: ${feed.last_sync || 'Never'}
+                                        </small>
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar"></i> Events: ${feed.events_count || 0}
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="syncFeed(${feed.id})">
+                                        <i class="fas fa-sync"></i> Sync
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteFeed(${feed.id})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    feedsList.innerHTML = `
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-calendar-plus fa-2x mb-2"></i>
+                            <p>No iCal feeds configured yet</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('icalFeedsList').innerHTML = `
+                    <div class="text-center text-danger py-4">
+                        <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                        <p>Failed to load feeds</p>
+                    </div>
+                `;
+            });
+        }
+
+        // Generate new iCal feed
+        function generateNewICalFeed() {
+            const name = document.getElementById('generate_feed_name').value.trim();
+            const type = document.getElementById('generate_feed_type').value;
+            const expiresAt = document.getElementById('generate_expires_at').value;
+            
+            if (!name) {
+                showAlert('error', 'Please enter a feed name');
+                return;
+            }
+            
+            const button = document.getElementById('generateFeedBtn');
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+            
+            fetch('{{ route("user-ical-feeds.store") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    name: name,
+                    type: type,
+                    expires_at: expiresAt || null
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', data.message);
+                    $('#generateICalModal').modal('hide');
+                    loadUserICalFeeds();
+                    // Reset form
+                    document.getElementById('generate_feed_name').value = '';
+                    document.getElementById('generate_feed_type').value = 'all_events';
+                    document.getElementById('generate_expires_at').value = '';
+                } else {
+                    showAlert('error', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Failed to generate iCal feed. Please try again.');
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-plus"></i> Generate Feed';
+            });
+        }
+
+        // Load user iCal feeds
+        function loadUserICalFeeds() {
+            fetch('{{ route("user-ical-feeds.index") }}', {
+                method: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const feedsList = document.getElementById('userICalFeedsList');
+                if (data.feeds && data.feeds.length > 0) {
+                    feedsList.innerHTML = data.feeds.map(feed => `
+                        <div class="feed-item border rounded p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">${feed.name}</h6>
+                                    <small class="text-muted d-block mb-2">
+                                        <strong>Type:</strong> ${feed.type === 'bookings_only' ? 'Bookings Only' : 'All Events'}
+                                    </small>
+                                    <div class="d-flex gap-3 mb-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock"></i> Created: ${feed.created_at}
+                                        </small>
+                                        ${feed.expires_at ? `
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar-times"></i> Expires: ${feed.expires_at}
+                                            </small>
+                                        ` : ''}
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted d-block">
+                                            <strong>Public URL:</strong> 
+                                            <code class="bg-light px-2 py-1 rounded">${feed.public_url}</code>
+                                        </small>
+                                        <small class="text-muted d-block">
+                                            <strong>Secure URL:</strong> 
+                                            <code class="bg-light px-2 py-1 rounded">${feed.secure_url}</code>
+                                        </small>
+                                        <small class="text-muted d-block">
+                                            <strong>Current OTP:</strong> 
+                                            <code class="bg-light px-2 py-1 rounded">${feed.current_otp}</code>
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="regenerateOTP(${feed.id})">
+                                        <i class="fas fa-key"></i> New OTP
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteUserFeed(${feed.id})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    feedsList.innerHTML = `
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-calendar-plus fa-2x mb-2"></i>
+                            <p>No iCal feeds generated yet</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('userICalFeedsList').innerHTML = `
+                    <div class="text-center text-danger py-4">
+                        <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                        <p>Failed to load feeds</p>
+                    </div>
+                `;
+            });
+        }
+
+        function saveICalFeed() {
+            const form = document.getElementById('icalImportForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Set default sync type to 'all_events' for import
+            data.sync_type = 'all_events';
+
+            const button = event.target;
+            const originalText = button.innerHTML;
+            
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            button.disabled = true;
+            
+            fetch('{{ route("ical-feeds.store") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', data.message);
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('icalImportModal'));
+                    modal.hide();
+                    form.reset();
+                    document.getElementById('saveICalBtn').style.display = 'none';
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showAlert('error', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Failed to save iCal feed. Please try again.');
+            })
+            .finally(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+
+        function syncICalFeed(feedId) {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            button.disabled = true;
+            
+            fetch(`{{ url('ical/feeds') }}/${feedId}/sync`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', data.message);
+                    loadICalFeeds(); // Reload the list
+                } else {
+                    showAlert('error', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Failed to sync feed. Please try again.');
+            })
+            .finally(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+
+        function deleteICalFeed(feedId) {
+            if (!confirm('Are you sure you want to delete this iCal feed? This action cannot be undone.')) {
+                return;
+            }
+
+            const button = event.target;
+            const originalText = button.innerHTML;
+            
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            button.disabled = true;
+            
+            fetch(`{{ url('ical/feeds') }}/${feedId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', data.message);
+                    loadICalFeeds(); // Reload the list
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showAlert('error', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Failed to delete feed. Please try again.');
+            })
+            .finally(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+
+        // Generate iCal Feed Functions
+        function openGenerateICalModal() {
+            const modal = new bootstrap.Modal(document.getElementById('generateICalModal'));
+            modal.show();
+        }
+
+        function generateICalFeed() {
+            const form = document.getElementById('generateICalForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Remove empty expires_at if not set
+            if (!data.expires_at) {
+                delete data.expires_at;
+            }
+
+            const button = event.target;
+            const originalText = button.innerHTML;
+            
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+            button.disabled = true;
+            
+            fetch('{{ route("user-ical-feeds.store") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', data.message);
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('generateICalModal'));
+                    modal.hide();
+                    form.reset();
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showAlert('error', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Failed to generate iCal feed. Please try again.');
+            })
+            .finally(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+
+        function regenerateUserICalToken(feedId) {
+            if (!confirm('Are you sure you want to regenerate the token? This will invalidate the current URL.')) {
+                return;
+            }
+
+            const button = event.target;
+            const originalText = button.innerHTML;
+            
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            button.disabled = true;
+            
+            fetch(`{{ url('user-ical/feeds') }}/${feedId}/regenerate-token`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', data.message);
+                    loadUserICalFeeds(); // Reload the list
+                } else {
+                    showAlert('error', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Failed to regenerate token. Please try again.');
+            })
+            .finally(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+
+        function deleteUserICalFeed(feedId) {
+            if (!confirm('Are you sure you want to delete this iCal feed? This action cannot be undone.')) {
+                return;
+            }
+
+            const button = event.target;
+            const originalText = button.innerHTML;
+            
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            button.disabled = true;
+            
+            fetch(`{{ url('user-ical/feeds') }}/${feedId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', data.message);
+                    loadUserICalFeeds(); // Reload the list
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showAlert('error', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Failed to delete feed. Please try again.');
+            })
+            .finally(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showAlert('success', 'Copied to clipboard!');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showAlert('success', 'Copied to clipboard!');
+            });
+        }
+
+        function showAlert(type, message) {
+            // Create alert element
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+            alertDiv.style.position = 'fixed';
+            alertDiv.style.top = '20px';
+            alertDiv.style.right = '20px';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.style.maxWidth = '400px';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
+
+        // Calendar initialization and other functions would go here...
+        // (I'm keeping this focused on the iCal integration functions)
+
         let picker;
         let currentFilters = {
             guiding_id: '',
@@ -1124,7 +1778,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeCalendar();
             initializeTourDropdown();
-            initializeForms();
             
             // Load actual events from API
             loadCalendarEvents();
@@ -1760,14 +2413,6 @@
                                             ${event.extendedProps.note ? `<i class="fas fa-note-sticky"></i> ${event.extendedProps.note}` : ''}
                                         </small>
                                     </div>
-                                    <div class="custom-event-actions">
-                                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editCustomEvent('${eventId}', '${dateStr}', '${(event.extendedProps.note || '').replace(/'/g, "\\'")}')">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteCustomEvent('${eventId}', '${dateStr}')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
                                 </div>
                             </div>
                         `;
@@ -1786,578 +2431,425 @@
             document.getElementById('sideDetailPanel').style.display = 'none';
         }
 
-        function getTypeLabel(type) {
-            const labels = {
-                'tour_request': 'Booking',
-                'tour_schedule': 'Blocked',
-                'vacation_schedule': 'Vacation',
-                'vacation_request': 'Vacation Request',
-                'custom_schedule': 'Custom'
-            };
-            return labels[type] || type;
+        // Show iCal Import Modal
+        function showICalImportModal() {
+            $('#icalImportModal').modal('show');
         }
 
-        function initializeForms() {
-            // Get tomorrow's date as minimum date (disable past dates)
-            const today = new Date();
-            const tomorrow = new Date(today);
-            tomorrow.setDate(today.getDate() + 1);
-            const tomorrowStr = tomorrow.toISOString().split('T')[0];
-            
-            // Set minimum date for all date inputs
-            const singleDateInput = document.getElementById('singleDateInput');
-            const beginInput = document.getElementById('addNewBeginInput');
-            const endInput = document.getElementById('addNewEndInput');
-            
-            if (singleDateInput) singleDateInput.min = tomorrowStr;
-            if (beginInput) beginInput.min = tomorrowStr;
-            if (endInput) endInput.min = tomorrowStr;
-            
-            // Handle radio button toggle
-            const singleDayRadio = document.getElementById('singleDay');
-            const dateRangeRadio = document.getElementById('dateRange');
-            const singleDaySection = document.getElementById('singleDaySection');
-            const dateRangeSection = document.getElementById('dateRangeSection');
-            
-            if (singleDayRadio && dateRangeRadio && singleDaySection && dateRangeSection) {
-                singleDayRadio.addEventListener('change', function() {
-                    if (this.checked) {
-                        singleDaySection.style.display = 'block';
-                        dateRangeSection.style.display = 'none';
-                        if (singleDateInput) singleDateInput.required = true;
-                        if (beginInput) beginInput.required = false;
-                        if (endInput) endInput.required = false;
-                    }
-                });
-                
-                dateRangeRadio.addEventListener('change', function() {
-                    if (this.checked) {
-                        singleDaySection.style.display = 'none';
-                        dateRangeSection.style.display = 'block';
-                        if (singleDateInput) singleDateInput.required = false;
-                        if (beginInput) beginInput.required = true;
-                        if (endInput) endInput.required = true;
-                    }
-                });
-            }
-            
-            // Auto-set end date when beginning date changes (for range mode)
-            if (beginInput && endInput) {
-                beginInput.addEventListener('change', function() {
-                    if (this.value) {
-                        // Set minimum date for end input to prevent selecting dates before beginning
-                        endInput.min = this.value;
-                        
-                        // If end date is not set or is before begin date, set it to begin date
-                        if (!endInput.value || endInput.value < this.value) {
-                            endInput.value = this.value;
-                        }
-                    }
-                });
-                
-                // Ensure end date can't be before beginning date
-                endInput.addEventListener('change', function() {
-                    if (beginInput.value && this.value && this.value < beginInput.value) {
-                        this.value = beginInput.value;
-                        showAlert('warning', 'End date cannot be before the start date.');
-                    }
-                });
-            }
-
-            // Add/Edit event form submission
-            const addEventForm = document.getElementById('addEventForm');
-            if (addEventForm) {
-                addEventForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    // Get save button and show loading state
-                    const saveBtn = document.querySelector('.btn-save');
-                    const originalText = saveBtn.innerHTML;
-                    const modal = document.getElementById('addEventModal');
-                    const isEditMode = modal.dataset.editMode === 'true';
-                    const eventId = modal.dataset.editEventId;
-                    
-                    saveBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>${isEditMode ? 'Updating...' : 'Saving...'}`;
-                    saveBtn.disabled = true;
-                    
-                    const formData = new FormData(this);
-                    const data = {};
-                    
-                    // Get the block type
-                    const blockType = formData.get('blockType');
-                    
-                    if (blockType === 'single') {
-                        data.start = formData.get('single_date');
-                        data.end = formData.get('single_date');
-                        if (isEditMode) {
-                            data.date = formData.get('single_date');
-                        }
-                    } else {
-                        data.start = formData.get('start');
-                        data.end = formData.get('end');
-                        if (isEditMode) {
-                            data.date = formData.get('start');
-                        }
-                    }
-                    
-                    data.type = 'custom_schedule';
-                    data.note = formData.get('note') || 'Custom blocked date';
-
-                    // Determine URL and method based on mode
-                    const url = isEditMode 
-                        ? `{{ url('/profile/calendar/update') }}/${eventId}`
-                        : '{{ route("profile.calendar.store") }}';
-                    const method = isEditMode ? 'PUT' : 'POST';
-
-                    fetch(url, {
-                        method: method,
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify(data)
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('addEventModal'));
-                            if (modalInstance) modalInstance.hide();
-                            loadCalendarEvents();
-                            
-                            // Auto-refresh the details panel if a date is currently selected
-                            if (selectedDate) {
-                                setTimeout(() => {
-                                    showDayDetails(selectedDate);
-                                }, 1000); // Wait for calendar events to load
-                            }
-                            
-                            const message = isEditMode ? 'Schedule updated successfully!' : 'Schedule created successfully!';
-                            showAlert('success', data.message || message);
-                        } else {
-                            const message = isEditMode ? 'Error updating schedule' : 'Error creating schedule';
-                            showAlert('error', data.message || message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        const message = isEditMode ? 'Error updating schedule' : 'Error creating schedule';
-                        showAlert('error', message);
-                    })
-                    .finally(() => {
-                        // Reset button state
-                        saveBtn.innerHTML = originalText;
-                        saveBtn.disabled = false;
-                    });
-                });
-            }
-
-            // Delete confirmation
-            const confirmDeleteBtn = document.getElementById('confirmDelete');
-            if (confirmDeleteBtn) {
-                confirmDeleteBtn.addEventListener('click', function() {
-                    const eventId = this.dataset.eventId;
-                    const dateStr = this.dataset.dateStr;
-                    if (eventId) {
-                        deleteEvent(eventId, dateStr);
-                    }
-                });
-            }
-
-
-
-            // Pre-populate modal with selected date when modal opens (only for new events)
-            const addEventModal = document.getElementById('addEventModal');
-            if (addEventModal) {
-                addEventModal.addEventListener('show.bs.modal', function() {
-                    // Don't auto-populate if in edit mode
-                    if (this.dataset.editMode === 'true') {
-                        return;
-                    }
-                    
-                    if (selectedDate) {
-                        // Check if selected date is valid (future date)
-                        const today = new Date();
-                        const tomorrow = new Date(today);
-                        tomorrow.setDate(today.getDate() + 1);
-                        const tomorrowStr = tomorrow.toISOString().split('T')[0];
-                        
-                        // Only pre-populate if selected date is today or future
-                        const selectedDateObj = new Date(selectedDate);
-                        const todayObj = new Date();
-                        todayObj.setHours(0, 0, 0, 0);
-                        selectedDateObj.setHours(0, 0, 0, 0);
-                        
-                        if (selectedDateObj >= todayObj) {
-                            // Pre-populate single date input
-                            const singleDateInput = document.getElementById('singleDateInput');
-                            if (singleDateInput) {
-                                singleDateInput.value = selectedDate;
-                            }
-
-                            // Pre-populate date range inputs with the selected date
-                            const beginInput = document.getElementById('addNewBeginInput');
-                            const endInput = document.getElementById('addNewEndInput');
-                            if (beginInput) {
-                                beginInput.value = selectedDate;
-                                // Update minimum date for end input
-                                endInput.min = selectedDate;
-                            }
-                            if (endInput) {
-                                endInput.value = selectedDate;
-                            }
-
-                            console.log('Modal opened with pre-selected date:', selectedDate);
-                        } else {
-                            console.log('Selected date is in the past, not pre-populating:', selectedDate);
-                        }
-                    }
-                });
-
-                // Clear form when modal is hidden
-                addEventModal.addEventListener('hidden.bs.modal', function() {
-                    // Reset form
-                    const form = document.getElementById('addEventForm');
-                    if (form) {
-                        form.reset();
-                    }
-                    
-                    // Reset edit mode
-                    this.dataset.editMode = 'false';
-                    this.dataset.editEventId = '';
-                    
-                    // Reset modal title and button text
-                    const modalTitle = document.getElementById('addEventModalLabel');
-                    const saveBtn = this.querySelector('.btn-save');
-                    modalTitle.innerHTML = '<i class="fas fa-calendar-plus me-2"></i>@lang('profile.block-calendar-dates')';
-                    saveBtn.innerHTML = '<i class="fas fa-save me-2"></i>@lang('profile.save-schedule')';
-                    
-                    // Reset to single day mode
-                    const singleDayRadio = document.getElementById('singleDay');
-                    const dateRangeRadio = document.getElementById('dateRange');
-                    const singleDaySection = document.getElementById('singleDaySection');
-                    const dateRangeSection = document.getElementById('dateRangeSection');
-                    
-                    if (singleDayRadio) singleDayRadio.checked = true;
-                    if (singleDaySection) singleDaySection.style.display = 'block';
-                    if (dateRangeSection) dateRangeSection.style.display = 'none';
-                    
-                    // Reset min attributes
-                    const endInput = document.getElementById('addNewEndInput');
-                    if (endInput) endInput.removeAttribute('min');
-                    
-                    console.log('Modal closed, form reset');
-                });
-            }
+        // Show Generate iCal Modal
+        function showGenerateICalModal() {
+            $('#generateICalModal').modal('show');
         }
 
-        function deleteEvent(eventId, dateStr = null) {
-            // Use POST with _method override for better Laravel compatibility
-            const formData = new FormData();
-            formData.append('_method', 'DELETE');
-            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+        // Sync All Integrations
+        function syncAllIntegrations() {
+            const button = event.target;
+            const originalText = button.innerHTML;
             
-            fetch(`{{ url('/profile/calendar/delete') }}/${eventId}`, {
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Syncing...';
+            
+            // Sync import feeds
+            fetch('{{ route("ical-feeds.sync-all") }}', {
                 method: 'POST',
                 headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: formData
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteEventModal'));
-                    if (deleteModal) deleteModal.hide();
-                    loadCalendarEvents();
-                    
-                    // Auto-refresh the details panel if we have a date or selected date
-                    const refreshDate = dateStr || selectedDate;
-                    if (refreshDate) {
-                        setTimeout(() => {
-                            showDayDetails(refreshDate);
-                        }, 1000);
-                    }
-                    
-                    showAlert('success', data.message || 'Schedule deleted successfully!');
+                    showAlert('success', 'All integrations synced successfully');
+                    updateIntegrationCounts();
                 } else {
-                    showAlert('error', data.error || data.message || 'Error deleting event');
+                    showAlert('error', data.message || 'Failed to sync integrations');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                showAlert('error', 'Error deleting event');
+                showAlert('error', 'Failed to sync integrations. Please try again.');
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.innerHTML = originalText;
             });
         }
 
-        function editCustomEvent(eventId, dateStr, note) {
-            // Set up add modal for editing
-            const addModal = document.getElementById('addEventModal');
-            const modalTitle = document.getElementById('addEventModalLabel');
-            const saveBtn = addModal.querySelector('.btn-save');
-            
-            // Change modal title and button text for editing
-            modalTitle.innerHTML = '<i class="fas fa-edit me-2"></i>Edit Custom Schedule';
-            saveBtn.innerHTML = '<i class="fas fa-save me-2"></i>Update Schedule';
-            
-            // Store edit data
-            addModal.dataset.editMode = 'true';
-            addModal.dataset.editEventId = eventId;
-            
-            // Pre-populate the form with existing data
-            const singleDateInput = document.getElementById('singleDateInput');
-            const noteInput = document.getElementById('eventNote');
-            
-            if (singleDateInput) singleDateInput.value = dateStr;
-            if (noteInput) noteInput.value = note;
-            
-            // Ensure single day mode is selected
-            const singleDayRadio = document.getElementById('singleDay');
-            const singleDaySection = document.getElementById('singleDaySection');
-            const dateRangeSection = document.getElementById('dateRangeSection');
-            
-            if (singleDayRadio) singleDayRadio.checked = true;
-            if (singleDaySection) singleDaySection.style.display = 'block';
-            if (dateRangeSection) dateRangeSection.style.display = 'none';
-
-            // Show the modal
-            const modal = new bootstrap.Modal(addModal);
-            modal.show();
-        }
-
-        function deleteCustomEvent(eventId, dateStr) {
-            // Set up delete modal with event data
-            const deleteModal = document.getElementById('deleteEventModal');
-            const confirmDeleteBtn = document.getElementById('confirmDelete');
-
-            if (confirmDeleteBtn) {
-                confirmDeleteBtn.dataset.eventId = eventId;
-                confirmDeleteBtn.dataset.dateStr = dateStr;
-            }
-
-            // Show the modal
-            const modal = new bootstrap.Modal(deleteModal);
-            modal.show();
-        }
-
-        function showAlert(type, message) {
-            // Create alert element
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
-            alertDiv.style.position = 'fixed';
-            alertDiv.style.top = '20px';
-            alertDiv.style.right = '20px';
-            alertDiv.style.zIndex = '9999';
-            alertDiv.style.maxWidth = '400px';
-            alertDiv.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            `;
-            
-            document.body.appendChild(alertDiv);
-            
-            // Auto-remove after 5 seconds
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.parentNode.removeChild(alertDiv);
+        // Update Integration Counts
+        function updateIntegrationCounts() {
+            // Update import count
+            fetch('{{ route("ical-feeds.index") }}', {
+                method: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-            }, 5000);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Import count data:', data); // Debug log
+                const feeds = data.feeds || data.data || data || [];
+                const importCount = Array.isArray(feeds) ? feeds.length : 0;
+                document.getElementById('importCount').textContent = importCount;
+            })
+            .catch(error => {
+                console.error('Error loading import count:', error);
+                document.getElementById('importCount').textContent = '0';
+            });
+
+            // Update export count
+            fetch('{{ route("user-ical-feeds.index") }}', {
+                method: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Export count data:', data); // Debug log
+                const feeds = data.feeds || data.data || data || [];
+                const exportCount = Array.isArray(feeds) ? feeds.length : 0;
+                document.getElementById('exportCount').textContent = exportCount;
+            })
+            .catch(error => {
+                console.error('Error loading export count:', error);
+                document.getElementById('exportCount').textContent = '0';
+            });
+        }
+
+        // Initialize integration counts on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateIntegrationCounts();
+        });
+
+        // Sync individual feed
+        function syncFeed(feedId) {
+            const button = event.target.closest('button');
+            const originalText = button.innerHTML;
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            fetch(`/ical-feeds/${feedId}/sync`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', data.message);
+                    loadImportFeedsTable(); // Refresh the table
+                } else {
+                    showAlert('error', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Failed to sync feed. Please try again.');
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.innerHTML = originalText;
+            });
+        }
+
+        // Delete feed
+        function deleteFeed(feedId) {
+            if (!confirm('Are you sure you want to delete this feed?')) {
+                return;
+            }
+            
+            const button = event.target.closest('button');
+            const originalText = button.innerHTML;
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            fetch(`/ical-feeds/${feedId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', data.message);
+                    loadImportFeedsTable(); // Refresh the table
+                    updateIntegrationCounts(); // Update counts
+                } else {
+                    showAlert('error', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Failed to delete feed. Please try again.');
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.innerHTML = originalText;
+            });
+        }
+
+        // Regenerate OTP for user feed
+        function regenerateOTP(feedId) {
+            const button = event.target.closest('button');
+            const originalText = button.innerHTML;
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            fetch(`/user-ical-feeds/${feedId}/regenerate-otp`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', data.message);
+                    loadExportFeedsTable(); // Refresh the table
+                } else {
+                    showAlert('error', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Failed to regenerate OTP. Please try again.');
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.innerHTML = originalText;
+            });
+        }
+
+        // Delete user feed
+        function deleteUserFeed(feedId) {
+            if (!confirm('Are you sure you want to delete this feed?')) {
+                return;
+            }
+            
+            const button = event.target.closest('button');
+            const originalText = button.innerHTML;
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            fetch(`/user-ical-feeds/${feedId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', data.message);
+                    loadExportFeedsTable(); // Refresh the table
+                    updateIntegrationCounts(); // Update counts
+                } else {
+                    showAlert('error', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Failed to delete feed. Please try again.');
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.innerHTML = originalText;
+            });
+        }
+
+        // Show Unified iCal Management Modal
+        function showUnifiedICalModal() {
+            $('#unifiedICalModal').modal('show');
+            loadImportFeedsTable();
+            loadExportFeedsTable();
+        }
+
+        // Load Import Feeds Table
+        function loadImportFeedsTable() {
+            fetch('{{ route("ical-feeds.index") }}', {
+                method: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Import feeds data:', data); // Debug log
+                const tbody = document.getElementById('importFeedsTableBody');
+                
+                // Handle different response formats
+                const feeds = data.feeds || data.data || data || [];
+                
+                if (feeds && feeds.length > 0) {
+                    tbody.innerHTML = feeds.map(feed => {
+                        // Format the last sync date
+                        let lastSync = 'Never';
+                        if (feed.last_sync || feed.last_sync_at) {
+                            const syncDate = new Date(feed.last_sync || feed.last_sync_at);
+                            if (!isNaN(syncDate.getTime())) {
+                                lastSync = syncDate.toLocaleDateString() + ' ' + syncDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                            }
+                        }
+                        
+                        return `
+                            <tr>
+                                <td><strong>${feed.name || feed.feed_name || 'Unnamed Feed'}</strong></td>
+                                <td><code class="small">${feed.url || feed.feed_url || 'No URL'}</code></td>
+                                <td>${lastSync}</td>
+                                <td><span class="badge bg-info">${feed.events_count || 0}</span></td>
+                                <td><span class="badge bg-success">Active</span></td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button class="btn btn-outline-primary" onclick="syncFeed(${feed.id})" title="Sync">
+                                            <i class="fas fa-sync"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger" onclick="deleteFeed(${feed.id})" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                } else {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="fas fa-calendar-plus fa-2x mb-2"></i>
+                                <p>No import feeds configured yet</p>
+                            </td>
+                        </tr>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading import feeds:', error);
+                document.getElementById('importFeedsTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center text-danger py-4">
+                            <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                            <p>Failed to load feeds: ${error.message}</p>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Load Export Feeds Table
+        function loadExportFeedsTable() {
+            fetch('{{ route("user-ical-feeds.index") }}', {
+                method: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Export feeds data:', data); // Debug log
+                const tbody = document.getElementById('exportFeedsTableBody');
+                
+                // Handle different response formats
+                const feeds = data.feeds || data.data || data || [];
+                
+                if (feeds && feeds.length > 0) {
+                    tbody.innerHTML = feeds.map(feed => {
+                        // Format the expires date
+                        let expiresAt = 'Never';
+                        if (feed.expires_at) {
+                            const expireDate = new Date(feed.expires_at);
+                            if (!isNaN(expireDate.getTime())) {
+                                expiresAt = expireDate.toLocaleDateString() + ' ' + expireDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                            }
+                        }
+                        
+                        return `
+                            <tr>
+                                <td><strong>${feed.name || feed.feed_name || 'Unnamed Feed'}</strong></td>
+                                <td><span class="badge bg-secondary">${feed.type === 'bookings_only' ? 'Bookings Only' : 'All Events'}</span></td>
+                                <td><code class="small">${feed.public_url || feed.feed_url || 'No URL'}</code></td>
+                                <td><code class="small">${feed.current_otp || 'No OTP'}</code></td>
+                                <td>${expiresAt}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button class="btn btn-outline-warning" onclick="regenerateOTP(${feed.id})" title="New OTP">
+                                            <i class="fas fa-key"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger" onclick="deleteUserFeed(${feed.id})" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                } else {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="fas fa-calendar-plus fa-2x mb-2"></i>
+                                <p>No export feeds generated yet</p>
+                            </td>
+                        </tr>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading export feeds:', error);
+                document.getElementById('exportFeedsTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center text-danger py-4">
+                            <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                            <p>Failed to load feeds: ${error.message}</p>
+                        </td>
+                    </tr>
+                `;
+            });
         }
     </script>
 @endsection
 
-<!-- Add Custom Schedule Modal -->
-<div class="modal fade" id="addEventModal" tabindex="-1" aria-labelledby="addEventModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content schedule-modal">
-            <div class="modal-header schedule-modal-header">
-                <div class="modal-header-content">
-                    <h4 class="modal-title" id="addEventModalLabel">
-                        <i class="fas fa-calendar-plus me-2"></i>
-                        @lang('profile.block-calendar-dates')
-                    </h4>
-                    <p class="modal-subtitle mb-0">@lang('profile.create-custom-blocked-periods')</p>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="addEventForm">
-                @csrf
-                <div class="modal-body schedule-modal-body">
-                    <!-- Instructions -->
-                    <div class="instructions-card mb-4">
-                        <div class="d-flex align-items-start">
-                            <div class="instruction-icon">
-                                <i class="fas fa-info-circle"></i>
-                            </div>
-                            <div class="instruction-content">
-                                <h6>@lang('profile.how-to-block-dates')</h6>
-                                <ul class="instruction-list">
-                                    <li>@lang('profile.choose-single-day-or-range')</li>
-                                    <li>@lang('profile.select-future-dates-only')</li>
-                                    <li>@lang('profile.add-notes-to-explain')</li>
-                                    <li>@lang('profile.blocked-dates-appear-teal')</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Block Type Selection -->
-                    <div class="form-section mb-4">
-                        <label class="form-label-main">@lang('profile.block-type')</label>
-                        <p class="form-help-text">@lang('profile.choose-how-to-block')</p>
-                        
-                        <div class="custom-radio-group">
-                            <div class="custom-radio-option">
-                                <input type="radio" name="blockType" id="singleDay" value="single" checked>
-                                <label for="singleDay" class="custom-radio-label">
-                                    <div class="radio-icon">
-                                        <i class="fas fa-calendar-day"></i>
-                                    </div>
-                                    <div class="radio-content">
-                                        <span class="radio-title">@lang('profile.single-day')</span>
-                                        <span class="radio-description">@lang('profile.block-one-specific-date')</span>
-                                    </div>
-                                </label>
-                            </div>
-                            
-                            <div class="custom-radio-option">
-                                <input type="radio" name="blockType" id="dateRange" value="range">
-                                <label for="dateRange" class="custom-radio-label">
-                                    <div class="radio-icon">
-                                        <i class="fas fa-calendar-week"></i>
-                                    </div>
-                                    <div class="radio-content">
-                                        <span class="radio-title">@lang('profile.date-range')</span>
-                                        <span class="radio-description">@lang('profile.block-multiple-consecutive-dates')</span>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Single Day Selection -->
-                    <div id="singleDaySection" class="form-section mb-4">
-                        <label for="singleDateInput" class="form-label-main">@lang('profile.select-date')</label>
-                        <p class="form-help-text">@lang('profile.choose-date-to-block')</p>
-                        <input type="date" id="singleDateInput" class="form-control form-control-modern" name="single_date" required>
-                    </div>
-                    
-                    <!-- Date Range Selection -->
-                    <div id="dateRangeSection" class="form-section mb-4" style="display: none;">
-                        <label class="form-label-main">@lang('profile.date-range')</label>
-                        <p class="form-help-text">@lang('profile.choose-start-end-dates')</p>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="addNewBeginInput" class="form-label-secondary">@lang('profile.start-date')</label>
-                                <input type="date" id="addNewBeginInput" class="form-control form-control-modern" name="start">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="addNewEndInput" class="form-label-secondary">@lang('profile.end-date')</label>
-                                <input type="date" id="addNewEndInput" class="form-control form-control-modern" name="end">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Notes Input -->
-                    <div class="form-section mb-4">
-                        <label for="eventNote" class="form-label-main">@lang('profile.notes')</label>
-                        <p class="form-help-text">@lang('profile.add-description-why-blocked')</p>
-                        <textarea 
-                            id="eventNote" 
-                            class="form-control form-control-modern" 
-                            name="note" 
-                            rows="4" 
-                            placeholder="@lang('profile.notes-placeholder')"
-                        ></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer schedule-modal-footer">
-                    <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i>@lang('profile.cancel')
-                    </button>
-                    <button type="submit" class="btn btn-save">
-                        <i class="fas fa-save me-2"></i>@lang('profile.save-schedule')
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-
-
-<!-- Delete Event Modal -->
-<div class="modal fade" id="deleteEventModal" tabindex="-1" aria-labelledby="deleteEventModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteEventModalLabel">
-                    <i class="fas fa-trash me-2"></i>Delete Custom Schedule
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    <strong>Are you sure?</strong>
-                </div>
-                <p>This will permanently delete this custom blocked date from your calendar. This action cannot be undone.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-2"></i>Cancel
-                </button>
-                <button type="button" id="confirmDelete" class="btn btn-danger">
-                    <i class="fas fa-trash me-2"></i>Delete Schedule
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Booking Detail Modal -->
-<div class="modal fade" id="bookingDetailModal" tabindex="-1" aria-labelledby="bookingDetailModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title text-white">@lang('message.booking-overview')</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="card border-0">
-                <div class="card-body mx-4">
-                    <div id="bookingDetails">
-                        <!-- Content will be populated by JavaScript -->
-                    </div>
-                    <div class="text-center mt-3">
-                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">@lang('profile.close')</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Event Detail Modal -->
-<div class="modal fade" id="eventDetailModal" tabindex="-1" aria-labelledby="eventDetailModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-md" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title text-white">@lang('profile.event-details')</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="card border-0">
-                <div class="card-body mx-4">
-                    <div id="eventDetails">
-                        <!-- Content will be populated by JavaScript -->
-                    </div>
-                    <div class="text-center mt-3">
-                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">@lang('profile.close')</button>
-                        <button type="button" id="deleteEventBtn" class="btn btn-danger ms-2" style="display: none;">@lang('profile.delete')</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 
