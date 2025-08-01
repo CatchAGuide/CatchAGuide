@@ -335,6 +335,7 @@ class Checkout extends Component
         ]);
 
         $currentUser = auth()->user();
+        $locale = app()->getLocale();
 
         if ($currentUser) {
             $user = $currentUser;
@@ -393,7 +394,6 @@ class Checkout extends Component
             } else {
                 // Check if guest user already exists with this email
                 $user = UserGuest::where('email', $this->userData['email'])->first();
-                $locale = app()->getLocale();
 
                 if (!$user) {
                     // Combine country code with phone number
