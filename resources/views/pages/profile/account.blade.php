@@ -189,6 +189,30 @@
                 opacity: 1;
             }
         }
+
+        /* Phone input responsive styles */
+        @media (max-width: 576px) {
+            .d-flex {
+                flex-direction: column;
+            }
+            
+            .d-flex > * {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin-bottom: 0.5rem;
+                border-radius: 0.25rem !important;
+            }
+            
+            .d-flex > *:not(:last-child) {
+                border-right: 1px solid #ced4da;
+            }
+        }
+
+        @media (min-width: 577px) {
+            .d-flex > *:not(:first-child) {
+                border-left: none;
+            }
+        }
         
 
     </style>
@@ -270,8 +294,61 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label class="form-label" for="phone">@lang('profile.pnumber')<span class="required">*</span></label>
-                        <input type="text" class="form-control" id="phone" name="phone" 
-                               placeholder="{{translate('Telefonnummer')}}" value="{{auth()->user()?->phone ?? ''}}" required>
+                        <div class="d-flex">
+                            <select class="form-control rounded w-25 me-2" 
+                                    id="countryCode" name="countryCode" style="max-width: 120px;" required>
+                                <option value="+49" {{ auth()->user()?->phone_country_code == '+49' ? 'selected' : '' }}>+49 (Germany)</option>
+                                <option value="+1" {{ auth()->user()?->phone_country_code == '+1' ? 'selected' : '' }}>+1 (USA/Canada)</option>
+                                <option value="+44" {{ auth()->user()?->phone_country_code == '+44' ? 'selected' : '' }}>+44 (UK)</option>
+                                <option value="+33" {{ auth()->user()?->phone_country_code == '+33' ? 'selected' : '' }}>+33 (France)</option>
+                                <option value="+39" {{ auth()->user()?->phone_country_code == '+39' ? 'selected' : '' }}>+39 (Italy)</option>
+                                <option value="+34" {{ auth()->user()?->phone_country_code == '+34' ? 'selected' : '' }}>+34 (Spain)</option>
+                                <option value="+81" {{ auth()->user()?->phone_country_code == '+81' ? 'selected' : '' }}>+81 (Japan)</option>
+                                <option value="+86" {{ auth()->user()?->phone_country_code == '+86' ? 'selected' : '' }}>+86 (China)</option>
+                                <option value="+91" {{ auth()->user()?->phone_country_code == '+91' ? 'selected' : '' }}>+91 (India)</option>
+                                <option value="+61" {{ auth()->user()?->phone_country_code == '+61' ? 'selected' : '' }}>+61 (Australia)</option>
+                                <option value="+353" {{ auth()->user()?->phone_country_code == '+353' ? 'selected' : '' }}>+353 (Ireland)</option>
+                                <option value="+31" {{ auth()->user()?->phone_country_code == '+31' ? 'selected' : '' }}>+31 (Netherlands)</option>
+                                <option value="+46" {{ auth()->user()?->phone_country_code == '+46' ? 'selected' : '' }}>+46 (Sweden)</option>
+                                <option value="+47" {{ auth()->user()?->phone_country_code == '+47' ? 'selected' : '' }}>+47 (Norway)</option>
+                                <option value="+45" {{ auth()->user()?->phone_country_code == '+45' ? 'selected' : '' }}>+45 (Denmark)</option>
+                                <option value="+358" {{ auth()->user()?->phone_country_code == '+358' ? 'selected' : '' }}>+358 (Finland)</option>
+                                <option value="+32" {{ auth()->user()?->phone_country_code == '+32' ? 'selected' : '' }}>+32 (Belgium)</option>
+                                <option value="+41" {{ auth()->user()?->phone_country_code == '+41' ? 'selected' : '' }}>+41 (Switzerland)</option>
+                                <option value="+43" {{ auth()->user()?->phone_country_code == '+43' ? 'selected' : '' }}>+43 (Austria)</option>
+                                <option value="+48" {{ auth()->user()?->phone_country_code == '+48' ? 'selected' : '' }}>+48 (Poland)</option>
+                                <option value="+351" {{ auth()->user()?->phone_country_code == '+351' ? 'selected' : '' }}>+351 (Portugal)</option>
+                                <option value="+30" {{ auth()->user()?->phone_country_code == '+30' ? 'selected' : '' }}>+30 (Greece)</option>
+                                <option value="+420" {{ auth()->user()?->phone_country_code == '+420' ? 'selected' : '' }}>+420 (Czech Republic)</option>
+                                <option value="+36" {{ auth()->user()?->phone_country_code == '+36' ? 'selected' : '' }}>+36 (Hungary)</option>
+                                <option value="+7" {{ auth()->user()?->phone_country_code == '+7' ? 'selected' : '' }}>+7 (Russia)</option>
+                                <option value="+380" {{ auth()->user()?->phone_country_code == '+380' ? 'selected' : '' }}>+380 (Ukraine)</option>
+                                <option value="+90" {{ auth()->user()?->phone_country_code == '+90' ? 'selected' : '' }}>+90 (Turkey)</option>
+                                <option value="+20" {{ auth()->user()?->phone_country_code == '+20' ? 'selected' : '' }}>+20 (Egypt)</option>
+                                <option value="+27" {{ auth()->user()?->phone_country_code == '+27' ? 'selected' : '' }}>+27 (South Africa)</option>
+                                <option value="+55" {{ auth()->user()?->phone_country_code == '+55' ? 'selected' : '' }}>+55 (Brazil)</option>
+                                <option value="+52" {{ auth()->user()?->phone_country_code == '+52' ? 'selected' : '' }}>+52 (Mexico)</option>
+                                <option value="+54" {{ auth()->user()?->phone_country_code == '+54' ? 'selected' : '' }}>+54 (Argentina)</option>
+                                <option value="+56" {{ auth()->user()?->phone_country_code == '+56' ? 'selected' : '' }}>+56 (Chile)</option>
+                                <option value="+57" {{ auth()->user()?->phone_country_code == '+57' ? 'selected' : '' }}>+57 (Colombia)</option>
+                                <option value="+51" {{ auth()->user()?->phone_country_code == '+51' ? 'selected' : '' }}>+51 (Peru)</option>
+                                <option value="+64" {{ auth()->user()?->phone_country_code == '+64' ? 'selected' : '' }}>+64 (New Zealand)</option>
+                                <option value="+65" {{ auth()->user()?->phone_country_code == '+65' ? 'selected' : '' }}>+65 (Singapore)</option>
+                                <option value="+60" {{ auth()->user()?->phone_country_code == '+60' ? 'selected' : '' }}>+60 (Malaysia)</option>
+                                <option value="+66" {{ auth()->user()?->phone_country_code == '+66' ? 'selected' : '' }}>+66 (Thailand)</option>
+                                <option value="+62" {{ auth()->user()?->phone_country_code == '+62' ? 'selected' : '' }}>+62 (Indonesia)</option>
+                                <option value="+63" {{ auth()->user()?->phone_country_code == '+63' ? 'selected' : '' }}>+63 (Philippines)</option>
+                                <option value="+84" {{ auth()->user()?->phone_country_code == '+84' ? 'selected' : '' }}>+84 (Vietnam)</option>
+                                <option value="+82" {{ auth()->user()?->phone_country_code == '+82' ? 'selected' : '' }}>+82 (South Korea)</option>
+                                <option value="+972" {{ auth()->user()?->phone_country_code == '+972' ? 'selected' : '' }}>+972 (Israel)</option>
+                                <option value="+971" {{ auth()->user()?->phone_country_code == '+971' ? 'selected' : '' }}>+971 (UAE)</option>
+                                <option value="+966" {{ auth()->user()?->phone_country_code == '+966' ? 'selected' : '' }}>+966 (Saudi Arabia)</option>
+                            </select>
+                            <input type="tel" class="form-control rounded" 
+                                   id="phone" name="phone" 
+                                   placeholder="{{translate('Telefonnummer')}}" 
+                                   value="{{auth()->user()?->phone ?? ''}}" required>
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-6">

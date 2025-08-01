@@ -92,6 +92,7 @@ class ProfileController extends Controller
         $user->language = json_encode($request->get('language_speak'));
         $user->tax_id = $request->get('information')['tax_id'];
         $user->phone = $request->phone;
+        $user->phone_country_code = $request->countryCode;
 
         if($user->is_company){
             $user->company_name = $request->company_name;
