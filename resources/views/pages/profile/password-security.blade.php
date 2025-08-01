@@ -240,6 +240,8 @@
             font-family: monospace;
             word-break: break-all;
         }
+        
+
     </style>
 
     @if($errors->any())
@@ -373,6 +375,10 @@
         </div>
     </div>
 
+
+
+
+
 @endsection
 
 @section('js_after')
@@ -436,5 +442,48 @@
                 }
             }
         });
+        
+
+        
+        function showAlert(type, message) {
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            const alertHtml = `
+                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            // Insert alert at the top of the page
+            const header = document.querySelector('.security-header');
+            header.insertAdjacentHTML('afterend', alertHtml);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                const alert = document.querySelector('.alert');
+                if (alert) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+        
+        // Add loading states to integration cards
+        function setIntegrationLoading(integrationType, isLoading) {
+            const card = document.querySelector(`[data-integration="${integrationType}"]`);
+            if (card) {
+                const actions = card.querySelector('.integration-actions');
+                if (isLoading) {
+                    actions.innerHTML = `
+                        <button class="btn btn-secondary w-100" disabled>
+                            <i class="fas fa-spinner fa-spin me-2"></i>
+                            Processing...
+                        </button>
+                    `;
+                }
+            }
+        }
+
+
     </script>
 @endsection 

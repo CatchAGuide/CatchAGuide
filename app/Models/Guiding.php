@@ -43,6 +43,7 @@ class Guiding extends Model
         'slug',
         'location',
         'country',
+        'language',
         'water',
         'water_sonstiges',
         'targets',
@@ -124,6 +125,16 @@ class Guiding extends Model
         'price_four_persons',
         'price_five_persons',
     ];
+
+    public $translated = null;
+
+    public function __get($key)
+    {
+        if ($this->translated && isset($this->translated[$key])) {
+            return $this->translated[$key];
+        }
+        return parent::__get($key);
+    }
 
     /**
      * @return BelongsTo
@@ -409,7 +420,7 @@ class Guiding extends Model
     public function getGuidingPriceByPerson($person)
     {
         if ($this->price_type == 'per_person') {
-            $prices = json_decode($this->prices, true);
+            $prices = decode_if_json($this->prices, true);
             foreach($prices as $price){
                 if($price['person'] == $person){
                     return $price['amount'];
@@ -434,7 +445,7 @@ class Guiding extends Model
 
     public function getLowestPrice()
     {
-        $prices = json_decode($this->prices, true);
+        $prices = decode_if_json($this->prices, true);
         if (!$prices) {
             return 0;
         }
@@ -788,7 +799,7 @@ class Guiding extends Model
      */
     public function getFishingMethodNames($methodsMap = null): array
     {
-        $methodIds = json_decode($this->fishing_methods) ?? [];
+        $methodIds = decode_if_json($this->fishing_methods) ?? [];
         if (empty($methodIds)) {
             return [];
         }
@@ -822,7 +833,7 @@ class Guiding extends Model
      */
     public function getTargetFishNames($targetsMap = null): array
     {
-        $targetIds = json_decode($this->target_fish) ?? [];
+        $targetIds = decode_if_json($this->target_fish) ?? [];
         if (empty($targetIds)) {
             return [];
         }
@@ -856,7 +867,7 @@ class Guiding extends Model
      */
     public function getInclusionNames($inclussionsMap = null): array
     {
-        $inclusionIds = json_decode($this->inclusions) ?? [];
+        $inclusionIds = decode_if_json($this->inclusions) ?? [];
         if (empty($inclusionIds)) {
             return [];
         }
@@ -890,7 +901,7 @@ class Guiding extends Model
      */
     public function getWaterNames($watersMap = null): array
     {
-        $waterIds = json_decode($this->water_types) ?? [];
+        $waterIds = decode_if_json($this->water_types) ?? [];
         if (empty($waterIds)) {
             return [];
         }
@@ -920,7 +931,7 @@ class Guiding extends Model
 
     public function getBoatExtras(): array
     {
-        $boatExtras = json_decode($this->boat_extras) ?? [];
+        $boatExtras = decode_if_json($this->boat_extras) ?? [];
         
         if (empty($boatExtras)) {
             return [];
@@ -959,7 +970,7 @@ class Guiding extends Model
             return collect();
         }
 
-        $requirementsData = collect(json_decode($this->attributes['requirements'], true));
+        $requirementsData = collect(decode_if_json($this->attributes['requirements'], true));
         return GuidingRequirements::whereIn('id', array_keys($requirementsData->all()))
             ->get()
             ->map(function ($requirement) use ($requirementsData) {
@@ -979,7 +990,7 @@ class Guiding extends Model
             return collect();
         }
 
-        $otherInformationData = collect(json_decode($this->attributes['other_information'], true));
+        $otherInformationData = collect(decode_if_json($this->attributes['other_information'], true));
         
         return GuidingAdditionalInformation::whereIn('id', array_keys($otherInformationData->all()))
             ->get()
@@ -999,7 +1010,7 @@ class Guiding extends Model
             return collect();
         }
 
-        $recommendationsData = collect(json_decode($this->attributes['recommendations'], true));
+        $recommendationsData = collect(decode_if_json($this->attributes['recommendations'], true));
 
         return GuidingRecommendations::whereIn('id', array_keys($recommendationsData->all()))
             ->get()
@@ -1019,7 +1030,7 @@ class Guiding extends Model
             return collect();
         }
         
-        $boatInformationData = collect(json_decode($this->attributes['boat_information'], true));
+        $boatInformationData = collect(decode_if_json($this->attributes['boat_information'], true));
         
         return GuidingBoatDescription::whereIn('id', array_keys($boatInformationData->all()))
             ->get()
@@ -1044,7 +1055,7 @@ class Guiding extends Model
         $maxId = ExtrasPrice::max('id') ?? 10000; // Get highest existing ID or start at 10000
         $counter = $maxId + 1; // Start counter above highest existing ID
         
-        return collect(json_decode($this->attributes['pricing_extra'], true))->map(function ($item) use (&$counter) {
+        return collect(decode_if_json($this->attributes['pricing_extra'], true))->map(function ($item) use (&$counter) {
             // Check if name is numeric (an ID)
             if (is_numeric($item['name'])) {
                 // Try to find matching ExtrasPrice

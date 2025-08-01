@@ -91,6 +91,21 @@ return [
     'guest_booking_request_accepted_text_4' => 'Wenn Du Fragen hast oder Unterstützung während des Prozesses benötigst, sind wir als neutraler Dritter da und helfen gerne in jeder Situation.',
     'guest_booking_request_accepted_text_5' => 'Danke, dass Du unsere Plattform nutzt. Wir wünschen Dir eine fantastische Angeltour und hoffen, dass Du das bevorstehende Abenteuer genießt!',
     
+    // Calendar Integration
+    'calendar_integration_title' => 'Kalender-Integration',
+    'calendar_integration_text' => 'Wir haben eine Kalenderdatei (.ics) an diese E-Mail angehängt. Du kannst diese in Deine Kalenderanwendung importieren, um diese Angeltour automatisch zu Deinem Zeitplan hinzuzufügen.',
+    'calendar_supported_apps' => 'Unterstützte Anwendungen:',
+    'calendar_apps_list' => 'Google Kalender, Apple Kalender, Outlook und die meisten anderen Kalender-Apps',
+    'calendar_add_to_calendar' => 'Zum Kalender hinzufügen',
+    'calendar_add_to_calendar_text' => 'Vergiss nicht, diese Angeltour zu Deinem Kalender hinzuzufügen! Du kannst:',
+    'calendar_download_ics' => 'Lade die angehängte .ics-Datei herunter und importiere sie in Deine Kalender-App',
+    'calendar_subscribe_feed' => 'Abonniere Deinen persönlichen Kalender-Feed, um alle Deine Angeltouren automatisch zu synchronisieren',
+    'calendar_subscribe_feed_button' => 'Kalender-Feed abonnieren',
+    'calendar_secure_feed_button' => 'Sicherer Feed (mit OTP)',
+    'calendar_feed_url' => 'Kalender-Feed URL:',
+    'calendar_secure_feed_url' => 'Sicherer Feed URL:',
+    'calendar_guest_user_note' => 'Hinweis: Kalender-Feed-Abonnements sind nur für registrierte Benutzer verfügbar. Gastbenutzer können weiterhin die angehängte .ics-Datei herunterladen.',
+    
     'guest_booking_request_cancelled_title' => 'Update zu Deiner Catch A Guide Buchungsanfrage!',
     'guest_booking_request_cancelled_text_1' => 'Wir möchten Dich informieren, dass [Guide Name] Deine Buchungsanfrage für den [Date] am [Location] abgelehnt hat. Wir verstehen, dass dies enttäuschend sein kann, und entschuldigen uns für eventuelle Unannehmlichkeiten.',
     'guest_booking_request_cancelled_text_2' => 'Hier ist die Nachricht von:',

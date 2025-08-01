@@ -21,6 +21,7 @@
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.4",
         "livewire/livewire": "^2.10",
+        "sabre/vobject": "^4.5",
         "spatie/geocoder": "^3.16",
         "spatie/laravel-cookie-consent": "^3.2",
         "spatie/laravel-sitemap": "^6.4",

@@ -27,6 +27,7 @@ class User extends Authenticatable
         'lastname',
         'email',
         'phone',
+        'phone_country_code',
         'password',
         'is_active',
         'is_guide',
@@ -174,6 +175,22 @@ class User extends Authenticatable
     /**
      * @return HasMany
      */
+    public function icalFeeds(): HasMany
+    {
+        return $this->hasMany(ICalFeed::class);
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function userIcalFeeds(): HasMany
+    {
+        return $this->hasMany(UserICalFeed::class);
+    }
+
+    /**
+     * @return HasMany
+     */
     public function wishlist_items(): HasMany
     {
         return $this->hasMany(WishlistItem::class);
@@ -201,5 +218,19 @@ class User extends Authenticatable
             return false;
         }
         return true;
+    }
+
+    /**
+     * Get the full phone number with country code
+     * 
+     * @return string
+     */
+    public function getFullPhoneNumber(): string
+    {
+        if ($this->phone_country_code && $this->phone) {
+            return $this->phone_country_code . ' ' . $this->phone;
+        }
+        
+        return $this->phone ?? '';
     }
 }

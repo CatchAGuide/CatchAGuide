@@ -95,6 +95,21 @@ return [
     'guest_booking_request_accepted_text_4' => 'If you have any questions or need assistance during the process, we are here as a neutral third party and will be happy to help in any situation.',
     'guest_booking_request_accepted_text_5' => 'Thank you for using our platform. We wish you a fantastic fishing experience and hope you enjoy the adventure ahead!',
 
+    // Calendar Integration
+    'calendar_integration_title' => 'Calendar Integration',
+    'calendar_integration_text' => 'We\'ve attached a calendar file (.ics) to this email. You can import this into your calendar application to automatically add this fishing trip to your schedule.',
+    'calendar_supported_apps' => 'Supported applications:',
+    'calendar_apps_list' => 'Google Calendar, Apple Calendar, Outlook, and most other calendar apps',
+    'calendar_add_to_calendar' => 'Add to Calendar',
+    'calendar_add_to_calendar_text' => 'Don\'t forget to add this fishing trip to your calendar! You can:',
+    'calendar_download_ics' => 'Download the attached .ics file and import it into your calendar app',
+    'calendar_subscribe_feed' => 'Subscribe to your personal calendar feed to automatically sync all your fishing trips',
+    'calendar_subscribe_feed_button' => 'Subscribe to Calendar Feed',
+    'calendar_secure_feed_button' => 'Secure Feed (with OTP)',
+    'calendar_feed_url' => 'Calendar Feed URL:',
+    'calendar_secure_feed_url' => 'Secure Feed URL:',
+    'calendar_guest_user_note' => 'Note: Calendar feed subscription is available for registered users. Guest users can still download the attached .ics file.',
+
     'guest_booking_request_cancelled_title' => 'Update on Your Catch A Guide Booking Request!',
     'guest_booking_request_cancelled_text_1' => 'We\'re writing to inform you that <b>[Guide Name]</b> has declined your booking request for <b>[Date]</b> at <b>[Location]</b>. We understand this can be disappointing, and we apologize for any inconvenience.',
     'guest_booking_request_cancelled_text_2' => 'Here is the message provided by',

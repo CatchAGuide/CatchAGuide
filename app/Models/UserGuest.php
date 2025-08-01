@@ -20,6 +20,7 @@ class UserGuest extends Model
         'city',
         'country',
         'phone',
+        'phone_country_code',
         'email',
         'language',
     ];
@@ -27,5 +28,19 @@ class UserGuest extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class, 'user_id')->where('is_guest', true);
+    }
+
+    /**
+     * Get the full phone number with country code
+     * 
+     * @return string
+     */
+    public function getFullPhoneNumber(): string
+    {
+        if ($this->phone_country_code && $this->phone) {
+            return $this->phone_country_code . ' ' . $this->phone;
+        }
+        
+        return $this->phone ?? '';
     }
 }
