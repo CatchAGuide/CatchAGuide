@@ -476,7 +476,7 @@
                               </div>
                               <div class="col-12">
                                 <span class="text-dark fw-bold">{{ translate('Phone Number') }}</span>
-                                <p class="form-control-static">{{ $userData['phone'] }}</p>
+                                <p class="form-control-static">{{ $userData['countryCode'] }} {{ $userData['phone'] }}</p>
                               </div>
                             </div>
                           </div>
