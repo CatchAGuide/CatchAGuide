@@ -115,8 +115,8 @@ class RegisterController extends Controller
         $locale = app()->getLocale();
         $request->merge(['language' => $locale]);
 
-        // Create and get the user
-        $user = User::create($request->all());
+        // Create and get the user using the create method that properly hashes the password
+        $user = $this->create($request->all());
 
         // Fire registered event
         event(new Registered($user));
