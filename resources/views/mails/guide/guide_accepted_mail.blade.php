@@ -24,7 +24,13 @@
         <h4>{{__('emails.guide_booking_accepted_text_2')}}</h4>
         <div class="booking-details">
             <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_7')}} </strong>{{$user->firstname}}</p>
-            <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_8')}} </strong>{{$user->phone_country_code}} {{$user->phone ?? $booking->phone ?? $user->information->phone ?? null}}</p>
+            <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_8')}} </strong>
+                @if($booking->phone)
+                    {{$booking->phone}}
+                @else
+                    {{$user->phone_country_code}} {{$user->phone ?? $user->information->phone ?? null}}
+                @endif
+            </p>
             <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_9')}} </strong>{{$user->email}}</p>
             <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_10')}} </strong><a href="{{route('guidings.show', [$guiding->id, $guiding->slug])}}" target="_blank" style="text-decoration: none; font-weight: bold;">{{$guiding->title}}</a></p>
             <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_11')}} </strong>{{$guiding->location}}</p>
