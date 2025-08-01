@@ -24,7 +24,7 @@
                 <h4 style="font-family: 'Morrison', sans-serif;">@lang('emails.guest_booking_request_accepted_text_3')</h4>
                 <div style="margin-top: 10px; font-family: 'Morrison', sans-serif;">
                     <p><strong>{{__('emails.guest_booking_accepted_text_7')}}</strong> {{$guide->firstname}}</p>
-                    <p><strong>{{__('emails.guest_booking_accepted_text_8')}}</strong> {{$guide->phone}}</p>
+                    <p><strong>{{__('emails.guest_booking_accepted_text_8')}}</strong> {{$guide->phone_country_code}} {{$guide->phone}}</p>
                     <p><strong>{{__('emails.guest_booking_accepted_text_9')}}</strong> {{$guide->email}}</p>
                     <p><strong>{{__('emails.tour')}}:</strong> <a href="{{route('guidings.show', ['id' => $guiding->id, 'slug' => $guiding->slug])}}" target="_blank">{{$guiding->title}}</a></p>
                     <p><strong>{{__('emails.location')}}:</strong> {{$guiding->location}}</p>
