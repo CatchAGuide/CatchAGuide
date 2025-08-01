@@ -32,6 +32,7 @@ class Booking extends Model
         'book_date',
         'additional_information',
         'phone',
+        'phone_country_code',
         'email',
         'last_employee_id',
         'expires_at',
@@ -209,5 +210,19 @@ class Booking extends Model
 
         // Also check if a review exists in the reviews table
         return Review::where('booking_id', $this->id)->exists();
+    }
+
+    /**
+     * Get the full phone number with country code
+     * 
+     * @return string
+     */
+    public function getFullPhoneNumber(): string
+    {
+        if ($this->phone_country_code && $this->phone) {
+            return $this->phone_country_code . ' ' . $this->phone;
+        }
+        
+        return $this->phone ?? '';
     }
 }
