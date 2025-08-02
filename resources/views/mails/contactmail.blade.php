@@ -36,7 +36,7 @@
                             @if($phone)
                             <tr>
                                 <td style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
-                                    Telefon: {{$phone}}
+                                    Telefon: {{ $phone_country_code }} {{$phone}}
                                 </td>
                             </tr>
                             @endif

@@ -217,61 +217,29 @@
   
                             <div class="col-12">
                               <div class="form-group">
-                                <label for="phone">@lang('forms.pNumber')<span style="color: #e8604c !important; font-size: 12px;">*</span></label>
-                                <div class="d-flex">
-                                  <select class="form-control rounded w-25 me-2 @error('userData.countryCode') is-invalid @enderror" 
-                                          id="countryCode" wire:model="userData.countryCode" style="max-width: 120px;" required>
-                                    <option value="+49">+49 (Germany)</option>
-                                    <option value="+1">+1 (USA/Canada)</option>
-                                    <option value="+44">+44 (UK)</option>
-                                    <option value="+33">+33 (France)</option>
-                                    <option value="+39">+39 (Italy)</option>
-                                    <option value="+34">+34 (Spain)</option>
-                                    <option value="+81">+81 (Japan)</option>
-                                    <option value="+86">+86 (China)</option>
-                                    <option value="+91">+91 (India)</option>
-                                    <option value="+61">+61 (Australia)</option>
-                                    <option value="+353">+353 (Ireland)</option>
-                                    <option value="+31">+31 (Netherlands)</option>
-                                    <option value="+46">+46 (Sweden)</option>
-                                    <option value="+47">+47 (Norway)</option>
-                                    <option value="+45">+45 (Denmark)</option>
-                                    <option value="+358">+358 (Finland)</option>
-                                    <option value="+32">+32 (Belgium)</option>
-                                    <option value="+41">+41 (Switzerland)</option>
-                                    <option value="+43">+43 (Austria)</option>
-                                    <option value="+48">+48 (Poland)</option>
-                                    <option value="+351">+351 (Portugal)</option>
-                                    <option value="+30">+30 (Greece)</option>
-                                    <option value="+420">+420 (Czech Republic)</option>
-                                    <option value="+36">+36 (Hungary)</option>
-                                    <option value="+7">+7 (Russia)</option>
-                                    <option value="+380">+380 (Ukraine)</option>
-                                    <option value="+90">+90 (Turkey)</option>
-                                    <option value="+20">+20 (Egypt)</option>
-                                    <option value="+27">+27 (South Africa)</option>
-                                    <option value="+55">+55 (Brazil)</option>
-                                    <option value="+52">+52 (Mexico)</option>
-                                    <option value="+54">+54 (Argentina)</option>
-                                    <option value="+56">+56 (Chile)</option>
-                                    <option value="+57">+57 (Colombia)</option>
-                                    <option value="+51">+51 (Peru)</option>
-                                    <option value="+64">+64 (New Zealand)</option>
-                                    <option value="+65">+65 (Singapore)</option>
-                                    <option value="+60">+60 (Malaysia)</option>
-                                    <option value="+66">+66 (Thailand)</option>
-                                    <option value="+62">+62 (Indonesia)</option>
-                                    <option value="+63">+63 (Philippines)</option>
-                                    <option value="+84">+84 (Vietnam)</option>
-                                    <option value="+82">+82 (South Korea)</option>
-                                    <option value="+972">+972 (Israel)</option>
-                                    <option value="+971">+971 (UAE)</option>
-                                    <option value="+966">+966 (Saudi Arabia)</option>
-                                  </select>
-                                  <input type="tel" class="form-control rounded @error('userData.phone') is-invalid @enderror" 
-                                         id="phone" wire:model="userData.phone" required>
-                                </div>
-                                <small class="text-muted">@lang('forms.pNumberMsg')</small>
+                                @include('includes.forms.phone-input', [
+                                    'name' => 'userData.phone',
+                                    'id' => 'phone',
+                                    'countryCodeName' => 'userData.countryCode',
+                                    'countryCodeId' => 'countryCode',
+                                    'selectedCountryCode' => $userData['countryCode'] ?? '+49',
+                                    'phoneValue' => $userData['phone'] ?? '',
+                                    'showLabel' => true,
+                                    'showHelpText' => true,
+                                    'wireModel' => 'userData.phone',
+                                    'wireModelCountryCode' => 'userData.countryCode',
+                                    'errorClass' => $errors->has('userData.phone') || $errors->has('userData.countryCode') ? 'is-invalid' : ''
+                                ])
+                                @error('userData.countryCode')
+                                  <div class="invalid-feedback">
+                                    {{ $message }}
+                                  </div>
+                                @enderror
+                                @error('userData.phone')
+                                  <div class="invalid-feedback">
+                                    {{ $message }}
+                                  </div>
+                                @enderror
                               </div>
                             </div>
   
