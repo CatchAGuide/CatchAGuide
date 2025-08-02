@@ -686,7 +686,7 @@
                 <button class="nav-link" id="nav-include-tab" data-bs-toggle="tab" data-bs-target="#include" type="button" role="tab" aria-controls="nav-include" aria-selected="false">@lang('guidings.Inclusions')</button>
             @endif
             
-            @if ($guiding->is_boat && (!empty(decode_if_json($boatInformation)) || !empty(decode_if_json($guiding->boat_extras)) || (!empty($guiding->additional_information) && $guiding->additional_information !== null && $guiding->additional_information !== '')))
+            @if ($guiding->is_boat && (!$boatInformation->isEmpty() || !empty(decode_if_json($guiding->boat_extras)) || (!empty($guiding->additional_information) && $guiding->additional_information !== null && $guiding->additional_information !== '')))
                 <button class="nav-link" id="nav-boat-tab" data-bs-toggle="tab" data-bs-target="#boat" type="button" role="tab" aria-controls="nav-boat" aria-selected="false">@lang('guidings.Boat_Details')</button>
             @endif
             <button class="nav-link" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab" aria-controls="nav-info" aria-selected="false">@lang('guidings.Additional_Info')</button>
@@ -702,9 +702,11 @@
                             <div class="row">
                                 <strong class="mb-2 subtitle-text">@lang('guidings.Inclusions')</strong>
                                 @foreach ($guiding->getInclusionNames() as $index => $inclusion)
-                                    <div class="col-12 mb-2 text-start">
-                                    <i data-lucide="wrench"></i> {{ $inclusion['name'] }}
-                                    </div>
+                                    @if(is_array($inclusion) && isset($inclusion['name']))
+                                        <div class="col-12 mb-2 text-start">
+                                        <i data-lucide="wrench"></i> {{ $inclusion['name'] }}
+                                        </div>
+                                    @endif
                                 @endforeach
                             </div>
                         @endif
@@ -722,8 +724,8 @@
                                 </div>
                                 @foreach (decode_if_json($guiding->pricing_extra) as $pricing_extras)
                                     <div class="mb-2">
-                                        <strong>{{$pricing_extras->name}}:</strong> 
-                                        <span>{{$pricing_extras->price}}€ p.P</span>
+                                        <strong>{{$pricing_extras['name']}}:</strong> 
+                                        <span>{{$pricing_extras['price']}}€ p.P</span>
                                     </div>
                                 @endforeach
                             </div>
@@ -741,11 +743,13 @@
                             <strong class="subtitle-text">@lang('guidings.Target_Fish')</strong>
                             <div class="row">
                                 @foreach ($guiding->getTargetFishNames() as $fish)
-                                    <div class="col-12 text-start">
-                                        {{$fish['name']}}
-                                    </div>
-                                    @if(($loop->index + 1) % 2 == 0)
-                                        </div><div class="row">
+                                    @if(is_array($fish) && isset($fish['name']))
+                                        <div class="col-12 text-start">
+                                            {{$fish['name']}}
+                                        </div>
+                                        @if(($loop->index + 1) % 2 == 0)
+                                            </div><div class="row">
+                                        @endif
                                     @endif
                                 @endforeach
                             </div>
@@ -760,11 +764,13 @@
                             <strong class="subtitle-text">@lang('guidings.Fishing_Method')</strong>
                             <div class="row">
                                 @foreach ($guiding->getFishingMethodNames() as $index => $fishing_method)
-                                    <div class="col-12 text-start">
-                                        {{$fishing_method['name']}}
-                                    </div>
-                                    @if(($index + 1) % 2 == 0)
-                                        </div><div class="row">
+                                    @if(is_array($fishing_method) && isset($fishing_method['name']))
+                                        <div class="col-12 text-start">
+                                            {{$fishing_method['name']}}
+                                        </div>
+                                        @if(($index + 1) % 2 == 0)
+                                            </div><div class="row">
+                                        @endif
                                     @endif
                                 @endforeach
                             </div>
@@ -779,11 +785,13 @@
                             <strong class="subtitle-text">@lang('guidings.Water_Type')</strong>
                             <div class="row">
                                 @foreach ($guiding->getWaterNames() as $water)
-                                    <div class="col-12 text-start">
-                                        {{$water['name']}}
-                                    </div>
-                                    @if(($loop->index + 1) % 2 == 0)
-                                        </div><div class="row">
+                                    @if(is_array($water) && isset($water['name']))
+                                        <div class="col-12 text-start">
+                                            {{$water['name']}}
+                                        </div>
+                                        @if(($loop->index + 1) % 2 == 0)
+                                            </div><div class="row">
+                                        @endif
                                     @endif
                                 @endforeach
                             </div>
@@ -794,7 +802,7 @@
                 </div>
             </div>
 
-            @if ($guiding->is_boat && (!empty(decode_if_json($boatInformation)) || !empty(decode_if_json($guiding->boat_extras)) || (!empty($guiding->additional_information) && $guiding->additional_information !== null && $guiding->additional_information !== '')))
+            @if ($guiding->is_boat && (!$boatInformation->isEmpty() || !empty(decode_if_json($guiding->boat_extras)) || (!empty($guiding->additional_information) && $guiding->additional_information !== null && $guiding->additional_information !== '')))
             <div class="tab-pane fade" id="boat" role="tabpanel" aria-labelledby="nav-boat-tab">
                 <div class="row card tab-card h-100 shadow m-0 p-2">
                     @if(!empty($guiding->additional_information))
@@ -804,17 +812,17 @@
                         </div>
                     @endif
 
-                    @if(!empty(decode_if_json($boatInformation)))
+                    @if(!$boatInformation->isEmpty())
                         <div class="col-md-12">
                             <strong class="subtitle-text">@lang('guidings.Boat')</strong>
                             <!-- Boat Information as a Table -->
                             <table class="table ">
                                 <tbody>
                                     @foreach($boatInformation as $key => $value)
-                                    <tr>
-                                        <th>{{$value['name']}}</th>
-                                        <td colspan="1">{{ $value['value'] }}</td>
-                                    </tr>
+                                        <tr>
+                                            <th>{{$value->name}}</th>
+                                            <td colspan="1">{{ $value->value }}</td>
+                                        </tr>
                                     @endforeach
                                 </tbody>
                             </table>
@@ -828,7 +836,9 @@
                             <!-- Boat Extras as a List -->
                             <ul>
                                 @foreach($guiding->getBoatExtras() as $extra)
-                                    <li>{{ $extra['name'] }}</li>
+                                    @if(is_array($extra) && isset($extra['name']))
+                                        <li>{{ $extra['name'] }}</li>
+                                    @endif
                                 @endforeach
                             </ul>
                         @endif
@@ -846,7 +856,7 @@
                     @php
                         $requirements = $guiding->getRequirementsAttribute();
                     @endphp
-                    @if(!empty($requirements) && $requirements !== null && $requirements->count() > 0)
+                    @if(!$requirements->isEmpty())
                         <div class="tab-category mb-4">
                             <strong class="subtitle-text">@lang('guidings.Requirements')</strong>
                             <div class="row">
@@ -854,7 +864,7 @@
                                     <div class="col-12 text-start">
                                         <ul>
                                             <li>
-                                                <strong>{{ $requirement['name'] }}:</strong> {{ $requirement['value'] ?? '' }}
+                                                <strong>{{ $requirement->name }}:</strong> {{ $requirement->value ?? '' }}
                                             </li>
                                         </ul>
                                     </div>
@@ -871,7 +881,7 @@
                     @php
                         $otherInformation = $guiding->getOtherInformationAttribute();
                     @endphp
-                    @if(!empty($otherInformation) && $otherInformation !== null && $otherInformation->count() > 0)
+                    @if(!$otherInformation->isEmpty())
                         <div class="tab-category mb-4">
                             <strong class="subtitle-text">@lang('guidings.Other_Info')</strong>
                             <div class="row">
@@ -879,7 +889,7 @@
                                     <div class="col-12 text-start">
                                         <ul>
                                             <li>
-                                                <strong>{{ $other['name'] }}:</strong> {{ $other['value'] ?? '' }}
+                                                <strong>{{ $other->name }}:</strong> {{ $other->value ?? '' }}
                                             </li>
                                         </ul>
                                     </div>
@@ -895,7 +905,7 @@
                     @php
                         $recommendations = $guiding->getRecommendationsAttribute();
                     @endphp
-                    @if(!empty($recommendations ) && $recommendations !== null && $recommendations->count() > 0)
+                    @if(!$recommendations->isEmpty())
                         <div class="tab-category mb-4">
                             <strong class="subtitle-text">@lang('guidings.Reco_Prep')</strong>
                             <div class="row">
@@ -903,7 +913,7 @@
                                     <div class="col-12 text-start">
                                         <ul>
                                             <li>
-                                                <strong>{{ $recommendation['name'] }}:</strong> {{ $recommendation['value'] ?? '' }}
+                                                <strong>{{ $recommendation->name }}:</strong> {{ $recommendation->value ?? '' }}
                                             </li>
                                         </ul>
                                     </div>
@@ -964,9 +974,11 @@
                                     <div class="row">
                                         <strong class="mb-2 subtitle-text">@lang('guidings.Inclusions')</strong>
                                         @foreach ($inclussions as $index => $inclussion)
-                                            <div class="col-12 text-start">
-                                                <i data-lucide="wrench"></i> {{$inclussion['name']}}
-                                            </div>
+                                            @if(is_array($inclussion) && isset($inclussion['name']))
+                                                <div class="col-12 text-start">
+                                                    <i data-lucide="wrench"></i> {{$inclussion['name']}}
+                                                </div>
+                                            @endif
                                         @endforeach
                                     </div>
                                 @endif
@@ -986,8 +998,8 @@
                                         </div>
                                         @foreach (decode_if_json($guiding->pricing_extra) as $pricing_extras)
                                             <div class="mb-2">
-                                                <strong>{{$pricing_extras->name}}:</strong> 
-                                                <span>{{$pricing_extras->price}}€ p.P</span>
+                                                <strong>{{$pricing_extras['name']}}:</strong> 
+                                                <span>{{$pricing_extras['price']}}€ p.P</span>
                                             </div>
                                         @endforeach
                                     </div>
@@ -1015,11 +1027,13 @@
                                     <strong class="subtitle-text"> @lang('guidings.Target_Fish')</strong>
                                     <div class="row">
                                         @foreach ($guiding->getTargetFishNames() as $index => $target_fish)
-                                            <div class="col-12 text-start">
-                                                {{$target_fish['name']}}
-                                            </div>
-                                            @if(($index + 1) % 2 == 0)
-                                                </div><div class="row">
+                                            @if(is_array($target_fish) && isset($target_fish['name']))
+                                                <div class="col-12 text-start">
+                                                    {{$target_fish['name']}}
+                                                </div>
+                                                @if(($index + 1) % 2 == 0)
+                                                    </div><div class="row">
+                                                @endif
                                             @endif
                                         @endforeach
                                     </div>
@@ -1034,11 +1048,13 @@
                                     <strong class="subtitle-text"> @lang('guidings.Fishing_Method')</strong>
                                     <div class="row">
                                         @foreach ($guiding->getFishingMethodNames() as $index => $fishing_method)
-                                            <div class="col-12 text-start">
-                                                {{$fishing_method['name']}}
-                                            </div>
-                                            @if(($index + 1) % 2 == 0)
-                                                </div><div class="row">
+                                            @if(is_array($fishing_method) && isset($fishing_method['name']))
+                                                <div class="col-12 text-start">
+                                                    {{$fishing_method['name']}}
+                                                </div>
+                                                @if(($index + 1) % 2 == 0)
+                                                    </div><div class="row">
+                                                @endif
                                             @endif
                                         @endforeach
                                     </div>
@@ -1053,11 +1069,13 @@
                                     <strong class="subtitle-text"> @lang('guidings.Water_Type')</strong>
                                     <div class="row">
                                         @foreach ($guiding->getWaterNames() as $index => $water_type)
-                                            <div class="col-12 text-start">
-                                                {{$water_type['name']}}
-                                            </div>
-                                            @if(($index + 1) % 2 == 0)
-                                                </div><div class="row">
+                                            @if(is_array($water_type) && isset($water_type['name']))
+                                                <div class="col-12 text-start">
+                                                    {{$water_type['name']}}
+                                                </div>
+                                                @if(($index + 1) % 2 == 0)
+                                                    </div><div class="row">
+                                                @endif
                                             @endif
                                         @endforeach
                                     </div>
@@ -1071,7 +1089,7 @@
             </div>
         @endif
 
-        @if ($guiding->is_boat && (!empty(decode_if_json($boatInformation)) || !empty(decode_if_json($guiding->boat_extras)) || (!empty($guiding->additional_information) && $guiding->additional_information !== null && $guiding->additional_information !== '')))
+        @if ($guiding->is_boat && (!$boatInformation->isEmpty() || !empty(decode_if_json($guiding->boat_extras)) || (!empty($guiding->additional_information) && $guiding->additional_information !== null && $guiding->additional_information !== '')))
         <!-- Boat Information Accordion -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingBoat">
@@ -1089,13 +1107,13 @@
                                 </div>
                             @endif
 
-                            @if(!empty(decode_if_json($boatInformation) ))
+                            @if(!$boatInformation->isEmpty())
                                 <div class="col-md-12">
                                     <strong class="subtitle-text">@lang('guidings.Boat')</strong>
                                     <table class="table my-4">
                                         <tbody>
                                             @foreach($boatInformation as $key => $value)
-                                                <tr><th>{{ $value['name'] }}</th><td colspan="1">{{ $value['value'] }}</td></tr>
+                                                <tr><th>{{ $value->name }}</th><td colspan="1">{{ $value->value }}</td></tr>
                                             @endforeach
                                         </tbody>
                                     </table>
@@ -1107,7 +1125,9 @@
                                 <strong class="subtitle-text">@lang('guidings.Boat_Extras'):</strong>
                                 <ul>
                                     @foreach($guiding->getBoatExtras() as $extra)
-                                        <li>{{ $extra['name'] }}</li>
+                                        @if(is_array($extra) && isset($extra['name']))
+                                            <li>{{ $extra['name'] }}</li>
+                                        @endif
                                     @endforeach
                                 </ul>
                             @endif
@@ -1133,27 +1153,27 @@
                                 <strong class="subtitle-text">@lang('guidings.Requirements')</strong>
                                 <ul>
                                     @foreach ($guiding->getRequirementsAttribute() as $requirements)
-                                        <li><span>{{ $requirements['name'] }}:</span> {{ $requirements['value'] ?? '' }}</li>
+                                        <li><span>{{ $requirements->name }}:</span> {{ $requirements->value ?? '' }}</li>
                                     @endforeach
                                 </ul>
                                 <hr/>
                             @endif
                             <!-- Other Information Section -->
-                            @if(!empty($guiding->other_information) && $guiding->other_information !== null && $guiding->other_information->count() > 0)
+                            @if(!$guiding->getOtherInformationAttribute()->isEmpty())
                                 <strong class="subtitle-text">@lang('guidings.Other_Info')</strong>
                                 <ul>
                                     @foreach ($guiding->getOtherInformationAttribute() as $otherIndex => $other)
-                                        <li><span>{{ $other['name'] }}:</span> {{ $other['value'] ?? '' }}</li>
+                                        <li><span>{{ $other->name }}:</span> {{ $other->value ?? '' }}</li>
                                     @endforeach
                                 </ul>
                                 <hr/>
                             @endif
                             <!-- Recommended Preparation Section -->
-                            @if(!empty($guiding->recommendations ) && $guiding->recommendations !== null && $guiding->recommendations->count() > 0)
+                            @if(!$guiding->getRecommendationsAttribute()->isEmpty())
                                 <strong class="subtitle-text">@lang('guidings.Reco_Prep')</strong>
                                 <ul>
                                     @foreach ($guiding->getRecommendationsAttribute() as $recIndex => $recommendations)
-                                        <li><span>{{ $recommendations['name'] }}:</span> {{ $recommendations['value'] ?? '' }}</li>
+                                        <li><span>{{ $recommendations->name }}:</span> {{ $recommendations->value ?? '' }}</li>
                                     @endforeach
                                 </ul>
                                 <hr/>
@@ -1483,7 +1503,7 @@
                                                                     @endphp
 
                                                                     @foreach ($inclussions as $index => $inclussion)
-                                                                        @if ($index < $maxToShow)
+                                                                        @if ($index < $maxToShow && is_array($inclussion) && isset($inclussion['name']))
                                                                             <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclussion['name'] }}</span>
                                                                         @endif
                                                                     @endforeach
