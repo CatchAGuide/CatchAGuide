@@ -1625,7 +1625,9 @@
                             </div>
                         </div>
                         <div class="form-group mb-3">
-                            <input type="tel" class="form-control" placeholder="@lang('contact.phone')" name="phone">
+                            @include('includes.forms.phone-input', [
+                                'placeholder' => 'contact.phone'
+                            ])
                         </div>
                         <div class="form-group mb-3">
                             <textarea name="description" class="form-control" rows="4" placeholder="@lang('contact.feedback')" required></textarea>

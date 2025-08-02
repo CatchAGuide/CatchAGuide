@@ -68,7 +68,9 @@
                                 <div class="row">
                                     <div class="col-xl-12">
                                         <div class="comment-form__input-box">
-                                            <input type="tel" placeholder="@lang('contact.phone')" name="phone">
+                                            @include('includes.forms.phone-input', [
+                                                'placeholder' => 'contact.phone'
+                                            ])
                                         </div>
                                     </div>
                                 </div>
@@ -151,4 +153,73 @@
         </div>
     </section>
     <!--Information End-->
+@endsection
+
+@section('css_after')
+<style>
+  /* Phone input responsive styles */
+  @media (max-width: 576px) {
+    .d-flex {
+        flex-direction: column;
+    }
+    
+    .d-flex > * {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 0.5rem;
+        border-radius: 0.25rem !important;
+    }
+    
+    .d-flex > *:not(:last-child) {
+        border-right: 1px solid #ced4da;
+    }
+  }
+
+  @media (min-width: 577px) {
+    .d-flex > *:not(:first-child) {
+        border-left: none;
+    }
+  }
+
+  /* Form label styling */
+  .comment-form__input-box label {
+    font-weight: 600;
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  /* Small text styling */
+  .text-muted {
+    color: #6c757d !important;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+
+  /* Form control styling */
+  .form-control {
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+
+  .form-control:focus {
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  }
+
+  /* Select dropdown styling */
+  select.form-control {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    padding-right: 2.25rem;
+  }
+</style>
 @endsection

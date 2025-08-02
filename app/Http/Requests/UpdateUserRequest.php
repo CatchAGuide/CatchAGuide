@@ -41,6 +41,7 @@ class UpdateUserRequest extends FormRequest
             'information.fishing_start_year' =>['nullable', 'integer'],
             'information.request_as_guide' =>['nullable', 'boolean'],
             'information.tax_id' =>['nullable'],
+            'language' => ['required', 'string', 'in:en,de'],
         ];
     }
 }

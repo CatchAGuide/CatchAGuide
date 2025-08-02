@@ -342,18 +342,15 @@ class Checkout extends Component
             $isGuest = false;
             $userId = $user->id;
             
-            // Combine country code with phone number
-            $fullPhoneNumber = $this->userData['countryCode'] . ' ' . $this->userData['phone'];
-            
             // Update phone for registered user
             if (!$user->is_guide) {
-                $user->phone = $fullPhoneNumber;
+                $user->phone = $this->userData['phone'];
                 $user->phone_country_code = $this->userData['countryCode'];
                 $user->save();
             }
 
             if ($user->information) {
-                $user->information->phone = $fullPhoneNumber;
+                $user->information->phone = $this->userData['phone'];
                 $user->information->phone_country_code = $this->userData['countryCode'];
                 $user->information->save();
             }
@@ -368,13 +365,10 @@ class Checkout extends Component
                     'is_temp_password' => 1,
                     'password' => \Hash::make($randomPassword),
                 ]);
-
-                // Combine country code with phone number
-                $fullPhoneNumber = $this->userData['countryCode'] . ' ' . $this->userData['phone'];
                 
                 // Create UserInformation record
                 $userInformation = UserInformation::create([
-                    'phone' => $fullPhoneNumber,
+                    'phone' => $this->userData['phone'],
                     'phone_country_code' => $this->userData['countryCode'],
                     'address' => $this->userData['address'],
                     'postal' => $this->userData['postal'],
@@ -395,10 +389,7 @@ class Checkout extends Component
                 // Check if guest user already exists with this email
                 $user = UserGuest::where('email', $this->userData['email'])->first();
 
-                if (!$user) {
-                    // Combine country code with phone number
-                    $fullPhoneNumber = $this->userData['countryCode'] . ' ' . $this->userData['phone'];
-                    
+                if (!$user) {                    
                     // Create new guest user if not found
                     $user = UserGuest::create([
                         'salutation' => $this->userData['salutation'],
@@ -409,15 +400,12 @@ class Checkout extends Component
                         'postal' => $this->userData['postal'],
                         'city' => $this->userData['city'],
                         'country' => $this->userData['country'],
-                        'phone' => $fullPhoneNumber,
+                        'phone' => $this->userData['phone'],
                         'phone_country_code' => $this->userData['countryCode'],
                         'email' => $this->userData['email'],
                         'language' => $locale,
                     ]);
-                } else {
-                    // Combine country code with phone number
-                    $fullPhoneNumber = $this->userData['countryCode'] . ' ' . $this->userData['phone'];
-                    
+                } else {                    
                     // Update existing guest user information
                     $user->update([
                         'salutation' => $this->userData['salutation'],
@@ -428,7 +416,7 @@ class Checkout extends Component
                         'postal' => $this->userData['postal'],
                         'city' => $this->userData['city'],
                         'country' => $this->userData['country'],
-                        'phone' => $fullPhoneNumber,
+                        'phone' => $this->userData['phone'],
                         'phone_country_code' => $this->userData['countryCode'],
                         'language' => $locale,
                     ]);
@@ -454,9 +442,6 @@ class Checkout extends Component
             $expiresAt = Carbon::now()->addHours(72);
         }
 
-        // Combine country code with phone number for booking
-        $fullPhoneNumber = $this->userData['countryCode'] . ' ' . $this->userData['phone'];
-        
         $booking = Booking::create([
             'user_id' => $userId, // Use null for guests, actual user ID for registered users
             'is_guest' => $isGuest,
@@ -471,17 +456,14 @@ class Checkout extends Component
             'status' => 'pending',
             'book_date' => $this->selectedDate,
             'expires_at' => $expiresAt,
-            'phone' => $fullPhoneNumber,
-            'phone_country_code' => $this->userData['countryCode'],
+            'phone' => $this->userData['phone'],
+            'phone_country_code' => $this->userData['countryCode'] . ' ' . $this->userData['phone'],
             'language' => $locale,
             'email' => $this->userData['email'],
             'token' => $this->generateBookingToken($blockedEvent->id),
         ]);
 
-        Log::info('Booking: ' . $booking->id);
-        Log::info('Blocked event: ' . $blockedEvent->id);
         $updateSchedule = CalendarSchedule::find($blockedEvent->id);
-        Log::info('Update schedule: ' . $updateSchedule);
         $updateSchedule->booking_id = $booking->id;
         $updateSchedule->save();
 

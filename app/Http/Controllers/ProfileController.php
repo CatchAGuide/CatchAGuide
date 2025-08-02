@@ -81,15 +81,14 @@ class ProfileController extends Controller
             $user->profil_image = $imageName;
         }
 
-        $user->number_of_guides = $request->numguides;
-
+        // $user->number_of_guides = $request->numguides;
 
         if($user->information()) {
             $user->information->update($request->information);
         } else {
             $user->information->create($request->information);
         }
-        $user->language = json_encode($request->get('language_speak'));
+        $user->language = $request->get('language') ?? app()->getLocale();
         $user->tax_id = $request->get('information')['tax_id'];
         $user->phone = $request->phone;
         $user->phone_country_code = $request->countryCode;
@@ -101,7 +100,7 @@ class ProfileController extends Controller
             $user->lastname = $request->get('lastname');
         }
 
-        $user->update();
+        $user->update() ?? $user->save();
 
         if ($request->get('update_merchant')) {
             $compliance = $this->getMerchantStatus(auth()->user());

@@ -38,13 +38,13 @@ class ZoisController extends Controller
         ContactSubmission::create([
             'name' => $request->name,
             'email' => $request->email,
-            'phone' => $request->phone,
+            'phone' => $request->countryCode . ' ' . $request->phone,
             'description' => $request->description,
             'source_type' => $sourceType,
             'source_id' => $sourceId
         ]);
 
-        Mail::send(new ContactMail($request->name, $request->email, $description, $request->phone));
+        Mail::send(new ContactMail($request->name, $request->email, $description, $request->phone, $request->countryCode));
         Mail::send(new CustomerContactMail($request->name, $request->email, $request->description));
         
         // If it's an AJAX request or from a modal, return JSON

@@ -14,6 +14,7 @@ class ContactMail extends Mailable
     public $email;
     public $description;
     public $phone;
+    public $phone_country_code;
     public $language;
     public $target;
     public $type = 'contact_mail';
@@ -23,12 +24,13 @@ class ContactMail extends Mailable
      *
      * @return void
      */
-    public function __construct($name, $email, $description, $phone = null)
+    public function __construct($name, $email, $description, $phone = null, $phone_country_code = null)
     {
         $this->name = $name;
         $this->email = $email;
         $this->description = $description;
         $this->phone = $phone;
+        $this->phone_country_code = $phone_country_code;
         $this->language = app()->getLocale();
         $this->target = 'contact_mail';
     }
