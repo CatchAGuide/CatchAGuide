@@ -17,7 +17,8 @@ class SyncICalFeeds extends Command
     protected $signature = 'ical:sync-feeds 
                             {--user-id= : Sync for specific user ID} 
                             {--feed-id= : Sync specific feed ID}
-                            {--force : Force sync even if recently synced}';
+                            {--force : Force sync even if recently synced}
+                            {--no-cleanup : Skip cleanup of past events}';
 
     /**
      * The console command description.
@@ -49,16 +50,17 @@ class SyncICalFeeds extends Command
         $userId = $this->option('user-id');
         $feedId = $this->option('feed-id');
         $force = $this->option('force');
+        $noCleanup = $this->option('no-cleanup');
 
         if ($feedId) {
             // Sync specific feed
-            $this->syncSpecificFeed($feedId, $force);
+            $this->syncSpecificFeed($feedId, $force, $noCleanup);
         } elseif ($userId) {
             // Sync for specific user
-            $this->syncUserFeeds($userId, $force);
+            $this->syncUserFeeds($userId, $force, $noCleanup);
         } else {
             // Sync all feeds that need syncing
-            $this->syncAllFeeds($force);
+            $this->syncAllFeeds($force, $noCleanup);
         }
 
         return 0;
@@ -67,7 +69,7 @@ class SyncICalFeeds extends Command
     /**
      * Sync a specific feed
      */
-    private function syncSpecificFeed($feedId, $force = false)
+    private function syncSpecificFeed($feedId, $force = false, $noCleanup = false)
     {
         $feed = ICalFeed::find($feedId);
         
@@ -84,7 +86,7 @@ class SyncICalFeeds extends Command
         $this->info("Syncing feed: {$feed->name}");
         
         try {
-            $result = $this->icalService->syncFeed($feed);
+            $result = $this->icalService->syncFeed($feed, !$noCleanup);
             
             if ($result['success']) {
                 $this->info("✓ Successfully synced {$result['synced_count']} events from '{$feed->name}'");
@@ -104,7 +106,7 @@ class SyncICalFeeds extends Command
     /**
      * Sync all feeds for a specific user
      */
-    private function syncUserFeeds($userId, $force = false)
+    private function syncUserFeeds($userId, $force = false, $noCleanup = false)
     {
         $user = \App\Models\User::find($userId);
         
@@ -116,7 +118,7 @@ class SyncICalFeeds extends Command
         $this->info("Syncing iCal feeds for user: {$user->email}");
 
         try {
-            $results = $this->icalService->syncUserFeeds($user);
+            $results = $this->icalService->syncUserFeeds($user, !$noCleanup);
             
             $successCount = 0;
             $errorCount = 0;
@@ -147,7 +149,7 @@ class SyncICalFeeds extends Command
     /**
      * Sync all feeds that need syncing
      */
-    private function syncAllFeeds($force = false)
+    private function syncAllFeeds($force = false, $noCleanup = false)
     {
         $query = ICalFeed::where('is_active', true);
 
@@ -176,7 +178,7 @@ class SyncICalFeeds extends Command
 
         foreach ($feeds as $feed) {
             try {
-                $result = $this->icalService->syncFeed($feed);
+                $result = $this->icalService->syncFeed($feed, !$noCleanup); // Pass $noCleanup to syncFeed
                 
                 if ($result['success']) {
                     $successCount++;

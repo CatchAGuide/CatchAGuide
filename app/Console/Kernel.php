@@ -52,6 +52,14 @@ class Kernel extends ConsoleKernel
                         ->daily()
                         ->withoutOverlapping()
                         ->runInBackground();
+
+        // iCal Feed Sync Scheduling
+        // Sync all iCal feeds every 2 hours (adjust frequency as needed)
+        $schedule->command('ical:sync-feeds')
+                ->everyTwoHours()
+                ->withoutOverlapping()
+                ->runInBackground()
+                ->appendOutputTo(storage_path('logs/ical-sync.log'));
     }
 
     /**
