@@ -189,12 +189,16 @@ class ICalService
      */
     private function enhanceEventSummary(string $summary, string $description, string $location, string $status, string $transp): string
     {
+        // Don't modify the summary if it's explicitly set to "Busy" - preserve it as is
+        if (trim(strtolower($summary)) === 'busy') {
+            return $summary;
+        }
+
         // If summary is generic, try to extract better info from description
         $genericPatterns = [
             '/blocked/i',
             '/not available/i',
             '/unavailable/i',
-            '/busy/i',
             '/occupied/i',
             '/scheduled/i'
         ];
@@ -294,8 +298,8 @@ class ICalService
         }
 
         // Check for blocked/unavailable time
-        if (preg_match('/blocked|unavailable|not available|busy|occupied/i', $text)) {
-            return 'tour_schedule';
+        if (preg_match('/blocked|unavailable|not available|busy|occupied|appointment|meeting|personal|private/i', $text)) {
+            return 'custom_schedule';
         }
 
         // Check for bookings/appointments
