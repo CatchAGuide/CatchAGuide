@@ -378,10 +378,10 @@ class ICalService
 
         foreach ($events as $event) {
             try {
-                // Check if event already exists
+                // Check if event already exists (by date and summary since we no longer store UID in note)
                 $existingEvent = CalendarSchedule::where('user_id', $feed->user_id)
                     ->where('date', $event['start_time']->format('Y-m-d'))
-                    ->where('note', 'like', "%{$event['uid']}%")
+                    ->where('note', $event['summary'])
                     ->first();
 
                 // Create enhanced note with more context
@@ -429,9 +429,10 @@ class ICalService
             $today = Carbon::today();
             
             // Delete past events that were imported from this feed
+            // Since we no longer store UID in notes, we'll clean up based on feed sync patterns
             $deletedCount = CalendarSchedule::where('user_id', $feed->user_id)
                 ->where('date', '<', $today->format('Y-m-d'))
-                ->where('note', 'like', '%[UID:%') // Only imported events have UID
+                ->where('type', 'custom_schedule') // Most imported events are custom_schedule type
                 ->delete();
 
             if ($deletedCount > 0) {
@@ -452,7 +453,7 @@ class ICalService
     }
 
     /**
-     * Create enhanced note with better context and formatting
+     * Create note with only the summary text
      */
     private function createEnhancedNote(array $event): string
     {
@@ -463,40 +464,40 @@ class ICalService
             $parts[] = $event['summary'];
         }
         
-        // Add enhanced description if it has meaningful content
-        if (!empty($event['description']) && $event['description'] !== $event['summary']) {
-            $parts[] = $event['description'];
-        }
+        // // Add enhanced description if it has meaningful content
+        // if (!empty($event['description']) && $event['description'] !== $event['summary']) {
+        //     $parts[] = $event['description'];
+        // }
         
-        // Add location if available
-        if (!empty($event['location'])) {
-            $parts[] = "📍 {$event['location']}";
-        }
+        // // Add location if available
+        // if (!empty($event['location'])) {
+        //     $parts[] = "📍 {$event['location']}";
+        // }
         
-        // Add organizer if available
-        if (!empty($event['organizer'])) {
-            $parts[] = "👤 {$event['organizer']}";
-        }
+        // // Add organizer if available
+        // if (!empty($event['organizer'])) {
+        //     $parts[] = "👤 {$event['organizer']}";
+        // }
         
-        // Add categories if available
-        if (!empty($event['categories'])) {
-            $parts[] = "🏷️ {$event['categories']}";
-        }
+        // // Add categories if available
+        // if (!empty($event['categories'])) {
+        //     $parts[] = "🏷️ {$event['categories']}";
+        // }
         
-        // Add status if meaningful
-        if (!empty($event['status']) && $event['status'] !== 'CONFIRMED') {
-            $parts[] = "📊 {$event['status']}";
-        }
+        // // Add status if meaningful
+        // if (!empty($event['status']) && $event['status'] !== 'CONFIRMED') {
+        //     $parts[] = "📊 {$event['status']}";
+        // }
         
-        // Add availability status
-        if ($event['transp'] === 'TRANSPARENT') {
-            $parts[] = "✅ Available";
-        } elseif ($event['transp'] === 'OPAQUE') {
-            $parts[] = "🚫 Busy";
-        }
+        // // Add availability status
+        // if ($event['transp'] === 'TRANSPARENT') {
+        //     $parts[] = "✅ Available";
+        // } elseif ($event['transp'] === 'OPAQUE') {
+        //     $parts[] = "🚫 Busy";
+        // }
         
-        // Add UID for tracking
-        $parts[] = "[UID: {$event['uid']}]";
+        // // Add UID for tracking
+        // $parts[] = "[UID: {$event['uid']}]";
         
         return implode(' | ', $parts);
     }

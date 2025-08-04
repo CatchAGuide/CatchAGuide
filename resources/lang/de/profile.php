@@ -490,6 +490,8 @@ return [
     'ical_export_benefit_1' => 'Sichere iCal-Feed-URLs für externe Kalender generieren',
     'ical_export_benefit_2' => 'OTP-basierte Sicherheit für Feed-Zugriff',
     'ical_export_benefit_3' => 'Teilen Sie Ihren Kalender sicher mit anderen',
+    'enter-note' => 'Notiz eingeben',
+    'save-event' => 'Ereignis speichern',
 ];
 
 ?>

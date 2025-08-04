@@ -476,6 +476,45 @@
         </div>
     </div>
 
+    <!-- Add Event Modal -->
+    <div class="modal fade" id="addEventModal" tabindex="-1" aria-labelledby="addEventModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addEventModalLabel">@lang('profile.add-event')</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addEventForm">
+                        <div class="mb-3">
+                            <label for="event_date" class="form-label">@lang('profile.date') *</label>
+                            <input type="date" class="form-control" id="event_date" name="date" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="event_type" class="form-label">@lang('profile.event-type') *</label>
+                            <select class="form-select" id="event_type" name="type" required>
+                                <option value="custom_schedule">@lang('profile.custom')</option>
+                                <option value="vacation_schedule">@lang('profile.vacation')</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="event_note" class="form-label">@lang('profile.note')</label>
+                            <textarea class="form-control" id="event_note" name="note" rows="3" placeholder="@lang('profile.enter-note')"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@lang('profile.cancel')</button>
+                    <button type="button" class="btn btn-primary" onclick="saveEvent()">
+                        <i class="fas fa-save"></i> @lang('profile.save-event')
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 <style>
@@ -1881,6 +1920,8 @@
                             }
                             
                             selectedDate = selectedDateStr;
+                            // Store the selected date for the add event modal
+                            setSelectedCalendarDate(selectedDateStr);
                             showDayDetails(selectedDateStr);
                         } catch (error) {
                             console.error('Error formatting selected date:', error, date1);
@@ -1919,6 +1960,8 @@
                                             dateStr = currentDate.toISOString().split('T')[0];
                                         }
                                         selectedDate = dateStr;
+                                        // Store the selected date for the add event modal
+                                        setSelectedCalendarDate(dateStr);
                                         showDayDetails(dateStr);
                                     }
                                 }, 100);
@@ -2981,6 +3024,175 @@
                     </tr>
                 `;
             });
+        }
+
+        // Save Event Function
+        function saveEvent() {
+            const form = document.getElementById('addEventForm');
+            const formData = new FormData(form);
+            
+            // Validate form
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            // Disable save button during request
+            const saveButton = document.querySelector('#addEventModal .btn-primary');
+            const originalText = saveButton.innerHTML;
+            saveButton.disabled = true;
+            saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            
+            // Send request to save event
+            fetch('{{ route("profile.calendar.store.custom") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    date: formData.get('date'),
+                    type: formData.get('type'),
+                    note: formData.get('note')
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success || data.message) {
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addEventModal'));
+                    modal.hide();
+                    
+                    // Reset form
+                    form.reset();
+                    
+                    // Show success message
+                    showAlert('success', data.message || 'Event saved successfully');
+                    
+                    // Reload calendar events
+                    loadCalendarEvents();
+                } else {
+                    showAlert('error', data.error || 'Failed to save event');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Failed to save event. Please try again.');
+            })
+            .finally(() => {
+                // Re-enable save button
+                saveButton.disabled = false;
+                saveButton.innerHTML = originalText;
+            });
+        }
+
+        // Show alert function (if not already defined)
+        function showAlert(type, message) {
+            // Create alert element
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            // Add to page
+            const container = document.querySelector('.calendar-header') || document.body;
+            container.insertAdjacentElement('afterend', alertDiv);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Global variable to store the selected date from calendar clicks
+        let selectedCalendarDate = null;
+
+        // Initialize add event modal
+        document.addEventListener('DOMContentLoaded', function() {
+            const addEventModal = document.getElementById('addEventModal');
+            if (addEventModal) {
+                addEventModal.addEventListener('show.bs.modal', function (event) {
+                    const dateInput = document.getElementById('event_date');
+                    
+                    let selectedDate = null;
+                    
+                    // Priority 1: Use the globally stored selected date from calendar click
+                    if (selectedCalendarDate) {
+                        selectedDate = selectedCalendarDate;
+                    }
+                    // Priority 2: Try to get selected date from side panel
+                    else {
+                        const sidePanel = document.getElementById('sideDetailPanel');
+                        if (sidePanel && sidePanel.style.display !== 'none') {
+                            const dateElement = document.getElementById('sideDetailPanelDate');
+                            if (dateElement && dateElement.textContent.trim()) {
+                                // Try to parse the date from the side panel
+                                const dateText = dateElement.textContent.trim();
+                                // Handle different date formats
+                                const parsedDate = parseCalendarDate(dateText);
+                                if (parsedDate) {
+                                    selectedDate = parsedDate;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Priority 3: Fall back to today's date
+                    if (!selectedDate) {
+                        const today = new Date();
+                        selectedDate = today.getFullYear() + '-' + 
+                                     String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                                     String(today.getDate()).padStart(2, '0');
+                    }
+                    
+                    if (dateInput) {
+                        dateInput.value = selectedDate;
+                    }
+                });
+            }
+        });
+
+        // Helper function to parse different date formats from the calendar
+        function parseCalendarDate(dateText) {
+            try {
+                // Remove any extra whitespace and common prefixes
+                dateText = dateText.replace(/^(Schedule for|Details for|Events for)\s*/i, '').trim();
+                
+                // Try different date parsing approaches
+                let parsedDate = null;
+                
+                // Try ISO format first (YYYY-MM-DD)
+                if (/^\d{4}-\d{2}-\d{2}$/.test(dateText)) {
+                    parsedDate = new Date(dateText + 'T00:00:00');
+                }
+                // Try various other formats
+                else {
+                    parsedDate = new Date(dateText);
+                }
+                
+                // Validate the parsed date
+                if (parsedDate && !isNaN(parsedDate.getTime())) {
+                    // Format as YYYY-MM-DD for input field
+                    const year = parsedDate.getFullYear();
+                    const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(parsedDate.getDate()).padStart(2, '0');
+                    return year + '-' + month + '-' + day;
+                }
+            } catch (e) {
+                console.warn('Date parsing failed:', e);
+            }
+            return null;
+        }
+
+        // Function to store selected date when calendar date is clicked
+        // This should be called by the calendar click handler
+        function setSelectedCalendarDate(dateString) {
+            selectedCalendarDate = dateString;
         }
     </script>
 @endsection

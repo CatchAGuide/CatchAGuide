@@ -483,6 +483,8 @@ return [
     'generate_feed' => 'Generate Feed',
     'bookings_only' => 'Bookings Only',
     'all_events' => 'All Events',
+    'enter-note' => 'Enter note',
+    'save-event' => 'Save Event',
 ];
 
 ?>
