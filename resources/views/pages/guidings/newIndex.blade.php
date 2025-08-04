@@ -820,8 +820,8 @@
                                 <tbody>
                                     @foreach($boatInformation as $key => $value)
                                         <tr>
-                                            <th>{{$value->name}}</th>
-                                            <td colspan="1">{{ $value->value }}</td>
+                                            <th>{{$value['name']}}</th>
+                                            <td colspan="1">{{ $value['value'] }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>

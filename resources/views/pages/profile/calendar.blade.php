@@ -127,6 +127,10 @@
                             <div class="legend-color legend-custom"></div>
                             <span class="legend-text">@lang('profile.custom')</span>
                         </div>
+                        <div class="legend-item" id="vacationLegend">
+                            <div class="legend-color legend-vacation"></div>
+                            <span class="legend-text">@lang('profile.vacation')</span>
+                        </div>
                         <div class="legend-item" id="availableLegend" style="display: none;">
                             <div class="legend-color legend-available"></div>
                             <span class="legend-text">@lang('profile.available')</span>
@@ -720,6 +724,7 @@
 .legend-pending { background: #ffc107; border-color: #ffc107; }
 .legend-rejected { background: #dc3545; border-color: #dc3545; }
 .legend-custom { background: #17a2b8; border-color: #17a2b8; }
+.legend-vacation { background: #6f42c1; border-color: #6f42c1; }
 .legend-available { background: #28a745; border-color: #28a745; }
 .legend-unavailable { background: #dc3545; border-color: #dc3545; }
 
@@ -876,6 +881,13 @@
     color: white !important;
 }
 
+/* Vacation Event Color */
+.litepicker .day-item.vacation-event {
+    background-color: #6f42c1 !important;
+    border: 2px solid #6f42c1 !important;
+    color: white !important;
+}
+
 /* Tour Availability Colors */
 .litepicker .day-item.tour-available {
     background-color: #28a745 !important;
@@ -968,6 +980,33 @@
 .status-rejected { background: #dc3545; color: white; }
 .status-blocked { background: #fd7e14; color: white; }
 .status-vacation { background: #6f42c1; color: white; }
+
+/* Side Detail Panel Improvements */
+#sideDetailPanel {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+#sideDetailPanel .side-detail-cards {
+    max-width: 100%;
+}
+
+#sideDetailPanel .text-truncate {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#sideDetailPanel .border.rounded {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+#sideDetailPanel h6 {
+    word-break: break-word;
+    line-height: 1.3;
+}
 .status-custom { background: #20c997; color: white; }
 
 /* Tour Filter Dropdown Styles */
@@ -2202,8 +2241,9 @@
                         const blockedTours = events.filter(e => e.extendedProps && e.extendedProps.type && 
                             (e.extendedProps.type === 'tour_schedule' || e.extendedProps.type === 'vacation_schedule'));
                         const customEvents = events.filter(e => e.extendedProps && e.extendedProps.type === 'custom_schedule');
+                        const vacationEvents = events.filter(e => e.extendedProps && e.extendedProps.type === 'vacation_schedule');
                         
-                        dayEl.classList.remove('booking-accepted', 'booking-pending', 'booking-rejected', 'booking-cancelled', 'custom-event', 'blocked-tour', 'tour-available', 'tour-blocked');
+                        dayEl.classList.remove('booking-accepted', 'booking-pending', 'booking-rejected', 'booking-cancelled', 'custom-event', 'blocked-tour', 'tour-available', 'tour-blocked', 'vacation-event');
                         
                         if (bookings.length > 0) {
                             const statuses = bookings.map(b => b.extendedProps.booking.status);
@@ -2221,6 +2261,9 @@
                             } else if (statuses.includes('cancelled')) {
                                 dayEl.classList.add('booking-cancelled');
                             }
+                        } else if (vacationEvents.length > 0) {
+                            // Vacation events should always be displayed regardless of tour filter
+                            dayEl.classList.add('vacation-event');
                         } else if (customEvents.length > 0) {
                             dayEl.classList.remove('tour-available', 'tour-blocked');
                             dayEl.classList.add('custom-event');
@@ -2295,6 +2338,7 @@
             const pendingLegend = document.getElementById('pendingLegend');
             const rejectedLegend = document.getElementById('rejectedLegend');
             const customLegend = document.getElementById('customLegend');
+            const vacationLegend = document.getElementById('vacationLegend');
             
             if (currentFilters.guiding_id !== '' && currentFilters.guiding_id !== null && currentFilters.guiding_id !== undefined) {
                 // When a specific tour is selected, show availability states
@@ -2304,6 +2348,7 @@
                 if (pendingLegend) pendingLegend.style.display = 'flex';
                 if (rejectedLegend) rejectedLegend.style.display = 'none';
                 if (customLegend) customLegend.style.display = 'flex';
+                if (vacationLegend) vacationLegend.style.display = 'flex';
             } else {
                 // When showing all tours (default), show booking states
                 if (availableLegend) availableLegend.style.display = 'none';
@@ -2312,6 +2357,7 @@
                 if (pendingLegend) pendingLegend.style.display = 'flex';
                 if (rejectedLegend) rejectedLegend.style.display = 'flex';
                 if (customLegend) customLegend.style.display = 'flex';
+                if (vacationLegend) vacationLegend.style.display = 'flex';
             }
         }
 
@@ -2334,6 +2380,10 @@
             
             const dayEvents = calendarEvents[dateStr] || [];
             
+            console.log('Showing day details for date:', dateStr);
+            console.log('Events for this date:', dayEvents);
+            console.log('Custom schedule events:', dayEvents.filter(e => e.extendedProps && e.extendedProps.type === 'custom_schedule'));
+            
             if (dayEvents.length === 0) {
                 content.innerHTML = `
                     <div class="text-center text-muted py-3">
@@ -2347,6 +2397,7 @@
                 
                 const bookings = dayEvents.filter(e => e.extendedProps && e.extendedProps.booking);
                 const customEvents = dayEvents.filter(e => e.extendedProps && e.extendedProps.type === 'custom_schedule');
+                const vacationEvents = dayEvents.filter(e => e.extendedProps && e.extendedProps.type === 'vacation_schedule');
                 const otherEvents = dayEvents.filter(e => !e.extendedProps || (!e.extendedProps.booking && 
                     e.extendedProps.type !== 'tour_schedule' && e.extendedProps.type !== 'vacation_schedule' && 
                     e.extendedProps.type !== 'custom_schedule'));
@@ -2359,23 +2410,22 @@
                         const guiding = event.extendedProps.guiding;
                         
                          contentHtml += `
-                    <div class="border rounded p-2 mb-2">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div class="d-flex align-items-center">
-                                <small class="fw-bold me-2">${guiding ? guiding.title : 'Tour Booking'}</small>
-                                <div class="booking-id-tag me-2">
-                                    <i class="fas fa-hashtag"></i>
-                                    <strong>ID: ${booking.id}</strong>
+                    <div class="border rounded p-3 mb-2">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1" style="font-weight: 600;">
+                                    ${guiding ? guiding.title : 'Tour Booking'}
+                                </h6>
+                                <div class="text-muted small mb-2">
+                                    <i class="fas fa-hashtag me-1"></i> ID: ${booking.id}
                                 </div>
                             </div>
                             <span class="status-badge status-${booking.status} text-uppercase">${booking.status}</span>
                         </div>
-                        <div class="mb-2">
-                            <small class="text-muted d-block">
-                                <i class="fas fa-user me-1"></i> ${user ? user.firstname + ' ' + user.lastname : 'Guest User'}
-                            </small>
+                        <div class="small text-muted mb-2">
+                            <i class="fas fa-user me-1"></i> ${user ? user.firstname + ' ' + user.lastname : 'Guest User'}
                         </div>
-                        <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
                             <small class="text-muted">
                                 <i class="fas fa-users me-1"></i> ${booking.count_of_users} guests
                             </small>
@@ -2384,7 +2434,7 @@
                             </small>
                         </div>
                         ${booking.status === 'pending' && {{ auth()->user()->is_guide }} ? `
-                            <div class="d-flex justify-content-end mt-2">
+                            <div class="d-flex justify-content-end">
                                 <button class="btn btn-sm btn-success me-2" onclick="window.location.href='/profile/guidebookings/accept/${booking.id}'">
                                     <i class="fas fa-check"></i> Accept
                                 </button>
@@ -2399,21 +2449,65 @@
                     contentHtml += '</div>';
                 }
                 
+                if (vacationEvents.length > 0) {
+                    contentHtml += `<div class="mb-3"><h6><i class="fas fa-umbrella-beach text-purple"></i> Vacation Events (${vacationEvents.length})</h6>`;
+                    vacationEvents.forEach(event => {
+                        const eventId = event.id || event.extendedProps?.id;
+                        const parsedNote = parseICalNote(event.extendedProps.note);
+                        
+                        contentHtml += `
+                            <div class="border rounded p-3 mb-2" style="border-color: #6f42c1 !important;">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1" style="color: #6f42c1; font-weight: 600;">
+                                            ${parsedNote ? parsedNote.title : (event.title || 'Vacation Event')}
+                                        </h6>
+                                        <div class="text-muted small">
+                                            <i class="fas fa-clock me-1"></i> ${event.extendedProps.date || dateStr}
+                                        </div>
+                                    </div>
+                                    <span class="status-badge status-vacation text-uppercase">${event.extendedProps.status || 'vacation'}</span>
+                                </div>
+                                ${parsedNote ? `
+                                    <div class="small text-muted">
+                                        ${parsedNote.description ? `<div class="mb-1"><i class="fas fa-info-circle me-1"></i> ${parsedNote.description}</div>` : ''}
+                                        ${parsedNote.availability ? `<div class="mb-1"><i class="fas fa-check-circle me-1"></i> ${parsedNote.availability}</div>` : ''}
+                                        <div class="text-truncate" title="${parsedNote.uid}">
+                                            <i class="fas fa-key me-1"></i> UID: ${parsedNote.uid}
+                                        </div>
+                                    </div>
+                                ` : (event.extendedProps.note ? `
+                                    <div class="small text-muted">
+                                        <i class="fas fa-note-sticky me-1"></i> ${event.extendedProps.note}
+                                    </div>
+                                ` : '')}
+                            </div>
+                        `;
+                    });
+                    contentHtml += '</div>';
+                }
+                
                 if (customEvents.length > 0) {
                     contentHtml += `<div class="mb-3"><h6><i class="fas fa-calendar-plus text-info"></i> Custom Events (${customEvents.length})</h6>`;
                     customEvents.forEach(event => {
                         const eventId = event.id || event.extendedProps?.id;
                         contentHtml += `
-                            <div class="border rounded p-2 mb-2">
-                                <div class="d-flex justify-content-between align-items-start">
+                            <div class="border rounded p-3 mb-2">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
                                     <div class="flex-grow-1">
-                                        <small class="fw-bold">${event.title || 'Custom Event'}</small><br>
-                                        <small class="text-muted">
-                                            <i class="fas fa-clock"></i> ${event.extendedProps.date || dateStr}<br>
-                                            ${event.extendedProps.note ? `<i class="fas fa-note-sticky"></i> ${event.extendedProps.note}` : ''}
-                                        </small>
+                                        <h6 class="mb-1 text-info" style="font-weight: 600;">
+                                            ${event.title || 'Custom Event'}
+                                        </h6>
+                                        <div class="text-muted small">
+                                            <i class="fas fa-clock me-1"></i> ${event.extendedProps.date || dateStr}
+                                        </div>
                                     </div>
                                 </div>
+                                ${event.extendedProps.note ? `
+                                    <div class="small text-muted">
+                                        <i class="fas fa-note-sticky me-1"></i> ${event.extendedProps.note}
+                                    </div>
+                                ` : ''}
                             </div>
                         `;
                     });
@@ -2429,6 +2523,46 @@
 
         function closeSideDetailPanel() {
             document.getElementById('sideDetailPanel').style.display = 'none';
+        }
+
+        // Parse iCal format notes and extract meaningful information
+        function parseICalNote(note) {
+            if (!note) return null;
+            
+            // Check if it's an iCal format note
+            if (note.includes('|') && note.includes('UID:')) {
+                const parts = note.split('|').map(part => part.trim());
+                const parsed = {
+                    title: '',
+                    description: '',
+                    availability: '',
+                    uid: '',
+                    raw: note
+                };
+                
+                parts.forEach(part => {
+                    if (part.includes('Public holiday') || part.includes('Special non-working Day')) {
+                        parsed.title = part;
+                    } else if (part.includes('Availability:')) {
+                        parsed.availability = part.replace('Availability:', '').trim();
+                    } else if (part.includes('UID:')) {
+                        parsed.uid = part.replace('UID:', '').trim();
+                    } else if (part && !part.includes('✅') && !part.includes('Available') && !part.includes('UID:')) {
+                        parsed.description = part;
+                    }
+                });
+                
+                return parsed;
+            }
+            
+            // Return simple note if not iCal format
+            return {
+                title: note,
+                description: '',
+                availability: '',
+                uid: '',
+                raw: note
+            };
         }
 
         // Show iCal Import Modal
