@@ -864,7 +864,7 @@
                                     <div class="col-12 text-start">
                                         <ul>
                                             <li>
-                                                <strong>{{ $requirement['name'] }}:</strong> {{ $requirement['value'] ?? '' }}
+                                                <strong>{{ $requirement->name }}:</strong> {{ $requirement->value ?? '' }}
                                             </li>
                                         </ul>
                                     </div>
@@ -889,7 +889,7 @@
                                     <div class="col-12 text-start">
                                         <ul>
                                             <li>
-                                                <strong>{{ $other['name'] }}:</strong> {{ $other['value'] ?? '' }}
+                                                <strong>{{ $other->name }}:</strong> {{ $other->value ?? '' }}
                                             </li>
                                         </ul>
                                     </div>
@@ -913,7 +913,7 @@
                                     <div class="col-12 text-start">
                                         <ul>
                                             <li>
-                                                <strong>{{ $recommendation['name'] }}:</strong> {{ $recommendation['value'] ?? '' }}
+                                                <strong>{{ $recommendation->name }}:</strong> {{ $recommendation->value ?? '' }}
                                             </li>
                                         </ul>
                                     </div>
@@ -1113,7 +1113,7 @@
                                     <table class="table my-4">
                                         <tbody>
                                             @foreach($boatInformation as $key => $value)
-                                                <tr><th>{{ $value['name'] }}</th><td colspan="1">{{ $value['value'] }}</td></tr>
+                                                <tr><th>{{ $value->name }}</th><td colspan="1">{{ $value->value }}</td></tr>
                                             @endforeach
                                         </tbody>
                                     </table>
@@ -1153,7 +1153,7 @@
                                 <strong class="subtitle-text">@lang('guidings.Requirements')</strong>
                                 <ul>
                                     @foreach ($guiding->getRequirementsAttribute() as $requirements)
-                                        <li><span>{{ $requirements['name'] }}:</span> {{ $requirements['value'] ?? '' }}</li>
+                                        <li><span>{{ $requirements->name }}:</span> {{ $requirements->value ?? '' }}</li>
                                     @endforeach
                                 </ul>
                                 <hr/>
@@ -1163,7 +1163,7 @@
                                 <strong class="subtitle-text">@lang('guidings.Other_Info')</strong>
                                 <ul>
                                     @foreach ($guiding->getOtherInformationAttribute() as $otherIndex => $other)
-                                        <li><span>{{ $other['name'] }}:</span> {{ $other['value'] ?? '' }}</li>
+                                        <li><span>{{ $other->name }}:</span> {{ $other->value ?? '' }}</li>
                                     @endforeach
                                 </ul>
                                 <hr/>
@@ -1173,7 +1173,7 @@
                                 <strong class="subtitle-text">@lang('guidings.Reco_Prep')</strong>
                                 <ul>
                                     @foreach ($guiding->getRecommendationsAttribute() as $recIndex => $recommendations)
-                                        <li><span>{{ $recommendations['name'] }}:</span> {{ $recommendations['value'] ?? '' }}</li>
+                                        <li><span>{{ $recommendations->name }}:</span> {{ $recommendations->value ?? '' }}</li>
                                     @endforeach
                                 </ul>
                                 <hr/>
