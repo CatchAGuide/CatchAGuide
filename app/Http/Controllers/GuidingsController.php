@@ -1057,7 +1057,15 @@ class GuidingsController extends Controller
         foreach ($guidings as $guiding) {
             $galleryImages = json_decode($guiding->gallery_images, true) ?? [];
             $optimizedImages = [];
+            
+            if (!empty($guiding->thumbnail_path)) {
+                $optimizedImages[] = $this->imageOptimizationService->getOptimizedThumbnail($guiding->thumbnail_path);
+            }
+            
             foreach ($galleryImages as $imagePath) {
+                if ($guiding->thumbnail_path && $imagePath === $guiding->thumbnail_path) {
+                    continue;
+                }
                 $optimizedImages[] = $this->imageOptimizationService->getOptimizedThumbnail($imagePath);
             }
             $guiding->cached_gallery_images = $optimizedImages;
