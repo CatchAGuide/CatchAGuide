@@ -16,7 +16,7 @@ class DiagnoseVacationDisplayCommand extends Command
         $vacationId = $this->argument('vacation_id');
         
         $this->info("=== VACATION TRANSLATION DISPLAY DIAGNOSIS ===");
-        $this->line("Vacation ID: {$vacationId}");
+        $this->line("Vacation ID: " . $vacationId);
         
         // Step 1: Check if vacation exists
         $vacation = Vacation::with(['accommodations', 'boats', 'packages', 'guidings', 'extras'])
@@ -27,7 +27,7 @@ class DiagnoseVacationDisplayCommand extends Command
             return 1;
         }
         
-        $this->info("✅ Vacation found: {$vacation->title}");
+        $this->info("✅ Vacation found: " . $vacation->title);
         $this->line("   Source language: " . ($vacation->language ?: 'NOT SET'));
         
         // Step 2: Check relation counts
@@ -51,14 +51,14 @@ class DiagnoseVacationDisplayCommand extends Command
         foreach ($translationTypes as $type) {
             $count = Language::where('type', $type)->count();
             $enCount = Language::where('type', $type)->where('language', 'en')->count();
-            $this->line("{$type}: {$count} total, {$enCount} EN");
+            $this->line($type . ": " . $count . " total, " . $enCount . " EN");
         }
         
         // Step 4: Check specific accommodation translations
         if ($vacation->accommodations->count() > 0) {
             $this->info("\n=== ACCOMMODATION TRANSLATION DETAILS ===");
             foreach ($vacation->accommodations as $index => $accommodation) {
-                $this->line("\n--- Accommodation #{$index + 1} (ID: {$accommodation->id}) ---");
+                $this->line("\n--- Accommodation #" . ($index + 1) . " (ID: " . $accommodation->id . ") ---");
                 $this->line("Title: " . ($accommodation->title ?? 'N/A'));
                 
                 // Check for EN translation
@@ -69,9 +69,9 @@ class DiagnoseVacationDisplayCommand extends Command
                 ])->first();
                 
                 if ($enTranslation) {
-                    $this->info("✅ EN translation found (ID: {$enTranslation->id})");
+                    $this->info("✅ EN translation found (ID: " . $enTranslation->id . ")");
                     $this->line("   Title: " . ($enTranslation->title ?? 'N/A'));
-                    $this->line("   Updated: {$enTranslation->updated_at}");
+                    $this->line("   Updated: " . $enTranslation->updated_at);
                     
                     $translatedData = json_decode($enTranslation->json_data, true);
                     if ($translatedData) {
@@ -96,7 +96,7 @@ class DiagnoseVacationDisplayCommand extends Command
         
         // Test with different locales
         foreach (['en', 'de'] as $locale) {
-            $this->line("\n--- Testing locale: {$locale} ---");
+            $this->line("\n--- Testing locale: " . $locale . " ---");
             app()->setLocale($locale);
             $this->line("App locale set to: " . app()->getLocale());
             
@@ -136,7 +136,7 @@ class DiagnoseVacationDisplayCommand extends Command
         if ($vacation->accommodations->count() > 0) {
             $firstAccommodation = $vacation->accommodations->first();
             $cacheKey = 'vacation_relation_translation_' . $firstAccommodation->id . '_accommodation_en';
-            $this->line("Cache key: {$cacheKey}");
+            $this->line("Cache key: " . $cacheKey);
             
             $cachedData = \Cache::get($cacheKey);
             if ($cachedData) {
