@@ -295,28 +295,69 @@ class Vacation extends Model
             $translatedData = json_decode($translation->json_data, true);
             $result = $item->toArray();
             
-            // Update title and description from translation
-            if (isset($translatedData['title'])) {
-                $result['title'] = $translatedData['title'];
-            }
-            if (isset($translatedData['description'])) {
-                $result['description'] = $translatedData['description'];
-            }
-            
-            // Update dynamic fields
-            foreach ($translatedData as $key => $value) {
-                if (strpos($key, 'dynamic_') === 0) {
-                    $fieldName = substr($key, 8); // Remove 'dynamic_' prefix
-                    if ($result['dynamic_fields']) {
-                        $dynamicFields = is_string($result['dynamic_fields']) ? json_decode($result['dynamic_fields'], true) : $result['dynamic_fields'];
-                        $dynamicFields[$fieldName] = $value;
-                        $result['dynamic_fields'] = json_encode($dynamicFields);
+            // Handle different relation types
+            switch ($relationType) {
+                case 'accommodation':
+                case 'boat':
+                case 'package':
+                case 'guiding':
+                    // These models have: title, description, dynamic_fields
+                    if (isset($translatedData['title'])) {
+                        $result['title'] = $translatedData['title'];
                     }
-                }
+                    if (isset($translatedData['description'])) {
+                        $result['description'] = $translatedData['description'];
+                    }
+                    
+                    // Update dynamic fields
+                    $this->updateDynamicFields($result, $translatedData);
+                    break;
+                    
+                case 'extra':
+                    // VacationExtra has: type, description, price
+                    if (isset($translatedData['description'])) {
+                        $result['description'] = $translatedData['description'];
+                    }
+                    if (isset($translatedData['type'])) {
+                        $result['type'] = $translatedData['type'];
+                    }
+                    break;
+                    
+                default:
+                    // Generic fallback
+                    if (isset($translatedData['title'])) {
+                        $result['title'] = $translatedData['title'];
+                    }
+                    if (isset($translatedData['description'])) {
+                        $result['description'] = $translatedData['description'];
+                    }
+                    break;
             }
             
             return (object) $result;
         });
+    }
+
+    /**
+     * Update dynamic fields with translated values
+     */
+    private function updateDynamicFields(array &$result, array $translatedData): void
+    {
+        foreach ($translatedData as $key => $value) {
+            if (strpos($key, 'dynamic_') === 0) {
+                $fieldName = substr($key, 8); // Remove 'dynamic_' prefix
+                if (isset($result['dynamic_fields'])) {
+                    $dynamicFields = is_string($result['dynamic_fields']) ? 
+                        json_decode($result['dynamic_fields'], true) : 
+                        $result['dynamic_fields'];
+                        
+                    if (is_array($dynamicFields)) {
+                        $dynamicFields[$fieldName] = $value;
+                        $result['dynamic_fields'] = $dynamicFields;
+                    }
+                }
+            }
+        }
     }
 
     public static function locationFilter(string $city = null, string $country = null, ?int $radius = null, $placeLat = null, $placeLng = null )
