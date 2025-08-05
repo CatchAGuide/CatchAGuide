@@ -189,12 +189,16 @@ class ICalService
      */
     private function enhanceEventSummary(string $summary, string $description, string $location, string $status, string $transp): string
     {
+        // Don't modify the summary if it's explicitly set to "Busy" - preserve it as is
+        if (trim(strtolower($summary)) === 'busy') {
+            return $summary;
+        }
+
         // If summary is generic, try to extract better info from description
         $genericPatterns = [
             '/blocked/i',
             '/not available/i',
             '/unavailable/i',
-            '/busy/i',
             '/occupied/i',
             '/scheduled/i'
         ];
@@ -294,8 +298,8 @@ class ICalService
         }
 
         // Check for blocked/unavailable time
-        if (preg_match('/blocked|unavailable|not available|busy|occupied/i', $text)) {
-            return 'tour_schedule';
+        if (preg_match('/blocked|unavailable|not available|busy|occupied|appointment|meeting|personal|private/i', $text)) {
+            return 'custom_schedule';
         }
 
         // Check for bookings/appointments
@@ -374,10 +378,10 @@ class ICalService
 
         foreach ($events as $event) {
             try {
-                // Check if event already exists
+                // Check if event already exists (by date and summary since we no longer store UID in note)
                 $existingEvent = CalendarSchedule::where('user_id', $feed->user_id)
                     ->where('date', $event['start_time']->format('Y-m-d'))
-                    ->where('note', 'like', "%{$event['uid']}%")
+                    ->where('note', $event['summary'])
                     ->first();
 
                 // Create enhanced note with more context
@@ -425,9 +429,10 @@ class ICalService
             $today = Carbon::today();
             
             // Delete past events that were imported from this feed
+            // Since we no longer store UID in notes, we'll clean up based on feed sync patterns
             $deletedCount = CalendarSchedule::where('user_id', $feed->user_id)
                 ->where('date', '<', $today->format('Y-m-d'))
-                ->where('note', 'like', '%[UID:%') // Only imported events have UID
+                ->where('type', 'custom_schedule') // Most imported events are custom_schedule type
                 ->delete();
 
             if ($deletedCount > 0) {
@@ -447,9 +452,6 @@ class ICalService
         }
     }
 
-    /**
-     * Create enhanced note with better context and formatting
-     */
     private function createEnhancedNote(array $event): string
     {
         $parts = [];
@@ -459,40 +461,40 @@ class ICalService
             $parts[] = $event['summary'];
         }
         
-        // Add enhanced description if it has meaningful content
-        if (!empty($event['description']) && $event['description'] !== $event['summary']) {
-            $parts[] = $event['description'];
-        }
+        // // Add enhanced description if it has meaningful content
+        // if (!empty($event['description']) && $event['description'] !== $event['summary']) {
+        //     $parts[] = $event['description'];
+        // }
         
-        // Add location if available
-        if (!empty($event['location'])) {
-            $parts[] = "📍 {$event['location']}";
-        }
+        // // Add location if available
+        // if (!empty($event['location'])) {
+        //     $parts[] = "📍 {$event['location']}";
+        // }
         
-        // Add organizer if available
-        if (!empty($event['organizer'])) {
-            $parts[] = "👤 {$event['organizer']}";
-        }
+        // // Add organizer if available
+        // if (!empty($event['organizer'])) {
+        //     $parts[] = "👤 {$event['organizer']}";
+        // }
         
-        // Add categories if available
-        if (!empty($event['categories'])) {
-            $parts[] = "🏷️ {$event['categories']}";
-        }
+        // // Add categories if available
+        // if (!empty($event['categories'])) {
+        //     $parts[] = "🏷️ {$event['categories']}";
+        // }
         
-        // Add status if meaningful
-        if (!empty($event['status']) && $event['status'] !== 'CONFIRMED') {
-            $parts[] = "📊 {$event['status']}";
-        }
+        // // Add status if meaningful
+        // if (!empty($event['status']) && $event['status'] !== 'CONFIRMED') {
+        //     $parts[] = "📊 {$event['status']}";
+        // }
         
-        // Add availability status
-        if ($event['transp'] === 'TRANSPARENT') {
-            $parts[] = "✅ Available";
-        } elseif ($event['transp'] === 'OPAQUE') {
-            $parts[] = "🚫 Busy";
-        }
+        // // Add availability status
+        // if ($event['transp'] === 'TRANSPARENT') {
+        //     $parts[] = "✅ Available";
+        // } elseif ($event['transp'] === 'OPAQUE') {
+        //     $parts[] = "🚫 Busy";
+        // }
         
-        // Add UID for tracking
-        $parts[] = "[UID: {$event['uid']}]";
+        // // Add UID for tracking
+        // $parts[] = "[UID: {$event['uid']}]";
         
         return implode(' | ', $parts);
     }
