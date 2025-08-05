@@ -115,7 +115,7 @@ class VacationTranslationCommand extends Command
                     }
 
                     // Perform translation
-                    $success = $this->translationService->translateVacation($vacation, $targetLanguage);
+                    $success = $this->translationService->translateVacation($vacation, $targetLanguage, $force);
                     
                     if ($success) {
                         // Translate relations if requested

@@ -87,7 +87,7 @@ class VacationTranslationService
     /**
      * Translate vacation to target language and save to Language table
      */
-    public function translateVacation(Vacation $vacation, string $targetLanguage): bool
+    public function translateVacation(Vacation $vacation, string $targetLanguage, bool $force = false): bool
     {
         try {
             // Don't translate if target language is same as source
@@ -116,12 +116,22 @@ class VacationTranslationService
                 return true; // Recent translation, no need to retranslate
             }
 
-            // Get only the fields that have changed since last translation
-            $changedFields = $this->getChangedTranslatableFields($vacation, $targetLanguage);
+            // Get fields to translate
+            if ($force || !$existingTranslation) {
+                // For force mode or initial translation, translate all translatable fields
+                $translatableFields = [
+                    'title', 'surroundings_description', 'best_travel_times',
+                    'target_fish', 'water_distance', 'shopping_distance', 'travel_included', 'travel_options', 'included_services', 'airport_distance', 'additional_services'
+                ];
+                $fieldsToProcess = $translatableFields;
+            } else {
+                // Only translate changed fields
+                $fieldsToProcess = $this->getChangedTranslatableFields($vacation, $targetLanguage);
+            }
             
-            // Prepare data for translation (only changed fields)
+            // Prepare data for translation
             $dataToTranslate = [];
-            foreach ($changedFields as $field) {
+            foreach ($fieldsToProcess as $field) {
                 $value = $vacation->$field;
                 if (!empty($value)) {
                     if (is_array($value) || $this->isJsonString($value)) {
@@ -346,7 +356,7 @@ class VacationTranslationService
                 }
 
                 try {
-                    $success = $this->translateVacation($vacation, $language);
+                    $success = $this->translateVacation($vacation, $language, false);
                     $vacationResults[$language] = $success;
                     
                     if ($success) {
