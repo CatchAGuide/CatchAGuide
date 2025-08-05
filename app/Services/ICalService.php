@@ -452,9 +452,6 @@ class ICalService
         }
     }
 
-    /**
-     * Create note with only the summary text
-     */
     private function createEnhancedNote(array $event): string
     {
         $parts = [];
