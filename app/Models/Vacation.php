@@ -213,7 +213,7 @@ class Vacation extends Model
     /**
      * Get translated accommodations
      */
-    public function getTranslatedAccommodations(string $language = null): \Illuminate\Database\Eloquent\Collection
+    public function getTranslatedAccommodations(string $language = null): \Illuminate\Support\Collection
     {
         $language = $language ?: app()->getLocale();
         
@@ -225,7 +225,7 @@ class Vacation extends Model
     /**
      * Get translated boats
      */
-    public function getTranslatedBoats(string $language = null): \Illuminate\Database\Eloquent\Collection
+    public function getTranslatedBoats(string $language = null): \Illuminate\Support\Collection
     {
         $language = $language ?: app()->getLocale();
         
@@ -237,7 +237,7 @@ class Vacation extends Model
     /**
      * Get translated packages
      */
-    public function getTranslatedPackages(string $language = null): \Illuminate\Database\Eloquent\Collection
+    public function getTranslatedPackages(string $language = null): \Illuminate\Support\Collection
     {
         $language = $language ?: app()->getLocale();
         
@@ -249,7 +249,7 @@ class Vacation extends Model
     /**
      * Get translated guidings
      */
-    public function getTranslatedGuidings(string $language = null): \Illuminate\Database\Eloquent\Collection
+    public function getTranslatedGuidings(string $language = null): \Illuminate\Support\Collection
     {
         $language = $language ?: app()->getLocale();
         
@@ -261,7 +261,7 @@ class Vacation extends Model
     /**
      * Get translated extras
      */
-    public function getTranslatedExtras(string $language = null): \Illuminate\Database\Eloquent\Collection
+    public function getTranslatedExtras(string $language = null): \Illuminate\Support\Collection
     {
         $language = $language ?: app()->getLocale();
         
@@ -275,6 +275,7 @@ class Vacation extends Model
      */
     private function getTranslatedRelationItem($item, string $relationType, string $language): object
     {
+        // Skip translation if source language matches target language
         if ($this->language === $language) {
             return $item;
         }
