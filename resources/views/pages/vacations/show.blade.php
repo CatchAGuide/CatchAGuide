@@ -681,7 +681,17 @@
                                                     {!! $item->description !!}
                                                 </span>
                                                 <!-- Other Details Row -->
-                                                @php $dynamicFields = $item->dynamic_fields @endphp
+                                                @php 
+                                                    // Handle dynamic fields - ensure it's an array for iteration
+                                                    $dynamicFields = $item->dynamic_fields;
+                                                    if (is_string($dynamicFields)) {
+                                                        $dynamicFields = json_decode($dynamicFields, true) ?: [];
+                                                    } elseif (is_object($dynamicFields)) {
+                                                        $dynamicFields = (array) $dynamicFields;
+                                                    } elseif (!is_array($dynamicFields)) {
+                                                        $dynamicFields = [];
+                                                    }
+                                                @endphp
                                                 <div class="row mt-4">
                                                     @foreach($dynamicFields as $field => $value)
                                                         @if($field !== 'prices')
@@ -697,10 +707,10 @@
                                                                     
                                                                     // Display priority fields first
                                                                     foreach ($priorityFields as $priorityField) {
-                                                                        if (isset($dynamicFields->$priorityField)) {
+                                                                        if (isset($dynamicFields[$priorityField])) {
                                                                             echo '<div class="details-row">
                                                                                     <h6 class="mb-1">' . translate(ucwords(str_replace('_', ' ', $priorityField))) . ':</h6>
-                                                                                    <p class="mb-0">' . translate($dynamicFields->$priorityField)    . '</p>
+                                                                                    <p class="mb-0">' . translate($dynamicFields[$priorityField]) . '</p>
                                                                                 </div>';
                                                                         }
                                                                     }
@@ -843,7 +853,17 @@
                                                         {!! $item->description !!}
                                                     </span>
                                                     <!-- Other Details Row -->
-                                                    @php $dynamicFields = $item->dynamic_fields @endphp
+                                                    @php 
+                                                        // Handle dynamic fields - ensure it's an array for iteration
+                                                        $dynamicFields = $item->dynamic_fields;
+                                                        if (is_string($dynamicFields)) {
+                                                            $dynamicFields = json_decode($dynamicFields, true) ?: [];
+                                                        } elseif (is_object($dynamicFields)) {
+                                                            $dynamicFields = (array) $dynamicFields;
+                                                        } elseif (!is_array($dynamicFields)) {
+                                                            $dynamicFields = [];
+                                                        }
+                                                    @endphp
                                             <div class="row mt-4">
                                                 @foreach($dynamicFields as $field => $value)
                                                     @if($field !== 'prices')
@@ -859,10 +879,10 @@
                                                                 
                                                                 // Display priority fields first
                                                                 foreach ($priorityFields as $priorityField) {
-                                                                    if (isset($dynamicFields->$priorityField)) {
+                                                                    if (isset($dynamicFields[$priorityField])) {
                                                                         echo '<div class="details-row">
                                                                                 <h6 class="mb-1">' . translate(ucwords(str_replace('_', ' ', $priorityField))) . ':</h6>
-                                                                                <p class="mb-0">' . translate($dynamicFields->$priorityField) . '</p>
+                                                                                <p class="mb-0">' . translate($dynamicFields[$priorityField]) . '</p>
                                                                             </div>';
                                                                     }
                                                                 }

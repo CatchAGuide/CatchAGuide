@@ -353,6 +353,7 @@ class Vacation extends Model
                         
                     if (is_array($dynamicFields)) {
                         $dynamicFields[$fieldName] = $value;
+                        // Keep as array for consistent handling
                         $result['dynamic_fields'] = $dynamicFields;
                     }
                 }
