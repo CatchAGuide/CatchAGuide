@@ -117,6 +117,28 @@ return [
     'sync_failed' => 'Sync Failed',
     'events_synced' => 'events synced',
     'feed_status' => 'Feed Status',
+    
+    // Generate iCal Feed
+    'generate_ical_title' => 'Generate iCal Feed',
+    'generate_ical_description' => 'Create your own iCal feed URL with OTP security',
+    'generate_ical_benefit_1' => 'Generate secure iCal feed URLs for external calendars',
+    'generate_ical_benefit_2' => 'OTP-based security for feed access',
+    'generate_ical_benefit_3' => 'Share your calendar securely with others',
+    'generate_new_feed' => 'Generate New Feed',
+    'manage_feeds' => 'Manage Feeds',
+    'active_feeds' => 'Active Feeds',
+    'no_feeds' => 'No Feeds',
+    
+    // Generate iCal Modal
+    'generate_new_ical_feed' => 'Generate New iCal Feed',
+    'feed_name_help' => 'Enter a descriptive name for your iCal feed',
+    'feed_type_help' => 'Choose which type of events to include in the feed',
+    'custom_schedule' => 'Custom Schedule',
+    'expires_at' => 'Expires At',
+    'expires_at_help' => 'Optional: Set when this feed should expire (leave empty for no expiration)',
+    'generate_feed' => 'Generate Feed',
+    'manage_user_ical_feeds' => 'Manage Your iCal Feeds',
+    'close' => 'Close',
 
     /**
      *
@@ -184,12 +206,12 @@ return [
     'waterType' => 'Water Body Types',
     'otherWaterTypes' => 'Other water body types',
     'guestAndWater' => 'Guest/water ticket',
-    'waterTypeMsg' => 'A water type is missing in this selection? Enter it under “Other” yourself',
+    'waterTypeMsg' => 'A water type is missing in this selection? Enter it under "Other" yourself',
     'targetFish' => 'Target Fish',
-    'targetFishMsg' => 'You are missing a target fish in this selection? Enter it yourself under “Other target fish”',
+    'targetFishMsg' => 'You are missing a target fish in this selection? Enter it yourself under "Other target fish"',
     'otherTargetFish' => 'Other target fish',
     'techniqueMethod' => 'Technique / Method',
-    'techniqueMethodMsg' => 'You are missing a method in this selection? Enter it yourself under “Other technique / method"',
+    'techniqueMethodMsg' => 'You are missing a method in this selection? Enter it yourself under "Other technique / method"',
     'otherTechniqueMethod' => 'Other technique / method',
     'bodyOfWater' => 'Name of the water your guiding takes place',
     'bodyOfWaterMsg' => 'Enter here the name of the body of water where you will be fishing with your guest.',
@@ -712,6 +734,10 @@ return [
     'become_a_guide' => 'Become a Guide',
     'please_login_access' => 'Please log in to access your profile',
     'login' => 'Login',
+    
+    // Additional UI elements
+    'actions' => 'Actions',
+    'current_otp' => 'Current OTP',
 ];
 
 ?>
