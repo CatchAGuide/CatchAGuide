@@ -196,6 +196,7 @@
                                         </div>
                                         <div class="detail-row">
                                             <strong>{{ __('profile.fishing_type') }}:</strong> {{ $booking->guiding ? $booking->guiding->type_of_fishing : __('profile.na') }}
+
                                         </div>
                                         @if($booking->guiding && $booking->guiding->description)
                                             <div class="detail-row">
@@ -243,6 +244,7 @@
                                         @if($booking->status == 'accepted')
                                             <div class="detail-row">
                                                 <strong>{{ __('profile.email') }}:</strong> {{ $booking->guiding && $booking->guiding->user ? $booking->guiding->user->email : __('profile.na') }}
+
                                             </div>
                                             @if($booking->guiding && $booking->guiding->user && $booking->guiding->user->phone)
                                                 <div class="detail-row">
@@ -304,6 +306,7 @@
                                 <div class="modal-body">
                                     <div class="contact-info">
                                         <strong>{{ __('profile.email') }}:</strong> {{ $booking->guiding && $booking->guiding->user ? $booking->guiding->user->email : __('profile.na') }}
+
                                     </div>
                                     @if($booking->guiding && $booking->guiding->user && $booking->guiding->user->phone)
                                         <div class="contact-info">
@@ -435,6 +438,7 @@
                                         @if($booking->status == 'accepted')
                                             <div class="detail-row">
                                                 <strong>{{ __('profile.email') }}:</strong> {{ $booking->guiding && $booking->guiding->user ? $booking->guiding->user->email : __('profile.na') }}
+
                                             </div>
                                             @if($booking->guiding && $booking->guiding->user && $booking->guiding->user->phone)
                                                 <div class="detail-row">
