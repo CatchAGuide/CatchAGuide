@@ -25,7 +25,7 @@
                 <th>@lang('profile.guest')</th>
                 <th>@lang('profile.price')</th>
                 <th>@lang('profile.contact')</th>
-                <th>Status</th>
+                <th>{{ __('profile.status') }}</th>
             </tr>
         </thead>
         <tbody>
@@ -34,7 +34,7 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="contact">E-mail</h5>
+                            <h5 class="modal-title" id="contact">{{ __('profile.email') }}</h5>
                         </div>
                         <div class="modal-body">
                             <div class="form-group">
@@ -42,7 +42,7 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">{{ __('profile.close') }}</button>
                         </div>
                     </div>
                 </div>
@@ -59,7 +59,7 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">{{ __('profile.close') }}</button>
                         </div>
                     </div>
                 </div>

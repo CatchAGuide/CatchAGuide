@@ -237,9 +237,9 @@
     <div class="account-header">
         <h1 class="mb-0 text-white">
             <i class="fas fa-user-edit"></i>
-            Personal Details
+            {{ __('profile.personal_details') }}
         </h1>
-        <p class="mb-0 mt-2 text-white">Manage your profile information and account settings</p>
+        <p class="mb-0 mt-2 text-white">{{ __('profile.manage_profile_information') }}</p>
     </div>
 
     <form action="{{route('profile.account')}}" method="POST" enctype="multipart/form-data" id="profileForm">
@@ -260,14 +260,14 @@
                 </div>
                 <div>
                     <input type="file" class="form-control" id="image" name="image" accept="image/*" />
-                    <small class="helper-text mt-2">Select an image to see preview before saving</small>
+                    <small class="helper-text mt-2">{{ __('profile.select_image_preview') }}</small>
                 </div>
             </div>
         </div>
 
         <!-- Personal Information Section -->
         <div class="profile-section">
-            <h3 class="section-title">Personal Information</h3>
+            <h3 class="section-title">{{ __('profile.personal_information') }}</h3>
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
@@ -309,16 +309,16 @@
                         <label class="form-label" for="email">@lang('profile.email')</label>
                         <input type="email" class="form-control" id="email" name="email" 
                                placeholder="E-Mail" value="{{ auth()->user()->email }}" disabled>
-                        <small class="helper-text">Email cannot be changed. Contact support if needed.</small>
+                        <small class="helper-text">{{ __('profile.email_cannot_be_changed') }}</small>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label class="form-label" for="language">Language<span class="required">*</span></label>
+                        <label class="form-label" for="language">{{ __('profile.language') }}<span class="required">*</span></label>
                         <select class="form-control form-select" name="language" id="language" required>
-                            <option value="">Select Language</option>
-                            <option value="en" {{ $authUser->language == 'en' ? 'selected' : '' }}>English</option>
-                            <option value="de" {{ $authUser->language == 'de' ? 'selected' : '' }}>German</option>
+                            <option value="">{{ __('profile.select_language') }}</option>
+                            <option value="en" {{ $authUser->language == 'en' ? 'selected' : '' }}>{{ __('profile.english') }}</option>
+                            <option value="de" {{ $authUser->language == 'de' ? 'selected' : '' }}>{{ __('profile.german') }}</option>
                         </select>
                     </div>
                 </div>
@@ -327,7 +327,7 @@
 
         <!-- Address Information Section -->
         <div class="profile-section">
-            <h3 class="section-title">Address Information</h3>
+            <h3 class="section-title">{{ __('profile.address_information') }}</h3>
             <div class="row">
                 <div class="col-md-8">
                     <div class="form-group">
@@ -371,7 +371,7 @@
         @if(auth()->user()->is_guide)
             <!-- Guide Information Section -->
             <div class="profile-section guide-section">
-                <h3 class="section-title">Guide Information</h3>
+                <h3 class="section-title">{{ __('profile.guide_information') }}</h3>
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
@@ -419,7 +419,7 @@
     
     <!-- Floating Save Button -->
     <button type="button" class="floating-save-btn" id="floatingSaveBtn" onclick="document.getElementById('profileForm').submit();">
-        <i class="fas fa-save"></i> Save Changes
+        <i class="fas fa-save"></i> {{ __('profile.save_changes') }}
     </button>
 @endsection
 

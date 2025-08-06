@@ -8,9 +8,9 @@
     <div class="bookings-header">
         <h1 class="mb-0 text-white">
             <i class="fas fa-certificate"></i>
-            {{translate('Become a Fishing Guide')}}
+            {{ __('profile.become_guide') }}
         </h1>
-        <p class="mb-0 mt-2 text-white">{{translate('Join our community of professional fishing guides')}}</p>
+        <p class="mb-0 mt-2 text-white">{{ __('profile.join_community') }}</p>
     </div>
 
     {{-- @if(Auth::user()->is_guide === 0)
@@ -30,7 +30,7 @@
             <div class="d-flex align-items-start">
                 <i class="fas fa-exclamation-triangle me-3 text-danger mt-1"></i>
                 <div>
-                    <strong>Please fix the following errors:</strong>
+                    <strong>{{ __('profile.fix_following_errors') }}</strong>
                     <ul class="mb-0 mt-2">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>

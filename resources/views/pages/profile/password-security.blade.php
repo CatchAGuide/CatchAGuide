@@ -1,5 +1,5 @@
 @extends('pages.profile.layouts.profile')
-@section('title', 'Password & Security')
+@section('title', __('profile.password_security'))
 
 @section('profile-content')
     <style>
@@ -218,7 +218,7 @@
         }
         
         .coming-soon::before {
-            content: "Coming Soon";
+            content: "{{ __('profile.coming_soon') }}";
             position: absolute;
             top: 10px;
             right: 10px;
@@ -270,20 +270,20 @@
     <div class="security-header">
         <h1 class="mb-0 text-white">
             <i class="fas fa-shield-alt"></i>
-            Password & Security
+            {{ __('profile.password_security') }}
         </h1>
-        <p class="mb-0 mt-2 text-white">Secure your account with strong authentication settings</p>
+        <p class="mb-0 mt-2 text-white">{{ __('profile.manage_password_security') }}</p>
     </div>
 
     <!-- Password Change Section -->
     <div class="security-section">
         <h3 class="section-title">
             <i class="fas fa-key"></i>
-            Change Password
+            {{ __('profile.change_password') }}
         </h3>
         
         <div class="alert security-tips">
-            <strong><i class="fas fa-shield-alt"></i> Password Security Tips:</strong>
+            <strong><i class="fas fa-shield-alt"></i> {{ __('profile.password_tips') }}</strong>
             <ul class="tips-list">
                 <li>Use at least 8 characters with a mix of letters, numbers, and symbols</li>
                 <li>Avoid using personal information like birthdays or names</li>

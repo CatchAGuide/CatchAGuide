@@ -79,14 +79,22 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    <a href="{{route('admin.guides.edit', $booking->guiding->user->id)}}">
-                                                        {{ $booking->guiding->user->full_name }}
-                                                    </a>
+                                                    @if($booking->guiding && $booking->guiding->user)
+                                                        <a href="{{route('admin.guides.edit', $booking->guiding->user->id)}}">
+                                                            {{ $booking->guiding->user->full_name }}
+                                                        </a>
+                                                    @else
+                                                        <span class="text-muted">N/A</span>
+                                                    @endif
                                                 </td>
                                                 <td>
-                                                    <a href="{{route('admin.guidings.edit', $booking->guiding->id)}}">
-                                                        {{$booking->guiding->title}}
-                                                    </a>
+                                                    @if($booking->guiding)
+                                                        <a href="{{route('admin.guidings.edit', $booking->guiding->id)}}">
+                                                            {{$booking->guiding->title}}
+                                                        </a>
+                                                    @else
+                                                        <span class="text-muted">N/A</span>
+                                                    @endif
                                                 </td>
                                                 <td>
                                                     @if($booking->status == 'pending')
@@ -101,9 +109,9 @@
                                                         {{ $booking->id }}, 
                                                         {{ json_encode($booking->user ? ($booking->user->firstname . ' ' . $booking->user->lastname) : ($booking->firstname . ' ' . $booking->lastname)) }}, 
                                                         {{ json_encode($booking->email ?: ($booking->user ? $booking->user->email : '')) }}, 
-                                                        {{ json_encode($booking->guiding->user->firstname . ' ' . $booking->guiding->user->lastname) }}, 
-                                                        {{ json_encode($booking->guiding->user->email) }}
-                                                    )">
+                                                        {{ json_encode($booking->guiding && $booking->guiding->user ? ($booking->guiding->user->firstname . ' ' . $booking->guiding->user->lastname) : 'N/A') }}, 
+                                                        {{ json_encode($booking->guiding && $booking->guiding->user ? $booking->guiding->user->email : '') }}
+                                                    )"
                                                         <i class="fa fa-paper-plane"></i> Resend Emails
                                                     </button>
                                                 </td>

@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Alle Zahlungen')
+@section('title', __('admin.all_payments'))
 
 @section('content')
     <div class="side-app">
@@ -13,7 +13,7 @@
                 <h1 class="page-title">@yield('title')</h1>
                 <div>
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="#">Verwaltung</a></li>
+                        <li class="breadcrumb-item"><a href="#">{{ __('admin.administration') }}</a></li>
                         <li class="breadcrumb-item active" aria-current="page">@yield('title')</li>
                     </ol>
                 </div>
@@ -25,17 +25,17 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-header">
-                            <h3>Zahlungen</h3>
+                            <h3>{{ __('admin.payments') }}</h3>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-bordered text-nowrap border-bottom" id="responsive-datatable">
                                     <thead>
                                     <tr>
-                                        <th class="wd-10p border-bottom-0">Transaction-ID</th>
-                                        <th class="wd-15p border-bottom-0">Benutzer</th>
-                                        <th class="wd-25p border-bottom-0">Typ</th>
-                                        <th class="wd-25p border-bottom-0">Euro</th>
+                                        <th class="wd-10p border-bottom-0">{{ __('admin.transaction_id') }}</th>
+                                        <th class="wd-15p border-bottom-0">{{ __('admin.user') }}</th>
+                                        <th class="wd-25p border-bottom-0">{{ __('admin.type') }}</th>
+                                        <th class="wd-25p border-bottom-0">{{ __('admin.euro') }}</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -45,9 +45,9 @@
                                                 <td>{{ $transaction->payable?->full_name }}</td>
                                                 <td>
                                                     @if($transaction->type === 'deposit')
-                                                        <span class="badge bg-secondary">Einzahlung</span>
+                                                        <span class="badge bg-secondary">{{ __('admin.deposit') }}</span>
                                                     @else
-                                                        <span class="badge bg-danger">Auszahlung</span>
+                                                        <span class="badge bg-danger">{{ __('admin.withdrawal') }}</span>
                                                     @endif
                                                 </td>
                                                 <td>{{ two($transaction->amount) }} €</td>
@@ -63,19 +63,19 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-header">
-                            <h3>Auszahlungsanfragen</h3>
+                            <h3>{{ __('admin.payout_requests') }}</h3>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-bordered text-nowrap border-bottom" id="responsive-datatable">
                                     <thead>
                                     <tr>
-                                        <th class="wd-10p border-bottom-0">Transaction-ID</th>
-                                        <th class="wd-15p border-bottom-0">Benutzer</th>
-                                        <th class="wd-25p border-bottom-0">Typ</th>
-                                        <th class="wd-25p border-bottom-0">Euro</th>
-                                        <th class="wd-25p border-bottom-0">Status</th>
-                                        <th class="wd-25p border-bottom-0">Aktion</th>
+                                        <th class="wd-10p border-bottom-0">{{ __('admin.transaction_id') }}</th>
+                                        <th class="wd-15p border-bottom-0">{{ __('admin.user') }}</th>
+                                        <th class="wd-25p border-bottom-0">{{ __('admin.type') }}</th>
+                                        <th class="wd-25p border-bottom-0">{{ __('admin.euro') }}</th>
+                                        <th class="wd-25p border-bottom-0">{{ __('admin.status') }}</th>
+                                        <th class="wd-25p border-bottom-0">{{ __('admin.action') }}</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -93,9 +93,9 @@
                                             <td>{{ two($transaction->amount) }} €</td>
                                             <td>
                                                 @if($transaction->is_completed === 1)
-                                                    freigegeben
+                                                    {{ __('admin.approved') }}
                                                 @else
-                                                    angefragt
+                                                    {{ __('admin.requested') }}
                                                 @endif
                                             </td>
                                             <td>
