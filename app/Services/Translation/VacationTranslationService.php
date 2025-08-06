@@ -87,7 +87,7 @@ class VacationTranslationService
     /**
      * Translate vacation to target language and save to Language table
      */
-    public function translateVacation(Vacation $vacation, string $targetLanguage): bool
+    public function translateVacation(Vacation $vacation, string $targetLanguage, bool $force = false): bool
     {
         try {
             // Don't translate if target language is same as source
@@ -116,12 +116,22 @@ class VacationTranslationService
                 return true; // Recent translation, no need to retranslate
             }
 
-            // Get only the fields that have changed since last translation
-            $changedFields = $this->getChangedTranslatableFields($vacation, $targetLanguage);
+            // Get fields to translate
+            if ($force || !$existingTranslation) {
+                // For force mode or initial translation, translate all translatable fields
+                $translatableFields = [
+                    'title', 'surroundings_description', 'best_travel_times',
+                    'target_fish', 'water_distance', 'shopping_distance', 'travel_included', 'travel_options', 'included_services', 'airport_distance', 'additional_services'
+                ];
+                $fieldsToProcess = $translatableFields;
+            } else {
+                // Only translate changed fields
+                $fieldsToProcess = $this->getChangedTranslatableFields($vacation, $targetLanguage);
+            }
             
-            // Prepare data for translation (only changed fields)
+            // Prepare data for translation
             $dataToTranslate = [];
-            foreach ($changedFields as $field) {
+            foreach ($fieldsToProcess as $field) {
                 $value = $vacation->$field;
                 if (!empty($value)) {
                     if (is_array($value) || $this->isJsonString($value)) {
@@ -219,7 +229,7 @@ class VacationTranslationService
     /**
      * Translate vacation's related models (accommodations, boats, etc.)
      */
-    public function translateVacationRelations(Vacation $vacation, string $targetLanguage): bool
+    public function translateVacationRelations(Vacation $vacation, string $targetLanguage, bool $force = false): bool
     {
         try {
             $relations = ['accommodations', 'boats', 'packages', 'guidings', 'extras'];
@@ -227,9 +237,9 @@ class VacationTranslationService
             foreach ($relations as $relationName) {
                 $relationItems = $vacation->$relationName;
                 
-                foreach ($relationItems as $item) {
-                    $this->translateRelationItem($item, $relationName, $targetLanguage, $vacation->language);
-                }
+                            foreach ($relationItems as $item) {
+                $this->translateRelationItem($item, $relationName, $targetLanguage, $vacation->language, $force);
+            }
             }
 
             return true;
@@ -246,34 +256,26 @@ class VacationTranslationService
     /**
      * Translate individual relation item
      */
-    private function translateRelationItem($item, string $relationType, string $targetLanguage, string $sourceLanguage): void
+    private function translateRelationItem($item, string $relationType, string $targetLanguage, string $sourceLanguage, bool $force = false): void
     {
+        $relationTypeClean = rtrim($relationType, 's'); // Remove 's' from plural
+        
         $existingTranslation = Language::where([
             'source_id' => $item->id,
-            'type' => 'vacation_' . rtrim($relationType, 's'), // Remove 's' from plural
+            'type' => 'vacation_' . $relationTypeClean,
             'language' => $targetLanguage
         ])->first();
 
-        // Skip if translation exists and is recent
-        if ($existingTranslation && $existingTranslation->updated_at > $item->updated_at) {
+        // Skip if translation exists and is recent (unless forced)
+        if (!$force && $existingTranslation && $existingTranslation->updated_at > $item->updated_at) {
             return;
         }
 
-        $dataToTranslate = [
-            'title' => $item->title ?? '',
-            'description' => $item->description ?? ''
-        ];
-
-        // Handle dynamic fields
-        if ($item->dynamic_fields) {
-            $dynamicFields = is_string($item->dynamic_fields) ? json_decode($item->dynamic_fields, true) : $item->dynamic_fields;
-            if (is_array($dynamicFields)) {
-                foreach ($dynamicFields as $key => $value) {
-                    if ($key !== 'prices' && is_string($value)) {
-                        $dataToTranslate['dynamic_' . $key] = $value;
-                    }
-                }
-            }
+        // Prepare data based on model type
+        $dataToTranslate = $this->getTranslatableFieldsForRelation($item, $relationTypeClean);
+        
+        if (empty($dataToTranslate)) {
+            return;
         }
 
         $translatedData = TranslationHelper::batchTranslate(
@@ -285,18 +287,77 @@ class VacationTranslationService
 
         if ($existingTranslation) {
             $existingTranslation->update([
-                'title' => $translatedData['title'] ?? null,
+                'title' => $translatedData['title'] ?? $translatedData['description'] ?? null,
                 'json_data' => json_encode($translatedData)
             ]);
         } else {
             Language::create([
                 'source_id' => $item->id,
-                'type' => 'vacation_' . rtrim($relationType, 's'),
+                'type' => 'vacation_' . $relationTypeClean,
                 'language' => $targetLanguage,
-                'title' => $translatedData['title'] ?? null,
+                'title' => $translatedData['title'] ?? $translatedData['description'] ?? null,
                 'json_data' => json_encode($translatedData)
             ]);
         }
+    }
+
+    /**
+     * Get translatable fields for different relation types
+     */
+    private function getTranslatableFieldsForRelation($item, string $relationType): array
+    {
+        $dataToTranslate = [];
+
+        switch ($relationType) {
+            case 'accommodation':
+            case 'boat':
+            case 'package':
+            case 'guiding':
+                // These models have: title, description, dynamic_fields
+                if (!empty($item->title)) {
+                    $dataToTranslate['title'] = $item->title;
+                }
+                if (!empty($item->description)) {
+                    $dataToTranslate['description'] = $item->description;
+                }
+                
+                // Handle dynamic fields
+                if ($item->dynamic_fields) {
+                    $dynamicFields = is_string($item->dynamic_fields) ? json_decode($item->dynamic_fields, true) : $item->dynamic_fields;
+                    if (is_array($dynamicFields)) {
+                        foreach ($dynamicFields as $key => $value) {
+                            // Skip numeric fields like prices, capacity numbers, etc.
+                            if ($key !== 'prices' && is_string($value) && !empty($value) && !is_numeric($value)) {
+                                $dataToTranslate['dynamic_' . $key] = $value;
+                            }
+                        }
+                    }
+                }
+                break;
+
+            case 'extra':
+                // VacationExtra has: type, description, price
+                if (!empty($item->description)) {
+                    $dataToTranslate['description'] = $item->description;
+                }
+                // Type field could be translatable (like "per_person", "per_day", etc.)
+                if (!empty($item->type) && is_string($item->type)) {
+                    $dataToTranslate['type'] = $item->type;
+                }
+                break;
+                
+            default:
+                // Generic fallback - try to get title and description
+                if (isset($item->title) && !empty($item->title)) {
+                    $dataToTranslate['title'] = $item->title;
+                }
+                if (isset($item->description) && !empty($item->description)) {
+                    $dataToTranslate['description'] = $item->description;
+                }
+                break;
+        }
+
+        return $dataToTranslate;
     }
 
     /**
@@ -346,7 +407,7 @@ class VacationTranslationService
                 }
 
                 try {
-                    $success = $this->translateVacation($vacation, $language);
+                    $success = $this->translateVacation($vacation, $language, false);
                     $vacationResults[$language] = $success;
                     
                     if ($success) {

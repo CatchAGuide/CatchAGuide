@@ -290,9 +290,9 @@
                                     <h4>{{ Auth::user()->firstname ?? 'Welcome' }} {{ Auth::user()->lastname ?? 'Back' }}</h4>
                                     <p class="user-type">
                                         @if(Auth::user()->is_guide)
-                                            <span class="badge badge-success"><i class="fas fa-fish"></i> Fishing Guide</span>
+                                            <span class="badge badge-success"><i class="fas fa-fish"></i> {{ __('profile.fishing_guide') }}</span>
                                         @else
-                                            <span class="badge badge-primary"><i class="fas fa-user"></i> Angler</span>
+                                            <span class="badge badge-primary"><i class="fas fa-user"></i> {{ __('profile.angler') }}</span>
                                         @endif
                                     </p>
                                 </div>
@@ -306,9 +306,9 @@
                                 </div>
                             </div>
                             <div class="user-info">
-                                <h4>Guest User</h4>
+                                <h4>{{ __('profile.guest_user') }}</h4>
                                 <p class="user-type">
-                                    <span class="badge badge-secondary"><i class="fas fa-user"></i> Guest</span>
+                                    <span class="badge badge-secondary"><i class="fas fa-user"></i> {{ __('profile.guest') }}</span>
                                 </p>
                             </div>
                         </div>
@@ -322,7 +322,7 @@
                                     <li class="nav-item">
                                         <a href="{{ route('profile.index') }}" class="nav-link {{ Request::routeIs('profile.index') ? 'active' : '' }}">
                                             <i class="fas fa-home"></i>
-                                            <span>Dashboard</span>
+                                            <span>{{ __('profile.dashboard') }}</span>
                                         </a>
                                     </li>
                                 </ul>
@@ -330,18 +330,18 @@
 
                             <!-- Profile Section -->
                             <div class="nav-section">
-                                <h6 class="nav-section-title">Profile</h6>
+                                <h6 class="nav-section-title">{{ __('profile.profile_section') }}</h6>
                                 <ul class="nav-list">
                                     <li class="nav-item">
                                         <a href="{{ route('profile.settings') }}" class="nav-link {{ Request::routeIs('profile.settings') ? 'active' : '' }}">
                                             <i class="fas fa-user-edit"></i>
-                                            <span>Personal Details</span>
+                                            <span>{{ __('profile.personal_details') }}</span>
                                         </a>
                                     </li>
                                     <li class="nav-item">
                                         <a href="{{ route('profile.password') }}" class="nav-link {{ Request::routeIs('profile.password') ? 'active' : '' }}">
                                             <i class="fas fa-lock"></i>
-                                            <span>Password & Security</span>
+                                            <span>{{ __('profile.password_security') }}</span>
                                         </a>
                                     </li>
 
@@ -349,7 +349,7 @@
                                         <li class="nav-item">
                                             <a href="{{ route('profile.payments') }}" class="nav-link {{ Request::routeIs('profile.payments') ? 'active' : '' }}">
                                                 <i class="fas fa-credit-card"></i>
-                                                <span>Payment Information</span>
+                                                <span>{{ __('profile.payment_information') }}</span>
                                             </a>
                                         </li>
                                     @endif
@@ -358,19 +358,19 @@
 
                             <!-- Booking Section -->
                             <div class="nav-section">
-                                <h6 class="nav-section-title">Bookings</h6>
+                                <h6 class="nav-section-title">{{ __('profile.bookings_section') }}</h6>
                                 <ul class="nav-list">
                                     <li class="nav-item">
                                         <a href="{{ route('profile.bookings') }}" class="nav-link {{ Request::routeIs('profile.bookings') || Request::routeIs('profile.showbooking') || Request::routeIs('profile.guidebookings') ? 'active' : '' }}">
                                             <i class="fas fa-calendar-check"></i>
-                                            <span>All Bookings</span>
+                                            <span>{{ __('profile.all_bookings') }}</span>
                                         </a>
                                     </li>
                                     @if(Auth::user()->is_guide)
                                     <li class="nav-item">
                                         <a href="{{ route('profile.calendar') }}" class="nav-link {{ Request::routeIs('profile.calendar') ? 'active' : '' }}">
                                             <i class="fas fa-calendar-alt"></i>
-                                            <span>Calendar</span>
+                                            <span>{{ __('profile.calendar') }}</span>
                                         </a>
                                     </li>
                                     @endif
@@ -380,18 +380,18 @@
                             @if(Auth::user()->is_guide)
                             <!-- My Guidings Section -->
                             <div class="nav-section">
-                                <h6 class="nav-section-title">My Guidings</h6>
+                                <h6 class="nav-section-title">{{ __('profile.my_guidings_section') }}</h6>
                                 <ul class="nav-list">
                                     <li class="nav-item">
                                         <a href="{{ route('profile.myguidings') }}" class="nav-link {{ Request::routeIs('profile.myguidings') || Request::routeIs('guidings.edit') ? 'active' : '' }}">
                                             <i class="fas fa-list-alt"></i>
-                                            <span>All Guidings</span>
+                                            <span>{{ __('profile.all_guidings') }}</span>
                                         </a>
                                     </li>
                                     <li class="nav-item">
                                         <a href="{{ route('profile.newguiding') }}" class="nav-link highlight {{ Request::routeIs('profile.newguiding') ? 'active' : '' }}">
                                             <i class="fas fa-plus-circle"></i>
-                                            <span>Create New Guiding</span>
+                                            <span>{{ __('profile.create_new_guiding') }}</span>
                                         </a>
                                     </li>
                                 </ul>
@@ -401,12 +401,12 @@
                             @if(!Auth::user()->is_guide)
                             <!-- Become a Guide Section -->
                             <div class="nav-section">
-                                <h6 class="nav-section-title">Upgrade</h6>
+                                <h6 class="nav-section-title">{{ __('profile.upgrade') }}</h6>
                                 <ul class="nav-list">
                                     <li class="nav-item">
                                         <a href="{{ route('profile.becomeguide') }}" class="nav-link {{ Request::routeIs('profile.becomeguide') ? 'active' : '' }}">
                                             <i class="fas fa-certificate"></i>
-                                            <span>Become a Guide</span>
+                                            <span>{{ __('profile.become_a_guide') }}</span>
                                         </a>
                                     </li>
                                 </ul>
@@ -417,9 +417,9 @@
                         <nav class="profile-nav">
                             <div class="nav-section">
                                 <div class="guest-nav">
-                                    <p class="text-muted mb-3">Please log in to access your profile</p>
+                                    <p class="text-muted mb-3">{{ __('profile.please_login_access') }}</p>
                                     <a href="{{ route('login') }}" class="btn btn-primary btn-sm">
-                                        <i class="fas fa-sign-in-alt"></i> Login
+                                        <i class="fas fa-sign-in-alt"></i> {{ __('profile.login') }}
                                     </a>
                                 </div>
                             </div>

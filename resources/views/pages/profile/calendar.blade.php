@@ -10,7 +10,7 @@
             <i class="fas fa-calendar-alt"></i>
             @lang('profile.calendar')
         </h1>
-        <p class="mb-0 mt-2 text-white">Manage your availability and schedule for fishing trips</p>
+        <p class="mb-0 mt-2 text-white">{{ __('profile.manage_availability_schedule') }}</p>
     </div>
 
     <!-- Bottom Row: Tour Filter (Left) and Details (Right) -->
@@ -71,14 +71,14 @@
             <div id="sideDetailPanel" class="side-detail-panel" style="display: none;">
                 <div class="detail-panel-header">
                     <button class="close-panel-btn" onclick="closeSideDetailPanel()">&times;</button>
-                    <h5 id="sideDetailPanelTitle">Schedule for Date</h5>
+                    <h5 id="sideDetailPanelTitle">{{ __('profile.schedule_for_date') }}</h5>
                     <p id="sideDetailPanelDate" class="mb-0 small"></p>
                 </div>
                 <div class="detail-panel-body">
                     <div id="sideDetailPanelContent" class="detail-content">
                         <div class="text-center text-muted py-3">
                             <i class="fas fa-calendar-alt fa-2x mb-2"></i>
-                            <p class="small">Click on a date to view details</p>
+                            <p class="small">{{ __('profile.click_date_view_details') }}</p>
                         </div>
                     </div>
                     <div class="detail-panel-actions mt-3 pt-2 border-top">
@@ -103,7 +103,7 @@
                     <div id="calendarLoadingOverlay" class="calendar-loading-overlay">
                         <div class="calendar-loading-spinner">
                             <div class="spinner"></div>
-                            <div class="loading-text">Applying calendar colors...</div>
+                            <div class="loading-text">{{ __('profile.applying_calendar_colors') }}</div>
                         </div>
                     </div>
                 </div>

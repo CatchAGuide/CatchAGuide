@@ -12,7 +12,7 @@
         </div>
         @if($guiding->additional_information)
         <div class="col-md-12 mt-2">
-                <br>Sonstiges:</br>
+                <br>{{ __('profile.additional_info') }}:</br>
                 {!! $guiding->additional_information !!}
         </div>
         @endif
@@ -21,7 +21,7 @@
         </div> --}}
 
         <div class="col-12 my-1 mt-5">
-            <h5><span class="bordered-heading">Guiding Information</span></h5>
+            <h5><span class="bordered-heading">{{ __('profile.guiding_information') }}</span></h5>
         </div>
         <div class="col-md-8 my-1">
             <div class="row">

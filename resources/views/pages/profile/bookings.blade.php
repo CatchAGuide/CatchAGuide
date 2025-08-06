@@ -692,9 +692,9 @@
         <div class="bookings-header">
         <h1 class="mb-0 text-white">
             <i class="fas fa-calendar-check"></i>
-            All Bookings
+            {{ __('profile.all_bookings') }}
         </h1>
-        <p class="mb-0 mt-2 text-white">Manage your fishing trip bookings and guide requests</p>
+        <p class="mb-0 mt-2 text-white">{{ __('profile.manage_fishing_trip_bookings') }}</p>
         
         <div class="stats">
             @php
@@ -746,42 +746,42 @@
             
             <div class="stat-item clickable-stat" data-filter="all">
                 <span class="stat-number">{{ $totalBookings }}</span>
-                <span class="stat-label">Total Bookings</span>
+                <span class="stat-label">{{ __('profile.total_bookings') }}</span>
             </div>
             <div class="stat-item clickable-stat" data-filter="pending">
                 <span class="stat-number">{{ $pendingRequests }}</span>
-                <span class="stat-label">Pending Requests</span>
+                <span class="stat-label">{{ __('profile.pending_requests') }}</span>
             </div>
             @if(auth()->user()->is_guide)
                 <div class="stat-item clickable-stat" data-filter="accepted">
                     <span class="stat-number">{{ $confirmedBookings }}</span>
-                    <span class="stat-label">My Confirmed</span>
+                    <span class="stat-label">{{ __('profile.my_confirmed') }}</span>
                 </div>
                 <div class="stat-item clickable-stat" data-filter="cancelled">
                     <span class="stat-number">{{ $cancelledBookings }}</span>
-                    <span class="stat-label">Cancelled</span>
+                    <span class="stat-label">{{ __('profile.cancelled') }}</span>
                 </div>
                 <div class="stat-item clickable-stat" data-filter="rejected">
                     <span class="stat-number">{{ $rejectedBookings }}</span>
-                    <span class="stat-label">Rejected</span>
+                    <span class="stat-label">{{ __('profile.rejected') }}</span>
                 </div>
                 <div class="stat-item clickable-stat" data-filter="completed">
                     <span class="stat-number">{{ $completedBookings }}</span>
-                    <span class="stat-label">Completed</span>
+                    <span class="stat-label">{{ __('profile.completed') }}</span>
                 </div>
             @else
                 <!-- Regular User Stats - Show simplified stats -->
                 <div class="stat-item clickable-stat" data-filter="accepted">
                     <span class="stat-number">{{ $confirmedBookings }}</span>
-                    <span class="stat-label">Confirmed</span>
+                    <span class="stat-label">{{ __('profile.confirmed') }}</span>
                 </div>
                 <div class="stat-item clickable-stat" data-filter="cancelled-rejected">
                     <span class="stat-number">{{ $cancelledRejectedBookings }}</span>
-                    <span class="stat-label">Cancelled/Rejected</span>
+                    <span class="stat-label">{{ __('profile.cancelled_rejected') }}</span>
                 </div>
                 <div class="stat-item clickable-stat" data-filter="completed">
                     <span class="stat-number">{{ $completedBookings }}</span>
-                    <span class="stat-label">Past Bookings</span>
+                    <span class="stat-label">{{ __('profile.past_bookings') }}</span>
                 </div>
             @endif
         </div>
@@ -792,31 +792,31 @@
         @if(auth()->user()->is_guide)
         <div class="filter-tabs">
             <button class="filter-tab active" data-filter="all">
-                <i class="fas fa-list"></i> All Bookings
+                <i class="fas fa-list"></i> {{ __('profile.all_bookings') }}
             </button>
             <button class="filter-tab" data-filter="my-booking">
-                <i class="fas fa-user"></i> My Bookings
+                <i class="fas fa-user"></i> {{ __('profile.my_bookings') }}
             </button>
             <button class="filter-tab" data-filter="guide-booking">
-                <i class="fas fa-fish"></i> Guide Bookings
+                <i class="fas fa-fish"></i> {{ __('profile.guide_bookings') }}
             </button>
         </div>
         @endif
         
         <div class="search-filters">
-            <input type="text" class="search-input" id="searchInput" placeholder="Search by guiding name, location, or guide...">
+            <input type="text" class="search-input" id="searchInput" placeholder="{{ __('profile.search_placeholder') }}">
             <select class="status-filter" id="statusFilter">
-                <option value="">All Statuses</option>
-                <option value="accepted">Confirmed</option>
-                <option value="pending">Pending Requests</option>
+                <option value="">{{ __('profile.all_statuses') }}</option>
+                <option value="accepted">{{ __('profile.confirmed') }}</option>
+                <option value="pending">{{ __('profile.pending_requests') }}</option>
                 @if(auth()->user()->is_guide)
-                    <option value="cancelled">Cancelled</option>
-                    <option value="rejected">Rejected</option>
+                    <option value="cancelled">{{ __('profile.cancelled') }}</option>
+                    <option value="rejected">{{ __('profile.rejected') }}</option>
                 @else
-                    <option value="accepted">Confirmed</option>
-                    <option value="cancelled-rejected">Cancelled/Rejected</option>
+                    <option value="accepted">{{ __('profile.confirmed') }}</option>
+                    <option value="cancelled-rejected">{{ __('profile.cancelled_rejected') }}</option>
                 @endif
-                <option value="completed">Completed</option>
+                <option value="completed">{{ __('profile.completed') }}</option>
             </select>
         </div>
     </div>
@@ -826,7 +826,7 @@
          data-has-more-my="{{ $bookings->hasMorePages() ? 'true' : 'false' }}"
          data-has-more-guide="{{ auth()->user()->is_guide && $guideBookings && method_exists($guideBookings, 'hasMorePages') ? ($guideBookings->hasMorePages() ? 'true' : 'false') : 'false' }}">
         @if($bookings && $bookings->count() > 0)
-            <!-- My Bookings -->
+            <!-- {{ __('profile.my_booking') }}s -->
             @foreach($bookings as $index => $booking)
                 <div class="booking-card my-booking" data-type="my-booking" data-status="{{ $booking->status }}" 
                      data-completed="{{ 
@@ -841,14 +841,14 @@
                         <div style="flex: 1;">
                             <div class="booking-type my-booking">
                                 <i class="fas fa-user"></i>
-                                My Booking
+                                {{ __('profile.my_booking') }}
                             </div>
                             <div class="booking-id-tag">
                                 <i class="fas fa-hashtag"></i>
                                 <strong>ID: {{ $booking->id }}</strong>
                             </div>
-                            <h3 class="booking-title">{{ $booking->guiding->title ?? 'Untitled Guiding' }}</h3>
-                            <p class="booking-subtitle">📍 {{ $booking->guiding->location ?? 'Location not specified' }}</p>
+                            <h3 class="booking-title">{{ $booking->guiding->title ?? __('profile.untitled_guiding') }}</h3>
+                            <p class="booking-subtitle">📍 {{ $booking->guiding->location ??  __('profile.location_not_specified') }}</p>
                         </div>
                         <div class="booking-status">
                             <span class="status-badge status-{{ $booking->status }}">
@@ -864,7 +864,7 @@
                                     <i class="fas fa-clock"></i>
                                 </div>
                                 <div class="detail-content">
-                                    <h6>Requested at</h6>
+                                    <h6>{{ __('profile.requested_at') }}</h6>
                                     <p>{{ $booking->created_at->format('D, M j, Y') }}</p>
                                 </div>
                             </div>
@@ -875,7 +875,7 @@
                                         <i class="fas fa-times-circle"></i>
                                     </div>
                                     <div class="detail-content">
-                                        <h6>Cancelled Date</h6>
+                                        <h6>{{ __('profile.cancelled_date') }}</h6>
                                         <p>{{ $booking->updated_at->format('D, M j, Y') }}</p>
                                     </div>
                                 </div>
@@ -886,7 +886,7 @@
                                     <i class="fas fa-calendar"></i>
                                 </div>
                                 <div class="detail-content">
-                                    <h6>Trip Date</h6>
+                                    <h6>{{ __('profile.trip_date') }}</h6>
                                     <p>
                                         @if($booking->calendar_schedule)
                                             {{ \Carbon\Carbon::parse($booking->calendar_schedule->date)->format('D, M j, Y') }}
@@ -925,15 +925,15 @@
                                 </div>
                                 <div class="detail-content">
                                     <h6>Guests</h6>
-                                    <p>{{ $booking->count_of_users ?? 1 }} Person(s)</p>
+                                    <p>{{ $booking->count_of_users ?? 1 }} {{ __('profile.person_s') }}</p>
                                 </div>
                             </div>
                         </div>
                         
                         <div class="booking-actions">
-                            <!-- View Details button for all statuses -->
+                            <!-- {{ __('profile.view_details') }} button for all statuses -->
                             <button class="btn-action btn-primary" data-bs-toggle="modal" data-bs-target="#detailsModal{{ $index }}">
-                                <i class="fas fa-eye"></i> View Details
+                                <i class="fas fa-eye"></i> {{ __('profile.view_details') }}
                             </button>
 
                             @if($booking->status == 'accepted')
@@ -948,18 +948,18 @@
                                 </button>
                             @elseif($booking->status == 'pending')
                                 <span class="btn-action btn-secondary">
-                                    <i class="fas fa-clock"></i> Waiting for Response
+                                    <i class="fas fa-clock"></i> {{ __('profile.waiting_for_response') }}
                                 </span>
                             @elseif(in_array($booking->status, ['cancelled', 'rejected', 'storniert']))
                                 <button class="btn-action btn-danger" data-bs-toggle="modal" data-bs-target="#rejectionModal{{ $index }}" 
-                                    <i class="fas fa-exclamation-triangle"></i> {{ $booking->status == 'cancelled' ? 'Cancellation' : 'Rejection' }} Details
+                                    <i class="fas fa-exclamation-triangle"></i> {{ $booking->status == 'cancelled' ? __('profile.cancellation_details') : 'Rejection' }} Details
                                 </button>
                             @endif
                         </div>
                     </div>
                 </div>
 
-                <!-- Details Modal for My Bookings -->
+                <!-- Details Modal for {{ __('profile.my_booking') }}s -->
                 <div class="modal fade booking-details-modal" id="detailsModal{{ $index }}" tabindex="-1">
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content">
@@ -1016,7 +1016,7 @@
                                             </div>
                                             @if($booking->status == 'cancelled' && $booking->additional_information)
                                                 <div class="detail-row">
-                                                    <strong>Cancellation Reason:</strong> 
+                                                    <strong>{{ __('profile.cancellation_details') }} Reason:</strong> 
                                                     <p class="mt-1 text-danger">{{ $booking->additional_information }}</p>
                                                 </div>
                                             @endif
@@ -1095,7 +1095,7 @@
                         </div>
                     </div>
 
-                <!-- Contact Modal for My Bookings -->
+                <!-- Contact Modal for {{ __('profile.my_booking') }}s -->
                 <div class="modal fade contact-modal" id="contactModal{{ $index }}" tabindex="-1">
                         <div class="modal-dialog">
                             <div class="modal-content">
@@ -1122,7 +1122,7 @@
                         </div>
                     </div>
 
-                <!-- Rejection Details Modal for My Bookings -->
+                <!-- Rejection Details Modal for {{ __('profile.my_booking') }}s -->
                 @if(in_array($booking->status, ['cancelled', 'rejected', 'storniert']))
                     <div class="modal fade rejection-details-modal" id="rejectionModal{{ $index }}" tabindex="-1">
                         <div class="modal-dialog modal-lg">
@@ -1136,7 +1136,7 @@
                                 </div>
                                 <div class="modal-body">
                                     <div class="rejection-content">
-                                        <h6><i class="fas fa-info-circle"></i> {{ $booking->status == 'cancelled' ? 'Cancellation' : 'Rejection' }} Reason</h6>
+                                        <h6><i class="fas fa-info-circle"></i> {{ $booking->status == 'cancelled' ? __('profile.cancellation_details') : 'Rejection' }} Reason</h6>
                                         <p class="mb-0">{{ $booking->additional_information ?? __('emails.guest_booking_request_expired_text_2') }}</p>
                                     </div>
 
@@ -1217,7 +1217,7 @@
             @endforeach
         @endif
 
-        <!-- Guide Bookings -->
+        <!-- {{ __('profile.guide_booking') }}s -->
         @if(auth()->user()->is_guide && $guideBookings && method_exists($guideBookings, 'count') && $guideBookings->count() > 0)
             @foreach($guideBookings as $gIndex => $booking)
                 <div class="booking-card guide-booking" data-type="guide-booking" data-status="{{ $booking->status }}" 
@@ -1233,14 +1233,14 @@
                         <div style="flex: 1;">
                             <div class="booking-type guide-booking">
                                 <i class="fas fa-fish"></i>
-                                Guide Booking
+                                {{ __('profile.guide_booking') }}
                             </div>
                             <div class="booking-id-tag">
                                 <i class="fas fa-hashtag"></i>
                                 <strong>ID: {{ $booking->id }}</strong>
                             </div>
-                            <h3 class="booking-title">{{ $booking->guiding->title ?? 'Untitled Guiding' }}</h3>
-                            <p class="booking-subtitle">📍 {{ $booking->guiding->location ?? 'Location not specified' }}</p>
+                            <h3 class="booking-title">{{ $booking->guiding->title ?? __('profile.untitled_guiding') }}</h3>
+                            <p class="booking-subtitle">📍 {{ $booking->guiding->location ?? __('profile.location_not_specified') }}</p>
                         </div>
                         <div class="booking-status">
                             <span class="status-badge status-{{ $booking->status }}">
@@ -1267,7 +1267,7 @@
                                         <i class="fas fa-times-circle"></i>
                                     </div>
                                     <div class="detail-content">
-                                        <h6>Cancelled Date</h6>
+                                        <h6>{{ __('profile.cancelled_date') }}</h6>
                                         <p>{{ $booking->updated_at->format('D, M j, Y') }}</p>
                                     </div>
                                 </div>
@@ -1278,7 +1278,7 @@
                                     <i class="fas fa-calendar"></i>
                                 </div>
                                 <div class="detail-content">
-                                    <h6>Trip Date</h6>
+                                    <h6>{{ __('profile.trip_date') }}</h6>
                                     <p>
                                         @if($booking->calendar_schedule)
                                             {{ \Carbon\Carbon::parse($booking->calendar_schedule->date)->format('D, M j, Y') }}
@@ -1317,15 +1317,15 @@
                                 </div>
                                 <div class="detail-content">
                                     <h6>Guests</h6>
-                                    <p>{{ $booking->count_of_users ?? 1 }} Person(s)</p>
+                                    <p>{{ $booking->count_of_users ?? 1 }} {{ __('profile.person_s') }}</p>
                                 </div>
                             </div>
                         </div>
                         
                         <div class="booking-actions">
-                            <!-- View Details button for all statuses -->
+                            <!-- {{ __('profile.view_details') }} button for all statuses -->
                             <button class="btn-action btn-primary" data-bs-toggle="modal" data-bs-target="#guideDetailsModal{{ $gIndex }}">
-                                <i class="fas fa-eye"></i> View Details
+                                <i class="fas fa-eye"></i> {{ __('profile.view_details') }}
                             </button>
 
                             @if($booking->status == 'pending')
@@ -1341,14 +1341,14 @@
                                 </button>
                             @elseif(in_array($booking->status, ['cancelled', 'rejected', 'storniert']))
                                 <button class="btn-action btn-danger" data-bs-toggle="modal" data-bs-target="#guideRejectionModal{{ $gIndex }}">
-                                    <i class="fas fa-exclamation-triangle"></i> {{ $booking->status == 'cancelled' ? 'Cancellation' : 'Rejection' }} Details
+                                    <i class="fas fa-exclamation-triangle"></i> {{ $booking->status == 'cancelled' ? __('profile.cancellation_details') : 'Rejection' }} Details
                                 </button>
                             @endif
                         </div>
                     </div>
                 </div>
 
-                <!-- Details Modal for Guide Bookings -->
+                <!-- Details Modal for {{ __('profile.guide_booking') }}s -->
                 <div class="modal fade booking-details-modal" id="guideDetailsModal{{ $gIndex }}" tabindex="-1">
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content">
@@ -1402,7 +1402,7 @@
                                             </div>
                                             @if($booking->additional_information)
                                                 <div class="detail-row">
-                                                    <strong>@if($booking->status == 'cancelled') Cancellation Reason: @else Rejection Reason: @endif</strong> 
+                                                    <strong>@if($booking->status == 'cancelled') {{ __('profile.cancellation_details') }} Reason: @else Rejection Reason: @endif</strong> 
                                                     <p class="mt-1 text-danger">{{ $booking->additional_information }}</p>
                                                 </div>
                                             @endif
@@ -1467,7 +1467,7 @@
                         </div>
                     </div>
 
-                <!-- Contact Modal for Guide Bookings -->
+                <!-- Contact Modal for {{ __('profile.guide_booking') }}s -->
                 <div class="modal fade contact-modal" id="guideContactModal{{ $gIndex }}" tabindex="-1">
                         <div class="modal-dialog">
                             <div class="modal-content">
@@ -1494,7 +1494,7 @@
                         </div>
                     </div>
 
-                <!-- Rejection Details Modal for Guide Bookings -->
+                <!-- Rejection Details Modal for {{ __('profile.guide_booking') }}s -->
                 @if(in_array($booking->status, ['cancelled', 'rejected', 'storniert']))
                     <div class="modal fade rejection-details-modal" id="guideRejectionModal{{ $gIndex }}" tabindex="-1">
                         <div class="modal-dialog modal-lg">
@@ -1508,7 +1508,7 @@
                                 </div>
                                 <div class="modal-body">
                                     <div class="rejection-content">
-                                        <h6><i class="fas fa-info-circle"></i> {{ $booking->status == 'cancelled' ? 'Cancellation' : 'Rejection' }} Reason</h6>
+                                        <h6><i class="fas fa-info-circle"></i> {{ $booking->status == 'cancelled' ? __('profile.cancellation_details') : 'Rejection' }} Reason</h6>
                                         <p class="mb-0">{{ $booking->additional_information ?? __('emails.guest_booking_request_expired_text_2') }}</p>
                                     </div>
 

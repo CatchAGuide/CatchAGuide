@@ -6,9 +6,9 @@
     <div class="bookings-header">
         <h1 class="mb-0 text-white">
             <i class="fas fa-tachometer-alt"></i>
-            Dashboard Overview
+            {{ __('profile.dashboard_overview') }}
         </h1>
-        <p class="mb-0 mt-2 text-white">Manage your fishing experiences and bookings</p>
+        <p class="mb-0 mt-2 text-white">{{ __('profile.manage_fishing_experiences') }}</p>
     </div>
 
     <!-- Quick Stats Cards -->
@@ -20,7 +20,7 @@
                 </div>
                 <div class="stat-content">
                     <h3>{{ Auth::user()->bookings()->count() }}</h3>
-                    <p>Total Bookings</p>
+                    <p>{{ __('profile.total_bookings') }}</p>
                 </div>
             </a>
         </div>
@@ -41,7 +41,7 @@
                             }
                         @endphp
                         <h3>{{ $guidingsCount }}</h3>
-                        <p>Active Guidings</p>
+                        <p>{{ __('profile.active_guidings') }}</p>
                     </div>
                 </a>
             </div>
@@ -69,7 +69,7 @@
 
     <!-- Quick Actions -->
     <div class="quick-actions-section">
-        <h4>Quick Actions</h4>
+        <h4>{{ __('profile.quick_actions') }}</h4>
         <div class="row">
             @if (Auth::user()->is_guide)
                 <div class="col-lg-6 col-md-12 mb-3">
@@ -78,9 +78,9 @@
                             <i class="fas fa-plus-circle"></i>
                         </div>
                         <div class="action-content">
-                            <h5>Create New Guiding</h5>
-                            <p>Add a new fishing experience for anglers to book</p>
-                            <a href="{{ route('profile.newguiding') }}" class="btn btn-primary">Get Started</a>
+                            <h5>{{ __('profile.create_new_guiding') }}</h5>
+                            <p>{{ __('profile.add_new_fishing_experience') }}</p>
+                            <a href="{{ route('profile.newguiding') }}" class="btn btn-primary">{{ __('profile.get_started') }}</a>
                         </div>
                     </div>
                 </div>
@@ -90,9 +90,9 @@
                             <i class="fas fa-calendar-alt"></i>
                         </div>
                         <div class="action-content">
-                            <h5>Manage Calendar</h5>
-                            <p>Update your availability and blocked dates</p>
-                            <a href="{{ route('profile.calendar') }}" class="btn btn-outline-primary">Open Calendar</a>
+                            <h5>{{ __('profile.manage_calendar') }}</h5>
+                            <p>{{ __('profile.update_availability_blocked_dates') }}</p>
+                            <a href="{{ route('profile.calendar') }}" class="btn btn-outline-primary">{{ __('profile.open_calendar') }}</a>
                         </div>
                     </div>
                 </div>
@@ -103,9 +103,9 @@
                             <i class="fas fa-search"></i>
                         </div>
                         <div class="action-content">
-                            <h5>Find Fishing Guides</h5>
-                            <p>Discover amazing fishing experiences</p>
-                            <a href="{{ route('welcome') }}" class="btn btn-primary">Browse Guidings</a>
+                            <h5>{{ __('profile.find_fishing_guides') }}</h5>
+                            <p>{{ __('profile.discover_amazing_fishing_experiences') }}</p>
+                            <a href="{{ route('welcome') }}" class="btn btn-primary">{{ __('profile.browse_guidings') }}</a>
                         </div>
                     </div>
                 </div>
@@ -115,9 +115,9 @@
                             <i class="fas fa-certificate"></i>
                         </div>
                         <div class="action-content">
-                            <h5>Become a Guide</h5>
-                            <p>Share your fishing expertise with others</p>
-                            <a href="{{ route('profile.becomeguide') }}" class="btn btn-outline-primary">Learn More</a>
+                            <h5>{{ __('profile.become_a_guide') }}</h5>
+                            <p>{{ __('profile.share_fishing_expertise') }}</p>
+                            <a href="{{ route('profile.becomeguide') }}" class="btn btn-outline-primary">{{ __('profile.learn_more') }}</a>
                         </div>
                     </div>
                 </div>
@@ -129,7 +129,7 @@
     <div class="upcoming-bookings-section mb-5">
         <h4 class="profile-section-title">
             <i class="fas fa-calendar-day"></i>
-            Upcoming Bookings
+            {{ __('profile.upcoming_bookings') }}
         </h4>
         <div class="activity-list">
             @php
@@ -150,7 +150,7 @@
                     </div>
                     <div class="activity-content">
                         <h6 class="activity-item-title d-flex align-items-center">
-                            <span>{{ $booking->guiding->title ?? 'Booking' }}</span>
+                            <span>{{ $booking->guiding->title ?? __('profile.booking') }}</span>
                             <span class="booking-id-tag ms-2">
                                 <i class="fas fa-hashtag"></i>
                                 <strong>ID: {{ $booking->id }}</strong>
@@ -166,7 +166,7 @@
                     </div>
                     <div class="activity-action">
                         <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detailsModal{{ $index }}">
-                            <i class="fas fa-eye"></i> View
+                            <i class="fas fa-eye"></i> {{ __('profile.view') }}
                         </button>
                     </div>
                 </div>
@@ -177,57 +177,57 @@
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title">
-                                    <i class="fas fa-file-alt"></i> Booking Details - Reference #{{ $booking->id }}
+                                    <i class="fas fa-file-alt"></i> {{ __('profile.booking_details') }} - {{ __('profile.reference') }} #{{ $booking->id }}
                                 </h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('profile.close') }}"></button>
                             </div>
                             <div class="modal-body">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <h6 class="fw-bold mb-3"><i class="fas fa-fish"></i> Fishing Experience Details</h6>
+                                        <h6 class="fw-bold mb-3"><i class="fas fa-fish"></i> {{ __('profile.fishing_experience_details') }}</h6>
                                         <div class="detail-row">
-                                            <strong>Experience Title:</strong> {{ $booking->guiding->title ?? 'N/A' }}
+                                            <strong>{{ __('profile.experience_title') }}:</strong> {{ $booking->guiding->title ?? __('profile.na') }}
                                         </div>
                                         <div class="detail-row">
-                                            <strong>Fishing Location:</strong> {{ $booking->guiding->location ?? 'N/A' }}
+                                            <strong>{{ __('profile.fishing_location') }}:</strong> {{ $booking->guiding->location ?? __('profile.na') }}
                                         </div>
                                         <div class="detail-row">
-                                            <strong>Experience Duration:</strong> {{ $booking->guiding->duration ?? 'N/A' }} hours
+                                            <strong>{{ __('profile.experience_duration') }}:</strong> {{ $booking->guiding->duration ?? __('profile.na') }} {{ __('profile.hours') }}
                                         </div>
                                         <div class="detail-row">
-                                            <strong>Fishing Type:</strong> {{ $booking->guiding->type_of_fishing ?? 'N/A' }}
+                                            <strong>{{ __('profile.fishing_type') }}:</strong> {{ $booking->guiding->type_of_fishing ?? __('profile.na') }}
                                         </div>
                                         @if($booking->guiding->description)
                                             <div class="detail-row">
-                                                <strong>Experience Description:</strong> 
+                                                <strong>{{ __('profile.experience_description') }}:</strong> 
                                                 <p class="mt-1 text-muted">{{ Str::limit($booking->guiding->description, 200) }}</p>
                                             </div>
                                         @endif
                                     </div>
                                     <div class="col-md-6">
-                                        <h6 class="fw-bold mb-3"><i class="fas fa-calendar-check"></i> Reservation Summary</h6>
+                                        <h6 class="fw-bold mb-3"><i class="fas fa-calendar-check"></i> {{ __('profile.reservation_summary') }}</h6>
                                         <div class="detail-row">
-                                            <strong>Reservation Date:</strong> {{ $booking->created_at->format('l, F j, Y \a\t g:i A') }}
+                                            <strong>{{ __('profile.reservation_date') }}:</strong> {{ $booking->created_at->format('l, F j, Y \a\t g:i A') }}
                                         </div>
                                         <div class="detail-row">
-                                            <strong>Scheduled Date:</strong> 
+                                            <strong>{{ __('profile.scheduled_date') }}:</strong> 
                                             @if($booking->calendar_schedule)
                                                 {{ \Carbon\Carbon::parse($booking->calendar_schedule->date)->format('l, F j, Y') }}
                                             @elseif($booking->blocked_event)
                                                 {{ \Carbon\Carbon::parse($booking->blocked_event->from)->format('l, F j, Y') }}
                                             @else
-                                                <span class="text-danger">Date Not Available</span>
+                                                <span class="text-danger">{{ __('profile.date_not_available') }}</span>
                                             @endif
                                         </div>
                                         <div class="detail-row">
-                                            <strong>Party Size:</strong> {{ $booking->count_of_users ?? 1 }} {{ ($booking->count_of_users ?? 1) == 1 ? 'Guest' : 'Guests' }}
+                                            <strong>{{ __('profile.party_size') }}:</strong> {{ $booking->count_of_users ?? 1 }} {{ ($booking->count_of_users ?? 1) == 1 ? __('profile.guest') : __('profile.guests') }}
                                         </div>
                                         <div class="detail-row">
-                                            <strong>Booking Status:</strong> 
+                                            <strong>{{ __('profile.booking_status') }}:</strong> 
                                             <span class="badge bg-{{ $booking->status == 'accepted' ? 'success' : ($booking->status == 'pending' ? 'warning' : ($booking->status == 'cancelled' ? 'secondary' : 'danger')) }}">{{ ucfirst($booking->status) }}</span>
                                         </div>
                                         <div class="detail-row">
-                                            <strong>Total Amount:</strong> <span class="text-success fw-bold">€{{ number_format($booking->price, 2) }}</span>
+                                            <strong>{{ __('profile.total_amount') }}:</strong> <span class="text-success fw-bold">€{{ number_format($booking->price, 2) }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -236,38 +236,38 @@
                                 
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <h6 class="fw-bold mb-3"><i class="fas fa-user-tie"></i> Guide Information</h6>
+                                        <h6 class="fw-bold mb-3"><i class="fas fa-user-tie"></i> {{ __('profile.guide_information') }}</h6>
                                         <div class="detail-row">
-                                            <strong>Name:</strong> {{ $booking->guiding->user->full_name ?? 'N/A' }}
+                                            <strong>{{ __('profile.name') }}:</strong> {{ $booking->guiding->user->full_name ?? __('profile.na') }}
                                         </div>
                                         @if($booking->status == 'accepted')
                                             <div class="detail-row">
-                                                <strong>Email:</strong> {{ $booking->guiding->user->email ?? 'N/A' }}
+                                                <strong>{{ __('profile.email') }}:</strong> {{ $booking->guiding->user->email ?? __('profile.na') }}
                                             </div>
                                             @if($booking->guiding->user->phone)
                                                 <div class="detail-row">
-                                                    <strong>Phone:</strong> {{ $booking->guiding->user->phone }}
+                                                    <strong>{{ __('profile.phone') }}:</strong> {{ $booking->guiding->user->phone }}
                                                 </div>
                                             @endif
                                         @endif
                                     </div>
                                     <div class="col-md-6">
                                         @if($booking->extras)
-                                            <h6 class="fw-bold mb-3"><i class="fas fa-plus-circle"></i> Additional Services</h6>
+                                            <h6 class="fw-bold mb-3"><i class="fas fa-plus-circle"></i> {{ __('profile.additional_services') }}</h6>
                                             @php
                                                 $extras = is_string($booking->extras) ? unserialize($booking->extras) : $booking->extras;
                                             @endphp
                                             @if(is_array($extras) && count($extras) > 0)
                                                 @foreach($extras as $extra)
                                                     <div class="detail-row">
-                                                        <strong>{{ $extra['extra_name'] ?? 'Additional Service' }}:</strong> €{{ number_format($extra['extra_total_price'] ?? 0, 2) }}
+                                                        <strong>{{ $extra['extra_name'] ?? __('profile.additional_service') }}:</strong> €{{ number_format($extra['extra_total_price'] ?? 0, 2) }}
                                                     </div>
                                                 @endforeach
                                                 <div class="detail-row">
-                                                    <strong>Total Additional Services:</strong> <span class="text-info">€{{ number_format($booking->total_extra_price ?? 0, 2) }}</span>
+                                                    <strong>Total {{ __('profile.additional_services') }}:</strong> <span class="text-info">€{{ number_format($booking->total_extra_price ?? 0, 2) }}</span>
                                                 </div>
                                             @else
-                                                <p class="text-muted">No additional services selected</p>
+                                                <p class="text-muted">{{ __('profile.no_additional_services_selected') }}</p>
                                             @endif
                                         @endif
                                     </div>
@@ -277,14 +277,14 @@
                                 @if($booking->status == 'accepted')
                                     @if($booking->canBeReviewed())
                                         <a href="{{ route('ratings.show', ['token' => $booking->token]) }}" class="btn btn-warning">
-                                            <i class="fas fa-star"></i> Rate Guide
+                                            <i class="fas fa-star"></i> {{ __('profile.rate_guide') }}
                                         </a>
                                     @endif
                                     <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#contactModal{{ $index }}" data-bs-dismiss="modal">
-                                        <i class="fas fa-envelope"></i> Contact Guide
+                                        <i class="fas fa-envelope"></i> {{ __('profile.contact_guide') }}
                                     </button>
                                 @endif
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('profile.close') }}</button>
                             </div>
                         </div>
                     </div>
@@ -297,22 +297,22 @@
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h5 class="modal-title">
-                                        <i class="fas fa-address-book"></i> Guide Contact Information
+                                        <i class="fas fa-address-book"></i> {{ __('profile.guide_contact_information') }}
                                     </h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('profile.close') }}"></button>
                                 </div>
                                 <div class="modal-body">
                                     <div class="contact-info">
-                                        <strong>Email:</strong> {{ $booking->guiding->user->email ?? 'N/A' }}
+                                        <strong>{{ __('profile.email') }}:</strong> {{ $booking->guiding->user->email ?? __('profile.na') }}
                                     </div>
                                     @if($booking->guiding->user->phone)
                                         <div class="contact-info">
-                                            <strong>Phone:</strong> {{ $booking->guiding->user->phone }}
+                                            <strong>{{ __('profile.phone') }}:</strong> {{ $booking->guiding->user->phone }}
                                         </div>
                                     @endif
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('profile.close') }}</button>
                                 </div>
                             </div>
                         </div>
@@ -321,7 +321,7 @@
             @empty
                 <div class="empty-state">
                     <i class="fas fa-calendar-plus"></i>
-                    <p>No upcoming bookings</p>
+                    <p>{{ __('profile.no_upcoming_bookings') }}</p>
                 </div>
             @endforelse
         </div>
@@ -331,7 +331,7 @@
     <div class="recent-activity-section">
         <h4 class="profile-section-title">
             <i class="fas fa-calendar-check"></i>
-            Booking Overview
+            {{ __('profile.booking_overview') }}
         </h4>
         <div class="activity-list">
             @php
@@ -344,7 +344,7 @@
                     </div>
                     <div class="activity-content">
                         <h6 class="activity-item-title d-flex align-items-center">
-                            <span>{{ $booking->guiding->title ?? 'Booking' }}</span>
+                            <span>{{ $booking->guiding->title ?? __('profile.booking') }}</span>
                             <span class="booking-id-tag ms-2">
                                 <i class="fas fa-hashtag"></i>
                                 <strong>ID: {{ $booking->id }}</strong>
@@ -358,7 +358,7 @@
                     </div>
                     <div class="activity-action">
                         <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#recentDetailsModal{{ $index }}">
-                            <i class="fas fa-eye"></i> View
+                            <i class="fas fa-eye"></i> {{ __('profile.view') }}
                         </button>
                     </div>
                 </div>
@@ -369,57 +369,57 @@
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title">
-                                    <i class="fas fa-file-alt"></i> Booking Details - Reference #{{ $booking->id }}
+                                    <i class="fas fa-file-alt"></i> {{ __('profile.booking_details') }} - {{ __('profile.reference') }} #{{ $booking->id }}
                                 </h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('profile.close') }}"></button>
                             </div>
                             <div class="modal-body">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <h6 class="fw-bold mb-3"><i class="fas fa-fish"></i> Fishing Experience Details</h6>
+                                        <h6 class="fw-bold mb-3"><i class="fas fa-fish"></i> {{ __('profile.fishing_experience_details') }}</h6>
                                         <div class="detail-row">
-                                            <strong>Experience Title:</strong> {{ $booking->guiding->title ?? 'N/A' }}
+                                            <strong>{{ __('profile.experience_title') }}:</strong> {{ $booking->guiding->title ?? __('profile.na') }}
                                         </div>
                                         <div class="detail-row">
-                                            <strong>Fishing Location:</strong> {{ $booking->guiding->location ?? 'N/A' }}
+                                            <strong>{{ __('profile.fishing_location') }}:</strong> {{ $booking->guiding->location ?? __('profile.na') }}
                                         </div>
                                         <div class="detail-row">
-                                            <strong>Experience Duration:</strong> {{ $booking->guiding->duration ?? 'N/A' }} hours
+                                            <strong>{{ __('profile.experience_duration') }}:</strong> {{ $booking->guiding->duration ?? __('profile.na') }} {{ __('profile.hours') }}
                                         </div>
                                         <div class="detail-row">
-                                            <strong>Fishing Type:</strong> {{ $booking->guiding->type_of_fishing ?? 'N/A' }}
+                                            <strong>{{ __('profile.fishing_type') }}:</strong> {{ $booking->guiding->type_of_fishing ?? __('profile.na') }}
                                         </div>
                                         @if($booking->guiding->description)
                                             <div class="detail-row">
-                                                <strong>Experience Description:</strong> 
-                                                <p class="mt-1 text-muted">{{ Str::limit($booking->guiding->description, 200) }}</p>
+                                                <strong>{{ __('profile.experience_description') }}:</strong> 
+                                                <p class="mt-1 text-muted">{{ Str::limit($booking->guiding->description ?? "", 200) }}</p>
                                             </div>
                                         @endif
                                     </div>
                                     <div class="col-md-6">
-                                        <h6 class="fw-bold mb-3"><i class="fas fa-calendar-check"></i> Reservation Summary</h6>
+                                        <h6 class="fw-bold mb-3"><i class="fas fa-calendar-check"></i> {{ __('profile.reservation_summary') }}</h6>
                                         <div class="detail-row">
-                                            <strong>Reservation Date:</strong> {{ $booking->created_at->format('l, F j, Y \a\t g:i A') }}
+                                            <strong>{{ __('profile.reservation_date') }}:</strong> {{ $booking->created_at->format('l, F j, Y \a\t g:i A') }}
                                         </div>
                                         <div class="detail-row">
-                                            <strong>Scheduled Date:</strong> 
+                                            <strong>{{ __('profile.scheduled_date') }}:</strong> 
                                             @if($booking->calendar_schedule)
                                                 {{ \Carbon\Carbon::parse($booking->calendar_schedule->date)->format('l, F j, Y') }}
                                             @elseif($booking->blocked_event)
                                                 {{ \Carbon\Carbon::parse($booking->blocked_event->from)->format('l, F j, Y') }}
                                             @else
-                                                <span class="text-danger">Date Not Available</span>
+                                                <span class="text-danger">{{ __('profile.date_not_available') }}</span>
                                             @endif
                                         </div>
                                         <div class="detail-row">
-                                            <strong>Party Size:</strong> {{ $booking->count_of_users ?? 1 }} {{ ($booking->count_of_users ?? 1) == 1 ? 'Guest' : 'Guests' }}
+                                            <strong>{{ __('profile.party_size') }}:</strong> {{ $booking->count_of_users ?? 1 }} {{ ($booking->count_of_users ?? 1) == 1 ? __('profile.guest') : __('profile.guests') }}
                                         </div>
                                         <div class="detail-row">
-                                            <strong>Booking Status:</strong> 
+                                            <strong>{{ __('profile.booking_status') }}:</strong> 
                                             <span class="badge bg-{{ $booking->status == 'accepted' ? 'success' : ($booking->status == 'pending' ? 'warning' : ($booking->status == 'cancelled' ? 'secondary' : 'danger')) }}">{{ ucfirst($booking->status) }}</span>
                                         </div>
                                         <div class="detail-row">
-                                            <strong>Total Amount:</strong> <span class="text-success fw-bold">€{{ number_format($booking->price, 2) }}</span>
+                                            <strong>{{ __('profile.total_amount') }}:</strong> <span class="text-success fw-bold">€{{ number_format($booking->price, 2) }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -428,38 +428,38 @@
                                 
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <h6 class="fw-bold mb-3"><i class="fas fa-user-tie"></i> Guide Information</h6>
+                                        <h6 class="fw-bold mb-3"><i class="fas fa-user-tie"></i> {{ __('profile.guide_information') }}</h6>
                                         <div class="detail-row">
-                                            <strong>Name:</strong> {{ $booking->guiding->user->full_name ?? 'N/A' }}
+                                            <strong>{{ __('profile.name') }}:</strong> {{ $booking->guiding->user->full_name ?? __('profile.na') }}
                                         </div>
                                         @if($booking->status == 'accepted')
                                             <div class="detail-row">
-                                                <strong>Email:</strong> {{ $booking->guiding->user->email ?? 'N/A' }}
+                                                <strong>{{ __('profile.email') }}:</strong> {{ $booking->guiding->user->email ?? __('profile.na') }}
                                             </div>
                                             @if($booking->guiding->user->phone)
                                                 <div class="detail-row">
-                                                    <strong>Phone:</strong> {{ $booking->guiding->user->phone }}
+                                                    <strong>{{ __('profile.phone') }}:</strong> {{ $booking->guiding->user->phone }}
                                                 </div>
                                             @endif
                                         @endif
                                     </div>
                                     <div class="col-md-6">
                                         @if($booking->extras)
-                                            <h6 class="fw-bold mb-3"><i class="fas fa-plus-circle"></i> Additional Services</h6>
+                                            <h6 class="fw-bold mb-3"><i class="fas fa-plus-circle"></i> {{ __('profile.additional_services') }}</h6>
                                             @php
                                                 $extras = is_string($booking->extras) ? unserialize($booking->extras) : $booking->extras;
                                             @endphp
                                             @if(is_array($extras) && count($extras) > 0)
                                                 @foreach($extras as $extra)
                                                     <div class="detail-row">
-                                                        <strong>{{ $extra['extra_name'] ?? 'Additional Service' }}:</strong> €{{ number_format($extra['extra_total_price'] ?? 0, 2) }}
+                                                        <strong>{{ $extra['extra_name'] ?? __('profile.additional_service') }}:</strong> €{{ number_format($extra['extra_total_price'] ?? 0, 2) }}
                                                     </div>
                                                 @endforeach
                                                 <div class="detail-row">
-                                                    <strong>Total Additional Services:</strong> <span class="text-info">€{{ number_format($booking->total_extra_price ?? 0, 2) }}</span>
+                                                    <strong>Total {{ __('profile.additional_services') }}:</strong> <span class="text-info">€{{ number_format($booking->total_extra_price ?? 0, 2) }}</span>
                                                 </div>
                                             @else
-                                                <p class="text-muted">No additional services selected</p>
+                                                <p class="text-muted">{{ __('profile.no_additional_services_selected') }}</p>
                                             @endif
                                         @endif
                                     </div>
@@ -469,14 +469,14 @@
                                 @if($booking->status == 'accepted')
                                     @if($booking->canBeReviewed())
                                         <a href="{{ route('ratings.show', ['token' => $booking->token]) }}" class="btn btn-warning">
-                                            <i class="fas fa-star"></i> Rate Guide
+                                            <i class="fas fa-star"></i> {{ __('profile.rate_guide') }}
                                         </a>
                                     @endif
                                     <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#recentContactModal{{ $index }}" data-bs-dismiss="modal">
-                                        <i class="fas fa-envelope"></i> Contact Guide
+                                        <i class="fas fa-envelope"></i> {{ __('profile.contact_guide') }}
                                     </button>
                                 @endif
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('profile.close') }}</button>
                             </div>
                         </div>
                     </div>
@@ -489,22 +489,22 @@
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h5 class="modal-title">
-                                        <i class="fas fa-address-book"></i> Guide Contact Information
+                                        <i class="fas fa-address-book"></i> {{ __('profile.guide_contact_information') }}
                                     </h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('profile.close') }}"></button>
                                 </div>
                                 <div class="modal-body">
                                     <div class="contact-info">
-                                        <strong>Email:</strong> {{ $booking->guiding->user->email ?? 'N/A' }}
+                                        <strong>{{ __('profile.email') }}:</strong> {{ $booking->guiding->user->email ?? __('profile.na') }}
                                     </div>
                                     @if($booking->guiding->user->phone)
                                         <div class="contact-info">
-                                            <strong>Phone:</strong> {{ $booking->guiding->user->phone }}
+                                            <strong>{{ __('profile.phone') }}:</strong> {{ $booking->guiding->user->phone }}
                                         </div>
                                     @endif
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('profile.close') }}</button>
                                 </div>
                             </div>
                         </div>
@@ -513,7 +513,7 @@
             @empty
                 <div class="empty-state">
                     <i class="fas fa-calendar-times"></i>
-                    <p>No recent activity</p>
+                    <p>{{ __('profile.no_recent_activity') }}</p>
                 </div>
             @endforelse
         </div>

@@ -1,11 +1,11 @@
 @extends('layouts.app-v2-1')
 
-@section('title', $translatedVacation->title)
+@section('title', $translatedVacation->title ?? $vacation->title)
 
 @section('description',$vacation->description)
 
 @section('share_tags')
-    <meta property="og:title" content="{{$translatedVacation->title}}" />
+    <meta property="og:title" content="{{$translatedVacation->title ?? $vacation->title}}" />
     <meta property="og:description" content="{{$translatedVacation->description ?? ""}}" />
     
     @if(isset($vacation->gallery) && is_array($vacation->gallery) && !empty($vacation->gallery[0]) && file_exists(public_path(str_replace(asset(''), '', asset($vacation->gallery[0])))))
@@ -228,7 +228,7 @@
                             ]) }}">{{ translate('Vacations in') }} {{ $destination->name }}</a></li>
                              <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                         @endif
-                        <li class="active">{{ $translatedVacation->title }}</li>
+                        <li class="active">{{ $translatedVacation->title ?? $vacation->title }}</li>
                     </ul>
                 </div>
             </div>
@@ -268,7 +268,7 @@
             <div class="title-left-container">
                 <div class="col-24 col mb-1 guiding-title">
                     <h1>
-                        {{ $translatedVacation->title }}
+                        {{ $translatedVacation->title ?? $vacation->title }}
                     </h1>
                     <a class="btn" href="#" role="button"><i data-lucide="share-2"></i></a>
                 </div>
@@ -471,7 +471,7 @@
                             <span>{{ translate('Beschreibung')}}</span>
                         </div>
                         <span class="text-wrapper">
-                            {!! $translatedVacation->surroundings_description !!}
+                            {!! $translatedVacation->surroundings_description ?? $vacation->surroundings_description !!}
                         </span>
                     </div>
                     @endif
@@ -482,7 +482,8 @@
                             <span>{{ translate('Best travel times')}}</span>
                         </div>
                         <p class="text-wrapper">
-                            {!! is_array($translatedVacation->best_travel_times) ? implode(', ', $translatedVacation->best_travel_times) : $translatedVacation->best_travel_times !!}
+                            @php $bestTravelTimes = $translatedVacation->best_travel_times ?? $vacation->best_travel_times; @endphp
+                            {!! is_array($bestTravelTimes) ? implode(', ', $bestTravelTimes) : $bestTravelTimes !!}
                         </p>
                     </div>
                     @endif
@@ -492,7 +493,8 @@
                             <span>{{ translate('Target fish') }}</span>
                         </div>
                         <p class="text-wrapper">
-                            {!! is_array($translatedVacation->target_fish) ? implode(', ', $translatedVacation->target_fish) : $translatedVacation->target_fish !!}
+                            @php $targetFish = $translatedVacation->target_fish ?? $vacation->target_fish; @endphp
+                            {!! is_array($targetFish) ? implode(', ', $targetFish) : $targetFish !!}
                         </p>
                     </div>
                     @endif
@@ -503,14 +505,15 @@
                         <ol class="px-3">
                             <li class="mx-4">
                                 <strong class="subtitle-text">@lang('vacations.round_trip'):</strong>
-                                {{ $translatedVacation->travel_included }}
+                                {{ $translatedVacation->travel_included ?? $vacation->travel_included }}
                             </li>
                             <li class="mx-4">
                             @if(!empty($vacation->travel_options))
                                 <div class="tab-category mb-4">
                                     <strong class="subtitle-text">@lang('vacations.travel_recommendation'):</strong>
                                     <div class="row">
-                                    @foreach ((is_array($translatedVacation->travel_options) ? $translatedVacation->travel_options : []) as $travel_option)
+                                    @php $travelOptions = $translatedVacation->travel_options ?? $vacation->travel_options; @endphp
+                                    @foreach ((is_array($travelOptions) ? $travelOptions : []) as $travel_option)
                                             <div class="col-12 text-start">
                                                 - {{ $travel_option }}
                                             </div>
@@ -528,22 +531,22 @@
                     <div class="row mx-4">
                         <table class="table">
                             <tbody>
-                                @if(!empty($translatedVacation->airport_distance))
+                                @if(!empty($translatedVacation->airport_distance ?? $vacation->airport_distance))
                                 <tr>
                                     <td><strong>@lang('vacations.nearest_airport')</strong></td>
-                                    <td>{{ $translatedVacation->airport_distance }}</td>
+                                    <td>{{ $translatedVacation->airport_distance ?? $vacation->airport_distance }}</td>
                                 </tr>
                                 @endif
-                                @if(!empty($translatedVacation->water_distance))
+                                @if(!empty($translatedVacation->water_distance ?? $vacation->water_distance))
                                 <tr>
                                     <td><strong>@lang('vacations.distance_water')</strong></td>
-                                    <td>{{ $translatedVacation->water_distance }}</td>
+                                    <td>{{ $translatedVacation->water_distance ?? $vacation->water_distance }}</td>
                                 </tr>
                                 @endif
-                                @if(!empty($translatedVacation->shopping_distance))
+                                @if(!empty($translatedVacation->shopping_distance ?? $vacation->shopping_distance))
                                 <tr>
                                     <td><strong>@lang('vacations.distance_shoping')</strong></td>
-                                    <td>{{ $translatedVacation->shopping_distance }}</td>
+                                    <td>{{ $translatedVacation->shopping_distance ?? $vacation->shopping_distance }}</td>
                                 </tr>
                                 @endif
                                 @if(!empty($vacation->pets_allowed))
@@ -678,7 +681,17 @@
                                                     {!! $item->description !!}
                                                 </span>
                                                 <!-- Other Details Row -->
-                                                @php $dynamicFields = $item->dynamic_fields @endphp
+                                                @php 
+                                                    // Handle dynamic fields - ensure it's an array for iteration
+                                                    $dynamicFields = $item->dynamic_fields;
+                                                    if (is_string($dynamicFields)) {
+                                                        $dynamicFields = json_decode($dynamicFields, true) ?: [];
+                                                    } elseif (is_object($dynamicFields)) {
+                                                        $dynamicFields = (array) $dynamicFields;
+                                                    } elseif (!is_array($dynamicFields)) {
+                                                        $dynamicFields = [];
+                                                    }
+                                                @endphp
                                                 <div class="row mt-4">
                                                     @foreach($dynamicFields as $field => $value)
                                                         @if($field !== 'prices')
@@ -694,10 +707,10 @@
                                                                     
                                                                     // Display priority fields first
                                                                     foreach ($priorityFields as $priorityField) {
-                                                                        if (isset($dynamicFields->$priorityField)) {
+                                                                        if (isset($dynamicFields[$priorityField])) {
                                                                             echo '<div class="details-row">
                                                                                     <h6 class="mb-1">' . translate(ucwords(str_replace('_', ' ', $priorityField))) . ':</h6>
-                                                                                    <p class="mb-0">' . translate($dynamicFields->$priorityField)    . '</p>
+                                                                                    <p class="mb-0">' . translate($dynamicFields[$priorityField]) . '</p>
                                                                                 </div>';
                                                                         }
                                                                     }
@@ -840,7 +853,17 @@
                                                         {!! $item->description !!}
                                                     </span>
                                                     <!-- Other Details Row -->
-                                                    @php $dynamicFields = $item->dynamic_fields @endphp
+                                                    @php 
+                                                        // Handle dynamic fields - ensure it's an array for iteration
+                                                        $dynamicFields = $item->dynamic_fields;
+                                                        if (is_string($dynamicFields)) {
+                                                            $dynamicFields = json_decode($dynamicFields, true) ?: [];
+                                                        } elseif (is_object($dynamicFields)) {
+                                                            $dynamicFields = (array) $dynamicFields;
+                                                        } elseif (!is_array($dynamicFields)) {
+                                                            $dynamicFields = [];
+                                                        }
+                                                    @endphp
                                             <div class="row mt-4">
                                                 @foreach($dynamicFields as $field => $value)
                                                     @if($field !== 'prices')
@@ -856,10 +879,10 @@
                                                                 
                                                                 // Display priority fields first
                                                                 foreach ($priorityFields as $priorityField) {
-                                                                    if (isset($dynamicFields->$priorityField)) {
+                                                                    if (isset($dynamicFields[$priorityField])) {
                                                                         echo '<div class="details-row">
                                                                                 <h6 class="mb-1">' . translate(ucwords(str_replace('_', ' ', $priorityField))) . ':</h6>
-                                                                                <p class="mb-0">' . translate($dynamicFields->$priorityField) . '</p>
+                                                                                <p class="mb-0">' . translate($dynamicFields[$priorityField]) . '</p>
                                                                             </div>';
                                                                     }
                                                                 }
@@ -926,17 +949,18 @@
             </div>
 
             <!-- Description Section -->
-            @if ( ($translatedVacation->included_services && !empty($translatedVacation->included_services)) || ($translatedExtras && count($translatedExtras) > 0))
+            @if ( (($translatedVacation->included_services ?? $vacation->included_services) && !empty($translatedVacation->included_services ?? $vacation->included_services)) || ($translatedExtras && count($translatedExtras) > 0))
 
             <div class="description-container inclusions card p-3 mb-5">
                 <div class="description-list">
-                    @if ($translatedVacation->included_services && !empty($translatedVacation->included_services))
+                    @if (($translatedVacation->included_services ?? $vacation->included_services) && !empty($translatedVacation->included_services ?? $vacation->included_services))
                         <div class="description-item">
                             <div class="header-container">
                                 <span>@lang('vacations.included_services')</span>
                             </div>
                             <p class="text-wrapper">
-                                {!! is_array($translatedVacation->included_services) ? implode(', ', $translatedVacation->included_services) : $translatedVacation->included_services !!}
+                                @php $includedServices = $translatedVacation->included_services ?? $vacation->included_services; @endphp
+                                {!! is_array($includedServices) ? implode(', ', $includedServices) : $includedServices !!}
                             </p>
                         </div>
                     @endif
@@ -990,7 +1014,7 @@
     <section class="tour-details-two mb-5 p-0">
         <div class="container">
             <div class="tour-details-two__related-tours {{$agent->ismobile() ? 'text-center' : ''}}">
-                <h3 class="tour-details-two__title">{{ translate('Other Vacations in' . $translatedVacation->country) }}</h3>
+                <h3 class="tour-details-two__title">{{ translate('Other Vacations in ' . ($translatedVacation->country ?? $vacation->country)) }}</h3>
                 <div class="popular-tours__carousel owl-theme owl-carousel">
                     @foreach($sameCountries as $same_country)
                 

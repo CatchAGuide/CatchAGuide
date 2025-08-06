@@ -20,7 +20,8 @@ class VacationTranslationCommand extends Command
                             {--language=* : Target languages to translate to (e.g., en,es,fr)}
                             {--detect-language : Detect and update source language for all vacations}
                             {--force : Force retranslation even if translations exist}
-                            {--relations : Also translate related models (accommodations, boats, etc.)}
+                            {--relations : Also translate related models (accommodations, boats, etc.) - enabled by default}
+                            {--no-relations : Skip translating related models}
                             {--admin-changes : Only process vacations with admin changes}
                             {--dry-run : Show what would be translated without actually doing it}';
 
@@ -29,7 +30,7 @@ class VacationTranslationCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Translate vacation content using Gemini AI. Defaults to EN and DE languages. Use --admin-changes to only process vacations with admin changes, or --vacation=1,2,3 for specific IDs.';
+    protected $description = 'Translate vacation content using Gemini AI. Defaults to EN and DE languages. Relations (accommodations, boats, etc.) are translated by default. Use --admin-changes to only process vacations with admin changes, or --vacation=1,2,3 for specific IDs.';
 
     private VacationTranslationService $translationService;
     private AdminChangeTracker $changeTracker;
@@ -71,12 +72,19 @@ class VacationTranslationCommand extends Command
             return 0;
         }
 
-        $this->info("Processing {$vacations->count()} vacation(s) for languages: " . implode(', ', $targetLanguages));
-        $this->newLine();
-
         $dryRun = $this->option('dry-run');
         $force = $this->option('force');
-        $includeRelations = $this->option('relations');
+        $includeRelations = !$this->option('no-relations'); // Relations by default unless --no-relations is used
+
+        $this->info("Processing {$vacations->count()} vacation(s) for languages: " . implode(', ', $targetLanguages));
+        
+        if ($includeRelations) {
+            $this->line('Relations (accommodations, boats, packages, guidings, extras) will be translated.');
+        } else {
+            $this->line('Relations will be skipped (--no-relations flag used).');
+        }
+        
+        $this->newLine();
 
         $progressBar = $this->output->createProgressBar($vacations->count() * count($targetLanguages));
         $progressBar->start();
@@ -84,7 +92,9 @@ class VacationTranslationCommand extends Command
         $results = [
             'translated' => 0,
             'skipped' => 0,
-            'failed' => 0
+            'failed' => 0,
+            'relations_translated' => 0,
+            'relations_failed' => 0
         ];
 
         foreach ($vacations as $vacation) {
@@ -115,12 +125,17 @@ class VacationTranslationCommand extends Command
                     }
 
                     // Perform translation
-                    $success = $this->translationService->translateVacation($vacation, $targetLanguage);
+                    $success = $this->translationService->translateVacation($vacation, $targetLanguage, $force);
                     
                     if ($success) {
                         // Translate relations if requested
                         if ($includeRelations) {
-                            $this->translationService->translateVacationRelations($vacation, $targetLanguage);
+                            $relationSuccess = $this->translationService->translateVacationRelations($vacation, $targetLanguage, $force);
+                            if ($relationSuccess) {
+                                $results['relations_translated']++;
+                            } else {
+                                $results['relations_failed']++;
+                            }
                         }
                         
                         // Update content timestamp
@@ -247,14 +262,22 @@ class VacationTranslationCommand extends Command
     private function displayResults(array $results, bool $dryRun): void
     {
         $this->info('Translation Results:');
-        $this->table(
-            ['Status', 'Count'],
-            [
-                [$dryRun ? 'Would Translate' : 'Translated', $results['translated']],
-                ['Skipped', $results['skipped']],
-                ['Failed', $results['failed']]
-            ]
-        );
+        
+        $tableData = [
+            [$dryRun ? 'Would Translate' : 'Translated', $results['translated']],
+            ['Skipped', $results['skipped']],
+            ['Failed', $results['failed']]
+        ];
+        
+        // Add relation results if they exist
+        if (isset($results['relations_translated']) || isset($results['relations_failed'])) {
+            $tableData[] = ['Relations Translated', $results['relations_translated'] ?? 0];
+            if (($results['relations_failed'] ?? 0) > 0) {
+                $tableData[] = ['Relations Failed', $results['relations_failed']];
+            }
+        }
+        
+        $this->table(['Status', 'Count'], $tableData);
 
         if ($results['translated'] > 0) {
             $message = $dryRun 

@@ -521,7 +521,7 @@
             <i class="fas fa-fish"></i>
             @lang('profile.myGuides')
         </h1>
-        <p class="mb-0 mt-2 text-white">Manage your fishing guide experiences and track their performance</p>
+        <p class="mb-0 mt-2 text-white">{{ __('profile.manage_fishing_experiences') }}</p>
     </div>
 
     <div class="row">
@@ -535,7 +535,7 @@
                                 <div id="carouselExampleControls-{{$guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
                                     @if($guiding->status == 2)
                                         <div class="position-absolute start-0 top-0 m-3" style="z-index: 10;">
-                                            <span class="badge draft-badge">Draft</span>
+                                            <span class="badge draft-badge">{{ __('profile.draft') }}</span>
                                         </div>
                                     @endif
                                     
@@ -610,7 +610,7 @@
                                                 
                                                 @if (count($inclusions) > $maxToShow)
                                                     <span class="inclusion-tag more-inclusions">
-                                                        +{{ count($inclusions) - $maxToShow }} more
+                                                        +{{ count($inclusions) - $maxToShow }} {{ __('profile.more') }}
                                                     </span>
                                                 @endif
                                             </div>
