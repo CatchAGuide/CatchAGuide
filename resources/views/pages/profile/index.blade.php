@@ -150,7 +150,7 @@
                     </div>
                     <div class="activity-content">
                         <h6 class="activity-item-title d-flex align-items-center">
-                            <span>{{ $booking->guiding->title ?? __('profile.booking') }}</span>
+                            <span>{{ $booking->guiding ? $booking->guiding->title : __('profile.booking') }}</span>
                             <span class="booking-id-tag ms-2">
                                 <i class="fas fa-hashtag"></i>
                                 <strong>ID: {{ $booking->id }}</strong>
@@ -186,18 +186,18 @@
                                     <div class="col-md-6">
                                         <h6 class="fw-bold mb-3"><i class="fas fa-fish"></i> {{ __('profile.fishing_experience_details') }}</h6>
                                         <div class="detail-row">
-                                            <strong>{{ __('profile.experience_title') }}:</strong> {{ $booking->guiding->title ?? __('profile.na') }}
+                                            <strong>{{ __('profile.experience_title') }}:</strong> {{ $booking->guiding ? $booking->guiding->title : __('profile.na') }}
                                         </div>
                                         <div class="detail-row">
-                                            <strong>{{ __('profile.fishing_location') }}:</strong> {{ $booking->guiding->location ?? __('profile.na') }}
+                                            <strong>{{ __('profile.fishing_location') }}:</strong> {{ $booking->guiding ? $booking->guiding->location : __('profile.na') }}
                                         </div>
                                         <div class="detail-row">
-                                            <strong>{{ __('profile.experience_duration') }}:</strong> {{ $booking->guiding->duration ?? __('profile.na') }} {{ __('profile.hours') }}
+                                            <strong>{{ __('profile.experience_duration') }}:</strong> {{ $booking->guiding ? $booking->guiding->duration : __('profile.na') }} {{ __('profile.hours') }}
                                         </div>
                                         <div class="detail-row">
-                                            <strong>{{ __('profile.fishing_type') }}:</strong> {{ $booking->guiding->type_of_fishing ?? __('profile.na') }}
+                                            <strong>{{ __('profile.fishing_type') }}:</strong> {{ $booking->guiding ? $booking->guiding->type_of_fishing : __('profile.na') }}
                                         </div>
-                                        @if($booking->guiding->description)
+                                        @if($booking->guiding && $booking->guiding->description)
                                             <div class="detail-row">
                                                 <strong>{{ __('profile.experience_description') }}:</strong> 
                                                 <p class="mt-1 text-muted">{{ Str::limit($booking->guiding->description, 200) }}</p>
@@ -238,13 +238,13 @@
                                     <div class="col-md-6">
                                         <h6 class="fw-bold mb-3"><i class="fas fa-user-tie"></i> {{ __('profile.guide_information') }}</h6>
                                         <div class="detail-row">
-                                            <strong>{{ __('profile.name') }}:</strong> {{ $booking->guiding->user->full_name ?? __('profile.na') }}
+                                            <strong>{{ __('profile.name') }}:</strong> {{ $booking->guiding && $booking->guiding->user ? $booking->guiding->user->full_name : __('profile.na') }}
                                         </div>
                                         @if($booking->status == 'accepted')
                                             <div class="detail-row">
-                                                <strong>{{ __('profile.email') }}:</strong> {{ $booking->guiding->user->email ?? __('profile.na') }}
+                                                <strong>{{ __('profile.email') }}:</strong> {{ $booking->guiding && $booking->guiding->user ? $booking->guiding->user->email : __('profile.na') }}
                                             </div>
-                                            @if($booking->guiding->user->phone)
+                                            @if($booking->guiding && $booking->guiding->user && $booking->guiding->user->phone)
                                                 <div class="detail-row">
                                                     <strong>{{ __('profile.phone') }}:</strong> {{ $booking->guiding->user->phone }}
                                                 </div>
@@ -303,9 +303,9 @@
                                 </div>
                                 <div class="modal-body">
                                     <div class="contact-info">
-                                        <strong>{{ __('profile.email') }}:</strong> {{ $booking->guiding->user->email ?? __('profile.na') }}
+                                        <strong>{{ __('profile.email') }}:</strong> {{ $booking->guiding && $booking->guiding->user ? $booking->guiding->user->email : __('profile.na') }}
                                     </div>
-                                    @if($booking->guiding->user->phone)
+                                    @if($booking->guiding && $booking->guiding->user && $booking->guiding->user->phone)
                                         <div class="contact-info">
                                             <strong>{{ __('profile.phone') }}:</strong> {{ $booking->guiding->user->phone }}
                                         </div>
@@ -344,7 +344,7 @@
                     </div>
                     <div class="activity-content">
                         <h6 class="activity-item-title d-flex align-items-center">
-                            <span>{{ $booking->guiding->title ?? __('profile.booking') }}</span>
+                            <span>{{ $booking->guiding ? $booking->guiding->title : __('profile.booking') }}</span>
                             <span class="booking-id-tag ms-2">
                                 <i class="fas fa-hashtag"></i>
                                 <strong>ID: {{ $booking->id }}</strong>
@@ -378,18 +378,18 @@
                                     <div class="col-md-6">
                                         <h6 class="fw-bold mb-3"><i class="fas fa-fish"></i> {{ __('profile.fishing_experience_details') }}</h6>
                                         <div class="detail-row">
-                                            <strong>{{ __('profile.experience_title') }}:</strong> {{ $booking->guiding->title ?? __('profile.na') }}
+                                            <strong>{{ __('profile.experience_title') }}:</strong> {{ $booking->guiding ? $booking->guiding->title : __('profile.na') }}
                                         </div>
                                         <div class="detail-row">
-                                            <strong>{{ __('profile.fishing_location') }}:</strong> {{ $booking->guiding->location ?? __('profile.na') }}
+                                            <strong>{{ __('profile.fishing_location') }}:</strong> {{ $booking->guiding ? $booking->guiding->location : __('profile.na') }}
                                         </div>
                                         <div class="detail-row">
-                                            <strong>{{ __('profile.experience_duration') }}:</strong> {{ $booking->guiding->duration ?? __('profile.na') }} {{ __('profile.hours') }}
+                                            <strong>{{ __('profile.experience_duration') }}:</strong> {{ $booking->guiding ? $booking->guiding->duration : __('profile.na') }} {{ __('profile.hours') }}
                                         </div>
                                         <div class="detail-row">
-                                            <strong>{{ __('profile.fishing_type') }}:</strong> {{ $booking->guiding->type_of_fishing ?? __('profile.na') }}
+                                            <strong>{{ __('profile.fishing_type') }}:</strong> {{ $booking->guiding ? $booking->guiding->type_of_fishing : __('profile.na') }}
                                         </div>
-                                        @if($booking->guiding->description)
+                                        @if($booking->guiding && $booking->guiding->description)
                                             <div class="detail-row">
                                                 <strong>{{ __('profile.experience_description') }}:</strong> 
                                                 <p class="mt-1 text-muted">{{ Str::limit($booking->guiding->description ?? "", 200) }}</p>
@@ -430,13 +430,13 @@
                                     <div class="col-md-6">
                                         <h6 class="fw-bold mb-3"><i class="fas fa-user-tie"></i> {{ __('profile.guide_information') }}</h6>
                                         <div class="detail-row">
-                                            <strong>{{ __('profile.name') }}:</strong> {{ $booking->guiding->user->full_name ?? __('profile.na') }}
+                                            <strong>{{ __('profile.name') }}:</strong> {{ $booking->guiding && $booking->guiding->user ? $booking->guiding->user->full_name : __('profile.na') }}
                                         </div>
                                         @if($booking->status == 'accepted')
                                             <div class="detail-row">
-                                                <strong>{{ __('profile.email') }}:</strong> {{ $booking->guiding->user->email ?? __('profile.na') }}
+                                                <strong>{{ __('profile.email') }}:</strong> {{ $booking->guiding && $booking->guiding->user ? $booking->guiding->user->email : __('profile.na') }}
                                             </div>
-                                            @if($booking->guiding->user->phone)
+                                            @if($booking->guiding && $booking->guiding->user && $booking->guiding->user->phone)
                                                 <div class="detail-row">
                                                     <strong>{{ __('profile.phone') }}:</strong> {{ $booking->guiding->user->phone }}
                                                 </div>
@@ -495,9 +495,9 @@
                                 </div>
                                 <div class="modal-body">
                                     <div class="contact-info">
-                                        <strong>{{ __('profile.email') }}:</strong> {{ $booking->guiding->user->email ?? __('profile.na') }}
+                                        <strong>{{ __('profile.email') }}:</strong> {{ $booking->guiding && $booking->guiding->user ? $booking->guiding->user->email : __('profile.na') }}
                                     </div>
-                                    @if($booking->guiding->user->phone)
+                                    @if($booking->guiding && $booking->guiding->user && $booking->guiding->user->phone)
                                         <div class="contact-info">
                                             <strong>{{ __('profile.phone') }}:</strong> {{ $booking->guiding->user->phone }}
                                         </div>
