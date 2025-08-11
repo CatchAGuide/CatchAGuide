@@ -464,7 +464,7 @@ class Guiding extends Model
     {
         $blocked_events = collect($this->user->calendar_schedules)
             ->filter(function($blocked) {
-                return $blocked->guiding_id == $this->id || 
+                return $blocked->user_id == $this->user->id || 
                        $blocked->type === 'custom_schedule' || 
                        $this->bookings()->where('blocked_event_id', $blocked->id)->exists();
             })

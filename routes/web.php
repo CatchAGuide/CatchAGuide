@@ -60,11 +60,6 @@ use App\Http\Controllers\CategoryController;
 | contains the "web" middleware group. Now create something great!
 |
 */
-Route::any('{path}', function ($path) {
-    if (str_starts_with($path, 'public/')) {
-        return Redirect::to(substr($path, 7), 301);
-    }
-})->where('path', '.*');
 
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 Route::get('sitemap.xml',[SiteMapController::class, 'index']);
