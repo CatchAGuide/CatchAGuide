@@ -44,7 +44,7 @@
                                         <tr>
                                             <td class="text-center">
                                                 @if($row->categoryPage && $row->categoryPage->language)
-                                                    @foreach($row->categoryPage->language as $language)
+                                                    @foreach($row->categoryPage->language->unique('language') as $language)
                                                         @if($language->language == 'de')
                                                             <label><i class="fi fi-de"></i></label> 
                                                         @elseif($language->language == 'en')
