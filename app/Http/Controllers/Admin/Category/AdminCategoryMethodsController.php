@@ -32,6 +32,7 @@ class AdminCategoryMethodsController extends Controller
                 $query->where('type', 'Methods')
                     ->with(['language' => function($q) {
                         $q->select('source_id', 'language')
+                          ->distinct()
                           ->orderBy('language');
                     }]);
             }])
