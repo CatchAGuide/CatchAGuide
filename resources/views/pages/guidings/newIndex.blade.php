@@ -1245,7 +1245,7 @@
                             <div class="tour-details__review-comment-top-img">
                                 @if($guiding->user->profil_image)
                                     <img class="center-block rounded-circle"
-                                         src="{{asset('images/'. $guiding->user->profil_image)}}" alt="" width="200px"
+                                         src="{{asset('uploads/profile_images/'. $guiding->user->profil_image)}}" alt="" width="200px"
                                          height="200px">
                                 @else
                                     <img class="center-block rounded-circe"
