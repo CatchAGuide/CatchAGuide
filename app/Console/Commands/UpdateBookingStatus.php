@@ -59,23 +59,16 @@ class UpdateBookingStatus extends Command
             $booking->save();
 
             // Send an email notification to the guest and guide
-            if($user->language == 'en'){
-                \App::setLocale('en');
-            }
             if (!CheckEmailLog('guest_booking_expired', 'booking_' . $booking->id, $user->email)) {
-                Mail::to($user->email)->send(new GuestBookingExpiredMail($booking,$user,$guiding,$guide));
+                Mail::to($user->email)->locale($user->language ?? app()->getLocale())->send(new GuestBookingExpiredMail($booking,$user,$guiding,$guide));
             }
 
-            if($guide->language == 'en'){
-                \App::setLocale('en');
-            }
             if (!CheckEmailLog('guide_booking_expired', 'booking_' . $booking->id, $guide->email)) {
-                Mail::to($guide->email)->send(new GuideBookingExpiredMail($booking,$user,$guiding,$guide));
+                Mail::to($guide->email)->locale($guide->language ?? app()->getLocale())->send(new GuideBookingExpiredMail($booking,$user,$guiding,$guide));
             }
 
-            \App::setLocale('de');
             if (!CheckEmailLog('booking_expire_to_ceo', 'booking_' . $booking->id, env('TO_CEO','info@catchaguide.com'))) {
-                Mail::to(env('TO_CEO','info@catchaguide.com'))->send(new BookingExpireMailToCEO($booking,$user,$guiding,$guide));
+                Mail::to(env('TO_CEO','info@catchaguide.com'))->locale('de')->send(new BookingExpireMailToCEO($booking,$user,$guiding,$guide));
             }
         }
     }

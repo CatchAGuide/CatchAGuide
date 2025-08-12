@@ -147,7 +147,7 @@ class BookingsController extends Controller
             // Check and send guide booking request email
             $guideEmailLog = CheckEmailLog('guide_booking_request', 'guide_' . $guide->id . '_booking_' . $booking->id, $guideEmail);
             if (!$guideEmailLog) {
-                Mail::to($guideEmail)->send(new GuideBookingRequestMail($booking, $user, $guiding, $guide));
+                Mail::to($guideEmail)->locale($guide->language ?? app()->getLocale())->send(new GuideBookingRequestMail($booking, $user, $guiding, $guide));
                 $emailsSent[] = 'Guide email sent to ' . $guideEmail;
             } else {
                 $emailsSkipped[] = 'Guide email already sent to ' . $guideEmail;

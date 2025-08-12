@@ -2,10 +2,6 @@
 
 namespace App\Http\Livewire;
 
-
-use App\Mail\Guest\GuestBookingRequestMail;
-use App\Mail\Guide\GuideBookingRequestMail;
-use App\Mail\Guest\AutomaticRegistrationMail;
 use Mail;
 
 use Illuminate\Support\Str;
@@ -407,19 +403,18 @@ class Checkout extends Component
                     ]);
                 } else {                    
                     // Update existing guest user information
-                    $user->update([
-                        'salutation' => $this->userData['salutation'],
-                        'title' => $this->userData['title'],
-                        'firstname' => $this->userData['firstname'],
-                        'lastname' => $this->userData['lastname'],
-                        'address' => $this->userData['address'],
-                        'postal' => $this->userData['postal'],
-                        'city' => $this->userData['city'],
-                        'country' => $this->userData['country'],
-                        'phone' => $this->userData['phone'],
-                        'phone_country_code' => $this->userData['countryCode'],
-                        'language' => $locale,
-                    ]);
+                    $user->salutation = $this->userData['salutation'];
+                    $user->title = $this->userData['title'];
+                    $user->firstname = $this->userData['firstname'];
+                    $user->lastname = $this->userData['lastname'];
+                    $user->address = $this->userData['address'];
+                    $user->postal = $this->userData['postal'];
+                    $user->city = $this->userData['city'];
+                    $user->country = $this->userData['country'];
+                    $user->phone = $this->userData['phone'];
+                    $user->phone_country_code = $this->userData['countryCode'];
+                    $user->language = $locale;
+                    $user->save();
                 }
                 
                 $isGuest = true;

@@ -130,12 +130,12 @@ class Booking extends Model
 
     public function sendBookingConfirmationMail($phoneFromUser)
     {
-        Mail::send(new BookingConfirmationMail($this->guiding, $this->guiding->user, $this->user, $this, $phoneFromUser));
+        Mail::locale($this->guiding->user->language ?? app()->getLocale())->send(new BookingConfirmationMail($this->guiding, $this->guiding->user, $this->user, $this, $phoneFromUser));
     }
 
     public function sendBookingConfirmationMailGuest($phoneFromUser)
     {
-        Mail::send(new BookingConfirmationMailGuest($this, $this->guiding, $this->guiding->user, $this->user, $phoneFromUser));
+        Mail::locale($this->user->language ?? app()->getLocale())->send(new BookingConfirmationMailGuest($this, $this->guiding, $this->guiding->user, $this->user, $phoneFromUser));
     }
 
     public function sendBookingMailToCEO()
