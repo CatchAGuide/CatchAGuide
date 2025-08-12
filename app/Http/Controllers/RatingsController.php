@@ -48,7 +48,7 @@ class RatingsController extends Controller
             $booking->is_reviewed = true;
             $booking->save();
             if (!CheckEmailLog('rating_confirmation', 'rating_confirmation', $rating->guide->email)) {  
-                Mail::to($rating->guide->email)->send(new RatingConfirmation($rating));
+                Mail::to($rating->guide->email)->locale($rating->guide->language ?? app()->getLocale())->send(new RatingConfirmation($rating));
             }
         }
 
