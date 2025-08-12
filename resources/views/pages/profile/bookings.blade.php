@@ -985,7 +985,7 @@
                                             <div class="detail-row">
                                                 <strong>Fishing Type:</strong> {{ $booking->guiding->type_of_fishing ?? 'N/A' }}
                                             </div>
-                                            @if($booking->guiding->description)
+                                            @if($booking->guiding?->description)
                                                 <div class="detail-row">
                                                     <strong>Experience Description:</strong> 
                                                     <p class="mt-1 text-muted">{{ Str::limit($booking->guiding->description, 200) }}</p>
@@ -1072,7 +1072,7 @@
                                                 <div class="detail-row">
                                                     <strong>Email:</strong> {{ $booking->guiding->user->email ?? 'N/A' }}
                                                 </div>
-                                                @if($booking->guiding->user->phone)
+                                                @if($booking->guiding?->user?->phone)
                                                     <div class="detail-row">
                                                         <strong>Phone:</strong> {{ $booking->guiding->user->phone_country_code }} {{ $booking->guiding->user->phone }}
                                                     </div>
@@ -1109,7 +1109,7 @@
                                     <div class="contact-info">
                                         <strong>Email:</strong> {{ $booking->guiding->user->email ?? 'N/A' }}
                                     </div>
-                                    @if($booking->guiding->user->phone)
+                                    @if($booking->guiding?->user?->phone)
                                         <div class="contact-info">
                                             <strong>Phone:</strong> {{ $booking->guiding->user->phone_country_code }} {{ $booking->guiding->user->phone }}
                                         </div>
