@@ -51,7 +51,7 @@ class SendGuideUpcomingTourReminders extends Command
                 
                 try {
                     if (!CheckEmailLog('guide_reminder_upcoming_tour', 'booking_' . $booking->id, $guide->user->email)) {
-                        Mail::to($guide->user->email)->send(new GuideUpcomingTourMail($guide, $booking));
+                        Mail::to($guide->user->email)->locale($guide->user->language ?? app()->getLocale())->send(new GuideUpcomingTourMail($guide, $booking));
                         $this->info("Reminder sent successfully.");
                     }
                 } catch (\Exception $e) {
