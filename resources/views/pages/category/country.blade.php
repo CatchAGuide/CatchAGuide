@@ -1193,12 +1193,33 @@ $(document).ready(function() {
     const infowindows = [];
     const uniqueCoordinates = [];
     let isDuplicateCoordinate;  
+    // Bounds for primary markers
+    const redBounds = new google.maps.LatLngBounds();
+    let redMarkerCount = 0;
+    const redCoordinates = new Set();
 
     @if($allGuidings->isEmpty())
-        @include('pages.guidings.partials.maps',['guidings' => $otherguidings])
+        @include('pages.guidings.partials.maps',[
+            'guidings' => $otherguidings,
+            'grayIds' => collect($otherguidings)->pluck('id')->toArray(),
+        ])
     @else
-        @include('pages.guidings.partials.maps',['guidings' => $allGuidings])
+        @include('pages.guidings.partials.maps',[
+            'guidings' => $allGuidings,
+            'grayIds' => [],
+        ])
     @endif
+
+    // Focus map on red markers
+    if (redMarkerCount > 0) {
+        const uniqueCount = redCoordinates.size || redMarkerCount;
+        if (uniqueCount === 1) {
+            map.setCenter(redBounds.getCenter());
+            map.setZoom(12);
+        } else {
+            map.fitBounds(redBounds);
+        }
+    }
 
     function getRandomOffset() {
       // Generate a random value between -0.00005 and 0.00005 (adjust the range as needed)

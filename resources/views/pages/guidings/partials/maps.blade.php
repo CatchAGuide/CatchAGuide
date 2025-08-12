@@ -6,27 +6,61 @@
             return coordinate.lat === location{{$guiding->id}}.lat && coordinate.lng === location{{$guiding->id}}.lng;
         });
 
+        const isGray{{$guiding->id}} = {{ isset($grayIds) && in_array($guiding->id, $grayIds) ? 'true' : 'false' }};
+
         let marker{{$guiding->id}};
+        let markerOptions{{$guiding->id}};
 
         if (isDuplicateCoordinate) {
-            // If the coordinate is a duplicate, slightly adjust the position to avoid overlapping
-            const randomOffset = Math.random() / 1000; // Adjust this value based on your requirement
-            marker{{$guiding->id}} = new google.maps.marker.AdvancedMarkerElement({
+            // Slightly adjust the position to avoid overlapping for duplicate coordinates
+            markerOptions{{$guiding->id}} = {
                 position: {
                     lat: location{{$guiding->id}}.lat + getRandomOffset(),
                     lng: location{{$guiding->id}}.lng + getRandomOffset(),
                 },
                 map: map,
-            });
+            };
         } else {
-            // If the coordinate is unique, create the marker as usual
-            marker{{$guiding->id}} = new google.maps.marker.AdvancedMarkerElement({
+            // Use the exact location for unique coordinates
+            markerOptions{{$guiding->id}} = {
                 position: location{{$guiding->id}},
                 map: map,
-            });
+            };
             // Add the unique coordinate to the uniqueCoordinates array
             uniqueCoordinates.push(location{{$guiding->id}});
         }
+
+        if (isGray{{$guiding->id}}) {
+            const grayPin{{$guiding->id}} = new PinElement({
+                background: '#3C4043', // dark gray for strong contrast
+                borderColor: '#111827', // near-black border
+                glyph: '•',
+                glyphColor: '#ffffff',
+                scale: 1.35,
+            });
+            markerOptions{{$guiding->id}}.content = grayPin{{$guiding->id}}.element;
+            markerOptions{{$guiding->id}}.zIndex = 100;
+            markerOptions{{$guiding->id}}.collisionBehavior = google.maps.CollisionBehavior.REQUIRED;
+        }
+
+        // Track bounds for red (primary) markers so we can focus/zoom the map accordingly
+        if (!isGray{{$guiding->id}}) {
+            try {
+                if (typeof redBounds !== 'undefined' && redBounds && typeof redBounds.extend === 'function') {
+                    redBounds.extend(new google.maps.LatLng(location{{$guiding->id}}.lat, location{{$guiding->id}}.lng));
+                }
+                if (typeof redMarkerCount !== 'undefined') {
+                    redMarkerCount += 1;
+                }
+                if (typeof redCoordinates !== 'undefined' && redCoordinates) {
+                    redCoordinates.add(`${location{{$guiding->id}}.lat},${location{{$guiding->id}}.lng}`);
+                }
+            } catch (e) {
+                // no-op; keep rendering markers even if bounds logic fails
+            }
+        }
+
+        marker{{$guiding->id}} = new google.maps.marker.AdvancedMarkerElement(markerOptions{{$guiding->id}});
 
         markers.push(marker{{$guiding->id}});
 
