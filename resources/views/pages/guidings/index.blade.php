@@ -1126,26 +1126,41 @@
             map = new Map(document.getElementById("map"), mapOptions);
         }
 
+        // Bounds and marker counter for primary (non-gray) markers
+        let redBounds = new google.maps.LatLngBounds();
+        let redMarkerCount = 0;
+        const redCoordinates = new Set();
+
         @if($allGuidings->isEmpty())
-            @include('pages.guidings.partials.maps',['guidings' => $otherguidings])
+            @include('pages.guidings.partials.maps',[
+                'guidings' => $otherguidings,
+                'grayIds' => collect($otherguidings)->pluck('id')->toArray(),
+            ])
         @else
             @php
-                // Merge main guidings with other guidings if they exist
+                // Always append otherguidings to the displayed markers
                 $combinedGuidings = $allGuidings;
-                
-                // Only append otherguidings if there are no active checkbox filters
-                $hasActiveFilters = request()->has('target_fish') || 
-                                   request()->has('water') || 
-                                   request()->has('methods') || 
-                                   request()->has('duration_types') || 
-                                   request()->has('num_persons');
-                                   
-                if (isset($otherguidings) && count($otherguidings) > 0 && !$hasActiveFilters) {
+                if (isset($otherguidings) && count($otherguidings) > 0) {
                     $combinedGuidings = $allGuidings->concat($otherguidings);
                 }
+                $grayIds = isset($otherguidings) ? collect($otherguidings)->pluck('id')->toArray() : [];
             @endphp
-            @include('pages.guidings.partials.maps',['guidings' => $combinedGuidings])
+            @include('pages.guidings.partials.maps',[
+                'guidings' => $combinedGuidings,
+                'grayIds' => $grayIds,
+            ])
         @endif
+
+        // Focus map on red markers (main results)
+        if (redMarkerCount > 0) {
+            const uniqueCount = redCoordinates.size || redMarkerCount;
+            if (uniqueCount === 1) {
+                map.setCenter(redBounds.getCenter());
+                map.setZoom(12);
+            } else {
+                map.fitBounds(redBounds);
+            }
+        }
 
         function getRandomOffset() {
             return (Math.random() - 0.5) * 0.0080;
