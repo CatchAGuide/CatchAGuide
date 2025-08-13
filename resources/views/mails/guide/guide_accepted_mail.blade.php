@@ -32,7 +32,7 @@
                 @endif
             </p>
             <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_9')}} </strong>{{$user->email}}</p>
-            <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_10')}} </strong><a href="{{route('guidings.show', [$guiding->id, $guiding->slug])}}" target="_blank" style="text-decoration: none; font-weight: bold;">{{$guiding->title}}</a></p>
+            <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_10')}} </strong><a href="{{route('guidings.show', [$guiding->id, $guiding->slug])}}" target="_blank" style="text-decoration: none; font-weight: bold;">{{ translate($guiding->title) }}</a></p>
             <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_11')}} </strong>{{$guiding->location}}</p>
             <p style="font-size: 14px;"><strong>{{__('emails.number_of_guests')}} </strong>{{$booking->count_of_users}}</p>
             <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_12')}} </strong>{{date('d F Y', strtotime($booking->book_date))}}</p>

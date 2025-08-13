@@ -42,10 +42,11 @@
                     @foreach($sortedTargets as $index => $target)
                         @php
                             $isChecked = in_array($target->id, request()->get('target_fish', []));
+                            $count = $targetFishCounts[$target->id] ?? 0;
                             $shouldBeVisible = $visibleCount < $maxInitialVisible || $isChecked;
                             if($shouldBeVisible) $visibleCount++;
                         @endphp
-                        <div class="form-check {{ (!$shouldBeVisible) ? 'd-none extra-filter' : '' }}">
+                        <div class="form-check {{ (!$shouldBeVisible) ? 'd-none extra-filter' : '' }} {{ ($count == 0 && !$isChecked) ? 'd-none' : '' }}">
                             <input type="checkbox" 
                                    class="form-check-input mobile-filter-checkbox" 
                                    name="target_fish[]" 
@@ -54,7 +55,7 @@
                                    {{ $isChecked ? 'checked' : '' }}>
                             <label class="form-check-label d-flex justify-content-between" for="fish_mobile_{{ $target->id }}">
                                 {{ app()->getLocale() == 'en' ? $target->name_en : $target->name }}
-                                <span class="count">({{ $targetFishCounts[$target->id] ?? 0 }})</span>
+                                <span class="count">({{ $count }})</span>
                             </label>
                         </div>
                     @endforeach
@@ -79,10 +80,11 @@
                     @foreach($sortedMethods as $index => $method)
                         @php
                             $isChecked = in_array($method->id, request()->get('methods', []));
+                            $count = $methodCounts[$method->id] ?? 0;
                             $shouldBeVisible = $visibleCount < $maxInitialVisible || $isChecked;
                             if($shouldBeVisible) $visibleCount++;
                         @endphp
-                        <div class="form-check {{ (!$shouldBeVisible) ? 'd-none extra-filter' : '' }}">
+                        <div class="form-check {{ (!$shouldBeVisible) ? 'd-none extra-filter' : '' }} {{ ($count == 0 && !$isChecked) ? 'd-none' : '' }}">
                             <input type="checkbox" 
                                    class="form-check-input mobile-filter-checkbox" 
                                    name="methods[]" 
@@ -91,7 +93,7 @@
                                    {{ $isChecked ? 'checked' : '' }}>
                             <label class="form-check-label d-flex justify-content-between" for="method_mobile_{{ $method->id }}">
                                 {{ app()->getLocale() == 'en' ? $method->name_en : $method->name }}
-                                <span class="count">({{ $methodCounts[$method->id] ?? 0 }})</span>
+                                <span class="count">({{ $count }})</span>
                             </label>
                         </div>
                     @endforeach
@@ -116,10 +118,11 @@
                     @foreach($sortedWaters as $index => $water)
                         @php
                             $isChecked = in_array($water->id, request()->get('water', []));
+                            $count = $waterTypeCounts[$water->id] ?? 0;
                             $shouldBeVisible = $visibleCount < $maxInitialVisible || $isChecked;
                             if($shouldBeVisible) $visibleCount++;
                         @endphp
-                        <div class="form-check {{ (!$shouldBeVisible) ? 'd-none extra-filter' : '' }}">
+                        <div class="form-check {{ (!$shouldBeVisible) ? 'd-none extra-filter' : '' }} {{ ($count == 0 && !$isChecked) ? 'd-none' : '' }}">
                             <input type="checkbox" 
                                    class="form-check-input mobile-filter-checkbox" 
                                    name="water[]" 
@@ -128,7 +131,7 @@
                                    {{ $isChecked ? 'checked' : '' }}>
                             <label class="form-check-label d-flex justify-content-between" for="water_mobile_{{ $water->id }}">
                                 {{ app()->getLocale() == 'en' ? $water->name_en : $water->name }}
-                                <span class="count">({{ $waterTypeCounts[$water->id] ?? 0 }})</span>
+                                <span class="count">({{ $count }})</span>
                             </label>
                         </div>
                     @endforeach
