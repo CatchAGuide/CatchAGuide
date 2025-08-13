@@ -225,36 +225,55 @@ if (!function_exists('getLocationDetailsGoogle')) {
     function getLocationDetailsGoogle($city = null, $country = null, $region = null): ? array 
     {
         $searchString = implode(', ', array_filter([$city, $country, $region], fn($val) => !empty($val)));
-        // First check in the locations table
-        $location = \App\Models\Location::where(function($query) use ($searchString) {
-            $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.city')) = ?", [$searchString])
-                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.city')) LIKE ?", ['%' . $searchString . '%'])
-                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.country')) = ?", [$searchString])
-                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.country')) LIKE ?", ['%' . $searchString . '%'])
-                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.region')) = ?", [$searchString])
-                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.region')) LIKE ?", ['%' . $searchString . '%']);
-        })
-        ->select('city', 'country', 'region')
-        ->first();
-        
-        if ($location) {
-            if ($location->city || $location->country || $location->region) {
+
+        // First check in the locations table using JSON key lookups for translated variants
+        try {
+            $location = \App\Models\Location::where(function($query) use ($city, $country, $region) {
+                // Allow direct English matches first
+                if (!empty($city)) {
+                    $query->orWhere('city', $city);
+                }
+                if (!empty($country)) {
+                    $query->orWhere('country', $country);
+                }
+                if (!empty($region)) {
+                    $query->orWhere('region', $region);
+                }
+
+                // Then check if provided values exist as keys in translation JSON
+                if (!empty($city)) {
+                    $cityPath = '$.city."' . str_replace('"', '\\"', $city) . '"';
+                    $query->orWhereRaw('JSON_EXTRACT(translation, ?) IS NOT NULL', [$cityPath]);
+                }
+                if (!empty($country)) {
+                    $countryPath = '$.country."' . str_replace('"', '\\"', $country) . '"';
+                    $query->orWhereRaw('JSON_EXTRACT(translation, ?) IS NOT NULL', [$countryPath]);
+                }
+                if (!empty($region)) {
+                    $regionPath = '$.region."' . str_replace('"', '\\"', $region) . '"';
+                    $query->orWhereRaw('JSON_EXTRACT(translation, ?) IS NOT NULL', [$regionPath]);
+                }
+            })
+            ->select('city', 'country', 'region')
+            ->first();
+
+            if ($location && ($location->city || $location->country || $location->region)) {
                 return [
                     'city' => $location->city,
-                    'country' => $location->country, 
+                    'country' => $location->country,
                     'region' => $location->region
                 ];
             }
+        } catch (\Exception $e) {
+            \Log::error('Location JSON lookup error: ' . $e->getMessage());
         }
 
-        // If not found in DB, try to translate using Gemini and check again
+        // If not found in DB, try to translate using Gemini
         try {
             $requestTranslate = json_encode(['city' => $city, 'country' => $country, 'region' => $region]);
             $translationService = new \App\Services\Translation\GeminiTranslationService();
             
-            $translationPrompt = "Translate this location search to English: \"$requestTranslate\"\n\n";
-            $translationPrompt .= "Return only the translated location string in the same format. Examples:\n";
-            $translationPrompt .= "Only return the translated string, no explanation.";
+            $translationPrompt = "You are a translation API. Given a JSON with keys city, country, region, output a JSON with the same keys translated to English. Output ONLY valid JSON, no code fences or text. Input: $requestTranslate";
 
             $translatedString = $translationService->translate($translationPrompt);
             $translatedString = json_decode($translatedString, true);
@@ -265,11 +284,25 @@ if (!function_exists('getLocationDetailsGoogle')) {
                     'country' => $translatedString['country'],  
                     'region' => $translatedString['region']
                 ];
-            }else{
-                return null;
             }
         } catch (\Exception $e) {
             Log::error('Gemini translation error in getLocationDetailsGoogle: ' . $e->getMessage());
+        }
+
+        // As a robust fallback, use Google Places to resolve English names
+        try {
+            if (!empty($searchString)) {
+                $resolved = getLocationDetails($searchString);
+                if ($resolved && (isset($resolved['city']) || isset($resolved['country']) || isset($resolved['region']))) {
+                    return [
+                        'city' => $resolved['city'] ?? null,
+                        'country' => $resolved['country'] ?? null,
+                        'region' => $resolved['region'] ?? null,
+                    ];
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::error('Google Places fallback error in getLocationDetailsGoogle: ' . $e->getMessage());
         }
 
         return null;
