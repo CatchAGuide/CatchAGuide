@@ -546,6 +546,8 @@
 </style>
 @endsection
 
+@stack('guidingListingStyles')
+
 @section('content')
     <div class="country-content-fix">
         <div class="container" id="destination">
@@ -646,9 +648,10 @@
                                     <a class="btn btn-primary" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)">@lang('destination.show_on_map')</a>
                                 </div>
                             </div>            
-                            @include('pages.guidings.includes.filters', ['formAction' => route('guidings.index')])
+                            @include('pages.guidings.includes.filters', ['formAction' => request()->url()])
                         </div>
                         <div class="col-sm-12 col-lg-9 country-listing-item">
+                            <div id="guidings-list">
                             @foreach($guidings as $guiding)
                             <div class="row m-0 mb-2 guiding-list-item">
                                 <div class="tours-list__right col-md-12">
@@ -778,6 +781,7 @@
                             </div>
                             @endforeach
                             {!! $guidings->links('vendor.pagination.default') !!}
+                            </div>
                         </div>
                     </div>
 
@@ -900,7 +904,7 @@
                         </div>
                     @endif
                 </div>
-                @include('pages.guidings.includes.filters-mobile', ['formAction' => route('guidings.index')])
+                @include('pages.guidings.includes.filters-mobile', ['formAction' => request()->url()])
             </div>
         </div>
     </div>
@@ -1259,33 +1263,7 @@ window.addEventListener('load', function() {
     }
 });     
 
-document.addEventListener('DOMContentLoaded', function() {
-    const filterInputs = document.querySelectorAll('input[type="checkbox"], select');
-    console.log('Filter inputs found:', filterInputs.length);
-    
-    filterInputs.forEach(input => {
-        input.addEventListener('change', function(event) {
-            console.log('Input changed:', this);
-            console.log('Form:', this.form);
-            
-            // If the input has a form, use it
-            if (this.form) {
-                const formData = new FormData(this.form);
-                const params = new URLSearchParams();
-                
-                for (const [key, value] of formData.entries()) {
-                    if (value) {
-                        params.append(key, value);
-                    }
-                }
-                
-                window.location.href = `${window.location.pathname}?${params.toString()}`;
-            } else {
-                console.error('Input has no form:', this);
-            }
-        });
-    });
-});  
+    // Filters are handled by FilterManager in the shared filters partial
 </script>
 
 

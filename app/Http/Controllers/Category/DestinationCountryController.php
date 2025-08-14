@@ -16,8 +16,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Spatie\Geocoder\Geocoder;
 use Illuminate\Support\Facades\Log;
+use App\Traits\GuidingFilterOptimization;
 class DestinationCountryController extends Controller
 {
+    use GuidingFilterOptimization;
     public function index()
     {
         $countries = Destination::whereType('country')->whereLanguage(app()->getLocale())->get();
@@ -86,131 +88,31 @@ class DestinationCountryController extends Controller
             Session::put('random_seed', $randomSeed);
         }
 
-        // Clean up request parameters before processing
+        // Clean up request parameters before processing (reuse trait logic)
         $cleanedRequest = $this->cleanRequestParameters($request);
-        
-        // Eager load relationships to avoid N+1 problem
-        $baseQuery = Guiding::with(['target_fish', 'methods', 'water_types', 'boatType'])
-            ->select(['*', DB::raw('(
-                WITH price_per_person AS (
-                    SELECT 
-                        CASE 
-                            WHEN JSON_VALID(prices) THEN (
-                                SELECT MIN(
-                                    CASE 
-                                        WHEN person > 1 THEN CAST(amount AS DECIMAL(10,2)) / person
-                                        ELSE CAST(amount AS DECIMAL(10,2))
-                                    END
-                                )
-                                FROM JSON_TABLE(
-                                    prices,
-                                    "$[*]" COLUMNS(
-                                        person INT PATH "$.person",
-                                        amount DECIMAL(10,2) PATH "$.amount"
-                                    )
-                                ) as price_data
-                            )
-                            ELSE price
-                        END as lowest_pp
-                )
-                SELECT COALESCE(lowest_pp, price) 
-                FROM price_per_person
-            ) AS lowest_price')])->where('status',1)->whereNotNull('lat')->whereNotNull('lng');
-        
-        // Use caching for price ranges
-        $cacheKey = 'guiding_price_ranges';
-        $cacheDuration = 60 * 24; // Cache for 24 hours
 
-        if (Cache::has($cacheKey)) {
-            $priceRangeData = Cache::get($cacheKey);
-            $priceRanges = $priceRangeData['ranges'];
-            $overallMaxPrice = $priceRangeData['maxPrice'];
-        } else {
-            // Optimize max price query
-            $maxPriceResult = DB::table('guidings')
-                ->selectRaw('MAX(
-                    CASE 
-                        WHEN JSON_VALID(prices) THEN (
-                            SELECT MIN(
-                                CASE 
-                                    WHEN person > 1 THEN CAST(amount AS DECIMAL(10,2)) / person
-                                    ELSE CAST(amount AS DECIMAL(10,2))
-                                END
-                            )
-                            FROM JSON_TABLE(
-                                prices,
-                                "$[*]" COLUMNS(
-                                    person INT PATH "$.person",
-                                    amount DECIMAL(10,2) PATH "$.amount"
-                                )
-                            ) as price_data
-                        )
-                        ELSE price
-                    END
-                ) as max_price')
-                ->where('status', 1)
-                ->first();
-
-            $overallMaxPrice = ceil(($maxPriceResult->max_price ?? 5000) / 50) * 50;
-            
-            // Define price ranges
-            $priceRanges = [];
-            $minPrice = 50;
-            $step = 50;
-            
-            for ($i = $minPrice; $i <= $overallMaxPrice; $i += $step) {
-                $rangeEnd = min($i + $step, $overallMaxPrice);
-                $priceRanges[] = [
-                    'min' => $i,
-                    'max' => $rangeEnd,
-                    'range' => "€{$i}-€{$rangeEnd}",
-                    'count' => 0
-                ];
-            }
-            
-            // Count guidings in each price range
-            $priceResults = DB::table('guidings')
-                ->select('id', DB::raw('
-                    CASE 
-                        WHEN JSON_VALID(prices) THEN (
-                            SELECT MIN(
-                                CASE 
-                                    WHEN person > 1 THEN CAST(amount AS DECIMAL(10,2)) / person
-                                    ELSE CAST(amount AS DECIMAL(10,2))
-                                END
-                            )
-                            FROM JSON_TABLE(
-                                prices,
-                                "$[*]" COLUMNS(
-                                    person INT PATH "$.person",
-                                    amount DECIMAL(10,2) PATH "$.amount"
-                                )
-                            ) as price_data
-                        )
-                        ELSE price
-                    END as lowest_price
-                '))
-                ->where('status', 1)
-                ->get();
-            
-            foreach ($priceResults as $guiding) {
-                $price = $guiding->lowest_price;
-                if ($price >= $minPrice && $price <= $overallMaxPrice) {
-                    foreach ($priceRanges as &$range) {
-                        if ($price >= $range['min'] && $price < $range['max']) {
-                            $range['count']++;
-                            break;
-                        }
-                    }
-                }
-            }
-            
-            // Cache the results
-            Cache::put($cacheKey, [
-                'ranges' => $priceRanges,
-                'maxPrice' => $overallMaxPrice
-            ], $cacheDuration);
+        // Determine if we should leverage the JSON filter service (align with GuidingsController)
+        $hasCheckboxFilters = $this->hasActiveCheckboxFilters($cleanedRequest);
+        $checkboxFilteredIds = [];
+        if ($hasCheckboxFilters) {
+            $checkboxFilteredIds = $this->getFilterService()->getFilteredGuidingIds($cleanedRequest);
         }
+
+        // Base query, align eager loads with listings page
+        if ($hasCheckboxFilters) {
+            // If there are checkbox filters but no matches, prepare empty result later
+            $baseQuery = Guiding::with(['boatType', 'user.reviews'])
+                ->when(!empty($checkboxFilteredIds), function($q) use ($checkboxFilteredIds) {
+                    $q->whereIn('id', $checkboxFilteredIds);
+                })
+                ->where('status', 1);
+        } else {
+            $baseQuery = Guiding::with(['boatType', 'user.reviews'])
+                ->where('status', 1);
+        }
+
+        // Use the same overall max price logic as listings
+        $overallMaxPrice = $this->getMaxPriceFromFilterData();
         
         // 2. Apply filters to the query
         $filteredQuery = clone $baseQuery;
@@ -237,40 +139,8 @@ class DestinationCountryController extends Controller
             }
         }
 
-        // Apply sorting
-        $hasOnlyPageParam = count(array_diff(array_keys($cleanedRequest->all()), ['page'])) === 0;
-        $isFirstPage = !$cleanedRequest->has('page') || $cleanedRequest->get('page') == 1;
-
-        if ($hasOnlyPageParam && $isFirstPage) {
-            $filteredQuery->orderByRaw("RAND($randomSeed)");
-        } else {
-            // Default ordering for all other cases
-            if ($cleanedRequest->has('sortby') && !empty($cleanedRequest->get('sortby'))) {
-                switch ($cleanedRequest->get('sortby')) {
-                    case 'newest':
-                        $filteredQuery->orderBy('created_at', 'desc');
-                        break;
-                    case 'price-asc':
-                        $filteredQuery->orderBy('lowest_price', 'asc');
-                        break;
-                    case 'price-desc':
-                        $filteredQuery->orderBy('lowest_price', 'desc');
-                        break;
-                    case 'long-duration':
-                        $filteredQuery->orderBy('duration', 'desc');
-                        break;
-                    case 'short-duration':
-                        $filteredQuery->orderBy('duration', 'asc');
-                        break;
-                    default:
-                        // Default to sorting by lowest price if no valid sort option is provided
-                        $filteredQuery->orderBy('lowest_price', 'asc');
-                }
-            } else {
-                // Default to sorting by lowest price if no sort option is provided
-                $filteredQuery->orderBy('lowest_price', 'asc');
-            }
-        }
+        // Apply sorting consistent with listings
+        $this->applySorting($filteredQuery, $cleanedRequest, $randomSeed);
         
         // Apply title and filter title
         if($cleanedRequest->has('page')){
@@ -352,18 +222,14 @@ class DestinationCountryController extends Controller
             }
         }
 
-        // Apply price filters
-        if(($cleanedRequest->has('price_min') && $cleanedRequest->get('price_min') !== "") && ($cleanedRequest->has('price_max') && $cleanedRequest->get('price_max') !== "")){
-            // if ($minPrice != $request->get('price_min') || $overallMaxPrice != $request->get('price_max')){
-                $min_price = $cleanedRequest->get('price_min');
-                $max_price = $cleanedRequest->get('price_max');
-
-                $title .= 'Price ' . $min_price . '€ - ' . $max_price . '€ | ';
-                $filter_title .= 'Price ' . $min_price . '€ - ' . $max_price . '€, ';
-
-                // Use the lowest_price field we calculated in the main query
-                $filteredQuery->havingRaw('lowest_price >= ? AND lowest_price <= ?', [$min_price, $max_price]);
-            // }
+        // Apply price filters similar to listings: handled by service when checkbox filters are used
+        if (!$hasCheckboxFilters && $this->hasPriceFilter($cleanedRequest)) {
+            // For destination pages without service-filtered IDs, fallback to simple price range on base price
+            $min_price = (int) $cleanedRequest->get('price_min', 50);
+            $max_price = (int) $cleanedRequest->get('price_max', $overallMaxPrice);
+            $title .= 'Price ' . $min_price . '€ - ' . $max_price . '€ | ';
+            $filter_title .= 'Price ' . $min_price . '€ - ' . $max_price . '€, ';
+            $filteredQuery->whereBetween('price', [$min_price, $max_price]);
         }
 
         // Apply duration filters
@@ -415,61 +281,45 @@ class DestinationCountryController extends Controller
         }
 
         
-        // 3. Get all filtered guidings (for counts and filter options)
-        $allGuidings = $filteredQuery->get();
+        // Prepare results
+        if ($hasCheckboxFilters && empty($checkboxFilteredIds)) {
+            $allGuidings = collect();
+            $guidings = new \Illuminate\Pagination\LengthAwarePaginator(
+                collect(), 0, 20, 1, 
+                ['path' => request()->url(), 'pageName' => 'page']
+            );
+        } else {
+            // 3. Get all filtered guidings (for counts and filter options)
+            $allGuidings = $filteredQuery->get();
+        }
         
-        // 4. Extract available filter options from filtered results
-        $availableTargetFish = collect();
-        $availableMethods = collect();
-        $availableWaterTypes = collect();
-        $durationCounts = [
-            'multi_day' => 0,
-            'half_day' => 0,
-            'full_day' => 0
-        ];
-        $targetFishCounts = [];
-        $methodCounts = [];
-        $waterTypeCounts = [];
-        $personCounts = [];
-
-        foreach ($allGuidings as $guiding) {
-            // For target fish
-            $targetFish = json_decode($guiding->target_fish, true) ?? [];
-            $availableTargetFish = $availableTargetFish->concat($targetFish)->unique();
-            foreach ($targetFish as $fishId) {
-                $targetFishCounts[$fishId] = ($targetFishCounts[$fishId] ?? 0) + 1;
-            }
-            
-            // For methods
-            $methods = json_decode($guiding->fishing_methods, true) ?? [];
-            $availableMethods = $availableMethods->concat($methods)->unique();
-            foreach ($methods as $methodId) {
-                $methodCounts[$methodId] = ($methodCounts[$methodId] ?? 0) + 1;
-            }
-            
-            // For water types
-            $waterTypes = json_decode($guiding->water_types, true) ?? [];
-            $availableWaterTypes = $availableWaterTypes->concat($waterTypes)->unique();
-            foreach ($waterTypes as $waterId) {
-                $waterTypeCounts[$waterId] = ($waterTypeCounts[$waterId] ?? 0) + 1;
-            }
-
-            // Count durations
-            if (isset($guiding->duration_type)) {
-                $durationCounts[$guiding->duration_type] = ($durationCounts[$guiding->duration_type] ?? 0) + 1;
-            }
-            
-            // Count persons
-            if (isset($guiding->max_guests)) {
-                // Count all guidings that support at least this number of persons
-                for ($i = 1; $i <= min(8, $guiding->max_guests); $i++) {
-                    $personCounts[$i] = ($personCounts[$i] ?? 0) + 1;
-                }
-            }
+        // 4. Compute filter counts aligned with listings
+        if ($allGuidings->isNotEmpty()) {
+            $currentResultIds = $allGuidings->pluck('id')->toArray();
+            $filterCounts = $this->getFilterService()->getFilterCounts($currentResultIds);
+        } else {
+            $filterCounts = $this->getFilterService()->getFilterCounts();
         }
 
-        // Sort person counts
-        ksort($personCounts);
+        // Ensure arrays exist
+        $filterCounts = array_merge([
+            'targets' => [],
+            'methods' => [],
+            'water_types' => [],
+            'duration_types' => [
+                'half_day' => 0,
+                'full_day' => 0,
+                'multi_day' => 0
+            ],
+            'person_ranges' => []
+        ], $filterCounts);
+
+        // Backwards-compat local vars for filters partial
+        $targetFishCounts = $filterCounts['targets'];
+        $methodCounts = $filterCounts['methods'];
+        $waterTypeCounts = $filterCounts['water_types'];
+        $durationCounts = $filterCounts['duration_types'];
+        $personCounts = $filterCounts['person_ranges'];
         
         // Get the models for these IDs, only including items with counts > 0
         $targetFishOptions = Target::whereIn('id', array_keys(array_filter($targetFishCounts)))->get();
@@ -488,9 +338,32 @@ class DestinationCountryController extends Controller
             }
         }
 
-        // 6. Get paginated results
-        $guidings = $filteredQuery->paginate(20);
-        $guidings->appends(request()->except('page'));
+        // 5. Get paginated results if not already set
+        if (!isset($guidings)) {
+            $guidings = $filteredQuery->paginate(20);
+            $guidings->appends(request()->except('page'));
+        }
+
+        // Pre-compute view data to align with listings performance
+        if ($allGuidings->isNotEmpty()) {
+            $allTargetIds = $allGuidings->flatMap(function($g) { return json_decode($g->target_fish, true) ?: []; })->unique()->filter()->values();
+            $allMethodIds = $allGuidings->flatMap(function($g) { return json_decode($g->fishing_methods, true) ?: []; })->unique()->filter()->values();
+            $allWaterIds = $allGuidings->flatMap(function($g) { return json_decode($g->water_types, true) ?: []; })->unique()->filter()->values();
+            $allInclussionIds = $allGuidings->flatMap(function($g) { return json_decode($g->inclusions, true) ?: []; })->unique()->filter()->values();
+
+            $targetsMap = $allTargetIds->isNotEmpty() ? Target::whereIn('id', $allTargetIds)->get()->keyBy('id') : collect();
+            $methodsMap = $allMethodIds->isNotEmpty() ? Method::whereIn('id', $allMethodIds)->get()->keyBy('id') : collect();
+            $watersMap = $allWaterIds->isNotEmpty() ? Water::whereIn('id', $allWaterIds)->get()->keyBy('id') : collect();
+            $inclussionsMap = $allInclussionIds->isNotEmpty() ? \App\Models\Inclussion::whereIn('id', $allInclussionIds)->get()->keyBy('id') : collect();
+
+            $this->preComputeGuidingData($allGuidings, $targetsMap, $methodsMap, $watersMap, $inclussionsMap);
+            $this->preComputeGuidingData($guidings->items(), $targetsMap, $methodsMap, $watersMap, $inclussionsMap);
+        } else {
+            $targetsMap = collect();
+            $methodsMap = collect();
+            $watersMap = collect();
+            $inclussionsMap = collect();
+        }
 
         // Finalize filter title
         $filter_title = substr($filter_title, 0, -2);
@@ -508,10 +381,10 @@ class DestinationCountryController extends Controller
             $personCounts = [];
         }
         
-        // Handle AJAX requests
+        // Handle AJAX requests (match listings response shape)
         if ($cleanedRequest->ajax()) {
             Log::info('AJAX request received'); 
-            $view = view('pages.guidings.partials.guiding-list', [
+            $responseData = [
                 'title' => $title,
                 'filter_title' => $filter_title,
                 'guidings' => $guidings,
@@ -532,13 +405,18 @@ class DestinationCountryController extends Controller
                 'durationCounts' => $durationCounts,
                 'personCounts' => $personCounts,
                 'isMobile' => $isMobile,
-                // 'priceHistogramData' => $priceHistogramData,
                 'maxPrice' => $overallMaxPrice,
                 'overallMaxPrice' => $overallMaxPrice,
-            ])->render();
+                'targetsMap' => $targetsMap ?? collect(),
+                'methodsMap' => $methodsMap ?? collect(),
+                'watersMap' => $watersMap ?? collect(),
+                'inclussionsMap' => $inclussionsMap ?? collect(),
+            ];
+
+            $view = view('pages.guidings.partials.guiding-list', $responseData)->render();
             
             // Add guiding data for map updates
-            $guidingsData = $guidings->map(function($guiding) {
+            $guidingsData = $allGuidings->map(function($guiding) {
                 return [
                     'id' => $guiding->id,
                     'slug' => $guiding->slug,
@@ -549,24 +427,18 @@ class DestinationCountryController extends Controller
                 ];
             });
             
-            return response()->json([
+            return response()->json(array_merge($responseData, [
                 'html' => $view,
                 'guidings' => $guidingsData,
-                'allGuidings' => $allGuidings,
-                'searchMessage' => $searchMessage,
-                'isMobile' => $isMobile,
-                'total' => $guidings->total(),
+                'total' => is_object($guidings) ? $guidings->total() : count($guidings),
                 'filterCounts' => [
-                    'targetFish' => $targetFishCounts,
-                    'methods' => $methodCounts,
-                    'waters' => $waterTypeCounts,
-                    'durations' => $durationCounts,
-                    'persons' => $personCounts
+                    'targetFish' => $targetFishCounts ?? [],
+                    'methods' => $methodCounts ?? [],
+                    'waters' => $waterTypeCounts ?? [],
+                    'durations' => $durationCounts ?? [],
+                    'persons' => $personCounts ?? []
                 ],
-                // 'priceHistogramData' => $priceHistogramData,
-                'maxPrice' => $overallMaxPrice,
-                'overallMaxPrice' => $overallMaxPrice,
-            ]);
+            ]));
         }
 
         // Return full view for non-AJAX requests
@@ -610,6 +482,10 @@ class DestinationCountryController extends Controller
             // 'priceHistogramData' => $priceHistogramData,
             'maxPrice' => $overallMaxPrice,
             'overallMaxPrice' => $overallMaxPrice,
+            'targetsMap' => $targetsMap ?? collect(),
+            'methodsMap' => $methodsMap ?? collect(),
+            'watersMap' => $watersMap ?? collect(),
+            'inclussionsMap' => $inclussionsMap ?? collect(),
         ]);
     }
 
