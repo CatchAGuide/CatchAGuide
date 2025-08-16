@@ -148,6 +148,37 @@
             border-radius: 8px;
         }
         
+        /* Ratings overview layout/alignment */
+        .rating-overview .ratings-wrapper {
+            display: flex;
+            align-items: stretch;
+            gap: 24px;
+        }
+        .rating-overview .rating-left {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 140px;
+        }
+        .rating-overview .rating-categories { flex: 1; min-width: 0; }
+        .rating-overview .score-wrapper { margin: 0 auto; position: relative; display: flex; align-items: center; justify-content: center; }
+        .rating-overview .score-wrapper .score { line-height: 1; }
+        .rating-overview .score-wrapper .score-label { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); margin: 0; line-height: 1; }
+        .rating-overview .category .progress { height: 8px; }
+
+        /* Mobile alignment fixes for ratings */
+        @media (max-width: 767px) {
+            .rating-overview .ratings-wrapper { flex-direction: column; gap: 16px; align-items: center; }
+            .rating-overview .rating-categories { width: 100%; }
+            .rating-overview .category { align-items: center; }
+            .rating-overview .category .category-label { width: 130px; min-width: 130px; }
+            .rating-overview .rating-left { text-align: center; align-items: center; display: flex; justify-content: center; width: 100%; }
+            .rating-overview .score-wrapper { text-align: center; margin: 0 auto !important; }
+            .rating-overview .rating-info { text-align: center; }
+            .rating-overview .rating-left .score { margin: 0 auto; display: inline-block; }
+        }
+        
         /* Make reviews link look clickable */
         #reviews-link:hover {
             color: var(--primary-color, #007bff) !important;
@@ -1358,7 +1389,7 @@
                             <i class="fas fa-check-circle text-success"></i>
                             <strong class="mb-0">@lang('guidings.Real_experiences')</strong>
                         </div>
-                        <p class="text-muted mb-2">
+                        <p class="text-muted mb-2 review-disclaimer">
                             @lang('guidings.Real_experiences_description')
                         </p>
                     </div>
@@ -1989,6 +2020,33 @@ document.addEventListener("DOMContentLoaded", function() {
                 item.appendChild(toggle);
             }
         });
+    }
+
+    // Reviews disclaimer See More / Show Less
+    const disclaimer = document.querySelector('.review-disclaimer');
+    if (disclaimer) {
+        // Only shorten on mobile
+        if (window.innerWidth < 768) {
+            const fullText = disclaimer.innerText.trim();
+            const words = fullText.split(/\s+/);
+            const limit = 3.85;
+            if (words.length > limit) {
+                const truncated = words.slice(0, limit).join(' ') + '... ';
+                disclaimer.innerText = truncated;
+                const toggle = document.createElement('small');
+                toggle.textContent = 'See More';
+                toggle.style.cursor = 'pointer';
+                toggle.classList.add('text-orange');
+                let isExpanded = false;
+                toggle.addEventListener('click', function() {
+                    isExpanded = !isExpanded;
+                    disclaimer.innerText = isExpanded ? fullText + ' ' : truncated;
+                    toggle.textContent = isExpanded ? 'Show Less' : 'See More';
+                    disclaimer.appendChild(toggle);
+                });
+                disclaimer.appendChild(toggle);
+            }
+        }
     }
 
     // Add null check for comment content elements
