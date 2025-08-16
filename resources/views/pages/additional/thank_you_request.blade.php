@@ -84,7 +84,7 @@
             </div>
         </div>
         <div class="_footer">
-            <p> <a href="{{route('additional.contact')}}"style="color:var(--thm-primary) ">@lang('message.cont')</a> </p>
+            <p> <a id="contact-footer" href="{{route('additional.contact')}}"style="color:var(--thm-primary) ">@lang('message.cont')</a> </p>
             <a class="btn" href="{{route('welcome')}}">@lang('message.back')</a>
         </div>
     </div>

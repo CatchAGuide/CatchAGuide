@@ -645,7 +645,7 @@
                         <div id="filterCard" class="col-sm-12 col-lg-3">        
                             <div class="card mb-2 d-none d-sm-block">
                                 <div id="map-placeholder">
-                                    <a class="btn btn-primary" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)">@lang('destination.show_on_map')</a>
+                                    <a class="btn btn-primary" id="openMapModal" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)">@lang('destination.show_on_map')</a>
                                 </div>
                             </div>            
                             @include('pages.guidings.includes.filters', ['formAction' => request()->url()])

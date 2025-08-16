@@ -76,9 +76,9 @@
                               <div class="d-flex align-items-start">
                                 <i class="fas fa-user text-orange fs-4 me-3"></i>
                                 <span>
-                                  <a href="#" class="text-orange fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#loginModal" wire:click="$set('checkoutType', 'login')">{{ translate('Sign in') }}</a>
+                                  <a href="#" id="login-header" class="text-orange fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#loginModal" wire:click="$set('checkoutType', 'login')">{{ translate('Sign in') }}</a>
                                   @lang('checkout.to_book_with_your_saved_data_or')
-                                  <a href="#" class="text-orange fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#registerModal" wire:click="$set('checkoutType', 'register')">{{ translate('Sign up') }}</a>
+                                  <a href="#" id="signup-header" class="text-orange fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#registerModal" wire:click="$set('checkoutType', 'register')">{{ translate('Sign up') }}</a>
                                   @lang('checkout.to_process_your_bookings_on_the_go')
                                 </span>
                               </div>
@@ -283,7 +283,7 @@
                                     </div>
                                   @elseif ($page !== 2)
                                     <div class="pull-right">
-                                      <button class="thm-btn" wire:click="next">@lang('message.further') <i class="fa fa-chevron-right"></i></button>
+                                      <button class="thm-btn" wire:click="next" id="checkoutProceedPage2">@lang('message.further') <i class="fa fa-chevron-right"></i></button>
                                     </div>
                                   @endif
                                 </div>
@@ -588,6 +588,7 @@
                             <div class="d-grid gap-2">
                               <button class="btn thm-btn booking-btn {{ ($checkoutType === 'guest' && !$userData['createAccount'] && !$userData['guestCheckTerms']) ? 'disabled-btn' : '' }}" 
                                       type="submit" 
+                                      id="checkoutFinal"
                                       @if($checkoutType === 'guest' && !$userData['createAccount'] && !$userData['guestCheckTerms']) 
                                         disabled 
                                         data-bs-toggle="tooltip" 

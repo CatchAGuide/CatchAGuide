@@ -26,7 +26,7 @@
                         @lang('message.back')
                     </a>
                     <div class="mt-3">
-                        <a href="{{route('additional.contact')}}" style="color:var(--thm-primary)">@lang('message.cont')</a>
+                        <a id="contact-footer" href="{{route('additional.contact')}}" style="color:var(--thm-primary)">@lang('message.cont')</a>
                     </div>
                 </div>
             </div>
