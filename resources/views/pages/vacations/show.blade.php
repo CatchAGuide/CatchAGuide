@@ -787,7 +787,7 @@
                                 <i class="fas fa-phone-alt me-2"></i>
                                 <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>
                             </div>
-                            <a href="{{ route('additional.contact') }}" class="btn btn-outline-orange">
+                            <a id="contact-footer" href="{{ route('additional.contact') }}" class="btn btn-outline-orange">
                             >@lang('vacations.contact_us_button')
                                 <i class="fas fa-arrow-right ms-2"></i>
                             </a>

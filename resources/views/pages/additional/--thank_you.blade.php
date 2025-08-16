@@ -137,7 +137,7 @@
             </div>
         </div>
         <div class="_footer">
-            <p> <a href="{{route('additional.contact')}}"style="color:var(--thm-primary) ">Kontakt</a> </p>
+            <p> <a id="contact-footer" href="{{route('additional.contact')}}"style="color:var(--thm-primary) ">Kontakt</a> </p>
             <a class="btn" href="{{route('welcome')}}">Zurück zu Startseite</a>
         </div>
     </div>

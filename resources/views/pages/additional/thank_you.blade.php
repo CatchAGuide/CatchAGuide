@@ -308,7 +308,7 @@
                     </div>
 
                     <div class="btn-group">
-                        <a href="{{ route('additional.contact') }}" class="btn btn-outline">
+                        <a id="contact-footer" href="{{ route('additional.contact') }}" class="btn btn-outline">
                             @lang('thank-you.contact_us')
                         </a>
                         <a href="{{ route('guidings.index') }}" class="btn btn-back">

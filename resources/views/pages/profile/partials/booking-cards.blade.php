@@ -116,7 +116,7 @@
                             </a>
                         @endif
                         
-                        <button class="btn-action btn-info" data-bs-toggle="modal" data-bs-target="#contactModal{{ $index }}">
+                        <button id="contact-product" id="contact-product" class="btn-action btn-info" data-bs-toggle="modal" data-bs-target="#contactModal{{ $index }}">
                             <i class="fas fa-envelope"></i> Contact Guide
                         </button>
                     @elseif($booking->status == 'pending')

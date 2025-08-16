@@ -14,7 +14,7 @@
                 
                 <!-- Desktop Menu -->
                 <div class="d-none d-md-flex align-items-center top-nav-items">
-                    <a href="{{ route('additional.contact') }}" class="nav-link">
+                    <a id="contact-header" href="{{ route('additional.contact') }}" class="nav-link">
                         <i class="fas fa-question-circle"></i>
                     </a>
                     <div class="nav-link language-selector">
@@ -57,10 +57,10 @@
                             </div>
                         </div>
                     @else
-                        <a href="#" class="nav-link login-link" data-bs-toggle="modal" data-bs-target="#loginModal">
+                        <a href="#" id="login-header" class="nav-link login-link" data-bs-toggle="modal" data-bs-target="#loginModal">
                             @lang('homepage.header-login')
                         </a>
-                        <a href="#" class="btn btn-outline-light signup-btn" data-bs-toggle="modal" data-bs-target="#registerModal">
+                        <a href="#" id="signup-header" class="btn btn-outline-light signup-btn" data-bs-toggle="modal" data-bs-target="#registerModal">
                             @lang('homepage.header-signup')
                         </a>
                     @endauth
@@ -76,7 +76,7 @@
                                  alt="Profile">
                         </a>
                     @else
-                        <a href="#" class="text-white me-3" data-bs-toggle="modal" data-bs-target="#loginModal">
+                        <a href="#" id="login-header" class="text-white me-3" data-bs-toggle="modal" data-bs-target="#loginModal">
                             <i class="far fa-user-circle" style="font-size: 24px;"></i>
                         </a>
                     @endauth
@@ -1154,11 +1154,11 @@ input[type=number] {
                         </form>
                     @else
                         <div class="menu-divider"></div>
-                        <a href="#" class="menu-item" data-bs-toggle="modal" data-bs-target="#registerModal" onclick="closeMobileMenu()">
+                        <a href="#" id="singup-header" class="menu-item" data-bs-toggle="modal" data-bs-target="#registerModal" onclick="closeMobileMenu()">
                             <i class="fas fa-sign-out-alt"></i>
                             <span>@lang('homepage.header-signup')</span>
                         </a>
-                        <a href="#" class="menu-item" data-bs-toggle="modal" data-bs-target="#loginModal" onclick="closeMobileMenu()">
+                        <a href="#" id="login-header" class="menu-item" data-bs-toggle="modal" data-bs-target="#loginModal" onclick="closeMobileMenu()">
                             <i class="fas fa-sign-out-alt"></i>
                             <span>@lang('homepage.header-login')</span>
                         </a>

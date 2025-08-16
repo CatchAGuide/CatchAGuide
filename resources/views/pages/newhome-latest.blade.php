@@ -1324,7 +1324,7 @@
                 </div>
             </div>
             <div class="cta-right">
-                <a href="{{route('login')}}" class="about-one__btn thm-btn">@lang('homepage.guide-button')</a>
+                <a id="become-guide-homepage" href="{{route('login')}}" class="about-one__btn thm-btn">@lang('homepage.guide-button')</a>
 
             </div>
         </div>

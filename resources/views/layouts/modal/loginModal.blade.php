@@ -70,7 +70,7 @@
 
                 <div class="text-center">
                     <p>{{ translate('Not a member?')}}
-                        <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#registerModal" data-bs-dismiss="modal">
+                        <a href="#" id="signup-header" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#registerModal" data-bs-dismiss="modal">
                             @lang('homepage.header-signup')
                         </a>
                     </p>
