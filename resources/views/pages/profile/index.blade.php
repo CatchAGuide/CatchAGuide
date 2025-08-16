@@ -282,7 +282,7 @@
                                             <i class="fas fa-star"></i> {{ __('profile.rate_guide') }}
                                         </a>
                                     @endif
-                                    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#contactModal{{ $index }}" data-bs-dismiss="modal">
+                                    <button id="contact-product" type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#contactModal{{ $index }}" data-bs-dismiss="modal">
                                         <i class="fas fa-envelope"></i> {{ __('profile.contact_guide') }}
                                     </button>
                                 @endif

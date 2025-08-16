@@ -120,7 +120,7 @@
 
                 <div class="text-center">
                     <p>{{translate('Already have an account? ')}}
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal" data-bs-dismiss="modal">
+                        <a href="#" id="login-header" data-bs-toggle="modal" data-bs-target="#loginModal" data-bs-dismiss="modal">
                             @lang('homepage.header-login')
                         </a>
                     </p>

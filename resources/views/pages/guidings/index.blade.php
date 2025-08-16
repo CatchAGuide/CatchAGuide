@@ -531,7 +531,7 @@
                                 <i class="fa fa-filter me-1"></i>@lang('message.filter')
                                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="active-filter-counter"></span>
                             </a>
-                            <a class="btn border cag-btn-inverted" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)" style=" border-left: 2px solid #ccc!important; width:40%;"><i class="fa fa-map-marker-alt me-2"></i>@lang('destination.show_on_map')</a>
+                            <a class="btn border cag-btn-inverted" id="openMapModal" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)" style=" border-left: 2px solid #ccc!important; width:40%;"><i class="fa fa-map-marker-alt me-2"></i>@lang('destination.show_on_map')</a>
                         </div>
                     </div>
                 </div>
@@ -540,7 +540,7 @@
                 <div id="filterCard" class="col-sm-12 col-lg-3">        
                     <div class="card mb-2 d-none d-sm-block">
                         <div id="map-placeholder">
-                            <a class="btn btn-primary" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)">@lang('destination.show_on_map')</a>
+                            <a class="btn btn-primary" id="openMapModal" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)">@lang('destination.show_on_map')</a>
                         </div>
                     </div>            
                     @include('pages.guidings.includes.filters', ['formAction' => route('guidings.index')])

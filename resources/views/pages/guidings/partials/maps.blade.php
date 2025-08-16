@@ -77,7 +77,7 @@
                         <img src="{{ $thumbnailSrc }}" alt="{{translate($guiding->title)}}" style="width: 100%; height: 150px; object-fit: cover;">
                     </div>
                     <div class="p-2">
-                        <a class="text-decoration-none" href="{{route('guidings.show',[$guiding->id,$guiding->slug])}}">
+                        <a class="text-decoration-none" id="guiding-link-redirection" href="{{route('guidings.show',[$guiding->id,$guiding->slug])}}">
                             <h5 class="card-title mb-1" style="font-size: 14px; font-weight: bold; color: #333;">{{translate($guiding->title)}}</h5>
                         </a>
                         <div class="text-muted small">{{$guiding->location}}</div>

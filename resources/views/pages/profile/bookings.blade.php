@@ -1204,7 +1204,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     @if($booking->status == 'rejected' || $booking->status == 'cancelled' && $booking->guiding->user)
-                                        <a href="{{ route('additional.contact') }}" class="btn btn-primary">
+                                        <a id="contact-footer" href="{{ route('additional.contact') }}" class="btn btn-primary">
                                             <i class="fas fa-envelope"></i> Contact Us
                                         </a>
                                     @endif
@@ -1575,7 +1575,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     @if($booking->user)
-                                        <a href="{{ route('additional.contact') }}" class="btn btn-primary">
+                                        <a id="contact-footer" href="{{ route('additional.contact') }}" class="btn btn-primary">
                                             <i class="fas fa-envelope"></i> Contact Us
                                         </a>
                                     @endif
