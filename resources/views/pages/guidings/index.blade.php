@@ -888,8 +888,8 @@
                                                             <div class="guidings-item-ratings">
                                                             <div class="ratings-score">
                                                                     <span class="text-warning">★</span>
-                                                                    <span>{{$otherguide->user->average_rating()}} </span>
-                                                                    /5 ({{ $otherguide->user->received_ratings->count() }} review/s)
+                                                                    <span>{{one($otherguide->user->average_rating())}} </span>
+                                                                    ({{ $otherguide->user->reviews->count() }} review/s)
                                                                 </div>
                                                             </div>
                                                             @endif

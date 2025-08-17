@@ -419,7 +419,7 @@
                 @if ($average_grandtotal_score)
                 <div class="ave-reviews-row">
                     <div class="ratings-score">
-                    <span class="rating-value rating-clickable" id="rating-score-link">{{number_format($average_grandtotal_score, 1)}}</span>
+                    <span class="rating-value rating-clickable" id="rating-score-link">{{two($average_grandtotal_score, 1)}}</span>
                 </div> 
                     <span class="mb-1">
                         (<a href="#" id="reviews-link" class="text-decoration-none text-muted">{{$reviews_count}} reviews</a>)
@@ -1601,7 +1601,7 @@
         </div>
     </section>
     @endif
-    @if ($other_guidings)
+    @if ($other_guidings->count() > 0)
     <section class="tour-details-two mb-5 p-0">
         <div class="container">
 

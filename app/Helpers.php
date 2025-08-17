@@ -282,3 +282,12 @@ if (!function_exists('decode_if_json')) {
         return $value ?? [];
     }
 }
+
+if (!function_exists('getUserField')) {
+    function getUserField($user, $booking, $guestField, $infoField) {
+        if ($booking->is_guest) {
+            return $user->$guestField ?? '';
+        }
+        return $user->information && $user->information->$infoField ? $user->information->$infoField : '';
+    }
+}

@@ -385,31 +385,31 @@
                             <div>{{ $booking->email }}</div>
                             <input type="hidden" name="email" value="{{ $booking->email }}">
                         </div>
-                        
-                        <div class="mt-3">
+
+                        <div class="row g-3 mt-1">
                             <label class="fw-bold d-block">{{ translate('Address') }}</label>
-                            <div>{{ $user->information && $user->information->address ? $user->information->address : '' }}</div>
-                            <input type="hidden" name="address" value="{{ $user->information && $user->information->address ? $user->information->address : '' }}">
+                            <div>{{ getUserField($user, $booking, 'address', 'address') }}</div>
+                            <input type="hidden" name="address" value="{{ getUserField($user, $booking, 'address', 'address') }}">
                         </div>
                         
                         <div class="row g-3 mt-1">
                             <div class="col-6">
                                 <label class="fw-bold d-block">{{ translate('City') }}</label>
-                                <div>{{ $user->information && $user->information->city ? $user->information->city : '' }}</div>
-                                <input type="hidden" name="city" value="{{ $user->information && $user->information->city ? $user->information->city : '' }}">
+                                <div>{{ getUserField($user, $booking, 'city', 'city') }}</div>
+                                <input type="hidden" name="city" value="{{ getUserField($user, $booking, 'city', 'city') }}">
                             </div>
                             <div class="col-6">
                                 <label class="fw-bold d-block">{{ translate('Country / Region') }}</label>
-                                <div>{{ $user->information && $user->information->country ? $user->information->country : '' }}</div>
-                                <input type="hidden" name="country" value="{{ $user->information && $user->information->country ? $user->information->country : '' }}">
+                                <div>{{ getUserField($user, $booking, 'country', 'country') }}</div>
+                                <input type="hidden" name="country" value="{{ getUserField($user, $booking, 'country', 'country') }}">
                             </div>
                         </div>
                         
                         <div class="row g-3 mt-1">
                             <div class="col-6">
                                 <label class="fw-bold d-block">{{ translate('Postal code') }}</label>
-                                <div>{{ $user->information && $user->information->postal ? $user->information->postal : '' }}</div>
-                                <input type="hidden" name="postal_code" value="{{ $user->information && $user->information->postal ? $user->information->postal : '' }}">
+                                <div>{{ getUserField($user, $booking, 'postal', 'postal') }}</div>
+                                <input type="hidden" name="postal_code" value="{{ getUserField($user, $booking, 'postal', 'postal') }}">
                             </div>
                             <div class="col-6">
                                 <label class="fw-bold d-block">{{ translate('Phone Number') }}</label>
@@ -483,11 +483,15 @@
                                             // Check if this extra was previously selected in the booking
                                             $bookingExtras = [];
                                             if ($booking->extras !== null) {
-                                                $bookingExtras = is_array($booking->extras) ? $booking->extras : unserialize($booking->extras) ?? [];
+                                                if (is_array($booking->extras)) {
+                                                    $bookingExtras = $booking->extras;
+                                                } else {
+                                                    $unserialized = @unserialize($booking->extras);
+                                                    $bookingExtras = is_array($unserialized) ? $unserialized : [];
+                                                }
                                             }
                                             $isSelected = false;
                                             $quantity = 1;
-                                            
                                             foreach($bookingExtras as $bookingExtra) {
                                                 if(isset($bookingExtra['extra_name']) && $bookingExtra['extra_name'] == $extra['name']) {
                                                     $isSelected = true;
