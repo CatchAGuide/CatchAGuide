@@ -612,25 +612,33 @@ class GuidingsController extends Controller
 
         $otherGuidings = Guiding::where('status', 1)
             ->where('id', '!=', $guiding->id)
-            ->where(function($query) use ($guiding, $targetFish, $fishingFrom, $fishingType) {
-                $query->where(function($q) use ($guiding, $targetFish) {
-                    $q->where(function($subQ) use ($targetFish) {
-                        foreach ($targetFish as $fish) {
-                            $subQ->orWhereJsonContains('target_fish', $fish);
-                        }
-                    });
-                })
-                ->where(function($q) use ($guiding, $fishingFrom) {
-                    $q->where('fishing_from_id', $fishingFrom)
-                      ->orWhereHas('fishingFrom', function($subQ) use ($fishingFrom) {
-                          $subQ->where('id', $fishingFrom);
-                      });
-                })
-                ->where(function($q) use ($guiding, $fishingType) {
-                    $q->where('fishing_type_id', $fishingType)
-                      ->orWhereHas('fishingTypes', function($subQ) use ($fishingType) {
-                          $subQ->where('id', $fishingType);
-                      });
+            ->where(function($query) use ($targetFish, $fishingFrom, $fishingType) {
+                $query->where(function($q) use ($targetFish, $fishingFrom, $fishingType) {
+                    if (!empty($targetFish)) {
+                        $q->where(function($subQ) use ($targetFish) {
+                            foreach ($targetFish as $fish) {
+                                $subQ->orWhereJsonContains('target_fish', $fish);
+                            }
+                        });
+                    }
+                    
+                    if (!empty($fishingFrom)) {
+                        $q->orWhere(function($subQ) use ($fishingFrom) {
+                            $subQ->where('fishing_from_id', $fishingFrom)
+                                  ->orWhereHas('fishingFrom', function($subSubQ) use ($fishingFrom) {
+                                      $subSubQ->where('id', $fishingFrom);
+                                  });
+                        });
+                    }
+                    
+                    if (!empty($fishingType)) {
+                        $q->orWhere(function($subQ) use ($fishingType) {
+                            $subQ->where('fishing_type_id', $fishingType)
+                                  ->orWhereHas('fishingTypes', function($subSubQ) use ($fishingType) {
+                                      $subSubQ->where('id', $fishingType);
+                                  });
+                        });
+                    }
                 });
             })
             ->limit(4)
