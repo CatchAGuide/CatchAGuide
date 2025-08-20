@@ -6,12 +6,27 @@
                 
                 <form action="{{ route('checkout') }}" method="POST" class="checkout-form">
                     @csrf
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        @if($guiding->price_type == 'per_person')
-                            <h4 class="mb-0"><small class="from-text">{{ __('booking.from') }}</small> <span class="total-price">€</span> <span class="fs-6 fw-normal text-muted per-guiding-text" style="display: none;">{{ __('booking.per_guiding') }}</span></h4>
-                        @else
-                            <h4 class="mb-0"><span class="total-price">{{ $guiding->price }}€</span> <span class="fs-6 fw-normal text-muted per-guiding-text">{{ __('booking.per_guiding') }}</span></h4>
-                        @endif
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div>
+                            @if($guiding->price_type == 'per_person')
+                                <h4 class="mb-1"><small class="from-text">{{ __('booking.from') }}</small> <span class="total-price">€</span> <span class="fs-6 fw-normal text-muted per-guiding-text" style="display: none;">{{ __('booking.per_guiding') }}</span></h4>
+                            @else
+                                <h4 class="mb-1"><span class="total-price">{{ $guiding->price }}€</span> <span class="fs-6 fw-normal text-muted per-guiding-text">{{ __('booking.per_guiding') }}</span></h4>
+                            @endif
+                            
+                            <!-- Icons directly below price -->
+                            <div class="mb-2">
+                                @if ($guiding->user->bar_allowed)
+                                    <i class="fas fa-money-bill me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.pay_onsite') }}"></i>
+                                @endif
+                                @if ($guiding->user->banktransfer_allowed)
+                                    <i class="fas fa-credit-card me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.accepts_bank_transfer') }}"></i>
+                                @endif
+                                @if ($guiding->user->paypal_allowed)
+                                    <i class="fab fa-paypal" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.accepts_paypal') }}"></i>
+                                @endif
+                            </div>
+                        </div>
                         
                         <div class="booking-select" style="min-width: 150px;">
                             <select class="form-select border-0" aria-label="Personenanzahl" name="person" required id="personSelect">
@@ -83,6 +98,12 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Bootstrap tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
     const personSelect = document.getElementById('personSelect');
     const priceCalculation = document.getElementById('priceCalculation');
     const basePrice = document.querySelector('.base-price');
