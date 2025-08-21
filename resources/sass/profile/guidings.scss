@@ -888,3 +888,120 @@
         transform: rotate(360deg);
     }
 }
+
+// Enhanced Languages Section Styling
+.languages-section {
+    .icon-small {
+        i.fa-globe {
+            font-size: 18px;
+            color: #007bff !important;
+            animation: pulse 2s infinite;
+        }
+    }
+
+    .languages-display {
+        .languages-label {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .languages-flags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin-top: 5px;
+
+            .language-flag {
+                display: inline-block;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+                border-radius: 4px;
+                overflow: hidden;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+                &:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                }
+
+                img {
+                    display: block;
+                    border-radius: 4px;
+                    border: 2px solid #fff;
+                }
+            }
+
+            .language-text {
+                background: linear-gradient(135deg, #007bff, #0056b3);
+                color: white;
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+            }
+        }
+    }
+}
+
+// Animation for the globe icon
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+// Responsive design for languages section
+@media (max-width: 768px) {
+    .languages-section {
+        .languages-display {
+            .languages-flags {
+                gap: 6px;
+                
+                .language-flag img {
+                    width: 20px;
+                    height: 20px;
+                }
+                
+                .language-text {
+                    font-size: 11px;
+                    padding: 3px 6px;
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .languages-section {
+        .languages-display {
+            .languages-label {
+                font-size: 14px;
+            }
+            
+            .languages-flags {
+                gap: 4px;
+                
+                .language-flag img {
+                    width: 18px;
+                    height: 18px;
+                }
+                
+                .language-text {
+                    font-size: 10px;
+                    padding: 2px 5px;
+                }
+            }
+        }
+    }
+}

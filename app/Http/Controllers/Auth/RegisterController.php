@@ -128,10 +128,14 @@ class RegisterController extends Controller
         // Mail::send(new RegistrationVerification($user));
 
         if ($request->ajax()) {
+            // Check if user is currently on the checkout page
+            $referer = $request->header('referer');
+            $isOnCheckoutPage = $referer && str_contains($referer, '/checkout');
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Registration successful!',
-                'redirect' => route('profile.index')
+                'redirect' => $isOnCheckoutPage ? null : route('profile.index')
             ]);
         }
 

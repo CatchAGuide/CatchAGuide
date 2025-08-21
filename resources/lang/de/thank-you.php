@@ -3,6 +3,7 @@
 return [
     'thank_you' => 'Vielen Dank für Ihre Reservierung!',
     'booking_success_message' => 'Ihre Buchungsanfrage wurde erfolgreich vom Guide erhalten. Sie werden innerhalb der nächsten 72 Stunden per E-Mail über die Antwort des Guides benachrichtigt.',
+    'email_notification_message' => 'Eine E-Mail-Bestätigung mit allen Buchungsdetails wurde an Ihre E-Mail-Adresse gesendet.',
     'booking_information' => 'Buchungsinformationen',
     'booking_id' => 'Buchungs-ID',
     'booking_status' => 'Buchungsstatus',

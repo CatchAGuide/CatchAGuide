@@ -502,4 +502,11 @@ class Checkout extends Component
         $this->selectedTime = $selectedTime;
     }
     
+    public function refresh()
+    {
+        // This method will be called after successful registration
+        // It will refresh the component to reflect the new authenticated state
+        $this->mount();
+    }
+    
 }
