@@ -240,8 +240,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
                 
-                // If no specific redirect is provided, default to reloading the page
-                window.location.reload();
+                // If no specific redirect is provided (e.g., user is on checkout page), 
+                // just close the modal and stay on current page
+                const modal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
+                if (modal) {
+                    modal.hide();
+                }
+                
+                // Refresh the Livewire component to reflect the logged-in state
+                if (typeof Livewire !== 'undefined') {
+                    Livewire.dispatch('refresh');
+                }
+                
+                // Don't reload the page - let user continue with checkout
+                // The page will automatically reflect the logged-in state
 
             } else {
                 // Reset loading state

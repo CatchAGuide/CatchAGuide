@@ -223,6 +223,12 @@
                         </p>
                     </div>
 
+                    <div class="booking-status" style="background: #e3f2fd; border-left-color: #2196f3;">
+                        <p class="fw-bold fs-5 mb-0">
+                            @lang('thank-you.email_notification_message')
+                        </p>
+                    </div>
+
                     @if(isset($booking))
                     <div class="booking-details">
                         <div class="section">

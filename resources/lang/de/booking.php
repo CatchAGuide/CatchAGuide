@@ -14,4 +14,7 @@ return [
     'contact_form' => 'Kontaktformular',
     'fixed_price_for' => 'Festpreis für',
     'please_select_number_of_people' => 'Bitte wählen Sie die Anzahl der Personen',
+    'pay_onsite' => 'Vor Ort bezahlen',
+    'accepts_bank_transfer' => 'Akzeptiert Banküberweisung',
+    'accepts_paypal' => 'Akzeptiert PayPal',
 ];

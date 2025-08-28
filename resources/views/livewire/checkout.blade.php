@@ -38,12 +38,15 @@
                           <div class="my-4">
                             <h5 class="fw-bold">@lang('checkout.date_selection')</h5>
                           </div>
-                          @if(!$selectedDate)
-                          <div class="alert alert-warning mb-3" role="alert">
-                              <i class="fas fa-calendar-alt me-2"></i>
-                              @lang('checkout.please_select_a_date_to_proceed')
-                          </div>
-                          @endif
+                            <div class="alert alert-warning mb-3" role="alert" id="dateSelectionAlert">
+                               <i class="fas fa-calendar-alt me-2"></i>
+                               @if($selectedDate)
+                                {{ str_replace('{date}', \Carbon\Carbon::parse($selectedDate)->format('F j, Y'), __('checkout.you_have_selected_date')) }}
+                               @else
+                                @lang('checkout.please_select_a_date_to_proceed')
+                               @endif
+                           </div>
+                           <!-- Debug: selectedDate = "{{ $selectedDate }}" -->
                           @error('selectedDate')
                           <div class="alert alert-danger mb-3" role="alert">
                               <i class="fas fa-exclamation-circle me-2"></i>
@@ -85,9 +88,15 @@
                             </div>
                           @endif
   
-                          <div class="mb-4">
-                            <h5 class="fw-bold">@lang('checkout.fill_in_your_details')
-                          </div>
+                          @if(auth()->check())
+                            <div class="mb-4">
+                              <h5 class="fw-bold">@lang('checkout.fill_in_your_details')</h5>
+                            </div>
+                          @else
+                            <div class="mb-4">
+                              <h5 class="fw-bold">@lang('checkout.guest_information')</h5>
+                            </div>
+                          @endif
                           <div class="alert alert-warning mb-3" role="alert">
                             <i class="fas fa-info-circle me-2"></i>
                             @lang('checkout.almost_done_required_fields')
@@ -112,7 +121,7 @@
                                        class="form-control @error('userData.firstname') is-invalid @enderror" 
                                        placeholder="@lang('checkout.first_name')" 
                                        id="firstname" 
-                                       wire:model="userData.firstname" 
+                                       wire:model.debounce.500ms="userData.firstname" 
                                        required>
                                 @error('userData.firstname')
                                   <div class="invalid-feedback">
@@ -129,7 +138,7 @@
                                        class="form-control @error('userData.lastname') is-invalid @enderror" 
                                        placeholder="@lang('checkout.last_name')" 
                                        id="lastname" 
-                                       wire:model="userData.lastname" 
+                                       wire:model.debounce.500ms="userData.lastname" 
                                        required>
                                 @error('userData.lastname')
                                   <div class="invalid-feedback">
@@ -145,7 +154,7 @@
                                 <input type="email" 
                                        class="form-control @error('userData.email') is-invalid @enderror" 
                                        id="email" 
-                                       wire:model="userData.email" 
+                                       wire:model.debounce.500ms="userData.email" 
                                        required>
                                 <small class="text-muted">@lang('checkout.confirmation_email_sent_to_address')</small>
                                 @error('userData.email')
@@ -167,7 +176,7 @@
                                 <input type="text" 
                                        class="form-control @error('userData.address') is-invalid @enderror" 
                                        id="address" 
-                                       wire:model="userData.address" 
+                                       wire:model.debounce.500ms="userData.address" 
                                        required>
                                 @error('userData.address')
                                   <div class="invalid-feedback">
@@ -183,7 +192,7 @@
                                 <input type="text" 
                                        class="form-control @error('userData.city') is-invalid @enderror" 
                                        id="city" 
-                                       wire:model="userData.city" 
+                                       wire:model.debounce.500ms="userData.city" 
                                        required>
                                 @error('userData.city')
                                   <div class="invalid-feedback">
@@ -532,23 +541,36 @@
                                 <div class="ml-auto">€{{$totalExtraPrice}}</div>
                               </div>
                               @endif
-                              <div class="border-top px-4 mx-3"></div>
-                              <div class="px-2 py-1 d-flex pt-3">
-                                <div class="col-8">
-                                <span class="text-dark fw-bold">
-                                  Total
-                                 </span>   
-                              </div>
-                                <div class="ml-auto"><b class="green">€{{$totalPrice}}</b></div>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="alert alert-info note-box" role="alert">
+                                                             <div class="border-top px-4 mx-3"></div>
+                               <div class="px-2 py-1 d-flex pt-3">
+                                 <div class="col-8">
+                                 <span class="text-dark fw-bold">
+                                   Total
+                                  </span>   
+                               </div>
+                                 <div class="ml-auto"><b class="green">€{{$totalPrice}}</b></div>
+                               </div>
+                               
+                               <!-- Payment method icons below total price -->
+                               <div class="px-2 py-1 d-flex justify-content-center mt-3 mb-2">
+                                   @if ($guiding->user->bar_allowed)
+                                       <i class="fas fa-money-bill me-3 text-muted" style="font-size: 1.2rem;" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.pay_onsite') }}"></i>
+                                   @endif
+                                   @if ($guiding->user->banktransfer_allowed)
+                                       <i class="fas fa-credit-card me-3 text-muted" style="font-size: 1.2rem;" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.accepts_bank_transfer') }}"></i>
+                                   @endif
+                                   @if ($guiding->user->paypal_allowed)
+                                       <i class="fab fa-paypal me-3 text-muted" style="font-size: 1.2rem;" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.accepts_paypal') }}"></i>
+                                   @endif
+                               </div>
+                             </div>
+                           </div>
+                           <div class="alert alert-info note-box" role="alert">
                             @lang('forms.total')
                             {{$totalPrice}}€
                             @lang('forms.total2') <strong>@lang('forms.total3')</strong>
                           </div>
-                          
+                        
                           @if($checkoutType === 'guest' && !$userData['createAccount'])
                             <div class="col-12">
                               <div class="form-group terms-acceptance-container">
@@ -644,9 +666,28 @@
     }
   }
 
+  // Helper function to format date consistently
+  const formatDateForDisplay = (date) => {
+    const currentLocale = '{{app()->getLocale()}}';
+    
+    if (currentLocale === 'de') {
+      const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+      return monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+    } else {
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      return monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+    }
+  }
+
   
-  document.addEventListener('livewire:load', function () {
-    const blockedEvents = @json($guiding->getBlockedEvents());
+     document.addEventListener('livewire:load', function () {
+     // Initialize tooltips when Livewire loads
+     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+       return new bootstrap.Tooltip(tooltipTriggerEl);
+     });
+     
+     const blockedEvents = @json($guiding->getBlockedEvents());
 
     let lockDays = [];
     if (blockedEvents && typeof blockedEvents === 'object') {
@@ -665,6 +706,8 @@
 
     // Get initial selected date from Livewire
     const initialSelectedDate = @this.selectedDate;
+    
+    // No need to manually set up the message - Livewire handles it automatically
     
     const picker = new Litepicker({
       element: document.getElementById('lite-datepicker'),
@@ -685,8 +728,15 @@
           // Set Date to function
           $("#currentDate").html(date1.format('DD-MM-YYYY'));
           @this.setSelectedTime('00:00');
-          // Force component refresh to update button state
-          @this.$refresh();
+          
+          // Livewire will automatically update the message when selectedDate changes
+          
+          // Update button state without full refresh
+          const nextButton = document.getElementById('nextButton');
+          if (nextButton) {
+            nextButton.disabled = false;
+            nextButton.className = 'thm-btn';
+          }
         });
 
         // Change picker columns on resize
@@ -767,23 +817,33 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  // Simple button validation
+  // Simple button validation with debouncing
+  // This prevents excessive validation calls that could interfere with typing
+  let validationTimeout;
   function validateForm() {
-    const nextButton = document.getElementById('nextButton');
-    if (!nextButton) return;
+    // Clear any existing timeout
+    if (validationTimeout) {
+      clearTimeout(validationTimeout);
+    }
     
-    const hasDate = '{{ $selectedDate }}' !== '';
-    const firstname = document.getElementById('firstname')?.value?.trim() || '';
-    const lastname = document.getElementById('lastname')?.value?.trim() || '';
-    const email = document.getElementById('email')?.value?.trim() || '';
-    const address = document.getElementById('address')?.value?.trim() || '';
-    const city = document.getElementById('city')?.value?.trim() || '';
-    const phone = document.getElementById('phone')?.value?.trim() || '';
-    
-    const isValid = hasDate && firstname && lastname && email && address && city && phone;
-    
-    nextButton.disabled = !isValid;
-    nextButton.className = isValid ? 'thm-btn' : 'thm-btn thm-btn-disabled';
+    // Debounce validation to prevent excessive calls
+    validationTimeout = setTimeout(() => {
+      const nextButton = document.getElementById('nextButton');
+      if (!nextButton) return;
+      
+      const hasDate = '{{ $selectedDate }}' !== '';
+      const firstname = document.getElementById('firstname')?.value?.trim() || '';
+      const lastname = document.getElementById('lastname')?.value?.trim() || '';
+      const email = document.getElementById('email')?.value?.trim() || '';
+      const address = document.getElementById('address')?.value?.trim() || '';
+      const city = document.getElementById('city')?.value?.trim() || '';
+      const phone = document.getElementById('phone')?.value?.trim() || '';
+      
+      const isValid = hasDate && firstname && lastname && email && address && city && phone;
+      
+      nextButton.disabled = !isValid;
+      nextButton.className = isValid ? 'thm-btn' : 'thm-btn thm-btn-disabled';
+    }, 100); // 100ms debounce
   }
   
   // Run validation on page load and input changes
@@ -800,6 +860,24 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Watch for Livewire updates
   document.addEventListener('livewire:updated', validateForm);
+  
+  // Re-initialize tooltips after Livewire updates
+  document.addEventListener('livewire:updated', function() {
+    // Destroy existing tooltips to prevent duplicates
+    var existingTooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    existingTooltips.forEach(function(element) {
+      var tooltip = bootstrap.Tooltip.getInstance(element);
+      if (tooltip) {
+        tooltip.dispose();
+      }
+    });
+    
+    // Re-initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  });
 });
 </script>
 

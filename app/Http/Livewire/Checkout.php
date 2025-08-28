@@ -262,25 +262,32 @@ class Checkout extends Component
         $this->page--;
     }
 
+    /**
+     * Handle property updates with optimized validation
+     * Only validates critical fields (email, firstname, lastname) in real-time
+     * to prevent performance issues and typing interruptions
+     * Other fields are validated when the form is submitted
+     */
     public function updated($propertyName)
     {
-        $rules = [
-            'selectedDate' => ['required', 'string'],
-            'userData.firstname' => 'required|string',
-            'userData.lastname' => 'required|string',
-            'userData.address' => 'required|string',
-            'userData.postal' => 'required|string',
-            'userData.city' => 'required|string',
-            'userData.phone' => 'required|string',
-            'userData.email' => 'required|email',
-        ];
+        // Only validate specific fields that need real-time validation
+        if (str_starts_with($propertyName, 'userData.')) {
+            $fieldName = str_replace('userData.', '', $propertyName);
+            
+            // Only validate critical fields in real-time
+            if (in_array($fieldName, ['email', 'firstname', 'lastname'])) {
+                $rules = [
+                    "userData.{$fieldName}" => $fieldName === 'email' ? 'required|email' : 'required|string',
+                ];
 
-        // Only validate email uniqueness if creating account
-        if ($propertyName === 'userData.email' && $this->checkoutType === 'guest' && $this->userData['createAccount']) {
-            $rules['userData.email'] = 'required|email|unique:users,email';
+                // Only validate email uniqueness if creating account
+                if ($fieldName === 'email' && $this->checkoutType === 'guest' && $this->userData['createAccount']) {
+                    $rules["userData.{$fieldName}"] = 'required|email|unique:users,email';
+                }
+
+                $this->validateOnly($propertyName, $rules);
+            }
         }
-
-        $this->validateOnly($propertyName, $rules);
     }
 
     public function validateData()
@@ -485,13 +492,21 @@ class Checkout extends Component
         if ($this->selectedDate) {
             // Automatically set a default time when date is selected
             $this->selectedTime = '00:00';
-            $this->availableEvents = (new EventService())->getAvailableEvents($this->guiding->duration, $this->selectedDate, $this->guiding->user);
+            // Temporarily comment out to avoid potential errors
+            // $this->availableEvents = (new EventService())->getAvailableEvents($this->guiding->duration, $this->selectedDate, $this->guiding->user);
         }
     }
 
     public function setSelectedTime($selectedTime)
     {
         $this->selectedTime = $selectedTime;
+    }
+    
+    public function refresh()
+    {
+        // This method will be called after successful registration
+        // It will refresh the component to reflect the new authenticated state
+        $this->mount();
     }
     
 }
