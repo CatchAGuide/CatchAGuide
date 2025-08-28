@@ -284,6 +284,66 @@ class ICalFeedController extends Controller
     }
 
     /**
+     * Sync all iCal feeds using the SyncICalFeeds command
+     */
+    public function syncAllCommand(Request $request)
+    {
+        try {
+            $userId = Auth::id();
+            $force = $request->input('force', false);
+            $noCleanup = $request->input('no_cleanup', false);
+
+            // Run the SyncICalFeeds command for the current user
+            $command = \Artisan::call('ical:sync-feeds', [
+                '--user-id' => $userId,
+                '--force' => $force,
+                '--no-cleanup' => $noCleanup
+            ]);
+
+            // Get the command output
+            $output = \Artisan::output();
+
+            // Parse the output to extract results
+            $successCount = 0;
+            $errorCount = 0;
+            $totalEvents = 0;
+
+            // Extract numbers from the output using regex
+            if (preg_match('/(\d+) feeds synced successfully/', $output, $matches)) {
+                $successCount = (int) $matches[1];
+            }
+            if (preg_match('/(\d+) failed/', $output, $matches)) {
+                $errorCount = (int) $matches[1];
+            }
+            if (preg_match('/(\d+) total events synced/', $output, $matches)) {
+                $totalEvents = (int) $matches[1];
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => "Synced {$successCount} feeds successfully, {$errorCount} failed, {$totalEvents} total events",
+                'data' => [
+                    'feeds_synced' => $successCount,
+                    'feeds_failed' => $errorCount,
+                    'total_events' => $totalEvents,
+                    'command_output' => $output
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to sync all iCal feeds via command', [
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to sync iCal feeds: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Get user's iCal feeds
      */
     public function index()

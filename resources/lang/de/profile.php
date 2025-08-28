@@ -490,6 +490,21 @@ return [
     'ical_export_benefit_1' => 'Sichere iCal-Feed-URLs für externe Kalender generieren',
     'ical_export_benefit_2' => 'OTP-basierte Sicherheit für Feed-Zugriff',
     'ical_export_benefit_3' => 'Teilen Sie Ihren Kalender sicher mit anderen',
+    'integration_status' => 'Integrationsstatus',
+    'import_active' => 'Import Aktiv',
+    'export_active' => 'Export Aktiv',
+    'sync_all' => 'Alle synchronisieren',
+    
+    'generate_new_ical_feed' => 'Neuen iCal-Feed generieren',
+    'feed_name' => 'Feed-Name',
+    'feed_name_help' => 'Geben Sie einen beschreibenden Namen für Ihren iCal-Feed ein',
+    'feed_type' => 'Feed-Typ',
+    'feed_type_help' => 'Wählen Sie, welche Art von Ereignissen in den Feed aufgenommen werden sollen',
+    'expires_at' => 'Läuft ab am',
+    'expires_at_help' => 'Optional: Legen Sie fest, wann dieser Feed ablaufen soll (leer lassen für kein Ablaufdatum)',
+    'generate_feed' => 'Feed generieren',
+    'bookings_only' => 'Nur Buchungen',
+    'all_events' => 'Alle Ereignisse',
     'enter-note' => 'Notiz eingeben',
     'save-event' => 'Ereignis speichern',
 
@@ -719,6 +734,10 @@ return [
     'become_a_guide' => 'Guide werden',
     'please_login_access' => 'Bitte melden Sie sich an, um auf Ihr Profil zuzugreifen',
     'login' => 'Anmelden',
+    
+    // Additional UI elements
+    'actions' => 'Aktionen',
+    'current_otp' => 'Aktueller OTP',
 ];
 
 ?>
