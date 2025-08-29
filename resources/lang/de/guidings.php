@@ -135,6 +135,7 @@ return [
     'No_water_types_specified' => 'Kein Wasser angegeben',
     'Favorite_fish' => 'Lieblingsfisch',
     'Languages' => 'Sprachen',
+    'Languages_Colon' => 'Sprachen:',
     'Fishing_since' => 'Angelt seit',
     'About_me' => 'Über mich',
     'More' => 'Mehr',

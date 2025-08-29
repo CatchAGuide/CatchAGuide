@@ -718,25 +718,7 @@
                     </p>
                 </div>
                 
-                <!-- Languages Section - Upper Right Corner -->
-                <div class="languages-section-corner">
-                    @php
-                        $languages = getLanguagesWithFlags($guiding->user->information['languages']);
-                    @endphp
-                    <div class="d-flex align-items-center gap-2">
-                        @foreach($languages as $language)
-                            @if($language['has_flag'])
-                                <div class="language-flag-compact" title="{{ $language['name'] }}">
-                                    <img src="{{ asset('flags/' . $language['flag_code'] . '.svg') }}" 
-                                         alt="{{ $language['name'] }}" 
-                                         width="20" height="20">
-                                </div>
-                            @else
-                                <span class="language-text-compact">{{ $language['name'] }}</span>
-                            @endif
-                        @endforeach
-                    </div>
-                </div>
+
             @endif
             @if ($guiding->desc_tour_unique)
                 <div class="description-item">
@@ -780,6 +762,31 @@
                     </div>
                 @endif
             </div>
+            
+            <!-- Languages Section -->
+            @if ($guiding->user->information['languages'])
+                <div class="description-item">
+                    <div class="header-container">
+                        <span>@lang('guidings.Languages_Colon')</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        @php
+                            $languages = getLanguagesWithFlags($guiding->user->information['languages']);
+                        @endphp
+                        @foreach($languages as $language)
+                            @if($language['has_flag'])
+                                <div class="language-flag-compact" title="{{ $language['name'] }}">
+                                    <img src="{{ asset('flags/' . $language['flag_code'] . '.svg') }}" 
+                                         alt="{{ $language['name'] }}" 
+                                         width="20" height="20">
+                                </div>
+                            @else
+                                <span class="language-text-compact">{{ $language['name'] }}</span>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
             
