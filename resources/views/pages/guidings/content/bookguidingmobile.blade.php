@@ -29,19 +29,6 @@
                         
                         <!-- Icons and price side by side -->
                         <div class="d-flex align-items-center justify-content-between mt-2">
-                                                         <!-- Icons on the left -->
-                             <div class="d-flex align-items-left">
-                                @if ($guiding->user->bar_allowed)
-                                 <i class="fas fa-money-bill text-muted me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.pay_onsite') }}"></i>
-                                @endif
-                                @if ($guiding->user->banktransfer_allowed)
-                                 <i class="fas fa-credit-card text-muted me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.accepts_bank_transfer') }}"></i>
-                                @endif
-                                @if ($guiding->user->paypal_allowed)
-                                 <i class="fab fa-paypal text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.accepts_paypal') }}"></i>
-                                @endif
-                             </div>
-                            
                             <div class="booking-price">
                                 <span id="priceLabel" class="from-text">{{ __('booking.from') }}</span>
                                 @if($guiding->price_type == 'per_person')
@@ -81,12 +68,6 @@
 <script>
 
   document.addEventListener('DOMContentLoaded', function () {
-    // Initialize Bootstrap tooltips
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-    
     const personSelect = document.getElementById('personSelect');
     const priceLabel = document.getElementById('priceLabel');
     const priceDisplay = document.getElementById('priceDisplay');

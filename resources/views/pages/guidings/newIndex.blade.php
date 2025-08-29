@@ -705,7 +705,7 @@
     </div>
     
     <!-- Description Section -->
-    <div class="description-container card p-3 mb-5 position-relative">
+    <div class="description-container card p-3 mb-3 position-relative">
         <div class="description-list">
             <!-- Course of Action -->
             @if ($guiding->desc_course_of_action)
@@ -806,7 +806,7 @@
         $boatInformation = $guiding->getBoatInformationAttribute();
     @endphp
     
-    <div class="tabs-container mb-5">
+    <div class="tabs-container mb-3">
         <div class="nav nav-tabs" id="guiding-tab" role="tablist">
             <button class="nav-link active" id="nav-fishing-tab" data-bs-toggle="tab" data-bs-target="#fishing" type="button" role="tab" aria-controls="nav-fishing" aria-selected="true">@lang('guidings.Tour_Info')</button>
             @if(!empty( decode_if_json($guiding->inclusions)))
@@ -819,7 +819,7 @@
             <button class="nav-link" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab" aria-controls="nav-info" aria-selected="false">@lang('guidings.Additional_Info')</button>
         </div>
 
-        <div class="tab-content mb-5" id="guidings-tabs">
+        <div class="tab-content mb-2" id="guidings-tabs">
 
             <!-- What's Included Tab -->
             <div class="tab-pane fade" id="include" role="tabpanel" aria-labelledby="nav-include-tab">
@@ -1079,7 +1079,7 @@
     </div>
         
     <!-- Accordion mobile ver -->
-    <div class="accordion mb-5" id="guidings-accordion">
+    <div class="accordion mb-3" id="guidings-accordion">
 
         <!-- What's Included Accordion -->
         @if(!empty(decode_if_json($guiding->pricing_extra)) || !empty( decode_if_json($guiding->inclusions)))
@@ -1330,6 +1330,46 @@
 
     </div>
 
+    <!-- Payment Information Section -->
+    <div class="mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body py-3">
+                <h3 class="mb-2">@lang('booking.how_you_can_pay')</h3>
+                <p class="mb-2">@lang('booking.no_payment_now')</p>
+                <p class="mb-2">@lang('booking.payment_description')</p>
+                
+                <div class="row">
+                    @if ($guiding->user->bar_allowed)
+                    <div class="col-md-4 mb-1">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-money-bill text-success me-2" style="font-size: 1.1rem;"></i>
+                            <span>@lang('booking.cash')</span>
+                        </div>
+                    </div>
+                    @endif
+                    
+                    @if ($guiding->user->banktransfer_allowed)
+                    <div class="col-md-4 mb-1">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-credit-card text-primary me-2" style="font-size: 1.1rem;"></i>
+                            <span>@lang('booking.bank_transfer')</span>
+                        </div>
+                    </div>
+                    @endif
+                    
+                    @if ($guiding->user->paypal_allowed)
+                    <div class="col-md-4 mb-1">
+                        <div class="d-flex align-items-center">
+                            <i class="fab fa-paypal text-info me-2" style="font-size: 1.1rem;"></i>
+                            <span>@lang('booking.paypal')</span>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Description Section -->
     <div class="">
         <h2 class="mb-3">@lang('guidings.Availability')</h2>
@@ -1433,7 +1473,7 @@
         </div>
     </div>
 
-    <div class="guidings-rating mb-5">
+    <div class="guidings-rating mb-3">
         @if($reviews_count > 0)
             <div class="ratings-head">
                 <div class="rating-overview text-center shadow-sm">

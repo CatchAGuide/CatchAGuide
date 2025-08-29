@@ -17,4 +17,10 @@ return [
     'pay_onsite' => 'Vor Ort bezahlen',
     'accepts_bank_transfer' => 'Akzeptiert Banküberweisung',
     'accepts_paypal' => 'Akzeptiert PayPal',
+    'how_you_can_pay' => 'Wie du zahlen kannst',
+    'no_payment_now' => 'Du musst jetzt nichts zahlen. Du zahlst den Guide direkt.',
+    'payment_description' => 'Die Summe der Tour muss direkt an den Guide vor oder am Tag des Guidings mit den folgenden Zahlungsmethoden beglichen werden:',
+    'cash' => 'Bar',
+    'bank_transfer' => 'Banküberweisung',
+    'paypal' => 'PayPal',
 ];

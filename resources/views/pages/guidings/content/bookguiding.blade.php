@@ -13,19 +13,6 @@
                             @else
                                 <h4 class="mb-1"><span class="total-price">{{ $guiding->price }}€</span> <span class="fs-6 fw-normal text-muted per-guiding-text">{{ __('booking.per_guiding') }}</span></h4>
                             @endif
-                            
-                            <!-- Icons directly below price -->
-                            <div class="mb-2">
-                                @if ($guiding->user->bar_allowed)
-                                    <i class="fas fa-money-bill me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.pay_onsite') }}"></i>
-                                @endif
-                                @if ($guiding->user->banktransfer_allowed)
-                                    <i class="fas fa-credit-card me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.accepts_bank_transfer') }}"></i>
-                                @endif
-                                @if ($guiding->user->paypal_allowed)
-                                    <i class="fab fa-paypal" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.accepts_paypal') }}"></i>
-                                @endif
-                            </div>
                         </div>
                         
                         <div class="booking-select" style="min-width: 150px;">
@@ -98,12 +85,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Bootstrap tooltips
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-    
     const personSelect = document.getElementById('personSelect');
     const priceCalculation = document.getElementById('priceCalculation');
     const basePrice = document.querySelector('.base-price');
