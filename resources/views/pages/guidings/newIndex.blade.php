@@ -1441,7 +1441,7 @@
                                     <i class="fa fa-check"></i>
                                 </div>
                                 <div class="text">
-                                    <p><b>{{ __('guidings.Favorite_fish') }}:</b> {{ $guiding->user->information['favorite_fish'] }}
+                                    <p><b>{{ __('guidings.Favorite_fish') }}:</b> {{ translate($guiding->user->information['favorite_fish']) }}
                                     </p>
                                 </div>
                             </li>
@@ -1451,7 +1451,7 @@
                                 </div>
                                 <div class="text">
                                     <p>
-                                        <b>{{ __('guidings.Languages') }}:</b> {{ $guiding->user->information['languages'] }}
+                                        <b>{{ __('guidings.Languages') }}:</b> {{ translate($guiding->user->information['languages']) }}
                                     </p>
                                 </div>
                             </li>
@@ -1488,7 +1488,7 @@
                         <!-- Left side - Score and ratings -->
                         <div class="rating-left">
                             <div class="score-wrapper">
-                                <div class="score rating-clickable" id="rating-overview-link">{{ number_format($average_grandtotal_score, 1) }}</div>
+                                <div class="score rating-clickable" id="rating-overview-link">{{ one($average_grandtotal_score, 1) }}</div>
                                 <div class="score-label">@lang('guidings.over_10')</div>
                             </div>
                             <div class="rating-info text-center">
@@ -1505,7 +1505,7 @@
                                     <div class="progress flex-grow-1">
                                         <div class="progress-bar" style="width: {{ ($average_overall_score/10)*100 }}%"></div>
                                     </div>
-                                    <span class="rating-value">{{ number_format($average_overall_score, 1) }}</span>
+                                    <span class="rating-value">{{ one($average_overall_score, 1) }}</span>
                                 </div>
                             </div>
                             <div class="category d-flex align-items-center mb-3">
@@ -1514,7 +1514,7 @@
                                     <div class="progress flex-grow-1">
                                         <div class="progress-bar" style="width: {{ ($average_guide_score/10)*100 }}%"></div>
                                     </div>
-                                    <span class="rating-value">{{ number_format($average_guide_score, 1) }}</span>
+                                    <span class="rating-value">{{ one($average_guide_score, 1) }}</span>
                                 </div>
                             </div>
                             <div class="category d-flex align-items-center">
