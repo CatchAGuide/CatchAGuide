@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use App\Mail\RegistrationVerification;
 use App\Models\User;
+use App\Models\UserInformation;
 use Crypt;
 use DB;
 use Illuminate\Auth\Events\Registered;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\QueryException;
 
 class RegisterController extends Controller
 {
@@ -74,22 +76,7 @@ class RegisterController extends Controller
         return Validator::make($data, $rules);
     }
 
-    /**
-     * Create a new user instance after a valid registration.
-     *
-     * @param  array  $data
-     * @return \App\Models\User
-     */
-    protected function create(array $data)
-    {
-        return User::create([
-            'firstname' => mb_convert_encoding($data['firstname'], 'UTF-8', 'auto'),
-            'lastname' => mb_convert_encoding($data['lastname'], 'UTF-8', 'auto'),
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-            
-        ]);
-    }
+
 
     /*public function showRegistrationForm()
     {
@@ -115,24 +102,65 @@ class RegisterController extends Controller
         $locale = app()->getLocale();
         $request->merge(['language' => $locale]);
 
-        // Create and get the user using the create method that properly hashes the password
-        $user = $this->create($request->all());
+        try {
+            // Use database transaction to ensure data consistency
+            $user = DB::transaction(function () use ($request) {
+                // Create UserInformation record first
+                $userInformation = UserInformation::create([
+                    'request_as_guide' => false,
+                ]);
+                
+                // Create user with the user_information_id
+                $user = User::create([
+                    'firstname' => mb_convert_encoding($request->firstname, 'UTF-8', 'auto'),
+                    'lastname' => mb_convert_encoding($request->lastname, 'UTF-8', 'auto'),
+                    'email' => $request->email,
+                    'password' => Hash::make($request->password),
+                    'language' => $request->language ?? app()->getLocale(),
+                    'user_information_id' => $userInformation->id,
+                ]);
 
-        // Fire registered event
-        event(new Registered($user));
+                // Fire registered event
+                event(new Registered($user));
 
-        // Log the user in
-        Auth::login($user);
+                return $user;
+            });
+            
+            // Log the user in
+            Auth::login($user);
+        } catch (\Exception $e) {            
+            // Check for specific database errors
+            if ($e instanceof \Illuminate\Database\QueryException) {
+                Log::error('Database error details: ' . $e->getMessage());
+            }
+            
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => ['general' => ['Registration failed. Please try again.']]
+                ], 500);
+            }
+            
+            return redirect()->back()
+                ->withErrors(['general' => 'Registration failed. Please try again.'])
+                ->withInput();
+        }
 
         // Send verification email
         // Mail::send(new RegistrationVerification($user));
 
         if ($request->ajax()) {
-            return response()->json([
+            // Check if user is currently on the checkout page
+            $referer = $request->header('referer');
+            $isOnCheckoutPage = $referer && str_contains($referer, '/checkout');
+            
+            $response = [
                 'success' => true,
                 'message' => 'Registration successful!',
-                'redirect' => route('profile.index')
-            ]);
+                'redirect' => $isOnCheckoutPage ? null : route('profile.index')
+            ];
+            
+            return response()->json($response);
         }
 
         return redirect($this->redirectPath())

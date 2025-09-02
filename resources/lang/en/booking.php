@@ -14,4 +14,13 @@ return [
     'contact_form' => 'Contact Form',
     'fixed_price_for' => 'Fixed price for',
     'please_select_number_of_people' => 'Please select the number of people',
+    'pay_onsite' => 'Pay onsite',
+    'accepts_bank_transfer' => 'Accepts Bank Transfer',
+    'accepts_paypal' => 'Accepts PayPal',
+    'how_you_can_pay' => 'How you can pay',
+    'no_payment_now' => 'You don\'t need to pay now, you will pay the guide directly.',
+    'payment_description' => 'The total is to be paid directly to the guiding operator on or prior to your trip date in one of the following payment methods:',
+    'cash' => 'Cash',
+    'bank_transfer' => 'Bank transfer',
+    'paypal' => 'PayPal',
 ];

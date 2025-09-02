@@ -18,7 +18,12 @@ if (!function_exists('twoString')) {
 
 if (!function_exists('one')) {
     function one($number) {
-        return number_format($number, 1, ',', '.');
+        $formatted = number_format($number, 1, ',', '.');
+        // Remove .0 if the decimal is .0
+        if (substr($formatted, -2) === ',0') {
+            return substr($formatted, 0, -2);
+        }
+        return $formatted;
     }
 }
 
@@ -258,6 +263,7 @@ if (!function_exists('getLocationDetailsGoogle')) {
             ->first();
 
             if ($location && ($location->city || $location->country || $location->region)) {
+                Log::info('Location JSON lookup successful in getLocationDetailsGoogle', ['location' => $location]);
                 return [
                     'city' => $location->city,
                     'country' => $location->country,
@@ -294,6 +300,23 @@ if (!function_exists('getLocationDetailsGoogle')) {
             if (!empty($searchString)) {
                 $resolved = getLocationDetails($searchString);
                 if ($resolved && (isset($resolved['city']) || isset($resolved['country']) || isset($resolved['region']))) {
+                    return [
+                        'city' => $resolved['city'] ?? null,
+                        'country' => $resolved['country'] ?? null,
+                        'region' => $resolved['region'] ?? null,
+                    ];
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::error('Google Places fallback error in getLocationDetailsGoogle: ' . $e->getMessage());
+        }
+
+        // As a robust fallback, use Google Places to resolve English names
+        try {
+            if (!empty($searchString)) {
+                $resolved = getLocationDetails($searchString);
+                if ($resolved && (isset($resolved['city']) || isset($resolved['country']) || isset($resolved['region']))) {
+                    Log::info('Google Places fallback successful in getLocationDetailsGoogle', ['resolved' => $resolved]);
                     return [
                         'city' => $resolved['city'] ?? null,
                         'country' => $resolved['country'] ?? null,

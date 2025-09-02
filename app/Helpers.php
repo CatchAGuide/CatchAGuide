@@ -291,3 +291,101 @@ if (!function_exists('getUserField')) {
         return $user->information && $user->information->$infoField ? $user->information->$infoField : '';
     }
 }
+
+if (!function_exists('getLanguagesWithFlags')) {
+    function getLanguagesWithFlags(string $languagesString): array
+    {
+        $languages = explode(',', $languagesString);
+        $parsedLanguages = [];
+        
+        $languageMap = [
+            'Deutsch' => 'de',
+            'German' => 'de',
+            'Englisch' => 'gb',
+            'English' => 'gb',
+            'Spanisch' => 'es',
+            'Spanish' => 'es',
+            'Französisch' => 'fr',
+            'French' => 'fr',
+            'Italienisch' => 'it',
+            'Italian' => 'it',
+            'Niederländisch' => 'nl',
+            'Dutch' => 'nl',
+            'Dänisch' => 'dk',
+            'Danish' => 'dk',
+            'Schwedisch' => 'se',
+            'Swedish' => 'se',
+            'Norwegisch' => 'no',
+            'Norwegian' => 'no',
+            'Finnisch' => 'fi',
+            'Finnish' => 'fi',
+            'Polnisch' => 'pl',
+            'Polish' => 'pl',
+            'Tschechisch' => 'cz',
+            'Czech' => 'cz',
+            'Ungarisch' => 'hu',
+            'Hungarian' => 'hu',
+            'Slowakisch' => 'sk',
+            'Slovak' => 'sk',
+            'Slowenisch' => 'si',
+            'Slovenian' => 'si',
+            'Kroatisch' => 'hr',
+            'Croatian' => 'hr',
+            'Serbisch' => 'rs',
+            'Serbian' => 'rs',
+            'Bosnisch' => 'ba',
+            'Bosnian' => 'ba',
+            'Montenegrinisch' => 'me',
+            'Montenegrin' => 'me',
+            'Albanisch' => 'al',
+            'Albanian' => 'al',
+            'Griechisch' => 'gr',
+            'Greek' => 'gr',
+            'Türkisch' => 'tr',
+            'Turkish' => 'tr',
+            'Bulgarisch' => 'bg',
+            'Bulgarian' => 'bg',
+            'Rumänisch' => 'ro',
+            'Romanian' => 'ro',
+            'Moldauisch' => 'md',
+            'Moldovan' => 'md',
+            'Ukrainisch' => 'ua',
+            'Ukrainian' => 'ua',
+            'Weißrussisch' => 'by',
+            'Belarusian' => 'by',
+            'Russisch' => 'ru',
+            'Russian' => 'ru',
+            'Estnisch' => 'ee',
+            'Estonian' => 'ee',
+            'Lettisch' => 'lv',
+            'Latvian' => 'lv',
+            'Litauisch' => 'lt',
+            'Lithuanian' => 'lt',
+            'Portugiesisch' => 'pt',
+            'Portuguese' => 'pt',
+            'Isländisch' => 'is',
+            'Icelandic' => 'is',
+            'Färöisch' => 'fo',
+            'Faroese' => 'fo',
+            'Grönländisch' => 'gl',
+            'Greenlandic' => 'gl',
+            'Malta' => 'mt',
+            'Maltese' => 'mt',
+            'Zypriotisch' => 'cy',
+            'Cypriot' => 'cy'
+        ];
+        
+        foreach ($languages as $language) {
+            $trimmedLang = trim($language);
+            $flagCode = $languageMap[$trimmedLang] ?? null;
+            
+            $parsedLanguages[] = [
+                'name' => $trimmedLang,
+                'flag_code' => $flagCode,
+                'has_flag' => $flagCode !== null
+            ];
+        }
+        
+        return $parsedLanguages;
+    }
+}

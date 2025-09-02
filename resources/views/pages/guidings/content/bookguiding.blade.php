@@ -6,12 +6,14 @@
                 
                 <form action="{{ route('checkout') }}" method="POST" class="checkout-form">
                     @csrf
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        @if($guiding->price_type == 'per_person')
-                            <h4 class="mb-0"><small class="from-text">{{ __('booking.from') }}</small> <span class="total-price">€</span> <span class="fs-6 fw-normal text-muted per-guiding-text" style="display: none;">{{ __('booking.per_guiding') }}</span></h4>
-                        @else
-                            <h4 class="mb-0"><span class="total-price">{{ $guiding->price }}€</span> <span class="fs-6 fw-normal text-muted per-guiding-text">{{ __('booking.per_guiding') }}</span></h4>
-                        @endif
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div>
+                            @if($guiding->price_type == 'per_person')
+                                <h4 class="mb-1"><small class="from-text">{{ __('booking.from') }}</small> <span class="total-price">€</span> <span class="fs-6 fw-normal text-muted per-guiding-text" style="display: none;">{{ __('booking.per_guiding') }}</span></h4>
+                            @else
+                                <h4 class="mb-1"><span class="total-price">{{ $guiding->price }}€</span> <span class="fs-6 fw-normal text-muted per-guiding-text">{{ __('booking.per_guiding') }}</span></h4>
+                            @endif
+                        </div>
                         
                         <div class="booking-select" style="min-width: 150px;">
                             <select class="form-select border-0" aria-label="Personenanzahl" name="person" required id="personSelect">

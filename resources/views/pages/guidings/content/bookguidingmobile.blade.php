@@ -1,4 +1,11 @@
 <div class="col-md-12 tour-details-two__sticky sticky-lg-top {{$agent->ismobile() ? 'text-center' : ''}}">
+    <style>
+        .booking-icon {
+            font-size: 12px;
+            opacity: 0.7;
+            color: #6c757d;
+        }
+    </style>
     <div class="tour-details-two__sidebar">
         <div class="tour-details-two__book-tours">
             <div class="card-body pt-2">
@@ -19,14 +26,18 @@
                                 <i class="fa fa-times"></i>
                             </button>
                         </div>
-                        <div class="booking-price">
-                            <span id="priceLabel" class="from-text">{{ __('booking.from') }}</span>
-                            @if($guiding->price_type == 'per_person')
-                                <span id="priceDisplay" class="text-orange total-price">€</span>
-                            @else
-                                <span id="priceDisplay" class="text-orange total-price">{{ number_format($guiding->price, 2, '.', '') == number_format($guiding->price, 0, '.', '') . '.00' ? number_format($guiding->price, 0, '.', '') : number_format($guiding->price, 2, '.', '') }}€</span>
-                            @endif
-                            <span class="per-guiding-text" style="display: none;">{{ __('booking.per_guiding') }}</span>
+                        
+                        <!-- Icons and price side by side -->
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <div class="booking-price">
+                                <span id="priceLabel" class="from-text">{{ __('booking.from') }}</span>
+                                @if($guiding->price_type == 'per_person')
+                                    <span id="priceDisplay" class="text-orange total-price">€</span>
+                                @else
+                                    <span id="priceDisplay" class="text-orange total-price">{{ number_format($guiding->price, 2, '.', '') == number_format($guiding->price, 0, '.', '') . '.00' ? number_format($guiding->price, 0, '.', '') : number_format($guiding->price, 2, '.', '') }}€</span>
+                                @endif
+                                <span class="per-guiding-text" style="display: none;">{{ __('booking.per_guiding') }}</span>
+                            </div>
                         </div>
                     </div>
                     <div class="booking-price-container">

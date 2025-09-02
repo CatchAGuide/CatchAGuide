@@ -222,7 +222,7 @@ class GuidingTranslationService
                 'source_id' => $guiding->id,
                 'type' => 'guidings',
                 'language' => $targetLanguage,
-                'title' => $guiding->title,
+                'title' => $reconstructedFields['title'],
             ],
             [
                 'json_data' => json_encode($reconstructedFields),

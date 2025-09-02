@@ -206,17 +206,18 @@ Route::middleware('auth:web')->group(function () {
     Route::post('guidings/{guiding}/update', [GuidingsController::class, 'update'])->name('guidings.update');
 });
 
-Route::get('guidings', [GuidingsController::class, 'index'])->name('guidings.index');
-Route::get('guidings/{slug?}', [GuidingsController::class, 'redirectToNewFormat']);
+Route::get('guidings', [GuidingsController::class, 'index'])->name('guidings.index')->middleware('throttle.search');
+Route::get('guidings/{slug?}', [GuidingsController::class, 'redirectToNewFormat'])->middleware('throttle.search');
 Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'newShow'])->name('guidings.show');
 Route::post('newguidings', [GuidingsController::class, 'guidingsStore'])->name('guidings.store');
 
-Route::resource('vacations', VacationsController::class)->except('show');
+Route::get('vacations', [VacationsController::class, 'index'])->name('vacations.index')->middleware('throttle.search');
+Route::resource('vacations', VacationsController::class)->except(['index', 'show']);
 Route::get('vacations/{slug}', [VacationsController::class, 'show'])->name('vacations.show');
 Route::post('/vacation-booking', [VacationBookingController::class, 'store'])
     ->name('vacation.booking.store')
     ->middleware('web');
-Route::get('vacations/location/{country}', [VacationsController::class, 'category'])->name('vacations.category');
+Route::get('vacations/location/{country}', [VacationsController::class, 'category'])->name('vacations.category')->middleware('throttle.search');
 
 Route::get('searchrequest', [GuidingsController::class, 'bookingrequest'])->name('guidings.request');
 Route::post('searchrequest/store', [GuidingsController::class, 'bookingRequestStore'])->name('store.request');

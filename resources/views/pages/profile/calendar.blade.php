@@ -157,31 +157,31 @@
                 </div>
                 <div class="card-body">
                     <div class="text-center mb-4">
-                        <p class="text-muted mb-3">Manage your calendar integrations - import external feeds and share your calendar</p>
+                        <p class="text-muted mb-3">@lang('profile.third_party_integrations_description')</p>
                         
                         <div class="d-flex justify-content-center gap-3 flex-wrap">
                             <!-- Import Button -->
                             <button type="button" class="btn btn-outline-primary" onclick="showICalImportModal()">
                                 <i class="fas fa-download me-2"></i>
-                                Import External Calendar
+                                @lang('profile.ical_import_title')
                             </button>
                             
                             <!-- Export Button -->
                             <button type="button" class="btn btn-outline-success" onclick="showGenerateICalModal()">
                                 <i class="fas fa-share-alt me-2"></i>
-                                Share Your Calendar
+                                @lang('profile.ical_export_title')
                             </button>
                             
                             <!-- Manage Feeds Button -->
                             <button type="button" class="btn btn-outline-info" onclick="showUnifiedICalModal()">
                                 <i class="fas fa-list me-2"></i>
-                                Manage All Feeds
+                                @lang('profile.manage_ical_feeds')
                             </button>
                             
                             <!-- Sync All Button -->
                             <button type="button" class="btn btn-primary" onclick="syncAllIntegrations()">
                                 <i class="fas fa-sync me-2"></i>
-                                Sync All
+                                @lang('profile.sync_all')
                             </button>
                         </div>
                     </div>
@@ -192,11 +192,11 @@
                             <div class="border rounded p-3">
                                 <h6 class="text-primary">
                                     <i class="fas fa-download me-2"></i>
-                                    Import Status
+                                    @lang('profile.import_active')
                                 </h6>
                                 <div class="d-flex justify-content-center gap-3">
                                     <span class="badge bg-success">
-                                        Active: <span id="importCount">0</span>
+                                        @lang('profile.status_connected'): <span id="importCount">0</span>
                                     </span>
                                 </div>
                             </div>
@@ -205,11 +205,11 @@
                             <div class="border rounded p-3">
                                 <h6 class="text-success">
                                     <i class="fas fa-share-alt me-2"></i>
-                                    Export Status
+                                    @lang('profile.export_active')
                                 </h6>
                                 <div class="d-flex justify-content-center gap-3">
                                     <span class="badge bg-info">
-                                        Active: <span id="exportCount">0</span>
+                                        @lang('profile.status_connected'): <span id="exportCount">0</span>
                                     </span>
                                 </div>
                             </div>
@@ -235,15 +235,15 @@
                     <!-- Tab Navigation -->
                     <ul class="nav nav-tabs" id="iCalTabs" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="import-tab" data-bs-toggle="tab" data-bs-target="#import-tab-pane" type="button" role="tab" aria-controls="import-tab-pane" aria-selected="true">
-                                <i class="fas fa-download me-2"></i>
-                                Import Feeds
-                            </button>
+                        <button class="nav-link active" id="import-tab" data-bs-toggle="tab" data-bs-target="#import-tab-pane" type="button" role="tab" aria-controls="import-tab-pane" aria-selected="true">
+                            <i class="fas fa-download me-2"></i>
+                            @lang('profile.ical_import_title')
+                        </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="export-tab" data-bs-toggle="tab" data-bs-target="#export-tab-pane" type="button" role="tab" aria-controls="export-tab-pane" aria-selected="false">
                                 <i class="fas fa-share-alt me-2"></i>
-                                Export Feeds
+                                @lang('profile.ical_export_title')
                             </button>
                         </li>
                     </ul>
@@ -253,9 +253,9 @@
                         <!-- Import Tab -->
                         <div class="tab-pane fade show active" id="import-tab-pane" role="tabpanel" aria-labelledby="import-tab" tabindex="0">
                             <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
-                                <h6 class="mb-0">Imported iCal Feeds</h6>
+                                <h6 class="mb-0">@lang('profile.ical_import_title')</h6>
                                 <button type="button" class="btn btn-primary btn-sm" onclick="showICalImportModal()">
-                                    <i class="fas fa-plus me-1"></i> Add New Feed
+                                    <i class="fas fa-plus me-1"></i> @lang('profile.add_ical_feed')
                                 </button>
                             </div>
                             
@@ -263,19 +263,19 @@
                                 <table class="table table-hover" id="importFeedsTable">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Name</th>
-                                            <th>URL</th>
-                                            <th>Last Sync</th>
-                                            <th>Events</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
+                                            <th>@lang('profile.name')</th>
+                                            <th>@lang('profile.ical_feed_url')</th>
+                                            <th>@lang('profile.last_sync')</th>
+                                            <th>@lang('profile.events_synced')</th>
+                                            <th>@lang('profile.feed_status')</th>
+                                            <th>@lang('profile.actions')</th>
                                         </tr>
                                     </thead>
                                     <tbody id="importFeedsTableBody">
                                         <tr>
                                             <td colspan="6" class="text-center text-muted py-4">
                                                 <i class="fas fa-calendar-plus fa-2x mb-2"></i>
-                                                <p>No import feeds configured yet</p>
+                                                <p>@lang('profile.no_feeds_configured')</p>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -286,9 +286,9 @@
                         <!-- Export Tab -->
                         <div class="tab-pane fade" id="export-tab-pane" role="tabpanel" aria-labelledby="export-tab" tabindex="0">
                             <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
-                                <h6 class="mb-0">Generated iCal Feeds</h6>
+                                <h6 class="mb-0">@lang('profile.generate_ical_title')</h6>
                                 <button type="button" class="btn btn-success btn-sm" onclick="showGenerateICalModal()">
-                                    <i class="fas fa-plus me-1"></i> Generate New Feed
+                                    <i class="fas fa-plus me-1"></i> @lang('profile.generate_new_feed')
                                 </button>
                             </div>
                             
@@ -296,19 +296,19 @@
                                 <table class="table table-hover" id="exportFeedsTable">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Name</th>
-                                            <th>Type</th>
-                                            <th>Public URL</th>
-                                            <th>Current OTP</th>
-                                            <th>Expires</th>
-                                            <th>Actions</th>
+                                            <th>@lang('profile.name')</th>
+                                            <th>@lang('profile.feed_type')</th>
+                                            <th>@lang('profile.ical_feed_url')</th>
+                                            <th>@lang('profile.current_otp')</th>
+                                            <th>@lang('profile.expires_at')</th>
+                                            <th>@lang('profile.actions')</th>
                                         </tr>
                                     </thead>
                                     <tbody id="exportFeedsTableBody">
                                         <tr>
                                             <td colspan="6" class="text-center text-muted py-4">
                                                 <i class="fas fa-calendar-plus fa-2x mb-2"></i>
-                                                <p>No export feeds generated yet</p>
+                                                <p>@lang('profile.no_feeds')</p>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -318,9 +318,9 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@lang('profile.close')</button>
                     <button type="button" class="btn btn-primary" onclick="syncAllIntegrations()">
-                        <i class="fas fa-sync me-1"></i> Sync All
+                        <i class="fas fa-sync me-1"></i> @lang('profile.sync_all')
                     </button>
                 </div>
             </div>
@@ -1577,13 +1577,15 @@
             .then(data => {
                 if (data.success) {
                     showAlert('success', data.message);
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('icalImportModal'));
-                    modal.hide();
+                    const importModal = bootstrap.Modal.getInstance(document.getElementById('icalImportModal'));
+                    importModal.hide();
                     form.reset();
                     document.getElementById('saveICalBtn').style.display = 'none';
+                    
+                    // Open the unified modal to show all feeds
                     setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
+                        showUnifiedICalModal();
+                    }, 500);
                 } else {
                     showAlert('error', data.message);
                 }
@@ -1653,10 +1655,18 @@
             .then(data => {
                 if (data.success) {
                     showAlert('success', data.message);
-                    loadICalFeeds(); // Reload the list
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
+                    
+                    // Refresh the unified modal if it's open
+                    const unifiedModal = document.getElementById('unifiedICalModal');
+                    if (unifiedModal && bootstrap.Modal.getInstance(unifiedModal)) {
+                        loadImportFeedsTable();
+                        loadExportFeedsTable();
+                    } else {
+                        // If unified modal is not open, reload the page
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    }
                 } else {
                     showAlert('error', data.message);
                 }
@@ -1705,12 +1715,14 @@
             .then(data => {
                 if (data.success) {
                     showAlert('success', data.message);
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('generateICalModal'));
-                    modal.hide();
+                    const generateModal = bootstrap.Modal.getInstance(document.getElementById('generateICalModal'));
+                    generateModal.hide();
                     form.reset();
+                    
+                    // Open the unified modal to show all feeds
                     setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
+                        showUnifiedICalModal();
+                    }, 500);
                 } else {
                     showAlert('error', data.message);
                 }
@@ -1784,10 +1796,18 @@
             .then(data => {
                 if (data.success) {
                     showAlert('success', data.message);
-                    loadUserICalFeeds(); // Reload the list
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
+                    
+                    // Refresh the unified modal if it's open
+                    const unifiedModal = document.getElementById('unifiedICalModal');
+                    if (unifiedModal && bootstrap.Modal.getInstance(unifiedModal)) {
+                        loadImportFeedsTable();
+                        loadExportFeedsTable();
+                    } else {
+                        // If unified modal is not open, reload the page
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    }
                 } else {
                     showAlert('error', data.message);
                 }
@@ -2626,19 +2646,30 @@
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Syncing...';
             
-            // Sync import feeds
-            fetch('{{ route("ical-feeds.sync-all") }}', {
+            // Use the SyncICalFeeds command for comprehensive syncing
+            fetch('{{ route("ical-feeds.sync-all-command") }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
+                },
+                body: JSON.stringify({
+                    force: true, // Force sync even if recently synced
+                    no_cleanup: false // Include cleanup of past events
+                })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showAlert('success', 'All integrations synced successfully');
+                    showAlert('success', data.message);
                     updateIntegrationCounts();
+                    
+                    // If we're in the unified modal, refresh the tables
+                    const unifiedModal = document.getElementById('unifiedICalModal');
+                    if (unifiedModal && bootstrap.Modal.getInstance(unifiedModal)) {
+                        loadImportFeedsTable();
+                        loadExportFeedsTable();
+                    }
                 } else {
                     showAlert('error', data.message || 'Failed to sync integrations');
                 }

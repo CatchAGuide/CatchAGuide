@@ -3,8 +3,6 @@
 namespace App\Providers;
 
 use App\Http\Resources\EventResource;
-use App\Models\User;
-use App\Observers\UserObserver;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 use App\Services\LanguageService;
@@ -30,8 +28,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        User::observe(UserObserver::class);
-
         Paginator::useBootstrap();
         EventResource::withoutWrapping();
 

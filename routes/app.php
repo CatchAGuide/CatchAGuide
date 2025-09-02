@@ -22,6 +22,7 @@ Route::prefix('ical-feeds')->name('ical-feeds.')->middleware('auth:web')->group(
     Route::delete('/{feed}', [ICalFeedController::class, 'destroy'])->name('destroy');
     Route::post('/{feed}/sync', [ICalFeedController::class, 'sync'])->name('sync');
     Route::post('/sync-all', [ICalFeedController::class, 'syncAll'])->name('sync-all');
+    Route::post('/sync-all-command', [ICalFeedController::class, 'syncAllCommand'])->name('sync-all-command');
     Route::post('/validate-url', [ICalFeedController::class, 'validateUrl'])->name('validate-url');
 });
 

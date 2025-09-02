@@ -367,6 +367,81 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
+            
+            /* Compact Languages Section */
+            .languages-compact-section {
+                background: #f8f9fa;
+                padding: 8px 12px;
+                border-radius: 6px;
+                border-left: 3px solid #007bff;
+            }
+            
+            .language-flag-compact {
+                display: inline-block;
+                transition: transform 0.2s ease;
+            }
+            
+            .language-flag-compact:hover {
+                transform: scale(1.1);
+            }
+            
+            .language-flag-compact img {
+                border-radius: 3px;
+                border: 1px solid #dee2e6;
+            }
+            
+            .language-text-compact {
+                background: #007bff;
+                color: white;
+                padding: 2px 6px;
+                border-radius: 10px;
+                font-size: 11px;
+                font-weight: 500;
+            }
+        }
+
+        /* Languages Section - Upper Right */
+        .languages-section-upper-right {
+            background: #f8f9fa;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border-right: 3px solid #007bff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        /* Languages Section - Corner Position */
+        .languages-section-corner {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 0 6px 0 6px;
+            border-left: 2px solid rgba(0,0,0,.125);
+            border-bottom: 2px solid rgba(0,0,0,.125);
+        }
+        
+        .language-flag-compact {
+            display: inline-block;
+            transition: transform 0.2s ease;
+        }
+        
+        .language-flag-compact:hover {
+            transform: scale(1.1);
+        }
+        
+        .language-flag-compact img {
+            border-radius: 3px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .language-text-compact {
+            background: #007bff;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
         }
     </style>
 @endsection
@@ -440,6 +515,7 @@
                 </div>
         </div>
         </div>
+        
         <!-- Image Gallery -->
         <div class="guidings-gallery row mx-0 mb-3">
             <div class="left-image">
@@ -629,7 +705,7 @@
     </div>
     
     <!-- Description Section -->
-    <div class="description-container card p-3 mb-5">
+    <div class="description-container card p-3 mb-3 position-relative">
         <div class="description-list">
             <!-- Course of Action -->
             @if ($guiding->desc_course_of_action)
@@ -641,6 +717,8 @@
                         {!! $guiding->desc_course_of_action !!}
                     </p>
                 </div>
+                
+
             @endif
             @if ($guiding->desc_tour_unique)
                 <div class="description-item">
@@ -684,6 +762,31 @@
                     </div>
                 @endif
             </div>
+            
+            <!-- Languages Section -->
+            @if ($guiding->user->information['languages'])
+                <div class="description-item">
+                    <div class="header-container">
+                        <span>@lang('guidings.Languages_Colon')</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        @php
+                            $languages = getLanguagesWithFlags($guiding->user->information['languages']);
+                        @endphp
+                        @foreach($languages as $language)
+                            @if($language['has_flag'])
+                                <div class="language-flag-compact" title="{{ $language['name'] }}">
+                                    <img src="{{ asset('flags/' . $language['flag_code'] . '.svg') }}" 
+                                         alt="{{ $language['name'] }}" 
+                                         width="20" height="20">
+                                </div>
+                            @else
+                                <span class="language-text-compact">{{ $language['name'] }}</span>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
             
@@ -710,7 +813,7 @@
         $boatInformation = $guiding->getBoatInformationAttribute();
     @endphp
     
-    <div class="tabs-container mb-5">
+    <div class="tabs-container mb-3">
         <div class="nav nav-tabs" id="guiding-tab" role="tablist">
             <button class="nav-link active" id="nav-fishing-tab" data-bs-toggle="tab" data-bs-target="#fishing" type="button" role="tab" aria-controls="nav-fishing" aria-selected="true">@lang('guidings.Tour_Info')</button>
             @if(!empty( decode_if_json($guiding->inclusions)))
@@ -723,7 +826,7 @@
             <button class="nav-link" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab" aria-controls="nav-info" aria-selected="false">@lang('guidings.Additional_Info')</button>
         </div>
 
-        <div class="tab-content mb-5" id="guidings-tabs">
+        <div class="tab-content mb-2" id="guidings-tabs">
 
             <!-- What's Included Tab -->
             <div class="tab-pane fade" id="include" role="tabpanel" aria-labelledby="nav-include-tab">
@@ -983,7 +1086,7 @@
     </div>
         
     <!-- Accordion mobile ver -->
-    <div class="accordion mb-5" id="guidings-accordion">
+    <div class="accordion mb-3" id="guidings-accordion">
 
         <!-- What's Included Accordion -->
         @if(!empty(decode_if_json($guiding->pricing_extra)) || !empty( decode_if_json($guiding->inclusions)))
@@ -1234,6 +1337,46 @@
 
     </div>
 
+    <!-- Payment Information Section -->
+    <div class="mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body py-3">
+                <h3 class="mb-2">@lang('booking.how_you_can_pay')</h3>
+                <p class="mb-2">@lang('booking.no_payment_now')</p>
+                <p class="mb-2">@lang('booking.payment_description')</p>
+                
+                <div class="row">
+                    @if ($guiding->user->bar_allowed)
+                    <div class="col-md-4 mb-1">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-money-bill text-success me-2" style="font-size: 1.1rem;"></i>
+                            <span>@lang('booking.cash')</span>
+                        </div>
+                    </div>
+                    @endif
+                    
+                    @if ($guiding->user->banktransfer_allowed)
+                    <div class="col-md-4 mb-1">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-credit-card text-primary me-2" style="font-size: 1.1rem;"></i>
+                            <span>@lang('booking.bank_transfer')</span>
+                        </div>
+                    </div>
+                    @endif
+                    
+                    @if ($guiding->user->paypal_allowed)
+                    <div class="col-md-4 mb-1">
+                        <div class="d-flex align-items-center">
+                            <i class="fab fa-paypal text-info me-2" style="font-size: 1.1rem;"></i>
+                            <span>@lang('booking.paypal')</span>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Description Section -->
     <div class="">
         <h2 class="mb-3">@lang('guidings.Availability')</h2>
@@ -1298,7 +1441,7 @@
                                     <i class="fa fa-check"></i>
                                 </div>
                                 <div class="text">
-                                    <p><b>{{ __('guidings.Favorite_fish') }}:</b> {{ $guiding->user->information['favorite_fish'] }}
+                                    <p><b>{{ __('guidings.Favorite_fish') }}:</b> {{ translate($guiding->user->information['favorite_fish']) }}
                                     </p>
                                 </div>
                             </li>
@@ -1308,7 +1451,7 @@
                                 </div>
                                 <div class="text">
                                     <p>
-                                        <b>{{ __('guidings.Languages') }}:</b> {{ $guiding->user->information['languages'] }}
+                                        <b>{{ __('guidings.Languages') }}:</b> {{ translate($guiding->user->information['languages']) }}
                                     </p>
                                 </div>
                             </li>
@@ -1337,7 +1480,7 @@
         </div>
     </div>
 
-    <div class="guidings-rating mb-5">
+    <div class="guidings-rating mb-3">
         @if($reviews_count > 0)
             <div class="ratings-head">
                 <div class="rating-overview text-center shadow-sm">
@@ -1345,7 +1488,7 @@
                         <!-- Left side - Score and ratings -->
                         <div class="rating-left">
                             <div class="score-wrapper">
-                                <div class="score rating-clickable" id="rating-overview-link">{{ number_format($average_grandtotal_score, 1) }}</div>
+                                <div class="score rating-clickable" id="rating-overview-link">{{ one($average_grandtotal_score, 1) }}</div>
                                 <div class="score-label">@lang('guidings.over_10')</div>
                             </div>
                             <div class="rating-info text-center">
@@ -1362,7 +1505,7 @@
                                     <div class="progress flex-grow-1">
                                         <div class="progress-bar" style="width: {{ ($average_overall_score/10)*100 }}%"></div>
                                     </div>
-                                    <span class="rating-value">{{ number_format($average_overall_score, 1) }}</span>
+                                    <span class="rating-value">{{ one($average_overall_score, 1) }}</span>
                                 </div>
                             </div>
                             <div class="category d-flex align-items-center mb-3">
@@ -1371,7 +1514,7 @@
                                     <div class="progress flex-grow-1">
                                         <div class="progress-bar" style="width: {{ ($average_guide_score/10)*100 }}%"></div>
                                     </div>
-                                    <span class="rating-value">{{ number_format($average_guide_score, 1) }}</span>
+                                    <span class="rating-value">{{ one($average_guide_score, 1) }}</span>
                                 </div>
                             </div>
                             <div class="category d-flex align-items-center">
