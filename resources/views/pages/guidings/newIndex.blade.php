@@ -367,6 +367,81 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
+            
+            /* Compact Languages Section */
+            .languages-compact-section {
+                background: #f8f9fa;
+                padding: 8px 12px;
+                border-radius: 6px;
+                border-left: 3px solid #007bff;
+            }
+            
+            .language-flag-compact {
+                display: inline-block;
+                transition: transform 0.2s ease;
+            }
+            
+            .language-flag-compact:hover {
+                transform: scale(1.1);
+            }
+            
+            .language-flag-compact img {
+                border-radius: 3px;
+                border: 1px solid #dee2e6;
+            }
+            
+            .language-text-compact {
+                background: #007bff;
+                color: white;
+                padding: 2px 6px;
+                border-radius: 10px;
+                font-size: 11px;
+                font-weight: 500;
+            }
+        }
+
+        /* Languages Section - Upper Right */
+        .languages-section-upper-right {
+            background: #f8f9fa;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border-right: 3px solid #007bff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        /* Languages Section - Corner Position */
+        .languages-section-corner {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 0 6px 0 6px;
+            border-left: 2px solid rgba(0,0,0,.125);
+            border-bottom: 2px solid rgba(0,0,0,.125);
+        }
+        
+        .language-flag-compact {
+            display: inline-block;
+            transition: transform 0.2s ease;
+        }
+        
+        .language-flag-compact:hover {
+            transform: scale(1.1);
+        }
+        
+        .language-flag-compact img {
+            border-radius: 3px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .language-text-compact {
+            background: #007bff;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
         }
     </style>
 @endsection
@@ -440,6 +515,7 @@
                 </div>
         </div>
         </div>
+        
         <!-- Image Gallery -->
         <div class="guidings-gallery row mx-0 mb-3">
             <div class="left-image">
@@ -629,7 +705,7 @@
     </div>
     
     <!-- Description Section -->
-    <div class="description-container card p-3 mb-5">
+    <div class="description-container card p-3 mb-5 position-relative">
         <div class="description-list">
             <!-- Course of Action -->
             @if ($guiding->desc_course_of_action)
@@ -640,6 +716,26 @@
                     <p class="text-wrapper">
                         {!! $guiding->desc_course_of_action !!}
                     </p>
+                </div>
+                
+                <!-- Languages Section - Upper Right Corner -->
+                <div class="languages-section-corner">
+                    @php
+                        $languages = getLanguagesWithFlags($guiding->user->information['languages']);
+                    @endphp
+                    <div class="d-flex align-items-center gap-2">
+                        @foreach($languages as $language)
+                            @if($language['has_flag'])
+                                <div class="language-flag-compact" title="{{ $language['name'] }}">
+                                    <img src="{{ asset('flags/' . $language['flag_code'] . '.svg') }}" 
+                                         alt="{{ $language['name'] }}" 
+                                         width="20" height="20">
+                                </div>
+                            @else
+                                <span class="language-text-compact">{{ $language['name'] }}</span>
+                            @endif
+                        @endforeach
+                    </div>
                 </div>
             @endif
             @if ($guiding->desc_tour_unique)

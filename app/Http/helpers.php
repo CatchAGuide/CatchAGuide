@@ -305,6 +305,22 @@ if (!function_exists('getLocationDetailsGoogle')) {
             \Log::error('Google Places fallback error in getLocationDetailsGoogle: ' . $e->getMessage());
         }
 
+        // As a robust fallback, use Google Places to resolve English names
+        try {
+            if (!empty($searchString)) {
+                $resolved = getLocationDetails($searchString);
+                if ($resolved && (isset($resolved['city']) || isset($resolved['country']) || isset($resolved['region']))) {
+                    return [
+                        'city' => $resolved['city'] ?? null,
+                        'country' => $resolved['country'] ?? null,
+                        'region' => $resolved['region'] ?? null,
+                    ];
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::error('Google Places fallback error in getLocationDetailsGoogle: ' . $e->getMessage());
+        }
+
         return null;
     }
 }
