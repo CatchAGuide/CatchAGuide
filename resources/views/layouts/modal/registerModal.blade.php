@@ -217,6 +217,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const formData = new FormData(this);
         
+        // Debug: Log form data
+        console.log('Form data being sent:');
+        for (let [key, value] of formData.entries()) {
+            console.log(key + ': ' + value);
+        }
+        
         fetch(this.action, {
             method: 'POST',
             body: formData,
@@ -229,6 +235,13 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.status === 419) {
                 window.location.reload();
             }
+            
+            // Check if response is JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Server returned non-JSON response. Status: ' + response.status);
+            }
+            
             return response.json();
         })
         .then(data => {
@@ -242,18 +255,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // If no specific redirect is provided (e.g., user is on checkout page), 
                 // just close the modal and stay on current page
-                const modal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
-                if (modal) {
-                    modal.hide();
-                }
+                setTimeout(() => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
+                    if (modal) {
+                        modal.hide();
+                    }
+                }, 2000); // Close modal after 2 seconds to show success message
                 
-                // Refresh the Livewire component to reflect the logged-in state
-                if (typeof Livewire !== 'undefined') {
-                    Livewire.dispatch('refresh');
-                }
+                // Show success message briefly, then refresh the whole page
+                const successDiv = document.createElement('div');
+                successDiv.className = 'alert alert-success mb-3';
+                successDiv.textContent = 'Registration successful! You are now logged in. Refreshing page...';
+                registerForm.insertBefore(successDiv, registerForm.firstChild);
                 
-                // Don't reload the page - let user continue with checkout
-                // The page will automatically reflect the logged-in state
+                // Refresh the whole page after a short delay to show the success message
+                setTimeout(() => {
+                    console.log('Refreshing page to update state...');
+                    window.location.reload();
+                }, 1000);
 
             } else {
                 // Reset loading state

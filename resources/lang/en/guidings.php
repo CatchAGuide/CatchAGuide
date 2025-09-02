@@ -136,6 +136,7 @@ return [
     'No_water_types_specified' => 'No water types specified',
     'Favorite_fish' => 'Favorite fish',
     'Languages' => 'Languages',
+    'Languages_Colon' => 'Languages:',
     'Fishing_since' => 'Fishing since',
     'About_me' => 'About me',
     'More' => 'More',

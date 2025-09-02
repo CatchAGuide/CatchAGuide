@@ -741,7 +741,15 @@
     border-radius: 16px;
     font-weight: bold;
     margin-bottom: 0.25rem;
-    background-color: #3130419e;
+    background-color: #313041;
+    text-align: center;
+    min-width: 40px;
+    
+    .rating-value {
+        font-size: 14px;
+        font-weight: bold;
+        color: #fff;
+    }
 }
 
 .rating-count {
@@ -982,19 +990,21 @@ div#masonry-grid {
   .guidings-item-ratings {
     width: 200px;
     display: flex;
-    justify-content: flex-end;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
 
-    .ratings-score {
+    .rating-badge {
       display: flex;
       align-items: center;
-      gap: 4px;
+      justify-content: center;
+      min-width: 40px;
+    }
 
-      svg {
-        width: 18px;
-        height: 18px;
-        fill: #ffcc00;
-        color: #ffcc00;
-      }
+    .rating-count {
+      font-size: 0.875rem;
+      color: #313041;
+      text-align: center;
     }
 
     .comment-content p {
@@ -1447,9 +1457,10 @@ div#masonry-grid {
       flex-direction: column;
       gap: 8px;
 
-      .guidings-item-ratings {
-        width: auto;
-      }
+          .guidings-item-ratings {
+      width: auto;
+      align-items: flex-start;
+    }
     }
 
     .guidings-item-title {

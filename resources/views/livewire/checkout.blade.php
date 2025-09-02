@@ -252,7 +252,7 @@
                               </div>
                             </div>
   
-                            @if($checkoutType === 'guest')
+                            {{-- @if($checkoutType === 'guest')
                               <div class="col-12">
                                 <div class="form-group">
                                   <div class="d-flex align-items-start">
@@ -275,7 +275,7 @@
                                   @enderror
                                 </div>
                               </div>
-                            @endif
+                            @endif --}}
                             
                             <div class="col-md-12">
                               <div class="row-buttons">
