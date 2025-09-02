@@ -89,14 +89,14 @@ class GuidingTranslationService
             }
 
             // Use batch translation from TranslationHelper
-            $translatedFields = TranslationHelper::simpleBatchTranslate(
-                $translatableFields,
-                $targetLanguage,
-                $fromLanguage
-            );
+            // $translatedFields = TranslationHelper::simpleBatchTranslate(
+            //     $translatableFields,
+            //     $targetLanguage,
+            //     $fromLanguage
+            // );
 
             // Store the translation
-            $this->storeTranslation($guiding, $targetLanguage, $translatedFields);
+            // $this->storeTranslation($guiding, $targetLanguage, $translatedFields);
 
             return true;
         } catch (\Exception $e) {

@@ -385,13 +385,13 @@ class AdminCategoryCityController extends Controller
 
                 $translatedData = $data->replicate();
 
-                $translatedTexts = TranslationHelper::simpleBatchTranslate(
-                    $texts,
-                    $toLanguage,
-                    $data->language
-                );
+                // $translatedTexts = TranslationHelper::simpleBatchTranslate(
+                //     $texts,
+                //     $toLanguage,
+                //     $data->language
+                // );
                 
-                $forTranslatedData = $translatedTexts;
+                $forTranslatedData = $translatedTexts ?? [];
                 unset($forTranslatedData['fish_chart'], $forTranslatedData['fish_size_limit'], $forTranslatedData['fish_time_limit'], $forTranslatedData['faq']);
 
                 foreach ($forTranslatedData as $field => $translation) {
