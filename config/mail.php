@@ -98,6 +98,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Admin Email for DDoS Alerts
+    |--------------------------------------------------------------------------
+    |
+    | This email address will receive DDoS protection alerts and notifications.
+    | If not set, it will use the MAIL_FROM_ADDRESS as fallback.
+    |
+    */
+
+    'admin_email' => env('TO_CEO', env('TO_CEO')),
+
+    /*
+    |--------------------------------------------------------------------------
     | Markdown Mail Settings
     |--------------------------------------------------------------------------
     |
