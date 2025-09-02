@@ -275,25 +275,40 @@ if (!function_exists('getLocationDetailsGoogle')) {
         }
 
         // If not found in DB, try to translate using Gemini
-        try {
-            $requestTranslate = json_encode(['city' => $city, 'country' => $country, 'region' => $region]);
-            $translationService = new \App\Services\Translation\GeminiTranslationService();
+        // try {
+        //     $requestTranslate = json_encode(['city' => $city, 'country' => $country, 'region' => $region]);
+        //     $translationService = new \App\Services\Translation\GeminiTranslationService();
             
-            $translationPrompt = "You are a translation API. Given a JSON with keys city, country, region, output a JSON with the same keys translated to English. Output ONLY valid JSON, no code fences or text. Input: $requestTranslate";
+        //     $translationPrompt = "You are a translation API. Given a JSON with keys city, country, region, output a JSON with the same keys translated to English. Output ONLY valid JSON, no code fences or text. Input: $requestTranslate";
 
-            $translatedString = $translationService->translate($translationPrompt);
-            $translatedString = json_decode($translatedString, true);
+        //     $translatedString = $translationService->translate($translationPrompt);
+        //     $translatedString = json_decode($translatedString, true);
             
-            if (isset($translatedString['city']) && isset($translatedString['country']) && isset($translatedString['region'])) {
-                Log::info('Gemini translation successful in getLocationDetailsGoogle', ['translatedString' => $translatedString]);
-                return [
-                    'city' => $translatedString['city'],
-                    'country' => $translatedString['country'],  
-                    'region' => $translatedString['region']
-                ];
+        //     if (isset($translatedString['city']) && isset($translatedString['country']) && isset($translatedString['region'])) {
+        //         return [
+        //             'city' => $translatedString['city'],
+        //             'country' => $translatedString['country'],  
+        //             'region' => $translatedString['region']
+        //         ];
+        //     }
+        // } catch (\Exception $e) {
+        //     Log::error('Gemini translation error in getLocationDetailsGoogle: ' . $e->getMessage());
+        // }
+
+        // As a robust fallback, use Google Places to resolve English names
+        try {
+            if (!empty($searchString)) {
+                $resolved = getLocationDetails($searchString);
+                if ($resolved && (isset($resolved['city']) || isset($resolved['country']) || isset($resolved['region']))) {
+                    return [
+                        'city' => $resolved['city'] ?? null,
+                        'country' => $resolved['country'] ?? null,
+                        'region' => $resolved['region'] ?? null,
+                    ];
+                }
             }
         } catch (\Exception $e) {
-            Log::error('Gemini translation error in getLocationDetailsGoogle: ' . $e->getMessage());
+            \Log::error('Google Places fallback error in getLocationDetailsGoogle: ' . $e->getMessage());
         }
 
         // As a robust fallback, use Google Places to resolve English names

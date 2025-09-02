@@ -113,6 +113,27 @@ return [
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
+
+        'gemini_usage' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/gemini-usage.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 30, // Keep Gemini usage logs for 30 days
+        ],
+
+        'ddos_attacks' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/ddos-attacks.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 30, // Keep DDoS attack logs for 30 days
+        ],
+
+        'ddos_alerts' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/ddos-alerts.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 30, // Keep DDoS alert logs for 30 days
+        ],
     ],
 
 ];

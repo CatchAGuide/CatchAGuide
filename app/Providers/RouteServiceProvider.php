@@ -63,5 +63,19 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by(optional($request->user())->id ?: $request->ip());
         });
+
+        // Gemini translation specific rate limiting
+        RateLimiter::for('gemini-translation', function (Request $request) {
+            return Limit::perMinute(5) // 5 requests per minute
+                        ->perHour(50)  // 50 requests per hour
+                        ->perDay(200)  // 200 requests per day
+                        ->by(optional($request->user())->id ?: $request->ip())
+                        ->response(function () {
+                            return response()->json([
+                                'error' => 'Too many translation requests. Please try again later.',
+                                'retry_after' => 60
+                            ], 429);
+                        });
+        });
     }
 }

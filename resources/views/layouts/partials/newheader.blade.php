@@ -1308,8 +1308,60 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Client-side rate limiting for search requests
+const searchRateLimit = {
+    requests: 0,
+    windowStart: Date.now(),
+    maxRequests: 10, // 10 requests per minute
+    windowMs: 60000, // 1 minute
+    
+    canMakeRequest() {
+        const now = Date.now();
+        
+        // Reset counter if window has passed
+        if (now - this.windowStart > this.windowMs) {
+            this.requests = 0;
+            this.windowStart = now;
+        }
+        
+        return this.requests < this.maxRequests;
+    },
+    
+    recordRequest() {
+        this.requests++;
+    },
+    
+    getTimeUntilReset() {
+        const now = Date.now();
+        const timePassed = now - this.windowStart;
+        return Math.max(0, this.windowMs - timePassed);
+    }
+};
+
 function validateSearch(event, inputId) {
     const searchInput = document.getElementById(inputId);
+
+    // Check client-side rate limit
+    if (!searchRateLimit.canMakeRequest()) {
+        const timeLeft = Math.ceil(searchRateLimit.getTimeUntilReset() / 1000);
+        
+        // Show rate limit message
+        const tooltip = new bootstrap.Tooltip(searchInput, {
+            title: `Too many search requests. Please wait ${timeLeft} seconds.`,
+            placement: "bottom",
+            trigger: "manual"
+        });
+        
+        tooltip.show();
+        setTimeout(() => tooltip.dispose(), 3000);
+
+        // Add shake animation
+        searchInput.classList.add('shake');
+        setTimeout(() => searchInput.classList.remove('shake'), 500);
+
+        event.preventDefault();
+        return false;
+    }
 
     const form = searchInput.closest('form');
     const lat = form.querySelector('input[name="placeLat"]').value;
@@ -1336,6 +1388,8 @@ function validateSearch(event, inputId) {
         return false;
     }
 
+    // Record the request if validation passes
+    searchRateLimit.recordRequest();
     return true;
 }
 
