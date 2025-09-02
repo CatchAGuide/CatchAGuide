@@ -43,15 +43,15 @@ class Kernel extends ConsoleKernel
         $schedule->command('generate:sitemap')->daily()->runInBackground();
         
         // Process vacation translations for admin changes daily (defaults to EN and DE languages)
-        $schedule->command('vacation:translate --admin-changes --relations')
-                ->daily()
-                ->withoutOverlapping()
-                ->runInBackground();
+        // $schedule->command('vacation:translate --admin-changes --relations')
+        //         ->daily()
+        //         ->withoutOverlapping()
+        //         ->runInBackground();
 
-        $schedule->command('guiding:translate --detect-language')
-                        ->daily()
-                        ->withoutOverlapping()
-                        ->runInBackground();
+        // $schedule->command('guiding:translate --detect-language')
+        //                 ->daily()
+        //                 ->withoutOverlapping()
+        //                 ->runInBackground();
 
         // iCal Feed Sync Scheduling
         // Sync all iCal feeds every 2 hours (adjust frequency as needed)
