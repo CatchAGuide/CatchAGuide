@@ -118,4 +118,3 @@ return [
         'enable_suspicious_pattern_detection' => env('GEMINI_ENABLE_PATTERN_DETECTION', true),
     ],
 ];
-

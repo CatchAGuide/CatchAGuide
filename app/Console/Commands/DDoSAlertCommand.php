@@ -66,4 +66,3 @@ class DDoSAlertCommand extends Command
         $this->line('   MAIL_ADMIN_EMAIL=your-email@domain.com');
     }
 }
-

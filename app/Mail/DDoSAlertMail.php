@@ -32,4 +32,3 @@ class DDoSAlertMail extends Mailable
                     ]);
     }
 }
-
