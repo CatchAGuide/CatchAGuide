@@ -14,6 +14,7 @@ class TestDDoSProtection extends Command
     protected $signature = 'test:ddos-protection {--url=http://cag.local} {--test-email} {--context=all : Test specific context (gemini, search, checkout, all)}';
     protected $description = 'Test DDoS protection mechanisms for Gemini, Search, and Checkout';
 
+
     public function handle()
     {
         $url = $this->option('url');
@@ -22,6 +23,7 @@ class TestDDoSProtection extends Command
         
         $this->info('🛡️  DDoS Protection Test Suite');
         $this->info('===============================');
+
         $this->newLine();
         
         // Test email functionality if requested
@@ -145,6 +147,7 @@ class TestDDoSProtection extends Command
 
         // Test 1: Input Validation
         $this->line('1. Testing Search Input Validation...');
+
         $maliciousInputs = [
             ['city' => '<script>alert("xss")</script>', 'country' => 'Test'],
             ['city' => 'Test', 'country' => "'; DROP TABLE users; --"],
@@ -155,6 +158,7 @@ class TestDDoSProtection extends Command
 
         $blockedCount = 0;
         $allowedCount = 0;
+
 
         foreach ($maliciousInputs as $index => $input) {
             try {
