@@ -183,8 +183,8 @@ if (app()->environment('production')) {
 Route::post('/search', [\App\Http\Controllers\SearchController::class, 'search'])->name('search');
 Route::prefix('guides')->name('guides.')->group(function () {});
 
-Route::get('/checkout', [CheckoutController::class, 'checkoutView'])->name('checkout.index');
-Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
+Route::get('/checkout', [CheckoutController::class, 'checkoutView'])->name('checkout.index')->middleware(['throttle:10,1', 'ddos:checkout']);
+Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout')->middleware(['throttle:5,1', 'ddos:checkout']);
 
 Route::middleware('auth:web')->group(function () {
     Route::get('/transaction', [CheckoutController::class, 'completeTransaction'])->name('transaction');
@@ -206,18 +206,18 @@ Route::middleware('auth:web')->group(function () {
     Route::post('guidings/{guiding}/update', [GuidingsController::class, 'update'])->name('guidings.update');
 });
 
-Route::get('guidings', [GuidingsController::class, 'index'])->name('guidings.index')->middleware('throttle.search');
-Route::get('guidings/{slug?}', [GuidingsController::class, 'redirectToNewFormat'])->middleware('throttle.search');
+Route::get('guidings', [GuidingsController::class, 'index'])->name('guidings.index')->middleware('ddos:search');
+Route::get('guidings/{slug?}', [GuidingsController::class, 'redirectToNewFormat'])->middleware('ddos:search');
 Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'newShow'])->name('guidings.show');
 Route::post('newguidings', [GuidingsController::class, 'guidingsStore'])->name('guidings.store');
 
-Route::get('vacations', [VacationsController::class, 'index'])->name('vacations.index')->middleware('throttle.search');
+Route::get('vacations', [VacationsController::class, 'index'])->name('vacations.index')->middleware('ddos:search');
 Route::resource('vacations', VacationsController::class)->except(['index', 'show']);
 Route::get('vacations/{slug}', [VacationsController::class, 'show'])->name('vacations.show');
 Route::post('/vacation-booking', [VacationBookingController::class, 'store'])
     ->name('vacation.booking.store')
     ->middleware('web');
-Route::get('vacations/location/{country}', [VacationsController::class, 'category'])->name('vacations.category')->middleware('throttle.search');
+Route::get('vacations/location/{country}', [VacationsController::class, 'category'])->name('vacations.category')->middleware('ddos:search');
 
 Route::get('searchrequest', [GuidingsController::class, 'bookingrequest'])->name('guidings.request');
 Route::post('searchrequest/store', [GuidingsController::class, 'bookingRequestStore'])->name('store.request');

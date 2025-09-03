@@ -648,6 +648,74 @@
 @push('js_push')
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 <script>
+// Checkout Rate Limiting
+const checkoutRateLimit = {
+    requests: 0,
+    lastReset: Date.now(),
+    maxRequests: 30, // 30 requests per minute
+    resetInterval: 60000, // 1 minute
+    
+    canMakeRequest() {
+        const now = Date.now();
+        
+        // Reset counter if interval has passed
+        if (now - this.lastReset > this.resetInterval) {
+            this.requests = 0;
+            this.lastReset = now;
+        }
+        
+        return this.requests < this.maxRequests;
+    },
+    
+    recordRequest() {
+        this.requests++;
+    },
+    
+    getTimeUntilReset() {
+        const now = Date.now();
+        const timeSinceReset = now - this.lastReset;
+        return Math.max(0, this.resetInterval - timeSinceReset);
+    }
+};
+
+// Override Livewire request function to add rate limiting
+document.addEventListener('livewire:load', function () {
+    const originalRequest = Livewire.request;
+    
+    Livewire.request = function(...args) {
+        if (!checkoutRateLimit.canMakeRequest()) {
+            const timeLeft = Math.ceil(checkoutRateLimit.getTimeUntilReset() / 1000);
+            
+            // Show rate limit message
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-warning';
+            errorDiv.innerHTML = `
+                <i class="fas fa-clock me-2"></i>
+                Too many requests. Please wait ${timeLeft} seconds before trying again.
+            `;
+            
+            // Insert at top of form
+            const form = document.querySelector('form');
+            if (form) {
+                form.insertBefore(errorDiv, form.firstChild);
+                
+                // Remove after 5 seconds
+                setTimeout(() => {
+                    if (errorDiv.parentNode) {
+                        errorDiv.parentNode.removeChild(errorDiv);
+                    }
+                }, 5000);
+            }
+            
+            return Promise.reject(new Error('Rate limit exceeded'));
+        }
+        
+        checkoutRateLimit.recordRequest();
+        return originalRequest.apply(this, args);
+    };
+});
+</script>
+<script>
   var numericInput = document.getElementById("numericInput");
   // Listen for input events
   numericInput.addEventListener("input", function() {

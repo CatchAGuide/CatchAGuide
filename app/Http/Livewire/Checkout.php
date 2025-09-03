@@ -23,6 +23,8 @@ use App\Jobs\SendCheckoutEmail;
 use App\Models\UserInformation;
 use App\Models\UserGuest;
 use App\Models\CalendarSchedule;
+use Illuminate\Support\Facades\Cache;
+use App\Services\DDoSProtectionService;
 
 class Checkout extends Component
 {
@@ -263,13 +265,32 @@ class Checkout extends Component
     }
 
     /**
-     * Handle property updates with optimized validation
+     * Handle property updates with optimized validation and DDoS protection
      * Only validates critical fields (email, firstname, lastname) in real-time
      * to prevent performance issues and typing interruptions
      * Other fields are validated when the form is submitted
      */
     public function updated($propertyName)
     {
+                    // DDoS Protection: Rate limit validation requests
+            if (!$this->checkValidationRateLimit()) {
+                // Rate limit exceeded - silently block to prevent spam
+                return;
+            }
+
+        // Input validation for security
+        if (!$this->validateInputSecurity($propertyName)) {
+            Log::channel('ddos_attacks')->warning('Suspicious input detected in checkout', [
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'property' => $propertyName,
+                'value' => $this->getPropertyValue($propertyName),
+                'user_id' => auth()->id()
+            ]);
+            $this->addError($propertyName, 'Invalid input detected.');
+            return;
+        }
+
         // Only validate specific fields that need real-time validation
         if (str_starts_with($propertyName, 'userData.')) {
             $fieldName = str_replace('userData.', '', $propertyName);
@@ -277,12 +298,14 @@ class Checkout extends Component
             // Only validate critical fields in real-time
             if (in_array($fieldName, ['email', 'firstname', 'lastname'])) {
                 $rules = [
-                    "userData.{$fieldName}" => $fieldName === 'email' ? 'required|email' : 'required|string',
+                    "userData.{$fieldName}" => $fieldName === 'email' ? 'required|email|max:255' : 'required|string|max:255',
                 ];
 
-                // Only validate email uniqueness if creating account
+                // Only validate email uniqueness if creating account (with rate limiting)
                 if ($fieldName === 'email' && $this->checkoutType === 'guest' && $this->userData['createAccount']) {
-                    $rules["userData.{$fieldName}"] = 'required|email|unique:users,email';
+                    if ($this->canCheckEmailUniqueness()) {
+                        $rules["userData.{$fieldName}"] = 'required|email|max:255|unique:users,email';
+                    }
                 }
 
                 $this->validateOnly($propertyName, $rules);
@@ -331,6 +354,8 @@ class Checkout extends Component
     public function checkout()
     {
         $this->loading = true;
+
+        // DDoS protection is handled by middleware and component-level validation
 
         $this->validateData();
         $this->validate([
@@ -473,6 +498,8 @@ class Checkout extends Component
             SendCheckoutEmail::dispatch($booking, $user, $this->guiding, $this->guiding->user);
         }
         
+        // Checkout completed successfully
+        
         sleep(5);
 
         $this->loading = false;
@@ -507,6 +534,100 @@ class Checkout extends Component
         // This method will be called after successful registration
         // It will refresh the component to reflect the new authenticated state
         $this->mount();
+    }
+
+    /**
+     * DDoS Protection: Check validation rate limit using the service
+     */
+    private function checkValidationRateLimit(): bool
+    {
+        $protectionService = app(DDoSProtectionService::class);
+        $identifier = $this->getRateLimitIdentifier();
+        
+        $config = [
+            'context' => 'checkout_validation',
+            'limits' => ['minute' => 20],
+            'validate_input' => false
+        ];
+        
+        $result = $protectionService->shouldBlockRequest(request(), $config);
+        return !$result['blocked'];
+    }
+
+    /**
+     * DDoS Protection: Validate input security using the service
+     */
+    private function validateInputSecurity(string $propertyName): bool
+    {
+        $value = $this->getPropertyValueForValidation($propertyName);
+        
+        if (!is_string($value)) {
+            return true; // Skip non-string values
+        }
+
+        // Create a mock request with the value to validate
+        $mockRequest = request()->duplicate([], [$propertyName => $value]);
+        
+        $protectionService = app(DDoSProtectionService::class);
+        $config = [
+            'context' => 'checkout_input',
+            'limits' => ['minute' => 1000], // High limit for validation
+            'validate_input' => true
+        ];
+        
+        $result = $protectionService->shouldBlockRequest($mockRequest, $config);
+        return !$result['blocked'];
+    }
+
+    /**
+     * Get property value safely for DDoS validation
+     */
+    private function getPropertyValueForValidation(string $propertyName)
+    {
+        $keys = explode('.', $propertyName);
+        $value = $this;
+        
+        foreach ($keys as $key) {
+            if (is_array($value) && isset($value[$key])) {
+                $value = $value[$key];
+            } elseif (is_object($value) && isset($value->$key)) {
+                $value = $value->$key;
+            } else {
+                return null;
+            }
+        }
+        
+        return $value;
+    }
+
+    /**
+     * DDoS Protection: Rate limit email uniqueness checks using the service
+     */
+    private function canCheckEmailUniqueness(): bool
+    {
+        $protectionService = app(DDoSProtectionService::class);
+        $identifier = $this->getRateLimitIdentifier();
+        
+        $config = [
+            'context' => 'checkout_email_check',
+            'limits' => ['minute' => 5],
+            'validate_input' => false
+        ];
+        
+        $result = $protectionService->shouldBlockRequest(request(), $config);
+        return !$result['blocked'];
+    }
+
+    /**
+     * Get rate limit identifier
+     */
+    private function getRateLimitIdentifier(): string
+    {
+        if (auth()->check()) {
+            return 'user_' . auth()->id();
+        }
+        
+        return 'ip_' . request()->ip();
     }
     
 }
