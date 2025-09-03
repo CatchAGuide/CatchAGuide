@@ -698,7 +698,10 @@
                                                                              data-src="{{ $gallery_image_link }}"
                                                                              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
                                                                              alt="{{ translate($guiding->title) }}"
-                                                                             loading="lazy">
+                                                                             loading="lazy"
+                                                                             width="800"
+                                                                             height="600"
+                                                                             style="aspect-ratio: 4/3; object-fit: cover;">
                                                                     </div>
                                                                 @endforeach
                                                             @endif
@@ -1378,7 +1381,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // Lazy loading for images
+// Lazy loading for images
     var lazyImages = [].slice.call(document.querySelectorAll("img.lazy"));
 
     if ("IntersectionObserver" in window) {
