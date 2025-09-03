@@ -6,8 +6,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Client\Response;
-use Illuminate\Http\Request;
-use App\Services\DDoSNotificationService;
+use App\Services\DDoSProtectionService;
 
 class GeminiTranslationService
 {
@@ -35,28 +34,23 @@ class GeminiTranslationService
 
     public function translate(string $text): string
     {
-        // Input validation
-        if (!$this->validateInput($text)) {
-            throw new TranslationException('Invalid input provided for translation');
-        }
-
-        // Check if text is already in English
-        if ($this->isEnglish($text)) {
-            Log::channel('gemini_usage')->info('Skipping translation - text appears to be in English', ['text' => $text]);
-            return $text;
-        }
-
-        // Check cache first
-        $cachedResult = $this->getCachedTranslation($text);
-        if ($cachedResult !== null) {
-            Log::channel('gemini_usage')->info('Translation served from cache', ['text' => $text]);
-            return $cachedResult;
-        }
-
-
-
-        // Rate limiting
-        if (!$this->checkRateLimit()) {
+        // DDoS Protection: Check rate limits and validate input
+        $protectionService = app(DDoSProtectionService::class);
+        $config = [
+            'context' => 'gemini',
+            'limits' => [
+                'minute' => 10,
+                'hour' => 100,
+                'day' => 500
+            ],
+            'validate_input' => true,
+            'block_threshold' => 10,
+            'block_multiplier' => 30,
+            'max_block_duration' => 1800
+        ];
+        
+        $result = $protectionService->shouldBlockRequest(request(), $config);
+        if ($result['blocked']) {
             throw new TranslationException('Rate limit exceeded. Please try again later.');
         }
 
