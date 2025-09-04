@@ -10,6 +10,7 @@ use App\Services\HoneypotService;
 class DDoSProtectionCommand extends Command
 {
     protected $signature = 'ddos:manage {action} {context?} {identifier?} {--all : Apply to all identifiers} {--threat : Show threat intelligence} {--honeypot : Show honeypot stats}';
+
     protected $description = 'Manage DDoS protection settings and view statistics';
 
     public function handle()
@@ -42,6 +43,7 @@ class DDoSProtectionCommand extends Command
                 if ($showHoneypot) {
                     $this->showHoneypotStats($honeypotService);
                 }
+
                 break;
             case 'reset':
                 $this->resetLimits($protectionService, $context, $identifier, $all);
