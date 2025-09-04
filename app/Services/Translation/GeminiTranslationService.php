@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Client\Response;
 use Illuminate\Http\Request;
 use App\Services\DDoSProtectionService;
+use App\Services\DDoSNotificationService;
 
 class GeminiTranslationService
 {
@@ -23,8 +24,6 @@ class GeminiTranslationService
     // Input validation constants
     private const MAX_INPUT_LENGTH = 500;
     private const MIN_INPUT_LENGTH = 2;
-    
-
 
     public function __construct()
     {

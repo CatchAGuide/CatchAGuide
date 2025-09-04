@@ -6,14 +6,23 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use App\Services\DDoSNotificationService;
+use App\Services\ThreatIntelligenceService;
+use App\Services\HoneypotService;
 
 class DDoSProtectionService
 {
     private DDoSNotificationService $notificationService;
+    private ThreatIntelligenceService $threatIntelligence;
+    private HoneypotService $honeypotService;
     
-    public function __construct(DDoSNotificationService $notificationService)
-    {
+    public function __construct(
+        DDoSNotificationService $notificationService,
+        ThreatIntelligenceService $threatIntelligence,
+        HoneypotService $honeypotService
+    ) {
         $this->notificationService = $notificationService;
+        $this->threatIntelligence = $threatIntelligence;
+        $this->honeypotService = $honeypotService;
     }
 
     /**
@@ -24,13 +33,30 @@ class DDoSProtectionService
         $identifier = $this->getIdentifier($request);
         $context = $config['context'] ?? 'general';
         
+        // Enhanced threat intelligence collection
+        $threatData = $this->threatIntelligence->collectThreatData($request, $context);
+        
+        // Check honeypot triggers
+        $honeypotTriggers = $this->honeypotService->checkHoneypotTriggers($request);
+        if (!empty($honeypotTriggers)) {
+            $this->logHoneypotViolation($request, $honeypotTriggers);
+            return [
+                'blocked' => true,
+                'reason' => 'honeypot_triggered',
+                'retry_after' => 300, // 5 minutes
+                'threat_data' => $threatData,
+                'honeypot_triggers' => $honeypotTriggers
+            ];
+        }
+        
         // Check if already blocked
         if ($this->isBlocked($identifier, $context)) {
             $this->logBlockedAttempt($request, $identifier, $context);
             return [
                 'blocked' => true,
                 'reason' => 'already_blocked',
-                'retry_after' => $this->getRetryAfter($identifier, $context)
+                'retry_after' => $this->getRetryAfter($identifier, $context),
+                'threat_data' => $threatData
             ];
         }
 
@@ -42,7 +68,20 @@ class DDoSProtectionService
             return [
                 'blocked' => true,
                 'reason' => 'rate_limit_exceeded',
-                'retry_after' => 60
+                'retry_after' => 60,
+                'threat_data' => $threatData
+            ];
+        }
+
+        // High threat score blocking
+        if ($threatData['threat_score'] > 80) {
+            $this->logHighThreatBlock($request, $threatData);
+            $this->blockIdentifier($identifier, $context, 1800, 0); // Block for 30 minutes
+            return [
+                'blocked' => true,
+                'reason' => 'high_threat_score',
+                'retry_after' => 1800,
+                'threat_data' => $threatData
             ];
         }
 
@@ -181,10 +220,21 @@ class DDoSProtectionService
         // Store violations for 24 hours
         Cache::put($violationKey, $violations, 86400);
         
-        // Progressive blocking based on violations
+        // Enhanced progressive blocking for stubborn attackers
         $blockThreshold = $config['block_threshold'] ?? 10;
+        $stubbornThreshold = $config['stubborn_threshold'] ?? 50; // New threshold for stubborn attackers
+        
         if ($violations >= $blockThreshold) {
-            $blockDuration = min($violations * ($config['block_multiplier'] ?? 30), $config['max_block_duration'] ?? 1800);
+            // Calculate block duration based on violation count
+            if ($violations >= $stubbornThreshold) {
+                // Stubborn attacker - much longer blocks
+                $blockDuration = $this->calculateStubbornBlockDuration($violations, $config);
+                $this->logStubbornAttacker($identifier, $context, $violations);
+            } else {
+                // Regular progressive blocking
+                $blockDuration = min($violations * ($config['block_multiplier'] ?? 30), $config['max_block_duration'] ?? 1800);
+            }
+            
             $this->blockIdentifier($identifier, $context, $blockDuration, $violations);
         }
 
@@ -281,6 +331,70 @@ class DDoSProtectionService
             'endpoint' => $request->fullUrl(),
             'context' => $context
         ]);
+    }
+
+    /**
+     * Log honeypot violation
+     */
+    private function logHoneypotViolation(Request $request, array $honeypotTriggers): void
+    {
+        Log::channel('ddos_attacks')->critical("HONEYPOT TRIGGERED - BOT DETECTED", [
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'url' => $request->fullUrl(),
+            'triggers' => $honeypotTriggers,
+            'timestamp' => now()->toISOString()
+        ]);
+    }
+
+    /**
+     * Log high threat block
+     */
+    private function logHighThreatBlock(Request $request, array $threatData): void
+    {
+        Log::channel('ddos_attacks')->critical("HIGH THREAT BLOCKED", [
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'url' => $request->fullUrl(),
+            'threat_score' => $threatData['threat_score'],
+            'threat_data' => $threatData,
+            'timestamp' => now()->toISOString()
+        ]);
+    }
+
+    /**
+     * Calculate block duration for stubborn attackers
+     */
+    private function calculateStubbornBlockDuration(int $violations, array $config): int
+    {
+        $baseDuration = $config['stubborn_base_duration'] ?? 3600; // 1 hour base
+        $multiplier = $config['stubborn_multiplier'] ?? 2; // Exponential growth
+        $maxDuration = $config['stubborn_max_duration'] ?? 86400; // 24 hours max
+        
+        // Exponential growth: base * (multiplier ^ (violations - stubborn_threshold))
+        $stubbornThreshold = $config['stubborn_threshold'] ?? 50;
+        $excessViolations = max(0, $violations - $stubbornThreshold);
+        $duration = $baseDuration * pow($multiplier, $excessViolations);
+        
+        return min($duration, $maxDuration);
+    }
+
+    /**
+     * Log stubborn attacker detection
+     */
+    private function logStubbornAttacker(string $identifier, string $context, int $violations): void
+    {
+        Log::channel('ddos_attacks')->critical("STUBBORN ATTACKER DETECTED", [
+            'identifier' => $identifier,
+            'context' => $context,
+            'violations' => $violations,
+            'ip' => $this->extractIpFromIdentifier($identifier),
+            'timestamp' => now()->toISOString(),
+            'action' => 'extended_block_applied'
+        ]);
+        
+        // Send special notification for stubborn attackers
+        $this->notificationService->sendStubbornAttackerAlert($identifier, $violations, $context);
     }
 
     /**
