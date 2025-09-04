@@ -4,10 +4,12 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Services\DDoSProtectionService;
+use App\Services\ThreatIntelligenceService;
+use App\Services\HoneypotService;
 
 class DDoSProtectionCommand extends Command
 {
-    protected $signature = 'ddos:manage {action} {context?} {identifier?} {--all : Apply to all identifiers}';
+    protected $signature = 'ddos:manage {action} {context?} {identifier?} {--all : Apply to all identifiers} {--threat : Show threat intelligence} {--honeypot : Show honeypot stats}';
     protected $description = 'Manage DDoS protection settings and view statistics';
 
     public function handle()
@@ -16,8 +18,12 @@ class DDoSProtectionCommand extends Command
         $context = $this->argument('context');
         $identifier = $this->argument('identifier');
         $all = $this->option('all');
+        $showThreat = $this->option('threat');
+        $showHoneypot = $this->option('honeypot');
 
         $protectionService = app(DDoSProtectionService::class);
+        $threatService = app(ThreatIntelligenceService::class);
+        $honeypotService = app(HoneypotService::class);
 
         switch ($action) {
             case 'stats':
@@ -27,6 +33,14 @@ class DDoSProtectionCommand extends Command
                     $this->showStats($protectionService, $context, $identifier, false);
                 } else {
                     $this->showStats($protectionService, null, null, true);
+                }
+                
+                if ($showThreat) {
+                    $this->showThreatIntelligence($threatService);
+                }
+                
+                if ($showHoneypot) {
+                    $this->showHoneypotStats($honeypotService);
                 }
                 break;
             case 'reset':
@@ -172,5 +186,80 @@ class DDoSProtectionCommand extends Command
         $this->line("  php artisan ddos:manage stats livewire ip_192.168.1.1");
         $this->line("  php artisan ddos:manage reset checkout user_123");
         $this->line("  php artisan ddos:manage stats --all");
+        $this->line("  php artisan ddos:manage stats --threat --honeypot");
+    }
+
+    private function showThreatIntelligence(ThreatIntelligenceService $threatService)
+    {
+        $this->newLine();
+        $this->info("🔍 THREAT INTELLIGENCE ANALYSIS");
+        $this->line("=====================================");
+        
+        try {
+            // Get high threat incidents from logs
+            $logFile = storage_path('logs/ddos-attacks.log');
+            if (file_exists($logFile)) {
+                $logContent = file_get_contents($logFile);
+                $highThreatCount = substr_count($logContent, 'HIGH THREAT');
+                $honeypotCount = substr_count($logContent, 'HONEYPOT TRIGGERED');
+                
+                $this->line("High Threat Incidents: {$highThreatCount}");
+                $this->line("Honeypot Triggers: {$honeypotCount}");
+            }
+            
+            // Get recent threat data from database
+            $recentThreats = \DB::table('threat_intelligence')
+                ->where('created_at', '>=', now()->subHours(24))
+                ->orderBy('threat_score', 'desc')
+                ->limit(10)
+                ->get();
+            
+            if ($recentThreats->count() > 0) {
+                $this->newLine();
+                $this->info("Top Threats (Last 24h):");
+                $this->table(
+                    ['IP', 'Context', 'Threat Score', 'Time'],
+                    $recentThreats->map(function ($threat) {
+                        return [
+                            $threat->ip,
+                            $threat->context,
+                            $threat->threat_score,
+                            $threat->created_at
+                        ];
+                    })
+                );
+            }
+            
+        } catch (\Exception $e) {
+            $this->error("Error retrieving threat intelligence: " . $e->getMessage());
+        }
+    }
+
+    private function showHoneypotStats(HoneypotService $honeypotService)
+    {
+        $this->newLine();
+        $this->info("🍯 HONEYPOT STATISTICS");
+        $this->line("======================");
+        
+        try {
+            $stats = $honeypotService->getHoneypotStats(24);
+            
+            if (!empty($stats)) {
+                $this->line("Total Triggers (24h): " . ($stats['total_triggers'] ?? 0));
+                $this->line("Unique IPs: " . ($stats['unique_ips'] ?? 0));
+                $this->newLine();
+                $this->info("Trigger Types:");
+                $this->line("  Hidden Field: " . ($stats['hidden_field_triggers'] ?? 0));
+                $this->line("  Time Trap: " . ($stats['time_trap_triggers'] ?? 0));
+                $this->line("  JS Challenge: " . ($stats['js_challenge_triggers'] ?? 0));
+                $this->line("  CSS Trap: " . ($stats['css_trap_triggers'] ?? 0));
+                $this->line("  Endpoint Trap: " . ($stats['endpoint_trap_triggers'] ?? 0));
+            } else {
+                $this->line("No honeypot data available");
+            }
+            
+        } catch (\Exception $e) {
+            $this->error("Error retrieving honeypot stats: " . $e->getMessage());
+        }
     }
 }

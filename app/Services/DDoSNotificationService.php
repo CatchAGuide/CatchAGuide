@@ -117,6 +117,29 @@ class DDoSNotificationService
     }
     
     /**
+     * Send alert for stubborn attackers
+     */
+    public function sendStubbornAttackerAlert($identifier, $violations, $context)
+    {
+        $alertKey = "stubborn_attacker_alert_{$identifier}";
+        
+        if ($this->shouldSendAlert($alertKey)) {
+            $details = [
+                'ip' => $this->extractIpFromIdentifier($identifier),
+                'violations' => $violations,
+                'context' => $context,
+                'user_agent' => request()->userAgent(),
+                'severity' => 'CRITICAL',
+                'action_taken' => 'Extended block applied',
+                'recommendation' => 'Consider permanent IP ban if pattern continues'
+            ];
+            
+            $this->sendAlert('STUBBORN ATTACKER DETECTED', $details);
+            $this->recordAlertSent($alertKey);
+        }
+    }
+    
+    /**
      * Send the actual email alert
      */
     private function sendAlert($alertType, $details)
