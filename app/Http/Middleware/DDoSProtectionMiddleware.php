@@ -36,82 +36,23 @@ class DDoSProtectionMiddleware
      */
     private function getContextConfig(string $context, Request $request): array
     {
-        $configs = [
-            'search' => [
-                'context' => 'search',
-                'limits' => [
-                    'minute' => 20,
-                    'hour' => 200,
-                    'day' => 1000
-                ],
-                'validate_input' => true,
-                'block_threshold' => 5,
-                'block_multiplier' => 60,
-                'max_block_duration' => 3600
-            ],
-            
-            'livewire' => [
-                'context' => 'livewire',
-                'limits' => [
-                    'minute' => 30,
-                    'hour' => 300,
-                    'day' => 1500
-                ],
-                'validate_input' => true,
-                'block_threshold' => 10,
-                'block_multiplier' => 30,
-                'max_block_duration' => 1800
-            ],
-            
-            'checkout' => [
-                'context' => 'checkout',
-                'limits' => [
-                    'minute' => 10,
-                    'hour' => 50,
-                    'day' => 200
-                ],
-                'validate_input' => true,
-                'block_threshold' => 5,
-                'block_multiplier' => 60,
-                'max_block_duration' => 3600
-            ],
-            
-            'gemini' => [
-                'context' => 'gemini',
-                'limits' => [
-                    'minute' => 10,
-                    'hour' => 100,
-                    'day' => 500
-                ],
-                'validate_input' => true,
-                'block_threshold' => 10,
-                'block_multiplier' => 30,
-                'max_block_duration' => 1800
-            ],
-            
-            'general' => [
-                'context' => 'general',
-                'limits' => [
-                    'minute' => 60,
-                    'hour' => 1000,
-                    'day' => 5000
-                ],
-                'validate_input' => false,
-                'block_threshold' => 20,
-                'block_multiplier' => 30,
-                'max_block_duration' => 1800
-            ]
-        ];
-
-        $config = $configs[$context] ?? $configs['general'];
+        // Get base configuration from config file
+        $defaults = config('ddos.defaults', []);
+        $contextConfigs = config('ddos.contexts', []);
         
-        // Add context-specific input patterns if needed
-        if ($context === 'livewire') {
-            $config['input_patterns'] = [
-                // Additional patterns for Livewire-specific attacks
-                '/wire:model/i',
-                '/@this\./i'
-            ];
+        // Get context-specific config or fall back to defaults
+        $config = $contextConfigs[$context] ?? $defaults;
+        
+        // Add context identifier
+        $config['context'] = $context;
+        
+        // Add global input patterns
+        $config['input_patterns'] = config('ddos.input_patterns', []);
+        
+        // Add context-specific input patterns
+        $contextPatterns = config("ddos.context_input_patterns.{$context}", []);
+        if (!empty($contextPatterns)) {
+            $config['input_patterns'] = array_merge($config['input_patterns'], $contextPatterns);
         }
         
         return $config;
@@ -122,28 +63,23 @@ class DDoSProtectionMiddleware
      */
     private function createBlockedResponse(array $result): Response
     {
-        $statusCode = match($result['reason']) {
-            'already_blocked' => 429,
-            'rate_limit_exceeded' => 429,
-            'suspicious_input' => 400,
-            default => 429
-        };
-
-        $message = match($result['reason']) {
-            'already_blocked' => 'Too many requests. Please try again later.',
-            'rate_limit_exceeded' => 'Rate limit exceeded. Please try again later.',
-            'suspicious_input' => 'Invalid request parameters provided.',
-            default => 'Request blocked.'
-        };
+        $reason = $result['reason'] ?? 'default';
+        $responseConfigs = config('ddos.responses', []);
+        
+        // Get response configuration for this reason
+        $responseConfig = $responseConfigs[$reason] ?? $responseConfigs['default'] ?? [
+            'status' => 429,
+            'message' => 'Request blocked.'
+        ];
 
         $response = [
-            'error' => $message
+            'error' => $responseConfig['message']
         ];
 
         if (isset($result['retry_after']) && $result['retry_after'] > 0) {
             $response['retry_after'] = $result['retry_after'];
         }
 
-        return response()->json($response, $statusCode);
+        return response()->json($response, $responseConfig['status']);
     }
 }
