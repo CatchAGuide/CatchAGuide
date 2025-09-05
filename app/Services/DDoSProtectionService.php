@@ -73,14 +73,14 @@ class DDoSProtectionService
             ];
         }
 
-        // High threat score blocking
-        if ($threatData['threat_score'] > 80) {
+        // High threat score blocking - Made less aggressive
+        if ($threatData['threat_score'] > 95) { // Increased from 80 to 95
             $this->logHighThreatBlock($request, $threatData);
-            $this->blockIdentifier($identifier, $context, 1800, 0); // Block for 30 minutes
+            $this->blockIdentifier($identifier, $context, 900, 0); // Reduced from 1800 to 900 (15 minutes)
             return [
                 'blocked' => true,
                 'reason' => 'high_threat_score',
-                'retry_after' => 1800,
+                'retry_after' => 900, // Reduced from 1800 to 900
                 'threat_data' => $threatData
             ];
         }

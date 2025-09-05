@@ -206,29 +206,47 @@ class ThreatIntelligenceService
     {
         $score = 0;
         
-        // VPN/Proxy usage
-        if ($networkData['is_vpn_proxy']) $score += 20;
+        // Check if user agent is legitimate - Apply bonus reduction
+        $legitimateUserAgents = config('ddos.advanced.legitimate_user_agents', []);
+        $userAgent = $behavioralData['user_agent'] ?? '';
+        $isLegitimateUserAgent = false;
+        
+        foreach ($legitimateUserAgents as $legit) {
+            if (stripos($userAgent, $legit) !== false) {
+                $isLegitimateUserAgent = true;
+                break;
+            }
+        }
+        
+        // Apply 20 point reduction for legitimate user agents
+        $legitimateBonus = $isLegitimateUserAgent ? -20 : 0;
+        
+        // VPN/Proxy usage - Reduced penalty (legitimate users often use VPNs)
+        if ($networkData['is_vpn_proxy']) $score += 10; // Reduced from 20 to 10
         
         // Suspicious patterns
         if (!empty($networkData['suspicious_patterns'])) $score += 15;
         
-        // High request frequency
-        if ($behavioralData['request_count_last_hour'] > 100) $score += 25;
-        if ($behavioralData['request_count_last_hour'] > 500) $score += 35;
+        // High request frequency - Made more lenient
+        if ($behavioralData['request_count_last_hour'] > 200) $score += 15; // Increased threshold from 100 to 200, reduced score from 25 to 15
+        if ($behavioralData['request_count_last_hour'] > 1000) $score += 25; // Increased threshold from 500 to 1000, reduced score from 35 to 25
         
-        // Automation signs
-        if ($behavioralData['automation_signs']['high_confidence']) $score += 30;
+        // Automation signs - Only penalize high confidence automation
+        if ($behavioralData['automation_signs']['high_confidence']) $score += 25; // Reduced from 30 to 25
         
-        // Concurrent requests
-        if ($patternData['concurrent_requests'] > 10) $score += 20;
+        // Concurrent requests - More lenient for modern web apps
+        if ($patternData['concurrent_requests'] > 20) $score += 15; // Increased threshold from 10 to 20, reduced score from 20 to 15
         
-        // Tor usage
-        if ($networkData['is_tor_exit'] ?? false) $score += 25;
+        // Tor usage - Keep this high as it's genuinely suspicious
+        if ($networkData['is_tor_exit'] ?? false) $score += 30; // Increased from 25 to 30
         
-        // Datacenter IP
-        if ($networkData['is_datacenter'] ?? false) $score += 15;
+        // Datacenter IP - Reduced penalty (many ISPs use datacenter ranges)
+        if ($networkData['is_datacenter'] ?? false) $score += 8; // Reduced from 15 to 8
         
-        return min($score, 100);
+        // Apply legitimate user agent bonus and ensure minimum score of 0
+        $finalScore = max(0, $score + $legitimateBonus);
+        
+        return min($finalScore, 100);
     }
 
     /**
