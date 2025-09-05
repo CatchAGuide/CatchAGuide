@@ -361,4 +361,3 @@ return [
         'threat_score_blocking_threshold' => 95, // Only block very high threat scores
     ],
 ];
-

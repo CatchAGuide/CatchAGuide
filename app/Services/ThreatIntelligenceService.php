@@ -508,4 +508,3 @@ class ThreatIntelligenceService
         return array_keys(array_filter($counts, fn($count) => $count >= $total * 0.8));
     }
 }
-
