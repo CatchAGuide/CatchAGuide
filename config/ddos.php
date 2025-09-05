@@ -49,50 +49,50 @@ return [
     'contexts' => [
         'search' => [
             'limits' => [
-                'minute' => 20,
-                'hour' => 200,
-                'day' => 1000
+                'minute' => 60,  // Increased from 20 to 60
+                'hour' => 500,   // Increased from 200 to 500
+                'day' => 2000    // Increased from 1000 to 2000
             ],
             'validate_input' => true,
-            'block_threshold' => 5,
-            'block_multiplier' => 60,
-            'max_block_duration' => 3600, // 1 hour
-            'stubborn_threshold' => 30,
-            'stubborn_base_duration' => 3600, // 1 hour
+            'block_threshold' => 15,     // Increased from 5 to 15
+            'block_multiplier' => 30,    // Reduced from 60 to 30
+            'max_block_duration' => 1800, // Reduced from 3600 to 1800 (30 min)
+            'stubborn_threshold' => 50,  // Increased from 30 to 50
+            'stubborn_base_duration' => 1800, // Reduced from 3600 to 1800
             'stubborn_multiplier' => 2,
-            'stubborn_max_duration' => 86400, // 24 hours
+            'stubborn_max_duration' => 43200, // Reduced from 86400 to 43200 (12 hours)
         ],
 
         'livewire' => [
             'limits' => [
-                'minute' => 30,
-                'hour' => 300,
-                'day' => 1500
+                'minute' => 100, // Increased from 30 to 100
+                'hour' => 800,   // Increased from 300 to 800
+                'day' => 3000    // Increased from 1500 to 3000
             ],
             'validate_input' => true,
-            'block_threshold' => 10,
-            'block_multiplier' => 30,
-            'max_block_duration' => 1800, // 30 minutes
-            'stubborn_threshold' => 50,
+            'block_threshold' => 25,     // Increased from 10 to 25
+            'block_multiplier' => 20,    // Reduced from 30 to 20
+            'max_block_duration' => 900, // Reduced from 1800 to 900 (15 min)
+            'stubborn_threshold' => 75,  // Increased from 50 to 75
             'stubborn_base_duration' => 1800, // 30 minutes
             'stubborn_multiplier' => 2,
-            'stubborn_max_duration' => 43200, // 12 hours
+            'stubborn_max_duration' => 21600, // Reduced from 43200 to 21600 (6 hours)
         ],
 
         'checkout' => [
             'limits' => [
-                'minute' => 10,
-                'hour' => 50,
-                'day' => 200
+                'minute' => 30,  // Increased from 10 to 30 (CRITICAL for booking users!)
+                'hour' => 150,   // Increased from 50 to 150
+                'day' => 500     // Increased from 200 to 500
             ],
             'validate_input' => true,
-            'block_threshold' => 5,
-            'block_multiplier' => 60,
-            'max_block_duration' => 3600, // 1 hour
-            'stubborn_threshold' => 20,
-            'stubborn_base_duration' => 7200, // 2 hours
-            'stubborn_multiplier' => 3,
-            'stubborn_max_duration' => 86400, // 24 hours
+            'block_threshold' => 15,     // Increased from 5 to 15
+            'block_multiplier' => 30,    // Reduced from 60 to 30
+            'max_block_duration' => 1800, // Reduced from 3600 to 1800 (30 min)
+            'stubborn_threshold' => 40,  // Increased from 20 to 40
+            'stubborn_base_duration' => 3600, // Reduced from 7200 to 3600 (1 hour)
+            'stubborn_multiplier' => 2,  // Reduced from 3 to 2
+            'stubborn_max_duration' => 43200, // Reduced from 86400 to 43200 (12 hours)
         ],
 
         'gemini' => [
@@ -343,5 +343,22 @@ return [
             'spider',
             'crawler',
         ],
+        // Legitimate user agents that should get reduced scoring
+        'legitimate_user_agents' => [
+            'Mozilla',
+            'Safari',
+            'Chrome',
+            'Firefox',
+            'Edge',
+            'Opera',
+            'iPhone',
+            'iPad',
+            'Android',
+            'Mobile',
+        ],
+        // Reduce alert frequency to prevent spam
+        'alert_cooldown_minutes' => 60, // Send max 1 alert per hour per IP
+        'threat_score_blocking_threshold' => 95, // Only block very high threat scores
     ],
 ];
+
