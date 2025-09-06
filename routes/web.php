@@ -227,9 +227,9 @@ Route::name('additional.')->group(function () {
     Route::view('/about-us', 'pages.additional.about-us')->name('about_us');
 });
 
-Route::get('destination', [DestinationCountryController::class, 'index'])->name('destination');
-Route::get('destinationen', [DestinationCountryController::class, 'index'])->name('destination_de');
-Route::get('destination/{country}/{region?}/{city?}', [DestinationCountryController::class, 'country'])->name('destination.country');
+Route::get('destination', [DestinationCountryController::class, 'index'])->name('destination')->middleware('ddos:search');
+Route::get('destinationen', [DestinationCountryController::class, 'index'])->name('destination_de')->middleware('ddos:search');
+Route::get('destination/{country}/{region?}/{city?}', [DestinationCountryController::class, 'country'])->name('destination.country')->middleware('ddos:search');
 
 Route::get('category-page/{type}/', [CategoryController::class, 'index'])->name('category.types');
 Route::get('category-page/{type}/{slug}', [CategoryController::class, 'targets'])->name('category.targets');

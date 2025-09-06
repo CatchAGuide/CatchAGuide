@@ -79,9 +79,9 @@
                               <div class="d-flex align-items-start">
                                 <i class="fas fa-user text-orange fs-4 me-3"></i>
                                 <span>
-                                  <a href="#" id="login-header" class="text-orange fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#loginModal" wire:click="$set('checkoutType', 'login')">{{ translate('Sign in') }}</a>
+                                  <a href="#" id="login-header" class="text-orange fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#loginModal" wire:click="$set('checkoutType', 'login')">{{ @lang('checkout.sign_in') }}</a>
                                   @lang('checkout.to_book_with_your_saved_data_or')
-                                  <a href="#" id="signup-header" class="text-orange fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#registerModal" wire:click="$set('checkoutType', 'register')">{{ translate('Sign up') }}</a>
+                                  <a href="#" id="signup-header" class="text-orange fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#registerModal" wire:click="$set('checkoutType', 'register')">{{ @lang('checkout.sign_up') }}</a>
                                   @lang('checkout.to_process_your_bookings_on_the_go')
                                 </span>
                               </div>
