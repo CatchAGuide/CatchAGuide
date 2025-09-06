@@ -226,7 +226,7 @@ class ThreatIntelligenceService
         
         // Suspicious patterns
         if (!empty($networkData['suspicious_patterns'])) $score += 15;
-        
+      
         // High request frequency - Made more lenient
         if ($behavioralData['request_count_last_hour'] > 200) $score += 15; // Increased threshold from 100 to 200, reduced score from 25 to 15
         if ($behavioralData['request_count_last_hour'] > 1000) $score += 25; // Increased threshold from 500 to 1000, reduced score from 35 to 25
