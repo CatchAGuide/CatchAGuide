@@ -321,8 +321,8 @@
                                     </div>
                                     
                                     <div class="text-end d-flex">
-                                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">{{ translate('Cancel') }}</button>
-                                        <button type="submit" class="btn btn-orange">{{ translate('Complete Booking') }}</button>
+                                        <button type="button" id="cancelBookingBtn" class="btn btn-secondary me-2" data-bs-dismiss="modal">{{ translate('Cancel') }}</button>
+                                        <button type="submit" id="completeBookingBtn" class="btn btn-orange">{{ translate('Complete Booking') }}</button>
                                     </div>
                                 </form>
                             </div>
