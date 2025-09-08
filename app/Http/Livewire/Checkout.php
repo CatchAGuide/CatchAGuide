@@ -631,7 +631,5 @@ class Checkout extends Component
         }
         
         return 'ip_' . request()->ip();
-    }
-
-    
+    }    
 }

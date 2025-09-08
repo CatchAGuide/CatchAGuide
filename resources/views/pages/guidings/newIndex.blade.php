@@ -1349,7 +1349,7 @@
                 <h3 class="mb-2">@lang('booking.how_you_can_pay')</h3>
                 <p class="mb-2">@lang('booking.no_payment_now')</p>
                 <p class="mb-2">@lang('booking.payment_description')</p>
-                
+
                 <div class="d-flex flex-wrap gap-3">
                     @if ($guiding->user->bar_allowed)
                     <div class="d-flex align-items-center">

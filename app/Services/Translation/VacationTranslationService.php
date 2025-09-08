@@ -153,18 +153,18 @@ class VacationTranslationService
             }
 
             // Translate using batch translation
-            $translatedData = TranslationHelper::batchTranslate(
-                $dataToTranslate,
-                $targetLanguage,
-                $vacation->language,
-                'vacations'
-            );
+            // $translatedData = TranslationHelper::batchTranslate(
+            //     $dataToTranslate,
+            //     $targetLanguage,
+            //     $vacation->language,
+            //     'vacations'
+            // );
 
             // Save or update translation
             if ($existingTranslation) {
                 // Merge with existing translation data
                 $existingData = json_decode($existingTranslation->json_data, true) ?? [];
-                $mergedData = array_merge($existingData, $translatedData);
+                // $mergedData = array_merge($existingData, $translatedData);
                 
                 $existingTranslation->update([
                     'title' => $translatedData['title'] ?? $existingTranslation->title,
@@ -177,7 +177,7 @@ class VacationTranslationService
                     'type' => 'vacations',
                     'language' => $targetLanguage,
                     'title' => $translatedData['title'] ?? null,
-                    'json_data' => json_encode($translatedData)
+                    // 'json_data' => json_encode($translatedData)
                 ]);
             }
 
@@ -278,17 +278,17 @@ class VacationTranslationService
             return;
         }
 
-        $translatedData = TranslationHelper::batchTranslate(
-            $dataToTranslate,
-            $targetLanguage,
-            $sourceLanguage,
-            'vacation_relations'
-        );
+        // $translatedData = TranslationHelper::batchTranslate(
+        //     $dataToTranslate,
+        //     $targetLanguage,
+        //     $sourceLanguage,
+        //     'vacation_relations'
+        // );
 
         if ($existingTranslation) {
             $existingTranslation->update([
                 'title' => $translatedData['title'] ?? $translatedData['description'] ?? null,
-                'json_data' => json_encode($translatedData)
+                // 'json_data' => json_encode($translatedData)
             ]);
         } else {
             Language::create([
@@ -296,7 +296,7 @@ class VacationTranslationService
                 'type' => 'vacation_' . $relationTypeClean,
                 'language' => $targetLanguage,
                 'title' => $translatedData['title'] ?? $translatedData['description'] ?? null,
-                'json_data' => json_encode($translatedData)
+                // 'json_data' => json_encode($translatedData)
             ]);
         }
     }
