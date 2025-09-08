@@ -129,8 +129,41 @@ return [
     'url'                  => ':attribute muss eine URL sein.',
     'uuid'                 => ':attribute muss ein UUID sein.',
     'custom'               => [
-        'attribute-name' => [
-            'rule-name' => 'custom-message',
+        'selectedDate' => [
+            'required' => 'Bitte wählen Sie ein Datum aus dem Kalender.',
+        ],
+        'userData.firstname' => [
+            'required' => 'Bitte geben Sie Ihren Vornamen ein.',
+        ],
+        'userData.lastname' => [
+            'required' => 'Bitte geben Sie Ihren Nachnamen ein.',
+        ],
+        'userData.address' => [
+            'required' => 'Bitte geben Sie Ihre Straße und Hausnummer ein.',
+        ],
+        'userData.postal' => [
+            'required' => 'Bitte geben Sie Ihre Postleitzahl ein.',
+        ],
+        'userData.city' => [
+            'required' => 'Bitte geben Sie Ihre Stadt ein.',
+        ],
+        'userData.country' => [
+            'required' => 'Bitte geben Sie Ihr Land ein.',
+        ],
+        'userData.phone' => [
+            'required' => 'Bitte geben Sie Ihre Telefonnummer ein.',
+        ],
+        'userData.email' => [
+            'required' => 'Bitte geben Sie Ihre E-Mail-Adresse ein.',
+            'email' => 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
+            'unique' => 'Diese E-Mail-Adresse ist bereits vergeben.',
+        ],
+        'extraQuantities.*' => [
+            'max' => 'Die Anzahl der Extras darf nicht größer als die Anzahl der Personen sein.',
+        ],
+        'userData.guestCheckTerms' => [
+            'required' => 'Sie müssen die Allgemeinen Geschäftsbedingungen akzeptieren, um fortzufahren.',
+            'accepted' => 'Sie müssen die Allgemeinen Geschäftsbedingungen akzeptieren, um fortzufahren.',
         ],
     ],
 ];

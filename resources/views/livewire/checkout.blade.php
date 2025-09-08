@@ -79,9 +79,9 @@
                               <div class="d-flex align-items-start">
                                 <i class="fas fa-user text-orange fs-4 me-3"></i>
                                 <span>
-                                  <a href="#" id="login-header" class="text-orange fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#loginModal" wire:click="$set('checkoutType', 'login')">{{ @lang('checkout.sign_in') }}</a>
+                                  <a href="#" id="login-header" class="text-orange fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#loginModal" wire:click="$set('checkoutType', 'login')">@lang('checkout.sign_in')</a>
                                   @lang('checkout.to_book_with_your_saved_data_or')
-                                  <a href="#" id="signup-header" class="text-orange fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#registerModal" wire:click="$set('checkoutType', 'register')">{{ @lang('checkout.sign_up') }}</a>
+                                  <a href="#" id="signup-header" class="text-orange fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#registerModal" wire:click="$set('checkoutType', 'register')">@lang('checkout.sign_up')</a>
                                   @lang('checkout.to_process_your_bookings_on_the_go')
                                 </span>
                               </div>
@@ -236,6 +236,7 @@
                                     'showLabel' => true,
                                     'showHelpText' => true,
                                     'wireModel' => 'userData.phone',
+                                    'required' => true,
                                     'wireModelCountryCode' => 'userData.countryCode',
                                     'errorClass' => $errors->has('userData.phone') || $errors->has('userData.countryCode') ? 'is-invalid' : ''
                                 ])
@@ -552,15 +553,15 @@
                                </div>
                                
                                <!-- Payment method icons below total price -->
-                               <div class="px-2 py-1 d-flex justify-content-center mt-3 mb-2">
+                               <div class="px-2 py-1 d-flex justify-content-start mt-3 mb-2">
                                    @if ($guiding->user->bar_allowed)
-                                       <i class="fas fa-money-bill me-3 text-muted" style="font-size: 1.2rem;" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.pay_onsite') }}"></i>
+                                       <i class="fas fa-money-bill payment-icon me-3" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.pay_onsite') }}"></i>
                                    @endif
                                    @if ($guiding->user->banktransfer_allowed)
-                                       <i class="fas fa-credit-card me-3 text-muted" style="font-size: 1.2rem;" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.accepts_bank_transfer') }}"></i>
+                                       <i class="fas fa-credit-card payment-icon me-3" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.accepts_bank_transfer') }}"></i>
                                    @endif
                                    @if ($guiding->user->paypal_allowed)
-                                       <i class="fab fa-paypal me-3 text-muted" style="font-size: 1.2rem;" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.accepts_paypal') }}"></i>
+                                       <i class="fab fa-paypal payment-icon me-3" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.accepts_paypal') }}"></i>
                                    @endif
                                </div>
                              </div>
@@ -830,6 +831,7 @@ document.addEventListener('livewire:load', function () {
     }
   });
 
+
   // Handle checkbox changes
   Livewire.on('extraChanged', (extraId) => {
     const checkboxes = document.querySelectorAll('.form-check-input');
@@ -886,8 +888,8 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   // Simple button validation with debouncing
-  // This prevents excessive validation calls that could interfere with typing
   let validationTimeout;
+  
   function validateForm() {
     // Clear any existing timeout
     if (validationTimeout) {
@@ -899,25 +901,29 @@ document.addEventListener('DOMContentLoaded', function() {
       const nextButton = document.getElementById('nextButton');
       if (!nextButton) return;
       
-      const hasDate = '{{ $selectedDate }}' !== '';
-      const firstname = document.getElementById('firstname')?.value?.trim() || '';
-      const lastname = document.getElementById('lastname')?.value?.trim() || '';
-      const email = document.getElementById('email')?.value?.trim() || '';
-      const address = document.getElementById('address')?.value?.trim() || '';
-      const city = document.getElementById('city')?.value?.trim() || '';
-      const phone = document.getElementById('phone')?.value?.trim() || '';
-      
-      const isValid = hasDate && firstname && lastname && email && address && city && phone;
+       const hasDate = '{{ $selectedDate }}' !== '';
+       const firstname = document.getElementById('firstname')?.value?.trim() || '';
+       const lastname = document.getElementById('lastname')?.value?.trim() || '';
+       const email = document.getElementById('email')?.value?.trim() || '';
+       const address = document.getElementById('address')?.value?.trim() || '';
+       const city = document.getElementById('city')?.value?.trim() || '';
+       const phone = document.getElementById('phone')?.value?.trim() || '';
+       const countryCode = document.getElementById('countryCode')?.value?.trim() || '';
+       
+       // Phone number must have at least 3 digits to be considered valid
+       const isPhoneValid = phone && phone.length >= 3;
+       
+       const isValid = hasDate && firstname && lastname && email && address && city && isPhoneValid && countryCode;
       
       nextButton.disabled = !isValid;
       nextButton.className = isValid ? 'thm-btn' : 'thm-btn thm-btn-disabled';
-    }, 100); // 100ms debounce
+    }, 100);
   }
   
   // Run validation on page load and input changes
   validateForm();
   
-  const inputs = ['firstname', 'lastname', 'email', 'address', 'city', 'phone'];
+  const inputs = ['firstname', 'lastname', 'email', 'address', 'city', 'phone', 'countryCode'];
   inputs.forEach(function(inputId) {
     const input = document.getElementById(inputId);
     if (input) {
@@ -1354,6 +1360,11 @@ document.addEventListener('DOMContentLoaded', function() {
     font-size: 1rem;
   }
 
+  .payment-icon {
+    color: #E85B40;
+    font-size: 1.2rem;
+  }
+
   .btn-gray {
     background-color: #6c757d;
     border-color: #6c757d;
@@ -1387,6 +1398,16 @@ document.addEventListener('DOMContentLoaded', function() {
       font-size: 0.9rem;
       padding: 0.75rem;
     }
+  }
+
+  /* Ensure autofilled inputs maintain proper styling */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: #333 !important;
+    transition: background-color 5000s ease-in-out 0s;
   }
 </style>
 @endsection

@@ -99,19 +99,23 @@ class Checkout extends Component
         // 'extras' => 'nullable|array',
     ];
 
-    protected $messages = [
-        'selectedDate.required' => 'Bitte wählen Sie ein Datum aus dem Kalender.',
-        'userData.firstname.required' => 'Bitte geben Sie Ihren Vornamen ein.',
-        'userData.lastname.required' => 'Bitte geben Sie Ihren Nachnamen ein.',
-        'userData.address.required' => 'Bitte geben Sie Ihre Straße und Hausnummer ein.',
-        'userData.postal.required' => 'Bitte geben Sie Ihre Postleitzahl ein.',
-        'userData.city.required' => 'Bitte geben Sie Ihre Stadt ein.',
-        'userData.phone.required' => 'Bitte geben Sie Ihre Telefonnummer ein.',
-        'userData.email.required' => 'Bitte geben Sie Ihre E-Mail-Adresse ein.',
-        'userData.email.email' => 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
-        'userData.email.unique' => 'Diese E-Mail-Adresse ist bereits vergeben.',
-        'extraQuantities.*.max' => 'Die Anzahl der Extras darf nicht größer als die Anzahl der Personen sein.',
-    ];
+    protected function getMessages()
+    {
+        return [
+            'selectedDate.required' => __('validation.custom.selectedDate.required'),
+            'userData.firstname.required' => __('validation.custom.userData.firstname.required'),
+            'userData.lastname.required' => __('validation.custom.userData.lastname.required'),
+            'userData.address.required' => __('validation.custom.userData.address.required'),
+            'userData.postal.required' => __('validation.custom.userData.postal.required'),
+            'userData.city.required' => __('validation.custom.userData.city.required'),
+            'userData.country.required' => __('validation.custom.userData.country.required'),
+            'userData.phone.required' => __('validation.custom.userData.phone.required'),
+            'userData.email.required' => __('validation.custom.userData.email.required'),
+            'userData.email.email' => __('validation.custom.userData.email.email'),
+            'userData.email.unique' => __('validation.custom.userData.email.unique'),
+            'extraQuantities.*.max' => __('validation.custom.extraQuantities.*.max'),
+        ];
+    }
 
     public function render()
     {
@@ -251,7 +255,7 @@ class Checkout extends Component
         if ($this->checkoutType === 'guest' && $this->userData['createAccount']) {
             $existingUser = User::where('email', $this->userData['email'])->first();
             if ($existingUser) {
-                $this->addError('userData.email', 'Diese E-Mail-Adresse ist bereits vergeben.');
+                $this->addError('userData.email', __('validation.custom.userData.email.unique'));
                 return;
             }
         }
@@ -265,18 +269,14 @@ class Checkout extends Component
     }
 
     /**
-     * Handle property updates with optimized validation and DDoS protection
-     * Only validates critical fields (email, firstname, lastname) in real-time
-     * to prevent performance issues and typing interruptions
-     * Other fields are validated when the form is submitted
+     * Handle property updates with basic validation
      */
     public function updated($propertyName)
     {
-                    // DDoS Protection: Rate limit validation requests
-            if (!$this->checkValidationRateLimit()) {
-                // Rate limit exceeded - silently block to prevent spam
-                return;
-            }
+        // DDoS Protection: Rate limit validation requests
+        if (!$this->checkValidationRateLimit()) {
+            return;
+        }
 
         // Input validation for security
         if (!$this->validateInputSecurity($propertyName)) {
@@ -296,9 +296,10 @@ class Checkout extends Component
             $fieldName = str_replace('userData.', '', $propertyName);
             
             // Only validate critical fields in real-time
-            if (in_array($fieldName, ['email', 'firstname', 'lastname'])) {
+            if (in_array($fieldName, ['email', 'firstname', 'lastname', 'phone', 'countryCode'])) {
                 $rules = [
-                    "userData.{$fieldName}" => $fieldName === 'email' ? 'required|email|max:255' : 'required|string|max:255',
+                    "userData.{$fieldName}" => $fieldName === 'email' ? 'required|email|max:255' : 
+                                             ($fieldName === 'phone' ? 'required|string|min:3|max:20' : 'required|string|max:255'),
                 ];
 
                 // Only validate email uniqueness if creating account (with rate limiting)
@@ -317,7 +318,7 @@ class Checkout extends Component
     {
         if ($this->page == 1) {
             if (!$this->selectedDate) {
-                $this->addError('selectedDate', 'Bitte wählen Sie ein Datum aus dem Kalender.');
+                $this->addError('selectedDate', __('validation.custom.selectedDate.required'));
                 return false;
             }
             $rules = [
@@ -327,7 +328,9 @@ class Checkout extends Component
                 'userData.address' => 'required|string',
                 'userData.postal' => 'required|string',
                 'userData.city' => 'required|string',
-                'userData.phone' => 'required|string',
+                'userData.country' => 'required|string',
+                'userData.phone' => 'required|string|min:3',
+                'userData.countryCode' => 'required|string',
                 'userData.email' => 'required|email',
             ];
 
@@ -344,8 +347,8 @@ class Checkout extends Component
                 $this->validate([
                     'userData.guestCheckTerms' => 'required|accepted',
                 ], [
-                    'userData.guestCheckTerms.required' => 'You must accept the Terms and Conditions to proceed.',
-                    'userData.guestCheckTerms.accepted' => 'You must accept the Terms and Conditions to proceed.',
+                    'userData.guestCheckTerms.required' => __('validation.custom.userData.guestCheckTerms.required'),
+                    'userData.guestCheckTerms.accepted' => __('validation.custom.userData.guestCheckTerms.accepted'),
                 ]);
             }
         }
@@ -629,5 +632,6 @@ class Checkout extends Component
         
         return 'ip_' . request()->ip();
     }
+
     
 }
