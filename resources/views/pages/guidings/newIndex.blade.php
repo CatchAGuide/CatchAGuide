@@ -391,13 +391,18 @@
             }
             
             .language-text-compact {
-                background: #007bff;
+                background: #E85B40;
                 color: white;
                 padding: 2px 6px;
                 border-radius: 10px;
                 font-size: 11px;
                 font-weight: 500;
             }
+        }
+        
+        .payment-icon {
+            color: #E85B40;
+            font-size: 1.1rem;
         }
 
         /* Languages Section - Upper Right */
@@ -436,7 +441,7 @@
         }
         
         .language-text-compact {
-            background: #007bff;
+            background: #E85B40;
             color: white;
             padding: 2px 6px;
             border-radius: 10px;
@@ -494,7 +499,7 @@
                 @if ($average_grandtotal_score)
                 <div class="ave-reviews-row">
                     <div class="ratings-score">
-                    <span class="rating-value rating-clickable" id="rating-score-link">{{two($average_grandtotal_score, 1)}}</span>
+                    <span class="rating-value rating-clickable" id="rating-score-link">{{one($average_grandtotal_score, 1)}}</span>
                 </div> 
                     <span class="mb-1">
                         (<a href="#" id="reviews-link" class="text-decoration-none text-muted">{{$reviews_count}} reviews</a>)
@@ -1344,32 +1349,26 @@
                 <h3 class="mb-2">@lang('booking.how_you_can_pay')</h3>
                 <p class="mb-2">@lang('booking.no_payment_now')</p>
                 <p class="mb-2">@lang('booking.payment_description')</p>
-                
-                <div class="row">
+
+                <div class="d-flex flex-wrap gap-3">
                     @if ($guiding->user->bar_allowed)
-                    <div class="col-md-4 mb-1">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-money-bill text-success me-2" style="font-size: 1.1rem;"></i>
-                            <span>@lang('booking.cash')</span>
-                        </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-money-bill payment-icon me-2"></i>
+                        <span>@lang('booking.cash')</span>
                     </div>
                     @endif
                     
                     @if ($guiding->user->banktransfer_allowed)
-                    <div class="col-md-4 mb-1">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-credit-card text-primary me-2" style="font-size: 1.1rem;"></i>
-                            <span>@lang('booking.bank_transfer')</span>
-                        </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-credit-card payment-icon me-2"></i>
+                        <span>@lang('booking.bank_transfer')</span>
                     </div>
                     @endif
                     
                     @if ($guiding->user->paypal_allowed)
-                    <div class="col-md-4 mb-1">
-                        <div class="d-flex align-items-center">
-                            <i class="fab fa-paypal text-info me-2" style="font-size: 1.1rem;"></i>
-                            <span>@lang('booking.paypal')</span>
-                        </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fab fa-paypal payment-icon me-2"></i>
+                        <span>@lang('booking.paypal')</span>
                     </div>
                     @endif
                 </div>
@@ -1623,7 +1622,7 @@
                                                     <div class="guidings-item-ratings">
                                                     <div class="ratings-score">
                                                     <span class="text-warning">★</span>
-                                                            <span>{{$other_guiding->user->average_rating()}} </span>
+                                                            <span>{{one($other_guiding->user->average_rating(), 1)}} </span>
                                                         </div>
                                                     </div>
                                                     @endif

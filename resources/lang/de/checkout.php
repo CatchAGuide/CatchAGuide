@@ -11,7 +11,7 @@ return [
     'sign_in' => 'Anmelden',
     'to_book_with_your_saved_data_or' => 'um mit Ihren gespeicherten Daten zu buchen, oder',
     'sign_up' => 'Registrieren',
-    'to_process_your_bookings_on_the_go' => 'um Ihre Buchungen unterwegs zu bearbeiten!',
+    'to_process_your_bookings_on_the_go' => 'und ein Konto erstellen.',
     'fill_in_your_details' => 'Füllen Sie Ihre Details aus',
     'guest_information' => 'Gast-Informationen',
     'almost_done_required_fields' => 'Fast fertig! Sie müssen nur noch die erforderlichen Felder ausfüllen',
@@ -55,4 +55,6 @@ return [
     'please_accept' => 'Bitte akzeptieren Sie die Allgemeinen Geschäftsbedingungen, um mit Ihrer Buchung fortzufahren.',
     'available_for_request' => 'Reservierung möglich',
     'blocked' => 'Blockiert',
+    'sign_in' => 'Anmelden',
+    'sign_up' => 'Registrieren',
 ];

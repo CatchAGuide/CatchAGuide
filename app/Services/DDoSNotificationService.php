@@ -10,11 +10,12 @@ use Illuminate\Support\Facades\Log;
 class DDoSNotificationService
 {
     private $adminEmail;
-    private $cooldownMinutes = 15; // Don't send duplicate alerts within 15 minutes
+    private $cooldownMinutes; // Alert cooldown from config
     
     public function __construct()
     {
         $this->adminEmail = config('mail.admin_email', config('mail.from.address'));
+        $this->cooldownMinutes = config('ddos.advanced.alert_cooldown_minutes', 15);
     }
     
     /**

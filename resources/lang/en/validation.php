@@ -141,8 +141,41 @@ return [
     */
 
     'custom' => [
-        'attribute-name' => [
-            'rule-name' => 'custom-message',
+        'selectedDate' => [
+            'required' => 'Please select a date from the calendar.',
+        ],
+        'userData.firstname' => [
+            'required' => 'Please enter your first name.',
+        ],
+        'userData.lastname' => [
+            'required' => 'Please enter your last name.',
+        ],
+        'userData.address' => [
+            'required' => 'Please enter your street and house number.',
+        ],
+        'userData.postal' => [
+            'required' => 'Please enter your postal code.',
+        ],
+        'userData.city' => [
+            'required' => 'Please enter your city.',
+        ],
+        'userData.country' => [
+            'required' => 'Please enter your country.',
+        ],
+        'userData.phone' => [
+            'required' => 'Please enter your phone number.',
+        ],
+        'userData.email' => [
+            'required' => 'Please enter your email address.',
+            'email' => 'Please enter a valid email address.',
+            'unique' => 'This email address is already taken.',
+        ],
+        'extraQuantities.*' => [
+            'max' => 'The number of extras cannot be greater than the number of people.',
+        ],
+        'userData.guestCheckTerms' => [
+            'required' => 'You must accept the Terms and Conditions to proceed.',
+            'accepted' => 'You must accept the Terms and Conditions to proceed.',
         ],
     ],
 
