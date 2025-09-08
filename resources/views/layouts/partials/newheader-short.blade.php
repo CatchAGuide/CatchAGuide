@@ -1,7 +1,7 @@
 @include('layouts.modal.loginModal')
 @include('layouts.modal.registerModal')
 
-<nav class="navbar-custom short-header {{ request()->is('/') ? 'with-bg' : '' }} {{ request()->is('guidings*') ? 'no-search' : '' }}">
+<nav class="navbar-custom short-header {{ request()->is('/') ? 'with-bg' : '' }} {{ request()->is('guidings*') ? 'no-search' : '' }} {{ request()->is('checkout') ? 'checkout-minimal' : '' }}">
     <div class="container">
         <!-- Top Row -->
         <div class="row align-items-center">
@@ -33,9 +33,11 @@
                         </form>
                     </div>
                     
+                    @if(!request()->is('checkout'))
                     <a href="#" class="nav-link become-guide-link" data-bs-toggle="modal" data-bs-target="#registerModal">
                         @lang('homepage.header-become-guide')
                     </a>
+                    @endif
                     @auth
                         <div class="header-desktop-profile dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
@@ -92,6 +94,7 @@
             </div>
             @endif
             <!-- Categories Row - Mobile -->
+            @if(!request()->is('checkout'))
             <div class="col-12 d-md-none mt-2">
                 <div class="d-flex categories-mobile">
                     <a href="{{ route('guidings.index') }}" 
@@ -108,6 +111,7 @@
                     </a>
                 </div>
             </div>
+            @endif
 
             @php
                 $countries = \App\Models\Destination::where('type', 'vacations')->where('language',app()->getLocale())->pluck('name');
@@ -121,7 +125,7 @@
             @endphp
 
             <!-- Mobile Search Summary -->
-            @if(!$isVacation)
+            @if(!$isVacation && !request()->is('checkout'))
                 <div class="col-12 d-md-none mt-2">
                     <div class="search-summary" role="button" id="headerSearchTrigger">
                         <i class="fas fa-search me-2"></i>
@@ -144,7 +148,7 @@
                         @endif
                     </div>
                 </div>
-            @else
+            @elseif(!request()->is('checkout'))
                 <div id="filterContainer" class="col-12 d-md-none mt-3">
                     <form class="search-form row gx-2 pe-0" id="global-search1" action="{{ $isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index') }}" method="get">                
                         <div id="mobileherofilter" class="shadow-lg bg-white p-2 rounded">
@@ -167,6 +171,7 @@
         </div>
 
         <!-- Categories Row - Desktop -->
+        @if(!request()->is('checkout'))
         <div class="row categories-row d-none d-md-block">
             <div class="col-12">
                 <div class="d-flex">
@@ -185,9 +190,11 @@
                 </div>
             </div>
         </div>
+        @endif
     </div>
 
     <!-- Search Row - Floating (Desktop Only) -->
+    @if(!request()->is('checkout'))
     <div class="floating-search-container d-none d-md-block">
         <div class="container">
             <form id="global-search" action="{{$isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index')}}" method="get" onsubmit="return validateSearch(event, 'searchPlaceShortDesktop')">
@@ -253,6 +260,7 @@
             </form>
         </div>
     </div>
+    @endif
 </nav>
 
 <style>

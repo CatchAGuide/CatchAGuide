@@ -14,7 +14,7 @@
     <div id="content">
       <div class="container shadow-lg rounded p-0 my-4">
 
-        <div class="card px-0 pt-5 pb-0 mt-3">
+        <div class="card px-0 pt-1 pb-0 mt-3">
           <div class="text-center">
             <div class="my-2">
               <h2><strong>@lang('checkout.checkout') </strong></h2>
@@ -26,7 +26,7 @@
           </ul>
         </div>
 
-        <div class="row p-4">
+        <div class="row">
           <div class="col-md-12 clearfix" id="checkout">
             <div class="border-0">
               <form wire:submit.prevent="checkout" method="POST">
