@@ -4362,7 +4362,6 @@ select.list-dt:focus {
 
 /*progressbar*/
 #progressbar {
-    margin: 30px 0px;
     padding:0px;
     overflow: hidden;
     color: lightgrey;
