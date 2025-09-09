@@ -154,7 +154,7 @@
                                 <input type="email" 
                                        class="form-control @error('userData.email') is-invalid @enderror" 
                                        id="email" 
-                                       wire:model.debounce.500ms="userData.email" 
+                                       wire:model.debounce.1s="userData.email" 
                                        required>
                                 <small class="text-muted">@lang('checkout.confirmation_email_sent_to_address')</small>
                                 @error('userData.email')
@@ -553,23 +553,36 @@
                                </div>
                                
                                <!-- Payment method icons below total price -->
-                               <div class="px-2 py-1 d-flex justify-content-start mt-3 mb-2">
-                                   @if ($guiding->user->bar_allowed)
-                                       <i class="fas fa-money-bill payment-icon me-3" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.pay_onsite') }}"></i>
-                                   @endif
-                                   @if ($guiding->user->banktransfer_allowed)
-                                       <i class="fas fa-credit-card payment-icon me-3" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.accepts_bank_transfer') }}"></i>
-                                   @endif
-                                   @if ($guiding->user->paypal_allowed)
-                                       <i class="fab fa-paypal payment-icon me-3" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.accepts_paypal') }}"></i>
-                                   @endif
-                               </div>
                              </div>
                            </div>
                            <div class="alert alert-info note-box" role="alert">
-                            @lang('forms.total')
-                            {{$totalPrice}}€
-                            @lang('forms.total2') <strong>@lang('forms.total3')</strong>
+                            <h6 class="mb-3">@lang('checkout.important_payment_info_title')</h6>
+                            <p class="mb-3">@lang('checkout.payment_info_text', ['price' => $totalPrice])</p>
+                            <div class="d-flex align-items-center mb-3">
+                              @php
+                                  $paymentMethods = [];
+                                  if ($guiding->user->bar_allowed) {
+                                      $paymentMethods[] = 'Cash';
+                                  }
+                                  if ($guiding->user->banktransfer_allowed) {
+                                      $paymentMethods[] = 'Bank transfer';
+                                  }
+                                  if ($guiding->user->paypal_allowed) {
+                                      $paymentMethods[] = 'PayPal';
+                                  }
+                              @endphp
+                              @if ($guiding->user->bar_allowed)
+                                  <i class="fas fa-money-bill payment-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.pay_onsite') }}"></i>
+                              @endif
+                              @if ($guiding->user->banktransfer_allowed)
+                                  <i class="fas fa-credit-card payment-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.accepts_bank_transfer') }}"></i>
+                              @endif
+                              @if ($guiding->user->paypal_allowed)
+                                  <i class="fab fa-paypal payment-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.accepts_paypal') }}"></i>
+                              @endif
+                              <span class="ms-2">{{ implode(', ', $paymentMethods) }}</span>
+                            </div>
+                            <p class="mb-0">@lang('checkout.payment_confirmation_text')</p>
                           </div>
                         
                           @if($checkoutType === 'guest' && !$userData['createAccount'])
@@ -584,11 +597,10 @@
 
                                   <label class="form-check-label" for="guestCheckTerms" style="font-size: 14px;">
                                     <span class="text-danger me-1">*</span>
-                                    @lang('checkout.i_hereby_confirm')
+                                    @lang('checkout.terms_acceptance_text')
                                     <a href="{{ route('law.agb') }}" target="_blank" class="text-primary fw-bold">@lang('checkout.terms_and_conditions')</a>
-                                    {{ translate('and') }}
-                                    <a href="{{ route('law.data-protection') }}" target="_blank" class="text-primary fw-bold">@lang('checkout.privacy_policy')</a>.
-                                    @lang('checkout.i_agree')
+                                    @lang('checkout.and')
+                                    <a href="{{ route('law.data-protection') }}" target="_blank" class="text-primary fw-bold">@lang('checkout.privacy_policy')</a>@lang('checkout.terms_acceptance_end')
                                   </label>
                                 </div>
                                 @error('userData.guestCheckTerms')

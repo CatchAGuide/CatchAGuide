@@ -295,7 +295,7 @@ class Checkout extends Component
         if (str_starts_with($propertyName, 'userData.')) {
             $fieldName = str_replace('userData.', '', $propertyName);
             
-            // Only validate critical fields in real-time
+            // Only validate critical fields in real-time (email with longer debounce to check existing users)
             if (in_array($fieldName, ['email', 'firstname', 'lastname', 'phone', 'countryCode'])) {
                 $rules = [
                     "userData.{$fieldName}" => $fieldName === 'email' ? 'required|email|max:255' : 
@@ -309,7 +309,20 @@ class Checkout extends Component
                     }
                 }
 
-                $this->validateOnly($propertyName, $rules);
+                $customMessages = [];
+                if ($fieldName === 'email') {
+                    $customMessages["userData.{$fieldName}.required"] = __('validation.custom.userData.email.required');
+                    $customMessages["userData.{$fieldName}.email"] = __('validation.custom.userData.email.email');
+                    $customMessages["userData.{$fieldName}.unique"] = __('validation.custom.userData.email.unique');
+                } elseif ($fieldName === 'firstname') {
+                    $customMessages["userData.{$fieldName}.required"] = __('validation.custom.userData.firstname.required');
+                } elseif ($fieldName === 'lastname') {
+                    $customMessages["userData.{$fieldName}.required"] = __('validation.custom.userData.lastname.required');
+                } elseif ($fieldName === 'phone') {
+                    $customMessages["userData.{$fieldName}.required"] = __('validation.custom.userData.phone.required');
+                }
+                
+                $this->validateOnly($propertyName, $rules, $customMessages);
             }
         }
     }
@@ -339,7 +352,18 @@ class Checkout extends Component
                 $rules['userData.email'] = 'required|email|unique:users,email';
             }
 
-            $this->validate($rules);
+            $this->validate($rules, [
+                'userData.firstname.required' => __('validation.custom.userData.firstname.required'),
+                'userData.lastname.required' => __('validation.custom.userData.lastname.required'),
+                'userData.address.required' => __('validation.custom.userData.address.required'),
+                'userData.postal.required' => __('validation.custom.userData.postal.required'),
+                'userData.city.required' => __('validation.custom.userData.city.required'),
+                'userData.country.required' => __('validation.custom.userData.country.required'),
+                'userData.phone.required' => __('validation.custom.userData.phone.required'),
+                'userData.email.required' => __('validation.custom.userData.email.required'),
+                'userData.email.email' => __('validation.custom.userData.email.email'),
+                'userData.email.unique' => __('validation.custom.userData.email.unique'),
+            ]);
         }
         
         if ($this->page === 2) {
