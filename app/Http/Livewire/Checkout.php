@@ -85,7 +85,9 @@ class Checkout extends Component
                !empty(trim($this->userData['email'] ?? '')) && 
                !empty(trim($this->userData['address'] ?? '')) && 
                !empty(trim($this->userData['city'] ?? '')) && 
-               !empty(trim($this->userData['phone'] ?? ''));
+               !empty(trim($this->userData['country'] ?? '')) && 
+               !empty(trim($this->userData['phone'] ?? '')) &&
+               !empty(trim($this->userData['countryCode'] ?? ''));
     }
 
     protected $rules = [
@@ -119,7 +121,7 @@ class Checkout extends Component
 
     public function render()
     {
-        $formattedDate = Carbon::parse($this->selectedDate)->format('F d, Y');
+        $formattedDate = $this->selectedDate ? Carbon::parse($this->selectedDate)->format('F d, Y') : null;
 
         return view('livewire.checkout', [
             'guiding' => $this->guiding,

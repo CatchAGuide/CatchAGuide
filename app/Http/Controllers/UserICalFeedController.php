@@ -64,6 +64,52 @@ class UserICalFeedController extends Controller
     }
 
     /**
+     * Show a specific user iCal feed
+     */
+    public function show(UserICalFeed $feed)
+    {
+        // Ensure user owns this feed
+        if ($feed->user_id !== Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 403);
+        }
+
+        try {
+            return response()->json([
+                'success' => true,
+                'feed' => [
+                    'id' => $feed->id,
+                    'name' => $feed->name,
+                    'feed_type' => $feed->feed_type,
+                    'feed_type_display' => $feed->feed_type_display,
+                    'is_active' => $feed->is_active,
+                    'feed_url' => $feed->getFeedUrl(),
+                    'secure_feed_url' => $feed->getSecureFeedUrl(),
+                    'current_otp' => $feed->generateOTP(),
+                    'last_accessed_at' => $feed->last_accessed_at,
+                    'access_count' => $feed->access_count,
+                    'expires_at' => $feed->expires_at,
+                    'created_at' => $feed->created_at,
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to get user iCal feed', [
+                'feed_id' => $feed->id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to get iCal feed: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Create a new user iCal feed
      */
     public function store(Request $request)
@@ -264,6 +310,53 @@ class UserICalFeedController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to regenerate token: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get feed content (same as generateFeed but for authenticated users)
+     */
+    public function getFeed(UserICalFeed $feed)
+    {
+        // Ensure user owns this feed
+        if ($feed->user_id !== Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 403);
+        }
+
+        if (!$feed->isAccessible()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Feed is not accessible'
+            ], 403);
+        }
+
+        try {
+            // Update access statistics
+            $feed->updateAccessStats();
+
+            // Generate iCal content
+            $icalContent = $this->icalGeneratorService->generateICalContent($feed);
+
+            // Return iCal response
+            return Response::make($icalContent, 200, [
+                'Content-Type' => 'text/calendar; charset=utf-8',
+                'Content-Disposition' => 'attachment; filename="' . $feed->name . '.ics"',
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to get iCal feed content', [
+                'feed_id' => $feed->id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate feed: ' . $e->getMessage()
             ], 500);
         }
     }

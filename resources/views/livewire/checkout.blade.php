@@ -154,7 +154,7 @@
                                 <input type="email" 
                                        class="form-control @error('userData.email') is-invalid @enderror" 
                                        id="email" 
-                                       wire:model.debounce.1s="userData.email" 
+                                       wire:model.debounce.3s="userData.email" 
                                        required>
                                 <small class="text-muted">@lang('checkout.confirmation_email_sent_to_address')</small>
                                 @error('userData.email')
@@ -285,12 +285,12 @@
                                 <button class="thm-btn" type="button" onclick="window.history.back()"> <i class="fa fa-chevron-left"></i> @lang('message.return') </button>
                                 </div>
                                 <div class="button-container">
-                                  @if($page === 1)
-                                    <div class="pull-right">
-                                      <button class="thm-btn" type="button" wire:click="next" id="nextButton">
-                                        @lang('message.further') <i class="fa fa-chevron-right"></i>
-                                      </button>
-                                    </div>
+                                   @if($page === 1)
+                                     <div class="pull-right">
+                                       <button class="thm-btn disabled" type="button" wire:click="next" id="nextButton" disabled>
+                                         @lang('message.further') <i class="fa fa-chevron-right"></i>
+                                       </button>
+                                     </div>
                                   @elseif ($page !== 2)
                                     <div class="pull-right">
                                       <button class="thm-btn" wire:click="next" id="checkoutProceedPage2">@lang('message.further') <i class="fa fa-chevron-right"></i></button>
@@ -558,7 +558,7 @@
                            <div class="alert alert-info note-box" role="alert">
                             <h6 class="mb-3">@lang('checkout.important_payment_info_title')</h6>
                             <p class="mb-3">@lang('checkout.payment_info_text', ['price' => $totalPrice])</p>
-                            <div class="d-flex align-items-center mb-3">
+                            <div class="payment-methods-container mb-3">
                               @php
                                   $paymentMethods = [];
                                   if ($guiding->user->bar_allowed) {
@@ -571,16 +571,27 @@
                                       $paymentMethods[] = 'PayPal';
                                   }
                               @endphp
+                              
                               @if ($guiding->user->bar_allowed)
+                                <div class="payment-method-item">
                                   <i class="fas fa-money-bill payment-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.pay_onsite') }}"></i>
+                                  <span class="payment-method-name">{{ __('booking.pay_onsite') }}</span>
+                                </div>
                               @endif
+                              
                               @if ($guiding->user->banktransfer_allowed)
+                                <div class="payment-method-item">
                                   <i class="fas fa-credit-card payment-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.accepts_bank_transfer') }}"></i>
+                                  <span class="payment-method-name">{{ __('booking.bank_transfer') }}</span>
+                                </div>
                               @endif
+                              
                               @if ($guiding->user->paypal_allowed)
+                                <div class="payment-method-item">
                                   <i class="fab fa-paypal payment-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('booking.accepts_paypal') }}"></i>
+                                  <span class="payment-method-name">PayPal</span>
+                                </div>
                               @endif
-                              <span class="ms-2">{{ implode(', ', $paymentMethods) }}</span>
                             </div>
                             <p class="mb-0">@lang('checkout.payment_confirmation_text')</p>
                           </div>
@@ -661,82 +672,6 @@
 @push('js_push')
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 <script>
-// Checkout Rate Limiting
-const checkoutRateLimit = {
-    requests: 0,
-    lastReset: Date.now(),
-    maxRequests: 30, // 30 requests per minute
-    resetInterval: 60000, // 1 minute
-    
-    canMakeRequest() {
-        const now = Date.now();
-        
-        // Reset counter if interval has passed
-        if (now - this.lastReset > this.resetInterval) {
-            this.requests = 0;
-            this.lastReset = now;
-        }
-        
-        return this.requests < this.maxRequests;
-    },
-    
-    recordRequest() {
-        this.requests++;
-    },
-    
-    getTimeUntilReset() {
-        const now = Date.now();
-        const timeSinceReset = now - this.lastReset;
-        return Math.max(0, this.resetInterval - timeSinceReset);
-    }
-};
-
-// Override Livewire request function to add rate limiting
-document.addEventListener('livewire:load', function () {
-    const originalRequest = Livewire.request;
-    
-    Livewire.request = function(...args) {
-        if (!checkoutRateLimit.canMakeRequest()) {
-            const timeLeft = Math.ceil(checkoutRateLimit.getTimeUntilReset() / 1000);
-            
-            // Show rate limit message
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'alert alert-warning';
-            errorDiv.innerHTML = `
-                <i class="fas fa-clock me-2"></i>
-                Too many requests. Please wait ${timeLeft} seconds before trying again.
-            `;
-            
-            // Insert at top of form
-            const form = document.querySelector('form');
-            if (form) {
-                form.insertBefore(errorDiv, form.firstChild);
-                
-                // Remove after 5 seconds
-                setTimeout(() => {
-                    if (errorDiv.parentNode) {
-                        errorDiv.parentNode.removeChild(errorDiv);
-                    }
-                }, 5000);
-            }
-            
-            return Promise.reject(new Error('Rate limit exceeded'));
-        }
-        
-        checkoutRateLimit.recordRequest();
-        return originalRequest.apply(this, args);
-    };
-});
-</script>
-<script>
-  var numericInput = document.getElementById("numericInput");
-  // Listen for input events
-  numericInput.addEventListener("input", function() {
-    // Remove non-numeric characters using a regular expression
-    this.value = this.value.replace(/[^0-9]/g, "");
-  });
-</script>
-<script>
   const initCheckNumberOfColumns = () => {
     if (window.innerWidth > 1000) {
       return 2;
@@ -786,7 +721,7 @@ document.addEventListener('livewire:load', function () {
     }
 
     // Get initial selected date from Livewire
-    const initialSelectedDate = @this.selectedDate;
+    const initialSelectedDate = @this.selectedDate || null;
     
     // No need to manually set up the message - Livewire handles it automatically
     
@@ -801,23 +736,45 @@ document.addEventListener('livewire:load', function () {
       lockDaysFormat: 'YYYY-MM-DD',
       disallowLockDaysInRange: true,
       startDate: initialSelectedDate ? new Date(initialSelectedDate) : null, // Set initial date
+      autoApply: true, // Auto-apply date selection (no apply button needed)
+      allowRepick: true, // Allow repicking dates
       lang: '{{app()->getLocale()}}',
       setup: (picker) => {
         picker.on('selected', (date1, date2) => {
-          // Livewire set date
-          @this.selectedDate = date1.format('YYYY-MM-DD');
-          // Set Date to function
-          $("#currentDate").html(date1.format('DD-MM-YYYY'));
+          const selectedDate = date1.format('YYYY-MM-DD');
+          
+          // Livewire set date and force reactivity
+          @this.set('selectedDate', selectedDate);
           @this.setSelectedTime('00:00');
           
-          // Livewire will automatically update the message when selectedDate changes
+          // Set Date to function for display
+          $("#currentDate").html(date1.format('DD-MM-YYYY'));
           
-          // Update button state without full refresh
-          const nextButton = document.getElementById('nextButton');
-          if (nextButton) {
-            nextButton.disabled = false;
-            nextButton.className = 'thm-btn';
-          }
+          // Force Livewire to refresh and trigger validation
+          @this.$refresh().then(() => {
+            // Trigger validation after Livewire updates
+            setTimeout(() => {
+              if (typeof validateForm === 'function') {
+                validateForm();
+              }
+            }, 100);
+          });
+        });
+
+        picker.on('cleared', () => {
+          // Clear the selected date using Livewire set method
+          @this.set('selectedDate', null);
+          $("#currentDate").html('');
+          
+          // Force Livewire to refresh and trigger validation
+          @this.$refresh().then(() => {
+            // Trigger validation after Livewire updates
+            setTimeout(() => {
+              if (typeof validateForm === 'function') {
+                validateForm();
+              }
+            }, 100);
+          });
         });
 
         // Change picker columns on resize
@@ -913,39 +870,166 @@ document.addEventListener('DOMContentLoaded', function() {
       const nextButton = document.getElementById('nextButton');
       if (!nextButton) return;
       
-       const hasDate = '{{ $selectedDate }}' !== '';
-       const firstname = document.getElementById('firstname')?.value?.trim() || '';
-       const lastname = document.getElementById('lastname')?.value?.trim() || '';
-       const email = document.getElementById('email')?.value?.trim() || '';
-       const address = document.getElementById('address')?.value?.trim() || '';
-       const city = document.getElementById('city')?.value?.trim() || '';
-       const phone = document.getElementById('phone')?.value?.trim() || '';
-       const countryCode = document.getElementById('countryCode')?.value?.trim() || '';
+        // Get selectedDate from Livewire - handle different data types
+        let selectedDateValue;
+        
+        try {
+          // Try to get the raw value first
+          selectedDateValue = @this.selectedDate;
+          
+          // If it's an object, try to extract the date value
+          if (selectedDateValue && typeof selectedDateValue === 'object') {
+            // Check if it has a value property or is a Date object
+            if (selectedDateValue.value) {
+              selectedDateValue = selectedDateValue.value;
+            } else if (selectedDateValue instanceof Date) {
+              selectedDateValue = selectedDateValue.toISOString().split('T')[0];
+            } else {
+              // Try to convert to string and see if it contains a date
+              const stringValue = String(selectedDateValue);
+              if (stringValue && stringValue !== '[object Object]' && stringValue.match(/\d{4}-\d{2}-\d{2}/)) {
+                selectedDateValue = stringValue;
+              } else {
+                selectedDateValue = null;
+              }
+            }
+          }
+        } catch (e) {
+          console.log('Error accessing selectedDate:', e);
+          selectedDateValue = null;
+        }
+        
+        // First check - direct value validation
+        let hasDate = selectedDateValue && 
+                     typeof selectedDateValue === 'string' &&
+                     selectedDateValue.trim() !== '' && 
+                     selectedDateValue !== 'null' && 
+                     selectedDateValue.length >= 10 && // YYYY-MM-DD format
+                     selectedDateValue.match(/^\d{4}-\d{2}-\d{2}$/);
+        
+        // Fallback check - look for visual indicators that a date is selected
+        if (!hasDate) {
+          // Check if the calendar has a selected date (look for selected day in calendar)
+          const selectedDay = document.querySelector('.litepicker .day-item.is-selected, .litepicker .day-item.is-start-date');
+          const dateAlert = document.getElementById('dateSelectionAlert');
+          
+          // If we see a selected day in calendar or the date alert shows a selected date
+          if (selectedDay || (dateAlert && dateAlert.textContent.includes('selected'))) {
+            // Try to get the date from Livewire using a different approach
+            try {
+              const livewireData = window.Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
+              if (livewireData && livewireData.get('selectedDate')) {
+                selectedDateValue = livewireData.get('selectedDate');
+                hasDate = selectedDateValue && typeof selectedDateValue === 'string' && selectedDateValue.length >= 10;
+              }
+            } catch (e) {
+              console.log('Fallback date check failed:', e);
+            }
+          }
+        }
+      const firstname = document.getElementById('firstname')?.value?.trim() || '';
+      const lastname = document.getElementById('lastname')?.value?.trim() || '';
+      const email = document.getElementById('email')?.value?.trim() || '';
+      const address = document.getElementById('address')?.value?.trim() || '';
+      const city = document.getElementById('city')?.value?.trim() || '';
+      const country = document.getElementById('country')?.value?.trim() || '';
+      const phone = document.getElementById('phone')?.value?.trim() || '';
+      const countryCode = document.getElementById('countryCode')?.value?.trim() || '';
        
-       // Phone number must have at least 3 digits to be considered valid
-       const isPhoneValid = phone && phone.length >= 3;
+      // Phone number must have at least 3 digits to be considered valid
+      const isPhoneValid = phone && phone.length >= 3;
        
-       const isValid = hasDate && firstname && lastname && email && address && city && isPhoneValid && countryCode;
+        // Check all required fields: selectedDate, firstname, lastname, email, address, city, country, phone
+        const isValid = !!(hasDate && firstname && lastname && email && address && city && country && isPhoneValid && countryCode);
+       
+        // Debug validation (remove in production)
+        const rawLivewireDate = @this.selectedDate;
+        const selectedDayElement = document.querySelector('.litepicker .day-item.is-selected, .litepicker .day-item.is-start-date');
+        const dateAlert = document.getElementById('dateSelectionAlert');
+        
+        console.log('Form validation status:', {
+          rawLivewireDate: rawLivewireDate,
+          rawLivewireType: typeof rawLivewireDate,
+          processedDateValue: selectedDateValue,
+          processedDateType: typeof selectedDateValue,
+          selectedDateLength: selectedDateValue ? selectedDateValue.length : 'N/A',
+          hasSelectedDayInCalendar: !!selectedDayElement,
+          dateAlertContent: dateAlert ? dateAlert.textContent.substring(0, 50) : 'N/A',
+          hasDate: hasDate,
+          firstname: !!firstname,
+          lastname: !!lastname, 
+          email: !!email,
+          address: !!address,
+          city: !!city,
+          country: !!country,
+          phone: isPhoneValid,
+          countryCode: !!countryCode,
+          isValid: isValid
+        });
       
-      nextButton.disabled = !isValid;
-      nextButton.className = isValid ? 'thm-btn' : 'thm-btn thm-btn-disabled';
-    }, 100);
+       // Update button state: enabled only when all fields are valid
+       nextButton.disabled = !isValid;
+       nextButton.className = isValid ? 'thm-btn' : 'thm-btn disabled';
+     }, 1000); // Increased to prevent DDoS protection triggers
   }
   
-  // Run validation on page load and input changes
-  validateForm();
+   // Run validation on page load (button starts disabled, only enables when all fields valid)
+   if (typeof validateForm === 'function') {
+     validateForm();
+   }
+   
+   // Also run validation after a short delay to ensure Livewire is fully loaded
+   setTimeout(() => {
+     if (typeof validateForm === 'function') {
+       validateForm();
+     }
+   }, 500);
   
-  const inputs = ['firstname', 'lastname', 'email', 'address', 'city', 'phone', 'countryCode'];
+  const inputs = ['firstname', 'lastname', 'email', 'address', 'city', 'country', 'phone', 'countryCode'];
   inputs.forEach(function(inputId) {
     const input = document.getElementById(inputId);
     if (input) {
-      input.addEventListener('input', validateForm);
-      input.addEventListener('change', validateForm);
+      // Use debounced validation for input events to prevent DDoS triggers during autofill
+      let inputTimeout;
+      input.addEventListener('input', function() {
+        clearTimeout(inputTimeout);
+        inputTimeout = setTimeout(() => {
+          if (typeof validateForm === 'function') {
+            validateForm();
+          }
+        }, 800);
+      });
+      input.addEventListener('change', () => {
+        if (typeof validateForm === 'function') {
+          validateForm();
+        }
+      });
+      input.addEventListener('blur', () => {
+        if (typeof validateForm === 'function') {
+          validateForm();
+        }
+      });
     }
   });
   
   // Watch for Livewire updates
-  document.addEventListener('livewire:updated', validateForm);
+  document.addEventListener('livewire:updated', () => {
+    if (typeof validateForm === 'function') {
+      validateForm();
+    }
+  });
+  
+  // Listen for specific Livewire selectedDate changes
+  document.addEventListener('livewire:load', function () {
+    @this.watch('selectedDate', value => {
+      console.log('Livewire selectedDate changed to:', value);
+      setTimeout(() => {
+        if (typeof validateForm === 'function') {
+          validateForm();
+        }
+      }, 100);
+    });
+  });
   
   // Re-initialize tooltips after Livewire updates
   document.addEventListener('livewire:updated', function() {
@@ -1377,6 +1461,47 @@ document.addEventListener('DOMContentLoaded', function() {
     font-size: 1.2rem;
   }
 
+  /* Payment Methods Layout */
+  .payment-methods-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .payment-method-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .payment-method-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #333;
+    white-space: nowrap;
+  }
+
+  /* Mobile responsiveness */
+  @media (max-width: 767px) {
+    .payment-methods-container {
+      flex-direction: column;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+
+    .payment-method-item {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    .payment-method-name {
+      font-size: 0.85rem;
+    }
+  }
+
   .btn-gray {
     background-color: #6c757d;
     border-color: #6c757d;
@@ -1394,11 +1519,24 @@ document.addEventListener('DOMContentLoaded', function() {
     cursor: not-allowed;
   }
 
-  .disabled-btn:hover {
-    cursor: not-allowed;
-  }
+   .disabled-btn:hover {
+     cursor: not-allowed;
+   }
 
-  /* Responsive adjustments */
+   .thm-btn.disabled {
+     opacity: 0.6;
+     cursor: not-allowed;
+     background-color: #6c757d;
+     border-color: #6c757d;
+   }
+
+   .thm-btn.disabled:hover {
+     cursor: not-allowed;
+     background-color: #6c757d;
+     border-color: #6c757d;
+   }
+
+   /* Responsive adjustments */
   @media (min-width: 768px) {
     .booking-btn {
       font-size: 1rem;
