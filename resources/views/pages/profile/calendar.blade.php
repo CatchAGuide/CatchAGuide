@@ -1303,7 +1303,7 @@
                 },
                 body: JSON.stringify({
                     name: name,
-                    url: url
+                    feed_url: url
                 })
             })
             .then(response => response.json())
@@ -1447,7 +1447,7 @@
                 },
                 body: JSON.stringify({
                     name: name,
-                    type: type,
+                    feed_type: type,
                     expires_at: expiresAt || null
                 })
             })
@@ -1493,7 +1493,7 @@
                                 <div class="flex-grow-1">
                                     <h6 class="mb-1">${feed.name}</h6>
                                     <small class="text-muted d-block mb-2">
-                                        <strong>Type:</strong> ${feed.type === 'bookings_only' ? 'Bookings Only' : 'All Events'}
+                                        <strong>Type:</strong> ${feed.feed_type === 'bookings_only' ? 'Bookings Only' : feed.feed_type === 'all_events' ? 'All Events' : 'Custom Schedule'}
                                     </small>
                                     <div class="d-flex gap-3 mb-2">
                                         <small class="text-muted">
@@ -1508,11 +1508,11 @@
                                     <div class="mb-2">
                                         <small class="text-muted d-block">
                                             <strong>Public URL:</strong> 
-                                            <code class="bg-light px-2 py-1 rounded">${feed.public_url}</code>
+                                            <code class="bg-light px-2 py-1 rounded">${feed.feed_url}</code>
                                         </small>
                                         <small class="text-muted d-block">
                                             <strong>Secure URL:</strong> 
-                                            <code class="bg-light px-2 py-1 rounded">${feed.secure_url}</code>
+                                            <code class="bg-light px-2 py-1 rounded">${feed.secure_feed_url}</code>
                                         </small>
                                         <small class="text-muted d-block">
                                             <strong>Current OTP:</strong> 
@@ -1607,7 +1607,7 @@
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             button.disabled = true;
             
-            fetch(`{{ url('ical/feeds') }}/${feedId}/sync`, {
+            fetch(`{{ route('ical-feeds.sync', '') }}/${feedId}`, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -1644,7 +1644,7 @@
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             button.disabled = true;
             
-            fetch(`{{ url('ical/feeds') }}/${feedId}`, {
+            fetch(`{{ route('ical-feeds.destroy', '') }}/${feedId}`, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -1748,7 +1748,7 @@
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             button.disabled = true;
             
-            fetch(`{{ url('user-ical/feeds') }}/${feedId}/regenerate-token`, {
+            fetch(`{{ route('user-ical-feeds.regenerate-token', '') }}/${feedId}`, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -1785,7 +1785,7 @@
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             button.disabled = true;
             
-            fetch(`{{ url('user-ical/feeds') }}/${feedId}`, {
+            fetch(`{{ route('user-ical-feeds.destroy', '') }}/${feedId}`, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -2827,7 +2827,7 @@
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             
-            fetch(`/user-ical-feeds/${feedId}/regenerate-otp`, {
+            fetch(`{{ route('user-ical-feeds.regenerate-token', '') }}/${feedId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -2865,7 +2865,7 @@
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             
-            fetch(`/user-ical-feeds/${feedId}`, {
+            fetch(`{{ route('user-ical-feeds.destroy', '') }}/${feedId}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',

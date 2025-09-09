@@ -2282,6 +2282,7 @@ document.addEventListener("DOMContentLoaded", function() {
         numberOfColumns: initCheckNumberOfColumns(),
         numberOfMonths: initCheckNumberOfColumns(),
         minDate: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
+        startDate: null, // Explicitly set to null to prevent default date selection
         lockDays: lockDays, // Use the dynamically calculated blocked days
         lang: '{{app()->getLocale()}}',
         lockDaysFormat: 'YYYY-MM-DD',

@@ -34,10 +34,10 @@ Route::prefix('user-ical-feeds')->name('user-ical-feeds.')->middleware('auth:web
     Route::put('/{feed}', [UserICalFeedController::class, 'update'])->name('update');
     Route::delete('/{feed}', [UserICalFeedController::class, 'destroy'])->name('destroy');
     Route::get('/{feed}/feed', [UserICalFeedController::class, 'getFeed'])->name('feed');
-    Route::post('/{feed}/regenerate-otp', [UserICalFeedController::class, 'regenerateOtp'])->name('regenerate-otp');
+    Route::post('/{feed}/regenerate-token', [UserICalFeedController::class, 'regenerateToken'])->name('regenerate-token');
+    Route::get('/{feed}/otp', [UserICalFeedController::class, 'getCurrentOTP'])->name('otp');
 });
 
-// Public iCal Feed Route (no auth required for accessing feeds)
 Route::get('ical/feed/{token}', [UserICalFeedController::class, 'generateFeed'])->name('ical.feed');
 
 // Webhook Routes
