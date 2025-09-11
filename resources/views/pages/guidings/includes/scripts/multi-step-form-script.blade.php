@@ -356,6 +356,7 @@
         try {
             const formData = new FormData(form);
             
+            
             // Force draft mode
             formData.set('is_draft', '1');
             formData.set('current_step', currentStep);
@@ -781,30 +782,6 @@
             }
 
 
-            const timeOfDayData = {!! json_encode($formData['desc_departure_time'] ?? []) !!};
-            if (timeOfDayData && timeOfDayData.length > 0) {
-                timeOfDayData.forEach(timeOfDay => {
-                    const checkbox = document.querySelector(`input[name="desc_departure_time[]"][value="${timeOfDay}"]`);
-                    if (checkbox) {
-                        checkbox.checked = true;
-                        checkbox.dispatchEvent(new Event('change'));
-                    }
-                });
-            }
-
-            const weekdayAvailabilityData = '{{ $formData['weekday_availability'] ?? '' }}';
-            if (weekdayAvailabilityData) {
-                const weekdayRadio = document.querySelector(`input[name="weekday_availability"][value="${weekdayAvailabilityData}"]`);
-                if (weekdayRadio) {
-                    weekdayRadio.checked = true;
-                    weekdayRadio.dispatchEvent(new Event('change'));
-                    
-                    // Show weekday selection if certain_days is selected
-                    if (weekdayAvailabilityData === 'certain_days') {
-                        document.getElementById('weekday_selection').style.display = 'block';
-                    }
-                }
-            }
 
             const weekdaysData = {!! json_encode($formData['weekdays'] ?? []) !!};
             if (weekdaysData && weekdaysData.length > 0) {
@@ -1178,6 +1155,7 @@
     function submitForm(form) {
         const formData = new FormData(form);
 
+
         try {
             if (!imageManagerLoaded) {
                 console.error('ImageManager not initialized');
@@ -1464,6 +1442,12 @@
                 }
                 break;
             case 4:
+                // Populate form data when step 4 is shown (departure time checkboxes)
+                if (typeof populateEditFormData === 'function') {
+                    console.log('Calling populateEditFormData from step 4 validation');
+                    populateEditFormData();
+                }
+                
                 if (!document.getElementById('desc_course_of_action').value.trim()) {
                     errors.push('Course of action description is required.');
                     isValid = false;
@@ -1546,6 +1530,12 @@
                 }
                 break;
             case 7:
+                // Populate form data when step 7 is shown (weekday availability)
+                if (typeof populateEditFormData === 'function') {
+                    console.log('Calling populateEditFormData from step 7 validation');
+                    populateEditFormData();
+                }
+                
                 if (!document.querySelector('input[name="allowed_booking_advance"]:checked')) {
                     errors.push('Please select an allowed booking advance.');
                     isValid = false;
@@ -1601,9 +1591,7 @@
 
         // Call AJAX to save progress when moving forward and wait for completion
         if (stepNumber > currentStep) {
-            try {
-                console.log('Saving draft for step:', currentStep);
-                
+            try {                
                 // Update loading screen message to indicate saving
                 const loadingScreen = document.getElementById('loadingScreen');
                 if (loadingScreen) {
@@ -1614,7 +1602,6 @@
                 }
                 
                 await saveStepProgress(currentStep);
-                console.log('Draft saved successfully, proceeding to step:', stepNumber);
                 
                 // Update loading screen message to indicate proceeding
                 if (loadingScreen) {
@@ -1648,6 +1635,15 @@
         
         // Update current step
         currentStep = stepNumber;
+
+        // Populate form data when step 4 (departure time) or step 7 (weekday availability) is shown
+        if (stepNumber === 4 || stepNumber === 7) {
+            setTimeout(() => {
+                if (typeof window.populateEditFormData === 'function') {
+                    window.populateEditFormData();
+                }
+            }, 100);
+        }
 
         // Scroll form into view
         scrollToFormCenter();
@@ -1710,10 +1706,89 @@
         return element.tagify;
     }
 
+    // Function to populate form data from edit mode
+    function populateEditFormData() {
+        // Check if we're in edit mode
+        const isUpdate = document.getElementById('is_update');
+        if (!isUpdate || isUpdate.value !== '1') {
+            console.log('Not in edit mode, skipping populateEditFormData');
+            return;
+        }
+        
+        console.log('populateEditFormData called');
+        
+        // Set departure time checkboxes
+        const timeOfDayData = {!! json_encode($formData['desc_departure_time'] ?? []) !!};
+        console.log('timeOfDayData:', timeOfDayData);
+        if (timeOfDayData && timeOfDayData.length > 0) {
+            timeOfDayData.forEach(timeOfDay => {
+                console.log('Setting departure time:', timeOfDay);
+                const checkbox = document.querySelector(`input[name="desc_departure_time[]"][value="${timeOfDay}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    checkbox.dispatchEvent(new Event('change'));
+                    console.log('Set departure time checkbox:', timeOfDay);
+                } else {
+                    console.log('Departure time checkbox not found for:', timeOfDay);
+                }
+            });
+        } else {
+            console.log('No departure time data to set');
+        }
+
+        // Set weekday availability
+        const weekdayAvailabilityData = '{{ $formData['weekday_availability'] ?? '' }}';
+        console.log('weekdayAvailabilityData:', weekdayAvailabilityData);
+        if (weekdayAvailabilityData) {
+            const weekdayRadio = document.querySelector(`input[name="weekday_availability"][value="${weekdayAvailabilityData}"]`);
+            console.log('weekdayRadio found:', weekdayRadio);
+            if (weekdayRadio) {
+                weekdayRadio.checked = true;
+                weekdayRadio.dispatchEvent(new Event('change'));
+                console.log('Set weekday availability radio:', weekdayAvailabilityData);
+                
+                // Show weekday selection if certain_days is selected
+                if (weekdayAvailabilityData === 'certain_days') {
+                    const weekdaySelection = document.getElementById('weekday_selection');
+                    if (weekdaySelection) {
+                        weekdaySelection.style.display = 'block';
+                    }
+                    
+                    // Set specific weekdays if available
+                    const weekdaysData = {!! json_encode($formData['weekdays'] ?? []) !!};
+                    console.log('weekdaysData:', weekdaysData);
+                    if (weekdaysData && weekdaysData.length > 0) {
+                        weekdaysData.forEach(weekday => {
+                            const checkbox = document.querySelector(`input[name="weekdays[]"][value="${weekday}"]`);
+                            if (checkbox) {
+                                checkbox.checked = true;
+                                console.log('Set weekday checkbox:', weekday);
+                            } else {
+                                console.log('Weekday checkbox not found for:', weekday);
+                            }
+                        });
+                    }
+                }
+            } else {
+                console.log('Weekday availability radio not found for:', weekdayAvailabilityData);
+            }
+        } else {
+            console.log('No weekday availability data to set');
+        }
+    }
+
     // Then, in your DOMContentLoaded event listener, replace the existing Tagify initializations with:
     document.addEventListener('DOMContentLoaded', function() {
         showStep(currentStep);
         initializeImageManager();
+        
+        // Populate form data after a short delay to ensure all elements are rendered
+        setTimeout(populateEditFormData, 100);
+        setTimeout(populateEditFormData, 500);
+        setTimeout(populateEditFormData, 1000);
+        
+        // Also populate when step 7 is shown (where weekday availability is)
+        window.populateEditFormData = populateEditFormData;
 
         // Boat Extras
         initTagify('input[name="boat_extras"]', {
@@ -1895,6 +1970,7 @@
             const form = document.getElementById('newGuidingForm');
             const formData = new FormData(form);
 
+
             formData.append('current_step', stepNumber);
             formData.append('is_draft', 1);
 
@@ -1940,7 +2016,6 @@
                     $('#guiding_id').val(data.guiding_id);
                     $('#is_update').val(1);
                 }
-                console.log('Draft saved successfully for step:', stepNumber);
                 resolve(data); // Resolve the promise on success
             })
             .catch(error => {

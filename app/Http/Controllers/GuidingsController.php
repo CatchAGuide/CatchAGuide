@@ -697,8 +697,27 @@ class GuidingsController extends Controller
             }
 
             // Only enforce strict requirements if not draft
-            $galleryImages = json_decode($guiding->gallery_images, true) ?? [];
-            if (!$isDraft && (empty($galleryImages) || count($galleryImages) < 5)) {
+            // Count images from both existing and new uploads
+            $totalImageCount = 0;
+            if ($request->input('is_update') == '1') {
+                $existingImagesJson = $request->input('existing_images');
+                $existingImages = json_decode($existingImagesJson, true) ?? [];
+                $imageList = json_decode($request->input('image_list', '[]')) ?? [];
+                $keepImages = array_filter($imageList);
+                
+                foreach ($existingImages as $existingImage) {
+                    $imagePath = $existingImage;
+                    $imagePathWithSlash = '/' . $existingImage;
+                    if (in_array($imagePath, $keepImages) || in_array($imagePathWithSlash, $keepImages)) {
+                        $totalImageCount++;
+                    }
+                }
+            } else {
+                $galleryImages = json_decode($guiding->gallery_images, true) ?? [];
+                $totalImageCount = count($galleryImages);
+            }
+            
+            if (!$isDraft && $totalImageCount < 5) {
                 throw new \Exception('Please upload at least 5 images');
             }
 
@@ -785,6 +804,7 @@ class GuidingsController extends Controller
         $galeryImages = [];
         $imageList = json_decode($request->input('image_list', '[]')) ?? [];
         $thumbnailPath = '';
+        $processedFilenames = []; // Track processed filenames to prevent duplicates
 
         // Handle existing images for updates
         if ($request->input('is_update') == '1') {
@@ -797,6 +817,8 @@ class GuidingsController extends Controller
                 $imagePathWithSlash = '/' . $existingImage;
                 if (in_array($imagePath, $keepImages) || in_array($imagePathWithSlash, $keepImages)) {
                     $galeryImages[] = $existingImage;
+                    // Track this image as processed to prevent duplicates
+                    $processedFilenames[] = basename($existingImage);
                 } else {
                     media_delete($existingImage);
                 }
@@ -809,13 +831,21 @@ class GuidingsController extends Controller
             $tempSlug = slugify(($request->input('title') ?? 'temp') . "-in-" . ($request->input('location') ?? 'location'));
             
             foreach($request->file('title_image') as $index => $image) {
-                $filename = 'guidings-images/'.$image->getClientOriginalName();
-                if (in_array($filename, $imageList) || in_array('/' . $filename, $imageList)) {
+                $originalFilename = $image->getClientOriginalName();
+                $filename = 'guidings-images/'.$originalFilename;
+                
+                // Check if this image was already processed (existing image)
+                if (in_array($originalFilename, $processedFilenames)) {
                     continue;
                 }
-                $index = $index + $imageCount;
-                $webp_path = media_upload($image, 'guidings-images', $tempSlug. "-". $index . "-" . time());
-                $galeryImages[] = $webp_path;
+                
+                // Check if this image is in the image_list (new image that should be kept)
+                if (in_array($filename, $imageList) || in_array('/' . $filename, $imageList)) {
+                    $index = $index + $imageCount;
+                    $webp_path = media_upload($image, 'guidings-images', $tempSlug. "-". $index . "-" . time());
+                    $galeryImages[] = $webp_path;
+                    $processedFilenames[] = $originalFilename; // Track as processed
+                }
             }
         }
 
@@ -1106,6 +1136,7 @@ class GuidingsController extends Controller
         // Step 1: Images
         $galeryImages = [];
         $imageList = json_decode($request->input('image_list', '[]')) ?? [];
+        $processedFilenames = []; // Track processed filenames to prevent duplicates
 
         if ($request->input('is_update') == '1') {
             $existingImagesJson = $request->input('existing_images');
@@ -1117,6 +1148,8 @@ class GuidingsController extends Controller
                 $imagePathWithSlash = '/' . $existingImage;
                 if (in_array($imagePath, $keepImages) || in_array($imagePathWithSlash, $keepImages)) {
                     $galeryImages[] = $existingImage;
+                    // Track this image as processed to prevent duplicates
+                    $processedFilenames[] = basename($existingImage);
                 } else {
                     media_delete($existingImage);
                 }
@@ -1126,13 +1159,21 @@ class GuidingsController extends Controller
         if ($request->has('title_image')) {
             $imageCount = count($galeryImages);
             foreach($request->file('title_image') as $index => $image) {
-                $filename = 'guidings-images/'.$image->getClientOriginalName();
-                if (in_array($filename, $imageList) || in_array('/' . $filename, $imageList)) {
+                $originalFilename = $image->getClientOriginalName();
+                $filename = 'guidings-images/'.$originalFilename;
+                
+                // Check if this image was already processed (existing image)
+                if (in_array($originalFilename, $processedFilenames)) {
                     continue;
                 }
-                $index = $index + $imageCount;
-                $webp_path = media_upload($image, 'guidings-images', $guiding->slug. "-". $index . "-" . time(), 75, $guiding->id);
-                $galeryImages[] = $webp_path;
+                
+                // Check if this image is in the image_list (new image that should be kept)
+                if (in_array($filename, $imageList) || in_array('/' . $filename, $imageList)) {
+                    $index = $index + $imageCount;
+                    $webp_path = media_upload($image, 'guidings-images', $guiding->slug. "-". $index . "-" . time(), 75, $guiding->id);
+                    $galeryImages[] = $webp_path;
+                    $processedFilenames[] = $originalFilename; // Track as processed
+                }
             }
         }
 
@@ -1184,13 +1225,31 @@ class GuidingsController extends Controller
         })->toArray();
         $guiding->water_types = json_encode($waterTypes);
 
-        // Step 4: Descriptions
-        $guiding->desc_course_of_action = $request->input('desc_course_of_action', '');
-        $guiding->desc_meeting_point = $request->input('desc_meeting_point', '');
-        $guiding->meeting_point = $request->input('meeting_point', '');
-        $guiding->desc_starting_time = $request->input('desc_starting_time', '');
-        $guiding->desc_departure_time = $request->has('desc_departure_time') ? json_encode($request->input('desc_departure_time')) : json_encode([]);
-        $guiding->desc_tour_unique = $request->input('desc_tour_unique', '');
+        // Step 4: Descriptions - Only update if provided in current request
+        if ($request->has('desc_course_of_action')) {
+            $guiding->desc_course_of_action = $request->input('desc_course_of_action', '');
+        }
+        if ($request->has('desc_meeting_point')) {
+            $guiding->desc_meeting_point = $request->input('desc_meeting_point', '');
+        }
+        if ($request->has('meeting_point')) {
+            $guiding->meeting_point = $request->input('meeting_point', '');
+        }
+        if ($request->has('desc_starting_time')) {
+            $guiding->desc_starting_time = $request->input('desc_starting_time', '');
+        }
+        $departureTimeInput = $request->input('desc_departure_time');
+        $hasDepartureTime = $request->has('desc_departure_time');
+        
+        // Only update departure time if it's provided in the current request
+        // Otherwise, preserve existing data (important for draft saves)
+        if ($hasDepartureTime) {
+            $guiding->desc_departure_time = json_encode($departureTimeInput);
+        }
+        // If not provided, keep existing value (don't overwrite with empty array)
+        if ($request->has('desc_tour_unique')) {
+            $guiding->desc_tour_unique = $request->input('desc_tour_unique', '');
+        }
         $guiding->description = $request->input('desc_course_of_action', $this->generateLongDescription($request));
 
         // Step 5: Requirements, recommendations, other info
@@ -1297,12 +1356,17 @@ class GuidingsController extends Controller
             );
         }
 
-        $guiding->weekday_availability = $request->input('weekday_availability', 'all_week');
-        if ($request->input('weekday_availability') === 'all_week') {
-            $guiding->weekdays = json_encode(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']);
-        } else {
-            $guiding->weekdays = $request->has('weekdays') ? json_encode($request->input('weekdays')) : json_encode([]);
+        // Only update weekday availability if it's provided in the current request
+        // Otherwise, preserve existing data (important for draft saves)
+        if ($request->has('weekday_availability')) {
+            $guiding->weekday_availability = $request->input('weekday_availability');
+            if ($request->input('weekday_availability') === 'all_week') {
+                $guiding->weekdays = json_encode(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']);
+            } else {
+                $guiding->weekdays = $request->has('weekdays') ? json_encode($request->input('weekdays')) : json_encode([]);
+            }
         }
+        // If not provided, keep existing values (don't overwrite)
     }
 
     private function saveDescriptions( $request)
@@ -1468,8 +1532,11 @@ class GuidingsController extends Controller
 
     public function edit_newguiding(Guiding $guiding)
     {
+        \Log::info('DEBUG: edit_newguiding method called', ['guiding_id' => $guiding->id]);
+        
         // Ensure the user has permission to edit this guiding
         if ($guiding->user_id !== auth()->id()) {
+            \Log::info('DEBUG: User not authorized', ['user_id' => auth()->id(), 'guiding_user_id' => $guiding->user_id]);
             abort(403, 'Unauthorized action.');
         }
 
@@ -1477,6 +1544,13 @@ class GuidingsController extends Controller
         $guiding->load([
             'guidingTargets', 'guidingWaters', 'guidingMethods', 
             'fishingTypes', 'fishingFrom'
+        ]);
+        
+        \Log::info('DEBUG: edit_newguiding - Raw data from database', [
+            'guiding_id' => $guiding->id,
+            'raw_desc_departure_time' => $guiding->desc_departure_time,
+            'raw_weekday_availability' => $guiding->weekday_availability,
+            'raw_weekdays' => $guiding->weekdays
         ]);
 
         // Prepare data for the form
@@ -1515,7 +1589,7 @@ class GuidingsController extends Controller
             'long_description' => $guiding->description,
             'desc_course_of_action' => $guiding->desc_course_of_action,
             'desc_starting_time' => $guiding->desc_starting_time,
-            'desc_departure_time' => json_decode($guiding->desc_departure_time, true),
+            'desc_departure_time' => ($departureTimes = json_decode($guiding->desc_departure_time, true)),
             'desc_meeting_point' => $guiding->desc_meeting_point,
             'desc_tour_unique' => $guiding->desc_tour_unique,
             
@@ -1544,6 +1618,16 @@ class GuidingsController extends Controller
             'weekday_availability' => $guiding->weekday_availability,
             'weekdays' => json_decode($guiding->weekdays, true),
         ];
+
+        \Log::info('DEBUG: edit_newguiding - form data for frontend', [
+            'desc_departure_time' => $formData['desc_departure_time'],
+            'weekday_availability' => $formData['weekday_availability'],
+            'weekdays' => $formData['weekdays'],
+            'raw_desc_departure_time_from_db' => $guiding->desc_departure_time,
+            'raw_weekday_availability_from_db' => $guiding->weekday_availability,
+            'raw_weekdays_from_db' => $guiding->weekdays
+        ]);
+
 
         $locale = Config::get('app.locale');
         $nameField = $locale == 'en' ? 'name_en' : 'name';
@@ -1726,11 +1810,6 @@ class GuidingsController extends Controller
             if ($isUpdate && $request->input('guiding_id')) {
                 $guiding = Guiding::findOrFail($request->input('guiding_id'));
                 $originalStatus = $guiding->status;
-                Log::info('SaveDraftSync: Found existing guiding', [
-                    'guiding_id' => $guiding->id,
-                    'original_status' => $originalStatus,
-                    'is_update' => $isUpdate
-                ]);
             } else {
                 $guiding = Guiding::where('user_id', auth()->id())
                     ->where('status', 2)
@@ -1742,7 +1821,6 @@ class GuidingsController extends Controller
 
                 if (!$guiding) {
                     $guiding = new Guiding(['user_id' => auth()->id()]);
-                    Log::info('SaveDraftSync: Creating new guiding');
                 } else {
                     Log::info('SaveDraftSync: Found existing draft guiding', [
                         'guiding_id' => $guiding->id,
@@ -1765,29 +1843,16 @@ class GuidingsController extends Controller
             if ($isUpdate && ((int)$originalStatus === 1 || (int)$originalStatus === 0)) {
                 // Preserve original status if it was published (1) or disabled (0)
                 $guiding->status = $originalStatus;
-                Log::info('SaveDraftSync: Preserving original status', [
-                    'guiding_id' => $guiding->id,
-                    'original_status' => $originalStatus,
-                    'preserved_status' => $guiding->status
-                ]);
             } else {
                 // Set to draft for new guidings or guidings that were already drafts
                 $guiding->status = 2;
-                Log::info('SaveDraftSync: Setting to draft status', [
-                    'guiding_id' => $guiding->id,
-                    'original_status' => $originalStatus,
-                    'new_status' => $guiding->status,
-                    'reason' => $isUpdate ? 'was already draft (status 2)' : 'new guiding'
-                ]);
             }
+
+            // Fill the guiding with form data (this was missing!)
+            $this->fillGuidingFromRequest($guiding, $request, true);
 
             $guiding->save();
             DB::commit();
-
-            Log::info('SaveDraftSync: Successfully saved', [
-                'guiding_id' => $guiding->id,
-                'final_status' => $guiding->status
-            ]);
 
             return response()->json([
                 'success' => true,

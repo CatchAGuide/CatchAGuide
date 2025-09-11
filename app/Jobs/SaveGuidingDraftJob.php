@@ -134,14 +134,28 @@ class SaveGuidingDraftJob implements ShouldQueue
         $guiding->fishing_type_id = $this->guidingData['style_of_fishing'] ?? 3;
         $guiding->water_types = json_encode($this->guidingData['water_types'] ?? []);
 
-        // Descriptions
-        $guiding->desc_course_of_action = $this->guidingData['desc_course_of_action'] ?? '';
-        $guiding->desc_meeting_point = $this->guidingData['desc_meeting_point'] ?? '';
-        $guiding->meeting_point = $this->guidingData['meeting_point'] ?? '';
-        $guiding->desc_starting_time = $this->guidingData['desc_starting_time'] ?? '';
-        $guiding->desc_departure_time = json_encode($this->guidingData['desc_departure_time'] ?? []);
-        $guiding->desc_tour_unique = $this->guidingData['desc_tour_unique'] ?? '';
-        $guiding->description = $this->guidingData['description'] ?? '';
+        // Descriptions - Only update if provided, preserve existing data otherwise
+        if (isset($this->guidingData['desc_course_of_action'])) {
+            $guiding->desc_course_of_action = $this->guidingData['desc_course_of_action'];
+        }
+        if (isset($this->guidingData['desc_meeting_point'])) {
+            $guiding->desc_meeting_point = $this->guidingData['desc_meeting_point'];
+        }
+        if (isset($this->guidingData['meeting_point'])) {
+            $guiding->meeting_point = $this->guidingData['meeting_point'];
+        }
+        if (isset($this->guidingData['desc_starting_time'])) {
+            $guiding->desc_starting_time = $this->guidingData['desc_starting_time'];
+        }
+        if (isset($this->guidingData['desc_departure_time'])) {
+            $guiding->desc_departure_time = json_encode($this->guidingData['desc_departure_time']);
+        }
+        if (isset($this->guidingData['desc_tour_unique'])) {
+            $guiding->desc_tour_unique = $this->guidingData['desc_tour_unique'];
+        }
+        if (isset($this->guidingData['description'])) {
+            $guiding->description = $this->guidingData['description'];
+        }
 
         // Requirements, recommendations, other info
         $guiding->requirements = json_encode($this->guidingData['requirements'] ?? []);
@@ -167,8 +181,12 @@ class SaveGuidingDraftJob implements ShouldQueue
         $guiding->booking_window = $this->guidingData['booking_window'] ?? '';
         $guiding->seasonal_trip = $this->guidingData['seasonal_trip'] ?? '';
         $guiding->months = json_encode($this->guidingData['months'] ?? []);
-        $guiding->weekday_availability = $this->guidingData['weekday_availability'] ?? 'all_week';
-        $guiding->weekdays = json_encode($this->guidingData['weekdays'] ?? []);
+        
+        // Only update weekday availability if provided, preserve existing data otherwise
+        if (isset($this->guidingData['weekday_availability'])) {
+            $guiding->weekday_availability = $this->guidingData['weekday_availability'];
+            $guiding->weekdays = json_encode($this->guidingData['weekdays'] ?? []);
+        }
     }
 
     /**
