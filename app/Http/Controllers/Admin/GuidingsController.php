@@ -146,6 +146,7 @@ class GuidingsController extends Controller
             'long_description' => $guiding->description,
             'desc_course_of_action' => $guiding->desc_course_of_action,
             'desc_starting_time' => $guiding->desc_starting_time,
+            'desc_departure_time' => json_decode($guiding->desc_departure_time, true),
             'desc_meeting_point' => $guiding->desc_meeting_point,
             'desc_tour_unique' => $guiding->desc_tour_unique,
             
@@ -171,6 +172,8 @@ class GuidingsController extends Controller
             'seasonal_trip' => $guiding->seasonal_trip,
             'months' => json_decode($guiding->months, true),
             'other_boat_info' => $guiding->additional_information,
+            'weekday_availability' => $guiding->weekday_availability,
+            'weekdays' => json_decode($guiding->weekdays, true),
         ];
 
         $locale = Config::get('app.locale');

@@ -19,39 +19,6 @@ class ICalFeedController extends Controller
     }
 
     /**
-     * Show a specific iCal feed
-     */
-    public function show(ICalFeed $feed)
-    {
-        // Ensure user owns this feed
-        if ($feed->user_id !== Auth::id()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized'
-            ], 403);
-        }
-
-        try {
-            return response()->json([
-                'success' => true,
-                'feed' => $feed
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Failed to get iCal feed', [
-                'feed_id' => $feed->id,
-                'user_id' => Auth::id(),
-                'error' => $e->getMessage()
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to get iCal feed: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
      * Store a new iCal feed
      */
     public function store(Request $request)

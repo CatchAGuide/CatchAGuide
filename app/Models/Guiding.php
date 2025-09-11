@@ -104,6 +104,7 @@ class Guiding extends Model
         'months',
         'weekdays',
         'seasonal_trip',
+        'weekday_availability',
         'allowed_booking_advance',
         'booking_window',
         'gallery_images',
@@ -112,6 +113,7 @@ class Guiding extends Model
         'desc_course_of_action',
         'desc_meeting_point',
         'desc_starting_time',
+        'desc_departure_time',
         'desc_tour_unique'
     ];
 
