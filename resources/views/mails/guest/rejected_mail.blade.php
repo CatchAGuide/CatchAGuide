@@ -13,7 +13,7 @@
         <div class="content-header" style="padding: 20px;">
             <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">@lang('emails.dear') {{$user->firstname}},</p>
             <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
-            {!! $booking->textNote !!}
+            @lang('emails.guest_booking_request_processing')
             </p>
             <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
                 @lang('emails.guest_booking_request_cancelled_text_2') {{ $booking->guideName }}:
@@ -24,23 +24,42 @@
 
             <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">@php echo str_replace('[Guide Name]', $booking->guideName, __('emails.guest_booking_request_cancelled_text_4')) @endphp</p>
 
-            <ul>
+            <div style="margin: 20px 0; text-align: center;">
                 @if($booking->alternativeDates)
-                    @foreach($booking->alternativeDates as $date)
-                    <li>
-                        <a style="font-size: 14px; font-family: 'Morrison', sans-serif;" href="{{ route('booking.reschedule', ['token' => $booking->token]) }}?date={{ $date }}" style="font-size:14px; color:#e8604c; text-decoration:underline; cursor:pointer;" target="_blank">{{ date('F j, Y', strtotime($date)) }}</a>
-                    </li>
-                    @endforeach
+                    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 15px 0;">
+                        @foreach($booking->alternativeDates as $date)
+                        <a href="{{ route('booking.reschedule', ['token' => $booking->token]) }}?date={{ $date }}" 
+                           style="display: inline-block; 
+                                  background-color: #e8604c; 
+                                  color: #ffffff !important; 
+                                  padding: 8px 16px; 
+                                  text-decoration: none; 
+                                  border-radius: 6px; 
+                                  font-size: 12px; 
+                                  font-family: 'Morrison', sans-serif; 
+                                  font-weight: bold;
+                                  box-shadow: 0 2px 4px rgba(232, 96, 76, 0.3);
+                                  transition: all 0.3s ease;
+                                  border: 2px solid #e8604c;
+                                  min-width: 120px;
+                                  text-align: center;" 
+                           target="_blank"
+                           onmouseover="this.style.backgroundColor='#d54a3a'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(232, 96, 76, 0.4)';"
+                           onmouseout="this.style.backgroundColor='#e8604c'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(232, 96, 76, 0.3)';">
+                            {{ date('F j, Y', strtotime($date)) }}
+                        </a>
+                        @endforeach
+                    </div>
                 @else
                     <p style="font-size: 14px; font-family: 'Morrison', sans-serif;"> @lang('emails.guest_booking_request_cancelled_text_5')</p>
                 @endif
-            </ul>
+            </div>
         </div>
         <div style="padding: 0 20px;">
             <p style="font-size: 14px; font-family: 'Morrison', sans-serif;"> @lang('emails.guest_booking_request_cancelled_text_6')</p>
         </div>
         <div style="text-align: center; margin: 2rem 0;">
-            <a style="background-color: #e8604c; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px; font-family: 'Morrison', sans-serif;" href="{{route('additional.contact')}}" target="_blank">@lang('emails.contact_us')</a>
+            <a style="background-color: #313041; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px; font-family: 'Morrison', sans-serif;" href="{{route('additional.contact')}}" target="_blank">@lang('emails.contact_us')</a>
         </div>
     </div>
     <div style="padding: 0 20px;">

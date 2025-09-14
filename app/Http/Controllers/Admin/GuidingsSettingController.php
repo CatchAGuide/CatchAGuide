@@ -376,7 +376,8 @@ class GuidingsSettingController extends Controller
             'firstname' => 'John',
             'lastname' => 'Doe',
             'email' => 'john.doe@example.com',
-            'phone' => '+49 123 456 7890'
+            'phone' => '+49 123 456 7890',
+            'phone_country_code' => '+49'
         ];
         
         // Create mock guide
@@ -405,6 +406,7 @@ class GuidingsSettingController extends Controller
             'book_date' => '2024-02-15',
             'count_of_users' => 2,
             'price' => 299.99,
+            'phone' => '+49 123 456 7890',
             'extras' => serialize([
                 [
                     'extra_name' => 'Fishing Equipment',
@@ -420,7 +422,7 @@ class GuidingsSettingController extends Controller
                 ]
             ]),
             'additional_information' => 'Unfortunately, I have to cancel due to weather conditions. However, I can offer you these alternative dates.',
-            'alternativeDates' => ['2024-02-20', '2024-02-22', '2024-02-25'],
+            'alternativeDates' => ['2024-02-20', '2024-02-22', '2024-02-25', '2024-02-26', '2024-02-28'],
             'textNote' => 'Thank you for your booking request. We have received it and are processing it.',
             'alternativeText' => 'Please let us know if any of the alternative dates work for you.',
             'guideName' => 'Max Mustermann',
@@ -454,9 +456,22 @@ class GuidingsSettingController extends Controller
                 ]);
                 
             case 'guest_booking_request':
+                // Generate textNote using translation system
+                $guideName = $mockGuide->firstname;
+                $textNote = __('emails.guest_booking_request_text_1');
+                $textNote = str_replace('[Guide Name]', $guideName, $textNote);
+                
+                $formattedDate = date('F j, Y', strtotime($mockBooking->book_date));
+                $textNote = str_replace('[Date]', $formattedDate, $textNote);
+                
+                $textNote = str_replace('[Location]', $mockGuiding->location, $textNote);
+                
+                $alternativeText = __('emails.guest_booking_request_text_5');
+                $alternativeText = str_replace('[Guide Name]', $guideName, $alternativeText);
+                
                 return array_merge($baseData, [
-                    'textNote' => 'Thank you for your booking request. We have forwarded it to your selected guide.',
-                    'alternativeText' => 'You will receive a confirmation email once the guide responds to your request.'
+                    'textNote' => $textNote,
+                    'alternativeText' => $alternativeText
                 ]);
                 
             default:

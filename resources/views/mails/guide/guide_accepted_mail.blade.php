@@ -17,7 +17,8 @@
     <div class="content" style="padding-bottom: 0px;">
         <div class="content-header" style="padding: 20px;">
             <p style="font-size: 14px; margin-top: 0;">{{__('emails.dear')}} {{$guide->firstname}},</p>
-            <p style="font-size: 14px;">{{__('emails.guide_booking_accepted_text_1')}}</p>
+            <p style="font-size: 14px;">{!!__('emails.guide_booking_accepted_text_1')!!}</p>
+            <p style="font-size: 14px;"><b><u>{!!__('emails.guide_booking_accepted_text_1_1')!!}</u></b></p>
         </div>
     </div>
     <div class="order-details" style="border: 1px solid rgb(132, 132, 132); padding: 10px; border-radius: 12px; margin: 20px;">
@@ -25,10 +26,10 @@
         <div class="booking-details">
             <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_7')}} </strong>{{$user->firstname}}</p>
             <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_8')}} </strong>
-                @if($booking->phone)
+                @if(isset($booking->phone) && $booking->phone)
                     {{$booking->phone}}
                 @else
-                    {{$user->phone_country_code}} {{$user->phone ?? $user->information->phone ?? null}}
+                    {{$user->phone_country_code ?? ''}} {{$user->phone ?? $user->information->phone ?? null}}
                 @endif
             </p>
             <p style="font-size: 14px;"><strong>{{__('emails.guide_booking_accepted_text_9')}} </strong>{{$user->email}}</p>

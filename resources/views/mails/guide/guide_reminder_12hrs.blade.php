@@ -17,7 +17,8 @@
             <div style="margin-top: 2rem;">
                 <p style="font-size: 14px;">@lang('emails.guide_reminder_to_respond_12hrs_text_2')</p>
                 <div style="text-align: center; margin-top: 2rem;">
-                    <a style="background-color: #e8604c; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px; display: inline-block;" href="{{route('additional.contact')}}" target="_blank">@lang('emails.contact_us')</a>
+                    <a style="background-color: #e8604c; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px; display: inline-block;" href="{{route('profile.bookings', ['id' => $booking->id])}}" target="_blank">@lang('emails.view_bookings')</a>
+                    <a style="background-color: #313041; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px; display: inline-block; margin-right: 10px;" href="{{route('additional.contact')}}" target="_blank">@lang('emails.contact_us')</a>
                 </div>
             </div>
         </div>

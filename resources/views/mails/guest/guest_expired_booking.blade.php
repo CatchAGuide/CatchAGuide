@@ -16,18 +16,18 @@
             <p>@lang('emails.guest_booking_request_expired_text_2')</p>
             <div style="margin-top:20px;">
                 <p>
-                @lang('emails.guest_booking_request_expired_text_3')
-                </p>
-                <div style="text-align:center; margin-top: 2rem;">
-                    <a class="btn-theme" style="background-color: #e8604c;padding:10px 20px;color:#fff !important;border:0;text-decoration: none;margin-top:30px;" href="{{route('additional.contact')}}" target="_blank">@lang('emails.contact_us')</a>
-                </div>
-            </div>
-            <div style="margin-top:20px;">
-                <p>
                 @lang('emails.guest_booking_request_expired_text_4')
                 </p>
                 <div style="text-align:center; margin-top: 2rem;">
                     <a class="btn-theme" style="background-color: #e8604c;padding:10px 20px;color:#fff !important;border:0;text-decoration: none;margin-top:30px;" href="{{route('guidings.index')}}" target="_blank">@lang('emails.guest_booking_request_expired_find_other_fishing_tours')</a>
+                </div>
+            </div>
+            <div style="margin-top:20px;">
+                <p>
+                @lang('emails.guest_booking_request_expired_text_3')
+                </p>
+                <div style="text-align:center; margin-top: 2rem;">
+                    <a class="btn-theme" style="background-color: #313041;padding:10px 20px;color:#fff !important;border:0;text-decoration: none;margin-top:30px;" href="{{route('additional.contact')}}" target="_blank">@lang('emails.contact_us')</a>
                 </div>
             </div>
         </div>

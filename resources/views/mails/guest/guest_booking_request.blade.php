@@ -8,7 +8,7 @@
             <img src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_JPEG.jpg" alt="Catchaguide Logo" style="max-width: 150px; padding-top: 10px;">
         </a>
         <h2>
-        @lang('emails.guest_booking_request_title')
+        {!! __('emails.guest_booking_request_title') !!}
         </h2>
     </div>
     <div>
@@ -23,7 +23,7 @@
     </div>
     <div style="border:1px solid rgb(132, 132, 132); padding:10px; border-radius: 12px; margin: 0 20px 20px 20px;">
         <div>
-            <p style="font-size:14px;"> @lang('emails.guest_booking_request_text_3')</p>
+            <p style="font-size:14px;"> {!! __('emails.guest_booking_request_text_3') !!}</p>
         </div>
         <div>
             <p style="font-size:14px;"><strong>{{__('emails.guide_name')}}:</strong> {{$guide->firstname}}</p>
