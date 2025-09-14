@@ -13,12 +13,13 @@
         <div style="padding: 20px;">
             <p style="font-size: 14px; font-family: 'Arial', sans-serif;">@lang('emails.dear') {{$guide->user->firstname}},</p>
             <p style="font-size: 14px; font-family: 'Arial', sans-serif;">{!! str_replace('[Guest Name]', $booking->user->firstname, str_replace('[Location]', $guide->location, str_replace('[Date]', date('F j, Y', strtotime($booking->book_date)), __('emails.guide_reminder_upcoming_tour_text_1')))) !!}</p>
+            <p style="font-size: 14px; font-family: 'Arial', sans-serif;">{!! str_replace('[Guest Name]', $booking->user->firstname, __('emails.guide_reminder_upcoming_tour_text_1_1')) !!}</p>
             <ul>
                 <li>
-                    <p style="font-size: 14px; font-family: 'Arial', sans-serif;">@lang('emails.guide_reminder_upcoming_tour_text_2')</p>
+                    <p style="font-size: 14px; font-family: 'Arial', sans-serif;">{!! __('emails.guide_reminder_upcoming_tour_text_2') !!}</p>
                 </li>
                 <li>
-                    <p style="font-size: 14px; font-family: 'Arial', sans-serif;">@lang('emails.guide_reminder_upcoming_tour_text_3')</p>
+                    <p style="font-size: 14px; font-family: 'Arial', sans-serif;">{!! __('emails.guide_reminder_upcoming_tour_text_3') !!}</p>
                 </li>
                 <li>
                     <p style="font-size: 14px; font-family: 'Arial', sans-serif;">{!! str_replace('[Location]', $guide->location, __('emails.guide_reminder_upcoming_tour_text_4')) !!}</p>

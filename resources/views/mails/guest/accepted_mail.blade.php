@@ -24,7 +24,7 @@
                 <h4 style="font-family: 'Morrison', sans-serif;">@lang('emails.guest_booking_request_accepted_text_3')</h4>
                 <div style="margin-top: 10px; font-family: 'Morrison', sans-serif;">
                     <p><strong>{{__('emails.guest_booking_accepted_text_7')}}</strong> {{$guide->firstname}}</p>
-                    <p><strong>{{__('emails.guest_booking_accepted_text_8')}}</strong> {{$guide->phone_country_code}} {{$guide->phone ?? $guide->information->phone ?? null}}</p>
+                    <p><strong>{{__('emails.guest_booking_accepted_text_8')}}</strong> {{$guide->phone_country_code ?? ''}} {{$guide->phone ?? $guide->information->phone ?? null}}</p>
                     <p><strong>{{__('emails.guest_booking_accepted_text_9')}}</strong> {{$guide->email}}</p>
                     <p><strong>{{__('emails.tour')}}:</strong> <a href="{{route('guidings.show', ['id' => $guiding->id, 'slug' => $guiding->slug])}}" target="_blank">{{$guiding->title}}</a></p>
                     <p><strong>{{__('emails.location')}}:</strong> {{$guiding->location}}</p>
@@ -75,6 +75,11 @@
             </div>
 
             <div style="margin-top: 20px; font-family: 'Morrison', sans-serif;">
+                <h4 style="font-family: 'Morrison', sans-serif; font-size: 14px; margin-bottom: 10px;">@lang('emails.guest_booking_request_accepted_next_steps')</h4>
+                <ul style="font-size: 14px; font-family: 'Morrison', sans-serif; padding-left: 20px; margin-bottom: 20px; list-style-type: disc;">
+                    <li>@lang('emails.guest_booking_request_accepted_payment_steps')</li>
+                    <li>@lang('emails.guest_booking_request_accepted_payment_process')</li>
+                </ul>
                 <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
                     @lang('emails.guest_booking_request_accepted_text_4') 
                 </p>

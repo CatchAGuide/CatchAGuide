@@ -19,6 +19,7 @@
             <p style="font-size: 14px;">@lang('emails.dear') {{$guide->firstname}},</p>
             <p style="font-size: 14px;margin-bottom: 0px;">
                 @lang('emails.guide_new_booking_request_text_1')
+                @lang('emails.guide_new_booking_request_text_1_1')
             </p>
         </div>
     </div>

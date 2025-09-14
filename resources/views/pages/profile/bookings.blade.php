@@ -932,7 +932,7 @@
                         
                         <div class="booking-actions">
                             <!-- {{ __('profile.view_details') }} button for all statuses -->
-                            <button class="btn-action btn-primary" data-bs-toggle="modal" data-bs-target="#detailsModal{{ $index }}">
+                            <button class="btn-action btn-primary" data-bs-toggle="modal" data-bs-target="#detailsModal{{ $booking->id }}">
                                 <i class="fas fa-eye"></i> {{ __('profile.view_details') }}
                             </button>
 
@@ -943,7 +943,7 @@
                                     </a>
                                 @endif
                                 
-                                <button class="btn-action btn-info" data-bs-toggle="modal" data-bs-target="#contactModal{{ $index }}">
+                                <button class="btn-action btn-info" data-bs-toggle="modal" data-bs-target="#contactModal{{ $booking->id }}">
                                     <i class="fas fa-envelope"></i> Contact Guide
                                 </button>
                             @elseif($booking->status == 'pending')
@@ -951,7 +951,7 @@
                                     <i class="fas fa-clock"></i> {{ __('profile.waiting_for_response') }}
                                 </span>
                             @elseif(in_array($booking->status, ['cancelled', 'rejected', 'storniert']))
-                                <button class="btn-action btn-danger" data-bs-toggle="modal" data-bs-target="#rejectionModal{{ $index }}" 
+                                <button class="btn-action btn-danger" data-bs-toggle="modal" data-bs-target="#rejectionModal{{ $booking->id }}">
                                     <i class="fas fa-exclamation-triangle"></i> {{ $booking->status == 'cancelled' ? __('profile.cancellation_details') : 'Rejection' }} Details
                                 </button>
                             @endif
@@ -960,7 +960,7 @@
                 </div>
 
                 <!-- Details Modal for {{ __('profile.my_booking') }}s -->
-                <div class="modal fade booking-details-modal" id="detailsModal{{ $index }}" tabindex="-1">
+                <div class="modal fade booking-details-modal" id="detailsModal{{ $booking->id }}" tabindex="-1">
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -1096,7 +1096,7 @@
                     </div>
 
                 <!-- Contact Modal for {{ __('profile.my_booking') }}s -->
-                <div class="modal fade contact-modal" id="contactModal{{ $index }}" tabindex="-1">
+                <div class="modal fade contact-modal" id="contactModal{{ $booking->id }}" tabindex="-1">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -1124,7 +1124,7 @@
 
                 <!-- Rejection Details Modal for {{ __('profile.my_booking') }}s -->
                 @if(in_array($booking->status, ['cancelled', 'rejected', 'storniert']))
-                    <div class="modal fade rejection-details-modal" id="rejectionModal{{ $index }}" tabindex="-1">
+                    <div class="modal fade rejection-details-modal" id="rejectionModal{{ $booking->id }}" tabindex="-1">
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -1324,7 +1324,7 @@
                         
                         <div class="booking-actions">
                             <!-- {{ __('profile.view_details') }} button for all statuses -->
-                            <button class="btn-action btn-primary" data-bs-toggle="modal" data-bs-target="#guideDetailsModal{{ $gIndex }}">
+                            <button class="btn-action btn-primary" data-bs-toggle="modal" data-bs-target="#guideDetailsModal{{ $booking->id }}">
                                 <i class="fas fa-eye"></i> {{ __('profile.view_details') }}
                             </button>
 
@@ -1336,11 +1336,11 @@
                                     <i class="fas fa-times"></i> Reject
                                 </a>
                             @elseif($booking->status == 'accepted')
-                                <button class="btn-action btn-info" data-bs-toggle="modal" data-bs-target="#guideContactModal{{ $gIndex }}">
+                                <button class="btn-action btn-info" data-bs-toggle="modal" data-bs-target="#guideContactModal{{ $booking->id }}">
                                     <i class="fas fa-envelope"></i> Contact Customer
                                 </button>
                             @elseif(in_array($booking->status, ['cancelled', 'rejected', 'storniert']))
-                                <button class="btn-action btn-danger" data-bs-toggle="modal" data-bs-target="#guideRejectionModal{{ $gIndex }}">
+                                <button class="btn-action btn-danger" data-bs-toggle="modal" data-bs-target="#guideRejectionModal{{ $booking->id }}">
                                     <i class="fas fa-exclamation-triangle"></i> {{ $booking->status == 'cancelled' ? __('profile.cancellation_details') : 'Rejection' }} Details
                                 </button>
                             @endif
@@ -1349,7 +1349,7 @@
                 </div>
 
                 <!-- Details Modal for {{ __('profile.guide_booking') }}s -->
-                <div class="modal fade booking-details-modal" id="guideDetailsModal{{ $gIndex }}" tabindex="-1">
+                <div class="modal fade booking-details-modal" id="guideDetailsModal{{ $booking->id }}" tabindex="-1">
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -1457,7 +1457,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     @if($booking->status == 'accepted')
-                                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#guideContactModal{{ $gIndex }}" data-bs-dismiss="modal">
+                                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#guideContactModal{{ $booking->id }}" data-bs-dismiss="modal">
                                             <i class="fas fa-envelope"></i> Contact Client
                                         </button>
                                     @endif
@@ -1468,7 +1468,7 @@
                     </div>
 
                 <!-- Contact Modal for {{ __('profile.guide_booking') }}s -->
-                <div class="modal fade contact-modal" id="guideContactModal{{ $gIndex }}" tabindex="-1">
+                <div class="modal fade contact-modal" id="guideContactModal{{ $booking->id }}" tabindex="-1">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -1496,7 +1496,7 @@
 
                 <!-- Rejection Details Modal for {{ __('profile.guide_booking') }}s -->
                 @if(in_array($booking->status, ['cancelled', 'rejected', 'storniert']))
-                    <div class="modal fade rejection-details-modal" id="guideRejectionModal{{ $gIndex }}" tabindex="-1">
+                    <div class="modal fade rejection-details-modal" id="guideRejectionModal{{ $booking->id }}" tabindex="-1">
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -1864,6 +1864,74 @@
                 // Regular user - run initial filter
                 filterBookings();
             }
+
+            // Auto-open modal if ID is in URL
+            function openModalByBookingId() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const bookingId = urlParams.get('id');
+                
+                if (bookingId) {
+                    // Find the booking card with matching ID
+                    const bookingCards = document.querySelectorAll('.booking-card');
+                    let targetModal = null;
+                    
+                    // First, find the correct booking card and determine its type
+                    bookingCards.forEach((card) => {
+                        // Check if this card contains the booking ID
+                        const bookingIdElement = card.querySelector('.booking-id-tag strong');
+                        if (bookingIdElement) {
+                            const cardBookingId = bookingIdElement.textContent.replace('ID: ', '').trim();
+                            if (cardBookingId === bookingId) {
+                                // Determine which modal to open based on booking type
+                                const isMyBooking = card.classList.contains('my-booking');
+                                const isGuideBooking = card.classList.contains('guide-booking');
+                                
+                                if (isMyBooking) {
+                                    targetModal = document.getElementById(`detailsModal${bookingId}`);
+                                } else if (isGuideBooking) {
+                                    targetModal = document.getElementById(`guideDetailsModal${bookingId}`);
+                                }
+                            }
+                        }
+                    });
+                    
+                    // If not found in current cards, try to find by looking at all modals
+                    if (!targetModal) {
+                        // Look for modals that contain the booking ID in their title or content
+                        const allModals = document.querySelectorAll('.modal[id*="Modal"]');
+                        allModals.forEach(modal => {
+                            const modalTitle = modal.querySelector('.modal-title');
+                            if (modalTitle && modalTitle.textContent.includes(`#${bookingId}`)) {
+                                targetModal = modal;
+                            }
+                        });
+                    }
+                    
+                    // Open the modal if found
+                    if (targetModal) {
+                        // Use Bootstrap 5 modal API
+                        const modal = new bootstrap.Modal(targetModal);
+                        modal.show();
+                        
+                        // Clean up URL by removing the ID parameter
+                        const newUrl = new URL(window.location);
+                        newUrl.searchParams.delete('id');
+                        window.history.replaceState({}, '', newUrl);
+                        
+                        console.log(`Opened modal for booking ID ${bookingId}`);
+                    } else {
+                        console.warn(`Booking with ID ${bookingId} not found. Available booking IDs:`, 
+                            Array.from(bookingCards).map(card => {
+                                const idElement = card.querySelector('.booking-id-tag strong');
+                                return idElement ? idElement.textContent.replace('ID: ', '').trim() : 'N/A';
+                            })
+                        );
+                    }
+                }
+            }
+            
+            // Call the function after a short delay to ensure all elements are loaded
+            setTimeout(openModalByBookingId, 100);
         });
     </script>
 @endsection

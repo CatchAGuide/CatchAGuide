@@ -24,12 +24,15 @@
                 <li>
                     <p style="font-size: 14px;">{!!__('emails.guest_tour_reminder_text_3')!!}</p>
                 </li>
-                <li>
+                {{-- <li>
                     <p style="font-size: 14px;">{!!__('emails.guest_tour_reminder_text_4')!!}</p>
-                </li>
+                </li> --}}
             </ul>
             <p style="font-size: 14px;">
                 {!!str_replace('[Guide Name]', $guideName, __('emails.guest_tour_reminder_text_5'))!!}
+            </p>
+            <p style="font-size: 14px;">
+                {!! __('emails.guest_tour_reminder_text_4')!!}
             </p>
             <div style="text-align: center; margin-top: 2rem;">
                 <p style="font-size: 14px; text-align: left; " >{!!__('emails.guest_tour_reminder_text_6')!!}</p>
