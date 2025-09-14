@@ -2,7 +2,7 @@
 
 return [
     'thank_you' => 'Thank you for your reservation!',
-    'booking_success_message' => 'Your booking request has been successfully received by the guide. You will be notified of the guide\'s response by email within the next 72 hours.',
+    'booking_success_message' => 'Your booking request has been successfully received by the guide. You will be notified of the guide\'s response by email within the next 48 hours.',
     'email_notification_message' => 'An email confirmation has been sent to your email address with all the booking details.',
     'booking_information' => 'Booking Information',
     'booking_id' => 'Booking ID',

@@ -155,11 +155,11 @@ class BookingController extends Controller
         $fee = $helperService->calculateRates($request->total_price);
         
         // Set expiration time based on date difference
-        $expiresAt = Carbon::now()->addHours(24); // Default expiration time (24 hours)
+        $expiresAt = Carbon::now()->addHours(config('booking.default_expiration_hours'));
         $dateDifference = Carbon::parse($request->selectedDate)->diffInDays(Carbon::now());
-        if ($dateDifference > 3) {
-            // If the selected date is more than 3 days from now, add 72 hours to the expiration time
-            $expiresAt = Carbon::now()->addHours(72);
+        if ($dateDifference > config('booking.extended_expiration_days_threshold')) {
+            // If the selected date is more than the threshold days from now, use extended expiration time
+            $expiresAt = Carbon::now()->addHours(config('booking.extended_expiration_hours'));
         }
 
         // Process extras

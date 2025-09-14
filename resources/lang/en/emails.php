@@ -42,10 +42,10 @@ return [
     'guide_new_booking_request_text_3' => 'If you have any questions or need assistance, don\'t hesitate to contact us, and we\'ll be happy to help.',
     'guide_new_booking_request_text_4' => 'Thank you for being a part of our platform, and we look forward to your response.',
 
-    'guide_reminder_to_respond_24hrs_title' => 'Guiding Booking request expires soon - please accept now (24h)',
-    'guide_reminder_to_respond_24hrs_text_1' => 'This is a friendly reminder that you have a pending booking request for a fishing tour that requires your response. You have 24 hours left to confirm or decline the request before it expires',
-    'guide_reminder_to_respond_24hrs_text_2' => 'Please make sure to review the request and respond as soon as possible to secure this booking. If you need any assistance, feel free to reach out to us at any time.',
-    'guide_reminder_to_respond_24hrs_text_3' => 'Thank you for being a part of our platform, and we look forward to your prompt response.',
+    'guide_reminder_to_respond_title' => 'Guiding Booking request expires soon - please accept now ({time})',
+    'guide_reminder_to_respond_text_1' => 'This is a friendly reminder that you have a pending booking request for a fishing tour that requires your response. You have {time} left to confirm or decline the request before it expires.',
+    'guide_reminder_to_respond_text_2' => 'Please make sure to review the request and respond as soon as possible to secure this booking. If you need any assistance, feel free to reach out to us at any time.',
+    'guide_reminder_to_respond_text_3' => 'Thank you for being a part of our platform, and we look forward to your prompt response.',
 
     'guide_booking_accepted_title' => 'Booking confirmed - Please contact your guest now',
     'guide_booking_accepted_text_1' => 'You have successfully accepted a new booking request. Below, you\'ll find all the details of the tour and the guest who booked with you. <b><u>Contact your guest now.</u></b> Please note that the guest has not yet completed payment. It’s important to reach out to them as soon as possible to finalize the trip details and payment.',
@@ -69,10 +69,6 @@ return [
     'guide_booking_expired_text_2' => 'As a reminder, all booking requests on our platform expire after 48 hours if not responded to, ensuring that guests can continue planning their trips without unnecessary delays. We encourage you to respond to new requests as soon as possible to avoid missing out on future opportunities.',
     'guide_booking_expired_text_3' => 'If you need assistance or have any questions, feel free to contact us anytime. We\'re here to support you.',
     
-    'guide_reminder_to_respond_12hrs_title' => 'Guiding Booking request expires soon - please accept now (12h)',
-    'guide_reminder_to_respond_12hrs_text_1' => 'This is a friendly reminder that you have a pending booking request for a fishing tour that requires your response. You have 12 hours left to confirm or decline the request before it expires.',
-    'guide_reminder_to_respond_12hrs_text_2' => 'Please make sure to review the request and respond as soon as possible to secure this booking. If you need any assistance, feel free to reach out to us at any time.',
-    'guide_reminder_to_respond_12hrs_text_3' => 'Thank you for being a part of our platform, and we look forward to your prompt response.',
     
     'guide_reminder_upcoming_tour_title' => 'Your Fishing Tour with [Guest Name] in 3 Days!',
     'guide_reminder_upcoming_tour_text_1' => 'This is a reminder that you have a fishing tour scheduled with [Guest Name] at <b><u>[Location]</u></b> on <b><u>[Date]</u></b>. Please ensure you\'re fully prepared for the tour and have all the necessary equipment and supplies ready.',

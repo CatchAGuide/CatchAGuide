@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 use App\Models\Booking;
-use App\Mail\GuideReminder12Hours;
+use App\Mail\GuideReminder;
 
 class SendGuideReminders12Hours extends Command
 {
@@ -22,7 +22,7 @@ class SendGuideReminders12Hours extends Command
      *
      * @var string
      */
-    protected $description = 'Send reminders to guides 12 hours before booking requests expire';
+    protected $description = 'Send reminders to guides 12 hours before booking requests expire (Legacy command - use bookings:send-guide-reminders-all instead)';
 
     /**
      * Execute the console command.
@@ -32,7 +32,7 @@ class SendGuideReminders12Hours extends Command
     public function handle()
     {
         // Find bookings that will expire in 12 hours
-        // Assuming expires_at is set to 72 hours after creation
+        // Assuming expires_at is set to 48 hours after creation
         $bookingsToRemind = Booking::whereNotNull('expires_at')
             ->where('status', 'pending') // Adjust status as needed for your application
             ->where('expires_at', '>', Carbon::now())
@@ -47,7 +47,7 @@ class SendGuideReminders12Hours extends Command
             $guide = $booking->guiding->user;
             
             // Use the mailable's sendReminder method which includes duplicate checking
-            if (GuideReminder12Hours::sendReminder($booking, $guide)) {
+            if (GuideReminder::sendReminder($booking, $guide, 12)) {
                 $this->info("Sent 12-hour guide reminder email to {$guide->email} for booking #{$booking->id}");
                 $count++;
             } else {

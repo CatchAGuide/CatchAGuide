@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Mail;
 
 use App\Models\Booking;
 use App\Models\EmailLog;
+use App\Mail\GuideReminder;
 
 class SendGuideTourReminders extends Command
 {
@@ -23,7 +24,7 @@ class SendGuideTourReminders extends Command
      *
      * @var string
      */
-    protected $description = 'Send reminder emails to guides 24 hours before their booking requests expire';
+    protected $description = 'Send reminder emails to guides 24 hours before their booking requests expire (Legacy command - use bookings:send-guide-reminders-all instead)';
 
     /**
      * Execute the console command.
@@ -33,7 +34,7 @@ class SendGuideTourReminders extends Command
     public function handle()
     {
         // Find bookings that will expire in 24 hours
-        // (bookings that were created 48 hours ago and have an expiration of 72 hours)
+        // (bookings that were created 24 hours ago and have an expiration of 48 hours)
         $now = Carbon::now();
         $twentyFourHoursLater = Carbon::now()->addHours(24);
         
@@ -45,39 +46,22 @@ class SendGuideTourReminders extends Command
         $bookings = $query->get();
         
         $count = 0;
+        $skipped = 0;
+        
         foreach ($bookings as $booking) {
-            // Get the guide from the guiding relationship
             $guide = $booking->guiding->user;
             
-            // Define language and type for logging
-            $language = $guide->language ?? config('app.locale');
-            $type = 'guide_reminder';
-            $target = 'booking_' . $booking->id;
-            
-            // Send the reminder email
-            app()->setLocale($language);
-            
-            if (!CheckEmailLog('guide_reminder', 'booking_' . $booking->id, $booking->user->email)) {
-                Mail::send('mails.guide.guide_reminder', [
-                    'guide' => $guide,
-                    'booking' => $booking,
-                    'guideName' => $guide->name,
-                    'language' => $language,
-                    'type' => $type,
-                    'target' => $target,
-                ], function ($message) use ($guide) {
-                    $message->to($guide->email)
-                        ->subject(__('emails.guide_reminder_to_respond_24hrs_title'));
-                });
+            // Use the mailable's sendReminder method which includes duplicate checking
+            if (GuideReminder::sendReminder($booking, $guide, 24)) {
+                $this->info("Sent 24-hour guide reminder email to {$guide->email} for booking #{$booking->id}");
+                $count++;
+            } else {
+                $this->info("Skipping duplicate 24-hour reminder for booking #{$booking->id} to {$guide->email}");
+                $skipped++;
             }
-            
-            // Log the email
-            $this->info("Sent guide reminder email to {$guide->email} for booking #{$booking->id} in {$language}");
-            
-            $count++;
         }
 
-        $this->info("Sent {$count} reminder emails to guides.");
+        $this->info("Sent {$count} 24-hour reminders to guides. Skipped {$skipped} duplicates.");
         return 0;
     }
 } 

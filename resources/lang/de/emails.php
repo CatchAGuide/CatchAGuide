@@ -42,10 +42,10 @@ return [
     'guide_new_booking_request_text_3' => 'Wenn Du Fragen hast oder Unterstützung benötigst, zögere nicht, uns zu kontaktieren. Wir helfen Dir gerne weiter.',
     'guide_new_booking_request_text_4' => 'Danke, dass Du Teil unserer Plattform bist. Wir freuen uns auf Deine Antwort.',
 
-    'guide_reminder_to_respond_24hrs_title' => 'Buchungsanfrage läuft bald ab - bitte jetzt reagieren (24h)',
-    'guide_reminder_to_respond_24hrs_text_1' => 'Dies ist eine freundliche Erinnerung, dass Du noch eine offene Buchungsanfrage für eine Angeltour hast, die Deine Antwort benötigt. Du hast noch 24 Stunden Zeit, die Anfrage zu bestätigen oder abzulehnen, bevor sie abläuft.',
-    'guide_reminder_to_respond_24hrs_text_2' => 'Bitte stelle sicher, dass Du die Anfrage überprüfst und so schnell wie möglich antwortest, um die Buchung zu sichern. Wenn Du Unterstützung benötigst, kannst Du uns jederzeit kontaktieren.',
-    'guide_reminder_to_respond_24hrs_text_3' => 'Danke, dass Du Teil unserer Plattform bist. Wir freuen uns auf Deine schnelle Antwort.',
+    'guide_reminder_to_respond_title' => 'Buchungsanfrage läuft bald ab - bitte jetzt reagieren ({time})',
+    'guide_reminder_to_respond_text_1' => 'Dies ist eine freundliche Erinnerung, dass Du noch eine offene Buchungsanfrage für eine Angeltour hast, die Deine Antwort benötigt. Du hast noch {time} Zeit, die Anfrage zu bestätigen oder abzulehnen, bevor sie abläuft.',
+    'guide_reminder_to_respond_text_2' => 'Bitte stelle sicher, dass Du die Anfrage überprüfst und so schnell wie möglich antwortest, um die Buchung zu sichern. Wenn Du Unterstützung benötigst, kannst Du uns jederzeit kontaktieren.',
+    'guide_reminder_to_respond_text_3' => 'Danke, dass Du Teil unserer Plattform bist. Wir freuen uns auf Deine schnelle Antwort.',
 
     'guide_booking_accepted_title' => 'Buchung bestätigt - bitte kontaktieren Sie jetzt Ihren Gast',
     'guide_booking_accepted_text_1' => 'Du hast eine neue Buchungsanfrage erfolgreich angenommen. Hier findest Du alle Details der Tour und des Gastes, der bei Dir gebucht hat. <b><u>Kontaktiere jetzt deinen Gast.</u></b> Bitte beachte, dass der Gast noch nicht bezahlt hat. Es ist wichtig, dass Du Dich so schnell wie möglich mit ihm in Verbindung setzt, um die Tour und die Zahlung abzuschließen.',
@@ -65,10 +65,6 @@ return [
     'guide_booking_expired_text_2' => 'Zur Erinnerung: Alle Buchungsanfragen auf unserer Plattform laufen nach 48 Stunden ab, wenn keine Antwort erfolgt, damit Gäste ihre Reisen ohne unnötige Verzögerungen weiter planen können. Wir empfehlen, auf neue Anfragen so schnell wie möglich zu antworten, um keine zukünftigen Möglichkeiten zu verpassen.',
     'guide_booking_expired_text_3' => 'Wenn Du Unterstützung benötigst oder Fragen hast, zögere nicht, uns jederzeit zu kontaktieren. Wir sind hier, um Dich zu unterstützen.',
 
-    'guide_reminder_to_respond_12hrs_title' => 'Buchungsanfrage läuft bald ab - bitte jetzt reagieren (12h)',
-    'guide_reminder_to_respond_12hrs_text_1' => 'Dies ist eine freundliche Erinnerung, dass Du noch eine offene Buchungsanfrage für eine Angeltour hast, die Deine Antwort benötigt. Du hast noch 12 Stunden Zeit, die Anfrage zu bestätigen oder abzulehnen, bevor sie abläuft.',
-    'guide_reminder_to_respond_12hrs_text_2' => 'Bitte stelle sicher, dass Du die Anfrage überprüfst und so schnell wie möglich antwortest, um die Buchung zu sichern. Wenn Du Unterstützung benötigst, kannst Du uns jederzeit kontaktieren.',
-    'guide_reminder_to_respond_12hrs_text_3' => 'Danke, dass Du Teil unserer Plattform bist. Wir freuen uns auf Deine schnelle Antwort.',
 
     'guide_reminder_upcoming_tour_title' => 'Deine Angeltour mit [Guest Name] in 3 Tagen!',
     'guide_reminder_upcoming_tour_text_1' => 'Dies ist eine Erinnerung, dass Du eine Angeltour mit [Guest Name] in <b><u>[Location]</u></b> für den <b><u>[Date]</u></b> geplant hast. Bitte stelle sicher, dass Du vollständig auf die Tour vorbereitet bist und das notwendige Equipment und Material bereit hast.',

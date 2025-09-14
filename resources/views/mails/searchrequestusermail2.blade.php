@@ -118,10 +118,10 @@
         <div class="content-header">
             @if($myCurrentLocale == 'de')
             <p>wir freuen uns über Dein Interesse an einem Angelausflug über Catch A Guide. <br> Unser Team arbeitet bereits daran, Deine Anfrage zu bearbeiten und schnellstmöglich das passende Erlebnis für Dich zu finden.</p>
-            <p>Wir melden uns spätestens innerhalb der nächsten 72 Stunden bei Dir für die ersten Informationen. <br> Falls Du in der Zwischenzeit Fragen hast oder weitere Informationen benötigst, zögere nicht, uns zu kontaktieren. <br> Wir stehen Dir gerne jederzeit zur Verfügung! </p>
+            <p>Wir melden uns spätestens innerhalb der nächsten 48 Stunden bei Dir für die ersten Informationen. <br> Falls Du in der Zwischenzeit Fragen hast oder weitere Informationen benötigst, zögere nicht, uns zu kontaktieren. <br> Wir stehen Dir gerne jederzeit zur Verfügung! </p>
             @elseif($myCurrentLocale == 'en')
             <p>Thank you for your interest in a fishing trip with Catch A Guide. <br> Our team is already working on processing your request and finding the right experience for you as quickly as possible.</p>
-            <p>We will get back to you within the next 72 hours at the latest with initial information. <br> If you have any questions or require further information in the meantime, please do not hesitate to contact us. <br> We are always at your disposal!</p>
+            <p>We will get back to you within the next 48 hours at the latest with initial information. <br> If you have any questions or require further information in the meantime, please do not hesitate to contact us. <br> We are always at your disposal!</p>
             @endif
 
         </div>

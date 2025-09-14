@@ -488,14 +488,14 @@ class Checkout extends Component
         $fee = (new HelperService())->calculateRates($this->guidingprice);
         $partnerFee = (new HelperService())->convertAmountToString($fee);
 
-        $expiresAt = Carbon::now()->addHours(24); // Default expiration time (24 hours)
+        $expiresAt = Carbon::now()->addHours(config('booking.default_expiration_hours'));
 
         // Calculate the difference between the selected date and the current date
         $dateDifference = Carbon::parse($this->selectedDate)->diffInDays(Carbon::now());
 
-        if ($dateDifference > 3) {
-            // If the selected date is more than 3 days from now, add 72 hours to the expiration time
-            $expiresAt = Carbon::now()->addHours(72);
+        if ($dateDifference > config('booking.extended_expiration_days_threshold')) {
+            // If the selected date is more than the threshold days from now, use extended expiration time
+            $expiresAt = Carbon::now()->addHours(config('booking.extended_expiration_hours'));
         }
 
         $booking = Booking::create([
