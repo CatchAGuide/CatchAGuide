@@ -19,6 +19,8 @@ use App\Http\Controllers\Admin\Category\AdminCategoryMethodsController;
 use App\Http\Controllers\Admin\Category\AdminCategoryCountryController;
 use App\Http\Controllers\Admin\Category\AdminCategoryTargetFishController;
 use App\Http\Controllers\Admin\GuidingsController as AdminGuidingsController;
+use App\Http\Controllers\Admin\RentalBoatsController as AdminRentalBoatsController;
+use App\Http\Controllers\Admin\AccommodationsController as AdminAccommodationsController;
 use App\Http\Controllers\Admin\PaymentsController as AdminPaymentsController;
 use App\Http\Controllers\Admin\VacationsController as AdminVacationsController;
 use App\Http\Controllers\Admin\Category\AdminCategoryVacationCountryController;
@@ -312,6 +314,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::resource('guidings', AdminGuidingsController::class);
         Route::get('guidings/changeguidingstatus/{id}', [AdminGuidingsController::class, 'changeguidingstatus'])->name('changeGuidingStatus');
+        
+        Route::resource('rental-boats', AdminRentalBoatsController::class);
+        Route::get('rental-boats/change-status/{id}', [AdminRentalBoatsController::class, 'changeStatus'])->name('rental-boats.change-status');
+
+        Route::resource('accommodations', AdminAccommodationsController::class);
+        Route::get('accommodations/change-status/{id}', [AdminAccommodationsController::class, 'changeStatus'])->name('accommodations.change-status');
+
         Route::resource('bookings', BookingsController::class);
         Route::get('/bookings/{booking}/email-preview', [BookingsController::class, 'emailPreview'])->name('bookings.email-preview');
         Route::post('/bookings/{booking}/send-booking-request-emails', [BookingsController::class, 'sendBookingRequestEmails'])->name('bookings.send-booking-request-emails');
