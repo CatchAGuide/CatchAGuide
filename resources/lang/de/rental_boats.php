@@ -57,6 +57,10 @@ return [
     'add_extras' => 'Extras und Ausstattung hinzufügen',
     'tooltip_boat_extras' => 'Fügen Sie zusätzliche Funktionen oder Ausstattungen hinzu, die Ihr Boot bietet.',
     'tooltip_add_extras' => 'Trennen Sie mehrere Extras mit Kommas (z.B. GPS, Soundsystem, Angelausrüstung)',
+    'boat_descriptions' => 'Bootsbeschreibungen',
+    'tooltip_boat_descriptions' => 'Wählen Sie zusätzliche Bootsfunktionen aus und geben Sie Details für jede an.',
+    'other_boat_info' => 'Weitere Bootsinformationen',
+    'enter_value_for' => 'Wert eingeben für',
     
     // Step 4 - Requirements and Additional Info
     'requirements_additional_info' => 'Anforderungen & Zusätzliche Informationen',
@@ -92,3 +96,5 @@ return [
     'three_days' => '3 Tage',
     'one_week' => '1 Woche',
 ];
+
+

@@ -57,6 +57,10 @@ return [
     'add_extras' => 'Add extras and amenities',
     'tooltip_boat_extras' => 'Add any additional features or amenities your boat offers.',
     'tooltip_add_extras' => 'Separate multiple extras with commas (e.g., GPS, Sound system, Fishing equipment)',
+    'boat_descriptions' => 'Boat Descriptions',
+    'tooltip_boat_descriptions' => 'Select additional boat features and provide details for each.',
+    'other_boat_info' => 'Other Boat Information',
+    'enter_value_for' => 'Enter value for',
     
     // Step 4 - Requirements and Additional Info
     'requirements_additional_info' => 'Requirements & Additional Information',
@@ -92,3 +96,5 @@ return [
     'three_days' => '3 Days',
     'one_week' => '1 Week',
 ];
+
+

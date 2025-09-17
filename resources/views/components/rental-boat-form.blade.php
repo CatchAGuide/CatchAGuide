@@ -14,22 +14,22 @@
                     <i class="fas fa-info-circle"></i>
                 </div>
                 <div class="step-button" data-step="4">
-                    <i class="fas fa-list-alt"></i>
-                </div>
-                <div class="step-button" data-step="5">
                     <i class="fas fa-dollar-sign"></i>
                 </div>
-                <div class="step-button" data-step="6">
+                {{-- <div class="step-button" data-step="5">
                     <i class="fas fa-calendar-alt"></i>
-                </div>
+                </div> --}}
             </div>
 
             <div class="step-line"></div>
         </div>
         <div id="error-container" class="alert alert-danger" style="display: none;"></div>
 
-        <form action="{{ $formAction ?? route('rental-boats.store') }}" method="POST" id="rentalBoatForm" enctype="multipart/form-data">
+        <form action="{{ $formAction ?? (isset($formData['id']) && $formData['id'] ? route('admin.rental-boats.update', $formData['id']) : route('admin.rental-boats.store')) }}" method="POST" id="rentalBoatForm" enctype="multipart/form-data">
             @csrf
+            @if(isset($formData['id']) && $formData['id'])
+                @method('PUT')
+            @endif
             <meta name="csrf-token" content="{{ csrf_token() }}">
 
             @if ($errors->any())
@@ -49,6 +49,7 @@
             <input type="hidden" name="thumbnail_path" id="thumbnail_path" value="{{ $formData['thumbnail_path'] ?? '' }}">
             <input type="hidden" name="existing_images" id="existing_images" value="{{ $formData['gallery_images'] ?? '' }}">
             <input type="hidden" name="user_id" id="user_id" value="{{ $formData['user_id'] ?? auth()->id() }}">
+            <input type="hidden" name="status" id="status" value="{{ $formData['status'] ?? 'active' }}">
             <input type="hidden" id="image_list" name="image_list">
 
             <!-- Step 1: Images and Basic Info -->
@@ -130,15 +131,13 @@
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="{{ __('rental_boats.tooltip_boat_type') }}"></i>
                     </label>
-                    <select class="form-control" id="boat_type" name="boat_type">
-                        <option value="">{{ __('rental_boats.select_boat_type') }}</option>
-                        <option value="sailboat" {{ ($formData['boat_type'] ?? '') == 'sailboat' ? 'selected' : '' }}>{{ __('rental_boats.sailboat') }}</option>
-                        <option value="motorboat" {{ ($formData['boat_type'] ?? '') == 'motorboat' ? 'selected' : '' }}>{{ __('rental_boats.motorboat') }}</option>
-                        <option value="yacht" {{ ($formData['boat_type'] ?? '') == 'yacht' ? 'selected' : '' }}>{{ __('rental_boats.yacht') }}</option>
-                        <option value="catamaran" {{ ($formData['boat_type'] ?? '') == 'catamaran' ? 'selected' : '' }}>{{ __('rental_boats.catamaran') }}</option>
-                        <option value="fishing_boat" {{ ($formData['boat_type'] ?? '') == 'fishing_boat' ? 'selected' : '' }}>{{ __('rental_boats.fishing_boat') }}</option>
-                        <option value="other" {{ ($formData['boat_type'] ?? '') == 'other' ? 'selected' : '' }}>{{ __('rental_boats.other') }}</option>
-                    </select>
+                    <div class="d-flex flex-wrap btn-group-toggle">
+                        @foreach($rentalBoatTypes ?? [] as $rentalBoatType)
+                            <input type="radio" name="boat_type" value="{{ $rentalBoatType['id'] }}" id="boat_type_{{ $rentalBoatType['id'] }}">
+                            <label for="boat_type_{{ $rentalBoatType['id'] }}" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" 
+                                   style="flex-basis: calc(33.33% - 20px);">{{ $rentalBoatType['value'] }}</label>
+                        @endforeach
+                    </div>
                 </div>
 
                 <hr>
@@ -184,42 +183,21 @@
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="{{ __('rental_boats.tooltip_boat_information') }}"></i>
                     </label>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label for="length" class="form-label">{{ __('rental_boats.length') }}</label>
-                                <input type="text" class="form-control" id="length" name="boat_info[length]" value="{{ $formData['boat_information']['length'] ?? '' }}" placeholder="{{ __('rental_boats.boat_length') }}">
+                    <div class="btn-group-toggle">
+                        @if(isset($guidingBoatDescriptions) && !empty($guidingBoatDescriptions))
+                            @foreach($guidingBoatDescriptions as $guiding_boat_description)
+                            <div class="btn-checkbox-container">
+                                <input type="checkbox" name="boat_info_checkboxes[]" value="{{ $guiding_boat_description['id'] }}" id="boat_info_{{ $guiding_boat_description['id'] }}">
+                                <label for="boat_info_{{ $guiding_boat_description['id'] }}" class="btn btn-outline-primary m-2 btn-checkbox">
+                                    {{ $guiding_boat_description['value'] }}
+                                </label>
+                                <textarea class="form-control extra-input" name="boat_info_{{ $guiding_boat_description['id'] }}" placeholder="{{ __('rental_boats.enter_value_for') . ' ' . $guiding_boat_description['value'] }}"></textarea>
                             </div>
-                            <div class="form-group mb-3">
-                                <label for="capacity" class="form-label">{{ __('rental_boats.capacity') }}</label>
-                                <input type="number" class="form-control" id="capacity" name="boat_info[capacity]" value="{{ $formData['boat_information']['capacity'] ?? '' }}" placeholder="{{ __('rental_boats.max_passengers') }}" min="1" max="100" step="1">
-                            </div>
-                            <div class="form-group mb-3">
-                                <label for="engine" class="form-label">{{ __('rental_boats.engine') }}</label>
-                                <input type="text" class="form-control" id="engine" name="boat_info[engine]" value="{{ $formData['boat_information']['engine'] ?? '' }}" placeholder="{{ __('rental_boats.engine_type') }}">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label for="year" class="form-label">{{ __('rental_boats.year') }}</label>
-                                <input type="number" class="form-control" id="year" name="boat_info[year]" value="{{ $formData['boat_information']['year'] ?? '' }}" placeholder="{{ __('rental_boats.manufacturing_year') }}" min="1900" max="2025" step="1">
-                            </div>
-                            <div class="form-group mb-3">
-                                <label for="fuel_type" class="form-label">{{ __('rental_boats.fuel_type') }}</label>
-                                <select class="form-control" id="fuel_type" name="boat_info[fuel_type]">
-                                    <option value="">{{ __('rental_boats.select_fuel_type') }}</option>
-                                    <option value="diesel" {{ ($formData['boat_information']['fuel_type'] ?? '') == 'diesel' ? 'selected' : '' }}>{{ __('rental_boats.diesel') }}</option>
-                                    <option value="gasoline" {{ ($formData['boat_information']['fuel_type'] ?? '') == 'gasoline' ? 'selected' : '' }}>{{ __('rental_boats.gasoline') }}</option>
-                                    <option value="electric" {{ ($formData['boat_information']['fuel_type'] ?? '') == 'electric' ? 'selected' : '' }}>{{ __('rental_boats.electric') }}</option>
-                                </select>
-                            </div>
-                            <div class="form-group mb-3">
-                                <label for="safety_equipment" class="form-label">{{ __('rental_boats.safety_equipment') }}</label>
-                                <input type="text" class="form-control" id="safety_equipment" name="boat_info[safety_equipment]" value="{{ $formData['boat_information']['safety_equipment'] ?? '' }}" placeholder="{{ __('rental_boats.safety_equipment_list') }}">
-                            </div>
-                        </div>
+                            @endforeach
+                        @endif
                     </div>
                 </div>
+
 
                 <hr>
 
@@ -230,6 +208,17 @@
                            title="{{ __('rental_boats.tooltip_boat_extras') }}"></i>
                     </label>
                     <input type="text" class="form-control" name="boat_extras" id="boat_extras" data-role="tagsinput" placeholder="{{ __('rental_boats.add_extras') }}" data-bs-toggle="tooltip" title="{{ __('rental_boats.tooltip_add_extras') }}">
+                </div>
+
+                <hr>
+
+                <div class="form-group">
+                    <label for="requirements" class="form-label fw-bold fs-5">
+                        {{ __('rental_boats.requirements') }}
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                           title="{{ __('rental_boats.tooltip_requirements') }}"></i>
+                    </label>
+                    <textarea class="form-control" id="requirements" name="requirements" rows="4" placeholder="{{ __('rental_boats.rental_requirements') }}">{{ $formData['requirements'] ?? '' }}</textarea>
                 </div>
 
                 <div class="button-group">
@@ -254,54 +243,9 @@
                 </div>
             </div>
 
-            <!-- Step 4: Requirements and Additional Info -->
+
+            <!-- Step 4: Pricing Structure -->
             <div class="step" id="step4">
-                <h5>{{ __('rental_boats.requirements_additional_info') }}</h5>
-
-                <div class="form-group">
-                    <label for="requirements" class="form-label fw-bold fs-5">
-                        {{ __('rental_boats.requirements') }}
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                           title="{{ __('rental_boats.tooltip_requirements') }}"></i>
-                    </label>
-                    <textarea class="form-control" id="requirements" name="requirements" rows="4" placeholder="{{ __('rental_boats.rental_requirements') }}">{{ $formData['requirements'] ?? '' }}</textarea>
-                </div>
-
-                <hr>
-
-                <div class="form-group">
-                    <label for="inclusions" class="form-label fw-bold fs-5">
-                        {{ __('rental_boats.inclusions') }}
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                           title="{{ __('rental_boats.tooltip_inclusions') }}"></i>
-                    </label>
-                    <input type="text" class="form-control" name="inclusions" id="inclusions" data-role="tagsinput" placeholder="{{ __('rental_boats.inclusions_placeholder') }}">
-                </div>
-
-                <div class="button-group">
-                    <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn4">
-                            {{ __('rental_boats.leave_save_draft') }}
-                        </button>
-                    </div>
-                    <div class="right-buttons">
-                        <div class="row-button">
-                            <button type="button" class="btn btn-info" id="prevBtn4">
-                                {{ __('rental_boats.previous') }}
-                            </button>
-                            <button type="button" class="btn btn-primary" id="nextBtn4">
-                                {{ __('rental_boats.next') }}
-                            </button>
-                        </div>
-                        <button type="submit" class="btn btn-primary" id="submitBtn4" style="display: none;">
-                            {{ __('rental_boats.submit_publish') }}
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 5: Pricing Structure -->
-            <div class="step" id="step5">
                 <h5>{{ __('rental_boats.set_pricing_structure') }}</h5>
 
                 <div class="form-group">
@@ -354,30 +298,39 @@
                     <div id="extra-pricing-container"></div>
                 </div>
 
+                <hr>
+
+                <div class="form-group">
+                    <label for="inclusions" class="form-label fw-bold fs-5">
+                        {{ __('rental_boats.inclusions') }}
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                           title="{{ __('rental_boats.tooltip_inclusions') }}"></i>
+                    </label>
+                    <input type="text" class="form-control" name="inclusions" id="inclusions" data-role="tagsinput" placeholder="{{ __('rental_boats.inclusions_placeholder') }}">
+                </div>
+
                 <div class="button-group">
                     <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn5">
+                        <button type="button" class="btn btn-secondary" id="saveDraftBtn4">
                             {{ __('rental_boats.leave_save_draft') }}
                         </button>
                     </div>
                     <div class="right-buttons">
                         <div class="row-button">
-                            <button type="button" class="btn btn-info" id="prevBtn5">
+                            <button type="button" class="btn btn-info" id="prevBtn4">
                                 {{ __('rental_boats.previous') }}
                             </button>
-                            <button type="button" class="btn btn-primary" id="nextBtn5">
-                                {{ __('rental_boats.next') }}
-                            </button>
+                            <div></div>
                         </div>
-                        <button type="submit" class="btn btn-primary" id="submitBtn5" style="display: none;">
+                        <button type="submit" class="btn btn-primary" id="submitBtn4" onclick="document.getElementById('is_draft').value = '0';">
                             {{ __('rental_boats.submit_publish') }}
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Step 6: Availability and Booking Options -->
-            <div class="step" id="step6">
+            {{-- Step 5: Availability and Booking Options - Commented out for now --}}
+            {{-- <div class="step" id="step5">
                 <h5>{{ __('rental_boats.availability_booking_options') }}</h5>
 
                 <div class="form-group">
@@ -411,23 +364,23 @@
 
                 <div class="button-group">
                     <div class="left-buttons">
-                        <button type="button" class="btn btn-secondary" id="saveDraftBtn6">
+                        <button type="button" class="btn btn-secondary" id="saveDraftBtn5">
                             {{ __('rental_boats.leave_save_draft') }}
                         </button>
                     </div>
                     <div class="right-buttons">
                         <div class="row-button">
-                            <button type="button" class="btn btn-info" id="prevBtn6">
+                            <button type="button" class="btn btn-info" id="prevBtn5">
                                 {{ __('rental_boats.previous') }}
                             </button>
                             <div></div>
                         </div>
-                        <button type="submit" class="btn btn-primary" id="submitBtn6" onclick="document.getElementById('is_draft').value = '0';">
+                        <button type="submit" class="btn btn-primary" id="submitBtn5" onclick="document.getElementById('is_draft').value = '0';">
                             {{ __('rental_boats.submit_publish') }}
                         </button>
                     </div>
                 </div>
-            </div>
+            </div> --}}
         </form>
     </div>
 </div>

@@ -7,8 +7,10 @@ use App\Models\RentalBoat;
 use App\Models\User;
 use App\Models\BoatExtras;
 use App\Models\Inclussion;
+use App\Models\GuidingBoatType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\GuidingBoatDescription;
 use Illuminate\Support\Facades\Config;
 
 class RentalBoatsController extends Controller
@@ -31,38 +33,17 @@ class RentalBoatsController extends Controller
      */
     public function create()
     {
-        $pageTitle = 'Create Rental Boat';
-        $locale = Config::get('app.locale');
-        $nameField = $locale == 'en' ? 'name_en' : 'name';
-        
         $formData = [
             'is_update' => 0,
             'user_id' => Auth::id(),
             'status' => 'active'
         ];
         
-        // Get predefined options for boat extras and inclusions
-        $boatExtras = BoatExtras::all()->map(function($item) use ($nameField) {
-            return [
-                'value' => $item->$nameField,
-                'id' => $item->id
-            ];
-        });
-        
-        $inclusions = Inclussion::all()->map(function($item) use ($nameField) {
-            return [
-                'value' => $item->$nameField,
-                'id' => $item->id
-            ];
-        });
-        
-        return view('admin.pages.rental-boats.create', [
-            'pageTitle' => $pageTitle,
+        return view('admin.pages.rental-boats.create', array_merge([
+            'pageTitle' => 'Create Rental Boat',
             'formData' => $formData,
             'targetRedirect' => route('admin.rental-boats.index'),
-            'boatExtras' => $boatExtras,
-            'inclusions' => $inclusions
-        ]);
+        ], $this->getFormData()));
     }
 
     /**
@@ -73,85 +54,89 @@ class RentalBoatsController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'location' => 'required|string|max:255',
-            'boat_type' => 'required|string|max:255',
-            'desc_of_boat' => 'required|string',
-            'price_type' => 'required|string|in:per_hour,per_day,per_week',
-            'base_price' => 'required|numeric|min:0',
-            'status' => 'required|string|in:active,inactive',
-            'booking_advance' => 'required|string|in:same_day,one_day,three_days,one_week',
-        ]);
-
-        // Generate slug from title
-        $slug = \Str::slug($request->title);
+        $isDraft = $request->input('is_draft') == '1';
         
-        // Ensure slug is unique
-        $originalSlug = $slug;
-        $counter = 1;
-        while (RentalBoat::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $counter;
-            $counter++;
+        // Different validation rules for draft vs final submission
+        if ($isDraft) {
+            // Minimal validation for drafts
+            $request->validate([
+                'title' => 'nullable|string|max:255',
+                'location' => 'nullable|string|max:255',
+                'boat_type' => 'nullable|string|max:255',
+                'desc_of_boat' => 'nullable|string',
+                'price_type' => 'nullable|string|in:per_hour,per_day,per_week',
+                'base_price' => 'nullable|numeric|min:0',
+                'status' => 'nullable|string|in:active,inactive,draft',
+            ]);
+        } else {
+            // Full validation for final submission
+            $request->validate([
+                'title' => 'required|string|max:255',
+                'location' => 'required|string|max:255',
+                'boat_type' => 'required|string|max:255',
+                'desc_of_boat' => 'required|string',
+                'price_type' => 'required|string|in:per_hour,per_day,per_week',
+                'base_price' => 'required|numeric|min:0',
+                'status' => 'required|string|in:active,inactive,draft',
+            ]);
         }
 
-        // Process form data
-        $rentalBoatData = [
-            'user_id' => $request->user_id ?? Auth::id(),
-            'title' => $request->title,
-            'slug' => $slug,
-            'location' => $request->location,
-            'city' => $request->city,
-            'country' => $request->country,
-            'region' => $request->region,
-            'lat' => $request->latitude,
-            'lng' => $request->longitude,
-            'boat_type' => $request->boat_type,
-            'desc_of_boat' => $request->desc_of_boat,
-            'requirements' => $request->requirements,
-            'status' => $request->status,
-            'price_type' => $request->price_type,
-        ];
+        try {
+            $slug = $this->generateUniqueSlug($request->title ?? 'Untitled');
 
-        // Process boat information
-        if ($request->has('boat_info')) {
-            $rentalBoatData['boat_information'] = $request->boat_info;
+            // Process form data
+            $rentalBoatData = [
+                'user_id' => $request->user_id ?? Auth::id(),
+                'title' => $request->title ?? 'Untitled',
+                'slug' => $slug,
+                'location' => $request->location ?? '',
+                'city' => $request->city ?? '',
+                'country' => $request->country ?? '',
+                'region' => $request->region ?? '',
+                'lat' => $request->latitude ?? null,
+                'lng' => $request->longitude ?? null,
+                'boat_type' => $request->boat_type ?? null,
+                'desc_of_boat' => $request->desc_of_boat ?? '',
+                'requirements' => $request->requirements ?? '',
+                'status' => $isDraft ? 'draft' : ($request->status ?? 'active'),
+                'price_type' => $request->price_type ?? null,
+                'boat_information' => $this->processBoatInformation($request),
+                'boat_extras' => $this->processBoatExtras($request),
+                'inclusions' => $this->processInclusions($request),
+                'prices' => $this->processPricing($request),
+            ];
+
+            // Process images
+            if ($request->hasFile('title_image')) {
+                // Handle image upload logic here
+                // This would typically involve storing images and updating paths
+            }
+
+            $rentalBoat = RentalBoat::create($rentalBoatData);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $isDraft ? 'Draft saved successfully!' : 'Rental boat created successfully!',
+                    'rental_boat_id' => $rentalBoat->id,
+                    'redirect_url' => $request->input('target_redirect') ?? route('admin.rental-boats.index'),
+                ]);
+            }
+
+            return redirect()->route('admin.rental-boats.index')
+                ->with('success', 'Rental boat created successfully.');
+        } catch (\Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error creating rental boat: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error creating rental boat: ' . $e->getMessage());
         }
-
-        // Process boat extras
-        if ($request->has('boat_extras')) {
-            $rentalBoatData['boat_extras'] = is_string($request->boat_extras) 
-                ? explode(',', $request->boat_extras) 
-                : $request->boat_extras;
-        }
-
-        // Process inclusions
-        if ($request->has('inclusions')) {
-            $rentalBoatData['inclusions'] = is_string($request->inclusions) 
-                ? explode(',', $request->inclusions) 
-                : $request->inclusions;
-        }
-
-        // Process pricing
-        $rentalBoatData['prices'] = [
-            'base_price' => $request->base_price
-        ];
-
-        // Process extra pricing
-        if ($request->has('extra_pricing')) {
-            $rentalBoatData['pricing_extra'] = $request->extra_pricing;
-        }
-
-        // Process images
-        if ($request->hasFile('title_image')) {
-            // Handle image upload logic here
-            // This would typically involve storing images and updating paths
-        }
-
-        $rentalBoat = RentalBoat::create($rentalBoatData);
-
-        return redirect()->route('admin.rental-boats.index')
-            ->with('success', 'Rental boat created successfully.');
     }
 
     /**
@@ -174,59 +159,11 @@ class RentalBoatsController extends Controller
      */
     public function edit(RentalBoat $rentalBoat)
     {
-        $pageTitle = 'Edit Rental Boat';
-        $locale = Config::get('app.locale');
-        $nameField = $locale == 'en' ? 'name_en' : 'name';
-        
-        // Prepare form data for edit mode
-        $formData = [
-            'id' => $rentalBoat->id,
-            'is_update' => 1,
-            'user_id' => $rentalBoat->user_id,
-            'title' => $rentalBoat->title,
-            'slug' => $rentalBoat->slug,
-            'location' => $rentalBoat->location,
-            'city' => $rentalBoat->city,
-            'country' => $rentalBoat->country,
-            'region' => $rentalBoat->region,
-            'lat' => $rentalBoat->lat,
-            'lng' => $rentalBoat->lng,
-            'boat_type' => $rentalBoat->boat_type,
-            'desc_of_boat' => $rentalBoat->desc_of_boat,
-            'requirements' => $rentalBoat->requirements,
-            'boat_information' => $rentalBoat->boat_information,
-            'boat_extras' => $rentalBoat->boat_extras,
-            'inclusions' => $rentalBoat->inclusions,
-            'price_type' => $rentalBoat->price_type,
-            'prices' => $rentalBoat->prices,
-            'pricing_extra' => $rentalBoat->pricing_extra,
-            'status' => $rentalBoat->status,
-            'thumbnail_path' => $rentalBoat->thumbnail_path,
-            'gallery_images' => $rentalBoat->gallery_images,
-        ];
-        
-        // Get predefined options for boat extras and inclusions
-        $boatExtras = BoatExtras::all()->map(function($item) use ($nameField) {
-            return [
-                'value' => $item->$nameField,
-                'id' => $item->id
-            ];
-        });
-        
-        $inclusions = Inclussion::all()->map(function($item) use ($nameField) {
-            return [
-                'value' => $item->$nameField,
-                'id' => $item->id
-            ];
-        });
-        
-        return view('admin.pages.rental-boats.edit', [
-            'pageTitle' => $pageTitle,
-            'formData' => $formData,
+        return view('admin.pages.rental-boats.edit', array_merge([
+            'pageTitle' => 'Edit Rental Boat',
+            'formData' => $this->prepareEditFormData($rentalBoat),
             'targetRedirect' => route('admin.rental-boats.index'),
-            'boatExtras' => $boatExtras,
-            'inclusions' => $inclusions
-        ]);
+        ], $this->getFormData()));
     }
 
     /**
@@ -238,78 +175,90 @@ class RentalBoatsController extends Controller
      */
     public function update(Request $request, RentalBoat $rentalBoat)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'location' => 'required|string|max:255',
-            'boat_type' => 'required|string|max:255',
-            'desc_of_boat' => 'required|string',
-            'price_type' => 'required|string|in:per_hour,per_day,per_week',
-            'base_price' => 'required|numeric|min:0',
-            'status' => 'required|string|in:active,inactive',
-            'booking_advance' => 'required|string|in:same_day,one_day,three_days,one_week',
-        ]);
+        $isDraft = $request->input('is_draft') == '1';
+        
+        // Different validation rules for draft vs final submission
+        if ($isDraft) {
+            // Minimal validation for drafts
+            $request->validate([
+                'title' => 'nullable|string|max:255',
+                'location' => 'nullable|string|max:255',
+                'boat_type' => 'nullable|string|max:255',
+                'desc_of_boat' => 'nullable|string',
+                'price_type' => 'nullable|string|in:per_hour,per_day,per_week',
+                'base_price' => 'nullable|numeric|min:0',
+                'status' => 'nullable|string|in:active,inactive,draft',
+            ]);
+        } else {
+            // Full validation for final submission
+            $request->validate([
+                'title' => 'required|string|max:255',
+                'location' => 'required|string|max:255',
+                'boat_type' => 'required|string|max:255',
+                'desc_of_boat' => 'required|string',
+                'price_type' => 'required|string|in:per_hour,per_day,per_week',
+                'base_price' => 'required|numeric|min:0',
+                'status' => 'required|string|in:active,inactive,draft',
+            ]);
+        }
 
-        // Generate slug from title if title changed
-        if ($rentalBoat->title !== $request->title) {
-            $slug = \Str::slug($request->title);
-            
-            // Ensure slug is unique
-            $originalSlug = $slug;
-            $counter = 1;
-            while (RentalBoat::where('slug', $slug)->where('id', '!=', $rentalBoat->id)->exists()) {
-                $slug = $originalSlug . '-' . $counter;
-                $counter++;
+        try {
+            // Generate slug from title if title changed
+            if ($rentalBoat->title !== $request->title && $request->title) {
+                $rentalBoat->slug = $this->generateUniqueSlug($request->title, $rentalBoat->id);
             }
-            $rentalBoat->slug = $slug;
+
+            // Update basic fields
+            if ($request->title) $rentalBoat->title = $request->title;
+            if ($request->location) $rentalBoat->location = $request->location;
+            if ($request->city) $rentalBoat->city = $request->city;
+            if ($request->country) $rentalBoat->country = $request->country;
+            if ($request->region) $rentalBoat->region = $request->region;
+            if ($request->latitude) $rentalBoat->lat = $request->latitude;
+            if ($request->longitude) $rentalBoat->lng = $request->longitude;
+            if ($request->boat_type) $rentalBoat->boat_type = $request->boat_type;
+            if ($request->desc_of_boat) $rentalBoat->desc_of_boat = $request->desc_of_boat;
+            if ($request->requirements !== null) $rentalBoat->requirements = $request->requirements;
+            if ($request->price_type) $rentalBoat->price_type = $request->price_type;
+            
+            // Handle status - only update if not a draft or if explicitly provided
+            if (!$isDraft && $request->status) {
+                $rentalBoat->status = $request->status;
+            } elseif ($isDraft) {
+                $rentalBoat->status = 'draft';
+            }
+
+            // Update boat information and other fields
+            $rentalBoat->boat_information = $this->processBoatInformation($request);
+            $rentalBoat->boat_extras = $this->processBoatExtras($request);
+            $rentalBoat->inclusions = $this->processInclusions($request);
+            $rentalBoat->prices = $this->processPricing($request);
+
+            $rentalBoat->save();
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $isDraft ? 'Draft saved successfully!' : 'Rental boat updated successfully!',
+                    'rental_boat_id' => $rentalBoat->id,
+                    'redirect_url' => $request->input('target_redirect') ?? route('admin.rental-boats.index'),
+                ]);
+            }
+
+            return redirect()->route('admin.rental-boats.index')
+                ->with('success', 'Rental boat updated successfully.');
+        } catch (\Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error updating rental boat: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error updating rental boat: ' . $e->getMessage());
         }
-
-        // Update basic fields
-        $rentalBoat->title = $request->title;
-        $rentalBoat->location = $request->location;
-        $rentalBoat->city = $request->city;
-        $rentalBoat->country = $request->country;
-        $rentalBoat->region = $request->region;
-        $rentalBoat->lat = $request->latitude;
-        $rentalBoat->lng = $request->longitude;
-        $rentalBoat->boat_type = $request->boat_type;
-        $rentalBoat->desc_of_boat = $request->desc_of_boat;
-        $rentalBoat->requirements = $request->requirements;
-        $rentalBoat->status = $request->status;
-        $rentalBoat->price_type = $request->price_type;
-
-        // Process boat information
-        if ($request->has('boat_info')) {
-            $rentalBoat->boat_information = $request->boat_info;
-        }
-
-        // Process boat extras
-        if ($request->has('boat_extras')) {
-            $rentalBoat->boat_extras = is_string($request->boat_extras) 
-                ? explode(',', $request->boat_extras) 
-                : $request->boat_extras;
-        }
-
-        // Process inclusions
-        if ($request->has('inclusions')) {
-            $rentalBoat->inclusions = is_string($request->inclusions) 
-                ? explode(',', $request->inclusions) 
-                : $request->inclusions;
-        }
-
-        // Process pricing
-        $rentalBoat->prices = [
-            'base_price' => $request->base_price
-        ];
-
-        // Process extra pricing
-        if ($request->has('extra_pricing')) {
-            $rentalBoat->pricing_extra = $request->extra_pricing;
-        }
-
-        $rentalBoat->save();
-
-        return redirect()->route('admin.rental-boats.index')
-            ->with('success', 'Rental boat updated successfully.');
     }
 
     /**
@@ -342,5 +291,153 @@ class RentalBoatsController extends Controller
         $statusText = $rentalBoat->status === 'active' ? 'activated' : 'deactivated';
         
         return back()->with('success', "Rental boat {$statusText} successfully.");
+    }
+
+    private function getFormData()
+    {
+        $locale = Config::get('app.locale');
+        $nameField = $locale == 'en' ? 'name_en' : 'name';
+
+        return [
+            'rentalBoatTypes' => GuidingBoatType::all()->map(function($item) use ($nameField) {
+                return [
+                    'value' => $item->$nameField,
+                    'id' => $item->id
+                ];
+            }),
+            'boatExtras' => BoatExtras::all()->map(function($item) use ($nameField) {
+                return [
+                    'value' => $item->$nameField,
+                    'id' => $item->id
+                ];
+            }),
+            'inclusions' => Inclussion::all()->map(function($item) use ($nameField) {
+                return [
+                    'value' => $item->$nameField,
+                    'id' => $item->id
+                ];
+            }),
+            'guiding_boat_descriptions' => GuidingBoatDescription::all()->map(function($item) use ($nameField) {
+                return [
+                    'value' => $item->$nameField,
+                    'id' => $item->id
+                ];
+            })
+        ];
+    }
+
+    private function processBoatInformation($request)
+    {
+        $boatInformation = [];
+        
+        // Add boat info checkboxes (Length, Capacity, Engine, etc.)
+        if ($request->has('boat_info_checkboxes')) {
+            $boatInfoCheckboxes = $request->input('boat_info_checkboxes', []);
+            $boatInfoData = [];
+
+            foreach ($boatInfoCheckboxes as $checkbox) {
+                $boatInfoData[$checkbox] = $request->input("boat_info_".$checkbox);
+            }
+
+            $boatInformation = array_merge($boatInformation, $boatInfoData);
+        }
+
+
+        return $boatInformation;
+    }
+
+    private function processBoatExtras($request)
+    {
+        if (!$request->has('boat_extras')) {
+            return null;
+        }
+
+        return is_string($request->boat_extras) 
+            ? explode(',', $request->boat_extras) 
+            : $request->boat_extras;
+    }
+
+    private function processInclusions($request)
+    {
+        if (!$request->has('inclusions')) {
+            return null;
+        }
+
+        return is_string($request->inclusions) 
+            ? explode(',', $request->inclusions) 
+            : $request->inclusions;
+    }
+
+    private function processPricing($request)
+    {
+        $pricing = [
+            'base_price' => $request->base_price
+        ];
+
+        if ($request->has('extra_pricing')) {
+            $pricing['pricing_extra'] = $request->extra_pricing;
+        }
+
+        return $pricing;
+    }
+
+    private function prepareEditFormData($rentalBoat)
+    {
+        return [
+            'id' => $rentalBoat->id,
+            'is_update' => 1,
+            'user_id' => $rentalBoat->user_id,
+            'title' => $rentalBoat->title,
+            'slug' => $rentalBoat->slug,
+            'location' => $rentalBoat->location,
+            'city' => $rentalBoat->city,
+            'country' => $rentalBoat->country,
+            'region' => $rentalBoat->region,
+            'lat' => $rentalBoat->lat,
+            'lng' => $rentalBoat->lng,
+            'boat_type' => $rentalBoat->boat_type,
+            'desc_of_boat' => $rentalBoat->desc_of_boat,
+            'requirements' => $rentalBoat->requirements,
+            'boat_information' => $rentalBoat->boat_information,
+            'boat_extras' => $rentalBoat->boat_extras,
+            'inclusions' => $rentalBoat->inclusions,
+            'price_type' => $rentalBoat->price_type,
+            'prices' => $rentalBoat->prices,
+            'pricing_extra' => $rentalBoat->pricing_extra,
+            'status' => $rentalBoat->status,
+            'thumbnail_path' => $rentalBoat->thumbnail_path,
+            'gallery_images' => $rentalBoat->gallery_images,
+        ];
+    }
+
+    /**
+     * Generate unique slug for rental boat
+     *
+     * @param string $title
+     * @param int|null $excludeId
+     * @return string
+     */
+    private function generateUniqueSlug($title, $excludeId = null)
+    {
+        $slug = \Str::slug($title);
+        $originalSlug = $slug;
+        $counter = 1;
+
+        $query = RentalBoat::where('slug', $slug);
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        while ($query->exists()) {
+            $slug = $originalSlug . '-' . $counter;
+            $counter++;
+            
+            $query = RentalBoat::where('slug', $slug);
+            if ($excludeId) {
+                $query->where('id', '!=', $excludeId);
+            }
+        }
+
+        return $slug;
     }
 }

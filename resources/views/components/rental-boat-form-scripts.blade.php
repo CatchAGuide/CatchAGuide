@@ -7,7 +7,7 @@
 <script>
     window.imageManagerLoaded = window.imageManagerLoaded || null;
     window.currentStep = window.currentStep || 1;
-    window.totalSteps = window.totalSteps || 6;
+    window.totalSteps = window.totalSteps || 4;
     window.autocomplete = window.autocomplete || null;
     window.city = window.city || null;
     window.region = window.region || null;
@@ -19,10 +19,10 @@
         location: { field: 'Location', step: 1 },
         boat_type: { field: 'Boat Type', step: 2 },
         desc_of_boat: { field: 'Boat Description', step: 2 },
-        base_price: { field: 'Base Price', step: 5 },
-        price_type: { field: 'Price Type', step: 5 },
-        status: { field: 'Status', step: 6 },
-        booking_advance: { field: 'Booking Advance', step: 6 }
+        base_price: { field: 'Base Price', step: 4 },
+        price_type: { field: 'Price Type', step: 4 },
+        status: { field: 'Status', step: 4 },
+        booking_advance: { field: 'Booking Advance', step: 4 }
     };
 
     // Initialize form when document is ready
@@ -67,6 +67,15 @@
         if (document.getElementById('is_update').value == '1') {
             loadExistingData();
         }
+
+        // Initialize radio button functionality
+        initializeRadioButtons();
+
+        // Initialize checkbox functionality
+        initializeCheckboxes();
+
+        // Initialize radio button styling
+        initializeRadioButtonStyling();
 
         // Add additional file input event listener for multiple file selection
         const imageUploadInput = document.getElementById('title_image');
@@ -233,6 +242,14 @@
         return element.tagify;
     }
 
+    function initializeRadioButtons() {
+        // Radio button functionality for boat types and other radio groups
+        $('input[type="radio"]').change(function() {
+            $(this).closest('.btn-group-toggle').find('label').removeClass('active');
+            $(this).next('label').addClass('active');
+        });
+    }
+
     function initializeExtraPricing() {
         let extraPricingCount = 0;
 
@@ -325,44 +342,223 @@
             });
         });
 
-        // Draft save buttons
-        $(document).off('click', '[id^="saveDraftBtn"]').on('click', '[id^="saveDraftBtn"]', function(e) {
-            e.preventDefault();
-            document.getElementById('is_draft').value = '1';
-            document.getElementById('rentalBoatForm').submit();
-        });
     }
 
     function setupFormSubmission() {
         // Submit button handlers
         $(document).on('click', '[id^="submitBtn"]', function(e) {
-            showLoadingScreen();
+            e.preventDefault();
+            console.log('Submit button clicked:', this);
+            handleSubmit(e);
         });
 
         // Form submit handler
         document.getElementById('rentalBoatForm').addEventListener('submit', function(e) {
-            if (validateAllSteps()) {
-                showLoadingScreen();
-                // Process images before submission
-                if (window.imageManagerLoaded && typeof window.imageManagerLoaded.getCroppedImages === 'function') {
-                    const croppedImages = window.imageManagerLoaded.getCroppedImages();
-                    if (croppedImages.length > 0) {
-                        // Remove any existing title_image[] from FormData
-                        const formData = new FormData(this);
-                        formData.delete('title_image[]');
-                        croppedImages.forEach((imgObj, idx) => {
-                            // Convert dataURL to Blob
-                            const blob = dataURLtoBlob(imgObj.dataUrl);
-                            const filename = imgObj.filename || `cropped_${idx}.png`;
-                            formData.append('title_image[]', blob, filename);
-                        });
+            e.preventDefault();
+            handleSubmit(e);
+        });
+
+        // Draft save buttons
+        $(document).off('click', '[id^="saveDraftBtn"]').on('click', '[id^="saveDraftBtn"]', function(e) {
+            e.preventDefault();
+            saveDraft();
+        });
+    }
+
+    function handleSubmit(event) {
+        // Ensure we get the form element, not the event target (which might be a button)
+        const form = document.getElementById('rentalBoatForm');
+        const isDraft = document.getElementById('is_draft').value === '1';
+        
+        console.log('handleSubmit called with:', {
+            event: event,
+            form: form,
+            isDraft: isDraft
+        });
+        
+        // Show loading screen
+        showLoadingScreen();
+        
+        if (isDraft || validateAllSteps()) {
+            submitForm(form);
+        } else {
+            hideLoadingScreen();
+            // Scroll to error container if there are validation errors
+            const errorContainer = document.getElementById('error-container');
+            if (errorContainer && errorContainer.style.display === 'block') {
+                errorContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    }
+
+    async function saveDraft() {
+        const form = document.getElementById('rentalBoatForm');
+        if (!form) {
+            console.error('Form not found');
+            return;
+        }
+
+        // Show loading screen
+        showLoadingScreen();
+        
+        // Update loading screen message
+        const loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen) {
+            const loadingText = loadingScreen.querySelector('div[style*="font-size: 1.2rem"]');
+            if (loadingText) {
+                loadingText.textContent = 'Saving draft...';
+            }
+        }
+
+        try {
+            const formData = new FormData(form);
+            
+            // Force draft mode
+            formData.set('is_draft', '1');
+            formData.set('current_step', currentStep);
+            formData.set('status', 'draft');
+
+            // Always append these if present
+            const rentalBoatId = $('#rental_boat_id').val();
+            const isUpdate = $('#is_update').val();
+            if (rentalBoatId) formData.set('rental_boat_id', rentalBoatId);
+            if (isUpdate) formData.set('is_update', isUpdate);
+
+            // Append cropped images as files if available
+            if (window.imageManagerLoaded && typeof window.imageManagerLoaded.getCroppedImages === 'function') {
+                const croppedImages = window.imageManagerLoaded.getCroppedImages();
+                if (croppedImages.length > 0) {
+                    // Remove any existing title_image[] from FormData
+                    formData.delete('title_image[]');
+                    croppedImages.forEach((imgObj, idx) => {
+                        // Convert dataURL to Blob
+                        const blob = dataURLtoBlob(imgObj.dataUrl);
+                        const filename = imgObj.filename || `cropped_${idx}.png`;
+                        formData.append('title_image[]', blob, filename);
+                    });
+                }
+            }
+
+            // Submit the form
+            const response = await fetch(form.action, {
+                method: formData.get('_method') || 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    // Update form with new rental boat ID if it's a new record
+                    if (data.rental_boat_id) {
+                        $('#rental_boat_id').val(data.rental_boat_id);
+                        $('#is_update').val('1');
                     }
+                    hideLoadingScreen();
+                    alert(data.message || 'Draft saved successfully!');
                 }
             } else {
-                e.preventDefault();
-                hideLoadingScreen();
+                throw new Error(data.message || 'Failed to save draft');
             }
+        } catch (error) {
+            console.error('Error saving draft:', error);
+            hideLoadingScreen();
+            alert('Error saving draft: ' + error.message);
+        }
+    }
+
+    function submitForm(form) {
+        // Ensure we have a valid form element
+        if (!form || !(form instanceof HTMLFormElement)) {
+            console.error('Invalid form element:', form);
+            hideLoadingScreen();
+            alert('Error: Form not found or invalid.');
+            return;
+        }
+        
+        const formData = new FormData(form);
+        
+        // Ensure status is set to 'active' for final submission (not draft)
+        const isDraft = formData.get('is_draft') === '1';
+        if (!isDraft && !formData.get('status')) {
+            formData.set('status', 'active');
+        }
+        
+        // Process images before submission
+        if (window.imageManagerLoaded && typeof window.imageManagerLoaded.getCroppedImages === 'function') {
+            const croppedImages = window.imageManagerLoaded.getCroppedImages();
+            if (croppedImages.length > 0) {
+                // Remove any existing title_image[] from FormData
+                formData.delete('title_image[]');
+                croppedImages.forEach((imgObj, idx) => {
+                    // Convert dataURL to Blob
+                    const blob = dataURLtoBlob(imgObj.dataUrl);
+                    const filename = imgObj.filename || `cropped_${idx}.png`;
+                    formData.append('title_image[]', blob, filename);
+                });
+            }
+        }
+
+        // Submit the form
+        fetch(form.action, {
+            method: formData.get('_method') || 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        throw new Error(text);
+                    }
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.redirect_url) {
+                window.location.href = data.redirect_url;
+            } else {
+                displayValidationErrors(data.errors);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            hideLoadingScreen();
+            alert('Error submitting form: ' + error.message);
         });
+    }
+
+    function displayValidationErrors(errors) {
+        hideLoadingScreen();
+        const errorContainer = document.getElementById('error-container');
+        if (errors && Object.keys(errors).length > 0) {
+            let errorHtml = '<ul>';
+            Object.values(errors).forEach(errorArray => {
+                if (Array.isArray(errorArray)) {
+                    errorArray.forEach(error => {
+                        errorHtml += `<li>${error}</li>`;
+                    });
+                } else {
+                    errorHtml += `<li>${errorArray}</li>`;
+                }
+            });
+            errorHtml += '</ul>';
+            errorContainer.innerHTML = errorHtml;
+            errorContainer.style.display = 'block';
+            errorContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     }
 
     // Helper function to convert data URL to Blob (same as guidings)
@@ -412,7 +608,7 @@
                 break;
 
             case 2:
-                if (!document.getElementById('boat_type').value) {
+                if (!document.querySelector('input[name="boat_type"]:checked')) {
                     errors.push('Please select a boat type.');
                     isValid = false;
                 }
@@ -432,10 +628,6 @@
                 break;
 
             case 4:
-                // Requirements and inclusions are optional
-                break;
-
-            case 5:
                 if (!document.querySelector('input[name="price_type"]:checked')) {
                     errors.push('Please select a price type.');
                     isValid = false;
@@ -447,17 +639,6 @@
                 const basePrice = parseFloat(document.getElementById('base_price').value);
                 if (isNaN(basePrice) || basePrice < 0) {
                     errors.push('Base price must be a valid positive number.');
-                    isValid = false;
-                }
-                break;
-
-            case 6:
-                if (!document.querySelector('input[name="status"]:checked')) {
-                    errors.push('Please select availability status.');
-                    isValid = false;
-                }
-                if (!document.querySelector('input[name="booking_advance"]:checked')) {
-                    errors.push('Please select booking advance requirement.');
                     isValid = false;
                 }
                 break;
@@ -564,15 +745,39 @@
             console.log('Loading existing images:', formData.gallery_images);
         }
 
-        // Load other form data
+        // Load boat type selection
+        if (formData.boat_type) {
+            const boatTypeRadio = document.querySelector(`input[name="boat_type"][value="${formData.boat_type}"]`);
+            if (boatTypeRadio) {
+                boatTypeRadio.checked = true;
+                boatTypeRadio.dispatchEvent(new Event('change'));
+                const label = boatTypeRadio.closest('label');
+                if (label) {
+                    label.classList.add('active');
+                }
+            }
+        }
+
+        // Load boat info checkboxes data from boat_information
         if (formData.boat_information) {
-            Object.keys(formData.boat_information).forEach(key => {
-                const input = document.querySelector(`input[name="boat_info[${key}]"], select[name="boat_info[${key}]"]`);
-                if (input) {
-                    input.value = formData.boat_information[key];
+            Object.entries(formData.boat_information).forEach(([key, value]) => {
+                const checkbox = document.querySelector(`input[name="boat_info_checkboxes[]"][value="${key}"]`);
+                if (checkbox && value) {
+                    checkbox.checked = true;
+                    checkbox.dispatchEvent(new Event('change'));
+                    const container = checkbox.closest('.btn-checkbox-container');
+                    if (container) {
+                        container.classList.add('active');
+                        const textarea = container.querySelector('textarea');
+                        if (textarea) {
+                            textarea.value = value;
+                            textarea.style.display = 'block';
+                        }
+                    }
                 }
             });
         }
+
 
         // Load tagify data
         if (formData.boat_extras && document.getElementById('boat_extras').tagify) {
@@ -604,6 +809,90 @@
         if (loadingScreen) {
             loadingScreen.remove();
         }
+    }
+
+    function initializeCheckboxes() {
+        console.log('Initializing checkboxes...');
+        console.log('Found checkbox containers:', $('.btn-checkbox-container').length);
+        
+        // Checkbox with additional fields functionality - exactly like guidings form
+        $('.btn-checkbox-container input[type="checkbox"]').change(function() {
+            console.log('Checkbox changed:', this.checked);
+            var $container = $(this).closest('.btn-checkbox-container');
+            var $label = $container.find('label');
+            var $textarea = $container.find('textarea');
+
+            if (this.checked) {
+                $label.addClass('active');
+                $textarea.show();
+                $textarea.prop('required', true);
+                console.log('Checkbox checked - showing textarea');
+            } else {
+                $label.removeClass('active');
+                $textarea.hide();
+                $textarea.prop('required', false);
+                $textarea.val('');
+                console.log('Checkbox unchecked - hiding textarea');
+            }
+        });
+
+        // Initialize checkbox states on page load
+        $('.btn-checkbox-container input[type="checkbox"]').each(function() {
+            var $container = $(this).closest('.btn-checkbox-container');
+            var $label = $container.find('label');
+            var $textarea = $container.find('textarea');
+            
+            if (this.checked) {
+                $label.addClass('active');
+                $textarea.show();
+            } else {
+                $label.removeClass('active');
+                $textarea.hide();
+            }
+        });
+
+        // Add click handlers to labels to toggle checkboxes
+        $('.btn-checkbox-container label').click(function(e) {
+            console.log('Label clicked');
+            e.preventDefault();
+            var $checkbox = $(this).prev('input[type="checkbox"]');
+            console.log('Checkbox found:', $checkbox.length);
+            $checkbox.prop('checked', !$checkbox.prop('checked'));
+            $checkbox.trigger('change');
+        });
+    }
+
+    function initializeRadioButtonStyling() {
+        // Initialize radio button states on page load
+        $('input[type="radio"]').each(function() {
+            var $label = $(this).next('label');
+            if (this.checked) {
+                $label.addClass('active');
+            } else {
+                $label.removeClass('active');
+            }
+        });
+
+        // Add change handlers for radio buttons
+        $('input[type="radio"]').change(function() {
+            var name = $(this).attr('name');
+            var $labels = $(`input[name="${name}"]`).next('label');
+            $labels.removeClass('active');
+            
+            if (this.checked) {
+                $(this).next('label').addClass('active');
+            }
+        });
+
+        // Add click handlers for radio button labels
+        $('.btn-checkbox').click(function(e) {
+            e.preventDefault();
+            var $radio = $(this).prev('input[type="radio"]');
+            if ($radio.length) {
+                $radio.prop('checked', true);
+                $radio.trigger('change');
+            }
+        });
     }
 </script>
 @endpush

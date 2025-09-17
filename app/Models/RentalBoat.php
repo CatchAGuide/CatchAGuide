@@ -53,4 +53,9 @@ class RentalBoat extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function boatType(): BelongsTo
+    {
+        return $this->belongsTo(GuidingBoatType::class, 'boat_type', 'id');
+    }
 }

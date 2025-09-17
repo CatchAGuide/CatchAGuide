@@ -31,8 +31,10 @@
                         <div class="card-body">
                             <x-rental-boat-form 
                                 :form-data="$formData" 
+                                :rental-boat-types="$rentalBoatTypes"
                                 :boat-extras="$boatExtras"
                                 :inclusions="$inclusions"
+                                :guiding-boat-descriptions="$guiding_boat_descriptions"
                                 form-action="{{ route('admin.rental-boats.store') }}"
                                 target-redirect="{{ $targetRedirect }}" />
                         </div>
