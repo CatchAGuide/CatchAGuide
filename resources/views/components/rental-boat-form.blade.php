@@ -47,7 +47,7 @@
             <input type="hidden" name="is_draft" id="is_draft" value="{{ isset($formData['status']) && $formData['status'] == 'draft' ? 1 : 0 }}">
             <input type="hidden" name="rental_boat_id" id="rental_boat_id" value="{{ $formData['id'] ?? 0 }}">
             <input type="hidden" name="thumbnail_path" id="thumbnail_path" value="{{ $formData['thumbnail_path'] ?? '' }}">
-            <input type="hidden" name="existing_images" id="existing_images" value="{{ $formData['gallery_images'] ?? '' }}">
+            <input type="hidden" name="existing_images" id="existing_images" value="{{ is_array($formData['gallery_images'] ?? []) ? json_encode($formData['gallery_images']) : ($formData['gallery_images'] ?? '') }}">
             <input type="hidden" name="user_id" id="user_id" value="{{ $formData['user_id'] ?? auth()->id() }}">
             <input type="hidden" name="status" id="status" value="{{ $formData['status'] ?? 'active' }}">
             <input type="hidden" id="image_list" name="image_list">
@@ -133,7 +133,8 @@
                     </label>
                     <div class="d-flex flex-wrap btn-group-toggle">
                         @foreach($rentalBoatTypes ?? [] as $rentalBoatType)
-                            <input type="radio" name="boat_type" value="{{ $rentalBoatType['id'] }}" id="boat_type_{{ $rentalBoatType['id'] }}">
+                            <input type="radio" name="boat_type" value="{{ $rentalBoatType['value'] }}" id="boat_type_{{ $rentalBoatType['id'] }}" 
+                                   {{ (isset($formData['boat_type']) && $formData['boat_type'] == $rentalBoatType['value']) ? 'checked' : '' }}>
                             <label for="boat_type_{{ $rentalBoatType['id'] }}" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" 
                                    style="flex-basis: calc(33.33% - 20px);">{{ $rentalBoatType['value'] }}</label>
                         @endforeach
@@ -255,17 +256,20 @@
                            title="{{ __('rental_boats.tooltip_price_type') }}"></i>
                     </label>
                     <div class="d-flex flex-wrap btn-group-toggle">
-                        <input type="radio" name="price_type" value="per_hour" id="per_hour">
+                        <input type="radio" name="price_type" value="per_hour" id="per_hour" 
+                               {{ (isset($formData['price_type']) && $formData['price_type'] == 'per_hour') ? 'checked' : '' }}>
                         <label for="per_hour" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">
                             {{ __('rental_boats.per_hour') }}
                         </label>
                         
-                        <input type="radio" name="price_type" value="per_day" id="per_day">
+                        <input type="radio" name="price_type" value="per_day" id="per_day" 
+                               {{ (isset($formData['price_type']) && $formData['price_type'] == 'per_day') ? 'checked' : '' }}>
                         <label for="per_day" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">
                             {{ __('rental_boats.per_day') }}
                         </label>
                         
-                        <input type="radio" name="price_type" value="per_week" id="per_week">
+                        <input type="radio" name="price_type" value="per_week" id="per_week" 
+                               {{ (isset($formData['price_type']) && $formData['price_type'] == 'per_week') ? 'checked' : '' }}>
                         <label for="per_week" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">
                             {{ __('rental_boats.per_week') }}
                         </label>
