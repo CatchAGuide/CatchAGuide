@@ -28,6 +28,8 @@ return [
         'number_of_bedrooms' => 'Anzahl Schlafzimmer',
         'number_of_beds' => 'Anzahl Betten',
         'bed_types' => 'Bettentypen',
+        'bed_configuration' => 'Bettkonfiguration',
+    'accommodation_details' => 'Unterkunft Details',
         'living_room' => 'Wohnzimmer',
         'dining_room_or_area' => 'Esszimmer oder -bereich',
         'terrace' => 'Terrasse',
@@ -69,6 +71,10 @@ return [
         'currency' => 'Währung',
         'status' => 'Status',
         'user_id' => 'Eigentümer',
+        'checkin_checkout_time' => 'Eincheck- / Auscheckzeit',
+        'self_checkin' => 'Selbstständiges Einchecken',
+        'quiet_times' => 'Ruhezeiten',
+        'waste_disposal_recycling_rules' => 'Müllentsorgung / Recycling-Regeln',
     ],
     
     'placeholders' => [

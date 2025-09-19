@@ -58,7 +58,6 @@
 @endsection
 
 @push('styles')
-@include('components.accommodation-form-styles')
 <style>
 .page-header {
     display: flex;
@@ -150,6 +149,4 @@
 </style>
 @endpush
 
-@push('scripts')
-@include('components.accommodation-form-scripts')
-@endpush
+@stack('js_push')

@@ -351,7 +351,6 @@
         // Submit button handlers
         $(document).on('click', '[id^="submitBtn"]', function(e) {
             e.preventDefault();
-            console.log('Submit button clicked:', this);
             handleSubmit(e);
         });
 
@@ -372,12 +371,6 @@
         // Ensure we get the form element, not the event target (which might be a button)
         const form = document.getElementById('rentalBoatForm');
         const isDraft = document.getElementById('is_draft').value === '1';
-        
-        console.log('handleSubmit called with:', {
-            event: event,
-            form: form,
-            isDraft: isDraft
-        });
         
         // Show loading screen
         showLoadingScreen();
@@ -744,13 +737,8 @@
         // Load existing form data for edit mode
         const formData = @json($formData ?? []);
         
-        // Debug: Log all form data
-        console.log('Form data received:', formData);
-        
         // Load images if they exist
         if (formData.gallery_images && Array.isArray(formData.gallery_images)) {
-            // This would load existing images into the preview
-            console.log('Loading existing images:', formData.gallery_images);
         }
 
         // Load boat type selection
@@ -839,13 +827,9 @@
         }
     }
 
-    function initializeCheckboxes() {
-        console.log('Initializing checkboxes...');
-        console.log('Found checkbox containers:', $('.btn-checkbox-container').length);
-        
+    function initializeCheckboxes() {        
         // Checkbox with additional fields functionality - exactly like guidings form
         $('.btn-checkbox-container input[type="checkbox"]').change(function() {
-            console.log('Checkbox changed:', this.checked);
             var $container = $(this).closest('.btn-checkbox-container');
             var $label = $container.find('label');
             var $textarea = $container.find('textarea');
@@ -854,13 +838,11 @@
                 $label.addClass('active');
                 $textarea.show();
                 $textarea.prop('required', true);
-                console.log('Checkbox checked - showing textarea');
             } else {
                 $label.removeClass('active');
                 $textarea.hide();
                 $textarea.prop('required', false);
                 $textarea.val('');
-                console.log('Checkbox unchecked - hiding textarea');
             }
         });
 
@@ -881,10 +863,8 @@
 
         // Add click handlers to labels to toggle checkboxes
         $('.btn-checkbox-container label').click(function(e) {
-            console.log('Label clicked');
             e.preventDefault();
             var $checkbox = $(this).prev('input[type="checkbox"]');
-            console.log('Checkbox found:', $checkbox.length);
             $checkbox.prop('checked', !$checkbox.prop('checked'));
             $checkbox.trigger('change');
         });

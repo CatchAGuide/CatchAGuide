@@ -1,49 +1,201 @@
+@push('js_push')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/browser-image-compression@latest/dist/browser-image-compression.js"></script>
+<script src="{{ asset('assets/js/ImageManager.js') }}"></script>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Step navigation
-    const steps = document.querySelectorAll('.step');
-    const stepButtons = document.querySelectorAll('.step-button');
-    const stepLine = document.querySelector('.step-line');
-    let currentStep = 1;
-
-    // Initialize form
-    initializeForm();
-
-    function initializeForm() {
-        // Set up step navigation
-        stepButtons.forEach((button, index) => {
-            button.addEventListener('click', () => {
-                if (index + 1 <= currentStep) {
-                    goToStep(index + 1);
-                }
-            });
-        });
-
-        // Set up next/previous buttons
-        setupNavigationButtons();
-        
-        // Set up image upload
-        setupImageUpload();
-        
-        // Set up location search
-        setupLocationSearch();
-        
-        // Set up form validation
-        setupFormValidation();
-        
-        // Set up save draft functionality
-        setupSaveDraft();
+/**
+ * Accommodation Form Manager - OOP approach for better organization
+ */
+class AccommodationFormManager {
+    constructor() {
+        this.currentStep = 1;
+        this.totalSteps = 6;
+        this.pricingTierCounter = 0;
+        this.imageManager = null;
+        this.elements = this.initializeElements();
+        this.init();
     }
 
-    function goToStep(stepNumber) {
+    initializeElements() {
+        return {
+            form: document.getElementById('accommodation-form'),
+            steps: document.querySelectorAll('.step'),
+            stepButtons: document.querySelectorAll('.step-button'),
+            stepLine: document.querySelector('.step-line'),
+            errorContainer: document.getElementById('error-container'),
+            imageContainer: document.getElementById('croppedImagesContainer'),
+            imageInput: document.getElementById('title_image'),
+            locationInput: document.getElementById('location'),
+            maxOccupancyInput: document.getElementById('max_occupancy'),
+            priceTypeRadios: document.querySelectorAll('input[name="price_type"]'),
+            perAccommodationDiv: document.getElementById('per_accommodation_pricing'),
+            perPersonDiv: document.getElementById('per_person_pricing'),
+            dynamicPersonPricingContainer: document.getElementById('dynamic-person-pricing-container'),
+            addPersonPricingBtn: document.getElementById('add-person-pricing')
+        };
+    }
+
+    init() {
+        this.setupEventListeners();
+        this.initializeImageManager();
+        this.initializeBedTypes();
+        this.initializeTooltips();
+        this.initializePricing();
+    }
+
+    setupEventListeners() {
+    // Step navigation
+        this.elements.stepButtons.forEach((button, index) => {
+            button.addEventListener('click', () => this.goToStep(index + 1));
+        });
+
+        // Navigation buttons
+        this.setupNavigationButtons();
+    }
+
+    setupNavigationButtons() {
+        // Next buttons
+        for (let i = 1; i <= this.totalSteps; i++) {
+            const nextBtn = document.getElementById(`nextBtn${i}`);
+            if (nextBtn) {
+                nextBtn.addEventListener('click', () => {
+                    if (this.validateStep(i)) {
+                        this.goToStep(i + 1);
+                    }
+                });
+            }
+        }
+
+        // Previous buttons
+        for (let i = 2; i <= this.totalSteps; i++) {
+            const prevBtn = document.getElementById(`prevBtn${i}`);
+            if (prevBtn) {
+                prevBtn.addEventListener('click', () => this.goToStep(i - 1));
+            }
+        }
+    }
+
+    initializeBedTypes() {
+        const bedTypeCheckboxes = document.querySelectorAll('.bed-type-checkbox');
+        bedTypeCheckboxes.forEach(checkbox => {
+            this.setupBedTypeCheckbox(checkbox);
+        });
+    }
+
+    setupBedTypeCheckbox(checkbox) {
+        const row = checkbox.closest('.bed-type-row');
+        const quantityContainer = row.querySelector('.bed-quantity-container');
+        const quantityInput = row.querySelector('.bed-quantity-input');
+        
+        // Set initial state
+        this.updateBedTypeVisibility(checkbox, quantityContainer, quantityInput);
+
+        // Add event listener
+        checkbox.addEventListener('change', () => {
+            this.updateBedTypeVisibility(checkbox, quantityContainer, quantityInput);
+        });
+    }
+
+    updateBedTypeVisibility(checkbox, quantityContainer, quantityInput) {
+        if (checkbox.checked) {
+            quantityContainer.style.display = 'block';
+            if (quantityInput.value == 0) {
+                quantityInput.value = 1;
+            }
+        } else {
+            quantityContainer.style.display = 'none';
+            quantityInput.value = 0;
+        }
+    }
+
+    initializeImageManager() {
+        if (typeof ImageManager !== 'undefined' && !this.imageManager) {
+            this.imageManager = new ImageManager('#croppedImagesContainer', '#title_image');
+            
+            if (document.getElementById('is_update').value === '1') {
+                const existingImagesInput = document.getElementById('existing_images');
+                const thumbnailPath = document.getElementById('thumbnail_path').value;
+                
+                if (existingImagesInput && existingImagesInput.value) {
+                    this.imageManager.loadExistingImages(existingImagesInput.value, thumbnailPath);
+                }
+            }
+        }
+
+        // File input event listener
+        if (this.elements.imageInput) {
+            this.elements.imageInput.addEventListener('change', (event) => {
+                if (this.imageManager) {
+                    try {
+                        this.imageManager.handleFileSelect(event.target.files);
+                    } catch (error) {
+                        console.error('Error in handleFileSelect:', error);
+                    }
+                }
+            });
+        }
+    }
+
+    initializePricing() {
+        // Price type change handlers
+        this.elements.priceTypeRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                this.handlePriceTypeChange(radio.value);
+            });
+        });
+        
+        // Initialize pricing display based on current selection
+        const selectedPriceType = document.querySelector('input[name="price_type"]:checked');
+        if (selectedPriceType) {
+            this.handlePriceTypeChange(selectedPriceType.value);
+        }
+        
+        // Add person pricing button handler
+        if (this.elements.addPersonPricingBtn) {
+            this.elements.addPersonPricingBtn.addEventListener('click', () => this.addPersonPricingTier());
+        }
+    }
+
+    initializeTooltips() {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+
+    canNavigateToStep(targetStep) {
+        // Allow navigation to step 1 always
+        if (targetStep === 1) return true;
+        
+        // For other steps, check if previous steps are valid
+        for (let i = 1; i < targetStep; i++) {
+            if (!this.validateStep(i)) {
+                this.showError(`Please complete step ${i} before proceeding.`);
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    goToStep(stepNumber) {
+        // Validate step before allowing navigation
+        if (!this.canNavigateToStep(stepNumber)) {
+            return false;
+        }
+        
         // Hide all steps
-        steps.forEach(step => step.classList.remove('active'));
+        this.elements.steps.forEach(step => step.classList.remove('active'));
         
         // Show current step
-        document.getElementById(`step${stepNumber}`).classList.add('active');
+        const targetStep = document.getElementById(`step${stepNumber}`);
+        if (targetStep) {
+            targetStep.classList.add('active');
+        }
         
         // Update step buttons
-        stepButtons.forEach((button, index) => {
+        this.elements.stepButtons.forEach((button, index) => {
             button.classList.remove('active', 'completed');
             if (index + 1 < stepNumber) {
                 button.classList.add('completed');
@@ -53,36 +205,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Update step line
-        stepLine.className = `step-line step-${stepNumber}`;
+        if (this.elements.stepLine) {
+            this.elements.stepLine.className = `step-line step-${stepNumber}`;
+        }
         
-        currentStep = stepNumber;
+        this.currentStep = stepNumber;
+        return true;
     }
 
-    function setupNavigationButtons() {
-        // Next buttons
-        for (let i = 1; i <= 6; i++) {
-            const nextBtn = document.getElementById(`nextBtn${i}`);
-            if (nextBtn) {
-                nextBtn.addEventListener('click', () => {
-                    if (validateStep(i)) {
-                        goToStep(i + 1);
-                    }
-                });
-            }
-        }
-
-        // Previous buttons
-        for (let i = 2; i <= 6; i++) {
-            const prevBtn = document.getElementById(`prevBtn${i}`);
-            if (prevBtn) {
-                prevBtn.addEventListener('click', () => {
-                    goToStep(i - 1);
-                });
-            }
-        }
-    }
-
-    function validateStep(stepNumber) {
+    validateStep(stepNumber) {
         let isValid = true;
         const step = document.getElementById(`step${stepNumber}`);
         const requiredFields = step.querySelectorAll('[required]');
@@ -96,166 +227,123 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        if (!isValid) {
-            showError('Please fill in all required fields');
+        // Special validation for pricing step
+        if (stepNumber === 6) {
+            isValid = this.validatePricingStep() && isValid;
         }
         
         return isValid;
     }
 
-    function setupImageUpload() {
-        const fileInput = document.getElementById('title_image');
-        const imageContainer = document.getElementById('imagePreviewContainer');
-        const primaryImageInput = document.getElementById('primaryImageInput');
-        let uploadedImages = [];
-
-        fileInput.addEventListener('change', function(e) {
-            const files = Array.from(e.target.files);
-            
-            files.forEach(file => {
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const imageId = Date.now() + Math.random();
-                        const imageData = {
-                            id: imageId,
-                            file: file,
-                            url: e.target.result
-                        };
-                        
-                        uploadedImages.push(imageData);
-                        displayImage(imageData);
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-        });
-
-        function displayImage(imageData) {
-            const imagePreview = document.createElement('div');
-            imagePreview.className = 'image-preview';
-            imagePreview.dataset.imageId = imageData.id;
-            
-            imagePreview.innerHTML = `
-                <img src="${imageData.url}" alt="Preview">
-                <button type="button" class="remove-btn" onclick="removeImage('${imageData.id}')">
-                    <i class="fas fa-times"></i>
-                </button>
-                <button type="button" class="set-primary-btn" onclick="setPrimaryImage('${imageData.id}')">
-                    Set as Primary
-                </button>
-            `;
-            
-            imageContainer.appendChild(imagePreview);
+    validatePricingStep() {
+        const selectedPriceType = document.querySelector('input[name="price_type"]:checked');
+        if (!selectedPriceType) {
+            this.showError('Please select a pricing type.');
+            return false;
         }
 
-        // Make functions global for onclick handlers
-        window.removeImage = function(imageId) {
-            uploadedImages = uploadedImages.filter(img => img.id !== imageId);
-            const preview = document.querySelector(`[data-image-id="${imageId}"]`);
-            if (preview) {
-                preview.remove();
+        if (selectedPriceType.value === 'per_accommodation') {
+            const pricePerNight = document.querySelector('input[name="price_per_night"]');
+            if (!pricePerNight || !pricePerNight.value) {
+                this.showError('Please enter a price per night.');
+                return false;
             }
-        };
-
-        window.setPrimaryImage = function(imageId) {
-            // Remove primary badge from all images
-            document.querySelectorAll('.primary-badge').forEach(badge => badge.remove());
-            
-            // Add primary badge to selected image
-            const preview = document.querySelector(`[data-image-id="${imageId}"]`);
-            if (preview) {
-                const badge = document.createElement('div');
-                badge.className = 'primary-badge';
-                badge.textContent = 'Primary';
-                preview.appendChild(badge);
-                
-                // Set primary image input
-                const imageData = uploadedImages.find(img => img.id === imageId);
-                if (imageData) {
-                    primaryImageInput.value = imageData.id;
-                }
-            }
-        };
-    }
-
-    function setupLocationSearch() {
-        const locationInput = document.getElementById('location');
-        const latitudeInput = document.getElementById('latitude');
-        const longitudeInput = document.getElementById('longitude');
-        const countryInput = document.getElementById('country');
-        const cityInput = document.getElementById('city');
-        const regionInput = document.getElementById('region');
-
-        // Simple location search implementation
-        locationInput.addEventListener('blur', function() {
-            const location = this.value;
-            if (location) {
-                // In a real implementation, you would use a geocoding service
-                // For now, we'll just set some default values
-                latitudeInput.value = '55.6761';
-                longitudeInput.value = '12.5683';
-                countryInput.value = 'Denmark';
-                cityInput.value = 'Copenhagen';
-                regionInput.value = 'Capital Region';
-            }
-        });
-    }
-
-    function setupFormValidation() {
-        const form = document.getElementById('accommodationForm');
-        
-        form.addEventListener('submit', function(e) {
-            if (!validateAllSteps()) {
-                e.preventDefault();
-                showError('Please complete all required fields before submitting');
-            }
-        });
-    }
-
-    function validateAllSteps() {
-        for (let i = 1; i <= 6; i++) {
-            if (!validateStep(i)) {
-                goToStep(i);
+        } else if (selectedPriceType.value === 'per_person') {
+            const pricingTiers = document.querySelectorAll('.pricing-tier');
+            if (pricingTiers.length === 0) {
+                this.showError('Please add at least one pricing tier.');
                 return false;
             }
         }
+
         return true;
     }
 
-    function setupSaveDraft() {
-        const saveDraftButtons = document.querySelectorAll('[id^="saveDraftBtn"]');
+    handlePriceTypeChange(priceType) {
+        // Hide all pricing sections
+        if (this.elements.perAccommodationDiv) this.elements.perAccommodationDiv.style.display = 'none';
+        if (this.elements.perPersonDiv) this.elements.perPersonDiv.style.display = 'none';
         
-        saveDraftButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const isDraftInput = document.getElementById('is_draft');
-                isDraftInput.value = '1';
-                
-                // Show loading state
-                this.classList.add('loading');
-                this.disabled = true;
-                
-                // Submit form
-                document.getElementById('accommodationForm').submit();
-            });
-        });
+        // Show relevant pricing section
+        if (priceType === 'per_accommodation') {
+            if (this.elements.perAccommodationDiv) this.elements.perAccommodationDiv.style.display = 'block';
+        } else if (priceType === 'per_person') {
+            if (this.elements.perPersonDiv) this.elements.perPersonDiv.style.display = 'block';
+            // Initialize with one pricing tier if none exist
+            if (this.elements.dynamicPersonPricingContainer && this.elements.dynamicPersonPricingContainer.children.length === 0) {
+                this.addPersonPricingTier();
+            }
+        }
     }
 
-    function showError(message) {
-        const errorContainer = document.getElementById('error-container');
-        errorContainer.textContent = message;
-        errorContainer.style.display = 'block';
+    addPersonPricingTier() {
+        const container = this.elements.dynamicPersonPricingContainer;
+        if (!container) return;
+        
+        this.pricingTierCounter++;
+        
+        const fieldGroup = document.createElement('div');
+        fieldGroup.className = 'form-group mb-3 pricing-tier';
+        fieldGroup.setAttribute('data-tier', this.pricingTierCounter);
+        fieldGroup.innerHTML = `
+            <div class="row align-items-center">
+                <div class="col-md-2">
+                    <label class="form-label">Number of guests</label>
+                    <div class="form-control-static d-flex align-items-center" style="height: 38px; padding: 6px 12px; background-color: #f8f9fa; border: 1px solid #ced4da; border-radius: 4px;">
+                        ${this.pricingTierCounter}
+                    </div>
+                    <input type="hidden" name="guest_count_${this.pricingTierCounter}" value="${this.pricingTierCounter}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Price per Night</label>
+                    <div class="input-group">
+                        <span class="input-group-text">€</span>
+                        <input type="number" class="form-control" name="price_per_person_night_${this.pricingTierCounter}" placeholder="0.00" min="0" step="0.01" value="">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Price per Week</label>
+                    <div class="input-group">
+                        <span class="input-group-text">€</span>
+                        <input type="number" class="form-control" name="price_per_person_week_${this.pricingTierCounter}" placeholder="0.00" min="0" step="0.01" value="">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Actions</label>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-danger remove-pricing-tier" onclick="accommodationFormManager.removePersonPricingTier(${this.pricingTierCounter})">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        container.appendChild(fieldGroup);
+    }
+
+    removePersonPricingTier(tierId) {
+        const tierElement = document.querySelector(`[data-tier="${tierId}"]`);
+        if (tierElement) {
+            tierElement.remove();
+        }
+    }
+
+    showError(message) {
+        if (this.elements.errorContainer) {
+            this.elements.errorContainer.textContent = message;
+            this.elements.errorContainer.style.display = 'block';
         
         // Hide error after 5 seconds
         setTimeout(() => {
-            errorContainer.style.display = 'none';
+                this.elements.errorContainer.style.display = 'none';
         }, 5000);
+        }
     }
+}
 
-    // Initialize tooltips
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
+// Initialize the form manager when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    window.accommodationFormManager = new AccommodationFormManager();
 });
 </script>
+@endpush

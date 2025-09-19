@@ -5,7 +5,6 @@
     $formMethod = $isEdit ? 'PUT' : 'POST';
 @endphp
 
-@include('components.accommodation-form-styles')
 <div id="accommodation-form" class="card">
     <div class="card-body">
         
@@ -205,12 +204,6 @@
                                 <label for="number_of_bedrooms" class="form-label">{{ __('accommodations.fields.number_of_bedrooms') }}</label>
                                 <input type="number" class="form-control" id="number_of_bedrooms" name="number_of_bedrooms" value="{{ old('number_of_bedrooms', $accommodation->number_of_bedrooms) }}" placeholder="{{ __('accommodations.placeholders.number_of_bedrooms') }}" min="0">
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label for="number_of_beds" class="form-label">{{ __('accommodations.fields.number_of_beds') }}</label>
-                                <input type="number" class="form-control" id="number_of_beds" name="number_of_beds" value="{{ old('number_of_beds', $accommodation->number_of_beds) }}" placeholder="{{ __('accommodations.placeholders.number_of_beds') }}" min="0">
-                            </div>
                             <div class="form-group mb-3">
                                 <label for="bathroom" class="form-label">{{ __('accommodations.fields.bathroom') }}</label>
                                 <input type="number" class="form-control" id="bathroom" name="bathroom" value="{{ old('bathroom', $accommodation->bathroom) }}" placeholder="{{ __('accommodations.placeholders.bathroom') }}" min="0">
@@ -218,6 +211,32 @@
                             <div class="form-group mb-3">
                                 <label for="condition_or_style" class="form-label">{{ __('accommodations.fields.condition_or_style') }}</label>
                                 <input type="text" class="form-control" id="condition_or_style" name="condition_or_style" value="{{ old('condition_or_style', $accommodation->condition_or_style) }}" placeholder="{{ __('accommodations.placeholders.condition_or_style') }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ __('accommodations.fields.bed_configuration') }}</label>
+                                <div id="bed-types-container">
+                                    @foreach(__('accommodations.options.bed_types') as $key => $value)
+                                        <div class="bed-type-row mb-3">
+                                            <div class="d-flex flex-wrap btn-group-toggle mb-2">
+                                                <input type="checkbox" name="bed_types[{{ $key }}][enabled]" value="1" 
+                                                       class="bed-type-checkbox" data-bed-type="{{ $key }}" id="bed_type_{{ $key }}"
+                                                       {{ (old('bed_types.'.$key.'.enabled', $accommodation->bed_types[$key]['enabled'] ?? false)) ? 'checked' : '' }}>
+                                                <label for="bed_type_{{ $key }}" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(50% - 20px);">{{ $value }}</label>
+                                            </div>
+                                            <div class="bed-quantity-container" style="display: none;">
+                                                <div class="input-group">
+                                                    <span class="input-group-text">Quantity:</span>
+                                                    <input type="number" name="bed_types[{{ $key }}][quantity]" 
+                                                           class="form-control bed-quantity-input" 
+                                                           value="{{ old('bed_types.'.$key.'.quantity', $accommodation->bed_types[$key]['quantity'] ?? 0) }}" 
+                                                           min="0" max="20">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -333,36 +352,78 @@
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="Select all amenities available in your accommodation"></i>
                     </label>
-                    <div class="checkbox-grid">
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="living_room" value="1" {{ old('living_room', $accommodation->living_room) ? 'checked' : '' }}>
-                            <span class="checkbox-text">{{ __('accommodations.fields.living_room') }}</span>
-                        </label>
+                    <div class="d-flex flex-wrap btn-group-toggle">
+                        <input type="checkbox" name="terrace" value="1" id="terrace" {{ old('terrace', $accommodation->terrace) ? 'checked' : '' }}>
+                        <label for="terrace" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">{{ __('accommodations.fields.terrace') }}</label>
                         
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="dining_room_or_area" value="1" {{ old('dining_room_or_area', $accommodation->dining_room_or_area) ? 'checked' : '' }}>
-                            <span class="checkbox-text">{{ __('accommodations.fields.dining_room_or_area') }}</span>
-                        </label>
+                        <input type="checkbox" name="garden" value="1" id="garden" {{ old('garden', $accommodation->garden) ? 'checked' : '' }}>
+                        <label for="garden" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">{{ __('accommodations.fields.garden') }}</label>
                         
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="terrace" value="1" {{ old('terrace', $accommodation->terrace) ? 'checked' : '' }}>
-                            <span class="checkbox-text">{{ __('accommodations.fields.terrace') }}</span>
-                        </label>
+                        <input type="checkbox" name="swimming_pool" value="1" id="swimming_pool" {{ old('swimming_pool', $accommodation->swimming_pool) ? 'checked' : '' }}>
+                        <label for="swimming_pool" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">{{ __('accommodations.fields.swimming_pool') }}</label>
                         
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="garden" value="1" {{ old('garden', $accommodation->garden) ? 'checked' : '' }}>
-                            <span class="checkbox-text">{{ __('accommodations.fields.garden') }}</span>
-                        </label>
+                        <input type="checkbox" name="private_jetty_boat_dock" value="1" id="private_jetty_boat_dock" {{ old('private_jetty_boat_dock', $accommodation->private_jetty_boat_dock) ? 'checked' : '' }}>
+                        <label for="private_jetty_boat_dock" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Private jetty / boat dock</label>
                         
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="swimming_pool" value="1" {{ old('swimming_pool', $accommodation->swimming_pool) ? 'checked' : '' }}>
-                            <span class="checkbox-text">{{ __('accommodations.fields.swimming_pool') }}</span>
-                        </label>
+                        <input type="checkbox" name="fish_cleaning_station" value="1" id="fish_cleaning_station" {{ old('fish_cleaning_station', $accommodation->fish_cleaning_station) ? 'checked' : '' }}>
+                        <label for="fish_cleaning_station" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Fish cleaning / filleting station</label>
                         
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="wifi_or_internet" value="1" {{ old('wifi_or_internet', $accommodation->wifi_or_internet) ? 'checked' : '' }}>
-                            <span class="checkbox-text">{{ __('accommodations.fields.wifi_or_internet') }}</span>
-                        </label>
+                        <input type="checkbox" name="smoker" value="1" id="smoker" {{ old('smoker', $accommodation->smoker) ? 'checked' : '' }}>
+                        <label for="smoker" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Smoker</label>
+                        
+                        <input type="checkbox" name="barbecue_area" value="1" id="barbecue_area" {{ old('barbecue_area', $accommodation->barbecue_area) ? 'checked' : '' }}>
+                        <label for="barbecue_area" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Barbecue area</label>
+                        
+                        <input type="checkbox" name="lockable_storage_fishing" value="1" id="lockable_storage_fishing" {{ old('lockable_storage_fishing', $accommodation->lockable_storage_fishing) ? 'checked' : '' }}>
+                        <label for="lockable_storage_fishing" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Lockable storage for fishing equipment</label>
+                        
+                        <input type="checkbox" name="wifi" value="1" id="wifi" {{ old('wifi', $accommodation->wifi) ? 'checked' : '' }}>
+                        <label for="wifi" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">WiFi</label>
+                        
+                        <input type="checkbox" name="fireplace_stove" value="1" id="fireplace_stove" {{ old('fireplace_stove', $accommodation->fireplace_stove) ? 'checked' : '' }}>
+                        <label for="fireplace_stove" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Fireplace / stove</label>
+                        
+                        <input type="checkbox" name="sauna" value="1" id="sauna" {{ old('sauna', $accommodation->sauna) ? 'checked' : '' }}>
+                        <label for="sauna" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Sauna</label>
+                        
+                        <input type="checkbox" name="pool_hot_tub" value="1" id="pool_hot_tub" {{ old('pool_hot_tub', $accommodation->pool_hot_tub) ? 'checked' : '' }}>
+                        <label for="pool_hot_tub" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Pool / hot tub</label>
+                        
+                        <input type="checkbox" name="games_corner" value="1" id="games_corner" {{ old('games_corner', $accommodation->games_corner) ? 'checked' : '' }}>
+                        <label for="games_corner" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Billiards / table tennis / darts / games corner</label>
+                        
+                        <input type="checkbox" name="balcony" value="1" id="balcony" {{ old('balcony', $accommodation->balcony) ? 'checked' : '' }}>
+                        <label for="balcony" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Balcony</label>
+                        
+                        <input type="checkbox" name="garden_furniture_sun_loungers" value="1" id="garden_furniture_sun_loungers" {{ old('garden_furniture_sun_loungers', $accommodation->garden_furniture_sun_loungers) ? 'checked' : '' }}>
+                        <label for="garden_furniture_sun_loungers" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Garden furniture / sun loungers</label>
+                        
+                        <input type="checkbox" name="parking_spaces" value="1" id="parking_spaces" {{ old('parking_spaces', $accommodation->parking_spaces) ? 'checked' : '' }}>
+                        <label for="parking_spaces" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Parking spaces</label>
+                        
+                        <input type="checkbox" name="charging_station_electric_cars" value="1" id="charging_station_electric_cars" {{ old('charging_station_electric_cars', $accommodation->charging_station_electric_cars) ? 'checked' : '' }}>
+                        <label for="charging_station_electric_cars" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Charging station for electric cars</label>
+                        
+                        <input type="checkbox" name="boat_ramp_nearby" value="1" id="boat_ramp_nearby" {{ old('boat_ramp_nearby', $accommodation->boat_ramp_nearby) ? 'checked' : '' }}>
+                        <label for="boat_ramp_nearby" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Boat ramp nearby</label>
+                        
+                        <input type="checkbox" name="tv" value="1" id="tv" {{ old('tv', $accommodation->tv) ? 'checked' : '' }}>
+                        <label for="tv" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">TV</label>
+                        
+                        <input type="checkbox" name="sound_system" value="1" id="sound_system" {{ old('sound_system', $accommodation->sound_system) ? 'checked' : '' }}>
+                        <label for="sound_system" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Sound system</label>
+                        
+                        <input type="checkbox" name="reception" value="1" id="reception" {{ old('reception', $accommodation->reception) ? 'checked' : '' }}>
+                        <label for="reception" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Reception</label>
+                        
+                        <input type="checkbox" name="keybox" value="1" id="keybox" {{ old('keybox', $accommodation->keybox) ? 'checked' : '' }}>
+                        <label for="keybox" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Keybox</label>
+                        
+                        <input type="checkbox" name="heating" value="1" id="heating" {{ old('heating', $accommodation->heating) ? 'checked' : '' }}>
+                        <label for="heating" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Heating</label>
+                        
+                        <input type="checkbox" name="air_conditioning" value="1" id="air_conditioning" {{ old('air_conditioning', $accommodation->air_conditioning) ? 'checked' : '' }}>
+                        <label for="air_conditioning" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Air Conditioning</label>
                     </div>
                 </div>
 
@@ -374,36 +435,74 @@
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="Select kitchen equipment available"></i>
                     </label>
-                    <div class="checkbox-grid">
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="refrigerator_freezer" value="1" {{ old('refrigerator_freezer', $accommodation->refrigerator_freezer) ? 'checked' : '' }}>
-                            <span class="checkbox-text">{{ __('accommodations.fields.refrigerator_freezer') }}</span>
-                        </label>
+                    <div class="d-flex flex-wrap btn-group-toggle">
+                        <input type="checkbox" name="refrigerator" value="1" id="refrigerator" {{ old('refrigerator', $accommodation->refrigerator) ? 'checked' : '' }}>
+                        <label for="refrigerator" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Refrigerator</label>
                         
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="oven" value="1" {{ old('oven', $accommodation->oven) ? 'checked' : '' }}>
-                            <span class="checkbox-text">{{ __('accommodations.fields.oven') }}</span>
-                        </label>
+                        <input type="checkbox" name="freezer" value="1" id="freezer" {{ old('freezer', $accommodation->freezer) ? 'checked' : '' }}>
+                        <label for="freezer" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Freezer or freezer compartment</label>
                         
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="stove_or_ceramic_hob" value="1" {{ old('stove_or_ceramic_hob', $accommodation->stove_or_ceramic_hob) ? 'checked' : '' }}>
-                            <span class="checkbox-text">{{ __('accommodations.fields.stove_or_ceramic_hob') }}</span>
-                        </label>
+                        <input type="checkbox" name="oven" value="1" id="oven" {{ old('oven', $accommodation->oven) ? 'checked' : '' }}>
+                        <label for="oven" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">{{ __('accommodations.fields.oven') }}</label>
                         
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="microwave" value="1" {{ old('microwave', $accommodation->microwave) ? 'checked' : '' }}>
-                            <span class="checkbox-text">{{ __('accommodations.fields.microwave') }}</span>
-                        </label>
+                        <input type="checkbox" name="stove_or_ceramic_hob" value="1" id="stove_or_ceramic_hob" {{ old('stove_or_ceramic_hob', $accommodation->stove_or_ceramic_hob) ? 'checked' : '' }}>
+                        <label for="stove_or_ceramic_hob" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">{{ __('accommodations.fields.stove_or_ceramic_hob') }}</label>
                         
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="dishwasher" value="1" {{ old('dishwasher', $accommodation->dishwasher) ? 'checked' : '' }}>
-                            <span class="checkbox-text">{{ __('accommodations.fields.dishwasher') }}</span>
-                        </label>
+                        <input type="checkbox" name="microwave" value="1" id="microwave" {{ old('microwave', $accommodation->microwave) ? 'checked' : '' }}>
+                        <label for="microwave" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">{{ __('accommodations.fields.microwave') }}</label>
                         
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="coffee_machine" value="1" {{ old('coffee_machine', $accommodation->coffee_machine) ? 'checked' : '' }}>
-                            <span class="checkbox-text">{{ __('accommodations.fields.coffee_machine') }}</span>
+                        <input type="checkbox" name="dishwasher" value="1" id="dishwasher" {{ old('dishwasher', $accommodation->dishwasher) ? 'checked' : '' }}>
+                        <label for="dishwasher" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">{{ __('accommodations.fields.dishwasher') }}</label>
+                        
+                        <input type="checkbox" name="coffee_machine" value="1" id="coffee_machine" {{ old('coffee_machine', $accommodation->coffee_machine) ? 'checked' : '' }}>
+                        <label for="coffee_machine" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">{{ __('accommodations.fields.coffee_machine') }}</label>
+                        
+                        <input type="checkbox" name="kettle" value="1" id="kettle" {{ old('kettle', $accommodation->kettle) ? 'checked' : '' }}>
+                        <label for="kettle" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Kettle</label>
+                        
+                        <input type="checkbox" name="toaster" value="1" id="toaster" {{ old('toaster', $accommodation->toaster) ? 'checked' : '' }}>
+                        <label for="toaster" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Toaster</label>
+                        
+                        <input type="checkbox" name="blender_hand_mixer" value="1" id="blender_hand_mixer" {{ old('blender_hand_mixer', $accommodation->blender_hand_mixer) ? 'checked' : '' }}>
+                        <label for="blender_hand_mixer" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Blender or hand mixer</label>
+                        
+                        <input type="checkbox" name="basic_cooking_supplies" value="1" id="basic_cooking_supplies" {{ old('basic_cooking_supplies', $accommodation->basic_cooking_supplies) ? 'checked' : '' }}>
+                        <label for="basic_cooking_supplies" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Basic cooking supplies</label>
+                        
+                        <input type="checkbox" name="kitchen_utensils" value="1" id="kitchen_utensils" {{ old('kitchen_utensils', $accommodation->kitchen_utensils) ? 'checked' : '' }}>
+                        <label for="kitchen_utensils" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Kitchen utensils</label>
+                        
+                        <input type="checkbox" name="baking_equipment" value="1" id="baking_equipment" {{ old('baking_equipment', $accommodation->baking_equipment) ? 'checked' : '' }}>
+                        <label for="baking_equipment" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Baking equipment</label>
+                        
+                        <input type="checkbox" name="dishwashing_items" value="1" id="dishwashing_items" {{ old('dishwashing_items', $accommodation->dishwashing_items) ? 'checked' : '' }}>
+                        <label for="dishwashing_items" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Dishwashing items</label>
+                        
+                        <input type="checkbox" name="wine_glasses" value="1" id="wine_glasses" {{ old('wine_glasses', $accommodation->wine_glasses) ? 'checked' : '' }}>
+                        <label for="wine_glasses" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Wine Glasses</label>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="form-group">
+                    <label class="form-label fw-bold fs-5">
+                        Bathroom Amenities
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                           title="Select bathroom amenities available"></i>
                         </label>
+                    <div class="d-flex flex-wrap btn-group-toggle">
+                        <input type="checkbox" name="iron_and_ironing_board" value="1" id="iron_and_ironing_board" {{ old('iron_and_ironing_board', $accommodation->iron_and_ironing_board) ? 'checked' : '' }}>
+                        <label for="iron_and_ironing_board" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Iron and ironing board</label>
+                        
+                        <input type="checkbox" name="clothes_drying_rack" value="1" id="clothes_drying_rack" {{ old('clothes_drying_rack', $accommodation->clothes_drying_rack) ? 'checked' : '' }}>
+                        <label for="clothes_drying_rack" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Clothes drying rack / clothesline</label>
+                        
+                        <input type="checkbox" name="toilet" value="1" id="toilet" {{ old('toilet', $accommodation->toilet) ? 'checked' : '' }}>
+                        <label for="toilet" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Toilet</label>
+                        
+                        <input type="checkbox" name="own_shower" value="1" id="own_shower" {{ old('own_shower', $accommodation->own_shower) ? 'checked' : '' }}>
+                        <label for="own_shower" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Own shower</label>
                     </div>
                 </div>
 
@@ -434,30 +533,79 @@
                 <h5>{{ __('accommodations.sections.pricing') }}</h5>
 
                 <div class="form-group">
-                    <label class="form-label fw-bold fs-5">
+                    <label for="pricing" class="form-label fw-bold fs-5">
                         {{ __('accommodations.sections.pricing') }}
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="Set your pricing structure"></i>
                     </label>
+                    
+                    <div class="alert alert-secondary mb-3 d-flex">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <div>Choose how you want to price your accommodation. You can charge per accommodation (fixed price regardless of number of guests) or per person (price varies based on number of guests).</div>
+                    </div>
+                    
+                    <div class="d-flex flex-wrap btn-group-toggle">
+                        <input type="radio" name="price_type" value="per_accommodation" id="per_accommodation_checkbox" {{ old('price_type', $accommodation->price_type) == 'per_accommodation' ? 'checked' : '' }}>
+                        <label for="per_accommodation_checkbox" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(50% - 20px);">
+                            Price per accommodation
+                        </label>
+                        
+                        <input type="radio" name="price_type" value="per_person" id="per_person_checkbox" {{ old('price_type', $accommodation->price_type) == 'per_person' ? 'checked' : '' }}>
+                        <label for="per_person_checkbox" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(50% - 20px);">
+                            Price per person
+                        </label>
+                    </div>
+                    
+                    <!-- Per accommodation pricing -->
+                    <div id="per_accommodation_pricing" style="display: none; margin-top: 15px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group mb-3">
-                                <label for="price_per_night" class="form-label">{{ __('accommodations.fields.price_per_night') }}</label>
+                                    <label for="price_per_night" class="form-label">Price per night</label>
                                 <div class="input-group">
                                     <span class="input-group-text">€</span>
-                                    <input type="number" class="form-control" id="price_per_night" name="price_per_night" value="{{ old('price_per_night', $accommodation->price_per_night) }}" placeholder="{{ __('accommodations.placeholders.price_per_night') }}" min="0" step="0.01">
-                                </div>
+                                        <input type="number" class="form-control" id="price_per_night" name="price_per_night" value="{{ old('price_per_night', $accommodation->price_per_night) }}" placeholder="Enter price per night" min="0" step="0.01">
+                                    </div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group mb-3">
-                                <label for="price_per_week" class="form-label">{{ __('accommodations.fields.price_per_week') }}</label>
+                                    <label for="price_per_week" class="form-label">Price per week</label>
                                 <div class="input-group">
                                     <span class="input-group-text">€</span>
-                                    <input type="number" class="form-control" id="price_per_week" name="price_per_week" value="{{ old('price_per_week', $accommodation->price_per_week) }}" placeholder="{{ __('accommodations.placeholders.price_per_week') }}" min="0" step="0.01">
+                                        <input type="number" class="form-control" id="price_per_week" name="price_per_week" value="{{ old('price_per_week', $accommodation->price_per_week) }}" placeholder="Enter price per week" min="0" step="0.01">
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    
+                    <!-- Per person pricing -->
+                    <div id="per_person_pricing" style="display: none; margin-top: 15px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Per person pricing:</strong> You can set different prices based on the number of guests. The system will use the maximum occupancy you set earlier to create pricing tiers.
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Pricing per person:</strong> Set the price per person for each guest count. For example, if you set €50 for 1 guest and €45 for 2 guests, a single guest will pay €50 per night, while two guests will pay €45 each (€90 total).
+                        </div>
+                        <div class="form-group" id="dynamic-person-pricing-container"></div>
+                        <div class="mt-3">
+                            <button type="button" id="add-person-pricing" class="btn btn-sm btn-success">
+                                <i class="fas fa-plus me-1"></i> Add Guest Pricing Tier
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Currency selection -->
+                    <div class="mt-3">
+                        <label for="currency" class="form-label">Currency</label>
+                        <select class="form-control" id="currency" name="currency">
+                            <option value="EUR" {{ old('currency', $accommodation->currency ?? 'EUR') == 'EUR' ? 'selected' : '' }}>Euro (EUR)</option>
+                            <option value="USD" {{ old('currency', $accommodation->currency) == 'USD' ? 'selected' : '' }}>US Dollar (USD)</option>
+                            <option value="GBP" {{ old('currency', $accommodation->currency) == 'GBP' ? 'selected' : '' }}>British Pound (GBP)</option>
+                        </select>
                     </div>
                 </div>
 
@@ -469,26 +617,86 @@
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="Set your rental policies"></i>
                     </label>
-                    <div class="checkbox-grid">
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="bed_linen_included" value="1" {{ old('bed_linen_included', $accommodation->bed_linen_included) ? 'checked' : '' }}>
-                            <span class="checkbox-text">{{ __('accommodations.fields.bed_linen_included') }}</span>
-                        </label>
+                    <div class="d-flex flex-wrap btn-group-toggle">
+                        <input type="checkbox" name="bed_linen_included" value="1" id="bed_linen_included" {{ old('bed_linen_included', $accommodation->bed_linen_included) ? 'checked' : '' }}>
+                        <label for="bed_linen_included" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">{{ __('accommodations.fields.bed_linen_included') }}</label>
                         
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="utilities_included" value="1" {{ old('utilities_included', $accommodation->utilities_included) ? 'checked' : '' }}>
-                            <span class="checkbox-text">{{ __('accommodations.fields.utilities_included') }}</span>
-                        </label>
+                        <input type="checkbox" name="pets_allowed" value="1" id="pets_allowed" {{ old('pets_allowed', $accommodation->pets_allowed) ? 'checked' : '' }}>
+                        <label for="pets_allowed" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">{{ __('accommodations.fields.pets_allowed') }}</label>
                         
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="pets_allowed" value="1" {{ old('pets_allowed', $accommodation->pets_allowed) ? 'checked' : '' }}>
-                            <span class="checkbox-text">{{ __('accommodations.fields.pets_allowed') }}</span>
-                        </label>
+                        <input type="checkbox" name="smoking_allowed" value="1" id="smoking_allowed" {{ old('smoking_allowed', $accommodation->smoking_allowed) ? 'checked' : '' }}>
+                        <label for="smoking_allowed" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">{{ __('accommodations.fields.smoking_allowed') }}</label>
                         
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="smoking_allowed" value="1" {{ old('smoking_allowed', $accommodation->smoking_allowed) ? 'checked' : '' }}>
-                            <span class="checkbox-text">{{ __('accommodations.fields.smoking_allowed') }}</span>
+                        <input type="checkbox" name="towels_included" value="1" id="towels_included" {{ old('towels_included', $accommodation->towels_included) ? 'checked' : '' }}>
+                        <label for="towels_included" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Towels included</label>
+                        
+                        <input type="checkbox" name="quiet_hours_no_parties" value="1" id="quiet_hours_no_parties" {{ old('quiet_hours_no_parties', $accommodation->quiet_hours_no_parties) ? 'checked' : '' }}>
+                        <label for="quiet_hours_no_parties" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Quiet hours / no parties</label>
+                        
+                        <input type="checkbox" name="checkin_checkout_times" value="1" id="checkin_checkout_times" {{ old('checkin_checkout_times', $accommodation->checkin_checkout_times) ? 'checked' : '' }}>
+                        <label for="checkin_checkout_times" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Check-in / Check-out times</label>
+                        
+                        <input type="checkbox" name="children_allowed_child_friendly" value="1" id="children_allowed_child_friendly" {{ old('children_allowed_child_friendly', $accommodation->children_allowed_child_friendly) ? 'checked' : '' }}>
+                        <label for="children_allowed_child_friendly" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Children allowed / child-friendly</label>
+                        
+                        <input type="checkbox" name="accessible_barrier_free" value="1" id="accessible_barrier_free" {{ old('accessible_barrier_free', $accommodation->accessible_barrier_free) ? 'checked' : '' }}>
+                        <label for="accessible_barrier_free" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Accessible / barrier-free</label>
+                        
+                        <input type="checkbox" name="energy_usage_included" value="1" id="energy_usage_included" {{ old('energy_usage_included', $accommodation->energy_usage_included) ? 'checked' : '' }}>
+                        <label for="energy_usage_included" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Energy usage included</label>
+                        
+                        <input type="checkbox" name="water_usage_included" value="1" id="water_usage_included" {{ old('water_usage_included', $accommodation->water_usage_included) ? 'checked' : '' }}>
+                        <label for="water_usage_included" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Water usage included</label>
+                        
+                        <input type="checkbox" name="parking_availability" value="1" id="parking_availability" {{ old('parking_availability', $accommodation->parking_availability) ? 'checked' : '' }}>
+                        <label for="parking_availability" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(25% - 20px);">Parking availability</label>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="form-group">
+                    <label class="form-label fw-bold fs-5">
+                        Rental Conditions
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                           title="Set specific rental conditions and rules"></i>
                         </label>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="checkin_checkout_time" class="form-label">{{ __('accommodations.fields.checkin_checkout_time') }}</label>
+                                <input type="text" class="form-control" id="checkin_checkout_time" name="checkin_checkout_time" 
+                                       value="{{ old('checkin_checkout_time', $accommodation->checkin_checkout_time) }}" 
+                                       placeholder="e.g., Check-in: 15:00, Check-out: 10:00">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ __('accommodations.fields.self_checkin') }}</label>
+                                <div class="d-flex flex-wrap btn-group-toggle">
+                                    <input type="checkbox" name="self_checkin" value="1" id="self_checkin" {{ old('self_checkin', $accommodation->self_checkin) ? 'checked' : '' }}>
+                                    <label for="self_checkin" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(100% - 20px);">{{ __('accommodations.fields.self_checkin') }}</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="quiet_times" class="form-label">{{ __('accommodations.fields.quiet_times') }}</label>
+                                <input type="text" class="form-control" id="quiet_times" name="quiet_times" 
+                                       value="{{ old('quiet_times', $accommodation->quiet_times) }}" 
+                                       placeholder="e.g., 22:00 - 7:00">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="waste_disposal_recycling_rules" class="form-label">{{ __('accommodations.fields.waste_disposal_recycling_rules') }}</label>
+                                <input type="text" class="form-control" id="waste_disposal_recycling_rules" name="waste_disposal_recycling_rules" 
+                                       value="{{ old('waste_disposal_recycling_rules', $accommodation->waste_disposal_recycling_rules) }}" 
+                                       placeholder="e.g., Separate recycling bins provided">
+                            </div>
+                        </div>
                     </div>
                 </div>
 

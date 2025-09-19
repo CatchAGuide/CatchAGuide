@@ -28,6 +28,8 @@ return [
         'number_of_bedrooms' => 'Number of Bedrooms',
         'number_of_beds' => 'Number of Beds',
         'bed_types' => 'Bed Types',
+        'bed_configuration' => 'Bed Configuration',
+    'accommodation_details' => 'Accommodation Details',
         'living_room' => 'Living Room',
         'dining_room_or_area' => 'Dining Room or Area',
         'terrace' => 'Terrace',
@@ -69,6 +71,10 @@ return [
         'currency' => 'Currency',
         'status' => 'Status',
         'user_id' => 'Owner',
+        'checkin_checkout_time' => 'Check in / check out time',
+        'self_checkin' => 'Self check in',
+        'quiet_times' => 'Quiet Times',
+        'waste_disposal_recycling_rules' => 'Waste disposal / recycling rules',
     ],
     
     'placeholders' => [

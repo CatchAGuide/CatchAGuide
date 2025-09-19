@@ -105,52 +105,22 @@ class RentalBoatsController extends Controller
                 'inclusions' => $this->processInclusions($request),
                 'prices' => $this->processPricing($request),
             ];
-
-            // Process images
-            \Log::info('RentalBoatsController::store - Starting image processing', [
-                'has_files' => $request->hasFile('title_image'),
-                'file_count' => $request->hasFile('title_image') ? count($request->file('title_image')) : 0,
-                'slug' => $slug
-            ]);
             
             $imageData = $this->processImageUploads($request, $slug, null);
-            \Log::info('RentalBoatsController::store - Image processing result', [
-                'image_data' => $imageData,
-                'has_thumbnail' => !empty($imageData['thumbnail_path']),
-                'gallery_count' => is_array($imageData['gallery_images']) ? count($imageData['gallery_images']) : 0
-            ]);
             
             if ($imageData) {
                 $rentalBoatData['thumbnail_path'] = $imageData['thumbnail_path'];
                 $rentalBoatData['gallery_images'] = $imageData['gallery_images'];
-                \Log::info('RentalBoatsController::store - Added image data to rental boat data', [
-                    'thumbnail_path' => $rentalBoatData['thumbnail_path'],
-                    'gallery_images' => $rentalBoatData['gallery_images']
-                ]);
             }
 
             $rentalBoat = RentalBoat::create($rentalBoatData);
-            \Log::info('RentalBoatsController::store - Rental boat created', [
-                'rental_boat_id' => $rentalBoat->id,
-                'thumbnail_path' => $rentalBoat->thumbnail_path,
-                'gallery_images' => $rentalBoat->gallery_images
-            ]);
 
             // Move images from temp directory to final directory if they were created
             if ($imageData && $rentalBoat->id) {
-                \Log::info('RentalBoatsController::store - Moving images to final directory', [
-                    'rental_boat_id' => $rentalBoat->id,
-                    'image_data' => $imageData
-                ]);
                 $this->moveImagesToFinalDirectory($rentalBoat->id, $rentalBoat->slug, $imageData);
                 
                 // Log final state after moving
                 $rentalBoat->refresh();
-                \Log::info('RentalBoatsController::store - Final rental boat state after image move', [
-                    'rental_boat_id' => $rentalBoat->id,
-                    'thumbnail_path' => $rentalBoat->thumbnail_path,
-                    'gallery_images' => $rentalBoat->gallery_images
-                ]);
             }
 
             if ($request->expectsJson()) {
@@ -461,15 +431,6 @@ class RentalBoatsController extends Controller
 
     private function prepareEditFormData($rentalBoat)
     {
-
-        // Debug: Check what's actually in the database
-        \Log::info('Raw database data:', [
-            'boat_extras_raw' => $rentalBoat->getRawOriginal('boat_extras'),
-            'inclusions_raw' => $rentalBoat->getRawOriginal('inclusions'),
-            'boat_extras_casted' => $rentalBoat->boat_extras,
-            'inclusions_casted' => $rentalBoat->inclusions
-        ]);
-
         // Fix broken JSON arrays
         $boatInformation = $rentalBoat->boat_information;
         
@@ -483,11 +444,6 @@ class RentalBoatsController extends Controller
                 // Fix missing commas between key-value pairs and objects
                 $jsonString = preg_replace('/"value":"([^"]+)""id":(\d+)/', '"value":"\1","id":\2', $jsonString); // Fix missing comma between value and id
                 $jsonString = preg_replace('/\}\{/', '},{', $jsonString); // Fix missing comma between objects
-                \Log::info('Reconstructed boat_extras JSON:', [
-                    'original' => $boatExtras,
-                    'reconstructed' => $jsonString,
-                    'decoded' => json_decode($jsonString, true)
-                ]);
                 $decoded = json_decode($jsonString, true);
                 if (is_array($decoded)) {
                     $boatExtras = array_column($decoded, 'value');
@@ -522,12 +478,6 @@ class RentalBoatsController extends Controller
                 $boatTypeName = $boatType->$nameField;
             }
         }
-
-        // Log the fixed data
-        \Log::info('Fixed data:', [
-            'boat_extras' => $boatExtras,
-            'inclusions' => $inclusions
-        ]);
 
         return [
             'id' => $rentalBoat->id,
@@ -597,15 +547,6 @@ class RentalBoatsController extends Controller
      */
     private function processImageUploads(Request $request, string $slug, ?int $rentalBoatId = null)
     {
-        \Log::info('RentalBoatsController::processImageUploads - Starting', [
-            'slug' => $slug,
-            'rental_boat_id' => $rentalBoatId,
-            'is_update' => $request->input('is_update'),
-            'has_title_image' => $request->hasFile('title_image'),
-            'image_list' => $request->input('image_list'),
-            'existing_images' => $request->input('existing_images')
-        ]);
-
         $galleryImages = [];
         $thumbnailPath = '';
         $imageList = json_decode($request->input('image_list', '[]')) ?? [];
@@ -617,25 +558,12 @@ class RentalBoatsController extends Controller
             $existingImages = json_decode($existingImagesJson, true) ?? [];
             $keepImages = array_filter($imageList);
 
-            \Log::info('RentalBoatsController::processImageUploads - Processing existing images', [
-                'existing_images' => $existingImages,
-                'keep_images' => $keepImages
-            ]);
-
             foreach ($existingImages as $existingImage) {
                 $imagePath = $existingImage;
                 $imagePathWithSlash = '/' . $existingImage;
                 if (in_array($imagePath, $keepImages) || in_array($imagePathWithSlash, $keepImages)) {
                     $galleryImages[] = $existingImage;
-                    $processedFilenames[] = basename($existingImage);
-                    \Log::info('RentalBoatsController::processImageUploads - Keeping existing image', [
-                        'image' => $existingImage
-                    ]);
                 } else {
-                    // Delete removed images
-                    \Log::info('RentalBoatsController::processImageUploads - Deleting removed image', [
-                        'image' => $existingImage
-                    ]);
                     media_delete($existingImage);
                 }
             }
@@ -645,35 +573,13 @@ class RentalBoatsController extends Controller
         if ($request->hasFile('title_image')) {
             $imageCount = count($galleryImages);
             $tempSlug = $slug ?: 'temp-rental-boat';
-            
-            \Log::info('RentalBoatsController::processImageUploads - Processing new file uploads', [
-                'file_count' => count($request->file('title_image')),
-                'current_gallery_count' => $imageCount,
-                'temp_slug' => $tempSlug
-            ]);
-            
+
             foreach($request->file('title_image') as $index => $image) {
                 $originalFilename = $image->getClientOriginalName();
                 $filename = 'rental-boats-images/' . $originalFilename;
                 
-                \Log::info('RentalBoatsController::processImageUploads - Processing file', [
-                    'index' => $index,
-                    'original_filename' => $originalFilename,
-                    'filename' => $filename,
-                    'already_processed' => in_array($originalFilename, $processedFilenames),
-                    'original_in_image_list' => in_array($originalFilename, $imageList),
-                    'prefixed_in_image_list' => in_array($filename, $imageList),
-                    'slash_prefixed_in_image_list' => in_array('/' . $filename, $imageList),
-                    'will_process' => in_array($originalFilename, $imageList) || in_array($filename, $imageList) || in_array('/' . $filename, $imageList)
-                ]);
-                
                 // Check if this image was already processed (existing image)
-                if (in_array($originalFilename, $processedFilenames)) {
-                    \Log::info('RentalBoatsController::processImageUploads - Skipping already processed file', [
-                        'filename' => $originalFilename
-                    ]);
-                    continue;
-                }
+                if (in_array($originalFilename, $processedFilenames)) continue;
                 
                 // Check if this image is in the image_list (new image that should be kept)
                 // Check both the original filename and the prefixed filename
@@ -685,26 +591,10 @@ class RentalBoatsController extends Controller
                     // Use isolated directory structure: rental-boats/{id}/gallery/
                     $directory = $rentalBoatId ? "rental-boats/{$rentalBoatId}/gallery" : "rental-boats/temp/gallery";
                     
-                    \Log::info('RentalBoatsController::processImageUploads - Uploading file', [
-                        'directory' => $directory,
-                        'filename' => $filename,
-                        'rental_boat_id' => $rentalBoatId
-                    ]);
-                    
                     $webp_path = media_upload($image, $directory, $filename, 75, $rentalBoatId);
                     $galleryImages[] = $webp_path;
                     $processedFilenames[] = $originalFilename;
-                    
-                    \Log::info('RentalBoatsController::processImageUploads - File uploaded successfully', [
-                        'webp_path' => $webp_path,
-                        'gallery_images_count' => count($galleryImages)
-                    ]);
                 } else {
-                    \Log::info('RentalBoatsController::processImageUploads - Skipping file not in image list', [
-                        'original_filename' => $originalFilename,
-                        'filename' => $filename,
-                        'image_list' => $imageList
-                    ]);
                 }
             }
         } else {
@@ -715,27 +605,13 @@ class RentalBoatsController extends Controller
         $primaryImageIndex = $request->input('primaryImage', 0);
         if (isset($galleryImages[$primaryImageIndex])) {
             $thumbnailPath = $galleryImages[$primaryImageIndex];
-            \Log::info('RentalBoatsController::processImageUploads - Set thumbnail from gallery', [
-                'primary_image_index' => $primaryImageIndex,
-                'thumbnail_path' => $thumbnailPath
-            ]);
         } else {
-            \Log::info('RentalBoatsController::processImageUploads - No thumbnail set', [
-                'primary_image_index' => $primaryImageIndex,
-                'gallery_images_count' => count($galleryImages)
-            ]);
         }
 
         $result = [
             'gallery_images' => $galleryImages,
             'thumbnail_path' => $thumbnailPath
         ];
-
-        \Log::info('RentalBoatsController::processImageUploads - Final result', [
-            'gallery_images' => $galleryImages,
-            'thumbnail_path' => $thumbnailPath,
-            'gallery_count' => count($galleryImages)
-        ]);
 
         return $result;
     }
@@ -750,20 +626,9 @@ class RentalBoatsController extends Controller
      */
     private function moveImagesToFinalDirectory(int $rentalBoatId, string $slug, array $imageData)
     {
-        \Log::info('RentalBoatsController::moveImagesToFinalDirectory - Starting', [
-            'rental_boat_id' => $rentalBoatId,
-            'slug' => $slug,
-            'image_data' => $imageData
-        ]);
-
         $tempDirectory = "rental-boats/temp/gallery";
         $finalDirectory = "rental-boats/{$rentalBoatId}/gallery";
-        
-        \Log::info('RentalBoatsController::moveImagesToFinalDirectory - Directory setup', [
-            'temp_directory' => $tempDirectory,
-            'final_directory' => $finalDirectory
-        ]);
-        
+
         // Ensure final directory exists
         \Storage::disk('public')->makeDirectory($finalDirectory);
         if (!file_exists(public_path($finalDirectory))) {
@@ -822,25 +687,9 @@ class RentalBoatsController extends Controller
         // Update the rental boat record with final paths
         $rentalBoat = RentalBoat::find($rentalBoatId);
         if ($rentalBoat) {
-            \Log::info('RentalBoatsController::moveImagesToFinalDirectory - Updating rental boat record', [
-                'rental_boat_id' => $rentalBoatId,
-                'updated_gallery_images' => $updatedGalleryImages,
-                'updated_thumbnail_path' => $updatedThumbnailPath
-            ]);
-            
             $rentalBoat->gallery_images = $updatedGalleryImages;
             $rentalBoat->thumbnail_path = $updatedThumbnailPath;
             $rentalBoat->save();
-            
-            \Log::info('RentalBoatsController::moveImagesToFinalDirectory - Rental boat updated successfully', [
-                'rental_boat_id' => $rentalBoatId,
-                'final_gallery_images' => $rentalBoat->gallery_images,
-                'final_thumbnail_path' => $rentalBoat->thumbnail_path
-            ]);
-        } else {
-            \Log::error('RentalBoatsController::moveImagesToFinalDirectory - Rental boat not found', [
-                'rental_boat_id' => $rentalBoatId
-            ]);
         }
     }
 }
