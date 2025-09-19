@@ -33,7 +33,7 @@
                     <a class="side-menu__item {{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#"><i class="side-menu__icon fe fe-dollar-sign"></i><span class="side-menu__label">Bookings</span><i class="angle fe fe-chevron-right"></i></a>
                     <ul class="slide-menu">
                         <li><a href="{{ route('admin.bookings.index') }}" class="slide-item  {{ request()->routeIs('admin.vacations.index') ? 'active' : '' }}"> Guidings</a></li>
-                        <li><a href="{{ route('admin.vacations.bookings') }}" class="slide-item  {{ request()->routeIs('admin.vacations.bookings') ? 'active' : '' }}"> Vacations</a></li>
+                        <li><a href="{{ route('admin.vacations.bookings') }}" class="slide-item  {{ request()->routeIs('admin.vacations.bookings') ? 'active' : '' }} text-secondary"> Vacations (Old)</a></li>
                     </ul>
                     {{-- <a class="side-menu__item {{ request()->routeIs('admin.payments.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.payments.index') }}"><i class="side-menu__icon fe fe-credit-card"></i><span class="side-menu__label">Zahlungen</span></a> --}}
                 </li>

@@ -42,6 +42,7 @@ class AccommodationFormManager {
         this.initializeBedTypes();
         this.initializeTooltips();
         this.initializePricing();
+        this.initializeLocationAutocomplete();
     }
 
     setupEventListeners() {
@@ -162,6 +163,52 @@ class AccommodationFormManager {
         tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
+    }
+
+    initializeLocationAutocomplete() {
+        const locationInput = this.elements.locationInput;
+        if (locationInput && typeof google !== 'undefined' && google.maps && google.maps.places) {
+            try {
+                const autocomplete = new google.maps.places.Autocomplete(locationInput, {
+                    types: ['establishment', 'geocode'],
+                    fields: ['place_id', 'formatted_address', 'geometry', 'address_components']
+                });
+
+                autocomplete.addListener('place_changed', () => {
+                    const place = autocomplete.getPlace();
+                    if (place.geometry) {
+                        document.getElementById('latitude').value = place.geometry.location.lat();
+                        document.getElementById('longitude').value = place.geometry.location.lng();
+                        
+                        // Extract address components
+                        const addressComponents = place.address_components;
+                        let country = '', city = '', region = '';
+                        
+                        if (addressComponents) {
+                            addressComponents.forEach(component => {
+                                if (component.types.includes('country')) {
+                                    country = component.long_name;
+                                }
+                                if (component.types.includes('locality') || component.types.includes('administrative_area_level_1')) {
+                                    city = component.long_name;
+                                }
+                                if (component.types.includes('administrative_area_level_1')) {
+                                    region = component.long_name;
+                                }
+                            });
+                        }
+                        
+                        document.getElementById('country').value = country;
+                        document.getElementById('city').value = city;
+                        document.getElementById('region').value = region;
+                    }
+                });
+            } catch (error) {
+                console.warn('Google Places API not available:', error);
+            }
+        } else {
+            console.warn('Google Maps API not loaded or location input not found');
+        }
     }
 
     canNavigateToStep(targetStep) {
