@@ -392,15 +392,42 @@ class AccommodationsController extends Controller
     {
         $policies = [];
         
-        $policyFields = [
-            'towels_included', 'quiet_hours', 'checkin_checkout_time', 'children_allowed',
-            'accessible', 'energy_usage_included', 'water_usage_included', 'parking_availability'
-        ];
-
-        foreach ($policyFields as $field) {
-            $policies[$field] = $request->has($field);
+        // Handle policy checkboxes with textarea inputs (like boat information)
+        if ($request->has('policy_checkboxes')) {
+            $policyCheckboxes = $request->input('policy_checkboxes', []);
+            
+            foreach ($policyCheckboxes as $checkbox) {
+                $policies[$checkbox] = [
+                    'enabled' => true,
+                    'details' => $request->input("policy_{$checkbox}", '')
+                ];
+            }
         }
-
+        
+        // Also handle any remaining individual policy fields for backward compatibility
+        $policyFields = [
+            'bed_linen_included',
+            'pets_allowed',
+            'smoking_allowed',
+            'towels_included',
+            'quiet_hours_no_parties',
+            'checkin_checkout_times',
+            'children_allowed_child_friendly',
+            'accessible_barrier_free',
+            'energy_usage_included',
+            'water_usage_included',
+            'parking_availability'
+        ];
+        
+        foreach ($policyFields as $field) {
+            if (!isset($policies[$field])) {
+                $policies[$field] = [
+                    'enabled' => $request->has($field) ? (bool)$request->input($field) : false,
+                    'details' => ''
+                ];
+            }
+        }
+        
         return $policies;
     }
 
@@ -422,17 +449,31 @@ class AccommodationsController extends Controller
      */
     private function processBedTypes($request)
     {
-        if (!$request->has('bed_types')) {
-            return [];
-        }
-
         $bedTypes = [];
-        foreach ($request->bed_types as $type => $data) {
-            if (isset($data['enabled']) && $data['enabled']) {
-                $bedTypes[$type] = [
+        
+        // Handle new bed type checkboxes with quantity inputs (like policies)
+        if ($request->has('bed_type_checkboxes')) {
+            $bedTypeCheckboxes = $request->input('bed_type_checkboxes', []);
+            
+            foreach ($bedTypeCheckboxes as $bedType) {
+                $bedTypes[$bedType] = [
                     'enabled' => true,
-                    'quantity' => (int)($data['quantity'] ?? 0)
+                    'quantity' => (int)($request->input("bed_type_{$bedType}", 0))
                 ];
+            }
+        }
+        
+        // Handle old bed_types structure for backward compatibility
+        if ($request->has('bed_types')) {
+            foreach ($request->bed_types as $type => $data) {
+                if (!isset($bedTypes[$type])) { // Don't override new structure
+                    if (isset($data['enabled']) && $data['enabled']) {
+                        $bedTypes[$type] = [
+                            'enabled' => true,
+                            'quantity' => (int)($data['quantity'] ?? 0)
+                        ];
+                    }
+                }
             }
         }
 

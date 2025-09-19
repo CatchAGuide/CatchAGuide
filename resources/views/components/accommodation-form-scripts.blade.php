@@ -31,8 +31,7 @@ class AccommodationFormManager {
             priceTypeRadios: document.querySelectorAll('input[name="price_type"]'),
             perAccommodationDiv: document.getElementById('per_accommodation_pricing'),
             perPersonDiv: document.getElementById('per_person_pricing'),
-            dynamicPersonPricingContainer: document.getElementById('dynamic-person-pricing-container'),
-            addPersonPricingBtn: document.getElementById('add-person-pricing')
+            dynamicPersonPricingContainer: document.getElementById('dynamic-person-pricing-container')
         };
     }
 
@@ -43,6 +42,7 @@ class AccommodationFormManager {
         this.initializeTooltips();
         this.initializePricing();
         this.initializeLocationAutocomplete();
+        this.initializePolicyCheckboxes();
     }
 
     setupEventListeners() {
@@ -78,36 +78,39 @@ class AccommodationFormManager {
     }
 
     initializeBedTypes() {
-        const bedTypeCheckboxes = document.querySelectorAll('.bed-type-checkbox');
+        // Handle bed type checkboxes with show/hide functionality (new structure)
+        const bedTypeCheckboxes = document.querySelectorAll('input[name="bed_type_checkboxes[]"]');
+        
         bedTypeCheckboxes.forEach(checkbox => {
-            this.setupBedTypeCheckbox(checkbox);
+            // Initialize state - hide all quantity inputs by default
+            const quantityInput = checkbox.parentElement.querySelector('.extra-input');
+            if (quantityInput) {
+                quantityInput.style.display = checkbox.checked ? 'block' : 'none';
+            }
+            
+            // Add event listener for checkbox changes
+            checkbox.addEventListener('change', (e) => {
+                const quantityInput = e.target.parentElement.querySelector('.extra-input');
+                if (quantityInput) {
+                    quantityInput.style.display = e.target.checked ? 'block' : 'none';
+                    
+                    // Focus on quantity input when shown
+                    if (e.target.checked) {
+                        setTimeout(() => quantityInput.focus(), 100);
+                    }
+                }
+            });
         });
     }
 
     setupBedTypeCheckbox(checkbox) {
-        const row = checkbox.closest('.bed-type-row');
-        const quantityContainer = row.querySelector('.bed-quantity-container');
-        const quantityInput = row.querySelector('.bed-quantity-input');
-        
-        // Set initial state
-        this.updateBedTypeVisibility(checkbox, quantityContainer, quantityInput);
-
-        // Add event listener
-        checkbox.addEventListener('change', () => {
-            this.updateBedTypeVisibility(checkbox, quantityContainer, quantityInput);
-        });
+        // This method is kept for backward compatibility but no longer used
+        console.warn('setupBedTypeCheckbox is deprecated. New bed configuration uses checkbox+input pattern.');
     }
 
     updateBedTypeVisibility(checkbox, quantityContainer, quantityInput) {
-        if (checkbox.checked) {
-            quantityContainer.style.display = 'block';
-            if (quantityInput.value == 0) {
-                quantityInput.value = 1;
-            }
-        } else {
-            quantityContainer.style.display = 'none';
-            quantityInput.value = 0;
-        }
+        // This method is kept for backward compatibility but no longer used
+        console.warn('updateBedTypeVisibility is deprecated. New bed configuration uses checkbox+input pattern.');
     }
 
     initializeImageManager() {
@@ -146,16 +149,21 @@ class AccommodationFormManager {
             });
         });
         
+        // Max occupancy change handler for auto-generating pricing rows
+        if (this.elements.maxOccupancyInput) {
+            this.elements.maxOccupancyInput.addEventListener('input', () => {
+                this.generatePricingRowsBasedOnOccupancy();
+            });
+        }
+        
         // Initialize pricing display based on current selection
         const selectedPriceType = document.querySelector('input[name="price_type"]:checked');
         if (selectedPriceType) {
             this.handlePriceTypeChange(selectedPriceType.value);
         }
         
-        // Add person pricing button handler
-        if (this.elements.addPersonPricingBtn) {
-            this.elements.addPersonPricingBtn.addEventListener('click', () => this.addPersonPricingTier());
-        }
+        // Initialize pricing rows based on current max occupancy
+        this.generatePricingRowsBasedOnOccupancy();
     }
 
     initializeTooltips() {
@@ -209,6 +217,54 @@ class AccommodationFormManager {
         } else {
             console.warn('Google Maps API not loaded or location input not found');
         }
+    }
+
+    initializePolicyCheckboxes() {
+        // Handle policy checkboxes with show/hide functionality
+        const policyCheckboxes = document.querySelectorAll('input[name="policy_checkboxes[]"]');
+        
+        policyCheckboxes.forEach(checkbox => {
+            // Initialize state - hide all textareas by default
+            const textarea = checkbox.parentElement.querySelector('.extra-input');
+            const container = checkbox.parentElement;
+            
+            if (textarea) {
+                textarea.style.display = checkbox.checked ? 'block' : 'none';
+            }
+            
+            // Add/remove active class to container based on checkbox state
+            if (container) {
+                if (checkbox.checked) {
+                    container.classList.add('active');
+                } else {
+                    container.classList.remove('active');
+                }
+            }
+            
+            // Add event listener for checkbox changes
+            checkbox.addEventListener('change', (e) => {
+                const textarea = e.target.parentElement.querySelector('.extra-input');
+                const container = e.target.parentElement;
+                
+                if (textarea) {
+                    textarea.style.display = e.target.checked ? 'block' : 'none';
+                    
+                    // Focus on textarea when shown
+                    if (e.target.checked) {
+                        setTimeout(() => textarea.focus(), 100);
+                    }
+                }
+                
+                // Toggle active class on container
+                if (container) {
+                    if (e.target.checked) {
+                        container.classList.add('active');
+                    } else {
+                        container.classList.remove('active');
+                    }
+                }
+            });
+        });
     }
 
     canNavigateToStep(targetStep) {
@@ -316,63 +372,69 @@ class AccommodationFormManager {
             if (this.elements.perAccommodationDiv) this.elements.perAccommodationDiv.style.display = 'block';
         } else if (priceType === 'per_person') {
             if (this.elements.perPersonDiv) this.elements.perPersonDiv.style.display = 'block';
-            // Initialize with one pricing tier if none exist
-            if (this.elements.dynamicPersonPricingContainer && this.elements.dynamicPersonPricingContainer.children.length === 0) {
-                this.addPersonPricingTier();
-            }
+            // Generate pricing rows based on max occupancy
+            this.generatePricingRowsBasedOnOccupancy();
         }
+    }
+
+    generatePricingRowsBasedOnOccupancy() {
+        const container = this.elements.dynamicPersonPricingContainer;
+        const maxOccupancyInput = this.elements.maxOccupancyInput;
+        
+        if (!container || !maxOccupancyInput) return;
+        
+        const maxOccupancy = parseInt(maxOccupancyInput.value) || 0;
+        
+        // Clear existing rows
+        container.innerHTML = '';
+        
+        // Generate rows for each guest count from 1 to max occupancy
+        for (let guestCount = 1; guestCount <= maxOccupancy; guestCount++) {
+            const fieldGroup = document.createElement('div');
+            fieldGroup.className = 'form-group mb-3 pricing-tier';
+            fieldGroup.setAttribute('data-tier', guestCount);
+            fieldGroup.innerHTML = `
+                <div class="row align-items-center">
+                    <div class="col-md-2">
+                        <label class="form-label">Number of guests</label>
+                        <div class="form-control-static d-flex align-items-center" style="height: 38px; padding: 6px 12px; background-color: #f8f9fa; border: 1px solid #ced4da; border-radius: 4px;">
+                            ${guestCount}
+                        </div>
+                        <input type="hidden" name="guest_count_${guestCount}" value="${guestCount}">
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">Price per Night</label>
+                        <div class="input-group">
+                            <span class="input-group-text">€</span>
+                            <input type="number" class="form-control" name="price_per_person_night_${guestCount}" placeholder="0.00" min="0" step="0.01" value="">
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">Price per Week</label>
+                        <div class="input-group">
+                            <span class="input-group-text">€</span>
+                            <input type="number" class="form-control" name="price_per_person_week_${guestCount}" placeholder="0.00" min="0" step="0.01" value="">
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(fieldGroup);
+        }
+        
+        // Update counter
+        this.pricingTierCounter = maxOccupancy;
     }
 
     addPersonPricingTier() {
-        const container = this.elements.dynamicPersonPricingContainer;
-        if (!container) return;
-        
-        this.pricingTierCounter++;
-        
-        const fieldGroup = document.createElement('div');
-        fieldGroup.className = 'form-group mb-3 pricing-tier';
-        fieldGroup.setAttribute('data-tier', this.pricingTierCounter);
-        fieldGroup.innerHTML = `
-            <div class="row align-items-center">
-                <div class="col-md-2">
-                    <label class="form-label">Number of guests</label>
-                    <div class="form-control-static d-flex align-items-center" style="height: 38px; padding: 6px 12px; background-color: #f8f9fa; border: 1px solid #ced4da; border-radius: 4px;">
-                        ${this.pricingTierCounter}
-                    </div>
-                    <input type="hidden" name="guest_count_${this.pricingTierCounter}" value="${this.pricingTierCounter}">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Price per Night</label>
-                    <div class="input-group">
-                        <span class="input-group-text">€</span>
-                        <input type="number" class="form-control" name="price_per_person_night_${this.pricingTierCounter}" placeholder="0.00" min="0" step="0.01" value="">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Price per Week</label>
-                    <div class="input-group">
-                        <span class="input-group-text">€</span>
-                        <input type="number" class="form-control" name="price_per_person_week_${this.pricingTierCounter}" placeholder="0.00" min="0" step="0.01" value="">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Actions</label>
-                    <div>
-                        <button type="button" class="btn btn-sm btn-danger remove-pricing-tier" onclick="accommodationFormManager.removePersonPricingTier(${this.pricingTierCounter})">
-                            <i class="fas fa-trash"></i> Remove
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-        container.appendChild(fieldGroup);
+        // This method is kept for backward compatibility but no longer used
+        // Pricing rows are now auto-generated based on max occupancy
+        console.warn('addPersonPricingTier is deprecated. Use generatePricingRowsBasedOnOccupancy instead.');
     }
 
     removePersonPricingTier(tierId) {
-        const tierElement = document.querySelector(`[data-tier="${tierId}"]`);
-        if (tierElement) {
-            tierElement.remove();
-        }
+        // This method is kept for backward compatibility but no longer used
+        // Pricing rows are now auto-generated based on max occupancy
+        console.warn('removePersonPricingTier is deprecated. Pricing rows are auto-generated.');
     }
 
     showError(message) {

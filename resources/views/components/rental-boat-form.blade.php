@@ -47,7 +47,7 @@
             <input type="hidden" name="is_draft" id="is_draft" value="{{ isset($formData['status']) && $formData['status'] == 'draft' ? 1 : 0 }}">
             <input type="hidden" name="rental_boat_id" id="rental_boat_id" value="{{ $formData['id'] ?? 0 }}">
             <input type="hidden" name="thumbnail_path" id="thumbnail_path" value="{{ $formData['thumbnail_path'] ?? '' }}">
-            <input type="hidden" name="existing_images" id="existing_images" value="{{ is_array($formData['gallery_images'] ?? []) ? json_encode($formData['gallery_images']) : ($formData['gallery_images'] ?? '') }}">
+            <input type="hidden" name="existing_images" id="existing_images" value="{{ isset($formData['gallery_images']) && is_array($formData['gallery_images']) ? json_encode($formData['gallery_images']) : (isset($formData['gallery_images']) ? $formData['gallery_images'] : '') }}">
             <input type="hidden" name="user_id" id="user_id" value="{{ $formData['user_id'] ?? auth()->id() }}">
             <input type="hidden" name="status" id="status" value="{{ $formData['status'] ?? 'active' }}">
             <input type="hidden" id="image_list" name="image_list">
@@ -184,12 +184,13 @@
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="{{ __('rental_boats.tooltip_boat_information') }}"></i>
                     </label>
-                    <div class="btn-group-toggle">
+                    
+                    <div class="boat-information-grid">
                         @if(isset($guidingBoatDescriptions) && !empty($guidingBoatDescriptions))
                             @foreach($guidingBoatDescriptions as $guiding_boat_description)
                             <div class="btn-checkbox-container">
                                 <input type="checkbox" name="boat_info_checkboxes[]" value="{{ $guiding_boat_description['id'] }}" id="boat_info_{{ $guiding_boat_description['id'] }}">
-                                <label for="boat_info_{{ $guiding_boat_description['id'] }}" class="btn btn-outline-primary m-2 btn-checkbox">
+                                <label for="boat_info_{{ $guiding_boat_description['id'] }}" class="btn btn-outline-primary btn-checkbox">
                                     {{ $guiding_boat_description['value'] }}
                                 </label>
                                 <textarea class="form-control extra-input" name="boat_info_{{ $guiding_boat_description['id'] }}" placeholder="{{ __('rental_boats.enter_value_for') . ' ' . $guiding_boat_description['value'] }}"></textarea>
@@ -286,7 +287,7 @@
                     </label>
                     <div class="input-group">
                         <span class="input-group-text">€</span>
-                        <input type="number" class="form-control" id="base_price" name="base_price" value="{{ $formData['prices']['base_price'] ?? '' }}" placeholder="0.00" step="0.01" min="0">
+                        <input type="number" class="form-control" id="base_price" name="base_price" value="{{ isset($formData['prices']['base_price']) ? $formData['prices']['base_price'] : '' }}" placeholder="0.00" step="0.01" min="0">
                     </div>
                 </div>
 
