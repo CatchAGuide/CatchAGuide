@@ -188,6 +188,41 @@ Route::prefix('guides')->name('guides.')->group(function () {});
 Route::get('/checkout', [CheckoutController::class, 'checkoutView'])->name('checkout.index')->middleware(['throttle:10,1', 'ddos:checkout']);
 Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout')->middleware(['throttle:5,1', 'ddos:checkout']);
 
+// Modern Checkout Routes
+Route::get('/modern-checkout', [\App\Http\Controllers\ModernCheckoutController::class, 'index'])->name('modern-checkout.index')->middleware(['throttle:10,1', 'ddos:checkout']);
+Route::post('/modern-checkout', [\App\Http\Controllers\ModernCheckoutController::class, 'store'])->name('modern-checkout.store')->middleware(['throttle:5,1', 'ddos:checkout']);
+Route::get('/modern-checkout/thank-you/{bookingId}', [\App\Http\Controllers\ModernCheckoutController::class, 'thankYou'])->name('modern-checkout.thank-you');
+
+// Test route to set up session data for modern checkout
+Route::get('/test-modern-checkout/{guidingId}', function($guidingId) {
+    $guiding = \App\Models\Guiding::find($guidingId);
+    if (!$guiding) {
+        return 'Guiding not found';
+    }
+    
+    session([
+        'guiding_id' => $guidingId,
+        'person' => 2,
+        'selected_date' => now()->addDays(7)->format('Y-m-d')
+    ]);
+    
+    return redirect()->route('modern-checkout.index');
+})->name('test-modern-checkout');
+
+// Ajax-based modern checkout with perfect React design match
+Route::get('/ajax-checkout/{guidingId}', function($guidingId) {
+    $guiding = \App\Models\Guiding::with(['user'])->find($guidingId);
+    if (!$guiding) {
+        return 'Guiding not found';
+    }
+    
+    return view('pages.modern-checkout.react-style', [
+        'guiding' => $guiding,
+        'persons' => 1,
+        'selectedDate' => null
+    ]);
+})->name('ajax-checkout');
+
 Route::middleware('auth:web')->group(function () {
     Route::get('/transaction', [CheckoutController::class, 'completeTransaction'])->name('transaction');
 

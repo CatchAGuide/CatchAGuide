@@ -32,5 +32,10 @@
         </div>
     </section> --}}
     <!--Page Header End-->
+    <div class="mb-4">
+        <a href="{{ route('modern-checkout.index') }}" class="btn btn-primary">
+            Try the New Modern Checkout Experience
+        </a>
+    </div>
     <livewire:checkout :guiding="$guiding" :persons="$persons" :initial-selected-date="$selectedDate" />
 @endsection
