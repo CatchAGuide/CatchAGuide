@@ -176,7 +176,12 @@ class GuidingsSettingsSeeder extends Seeder
             ['name' => 'Drill Stuhl', 'name_en' => 'Fighting chair'],
             ['name' => 'E-Motor', 'name_en' => 'Electric motor'],
             ['name' => 'Felitiertisch', 'name_en' => 'Feliting table'],
-            ['name' => 'Sontiges', 'name_en' => 'Others']
+            ['name' => 'Sontiges', 'name_en' => 'Others'],
+            ['name' => 'Schwimmweste ', 'name_en' => 'Swimwear'],
+            ['name' => 'Plotter ', 'name_en' => 'Plotter'],
+            ['name' => 'Kabine ', 'name_en' => 'Cabin'],
+            ['name' => 'Rutenhalter ', 'name_en' => 'Rute holder'],
+            ['name' => 'Ruder ', 'name_en' => 'Rowing']
         ];
         foreach($boat_extras as $extra) {
             DB::table('boat_extras')->insert($extra);

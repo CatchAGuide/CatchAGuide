@@ -24,16 +24,18 @@
                 <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.customers.index') }}"><i class="side-menu__icon fe fe-users"></i><span class="side-menu__label">Customers</span></a>
                     <a class="side-menu__item {{ request()->routeIs('admin.guides.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.guides.index') }}"><i class="side-menu__icon fe fe-anchor"></i><span class="side-menu__label">Guides</span></a>
+                    <a class="side-menu__item {{ request()->routeIs('admin.guides.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.guides.index') }}"><i class="side-menu__icon fe fe-briefcase"></i><span class="side-menu__label">Providers</span></a>
                     <a class="side-menu__item {{ request()->routeIs('admin.guide-requests.index') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.guide-requests.index') }}"><i class="side-menu__icon fe fe-airplay"></i><span class="side-menu__label">Guide Requests</span></a>
                     <a class="side-menu__item {{ request()->routeIs('admin.guidings.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.guidings.index') }}"><i class="side-menu__icon fe fe-briefcase"></i><span class="side-menu__label">Guidings</span></a>
                     <a class="side-menu__item {{ request()->routeIs('admin.rental-boats.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.rental-boats.index') }}"><i class="side-menu__icon fas fa-ship"></i><span class="side-menu__label">Rental Boats</span></a>
                     <a class="side-menu__item {{ request()->routeIs('admin.accommodations.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.accommodations.index') }}"><i class="side-menu__icon fas fa-hotel"></i><span class="side-menu__label">Accommodations</span></a>
-                    <a class="side-menu__item {{ request()->routeIs('admin.holidays.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.vacations.index') }}"><i class="side-menu__icon fe fe-book-open"></i><span class="side-menu__label">Vacations</span></a>
+                    <a class="side-menu__item {{ request()->routeIs('admin.holidays.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.vacations.index') }}"><i class="side-menu__icon fas fa-campground"></i><span class="side-menu__label">Camps</span></a>
+                    <a class="side-menu__item {{ request()->routeIs('admin.holidays.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.vacations.index') }}"><i class="side-menu__icon fe fe-book-open"></i><span class="side-menu__label">Vacations (Old)</span></a>
                     
                     <a class="side-menu__item {{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#"><i class="side-menu__icon fe fe-dollar-sign"></i><span class="side-menu__label">Bookings</span><i class="angle fe fe-chevron-right"></i></a>
                     <ul class="slide-menu">
                         <li><a href="{{ route('admin.bookings.index') }}" class="slide-item  {{ request()->routeIs('admin.vacations.index') ? 'active' : '' }}"> Guidings</a></li>
-                        <li><a href="{{ route('admin.vacations.bookings') }}" class="slide-item  {{ request()->routeIs('admin.vacations.bookings') ? 'active' : '' }} text-secondary"> Vacations (Old)</a></li>
+                        <li><a href="{{ route('admin.vacations.bookings') }}" class="slide-item  {{ request()->routeIs('admin.vacations.bookings') ? 'active' : '' }} text-secondary"> Vacations</a></li>
                     </ul>
                     {{-- <a class="side-menu__item {{ request()->routeIs('admin.payments.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.payments.index') }}"><i class="side-menu__icon fe fe-credit-card"></i><span class="side-menu__label">Zahlungen</span></a> --}}
                 </li>
