@@ -12,6 +12,35 @@ function checkoutApp() {
         selectedExtras: {},
         extraQuantities: {},
         mode: '{{ auth()->check() ? "login" : "guest" }}',
+        
+        // Calendar translations
+        translations: {
+            prev: '{{ __('checkout.calendar_prev') }}',
+            next: '{{ __('checkout.calendar_next') }}',
+            months: [
+                '{{ __('checkout.calendar_january') }}',
+                '{{ __('checkout.calendar_february') }}',
+                '{{ __('checkout.calendar_march') }}',
+                '{{ __('checkout.calendar_april') }}',
+                '{{ __('checkout.calendar_may') }}',
+                '{{ __('checkout.calendar_june') }}',
+                '{{ __('checkout.calendar_july') }}',
+                '{{ __('checkout.calendar_august') }}',
+                '{{ __('checkout.calendar_september') }}',
+                '{{ __('checkout.calendar_october') }}',
+                '{{ __('checkout.calendar_november') }}',
+                '{{ __('checkout.calendar_december') }}'
+            ],
+            weekdays: [
+                '{{ __('checkout.calendar_sunday') }}',
+                '{{ __('checkout.calendar_monday') }}',
+                '{{ __('checkout.calendar_tuesday') }}',
+                '{{ __('checkout.calendar_wednesday') }}',
+                '{{ __('checkout.calendar_thursday') }}',
+                '{{ __('checkout.calendar_friday') }}',
+                '{{ __('checkout.calendar_saturday') }}'
+            ]
+        },
         form: {
             firstName: '{{ auth()->user()->firstname ?? "" }}',
             lastName: '{{ auth()->user()->lastname ?? "" }}',
@@ -36,13 +65,19 @@ function checkoutApp() {
 
         // Computed
         get canSubmit() {
-            return this.form.firstName && 
-                   this.form.lastName && 
-                   this.form.email && 
-                   this.form.phone && 
-                   this.form.policyAccepted && 
-                   this.selectedDate &&
-                   !this.loading;
+            const basicRequirements = this.form.firstName && 
+                                     this.form.lastName && 
+                                     this.form.email && 
+                                     this.form.phone && 
+                                     this.selectedDate &&
+                                     !this.loading;
+            
+            // T&C only required for guest users
+            if (this.isLoggedIn) {
+                return basicRequirements;
+            } else {
+                return basicRequirements && this.form.policyAccepted;
+            }
         },
 
                 getPaymentMethodsText() {
@@ -67,13 +102,25 @@ function checkoutApp() {
         getPaymentMethodIcon(method) {
             const methodLower = method.toLowerCase();
             if (methodLower.includes('cash') || methodLower.includes('bar')) {
-                return 'fas fa-money-bill-wave';
+                return 'cash-icon';
             } else if (methodLower.includes('bank') || methodLower.includes('transfer')) {
-                return 'fas fa-university';
+                return 'bank-icon';
             } else if (methodLower.includes('paypal')) {
-                return 'fab fa-paypal';
+                return 'paypal-icon';
             }
-            return 'fas fa-credit-card';
+            return 'cash-icon';
+        },
+
+        getPaymentMethodIconSrc(method) {
+            const methodLower = method.toLowerCase();
+            if (methodLower.includes('cash') || methodLower.includes('bar')) {
+                return '{{ asset("icons/cash.svg") }}';
+            } else if (methodLower.includes('bank') || methodLower.includes('transfer')) {
+                return '{{ asset("icons/bank.svg") }}';
+            } else if (methodLower.includes('paypal')) {
+                return '{{ asset("icons/paypal.svg") }}';
+            }
+            return '{{ asset("icons/cash.svg") }}';
         },
 
                 get modeText() {
@@ -215,7 +262,8 @@ function checkoutApp() {
                 },
 
         updatePersons(newCount) {
-            this.persons = Math.max(1, Math.min(10, newCount));
+            const maxGuests = this.guiding?.max_guest || 10;
+            this.persons = Math.max(1, Math.min(maxGuests, newCount));
             this.calculatePrice();
         },
 
@@ -289,12 +337,11 @@ function checkoutApp() {
         formatDate(dateString) {
             if (!dateString) return '';
             const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { 
-                weekday: 'short', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            });
+            const day = date.getDate();
+            const month = this.translations.months[date.getMonth()];
+            const year = date.getFullYear();
+            const weekday = this.translations.weekdays[date.getDay()];
+            return `${weekday}, ${month} ${day}, ${year}`;
         },
 
         initializeCalendar(data) {
@@ -346,18 +393,20 @@ function checkoutApp() {
             const container = document.getElementById('calendar-container');
             if (!container) return;
 
-            const monthNames = ["January", "February", "March", "April", "May", "June",
-                "July", "August", "September", "October", "November", "December"];
-
             let calendarHTML = `
                 <div class="calendar-header">
-                    <button onclick="window.checkoutAppInstance.previousMonth()" class="calendar-nav">← Prev</button>
-                    <div class="calendar-month">${monthNames[this.currentMonth]} ${this.currentYear}</div>
-                    <button onclick="window.checkoutAppInstance.nextMonth()" class="calendar-nav">Next →</button>
+                    <button onclick="window.checkoutAppInstance.previousMonth()" class="calendar-nav">← ${this.translations.prev}</button>
+                    <div class="calendar-month">${this.translations.months[this.currentMonth]} ${this.currentYear}</div>
+                    <button onclick="window.checkoutAppInstance.nextMonth()" class="calendar-nav">${this.translations.next} →</button>
                 </div>
                 <div class="calendar-weekdays">
-                    <div class="weekday">Sun</div><div class="weekday">Mon</div><div class="weekday">Tue</div>
-                    <div class="weekday">Wed</div><div class="weekday">Thu</div><div class="weekday">Fri</div><div class="weekday">Sat</div>
+                    <div class="weekday">${this.translations.weekdays[0]}</div>
+                    <div class="weekday">${this.translations.weekdays[1]}</div>
+                    <div class="weekday">${this.translations.weekdays[2]}</div>
+                    <div class="weekday">${this.translations.weekdays[3]}</div>
+                    <div class="weekday">${this.translations.weekdays[4]}</div>
+                    <div class="weekday">${this.translations.weekdays[5]}</div>
+                    <div class="weekday">${this.translations.weekdays[6]}</div>
                 </div>
                 <div class="calendar-days" id="calendar-days"></div>
             `;
@@ -409,6 +458,11 @@ function checkoutApp() {
                 const isSelected = this.selectedDate === dateStr;
                 const isAvailable = !isPast && !isBlocked;
 
+                // Debug logging for selected date
+                if (isSelected) {
+                    console.log('Rendering selected date:', dateStr, 'selectedDate:', this.selectedDate);
+                }
+
                 let classes = 'calendar-day';
                 if (isSelected) classes += ' selected';
                 if (isPast) classes += ' past';
@@ -430,8 +484,11 @@ function checkoutApp() {
         },
 
         selectDate(dateStr) {
+            console.log('Selecting date:', dateStr);
             this.selectedDate = dateStr;
             this.calculatePrice();
+            // Re-render calendar to show selected state
+            this.renderCalendar();
         },
 
         openLoginModal() {
