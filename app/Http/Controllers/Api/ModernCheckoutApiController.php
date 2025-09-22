@@ -8,6 +8,10 @@ use App\Models\Booking;
 use App\Models\User;
 use App\Models\UserGuest;
 use App\Models\UserInformation;
+use App\Models\CalendarSchedule;
+use App\Services\EventService;
+use App\Services\HelperService;
+use App\Jobs\SendCheckoutEmail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -73,6 +77,7 @@ class ModernCheckoutApiController extends Controller
         }
 
         try {
+            $guiding = Guiding::findOrFail($request->guiding_id);
             $persons = $request->persons;
             $selectedExtras = $request->selected_extras ?? [];
             $extras = json_decode($guiding->pricing_extra, true) ?? [];
@@ -194,6 +199,7 @@ class ModernCheckoutApiController extends Controller
         }
 
         try {
+            // Get guiding and user data
             $guiding = Guiding::with(['user'])->findOrFail($request->guiding_id);
             $currentUser = auth()->user();
             $locale = app()->getLocale();
