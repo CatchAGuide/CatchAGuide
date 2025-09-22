@@ -22,14 +22,18 @@
         </div>
 
         <!-- Info Alerts -->
-        <div class="alert-success mb-3">
-            <p class="alert-text">
-                ✅ <strong>{{ __('checkout.no_payment_required_now') }}</strong><br>
-                {{ __('checkout.confirmation_by_guide_within') }} <strong>48{{ __('checkout.hours_short') }}</strong>. {{ __('checkout.afterwards_contact_details') }} 
-            </p>
+        <div class="alert-success mb-3 mobile-order-1">
+            <div class="alert-content">
+                <div class="alert-icon">✅</div>
+                <div class="alert-text">
+                    <strong>{{ __('checkout.no_payment_required_now') }}</strong><br>
+                    {{ __('checkout.confirmation_by_guide_within') }}<br>
+                    {{ __('checkout.afterwards_contact_details') }}
+                </div>
+            </div>
         </div>
         
-        <div class="alert-warning mb-6">
+        <div class="alert-warning mb-6 mobile-order-1-2">
             {!! __('checkout.fishing_permit_warning') !!}
         </div>
 
@@ -37,30 +41,30 @@
             <!-- Main Content -->
             <div class="main-content">
                 <!-- Guiding Information -->
-                <section class="info-card">
+                <section class="info-card mobile-order-3">
                     <div class="p-3 border-b">
                         <h5 class="text-lg font-semibold">{{ __('checkout.your_guiding') }}</h5>
                     </div>
                     <div class="p-3" x-show="guiding">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                             <div class="info-row">
-                                <div class="info-label">{{ strtoupper(__('checkout.title')) }}</div>
+                                <div class="info-label">{{ __('checkout.title') }}</div>
                                 <div class="info-value" x-text="guiding?.title || '{{ __('checkout.loading') }}'"></div>
                             </div>
                             <div class="info-row">
-                                <div class="info-label">{{ strtoupper(__('checkout.location')) }}</div>
+                                <div class="info-label">{{ __('checkout.location') }}</div>
                                 <div class="info-value" x-text="guiding?.location || '{{ __('checkout.not_specified') }}'"></div>
                             </div>
                             <div class="info-row">
-                                <div class="info-label">{{ strtoupper(__('checkout.duration')) }}</div>
+                                <div class="info-label">{{ __('checkout.duration') }}</div>
                                 <div class="info-value" x-text="guiding?.duration + ' ' + (guiding?.duration_type === 'multi_day' ? '{{ __('checkout.days') }}' : '{{ __('checkout.hours') }}')"></div>
                             </div>
                             <div class="info-row">
-                                <div class="info-label">{{ strtoupper(__('checkout.target_fish')) }}</div>
+                                <div class="info-label">{{ __('checkout.target_fish') }}</div>
                                 <div class="info-value" x-text="guiding?.target_fish?.join(', ') || '{{ __('checkout.loading') }}'"></div>
                             </div>
                             <div class="info-row" x-show="guiding?.requirements?.length">
-                                <div class="info-label">{{ strtoupper(__('checkout.requirements')) }}</div>
+                                <div class="info-label">{{ __('checkout.requirements') }}</div>
                                 <div class="info-value">
                                     <template x-for="req in guiding?.requirements || []" :key="req.name">
                                         <div x-text="req.name + ': ' + req.value"></div>
@@ -68,7 +72,7 @@
                                 </div>
                             </div>
                             <div class="info-row">
-                                <div class="info-label">{{ strtoupper(__('checkout.date')) }}</div>
+                                <div class="info-label">{{ __('checkout.date') }}</div>
                                 <div class="info-value" x-text="selectedDate ? formatDate(selectedDate) : '{{ __('checkout.please_select_date') }}'"></div>
                             </div>
                         </div>
@@ -76,7 +80,7 @@
                 </section>
 
                 <!-- Optional Extras -->
-                <section class="info-card" x-show="guiding?.extras?.length">
+                <section class="info-card mobile-order-4" x-show="guiding?.extras?.length">
                     <div class="p-3">
                         <h5 class="text-lg font-semibold text-slate-800 mb-1">{{ __('checkout.optional_extras') }}</h5>
                         <p class="text-sm text-slate-600 mb-2">{{ __('checkout.prices_per_person') }}</p>
@@ -104,7 +108,7 @@
                 </section>
 
                 <!-- User Details Form -->
-                <section class="info-card form-section">
+                <section class="info-card form-section mobile-order-5">
                     <div class="p-3 border-b">
                         <div class="form-header">
                             <h5 class="text-lg font-semibold">{{ __('checkout.your_details') }}</h5>
@@ -183,7 +187,7 @@
                             ])
                         </div>
                     </div>
-                    <div class="px-3 pb-4">
+                    <div class="px-3 pb-4" x-show="!isLoggedIn">
                         <label class="flex items-start gap-3 text-sm text-slate-700">
                             <input
                                 type="checkbox"
@@ -205,14 +209,14 @@
             <aside class="sidebar">
                 <div class="space-y-4">
                     <!-- Date Selection -->
-                    <section class="info-card p-3 calendar-container">
+                    <section class="info-card p-3 calendar-container mobile-order-2">
                         <h5 class="text-lg font-semibold mb-1">{{ __('checkout.choose_preferred_date') }}</h5>
                         <div class="text-sm text-slate-600 mb-3" x-text="selectedDate ? formatDate(selectedDate) : '{{ __('checkout.please_select_date') }}'"></div>
                         <div id="calendar-container"></div>
                     </section>
 
                     <!-- Booking Summary -->
-                    <section class="info-card booking-summary">
+                    <section class="info-card booking-summary mobile-order-6">
                         <div class="p-3 border-b summary-header">
                             <h5 class="text-lg font-semibold">{{ __('checkout.booking_summary') }}</h5>
                             <div class="guest-counter">
@@ -225,11 +229,11 @@
                                 <button 
                                     @click="updatePersons(persons + 1)"
                                     class="counter-button"
-                                    :disabled="persons >= 10"
+                                    :disabled="persons >= (guiding?.max_guest || 10)"
                                 >+</button>
                             </div>
                         </div>
-                        <div class="p-4 summary-content">
+                        <div class="p-3 summary-content">
                             <div class="summary-row">
                                 <div class="summary-label">{{ __('checkout.guests') }}</div>
                                 <div class="summary-value" x-text="persons"></div>
@@ -259,19 +263,17 @@
                     </section>
 
                     <!-- Payment Info -->
-                    <section class="info-card p-3 payment-info">
-                        <h6 class="payment-title">{{ __('checkout.payment') }}</h6>
-                        <p class="payment-text">
-                            {{ __('checkout.payment_after_confirmation') }} 
-                            <span x-text="getPaymentMethodsText()"></span>
-                        </p>
+                    <section class="info-card p-3 payment-info mobile-order-7">
+                        <h6 class="payment-title">{{ __('checkout.payment_after_confirmation_via') }}</h6>
                         
                         <!-- Payment Method Buttons -->
                         <div class="payment-methods" x-show="guiding?.guide?.payment_methods?.length">
                             <div class="payment-method-buttons">
                                 <template x-for="method in guiding?.guide?.payment_methods || []" :key="method">
                                     <div class="payment-method-btn" :class="getPaymentMethodClass(method)">
-                                        <i :class="getPaymentMethodIcon(method)"></i>
+                                        <div class="payment-icon" :class="getPaymentMethodIcon(method)">
+                                            <img :src="getPaymentMethodIconSrc(method)" :alt="method" />
+                                        </div>
                                         <span x-text="method"></span>
                                     </div>
                                 </template>
@@ -280,20 +282,19 @@
                     </section>
 
                     <!-- Submit Button -->
-                    <button
+                    <button class="submit-button mobile-order-8"
                         @click="submitBooking()"
                         :disabled="!canSubmit || loading"
-                        class="submit-button"
                         aria-label="Send booking request"
                         title="Send booking request — free & non-binding"
                     >
-                        <i class="fas fa-user-plus me-2"></i>
-                        <span x-show="!loading">{{ __('checkout.send_booking_request') }}</span>
+                        <i class="fas fa-user me-2"></i>
+                        <span x-show="!loading">{{ __('checkout.inquire_free_secure_spot') }}</span>
                         <span x-show="loading">{{ __('checkout.processing') }}</span>
                     </button>
 
                     <!-- Security Certificates -->
-                    <div class="security-certificates">
+                    <div class="security-certificates mobile-order-9">
                         <div class="cert-item">
                             <i class="fas fa-shield-alt"></i>
                             <span>{{ __('checkout.ssl_secure') }}</span>

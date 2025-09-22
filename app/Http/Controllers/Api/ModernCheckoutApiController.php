@@ -8,10 +8,6 @@ use App\Models\Booking;
 use App\Models\User;
 use App\Models\UserGuest;
 use App\Models\UserInformation;
-use App\Models\CalendarSchedule;
-use App\Services\EventService;
-use App\Services\HelperService;
-use App\Jobs\SendCheckoutEmail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -39,6 +35,7 @@ class ModernCheckoutApiController extends Controller
                     'price_per_person' => $guiding->price_per_person,
                     'price_type' => $guiding->price_type,
                     'prices' => $guiding->prices,
+                    'max_guest' => $guiding->max_guests,
                     'requirements' => $guiding->getRequirementsAttribute(),
                     'target_fish' => collect($guiding->getTargetFishNames())->pluck('name')->toArray(),
                     'extras' => json_decode($guiding->pricing_extra, true) ?? [],
@@ -61,9 +58,12 @@ class ModernCheckoutApiController extends Controller
      */
     public function calculatePrice(Request $request)
     {
+        $guiding = Guiding::findOrFail($request->guiding_id);
+        $maxGuests = $guiding->max_guests ?? 10;
+        
         $validator = Validator::make($request->all(), [
             'guiding_id' => 'required|exists:guidings,id',
-            'persons' => 'required|integer|min:1|max:10',
+            'persons' => "required|integer|min:1|max:{$maxGuests}",
             'selected_extras' => 'array',
             'selected_extras.*' => 'boolean'
         ]);
@@ -73,7 +73,6 @@ class ModernCheckoutApiController extends Controller
         }
 
         try {
-            $guiding = Guiding::findOrFail($request->guiding_id);
             $persons = $request->persons;
             $selectedExtras = $request->selected_extras ?? [];
             $extras = json_decode($guiding->pricing_extra, true) ?? [];
@@ -172,18 +171,22 @@ class ModernCheckoutApiController extends Controller
      */
     public function submitBooking(Request $request)
     {
+        $guiding = Guiding::findOrFail($request->guiding_id);
+        $maxGuests = $guiding->max_guests ?? 10;
+        
         $validator = Validator::make($request->all(), [
             'guiding_id' => 'required|exists:guidings,id',
-            'persons' => 'required|integer|min:1|max:10',
+            'persons' => "required|integer|min:1|max:{$maxGuests}",
             'selected_date' => 'required|date|after:today',
             'form_data' => 'required|array',
-            'form_data.firstName' => 'required|string|max:255',
-            'form_data.lastName' => 'required|string|max:255',
+            'form_data.first_name' => 'required|string|max:255',
+            'form_data.last_name' => 'required|string|max:255',
             'form_data.email' => 'required|email|max:255',
             'form_data.phone' => 'required|string|min:3',
-            'form_data.countryCode' => 'required|string',
-            'form_data.policyAccepted' => 'required|accepted',
-            'selected_extras' => 'array'
+            'form_data.country_code' => 'required|string',
+            'form_data.policy_accepted' => 'required|accepted',
+            'selected_extras' => 'array',
+            'extra_quantities' => 'array'
         ]);
 
         if ($validator->fails()) {
@@ -191,7 +194,6 @@ class ModernCheckoutApiController extends Controller
         }
 
         try {
-            // Get guiding and user data
             $guiding = Guiding::with(['user'])->findOrFail($request->guiding_id);
             $currentUser = auth()->user();
             $locale = app()->getLocale();
