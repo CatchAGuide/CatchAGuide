@@ -4,34 +4,6 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ mix('css/app.css') }}">
-<style>
-.guide-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.guide-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
-}
-
-.guide-name {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin: 0 0 5px 0;
-    color: #333;
-}
-
-.guide-title {
-    font-size: 0.9rem;
-    color: #666;
-    margin: 0;
-}
-</style>
 @endpush
 
 @section('content')
