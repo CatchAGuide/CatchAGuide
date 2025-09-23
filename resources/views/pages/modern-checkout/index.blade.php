@@ -41,7 +41,7 @@
             <!-- Main Content -->
             <div class="main-content">
                 <!-- Guiding Information -->
-                <section class="info-card mobile-order-3">
+                <section class="info-card highlight mobile-order-7">
                     <div class="p-3 border-b">
                         <h5 class="text-lg font-semibold">{{ __('checkout.your_guiding') }}</h5>
                     </div>
@@ -80,7 +80,7 @@
                 </section>
 
                 <!-- Optional Extras -->
-                <section class="info-card mobile-order-4" x-show="guiding?.extras?.length">
+                <section class="info-card mobile-order-3" x-show="guiding?.extras?.length">
                     <div class="p-3">
                         <h5 class="text-lg font-semibold text-slate-800 mb-1">{{ __('checkout.optional_extras') }}</h5>
                         <p class="text-sm text-slate-600 mb-2">{{ __('checkout.prices_per_person') }}</p>
@@ -187,21 +187,7 @@
                             ])
                         </div>
                     </div>
-                    <div class="px-3 pb-4" x-show="!isLoggedIn">
-                        <label class="flex items-start gap-3 text-sm text-slate-700">
-                            <input
-                                type="checkbox"
-                                x-model="form.policyAccepted"
-                                class="mt-1 h-4 w-4 rounded border-slate-300"
-                            />
-                            <span>
-                                {{ __('checkout.terms_and_conditions_accept') }} 
-                                <a href="{{ route('law.agb') }}" class="underline" target="_blank">{{ __('checkout.terms_and_conditions_link') }}</a> 
-                                {{ __('checkout.and') }} 
-                                <a href="{{ route('law.data-protection') }}" class="underline" target="_blank">{{ __('checkout.privacy_policy_link') }}</a>.
-                            </span>
-                        </label>
-                    </div>
+                    
                 </section>
             </div>
 
@@ -216,7 +202,7 @@
                     </section>
 
                     <!-- Booking Summary -->
-                    <section class="info-card booking-summary mobile-order-6">
+                    <section class="info-card booking-summary highlight mobile-order-6">
                         <div class="p-3 border-b summary-header">
                             <h5 class="text-lg font-semibold">{{ __('checkout.booking_summary') }}</h5>
                             <div class="guest-counter">
@@ -263,7 +249,7 @@
                     </section>
 
                     <!-- Payment Info -->
-                    <section class="info-card p-3 payment-info mobile-order-7">
+                    <section class="info-card p-3 payment-info mobile-order-8">
                         <h6 class="payment-title">{{ __('checkout.payment_after_confirmation_via') }}</h6>
                         
                         <!-- Payment Method Buttons -->
@@ -281,8 +267,25 @@
                         </div>
                     </section>
 
+                    <!-- Policies above Submit -->
+                    <div class="p-3 mobile-order-9" x-show="!isLoggedIn">
+                        <label class="flex items-start gap-3 text-sm text-slate-700">
+                            <input
+                                type="checkbox"
+                                x-model="form.policyAccepted"
+                                class="mt-1 h-4 w-4 rounded border-slate-300"
+                            />
+                            <span>
+                                {{ __('checkout.terms_and_conditions_accept') }} 
+                                <a href="{{ route('law.agb') }}" class="underline" target="_blank">{{ __('checkout.terms_and_conditions_link') }}</a> 
+                                {{ __('checkout.and') }} 
+                                <a href="{{ route('law.data-protection') }}" class="underline" target="_blank">{{ __('checkout.privacy_policy_link') }}</a>.
+                            </span>
+                        </label>
+                    </div>
+
                     <!-- Submit Button -->
-                    <button class="submit-button mobile-order-8"
+                    <button class="submit-button mobile-order-9"
                         @click="submitBooking()"
                         :disabled="!canSubmit || loading"
                         aria-label="Send booking request"
@@ -294,7 +297,7 @@
                     </button>
 
                     <!-- Security Certificates -->
-                    <div class="security-certificates mobile-order-9">
+                    <div class="security-certificates mobile-order-10">
                         <div class="cert-item">
                             <i class="fas fa-shield-alt"></i>
                             <span>{{ __('checkout.ssl_secure') }}</span>
