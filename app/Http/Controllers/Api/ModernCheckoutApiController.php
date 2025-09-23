@@ -273,7 +273,7 @@ class ModernCheckoutApiController extends Controller
                 'data' => [
                     'booking_id' => $booking->id,
                     'total_price' => $priceData->data->totalPrice,
-                    'redirect_url' => route('modern-checkout.thank-you', [$booking])
+                    'redirect_url' => route('checkout.thank-you', [$booking])
                 ]
             ]);
 

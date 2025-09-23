@@ -116,7 +116,7 @@ return [
     'ssl_secure' => 'SSL Sicher',
     'free' => 'Kostenlos',
     'non_binding' => 'Unverbindlich',
-    'request_sent' => 'Anfrage gesendet 🎣',
+    'request_sent' => 'Anfrage gesendet',
     'confirmation_within_48h' => 'Sie erhalten eine Bestätigung vom Guide innerhalb von 48 Stunden.',
     'loading' => 'Laden...',
     'not_specified' => 'Nicht angegeben',

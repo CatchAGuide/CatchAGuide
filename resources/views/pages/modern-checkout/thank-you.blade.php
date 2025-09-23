@@ -4,37 +4,10 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ mix('css/app.css') }}">
-<style>
-.guide-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.guide-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
-}
-
-.guide-name {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin: 0 0 5px 0;
-    color: #333;
-}
-
-.guide-title {
-    font-size: 0.9rem;
-    color: #666;
-    margin: 0;
-}
-</style>
 @endpush
 
 @section('content')
+<div class="checkout-container">
 <main class="container mx-auto pb-4">
     <h3 class="text-2xl font-bold mb-2">{{ __('checkout.request_sent') }} 🎣</h3>
 
@@ -79,7 +52,7 @@
             </section>
 
             <!-- Guide Information -->
-            <section class="info-card">
+            <section class="info-card highlight">
                 <div class="p-3 border-b">
                     <h5 class="text-lg font-semibold">{{ __('checkout.guide_information') }}</h5>
                 </div>
@@ -156,7 +129,7 @@
 
             @if($booking->extras)
             <!-- Selected Extras -->
-            <section class="info-card">
+            <section class="info-card extras-compact">
                 <div class="p-3 border-b">
                     <h5 class="text-lg font-semibold">{{ __('checkout.selected_extras') }}</h5>
                 </div>
@@ -165,12 +138,17 @@
                         $extras = unserialize($booking->extras);
                     @endphp
                     @if($extras && is_array($extras))
-                        @foreach($extras as $extra)
-                            <div class="extra-item">
-                                <span class="extra-name">{{ $extra['extra_name'] }} ({{ $extra['extra_quantity'] }}x)</span>
-                                <span class="extra-price">€{{ number_format($extra['extra_total_price'], 2, ',', '.') }}</span>
-                            </div>
-                        @endforeach
+                        <div class="extras-list">
+                            @foreach($extras as $extra)
+                                <div class="extra-item-compact">
+                                    <div class="extra-info">
+                                        <span class="extra-name">{{ $extra['extra_name'] }}</span>
+                                        <span class="extra-quantity">{{ $extra['extra_quantity'] }}x</span>
+                                    </div>
+                                    <span class="extra-price">€{{ number_format($extra['extra_total_price'], 2, ',', '.') }}</span>
+                                </div>
+                            @endforeach
+                        </div>
                     @endif
                 </div>
             </section>
@@ -181,7 +159,7 @@
         <aside class="sidebar">
             <div class="space-y-4">
                 <!-- Price Summary -->
-                <section class="info-card booking-summary">
+                <section class="info-card booking-summary highlight">
                     <div class="p-3 border-b summary-header">
                         <h5 class="text-lg font-semibold">{{ __('checkout.price_breakdown') }}</h5>
                     </div>
@@ -212,7 +190,7 @@
 
                 <!-- Action Buttons -->
                 <div class="btn-group">
-                    <a href="{{ route('modern-checkout.index') }}" class="btn">
+                    <a href="{{ route('checkout.index') }}" class="btn">
                         {{ __('checkout.book_another_guiding') }}
                     </a>
                     <a href="{{ route('guidings.index') }}" class="btn btn-outline">
@@ -227,5 +205,6 @@
     </div>
     @endif
 </main>
+</div>
 @endsection
 

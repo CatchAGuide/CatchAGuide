@@ -114,7 +114,7 @@ return [
     'ssl_secure' => 'SSL Secure',
     'free' => 'Kostenlos',
     'non_binding' => 'Unverbindlich',
-    'request_sent' => 'Request sent 🎣',
+    'request_sent' => 'Request sent',
     'confirmation_within_48h' => 'You will receive a confirmation from the guide within 48 hours.',
     'loading' => 'Loading...',
     'not_specified' => 'Not specified',
