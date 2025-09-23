@@ -19,6 +19,8 @@ use App\Http\Controllers\Admin\Category\AdminCategoryMethodsController;
 use App\Http\Controllers\Admin\Category\AdminCategoryCountryController;
 use App\Http\Controllers\Admin\Category\AdminCategoryTargetFishController;
 use App\Http\Controllers\Admin\GuidingsController as AdminGuidingsController;
+use App\Http\Controllers\Admin\RentalBoatsController as AdminRentalBoatsController;
+use App\Http\Controllers\Admin\AccommodationsController as AdminAccommodationsController;
 use App\Http\Controllers\Admin\PaymentsController as AdminPaymentsController;
 use App\Http\Controllers\Admin\VacationsController as AdminVacationsController;
 use App\Http\Controllers\Admin\Category\AdminCategoryVacationCountryController;
@@ -183,8 +185,29 @@ if (app()->environment('production')) {
 Route::post('/search', [\App\Http\Controllers\SearchController::class, 'search'])->name('search');
 Route::prefix('guides')->name('guides.')->group(function () {});
 
-Route::get('/checkout', [CheckoutController::class, 'checkoutView'])->name('checkout.index')->middleware(['throttle:10,1', 'ddos:checkout']);
+// OLD CHECKOUT ROUTES - BACKED UP
+// Route::get('/checkout', [CheckoutController::class, 'checkoutView'])->name('checkout.index')->middleware(['throttle:10,1', 'ddos:checkout']);
 Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout')->middleware(['throttle:5,1', 'ddos:checkout']);
+
+// Modern Checkout Routes (now becoming the main checkout)
+Route::get('/checkout', [\App\Http\Controllers\ModernCheckoutController::class, 'index'])->name('checkout.index')->middleware(['throttle:10,1', 'ddos:checkout']);
+Route::post('/checkouts', [\App\Http\Controllers\ModernCheckoutController::class, 'store'])->name('checkout.store')->middleware(['throttle:5,1', 'ddos:checkout']);
+Route::get('/checkout/thank-you/{bookingId}', [\App\Http\Controllers\ModernCheckoutController::class, 'thankYou'])->name('checkout.thank-you');
+
+
+// Ajax-based modern checkout with perfect React design match
+Route::get('/ajax-checkout/{guidingId}', function($guidingId) {
+    $guiding = \App\Models\Guiding::with(['user'])->find($guidingId);
+    if (!$guiding) {
+        return 'Guiding not found';
+    }
+    
+    return view('pages.modern-checkout.react-style', [
+        'guiding' => $guiding,
+        'persons' => 1,
+        'selectedDate' => null
+    ]);
+})->name('ajax-checkout');
 
 Route::middleware('auth:web')->group(function () {
     Route::get('/transaction', [CheckoutController::class, 'completeTransaction'])->name('transaction');
@@ -312,6 +335,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::resource('guidings', AdminGuidingsController::class);
         Route::get('guidings/changeguidingstatus/{id}', [AdminGuidingsController::class, 'changeguidingstatus'])->name('changeGuidingStatus');
+        
+        Route::resource('rental-boats', AdminRentalBoatsController::class);
+        Route::get('rental-boats/change-status/{id}', [AdminRentalBoatsController::class, 'changeStatus'])->name('rental-boats.change-status');
+
+        Route::resource('accommodations', AdminAccommodationsController::class);
+        Route::get('accommodations/change-status/{id}', [AdminAccommodationsController::class, 'changeStatus'])->name('accommodations.change-status');
+
         Route::resource('bookings', BookingsController::class);
         Route::get('/bookings/{booking}/email-preview', [BookingsController::class, 'emailPreview'])->name('bookings.email-preview');
         Route::post('/bookings/{booking}/send-booking-request-emails', [BookingsController::class, 'sendBookingRequestEmails'])->name('bookings.send-booking-request-emails');

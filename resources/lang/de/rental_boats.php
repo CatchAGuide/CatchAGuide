@@ -1,0 +1,100 @@
+<?php
+
+return [
+    // General
+    'next' => 'Weiter',
+    'previous' => 'Zurück',
+    'submit_publish' => 'Einreichen & Veröffentlichen',
+    'leave_save_draft' => 'Verlassen & Entwurf speichern',
+    
+    // Step 1 - Images and Basic Info
+    'upload_images_title' => 'Bilder hochladen & Grundinformationen',
+    'upload_image' => 'Bilder hochladen',
+    'choose_files' => 'Dateien auswählen',
+    'tooltip_upload_image' => 'Laden Sie mindestens 1 Bild Ihres Bootes hoch. Das erste Bild wird als Hauptbild verwendet.',
+    'location' => 'Standort',
+    'location_placeholder' => 'Geben Sie den Standort ein, an dem Ihr Boot verfügbar ist',
+    'tooltip_location' => 'Geben Sie die Stadt, Region oder den spezifischen Standort ein, an dem Ihr Boot gemietet werden kann.',
+    'title' => 'Bootstitel',
+    'enter_catchy_title' => 'Geben Sie einen einprägsamen Titel für Ihre Bootsvermietung ein',
+    'tooltip_title' => 'Erstellen Sie einen attraktiven Titel, der Ihr Boot und seine Hauptmerkmale beschreibt.',
+    
+    // Step 2 - Boat Type and Description
+    'boat_type_description_title' => 'Bootstyp & Beschreibung',
+    'boat_type' => 'Bootstyp',
+    'select_boat_type' => 'Bootstyp auswählen',
+    'sailboat' => 'Segelboot',
+    'motorboat' => 'Motorboot',
+    'yacht' => 'Yacht',
+    'catamaran' => 'Katamaran',
+    'fishing_boat' => 'Angelboot',
+    'other' => 'Andere',
+    'tooltip_boat_type' => 'Wählen Sie den Typ des Bootes aus, das Sie vermieten.',
+    'boat_description' => 'Bootsbeschreibung',
+    'describe_your_boat' => 'Beschreiben Sie Ihr Boot, seine Eigenschaften und was es besonders macht',
+    'tooltip_boat_description' => 'Geben Sie eine detaillierte Beschreibung Ihres Bootes an, einschließlich seiner Eigenschaften, seines Zustands und seiner einzigartigen Verkaufsargumente.',
+    
+    // Step 3 - Boat Information and Extras
+    'boat_information_extras' => 'Bootsinformationen & Extras',
+    'boat_information' => 'Bootsinformationen',
+    'tooltip_boat_information' => 'Geben Sie technische Details zu Ihrem Boot an.',
+    'length' => 'Länge',
+    'boat_length' => 'Bootslänge (z.B. 25ft, 8m)',
+    'capacity' => 'Kapazität',
+    'max_passengers' => 'Maximale Anzahl der Passagiere',
+    'engine' => 'Motor',
+    'engine_type' => 'Motortyp und Leistung',
+    'year' => 'Jahr',
+    'manufacturing_year' => 'Baujahr',
+    'fuel_type' => 'Kraftstofftyp',
+    'select_fuel_type' => 'Kraftstofftyp auswählen',
+    'diesel' => 'Diesel',
+    'gasoline' => 'Benzin',
+    'electric' => 'Elektrisch',
+    'safety_equipment' => 'Sicherheitsausrüstung',
+    'safety_equipment_list' => 'Sicherheitsausrüstung auflisten (z.B. Rettungswesten, Erste-Hilfe-Kasten)',
+    'boat_extras' => 'Boots-Extras',
+    'add_extras' => 'Extras und Ausstattung hinzufügen',
+    'tooltip_boat_extras' => 'Fügen Sie zusätzliche Funktionen oder Ausstattungen hinzu, die Ihr Boot bietet.',
+    'tooltip_add_extras' => 'Trennen Sie mehrere Extras mit Kommas (z.B. GPS, Soundsystem, Angelausrüstung)',
+    'boat_descriptions' => 'Bootsbeschreibungen',
+    'tooltip_boat_descriptions' => 'Wählen Sie zusätzliche Bootsfunktionen aus und geben Sie Details für jede an.',
+    'other_boat_info' => 'Weitere Bootsinformationen',
+    'enter_value_for' => 'Wert eingeben für',
+    
+    // Step 4 - Requirements and Additional Info
+    'requirements_additional_info' => 'Anforderungen & Zusätzliche Informationen',
+    'requirements' => 'Anforderungen',
+    'rental_requirements' => 'Listen Sie alle Anforderungen für Mieter auf (z.B. Bootsführerschein, Altersbeschränkungen, Erfahrungsniveau)',
+    'tooltip_requirements' => 'Geben Sie alle Anforderungen oder Einschränkungen für Personen an, die Ihr Boot mieten möchten.',
+    'inclusions' => 'Inklusive',
+    'inclusions_placeholder' => 'Was ist im Mietpreis enthalten (z.B. Kraftstoff, Kapitän, Ausrüstung)',
+    'tooltip_inclusions' => 'Listen Sie auf, was im Mietpreis enthalten ist.',
+    
+    // Step 5 - Pricing Structure
+    'set_pricing_structure' => 'Preisstruktur festlegen',
+    'price_type' => 'Preistyp',
+    'tooltip_price_type' => 'Wählen Sie, wie Sie Ihre Bootsvermietung bepreisen möchten.',
+    'per_hour' => 'Pro Stunde',
+    'per_day' => 'Pro Tag',
+    'per_week' => 'Pro Woche',
+    'base_price' => 'Grundpreis',
+    'tooltip_base_price' => 'Legen Sie Ihren Grundmietpreis fest.',
+    'extra_pricing' => 'Zusätzliche Preise',
+    'tooltip_extra_pricing' => 'Fügen Sie zusätzliche Dienstleistungen oder Artikel hinzu, die für zusätzliche Kosten gebucht werden können.',
+    
+    // Step 6 - Availability and Booking Options
+    'availability_booking_options' => 'Verfügbarkeit & Buchungsoptionen',
+    'availability_status' => 'Verfügbarkeitsstatus',
+    'tooltip_availability_status' => 'Legen Sie fest, ob Ihr Boot derzeit zur Vermietung verfügbar ist.',
+    'available' => 'Verfügbar',
+    'unavailable' => 'Nicht verfügbar',
+    'booking_advance' => 'Buchungsvorlauf erforderlich',
+    'tooltip_booking_advance' => 'Wie weit im Voraus müssen Kunden buchen?',
+    'same_day' => 'Gleicher Tag',
+    'one_day' => '1 Tag',
+    'three_days' => '3 Tage',
+    'one_week' => '1 Woche',
+];
+
+
