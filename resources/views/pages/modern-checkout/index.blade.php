@@ -181,7 +181,6 @@
                                 'errorClass' => '',
                                 'alpineModel' => 'form.phone',
                                 'alpineModelCountryCode' => 'form.countryCode',
-                                'alpineDisabled' => 'mode === "login"',
                                 'modernCheckout' => true,
                                 'labelText' => 'checkout.phone_number_required'
                             ])
@@ -268,12 +267,12 @@
                     </section>
 
                     <!-- Policies above Submit -->
-                    <div class="p-3 mobile-order-9" x-show="!isLoggedIn">
-                        <label class="flex items-start gap-3 text-sm text-slate-700">
+                    <div class="p-1 mobile-order-9">
+                        <label class="terms-checkbox text-slate-700">
                             <input
                                 type="checkbox"
                                 x-model="form.policyAccepted"
-                                class="mt-1 h-4 w-4 rounded border-slate-300"
+                                class="h-4 w-4 rounded border-slate-300"
                             />
                             <span>
                                 {{ __('checkout.terms_and_conditions_accept') }} 
@@ -310,11 +309,6 @@
                             <i class="fas fa-check"></i>
                             <span>{{ __('checkout.non_binding') }}</span>
                         </div>
-                    </div>
-
-                    <div x-show="submitted" x-cloak class="alert-success">
-                        <p class="font-semibold mb-1">{{ __('checkout.request_sent') }}</p>
-                        <p>{{ __('checkout.confirmation_within_48h') }}</p>
                     </div>
                 </div>
             </aside>

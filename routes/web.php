@@ -185,29 +185,15 @@ if (app()->environment('production')) {
 Route::post('/search', [\App\Http\Controllers\SearchController::class, 'search'])->name('search');
 Route::prefix('guides')->name('guides.')->group(function () {});
 
-Route::get('/checkout', [CheckoutController::class, 'checkoutView'])->name('checkout.index')->middleware(['throttle:10,1', 'ddos:checkout']);
+// OLD CHECKOUT ROUTES - BACKED UP
+// Route::get('/checkout', [CheckoutController::class, 'checkoutView'])->name('checkout.index')->middleware(['throttle:10,1', 'ddos:checkout']);
 Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout')->middleware(['throttle:5,1', 'ddos:checkout']);
 
-// Modern Checkout Routes
-Route::get('/modern-checkout', [\App\Http\Controllers\ModernCheckoutController::class, 'index'])->name('modern-checkout.index')->middleware(['throttle:10,1', 'ddos:checkout']);
-Route::post('/modern-checkout', [\App\Http\Controllers\ModernCheckoutController::class, 'store'])->name('modern-checkout.store')->middleware(['throttle:5,1', 'ddos:checkout']);
-Route::get('/modern-checkout/thank-you/{bookingId}', [\App\Http\Controllers\ModernCheckoutController::class, 'thankYou'])->name('modern-checkout.thank-you');
+// Modern Checkout Routes (now becoming the main checkout)
+Route::get('/checkout', [\App\Http\Controllers\ModernCheckoutController::class, 'index'])->name('checkout.index')->middleware(['throttle:10,1', 'ddos:checkout']);
+Route::post('/checkouts', [\App\Http\Controllers\ModernCheckoutController::class, 'store'])->name('checkout.store')->middleware(['throttle:5,1', 'ddos:checkout']);
+Route::get('/checkout/thank-you/{bookingId}', [\App\Http\Controllers\ModernCheckoutController::class, 'thankYou'])->name('checkout.thank-you');
 
-// Test route to set up session data for modern checkout
-Route::get('/test-modern-checkout/{guidingId}', function($guidingId) {
-    $guiding = \App\Models\Guiding::find($guidingId);
-    if (!$guiding) {
-        return 'Guiding not found';
-    }
-    
-    session([
-        'guiding_id' => $guidingId,
-        'person' => 2,
-        'selected_date' => now()->addDays(7)->format('Y-m-d')
-    ]);
-    
-    return redirect()->route('modern-checkout.index');
-})->name('test-modern-checkout');
 
 // Ajax-based modern checkout with perfect React design match
 Route::get('/ajax-checkout/{guidingId}', function($guidingId) {
