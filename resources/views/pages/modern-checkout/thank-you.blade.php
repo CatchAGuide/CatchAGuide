@@ -9,7 +9,8 @@
 @section('content')
 <div class="checkout-container">
 <main class="container mx-auto pb-4">
-    <h3 class="text-2xl font-bold mb-2">{{ __('checkout.request_sent') }} 🎣</h3>
+    <h3 class="text-2xl font-bold mb-2">{{ __('checkout.request_sent') }}</h3>
+
 
     <!-- Success Message -->
     <div class="alert-success mb-3">
