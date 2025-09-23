@@ -249,8 +249,8 @@ class ModernCheckoutApiController extends Controller
                 'status' => 'pending',
                 'book_date' => $request->selected_date,
                 'expires_at' => $expiresAt,
-                'phone' => $request->form_data['countryCode'] . ' ' . $request->form_data['phone'],
-                'phone_country_code' => $request->form_data['countryCode'],
+                'phone' => $request->form_data['country_code'] . ' ' . $request->form_data['phone'],
+                'phone_country_code' => $request->form_data['country_code'],
                 'language' => $locale,
                 'email' => $request->form_data['email'],
                 'token' => $this->generateBookingToken($blockedEvent->id),
@@ -341,13 +341,13 @@ class ModernCheckoutApiController extends Controller
             // Update phone for registered user
             if (!$currentUser->is_guide) {
                 $currentUser->phone = $formData['phone'];
-                $currentUser->phone_country_code = $formData['countryCode'];
+                $currentUser->phone_country_code = $formData['country_code'];
                 $currentUser->save();
             }
 
             if ($currentUser->information) {
                 $currentUser->information->phone = $formData['phone'];
-                $currentUser->information->phone_country_code = $formData['countryCode'];
+                $currentUser->information->phone_country_code = $formData['country_code'];
                 $currentUser->information->save();
             }
 
@@ -361,23 +361,23 @@ class ModernCheckoutApiController extends Controller
                 $user = UserGuest::create([
                     'salutation' => 'male',
                     'title' => '',
-                    'firstname' => $formData['firstName'],
-                    'lastname' => $formData['lastName'],
+                    'firstname' => $formData['first_name'],
+                    'lastname' => $formData['last_name'],
                     'address' => '',
                     'postal' => '',
                     'city' => '',
                     'country' => 'Deutschland',
                     'phone' => $formData['phone'],
-                    'phone_country_code' => $formData['countryCode'],
+                    'phone_country_code' => $formData['country_code'],
                     'email' => $formData['email'],
                     'language' => $locale,
                 ]);
             } else {
                 // Update existing guest user information
-                $user->firstname = $formData['firstName'];
-                $user->lastname = $formData['lastName'];
+                $user->firstname = $formData['first_name'];
+                $user->lastname = $formData['last_name'];
                 $user->phone = $formData['phone'];
-                $user->phone_country_code = $formData['countryCode'];
+                $user->phone_country_code = $formData['country_code'];
                 $user->language = $locale;
                 $user->save();
             }
