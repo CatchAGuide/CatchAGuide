@@ -290,7 +290,14 @@ function checkoutApp() {
                     persons: this.persons,
                     selected_date: this.selectedDate,
                     selected_extras: Object.values(this.selectedExtras),
-                    form_data: this.form
+                    form_data: {
+                        first_name: this.form.firstName,
+                        last_name: this.form.lastName,
+                        email: this.form.email,
+                        country_code: this.form.countryCode,
+                        phone: this.form.phone,
+                        policy_accepted: this.form.policyAccepted
+                    }
                 });
 
                 if (response.data.success) {
