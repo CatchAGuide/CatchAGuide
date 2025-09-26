@@ -572,6 +572,91 @@ class GuidingsController extends Controller
         return $this->getOtherGuidingsBasedByLocation($latitude, $longitude, $allGuidings);
     }
 
+    /**
+     * Generate guiding cards for a collection of guidings
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function generateCards(Request $request)
+    {
+        try {
+            $guidingIds = $request->input('guiding_ids', []);
+            
+            \Log::info('generateCards called with IDs:', $guidingIds);
+            
+            if (empty($guidingIds)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No guiding IDs provided'
+                ], 400);
+            }
+            
+            // Get guidings by IDs - first check if they exist at all
+            $allGuidings = Guiding::whereIn('id', $guidingIds)->get();
+            \Log::info('Found guidings (any status):', $allGuidings->pluck('id', 'status')->toArray());
+            
+            // Show actual status values for debugging
+            $statusInfo = $allGuidings->map(function($g) {
+                return [
+                    'id' => $g->id,
+                    'status' => $g->status,
+                    'title' => $g->title
+                ];
+            })->toArray();
+            \Log::info('Guiding status details:', $statusInfo);
+            
+            // Get guidings by IDs - try different status values
+            // First try status = 1 (published)
+            $guidings = Guiding::whereIn('id', $guidingIds)
+                ->where('status', 1)
+                ->with(['user', 'guidingTargets', 'guidingMethods', 'guidingWaters'])
+                ->get();
+            
+            // If no active guidings found, try status = 'active' (string)
+            if ($guidings->isEmpty()) {
+                $guidings = Guiding::whereIn('id', $guidingIds)
+                    ->where('status', 'active')
+                    ->with(['user', 'guidingTargets', 'guidingMethods', 'guidingWaters'])
+                    ->get();
+            }
+            
+            // If still no guidings found, try any status (for testing)
+            if ($guidings->isEmpty()) {
+                $guidings = Guiding::whereIn('id', $guidingIds)
+                    ->with(['user', 'guidingTargets', 'guidingMethods', 'guidingWaters'])
+                    ->get();
+            }
+            
+            \Log::info('Found active guidings:', $guidings->pluck('id')->toArray());
+            
+            // Generate card HTML using a compact version for camp form
+            $cardsHtml = view('components.guiding-card-compact', [
+                'guidings' => $guidings
+            ])->render();
+            
+            return response()->json([
+                'success' => true,
+                'html' => $cardsHtml,
+                'count' => $guidings->count(),
+                'debug' => [
+                    'requested_ids' => $guidingIds,
+                    'found_any_status' => $allGuidings->pluck('id')->toArray(),
+                    'found_active' => $guidings->pluck('id')->toArray()
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error generating guiding cards: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error generating guiding cards',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function newShow($id, $slug, Request $request)
     {
         $locale = Config::get('app.locale');

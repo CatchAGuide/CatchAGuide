@@ -14,12 +14,12 @@ class RoomConfigurationSeeder extends Seeder
     public function run()
     {
         $roomConfigurations = [
-            ['value' => 'Einzelbett', 'value_de' => 'Einzelbett', 'sort_order' => 1],
-            ['value' => 'Doppelbett', 'value_de' => 'Doppelbett', 'sort_order' => 2],
-            ['value' => 'Sofabett', 'value_de' => 'Sofabett', 'sort_order' => 3],
-            ['value' => 'Etagenbett', 'value_de' => 'Etagenbett', 'sort_order' => 4],
-            ['value' => 'Kinderbett', 'value_de' => 'Kinderbett', 'sort_order' => 5],
-            ['value' => 'Klappbett', 'value_de' => 'Klappbett', 'sort_order' => 6],
+            ['name' => 'Einzelbett', 'name_en' => 'Single Bed', 'sort_order' => 1],
+            ['name' => 'Doppelbett', 'name_en' => 'Double Bed', 'sort_order' => 2],
+            ['name' => 'Sofabett', 'name_en' => 'Sofa Bed', 'sort_order' => 3],
+            ['name' => 'Etagenbett', 'name_en' => 'Bunk Bed', 'sort_order' => 4],
+            ['name' => 'Kinderbett', 'name_en' => 'Children\'s Bed', 'sort_order' => 5],
+            ['name' => 'Klappbett', 'name_en' => 'Folding Bed', 'sort_order' => 6],
         ];
 
         foreach ($roomConfigurations as $config) {
