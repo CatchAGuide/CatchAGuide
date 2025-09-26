@@ -30,6 +30,17 @@ class   DatabaseSeeder extends Seeder
         $this->call(GuidingsSettingsSeeder::class);
         $this->call(VacationsSeeder::class);
         // $this->call(LocationBoundarySeeder::class);
+        
+        // Accommodation form seeders
+        $this->call(AccommodationTypeSeeder::class);
+        $this->call(AccommodationDetailSeeder::class);
+        $this->call(RoomConfigurationSeeder::class);
+        $this->call(FacilitySeeder::class);
+        $this->call(KitchenEquipmentSeeder::class);
+        $this->call(BathroomAmenitySeeder::class);
+        
+        // Rental boat form seeders
+        $this->call(RentalBoatRequirementSeeder::class);
 
         #User::factory()->count(50)->create();
         #Employee::factory()->count(50)->create();

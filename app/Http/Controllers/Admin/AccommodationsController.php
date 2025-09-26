@@ -4,6 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Accommodation;
+use App\Models\AccommodationType;
+use App\Models\AccommodationDetail;
+use App\Models\RoomConfiguration;
+use App\Models\Facility;
+use App\Models\KitchenEquipment;
+use App\Models\BathroomAmenity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
@@ -27,7 +33,51 @@ class AccommodationsController extends Controller
      */
     public function create()
     {
-        return view('admin.pages.accommodations.create');
+        $formData = [
+            'is_update' => 0,
+            'user_id' => Auth::id(),
+            'status' => 'active'
+        ];
+        
+        // Use proper Eloquent relationships and scopes - transform data like rental boat form
+        $accommodationTypes = AccommodationType::active()->ordered()->get();
+        $accommodationDetails = AccommodationDetail::active()->ordered()->get();
+        $roomConfigurations = RoomConfiguration::active()->ordered()->get();
+        
+        // Transform data to have 'value' field for Tagify compatibility
+        $facilities = Facility::active()->ordered()->get()->map(function($item) {
+            return [
+                'value' => $item->name,
+                'id' => $item->id
+            ];
+        });
+        
+        $kitchenEquipment = KitchenEquipment::active()->ordered()->get()->map(function($item) {
+            return [
+                'value' => $item->name,
+                'id' => $item->id
+            ];
+        });
+        
+        $bathroomAmenities = BathroomAmenity::active()->ordered()->get()->map(function($item) {
+            return [
+                'value' => $item->name,
+                'id' => $item->id
+            ];
+        });
+        
+        $targetRedirect = route('admin.accommodations.index');
+        
+        return view('admin.pages.accommodations.create', compact(
+            'formData',
+            'targetRedirect',
+            'accommodationTypes',
+            'accommodationDetails', 
+            'roomConfigurations',
+            'facilities',
+            'kitchenEquipment',
+            'bathroomAmenities'
+        ));
     }
 
     /**
@@ -123,11 +173,13 @@ class AccommodationsController extends Controller
                 'price_per_night' => $request->price_per_night ?? null,
                 'price_per_week' => $request->price_per_week ?? null,
                 'currency' => $request->currency ?? 'EUR',
-                'amenities' => $this->processAmenities($request),
-                'kitchen_equipment' => $this->processKitchenEquipment($request),
-                'bathroom_amenities' => $this->processBathroomAmenities($request),
-                'policies' => $this->processPolicies($request),
-                'rental_conditions' => $this->processRentalConditions($request),
+                'amenities' => $this->processFacilities($request),
+                'kitchen_equipment' => $this->processKitchenEquipmentTagify($request),
+                'bathroom_amenities' => $this->processBathroomAmenitiesTagify($request),
+                'policies' => $this->processPoliciesTagify($request),
+                'rental_conditions' => $this->processRentalConditionsTagify($request),
+                'extras' => $this->processExtrasTagify($request),
+                'inclusives' => $this->processInclusivesTagify($request),
                 'bed_types' => $this->processBedTypes($request),
                 'per_person_pricing' => $this->processPerPersonPricing($request),
             ];
@@ -278,6 +330,15 @@ class AccommodationsController extends Controller
             }
             $validated['gallery_images'] = $galleryPaths;
         }
+
+        // Process Tagify fields
+        $validated['amenities'] = $this->processFacilities($request);
+        $validated['kitchen_equipment'] = $this->processKitchenEquipmentTagify($request);
+        $validated['bathroom_amenities'] = $this->processBathroomAmenitiesTagify($request);
+        $validated['policies'] = $this->processPoliciesTagify($request);
+        $validated['rental_conditions'] = $this->processRentalConditionsTagify($request);
+        $validated['extras'] = $this->processExtrasTagify($request);
+        $validated['inclusives'] = $this->processInclusivesTagify($request);
 
         $accommodation->update($validated);
 
@@ -651,5 +712,103 @@ class AccommodationsController extends Controller
             $accommodation->thumbnail_path = $updatedThumbnailPath;
             $accommodation->save();
         }
+    }
+
+    /**
+     * Process facilities Tagify data
+     */
+    private function processFacilities($request)
+    {
+        if (!$request->has('facilities')) {
+            return null;
+        }
+
+        return is_string($request->facilities) 
+            ? explode(',', $request->facilities) 
+            : $request->facilities;
+    }
+
+    /**
+     * Process kitchen equipment Tagify data
+     */
+    private function processKitchenEquipmentTagify($request)
+    {
+        if (!$request->has('kitchen_equipment')) {
+            return null;
+        }
+
+        return is_string($request->kitchen_equipment) 
+            ? explode(',', $request->kitchen_equipment) 
+            : $request->kitchen_equipment;
+    }
+
+    /**
+     * Process bathroom amenities Tagify data
+     */
+    private function processBathroomAmenitiesTagify($request)
+    {
+        if (!$request->has('bathroom_amenities')) {
+            return null;
+        }
+
+        return is_string($request->bathroom_amenities) 
+            ? explode(',', $request->bathroom_amenities) 
+            : $request->bathroom_amenities;
+    }
+
+    /**
+     * Process policies Tagify data
+     */
+    private function processPoliciesTagify($request)
+    {
+        if (!$request->has('policies')) {
+            return null;
+        }
+
+        return is_string($request->policies) 
+            ? explode(',', $request->policies) 
+            : $request->policies;
+    }
+
+    /**
+     * Process rental conditions Tagify data
+     */
+    private function processRentalConditionsTagify($request)
+    {
+        if (!$request->has('rental_conditions')) {
+            return null;
+        }
+
+        return is_string($request->rental_conditions) 
+            ? explode(',', $request->rental_conditions) 
+            : $request->rental_conditions;
+    }
+
+    /**
+     * Process extras Tagify data
+     */
+    private function processExtrasTagify($request)
+    {
+        if (!$request->has('extras')) {
+            return null;
+        }
+
+        return is_string($request->extras) 
+            ? explode(',', $request->extras) 
+            : $request->extras;
+    }
+
+    /**
+     * Process inclusives Tagify data
+     */
+    private function processInclusivesTagify($request)
+    {
+        if (!$request->has('inclusives')) {
+            return null;
+        }
+
+        return is_string($request->inclusives) 
+            ? explode(',', $request->inclusives) 
+            : $request->inclusives;
     }
 }

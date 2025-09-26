@@ -549,6 +549,140 @@ $transition: all 0.3s ease;
     }
 }
 
+// Rental Requirements Grid Layout
+.rental-requirements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.rental-requirements-grid .btn-checkbox-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    
+    &:hover {
+        border-color: $primary-color;
+        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+    }
+}
+
+.rental-requirements-grid .btn-checkbox-container .btn-checkbox {
+    width: 100%;
+    text-align: left;
+    padding: 0.75rem 1rem;
+    border: 2px solid #dee2e6;
+    background-color: #fff;
+    color: #495057;
+    transition: all 0.3s ease;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    
+    &:hover {
+        border-color: $primary-color;
+        background-color: #f8f9fa;
+        transform: translateY(-1px);
+    }
+}
+
+.rental-requirements-grid .btn-checkbox-container input[type="checkbox"]:checked + .btn-checkbox {
+    background-color: $primary-color;
+    border-color: $primary-color;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
+
+.rental-requirements-grid .btn-checkbox-container .extra-input {
+    margin-top: 0.5rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    transition: all 0.3s ease;
+    display: none;
+    
+    &:focus {
+        border-color: $primary-color;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        outline: none;
+    }
+    
+    &::placeholder {
+        color: #6c757d;
+        font-style: italic;
+        font-size: 0.85rem;
+    }
+}
+
+// Show input when checkbox is checked
+.rental-requirements-grid .btn-checkbox-container input[type="checkbox"]:checked + .btn-checkbox + .extra-input {
+    display: block;
+}
+
+// Active state for rental requirements container
+.rental-requirements-grid .btn-checkbox-container.active,
+.rental-requirements-grid .btn-checkbox-container input[type="checkbox"]:checked ~ .btn-checkbox {
+    border-color: $primary-color;
+    box-shadow: 0 2px 12px rgba(0, 123, 255, 0.15);
+}
+
+// Responsive adjustments for rental requirements grid
+@media (max-width: 992px) {
+    .rental-requirements-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .rental-requirements-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .rental-requirements-grid .btn-checkbox-container {
+        padding: 0.75rem;
+        
+        .btn-checkbox {
+            padding: 0.6rem 0.8rem;
+            font-size: 0.9rem;
+        }
+        
+        .extra-input {
+            padding: 0.6rem;
+            font-size: 0.85rem;
+        }
+    }
+}
+
+@media (max-width: 576px) {
+    .rental-requirements-grid {
+        gap: 0.5rem;
+    }
+    
+    .rental-requirements-grid .btn-checkbox-container {
+        padding: 0.6rem;
+        
+        .btn-checkbox {
+            padding: 0.5rem 0.6rem;
+            font-size: 0.85rem;
+        }
+        
+        .extra-input {
+            padding: 0.5rem;
+            font-size: 0.8rem;
+        }
+    }
+}
+
 // Ensure proper layout for boat descriptions section
 #rental-boat-form .btn-group-toggle,
 .rental-boat-form .btn-group-toggle {

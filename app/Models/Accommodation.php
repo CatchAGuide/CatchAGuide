@@ -53,6 +53,8 @@ class Accommodation extends Model
         'rental_conditions',
         'bed_types',
         'per_person_pricing',
+        'extras',
+        'inclusives',
     ];
 
     protected $casts = [
@@ -64,6 +66,8 @@ class Accommodation extends Model
         'rental_conditions' => 'array',
         'bed_types' => 'array',
         'per_person_pricing' => 'array',
+        'extras' => 'array',
+        'inclusives' => 'array',
         'lat' => 'decimal:8',
         'lng' => 'decimal:8',
     ];

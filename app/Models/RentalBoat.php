@@ -41,6 +41,7 @@ class RentalBoat extends Model
         'prices' => 'array',
         'pricing_extra' => 'array',
         'inclusions' => 'array',
+        'requirements' => 'array',
         'lat' => 'decimal:8',
         'lng' => 'decimal:8',
     ];
