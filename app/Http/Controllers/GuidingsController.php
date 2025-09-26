@@ -613,10 +613,18 @@ class GuidingsController extends Controller
                 ->with(['user', 'guidingTargets', 'guidingMethods', 'guidingWaters'])
                 ->get();
             
-            // If no active guidings found, try status = 'active' (string)
+            // If no published guidings found, try status = 'active' (string)
             if ($guidings->isEmpty()) {
                 $guidings = Guiding::whereIn('id', $guidingIds)
                     ->where('status', 'active')
+                    ->with(['user', 'guidingTargets', 'guidingMethods', 'guidingWaters'])
+                    ->get();
+            }
+            
+            // If still no guidings found, try status = 0 (draft/pending)
+            if ($guidings->isEmpty()) {
+                $guidings = Guiding::whereIn('id', $guidingIds)
+                    ->where('status', 0)
                     ->with(['user', 'guidingTargets', 'guidingMethods', 'guidingWaters'])
                     ->get();
             }
@@ -629,6 +637,28 @@ class GuidingsController extends Controller
             }
             
             \Log::info('Found active guidings:', $guidings->pluck('id')->toArray());
+            
+            // Debug: Log image data for first guiding
+            if ($guidings->count() > 0) {
+                $firstGuiding = $guidings->first();
+                $galleryImages = $firstGuiding->cached_gallery_images ?? json_decode($firstGuiding->gallery_images);
+                $firstImage = null;
+                if (!empty($galleryImages) && is_array($galleryImages) && count($galleryImages) > 0) {
+                    $firstImage = $galleryImages[0];
+                }
+                
+                \Log::info('First guiding image debug:', [
+                    'id' => $firstGuiding->id,
+                    'title' => $firstGuiding->title,
+                    'cached_gallery_images' => $firstGuiding->cached_gallery_images,
+                    'gallery_images' => $firstGuiding->gallery_images,
+                    'decoded_gallery_images' => $galleryImages,
+                    'first_image_raw' => $firstImage,
+                    'first_image_with_asset' => $firstImage ? asset($firstImage) : null,
+                    'cached_gallery_images_type' => gettype($firstGuiding->cached_gallery_images),
+                    'gallery_images_type' => gettype($firstGuiding->gallery_images)
+                ]);
+            }
             
             // Generate card HTML using a compact version for camp form
             $cardsHtml = view('components.guiding-card-compact', [

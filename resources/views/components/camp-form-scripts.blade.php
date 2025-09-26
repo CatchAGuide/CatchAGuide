@@ -328,6 +328,20 @@ function updateSelectedGuidingsCards() {
                 // Create a grid layout for the cards
                 cardsContainer.html('<div class="row">' + response.html + '</div>');
                 
+                // Apply compact layout based on number of cards
+                const cardCount = cardsContainer.find('.col-lg-4').length;
+                console.log('Card count:', cardCount);
+                
+                container.removeClass('compact-2-cards compact-3-cards');
+                
+                if (cardCount === 2) {
+                    container.addClass('compact-2-cards');
+                    console.log('Applied compact-2-cards class');
+                } else if (cardCount === 3) {
+                    container.addClass('compact-3-cards');
+                    console.log('Applied compact-3-cards class');
+                }
+                
                 // Initialize carousels for the new cards
                 initializeCarousels(cardsContainer[0]);
                 initializeLazyLoading(cardsContainer[0]);
