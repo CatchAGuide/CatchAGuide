@@ -38,7 +38,7 @@ return [
         'duration' => 9999999,
     ],
 
-    'key' => env('GOOGLE_MAPS_GEOCODING_API_KEY', 'AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q'),
+    'key' => env('GOOGLE_MAPS_GEOCODING_API_KEY'),
     'language' => '',
     'region' => '',
     'bounds' => '',
@@ -64,7 +64,7 @@ return [
         Chain::class => [
             GoogleMaps::class => [
                 env('GOOGLE_MAPS_LOCALE', 'us'),
-                env('AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q'),
+                env('GOOGLE_MAPS_GEOCODING_API_KEY'),
             ],
             GeoPlugin::class  => [],
         ],
