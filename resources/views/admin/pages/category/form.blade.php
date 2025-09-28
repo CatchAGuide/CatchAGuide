@@ -479,6 +479,7 @@ input[type=number] {
         $('#faq_item_' + counter).remove();
     }
 </script>
-<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/core-js-bundle@3.30.2/minified.js"></script>
 
 @endpush

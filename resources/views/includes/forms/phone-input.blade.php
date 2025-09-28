@@ -1,14 +1,16 @@
-<div class="phone-input-container">
+<div class="phone-input-container {{ isset($modernCheckout) && $modernCheckout ? 'modern-checkout-phone' : '' }}">
     @if(isset($showLabel) && $showLabel)
-        <label for="{{ $id ?? 'phone' }}">{{ __($labelText ?? 'forms.pNumber') }}<span style="color: #e8604c !important; font-size: 12px;">*</span></label>
+        <label for="{{ $id ?? 'phone' }}" class="{{ isset($modernCheckout) && $modernCheckout ? 'block text-sm font-medium text-slate-700 mb-1' : '' }}">{{ __($labelText ?? 'forms.pNumber') }}<span style="color: #e8604c !important; font-size: 12px;">*</span></label>
     @endif
     
-    <div class="d-flex">
-        <select class="form-control rounded w-25 me-2 {{ $errorClass ?? '' }}" 
+    <div class="d-flex {{ isset($modernCheckout) && $modernCheckout ? 'gap-2' : '' }}">
+        <select class="form-control rounded w-25 me-2 {{ $errorClass ?? '' }} {{ isset($modernCheckout) && $modernCheckout ? 'form-input' : '' }}" 
                 name="{{ $countryCodeName ?? 'countryCode' }}" 
                 id="{{ $countryCodeId ?? 'countryCode' }}"
                 style="max-width: 120px;" 
                 @if(isset($wireModelCountryCode) && $wireModelCountryCode) wire:model="{{ $wireModelCountryCode }}" @endif
+                @if(isset($alpineModelCountryCode) && $alpineModelCountryCode) x-model="{{ $alpineModelCountryCode }}" @endif
+                @if(isset($alpineDisabled) && $alpineDisabled) :disabled="{{ $alpineDisabled }}" @endif
                 {{ isset($required) && $required ? 'required' : '' }}>
             <option value="+49" {{ ($selectedCountryCode ?? '+49') === '+49' ? 'selected' : '' }}>+49 (Germany)</option>
             <option value="+1" {{ ($selectedCountryCode ?? '+49') === '+1' ? 'selected' : '' }}>+1 (USA/Canada)</option>
@@ -59,12 +61,14 @@
         </select>
         
         <input type="number" 
-               class="form-control rounded {{ $errorClass ?? '' }}" 
+               class="form-control rounded {{ $errorClass ?? '' }} {{ isset($modernCheckout) && $modernCheckout ? 'form-input' : '' }}" 
                placeholder="{{ __($placeholder ?? 'forms.pNumber') }}" 
                name="{{ $name ?? 'phone' }}" 
                id="{{ $id ?? 'phone' }}"
                value="{{ $phoneValue ?? '' }}"
                @if(isset($wireModel) && $wireModel) wire:model="{{ $wireModel }}" @endif
+               @if(isset($alpineModel) && $alpineModel) x-model="{{ $alpineModel }}" @endif
+               @if(isset($alpineDisabled) && $alpineDisabled) :disabled="{{ $alpineDisabled }}" @endif
                {{ isset($required) && $required ? 'required' : '' }}>
     </div>
     

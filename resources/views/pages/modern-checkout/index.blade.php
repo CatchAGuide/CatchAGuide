@@ -2,20 +2,33 @@
 
 @section('title', 'Booking Request')
 
+@push('styles')
+<!-- Modern checkout styles are included in app.css -->
+@endpush
+
 @section('content')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css" />
-    {{-- Checkout-specific styles are now handled by SCSS compilation --}}
-    <!-- template styles -->
-    <link rel="stylesheet" href="{{ asset('assets/css/tevily.css') }}" />
-    <link rel="stylesheet" href="{{ asset('assets/css/tevily-responsive.css') }}" />
-    <!--Page Header Start-->
-    {{-- <section class="page-header">
-        <div class="page-header__top">
-            <div class="page-header-bg-magazin" style="background-image: url({{asset('assets/images/shutterstock_620805824.jpg')}}); "></div>
-            <div class="page-header-bg-overly-magazin"></div>
-            <div class="container">
-                <div class="page-header__top-inner">
-                    <h2>@yield('title')</h2>
+<div class="checkout-container" x-data="checkoutApp()" x-init="init()">
+
+    <main class="container mx-auto pb-4">
+        <h3 class="text-2xl font-bold mb-2">{{ __('checkout.booking_request') }}</h3>
+
+        <!-- Success/Error Messages -->
+        <div x-show="alerts.success" x-cloak class="alert-success mb-3">
+            ✅ <span x-text="alerts.success"></span>
+        </div>
+
+        <div x-show="alerts.error" x-cloak class="alert-error mb-3">
+            ⚠️ <span x-text="alerts.error"></span>
+        </div>
+
+        <!-- Info Alerts -->
+        <div class="alert-success mb-3 mobile-order-1">
+            <div class="alert-content">
+                <div class="alert-icon">✅</div>
+                <div class="alert-text">
+                    <strong>{{ __('checkout.no_payment_required_now') }}</strong><br>
+                    {{ __('checkout.confirmation_by_guide_within') }}<br>
+                    {{ __('checkout.afterwards_contact_details') }}
                 </div>
             </div>
         </div>
@@ -300,7 +313,8 @@
                 </div>
             </aside>
         </div>
-    </section> --}}
-    <!--Page Header End-->
-    <livewire:checkout :guiding="$guiding" :persons="$persons" :initial-selected-date="$selectedDate" />
+    </main>
+</div>
 @endsection
+
+@include('components.modern-checkout-scripts')
