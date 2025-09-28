@@ -556,7 +556,8 @@ transform: translate3d(0,0,0); width: 100%;">
         $('.tour-details-two__overview *').removeAttr('style');
     </script>
 
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <script src="https://cdn.jsdelivr.net/npm/core-js-bundle@3.30.2/minified.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             var calendarEl = document.getElementById('calendar');
