@@ -38,7 +38,7 @@ return [
         'duration' => 9999999,
     ],
 
-    'key' => env('GOOGLE_MAPS_GEOCODING_API_KEY'),
+    'key' => env('GOOGLE_MAPS_API_KEY'),
     'language' => '',
     'region' => '',
     'bounds' => '',
@@ -64,7 +64,7 @@ return [
         Chain::class => [
             GoogleMaps::class => [
                 env('GOOGLE_MAPS_LOCALE', 'us'),
-                env('GOOGLE_MAPS_GEOCODING_API_KEY'),
+                env('GOOGLE_MAPS_API_KEY'),
             ],
             GeoPlugin::class  => [],
         ],
