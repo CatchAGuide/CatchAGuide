@@ -36,6 +36,12 @@ class DDoSProtectionService
         // Enhanced threat intelligence collection
         $threatData = $this->threatIntelligence->collectThreatData($request, $context);
         
+        // Advanced security checks
+        $advancedSecurity = $this->checkAdvancedSecurity($request, $identifier, $context);
+        if ($advancedSecurity['blocked']) {
+            return $advancedSecurity;
+        }
+        
         // Check honeypot triggers
         $honeypotTriggers = $this->honeypotService->checkHoneypotTriggers($request);
         if (!empty($honeypotTriggers)) {
@@ -435,5 +441,314 @@ class DDoSProtectionService
         Cache::forget("{$context}_blocked_{$identifier}");
         
         // Security limits reset - no logging needed for admin actions
+    }
+
+    /**
+     * Check advanced security features
+     */
+    private function checkAdvancedSecurity(Request $request, string $identifier, string $context): array
+    {
+        $advancedConfig = config('ddos.advanced_security', []);
+        
+        if (!$advancedConfig['enabled'] ?? false) {
+            return ['blocked' => false];
+        }
+
+        // Check IP whitelist
+        if ($this->isWhitelisted($request)) {
+            return ['blocked' => false];
+        }
+
+        // Check geolocation blocking
+        if ($this->isBlockedByGeolocation($request)) {
+            $this->logGeolocationBlock($request, $identifier);
+            return [
+                'blocked' => true,
+                'reason' => 'geolocation_blocked',
+                'retry_after' => 0
+            ];
+        }
+
+        // Check behavioral analysis
+        if ($advancedConfig['enable_behavioral_analysis'] ?? false) {
+            $behavioralResult = $this->analyzeBehavior($request, $identifier, $context);
+            if ($behavioralResult['blocked']) {
+                return $behavioralResult;
+            }
+        }
+
+        // Check bot detection
+        if ($this->isBot($request)) {
+            $this->logBotDetection($request, $identifier);
+            return [
+                'blocked' => true,
+                'reason' => 'bot_detected',
+                'retry_after' => 300 // 5 minutes
+            ];
+        }
+
+        return ['blocked' => false];
+    }
+
+    /**
+     * Check if IP is whitelisted
+     */
+    private function isWhitelisted(Request $request): bool
+    {
+        $advancedConfig = config('ddos.advanced_security', []);
+        
+        if (!($advancedConfig['enable_ip_whitelist'] ?? false)) {
+            return false;
+        }
+
+        $whitelistedIPs = $advancedConfig['whitelisted_ips'] ?? [];
+        $clientIP = $request->ip();
+        
+        return in_array($clientIP, $whitelistedIPs);
+    }
+
+    /**
+     * Check if request is blocked by geolocation
+     */
+    private function isBlockedByGeolocation(Request $request): bool
+    {
+        $advancedConfig = config('ddos.advanced_security', []);
+        
+        if (!($advancedConfig['enable_geolocation_blocking'] ?? false)) {
+            return false;
+        }
+
+        $blockedCountries = $advancedConfig['blocked_countries'] ?? [];
+        
+        // Simple country detection based on IP (you might want to use a proper GeoIP service)
+        $country = $this->getCountryFromIP($request->ip());
+        
+        return in_array($country, $blockedCountries);
+    }
+
+    /**
+     * Analyze user behavior for suspicious patterns
+     */
+    private function analyzeBehavior(Request $request, string $identifier, string $context): array
+    {
+        $advancedConfig = config('ddos.advanced_security', []);
+        $patterns = $advancedConfig['suspicious_behavior_patterns'] ?? [];
+        
+        $suspiciousScore = 0;
+        $reasons = [];
+
+        // Check rapid page navigation
+        if ($patterns['rapid_page_navigation'] ?? false) {
+            if ($this->hasRapidPageNavigation($identifier, $context)) {
+                $suspiciousScore += 30;
+                $reasons[] = 'rapid_page_navigation';
+            }
+        }
+
+        // Check missing referrer
+        if ($patterns['missing_referrer'] ?? false) {
+            if ($this->hasMissingReferrer($request)) {
+                $suspiciousScore += 20;
+                $reasons[] = 'missing_referrer';
+            }
+        }
+
+        // Check suspicious request sequences
+        if ($patterns['suspicious_request_sequences'] ?? false) {
+            if ($this->hasSuspiciousRequestSequence($identifier, $context)) {
+                $suspiciousScore += 40;
+                $reasons[] = 'suspicious_request_sequences';
+            }
+        }
+
+        // Check high error rate
+        if ($patterns['high_error_rate'] ?? false) {
+            if ($this->hasHighErrorRate($identifier, $context)) {
+                $suspiciousScore += 25;
+                $reasons[] = 'high_error_rate';
+            }
+        }
+
+        // Block if suspicious score is high enough
+        if ($suspiciousScore >= 50) {
+            $this->logBehavioralBlock($request, $identifier, $suspiciousScore, $reasons);
+            return [
+                'blocked' => true,
+                'reason' => 'suspicious_behavior',
+                'retry_after' => 600, // 10 minutes
+                'suspicious_score' => $suspiciousScore,
+                'reasons' => $reasons
+            ];
+        }
+
+        return ['blocked' => false];
+    }
+
+    /**
+     * Check if request is from a bot
+     */
+    private function isBot(Request $request): bool
+    {
+        $userAgent = $request->userAgent() ?? '';
+        $legitimateUserAgents = config('ddos.advanced.legitimate_user_agents', []);
+        
+        // Check if user agent contains legitimate patterns
+        foreach ($legitimateUserAgents as $pattern) {
+            if (stripos($userAgent, $pattern) !== false) {
+                return false; // Legitimate user agent
+            }
+        }
+
+        // Check for bot patterns
+        $botPatterns = [
+            'bot', 'crawler', 'spider', 'scraper', 'curl', 'wget', 'python-requests',
+            'java/', 'go-http', 'okhttp', 'libwww', 'lwp-trivial', 'wget', 'python-urllib'
+        ];
+
+        foreach ($botPatterns as $pattern) {
+            if (stripos($userAgent, $pattern) !== false) {
+                return true; // Bot detected
+            }
+        }
+
+        // Check for missing or suspicious user agent
+        if (empty($userAgent) || strlen($userAgent) < 10) {
+            return true; // Suspicious user agent
+        }
+
+        return false;
+    }
+
+    /**
+     * Check for rapid page navigation
+     */
+    private function hasRapidPageNavigation(string $identifier, string $context): bool
+    {
+        $key = "{$context}_page_navigation_{$identifier}";
+        $navigation = Cache::get($key, []);
+        $now = time();
+        
+        // Keep only last 60 seconds
+        $navigation = array_filter($navigation, fn($timestamp) => $now - $timestamp < 60);
+        
+        // Add current request
+        $navigation[] = $now;
+        Cache::put($key, $navigation, 60);
+        
+        // Check if more than 10 page changes in 60 seconds
+        return count($navigation) > 10;
+    }
+
+    /**
+     * Check for missing referrer
+     */
+    private function hasMissingReferrer(Request $request): bool
+    {
+        $referrer = $request->header('referer');
+        $path = $request->path();
+        
+        // Allow direct access to main pages
+        $allowedPaths = ['', '/', '/guidings', '/vacations', '/about', '/contact'];
+        if (in_array($path, $allowedPaths)) {
+            return false;
+        }
+        
+        // Check if referrer is missing for internal navigation
+        return empty($referrer) && !$request->is('api/*');
+    }
+
+    /**
+     * Check for suspicious request sequences
+     */
+    private function hasSuspiciousRequestSequence(string $identifier, string $context): bool
+    {
+        $key = "{$context}_request_sequence_{$identifier}";
+        $sequence = Cache::get($key, []);
+        $now = time();
+        
+        // Keep only last 300 seconds (5 minutes)
+        $sequence = array_filter($sequence, fn($timestamp) => $now - $timestamp < 300);
+        
+        // Add current request
+        $sequence[] = $now;
+        Cache::put($key, $sequence, 300);
+        
+        // Check for burst pattern (many requests in short time)
+        $recentRequests = array_filter($sequence, fn($timestamp) => $now - $timestamp < 30);
+        return count($recentRequests) > 20;
+    }
+
+    /**
+     * Check for high error rate
+     */
+    private function hasHighErrorRate(string $identifier, string $context): bool
+    {
+        $errorKey = "{$context}_errors_{$identifier}";
+        $totalKey = "{$context}_total_{$identifier}";
+        
+        $errors = Cache::get($errorKey, 0);
+        $total = Cache::get($totalKey, 0);
+        
+        // Increment total requests
+        Cache::put($totalKey, $total + 1, 3600); // 1 hour
+        
+        // Check if error rate is above 50%
+        return $total > 10 && ($errors / $total) > 0.5;
+    }
+
+    /**
+     * Get country from IP (simplified implementation)
+     */
+    private function getCountryFromIP(string $ip): string
+    {
+        // This is a simplified implementation
+        // In production, you should use a proper GeoIP service
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            // For now, return 'unknown' - implement proper GeoIP detection
+            return 'unknown';
+        }
+        
+        return 'private';
+    }
+
+    /**
+     * Log behavioral block
+     */
+    private function logBehavioralBlock(Request $request, string $identifier, int $score, array $reasons): void
+    {
+        Log::channel('ddos_attacks')->warning('Behavioral block triggered', [
+            'ip' => $request->ip(),
+            'identifier' => $identifier,
+            'user_agent' => $request->userAgent(),
+            'suspicious_score' => $score,
+            'reasons' => $reasons,
+            'url' => $request->fullUrl()
+        ]);
+    }
+
+    /**
+     * Log bot detection
+     */
+    private function logBotDetection(Request $request, string $identifier): void
+    {
+        Log::channel('ddos_attacks')->warning('Bot detected and blocked', [
+            'ip' => $request->ip(),
+            'identifier' => $identifier,
+            'user_agent' => $request->userAgent(),
+            'url' => $request->fullUrl()
+        ]);
+    }
+
+    /**
+     * Log geolocation block
+     */
+    private function logGeolocationBlock(Request $request, string $identifier): void
+    {
+        Log::channel('ddos_attacks')->warning('Request blocked by geolocation', [
+            'ip' => $request->ip(),
+            'identifier' => $identifier,
+            'user_agent' => $request->userAgent(),
+            'url' => $request->fullUrl()
+        ]);
     }
 }
