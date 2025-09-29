@@ -23,18 +23,18 @@ return [
     */
     'defaults' => [
         'limits' => [
-            'minute' => 60,
-            'hour' => 1000,
-            'day' => 5000
+            'minute' => 120,  // Balanced for normal users
+            'hour' => 1000,   // Balanced for normal users
+            'day' => 5000     // Balanced for normal users
         ],
-        'validate_input' => false,
-        'block_threshold' => 20,
-        'block_multiplier' => 30,
-        'max_block_duration' => 1800, // 30 minutes
-        'stubborn_threshold' => 100,
-        'stubborn_base_duration' => 1800, // 30 minutes
+        'validate_input' => false,  // Disable aggressive input validation
+        'block_threshold' => 30,    // Reasonable threshold for attacks
+        'block_multiplier' => 15,   // Moderate block duration
+        'max_block_duration' => 900, // 15 minutes max for normal violations
+        'stubborn_threshold' => 100, // Higher threshold for persistent attacks
+        'stubborn_base_duration' => 1800, // 30 minutes for stubborn attacks
         'stubborn_multiplier' => 2,
-        'stubborn_max_duration' => 43200, // 12 hours
+        'stubborn_max_duration' => 14400, // Max 4 hours for severe attacks
     ],
 
     /*
@@ -49,66 +49,66 @@ return [
     'contexts' => [
         'search' => [
             'limits' => [
-                'minute' => 60,  // Increased from 20 to 60
-                'hour' => 500,   // Increased from 200 to 500
-                'day' => 2000    // Increased from 1000 to 2000
+                'minute' => 80,   // Reasonable for search browsing
+                'hour' => 800,    // Reasonable for search browsing
+                'day' => 4000     // Reasonable for search browsing
             ],
-            'validate_input' => true,
-            'block_threshold' => 15,     // Increased from 5 to 15
-            'block_multiplier' => 30,    // Reduced from 60 to 30
-            'max_block_duration' => 1800, // Reduced from 3600 to 1800 (30 min)
-            'stubborn_threshold' => 50,  // Increased from 30 to 50
-            'stubborn_base_duration' => 1800, // Reduced from 3600 to 1800
+            'validate_input' => false,  // Disable aggressive input validation
+            'block_threshold' => 25,    // Moderate threshold for search attacks
+            'block_multiplier' => 20,   // Moderate block duration
+            'max_block_duration' => 600, // 10 minutes max for search violations
+            'stubborn_threshold' => 80,  // Higher threshold for persistent search attacks
+            'stubborn_base_duration' => 1200, // 20 minutes for stubborn search attacks
             'stubborn_multiplier' => 2,
-            'stubborn_max_duration' => 43200, // Reduced from 86400 to 43200 (12 hours)
+            'stubborn_max_duration' => 7200, // Max 2 hours for severe search attacks
         ],
 
         'livewire' => [
             'limits' => [
-                'minute' => 100, // Increased from 30 to 100
-                'hour' => 800,   // Increased from 300 to 800
-                'day' => 3000    // Increased from 1500 to 3000
+                'minute' => 150, // Reasonable for livewire interactions
+                'hour' => 1000,  // Reasonable for livewire interactions
+                'day' => 5000    // Reasonable for livewire interactions
             ],
-            'validate_input' => true,
-            'block_threshold' => 25,     // Increased from 10 to 25
-            'block_multiplier' => 20,    // Reduced from 30 to 20
-            'max_block_duration' => 900, // Reduced from 1800 to 900 (15 min)
-            'stubborn_threshold' => 75,  // Increased from 50 to 75
-            'stubborn_base_duration' => 1800, // 30 minutes
+            'validate_input' => false,  // Disable aggressive input validation
+            'block_threshold' => 40,    // Moderate threshold for livewire attacks
+            'block_multiplier' => 15,   // Moderate block duration
+            'max_block_duration' => 600, // 10 minutes max for livewire violations
+            'stubborn_threshold' => 120, // Higher threshold for persistent livewire attacks
+            'stubborn_base_duration' => 1800, // 30 minutes for stubborn livewire attacks
             'stubborn_multiplier' => 2,
-            'stubborn_max_duration' => 21600, // Reduced from 43200 to 21600 (6 hours)
+            'stubborn_max_duration' => 10800, // Max 3 hours for severe livewire attacks
         ],
 
         'checkout' => [
             'limits' => [
-                'minute' => 30,  // Increased from 10 to 30 (CRITICAL for booking users!)
-                'hour' => 150,   // Increased from 50 to 150
-                'day' => 500     // Increased from 200 to 500
+                'minute' => 60,   // Moderate for booking users (critical path)
+                'hour' => 300,    // Moderate for booking users
+                'day' => 1000     // Moderate for booking users
             ],
-            'validate_input' => true,
-            'block_threshold' => 15,     // Increased from 5 to 15
-            'block_multiplier' => 30,    // Reduced from 60 to 30
-            'max_block_duration' => 1800, // Reduced from 3600 to 1800 (30 min)
-            'stubborn_threshold' => 40,  // Increased from 20 to 40
-            'stubborn_base_duration' => 3600, // Reduced from 7200 to 3600 (1 hour)
-            'stubborn_multiplier' => 2,  // Reduced from 3 to 2
-            'stubborn_max_duration' => 43200, // Reduced from 86400 to 43200 (12 hours)
+            'validate_input' => false,  // Disable aggressive input validation
+            'block_threshold' => 20,    // Lower threshold for checkout (more sensitive)
+            'block_multiplier' => 30,   // Longer blocks for checkout attacks
+            'max_block_duration' => 1800, // 30 minutes max for checkout violations
+            'stubborn_threshold' => 60,  // Moderate threshold for persistent checkout attacks
+            'stubborn_base_duration' => 3600, // 1 hour for stubborn checkout attacks
+            'stubborn_multiplier' => 2,
+            'stubborn_max_duration' => 21600, // Max 6 hours for severe checkout attacks
         ],
 
         'gemini' => [
             'limits' => [
-                'minute' => 10,
-                'hour' => 100,
-                'day' => 500
+                'minute' => 50,  // Higher limits for AI usage
+                'hour' => 500,   // Higher limits for AI usage
+                'day' => 2000    // Higher limits for AI usage
             ],
-            'validate_input' => true,
-            'block_threshold' => 10,
-            'block_multiplier' => 30,
-            'max_block_duration' => 1800, // 30 minutes
-            'stubborn_threshold' => 25,
-            'stubborn_base_duration' => 3600, // 1 hour
+            'validate_input' => false,  // Disable input validation
+            'block_threshold' => 50,    // Higher threshold
+            'block_multiplier' => 10,   // Shorter blocks
+            'max_block_duration' => 600, // Only 10 minutes max
+            'stubborn_threshold' => 200, // Higher stubborn threshold
+            'stubborn_base_duration' => 1200, // Only 20 minutes
             'stubborn_multiplier' => 2,
-            'stubborn_max_duration' => 86400, // 24 hours
+            'stubborn_max_duration' => 7200, // Max 2 hours
         ],
 
         'general' => [
@@ -185,12 +185,18 @@ return [
         ],
         
         'search' => [
-            '/[<>"\']/', // Basic XSS prevention
+            '/<script[^>]*>.*?<\/script>/i', // Script tags
+            '/javascript:/i', // JavaScript URLs
+            '/on\w+\s*=/i', // Event handlers
+            '/<iframe[^>]*>.*?<\/iframe>/i', // Iframe tags
             '/\b(admin|root|administrator)\b/i', // Admin-related searches
         ],
         
         'checkout' => [
-            '/[<>"\']/', // Basic XSS prevention
+            '/<script[^>]*>.*?<\/script>/i', // Script tags
+            '/javascript:/i', // JavaScript URLs
+            '/on\w+\s*=/i', // Event handlers
+            '/<iframe[^>]*>.*?<\/iframe>/i', // Iframe tags
             '/\b(admin|root|administrator)\b/i', // Admin-related data
         ],
     ],
@@ -208,8 +214,15 @@ return [
         'collect_user_agent' => true,
         'collect_headers' => true,
         'collect_request_data' => true,
-        'threat_score_threshold' => 80,
-        'high_threat_threshold' => 90,
+        'threat_score_threshold' => 70,  // Lower threshold for better detection
+        'high_threat_threshold' => 85,   // Lower threshold for high threat detection
+        'bot_detection' => true,         // Enable bot detection
+        'suspicious_patterns' => [
+            'rapid_requests' => true,    // Detect rapid request patterns
+            'missing_headers' => true,   // Detect missing common headers
+            'suspicious_user_agents' => true, // Detect suspicious user agents
+            'geolocation_anomalies' => true,  // Detect unusual geographic patterns
+        ],
     ],
 
     /*
@@ -359,5 +372,34 @@ return [
         // Reduce alert frequency to prevent spam
         'alert_cooldown_minutes' => 60, // Send max 1 alert per hour per IP
         'threat_score_blocking_threshold' => 95, // Only block very high threat scores
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Advanced Security Features
+    |--------------------------------------------------------------------------
+    |
+    | Additional security measures for better attack detection and prevention.
+    |
+    */
+    'advanced_security' => [
+        'enabled' => false,                      // Enable advanced security features
+        'enable_ip_whitelist' => false,
+        'whitelisted_ips' => [
+            // Add trusted IPs here if needed
+        ],
+        'enable_geolocation_blocking' => false,
+        'blocked_countries' => [
+            // Add country codes to block if needed
+        ],
+        'enable_behavioral_analysis' => true,
+        'suspicious_behavior_patterns' => [
+            'rapid_page_navigation' => true,    // Detect rapid page changes
+            'missing_referrer' => true,         // Detect missing referrer headers
+            'suspicious_request_sequences' => true, // Detect unusual request patterns
+            'high_error_rate' => true,          // Detect high 404/error rates
+        ],
+        'adaptive_blocking' => true,            // Enable adaptive blocking based on threat level
+        'emergency_mode' => false,              // Emergency mode for severe attacks
     ],
 ];
