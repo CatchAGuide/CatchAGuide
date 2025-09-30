@@ -128,10 +128,10 @@ function checkoutApp() {
                         return '{{ __('checkout.login_mode_description') }}';
                     }
                     switch(this.mode) {
-                        case 'guest': return '{{ __('checkout.guest_mode_description') }}';
-                        case 'register': return '{{ __('checkout.register_mode_description') }}';
-                        case 'login': return '{{ __('checkout.login_mode_description') }}';
-                        default: return '{{ __('checkout.guest_mode_description') }}';
+                        case 'guest': return '{!! __('checkout.guest_mode_description') !!}';
+                        case 'register': return '{!! __('checkout.register_mode_description') !!}';
+                        case 'login': return '{!! __('checkout.login_mode_description') !!}';
+                        default: return '{!! __('checkout.guest_mode_description') !!}';
                     }
                 },
 

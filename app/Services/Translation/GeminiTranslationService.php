@@ -9,6 +9,7 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Http\Request;
 use App\Services\DDoSProtectionService;
 use App\Services\DDoSNotificationService;
+use Stichoza\GoogleTranslate\GoogleTranslate;
 
 class GeminiTranslationService
 {
@@ -32,7 +33,7 @@ class GeminiTranslationService
         $this->request = request();
     }
 
-    public function translate(string $text): string
+    public function translate(string $text, string $targetLanguage = 'en'): string
     {
         // DDoS Protection: Check rate limits and validate input
         $protectionService = app(DDoSProtectionService::class);
@@ -72,7 +73,25 @@ class GeminiTranslationService
             return $result;
         } catch (\Exception $e) {
             $this->logApiUsage($text, false);
-            throw new TranslationException("Translation failed: {$e->getMessage()}");
+            
+            // Fallback to Google Translate
+            Log::channel('gemini_usage')->warning('Gemini translation failed, falling back to Google Translate', [
+                'error' => $e->getMessage(),
+                'text' => substr($text, 0, 100)
+            ]);
+            
+            try {
+                return $this->googleTranslateFallback($text, $targetLanguage);
+            } catch (\Exception $fallbackError) {
+                Log::error('Both Gemini and Google Translate failed', [
+                    'gemini_error' => $e->getMessage(),
+                    'google_error' => $fallbackError->getMessage(),
+                    'text' => substr($text, 0, 100)
+                ]);
+                
+                // Return original text as last resort
+                return $text;
+            }
         }
     }
 
@@ -337,5 +356,41 @@ class GeminiTranslationService
         Cache::forget("gemini_rate_limit_day_{$identifier}");
         
         Log::channel('gemini_usage')->info('Gemini security limits reset', ['identifier' => $identifier]);
+    }
+
+    /**
+     * Fallback to Google Translate when Gemini fails
+     * 
+     * @param string $text Text to translate
+     * @param string $targetLanguage Target language code (default: 'en')
+     * @return string Translated text
+     */
+    private function googleTranslateFallback(string $text, string $targetLanguage = 'en'): string
+    {
+        try {
+            $translate = GoogleTranslate::trans($text, $targetLanguage);
+
+            // Apply the same custom replacements as in the translate helper
+            if (strpos($translate, 'Führungen')) {
+                $translate = str_replace('Führungen', 'Angelguidings', $translate);
+            }
+
+            if (strpos($translate, 'Führung')) {
+                $translate = str_replace('Führung', 'guiding', $translate);
+            }
+
+            Log::channel('gemini_usage')->info('Google Translate fallback succeeded', [
+                'text' => substr($text, 0, 50),
+                'result' => substr($translate, 0, 50)
+            ]);
+
+            return ucfirst($translate);
+        } catch (\Exception $e) {
+            Log::error('Google Translate fallback failed', [
+                'error' => $e->getMessage(),
+                'text' => substr($text, 0, 100)
+            ]);
+            throw $e;
+        }
     }
 } 
