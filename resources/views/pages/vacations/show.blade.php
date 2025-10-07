@@ -1156,7 +1156,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // Load Google Maps API dynamically with marker library
     if (typeof google === 'undefined') {
         const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY', 'AIzaSyBiGuDOg_5yhHeoRz-7bIkc9T1egi1fA7Q') }}&libraries=marker&callback=initMap`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&libraries=marker&callback=initMap`;
         script.async = true;
         script.defer = true;
         document.head.appendChild(script);

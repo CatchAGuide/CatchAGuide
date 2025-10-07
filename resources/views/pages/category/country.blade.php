@@ -1266,8 +1266,9 @@ window.addEventListener('load', function() {
     // Filters are handled by FilterManager in the shared filters partial
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/core-js-bundle@3.30.2/minified.js"></script>
 
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
 
 @endsection
 
