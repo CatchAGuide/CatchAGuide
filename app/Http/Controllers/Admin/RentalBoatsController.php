@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\BoatExtras;
 use App\Models\Inclussion;
 use App\Models\GuidingBoatType;
+use App\Models\RentalBoatRequirement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\GuidingBoatDescription;
@@ -97,7 +98,7 @@ class RentalBoatsController extends Controller
                 'lng' => $request->longitude ?? null,
                 'boat_type' => $this->processBoatType($request->boat_type),
                 'desc_of_boat' => $request->desc_of_boat ?? '',
-                'requirements' => $request->requirements ?? '',
+                'requirements' => $this->processRentalRequirements($request),
                 'status' => $isDraft ? 'draft' : ($request->status ?? 'active'),
                 'price_type' => $request->price_type ?? null,
                 'boat_information' => $this->processBoatInformation($request),
@@ -227,7 +228,7 @@ class RentalBoatsController extends Controller
             if ($request->longitude) $rentalBoat->lng = $request->longitude;
             if ($request->boat_type) $rentalBoat->boat_type = $this->processBoatType($request->boat_type);
             if ($request->desc_of_boat) $rentalBoat->desc_of_boat = $request->desc_of_boat;
-            if ($request->requirements !== null) $rentalBoat->requirements = $request->requirements;
+            if ($request->has('rental_requirement_checkboxes')) $rentalBoat->requirements = $this->processRentalRequirements($request);
             if ($request->price_type) $rentalBoat->price_type = $request->price_type;
             
             // Handle status - only update if not a draft or if explicitly provided
@@ -355,7 +356,8 @@ class RentalBoatsController extends Controller
                     'value' => $item->$nameField,
                     'id' => $item->id
                 ];
-            })
+            }),
+            'rentalBoatRequirements' => RentalBoatRequirement::active()->ordered()->get()
         ];
     }
 
@@ -392,6 +394,25 @@ class RentalBoatsController extends Controller
 
 
         return $boatInformation;
+    }
+
+    private function processRentalRequirements($request)
+    {
+        $rentalRequirements = [];
+        
+        // Add rental requirement checkboxes
+        if ($request->has('rental_requirement_checkboxes')) {
+            $requirementCheckboxes = $request->input('rental_requirement_checkboxes', []);
+            $requirementData = [];
+
+            foreach ($requirementCheckboxes as $checkbox) {
+                $requirementData[$checkbox] = $request->input("rental_requirement_".$checkbox);
+            }
+
+            $rentalRequirements = array_merge($rentalRequirements, $requirementData);
+        }
+
+        return $rentalRequirements;
     }
 
     private function processBoatExtras($request)

@@ -174,10 +174,7 @@
                     classname: "tagify__dropdown",
                     enabled: 0,
                     closeOnSelect: false
-                },
-                placeholder: 'Add boat extras...',
-                delimiters: ',|',
-                maxTags: 10
+                }
             });
             
             // Populate with existing data
@@ -191,11 +188,7 @@
         @else
         // Initialize tagify for boat extras without predefined options
         if (document.getElementById('boat_extras')) {
-            initTagify('#boat_extras', {
-                placeholder: 'Add boat extras...',
-                delimiters: ',|',
-                maxTags: 10
-            });
+            initTagify('#boat_extras', {});
         }
         @endif
 
@@ -209,10 +202,7 @@
                     classname: "tagify__dropdown",
                     enabled: 0,
                     closeOnSelect: false
-                },
-                placeholder: 'Add inclusions...',
-                delimiters: ',|',
-                maxTags: 15
+                }
             });
             
             // Populate with existing data
@@ -226,11 +216,7 @@
         @else
         // Initialize tagify for inclusions without predefined options
         if (document.getElementById('inclusions')) {
-            initTagify('#inclusions', {
-                placeholder: 'Add inclusions...',
-                delimiters: ',|',
-                maxTags: 15
-            });
+            initTagify('#inclusions', {});
         }
         @endif
     }
@@ -779,11 +765,7 @@
         if (formData.boat_extras && Array.isArray(formData.boat_extras)) {
             const boatExtrasElement = document.getElementById('boat_extras');
             if (boatExtrasElement && !boatExtrasElement.tagify) {
-                initTagify('#boat_extras', {
-                    placeholder: 'Add boat extras...',
-                    delimiters: ',|',
-                    maxTags: 10
-                });
+                initTagify('#boat_extras', {});
             }
             if (boatExtrasElement && boatExtrasElement.tagify) {
                 boatExtrasElement.tagify.addTags(formData.boat_extras);
@@ -793,11 +775,7 @@
         if (formData.inclusions && Array.isArray(formData.inclusions)) {
             const inclusionsElement = document.getElementById('inclusions');
             if (inclusionsElement && !inclusionsElement.tagify) {
-                initTagify('#inclusions', {
-                    placeholder: 'Add inclusions...',
-                    delimiters: ',|',
-                    maxTags: 15
-                });
+                initTagify('#inclusions', {});
             }
             if (inclusionsElement && inclusionsElement.tagify) {
                 inclusionsElement.tagify.addTags(formData.inclusions);
@@ -833,16 +811,22 @@
             var $container = $(this).closest('.btn-checkbox-container');
             var $label = $container.find('label');
             var $textarea = $container.find('textarea');
+            var $input = $container.find('.extra-input');
 
             if (this.checked) {
                 $label.addClass('active');
                 $textarea.show();
+                $input.show();
                 $textarea.prop('required', true);
+                $input.prop('required', true);
             } else {
                 $label.removeClass('active');
                 $textarea.hide();
+                $input.hide();
                 $textarea.prop('required', false);
+                $input.prop('required', false);
                 $textarea.val('');
+                $input.val('');
             }
         });
 
@@ -851,13 +835,16 @@
             var $container = $(this).closest('.btn-checkbox-container');
             var $label = $container.find('label');
             var $textarea = $container.find('textarea');
+            var $input = $container.find('.extra-input');
             
             if (this.checked) {
                 $label.addClass('active');
                 $textarea.show();
+                $input.show();
             } else {
                 $label.removeClass('active');
                 $textarea.hide();
+                $input.hide();
             }
         });
 
