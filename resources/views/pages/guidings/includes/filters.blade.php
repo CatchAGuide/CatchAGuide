@@ -329,11 +329,7 @@
     }
 
     .checkbox-group {
-        max-height: 200px;
-        overflow-y: auto;
-        border: 1px solid #dee2e6;
-        border-radius: 4px;
-        padding: 8px;
+        padding: 6px;
         position: relative;
     }
 
@@ -351,17 +347,26 @@
         width: 100%;
         background: white;
         border-top: 1px solid #dee2e6;
-        margin-top: 8px;
-        padding-top: 8px;
+        margin-top: 6px;
+        padding-top: 6px;
     }
 
     .form-check {
-        margin-bottom: 8px;
+        margin-bottom: 4px;
         transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        padding: 2px 0;
     }
 
     .form-check:last-child {
         margin-bottom: 0;
+    }
+
+    .form-check-input {
+        margin-top: 0;
+        margin-right: 8px;
+        flex-shrink: 0;
     }
 
     .form-check-label {
@@ -370,12 +375,16 @@
         align-items: center;
         width: 100%;
         cursor: pointer;
+        font-size: 1rem;
+        line-height: 1.2;
+        margin-bottom: 0;
     }
 
     .count {
         color: #666;
-        font-size: 0.9em;
-        margin-left: 8px;
+        font-size: 0.8em;
+        margin-left: 6px;
+        flex-shrink: 0;
     }
 
     .form-check-input:checked + .form-check-label {
@@ -444,7 +453,57 @@
     }
 
     .form-check-label {
-        font-size: 0.9rem;
+        font-size: 1rem;
+    }
+
+    /* Fix for black images in carousel */
+    .guiding-list-item .carousel-item img,
+    .guiding-list-item .carousel-image {
+        background-color: transparent !important;
+        opacity: 1 !important;
+        filter: none !important;
+    }
+
+    .guiding-list-item .carousel-item {
+        background-color: transparent !important;
+    }
+
+    /* Ensure proper image loading */
+    .guiding-list-item .carousel img {
+        max-width: 100%;
+        height: auto;
+        object-fit: cover;
+        background-color: #f8f9fa;
+    }
+
+    /* Fix map button size and centering */
+    #map-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 120px;
+        padding: 20px;
+    }
+
+    #map-placeholder .btn {
+        padding: 12px 24px;
+        font-size: 1rem;
+        font-weight: 600;
+        min-width: 160px;
+        border-radius: 6px;
+    }
+
+    /* Fix for white images after filter - ensure lazy loading works */
+    .guiding-list-item .carousel-item img.lazy {
+        background-color: #f8f9fa !important;
+        opacity: 1 !important;
+        filter: none !important;
+    }
+
+    .guiding-list-item .carousel-item img:not(.lazy) {
+        background-color: transparent !important;
+        opacity: 1 !important;
+        filter: none !important;
     }
 
     .chart-container {
@@ -660,6 +719,10 @@
 
         // Initialize components that need to be reinitialized after AJAX updates
         function reinitializeComponents() {
+            // Re-initialize lazy loading for new images
+            if (typeof window.initLazyLoading === 'function') {
+                window.initLazyLoading();
+            }
             // Re-attach event listeners to filter removal buttons using FilterManager
             FilterManager.attachFilterRemoveListeners();
             

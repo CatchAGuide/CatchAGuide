@@ -1124,12 +1124,19 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-// Lazy loading for images
+// Global lazy loading observer
+let lazyImageObserver = null;
+
+function initLazyLoading() {
+    // Clean up existing observer
+    if (lazyImageObserver) {
+        lazyImageObserver.disconnect();
+    }
+
     var lazyImages = [].slice.call(document.querySelectorAll("img.lazy"));
 
     if ("IntersectionObserver" in window) {
-        let lazyImageObserver = new IntersectionObserver(function(entries, observer) {
+        lazyImageObserver = new IntersectionObserver(function(entries, observer) {
             entries.forEach(function(entry) {
                 if (entry.isIntersecting) {
                     let lazyImage = entry.target;
@@ -1178,7 +1185,15 @@ document.addEventListener("DOMContentLoaded", function() {
         window.addEventListener("resize", lazyLoad);
         window.addEventListener("orientationchange", lazyLoad);
     }
+}
+
+// Initialize lazy loading on page load
+document.addEventListener("DOMContentLoaded", function() {
+    initLazyLoading();
 });
+
+// Make function globally available for filter updates
+window.initLazyLoading = initLazyLoading;
 </script>
 
 @endsection
