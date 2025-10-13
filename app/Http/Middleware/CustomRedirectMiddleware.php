@@ -16,6 +16,22 @@ class CustomRedirectMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
+        // Redirect URLs that start with /public to remove the /public segment
+        $path = $request->path();
+        if (str_starts_with($path, 'public') || str_starts_with($path, 'public/')) {
+            // Remove 'public' or 'public/' from the beginning
+            $newPath = preg_replace('#^public/?#', '', $path);
+            
+            // If the new path is empty, redirect to root
+            $newPath = $newPath ?: '/';
+            
+            // Build the full URL with query string if present
+            $queryString = $request->getQueryString();
+            $redirectUrl = $newPath . ($queryString ? '?' . $queryString : '');
+            
+            return redirect($redirectUrl, 301);
+        }
+
         $urls = [
             'https://catchaguide.com/blog' => 'https://catchaguide.com/fishing-magazine',
             'https://catchaguide.com/angelmagazin' => 'https://catchaguide.com/fishing-magazine',

@@ -1,14 +1,14 @@
 @extends('layouts.app-v2')
 
-@section('title', translate($row_data->title))
+@section('title', $row_data->title)
 @section('description', $row_data->sub_title)
-@section('header_title', translate($row_data->title))
-@section('header_sub_title', translate($row_data->sub_title))
-@section('description', translate($row_data->sub_title))
+@section('header_title', $row_data->title)
+@section('header_sub_title', $row_data->sub_title)
+@section('description', $row_data->sub_title)
 
 @section('share_tags')
-    <meta property="og:title" content="{{translate($row_data->title)}}" />
-    <meta property="og:description" content="{{translate($row_data->introduction ?? "")}}" />
+    <meta property="og:title" content="{{$row_data->title}}" />
+    <meta property="og:description" content="{{$row_data->introduction ?? ""}}" />
     
     @if(isset($row_data->thumbnail_path) && file_exists(public_path(str_replace(asset(''), '', asset($row_data->thumbnail_path)))))
         <meta property="og:image" content="{{asset($row_data->thumbnail_path)}}"/>
@@ -86,7 +86,7 @@
           transform: translateX(-25%);
         }
         .country-content-fix {
-            margin-top: 90px !important; /* Ensure this margin is applied */
+            margin-top: 15px !important; /* Ensure this margin is applied */
         }
     }
 
@@ -558,23 +558,23 @@
                             <ul class="thm-breadcrumb list-unstyled">
                                 <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                                 <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                                @if($row_data->type == 'country')
+                                @if($destination_type == 'country')
                                         <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
                                     
-                                    @elseif($row_data->type == 'region')
-                                        <li><a href="{{ route('destination.country', ['country' => $row_data->country_slug]) }}">
-                                            {{ translate('Fishing Destinations in ')}} {{ $row_data->country_name }}
+                                    @elseif($destination_type == 'region')
+                                        <li><a href="{{ route('destination.country', ['country' => $row_data->country->slug]) }}">
+                                            {{ translate('Fishing Destinations in ')}} {{ $row_data->country->name }}
                                         </a></li>
                                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>  
                                         <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
                                     
-                                    @elseif($row_data->type == 'city')
-                                        <li><a href="{{ route('destination.country', ['country' => $row_data->country_slug]) }}">
-                                            {{ translate('Fishing Destinations in ')}} {{ $row_data->country_name }}
+                                    @elseif($destination_type == 'city')
+                                        <li><a href="{{ route('destination.country', ['country' => $row_data->country->slug]) }}">
+                                            {{ translate('Fishing Destinations in ')}} {{ $row_data->country->name }}
                                         </a></li>
                                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                                        <li><a href="{{ route('destination.country', ['country' => $row_data->country_slug, 'region' => $row_data->region_slug]) }}">
-                                            {{ translate('Fishing Destinations in ')}} {{ $row_data->region_name }}
+                                        <li><a href="{{ route('destination.country', ['country' => $row_data->country->slug, 'region' => $row_data->region->slug]) }}">
+                                            {{ translate('Fishing Destinations in ')}} {{ $row_data->region->name }}
                                         </a></li>
                                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                                         <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
@@ -597,13 +597,14 @@
                     $city_counter = 0;
                     @endphp
 
-                    @if($region_count > 0)
+                    {{-- Only show regions if current destination is country --}}
+                    @if($destination_type == 'country' && $region_count > 0)
                         <h5 class="mb-2">@lang('destination.all_region')</h5>
                         <div id="carousel-regions" class="owl-carousel owl-theme mb-4">
                             @foreach($regions as $region)
                                 <div class="item">
                                     <div class="col-sm-12">
-                                        <a href="{{ route('destination.country', ['country' => $region->country_slug, 'region' => $region->slug]) }}">
+                                        <a href="{{ route('destination.country', ['country' => $region->country->slug, 'region' => $region->slug]) }}">
                                             <div class="card">
                                                 <div class="card-img">
                                                     <img src="{{ $region->getThumbnailPath() }}" class="dimg-fluid" alt="Image Not Available">
@@ -618,13 +619,15 @@
                             @endforeach
                         </div>
                     @endif
-                    @if($city_count > 0)
+                    
+                    {{-- Show cities if current destination is country or region --}}
+                    @if(in_array($destination_type, ['country', 'region']) && $city_count > 0)
                     <h5 class="mb-2">@lang('destination.all_cities')</h5>
                     <div id="carousel-cities" class="owl-carousel owl-theme mb-4">
                         @foreach($cities as $city)
                             <div class="item">
                                 <div class="col-sm-12 col-lgs-3">
-                                    <a href="{{ route('destination.country', ['country' => $city->country_slug, 'region' => $city->region_slug, 'city' => $city->slug]) }}">
+                                    <a href="{{ route('destination.country', ['country' => $city->country->slug, 'region' => $city->region->slug, 'city' => $city->slug]) }}">
                                         <div class="card">
                                             <div class="card-img">
                                                 <img src="{{ $city->getThumbnailPath() }}" class="dimg-fluid" alt="Image Not Available">

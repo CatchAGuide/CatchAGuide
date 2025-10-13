@@ -37,9 +37,10 @@
                             <table class="table blog-table table-bordered table-striped text-nowrap border-bottom">
                                 <thead>
                                 <tr>
-                                    <th width="10%" class="border-bottom-0 text-center">Language</th>
-                                    <th width="30%" class="border-bottom-0">Country</th>
-                                    <th width="45%" class="border-bottom-0">Region</th>
+                                    <th width="10%" class="border-bottom-0 text-center">Country</th>
+                                    <th width="35%" class="border-bottom-0">Name</th>
+                                    <th width="15%" class="border-bottom-0 text-center">Languages</th>
+                                    <th width="25%" class="border-bottom-0">Slug</th>
                                     <th width="15%" class="border-bottom-0">Aktionen</th>
                                 </tr>
                                 </thead>
@@ -47,16 +48,25 @@
                                     @foreach($rows as $row)
                                         <tr>
                                             <td class="text-center">
-                                                @if($row->language == 'de')
-                                                <label><i class="fi fi-de"></i></label> 
-                                                @elseif($row->language == 'en')
-                                                <label><i class="fi fi-gb"></i></label>
+                                                @if($row->countrycode)
+                                                <label><i class="fi fi-{{ strtolower($row->countrycode) }}" style="font-size: 1.5em;"></i></label>
                                                 @else
-                                                <label><i class="fi fi-de"></i></label>
+                                                <label>N/A</label>
                                                 @endif
                                             </td>
                                             <td>{{ $row->name }}</td>
-                                            <td>{{ $row->title }}</td>
+                                            <td class="text-center">
+                                                @if($row->translations->count() > 0)
+                                                    @foreach($row->translations as $translation)
+                                                        @if($translation->language == 'de')
+                                                        <i class="fi fi-de" style="font-size: 1.2em; margin: 0 2px;"></i>
+                                                        @elseif($translation->language == 'en')
+                                                        <i class="fi fi-gb" style="font-size: 1.2em; margin: 0 2px;"></i>
+                                                        @endif
+                                                    @endforeach
+                                                @endif
+                                            </td>
+                                            <td>{{ $row->slug }}</td>
                                             <td>
                                                 <a href="{{ route('admin.category.country.edit', $row->id) }}" class="btn btn-sm btn-secondary"><i class="fa fa-edit"></i></a>
                                                 <form class="frm-btn-delete" action="{{ route('admin.category.country.destroy', $row->id) }}" method="post">
@@ -64,7 +74,6 @@
                                                     @csrf()
                                                     <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Are you sure to delete this country?')"><i class="fa fa-trash"></i></button>
                                                 </form>
-                                                <!-- <a href="{{ route('admin.category.country.edit', $row->id) }}" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></a> -->
                                             </td>
                                         </tr>
                                     @endforeach
