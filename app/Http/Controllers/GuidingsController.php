@@ -29,7 +29,9 @@ use Illuminate\Support\Facades\Log;
 use App\Models\ExtrasPrice;
 use App\Services\CalendarScheduleService;
 use App\Models\BoatExtras;
-use App\Models\Destination;
+use App\Models\Country;
+use App\Models\Region;
+use App\Models\City;
 use App\Models\Review;
 use Illuminate\Support\Facades\Cache;
 use App\Services\GuidingFilterService;
@@ -130,24 +132,28 @@ class GuidingsController extends Controller
         // Build base query without filter service
         $baseQuery = Guiding::with(['boatType', 'user.reviews'])->where('status', 1);
 
-        // Handle destination filtering
-        if ($request->has('from_destination')) {
-            $destination = Destination::where('id', $request->input('destination_id'))->first();
+        // Handle destination filtering (new structure)
+        if ($request->has('from_destination') && $request->has('destination_id') && $request->has('destination_type')) {
+            $destinationType = $request->input('destination_type');
+            $destinationId = $request->input('destination_id');
             
-            if ($destination) {
-                switch ($destination->type) {
-                    case 'country':
-                        $baseQuery->where('country', $destination->name);
-                        break;
-                    case 'region':
-                        $baseQuery->where('region', $destination->name)
-                              ->where('country', $destination->country_name);
-                        break;
-                    case 'city':
-                        $baseQuery->where('city', $destination->name)
-                              ->where('region', $destination->region_name)
-                              ->where('country', $destination->country_name);
-                        break;
+            if ($destinationType === 'country') {
+                $destination = Country::find($destinationId);
+                if ($destination) {
+                    $baseQuery->where('country', $destination->name);
+                }
+            } elseif ($destinationType === 'region') {
+                $destination = Region::with('country')->find($destinationId);
+                if ($destination) {
+                    $baseQuery->where('region', $destination->name)
+                          ->where('country', $destination->country->name ?? '');
+                }
+            } elseif ($destinationType === 'city') {
+                $destination = City::with(['country', 'region'])->find($destinationId);
+                if ($destination) {
+                    $baseQuery->where('city', $destination->name)
+                          ->where('region', $destination->region->name ?? '')
+                          ->where('country', $destination->country->name ?? '');
                 }
             }
         }
@@ -361,24 +367,28 @@ class GuidingsController extends Controller
                     ->where('status', 1);
             }
 
-            // Handle destination filtering
-            if ($request->has('from_destination')) {
-                $destination = Destination::where('id', $request->input('destination_id'))->first();
+            // Handle destination filtering (new structure)
+            if ($request->has('from_destination') && $request->has('destination_id') && $request->has('destination_type')) {
+                $destinationType = $request->input('destination_type');
+                $destinationId = $request->input('destination_id');
                 
-                if ($destination) {
-                    switch ($destination->type) {
-                        case 'country':
-                            $baseQuery->where('country', $destination->name);
-                            break;
-                        case 'region':
-                            $baseQuery->where('region', $destination->name)
-                                  ->where('country', $destination->country_name);
-                            break;
-                        case 'city':
-                            $baseQuery->where('city', $destination->name)
-                                  ->where('region', $destination->region_name)
-                                  ->where('country', $destination->country_name);
-                            break;
+                if ($destinationType === 'country') {
+                    $destination = Country::find($destinationId);
+                    if ($destination) {
+                        $baseQuery->where('country', $destination->name);
+                    }
+                } elseif ($destinationType === 'region') {
+                    $destination = Region::with('country')->find($destinationId);
+                    if ($destination) {
+                        $baseQuery->where('region', $destination->name)
+                              ->where('country', $destination->country->name ?? '');
+                    }
+                } elseif ($destinationType === 'city') {
+                    $destination = City::with(['country', 'region'])->find($destinationId);
+                    if ($destination) {
+                        $baseQuery->where('city', $destination->name)
+                                  ->where('region', $destination->region->name ?? '')
+                                  ->where('country', $destination->country->name ?? '');
                     }
                 }
             }
@@ -580,9 +590,18 @@ class GuidingsController extends Controller
         
         $destination = null;
 
-        // If coming from destination page, get the destination context
-        if ($request->has('from_destination')) {
-            $destination = Destination::where('id', $request->input('destination_id'))->first();
+        // If coming from destination page, get the destination context (new structure)
+        if ($request->has('from_destination') && $request->has('destination_id') && $request->has('destination_type')) {
+            $destinationType = $request->input('destination_type');
+            $destinationId = $request->input('destination_id');
+            
+            if ($destinationType === 'country') {
+                $destination = Country::find($destinationId);
+            } elseif ($destinationType === 'region') {
+                $destination = Region::find($destinationId);
+            } elseif ($destinationType === 'city') {
+                $destination = City::find($destinationId);
+            }
         }
 
         if (!Auth::check()) {

@@ -493,17 +493,48 @@
         border-radius: 6px;
     }
 
-    /* Fix for white images after filter - ensure lazy loading works */
+    /* Loading animation for lazy images */
     .guiding-list-item .carousel-item img.lazy {
-        background-color: #f8f9fa !important;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading-shimmer 1.5s infinite;
         opacity: 1 !important;
         filter: none !important;
+        position: relative;
+    }
+
+    .guiding-list-item .carousel-item img.lazy::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40px;
+        height: 40px;
+        border: 3px solid #e0e0e0;
+        border-top: 3px solid #E8604C;
+        border-radius: 50%;
+        animation: loading-spin 1s linear infinite;
     }
 
     .guiding-list-item .carousel-item img:not(.lazy) {
         background-color: transparent !important;
         opacity: 1 !important;
         filter: none !important;
+    }
+
+    @keyframes loading-shimmer {
+        0% {
+            background-position: -200% 0;
+        }
+        100% {
+            background-position: 200% 0;
+        }
+    }
+
+    @keyframes loading-spin {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
     }
 
     .chart-container {

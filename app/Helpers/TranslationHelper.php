@@ -3,6 +3,8 @@
 namespace App\Helpers;
 
 use App\Services\Translation\GeminiTranslationService;
+use App\Services\Translation\GoogleTranslationService;
+use App\Services\Translation\TranslationServiceInterface;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 
@@ -22,8 +24,22 @@ class TranslationHelper
         }
 
         if (!self::$translator) {
-            self::$translator = new GeminiTranslationService();
+            self::$translator = self::createTranslationService();
         }
+    }
+
+    /**
+     * Create the appropriate translation service based on config
+     */
+    private static function createTranslationService(): TranslationServiceInterface
+    {
+        $driver = config('services.translation.driver', 'gemini');
+
+        return match($driver) {
+            'google' => new GoogleTranslationService(),
+            'gemini' => new GeminiTranslationService(),
+            default => new GeminiTranslationService(),
+        };
     }
 
     public static function getLanguageName(string $language): string

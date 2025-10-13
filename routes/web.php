@@ -422,6 +422,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('category')->name('category.')->group(function () {
+            // Translation routes must come before resource routes
+            Route::get('country/{id}/translation', [AdminCategoryCountryController::class, 'getTranslation'])->name('country.translation');
+            Route::get('region/{id}/translation', [AdminCategoryRegionController::class, 'getTranslation'])->name('region.translation');
+            Route::get('city/{id}/translation', [AdminCategoryCityController::class, 'getTranslation'])->name('city.translation');
+            
             Route::resource('country', AdminCategoryCountryController::class);
             Route::resource('vacation-country', AdminCategoryVacationCountryController::class);
             Route::resource('region', AdminCategoryRegionController::class);

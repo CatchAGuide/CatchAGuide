@@ -80,7 +80,7 @@ input[type=number] {
                                                     $lang = 'de';
                                                 }
                                             @endphp
-                                            <span class="fi fi-{{ $lang }}"></span>
+                                            <span class="fi fi-{{ $lang }}" id="language-flag"></span>
                                             <select class="form-control" name="language" id="language">
                                                 @foreach(config('app.locales') as $key => $locale)
                                                     <option value="{{$locale}}" @if($locale == $language) selected @endif>@if($locale == 'de') Deutsch @elseif($locale == 'en') English @endif</option>
@@ -170,9 +170,9 @@ input[type=number] {
                                             <input id="searchPlace" class="form-control" type="text" placeholder="Search Location" name="filters[place]" value="{{ $place }}" autocomplete="on">
                                             <input type="hidden" id="placeLat"  value="{{ $placeLat }}" name="filters[placeLat]"/>
                                             <input type="hidden" id="placeLng" value="{{ $placeLng }}" name="filters[placeLng]"/>
-                                            <input type="hidden" id="country" value="{{ $country }}"  name="filters[country]"/>
+                                            <input type="hidden" id="country" value="{{ $filterCountry ?? '' }}"  name="filters[country]"/>
                                             <input type="hidden" id="city" value="{{ $city }}"  name="filters[city]"/>
-                                            <input type="hidden" id="region" value="{{ $region }}"  name="filters[region]"/>
+                                            <input type="hidden" id="region" value="{{ $filterRegion ?? $region ?? '' }}"  name="filters[region]"/>
                                         </div>
 
                                     </div>
@@ -322,7 +322,128 @@ input[type=number] {
             countryRegions(selected);
         });
     });
+    @endif
 
+    // Language switching - Set variables from server-side PHP
+    var languageSwitchConfig = {
+        formType: '{{ $form }}',
+        entityId: null,
+        endpoint: null
+    };
+
+    @if(isset($city) && is_object($city))
+    languageSwitchConfig.entityId = '{{ $city->id }}';
+    languageSwitchConfig.endpoint = '/admin/category/city/{{ $city->id }}/translation';
+    @elseif(isset($region) && is_object($region))
+    languageSwitchConfig.entityId = '{{ $region->id }}';
+    languageSwitchConfig.endpoint = '/admin/category/region/{{ $region->id }}/translation';
+    @elseif(isset($country) && is_object($country))
+    languageSwitchConfig.entityId = '{{ $country->id }}';
+    languageSwitchConfig.endpoint = '/admin/category/country/{{ $country->id }}/translation';
+    @endif
+
+    @if($method != '')
+    $(function(){
+        $('#language').change(function(){
+            var language = $(this).val();
+            
+            if (!languageSwitchConfig.entityId || !languageSwitchConfig.endpoint) {
+                return;
+            }
+
+            // Update flag
+            var flagClass = language === 'en' ? 'fi-gb' : 'fi-de';
+            $('#language-flag').removeClass('fi-gb fi-de').addClass(flagClass);
+
+            // Show loading state
+            var $submitBtn = $('button[type="submit"]');
+            $submitBtn.prop('disabled', true).text('Loading...');
+
+            // Fetch translation data
+            $.ajax({
+                url: languageSwitchConfig.endpoint,
+                method: 'GET',
+                data: { language: language },
+                success: function(data) {
+                    // Update text fields
+                    $('#title').val(data.title || '');
+                    $('#sub_title').val(data.sub_title || '');
+                    
+                    // Update CKEditor instances
+                    if (CKEDITOR.instances['introduction']) {
+                        CKEDITOR.instances['introduction'].setData(data.introduction || '');
+                    }
+                    if (CKEDITOR.instances['body']) {
+                        CKEDITOR.instances['body'].setData(data.content || '');
+                    }
+
+                    // Update section titles
+                    $('#fish_avail_title').val(data.fish_avail_title || '');
+                    $('#fish_avail_intro').val(data.fish_avail_intro || '');
+                    $('#size_limit_title').val(data.size_limit_title || '');
+                    $('#size_limit_intro').val(data.size_limit_intro || '');
+                    $('#time_limit_title').val(data.time_limit_title || '');
+                    $('#time_limit_intro').val(data.time_limit_intro || '');
+                    $('#faq_title').val(data.faq_title || '');
+
+                    // Clear and reload fish chart
+                    $('#fish_chart_table tbody').empty();
+                    fish_chart_item_counter = 0;
+                    if (data.fish_chart && data.fish_chart.length > 0) {
+                        data.fish_chart.forEach(function(item) {
+                            add_fish_chart_item(
+                                item.id, item.fish,
+                                item.jan, item.feb, item.mar, item.apr,
+                                item.may, item.jun, item.jul, item.aug,
+                                item.sep, item.oct, item.nov, item.dec
+                            );
+                        });
+                    }
+
+                    // Clear and reload fish size limit
+                    $('#fish_size_limit_table tbody').empty();
+                    fish_size_limit_item_counter = 0;
+                    if (data.fish_size_limit && data.fish_size_limit.length > 0) {
+                        data.fish_size_limit.forEach(function(item) {
+                            add_fish_size_limit_item(item.id, item.fish, item.data);
+                        });
+                    }
+
+                    // Clear and reload fish time limit
+                    $('#fish_time_limit_table tbody').empty();
+                    fish_time_limit_item_counter = 0;
+                    if (data.fish_time_limit && data.fish_time_limit.length > 0) {
+                        data.fish_time_limit.forEach(function(item) {
+                            add_fish_time_limit_item(item.id, item.fish, item.data);
+                        });
+                    }
+
+                    // Clear and reload FAQ
+                    $('#faq_table tbody').empty();
+                    faq_item_counter = 0;
+                    if (data.faq && data.faq.length > 0) {
+                        data.faq.forEach(function(item) {
+                            add_faq_item(item.id, item.question, item.answer);
+                        });
+                    }
+
+                    // Show message if translation doesn't exist
+                    if (!data.exists) {
+                        alert('Translation for this language does not exist yet. You can create it by filling out the form and saving.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert('Error loading translation data. Please try again.');
+                },
+                complete: function() {
+                    $submitBtn.prop('disabled', false).text('Submit');
+                }
+            });
+        });
+    });
+    @endif
+
+    @if(isset($regions))
     function countryRegions(selected) {
         var regions = $.parseJSON('{!! $regions !!}');
         var region_selections = '<option value="">-- Select --</option>';

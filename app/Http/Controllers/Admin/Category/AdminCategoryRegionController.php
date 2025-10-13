@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin\Category;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Blog\StoreCategoryRequest;
 use App\Http\Requests\Admin\Blog\UpdateCategoryRequest;
-use App\Models\Destination;
+use App\Models\Country;
+use App\Models\Region;
+use App\Models\RegionTranslation;
 use App\Models\DestinationFaq;
 use App\Models\DestinationFishChart;
 use App\Models\DestinationFishSizeLimit;
@@ -32,7 +34,7 @@ class AdminCategoryRegionController extends Controller
 
     public function index()
     {
-        $rows = Destination::whereType('region')->paginate(25);
+        $rows = Region::with(['country', 'translations'])->paginate(25);
         $data = compact('rows');
         return view('admin.pages.category.region', $data);
     }
@@ -74,7 +76,7 @@ class AdminCategoryRegionController extends Controller
         $faq = old('faq');
         $faq_title = old('faq_title');
 
-        $countries = Destination::whereType('country')->orderBy('name', 'ASC')->get();
+        $countries = Country::orderBy('name', 'ASC')->get();
 
         $data = compact('form', 'route', 'method', 'language', 'country_id', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'country', 
             'fish_chart', 'fish_avail_title', 'fish_avail_intro', 
@@ -90,33 +92,50 @@ class AdminCategoryRegionController extends Controller
     {
         $request->validate([
             'country_id' => [ 'required' ],
-            'name' => [
-                'required',
-                'max:255',
-                Rule::unique('destinations')->where('name', $request->name)->where('type', 'region')->where('country_id', $request->country_id)->where('deleted_at', null)
-            ],
+            'name' => [ 'required', 'max:255' ],
             'title' => [ 'required', 'max:255' ],
             'sub_title' => [ 'required', 'max:255' ],
             'filters' => [ 'required' ],
+            'language' => [ 'required' ]
         ]);
 
         try {
             DB::beginTransaction();
-            $data = $request->only(['language', 'country_id', 'name', 'title', 'sub_title', 'introduction', 'fish_avail_title', 'fish_avail_intro', 'size_limit_title', 'size_limit_intro', 'time_limit_title', 'time_limit_intro', 'faq_title']);
-            $data['type'] = 'region';
-            $data['filters'] = json_encode($request->filters);
-            $data['content'] = $request->body;
-            $data['slug'] = $this->slug_format($request->name);
+            
+            $slug = $this->slug_format($request->name);
             $webp_path = null;
 
             if($request->has('thumbnailImage')) {
                 $webp_path = $this->upload_thumbnail($request->thumbnailImage);
             }
 
-            $data['thumbnail_path'] = $webp_path;
-            $country = Destination::create($data);
+            // Create base region
+            $region = Region::firstOrCreate([
+                'country_id' => $request->country_id,
+                'slug' => $slug,
+            ], [
+                'name' => $request->name,
+                'filters' => $request->filters,
+                'thumbnail_path' => $webp_path,
+            ]);
 
-            $this->translate($country, $request);
+            // Create translation
+            RegionTranslation::updateOrCreate([
+                'region_id' => $region->id,
+                'language' => $request->language,
+            ], [
+                'title' => $request->title,
+                'sub_title' => $request->sub_title,
+                'introduction' => $request->introduction,
+                'content' => $request->body,
+                'fish_avail_title' => $request->fish_avail_title,
+                'fish_avail_intro' => $request->fish_avail_intro,
+                'size_limit_title' => $request->size_limit_title,
+                'size_limit_intro' => $request->size_limit_intro,
+                'time_limit_title' => $request->time_limit_title,
+                'time_limit_intro' => $request->time_limit_intro,
+                'faq_title' => $request->faq_title,
+            ]);
 
             DB::commit();
 
@@ -132,87 +151,188 @@ class AdminCategoryRegionController extends Controller
 
     public function edit($id)
     {
-        $row = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->find($id);
+        $region = Region::with(['translations', 'country'])->find($id);
 
-        if (is_null($row)) {
+        if (is_null($region)) {
             return redirect()->back();
+        }
+
+        // Get primary language translation
+        $primaryTranslation = $region->translations->where('language', 'de')->first() 
+            ?? $region->translations->first();
+
+        if (!$primaryTranslation) {
+            return redirect()->back()->withErrors(['message' => 'No translations found']);
         }
 
         $form = 'Region';
         $route = route('admin.category.region.update', $id);
         $method = 'PUT';
-        $language = $row->language;
-        $country_id = $row->country_id;
-        $name = $row->name;
-        $thumbnail = $row->getThumbnailPath();
-        $title = $row->title;
-        $sub_title = $row->sub_title;
-        $introduction = $row->introduction;
-        $body = $row->content;
+        $language = $primaryTranslation->language;
+        $country_id = $region->country_id;
+        $name = $region->name;
+        $thumbnail = $region->getThumbnailPath();
+        $title = $primaryTranslation->title;
+        $sub_title = $primaryTranslation->sub_title;
+        $introduction = $primaryTranslation->introduction;
+        $body = $primaryTranslation->content;
 
-        $filter = json_decode($row->filters);
+        $filter = $region->filters ?? [];
 
-        $place = $filter->place ?? '';
-        $placeLat = $filter->placeLat ?? '';
-        $placeLng = $filter->placeLng ?? '';
-        $country = $filter->country ?? '';
-        $city = $filter->city ?? '';
-        $region = $filter->region ?? '';
+        $place = $filter['place'] ?? '';
+        $placeLat = $filter['placeLat'] ?? '';
+        $placeLng = $filter['placeLng'] ?? '';
+        $filterCountry = $filter['country'] ?? '';
+        $city = $filter['city'] ?? '';
+        $filterRegion = $filter['region'] ?? '';
 
-        $fish_chart = $row->fish_chart;
-        $fish_avail_title = $row->fish_avail_title;
-        $fish_avail_intro = $row->fish_avail_intro;
+        $fish_chart = DestinationFishChart::where('destination_id', $region->id)->get();
+        $fish_avail_title = $primaryTranslation->fish_avail_title;
+        $fish_avail_intro = $primaryTranslation->fish_avail_intro;
 
-        $fish_size_limit = $row->fish_size_limit;
-        $size_limit_title = $row->size_limit_title;
-        $size_limit_intro = $row->size_limit_intro;
+        $fish_size_limit = DestinationFishSizeLimit::where('destination_id', $region->id)->get();
+        $size_limit_title = $primaryTranslation->size_limit_title;
+        $size_limit_intro = $primaryTranslation->size_limit_intro;
 
-        $fish_time_limit = $row->fish_time_limit;
-        $time_limit_title = $row->time_limit_title;
-        $time_limit_intro = $row->time_limit_intro;
+        $fish_time_limit = DestinationFishTimeLimit::where('destination_id', $region->id)->get();
+        $time_limit_title = $primaryTranslation->time_limit_title;
+        $time_limit_intro = $primaryTranslation->time_limit_intro;
 
-        $faq = $row->faq;
-        $faq_title = $row->faq_title;
+        $faq = DestinationFaq::where('destination_id', $region->id)
+            ->where('destination_type', 'region')
+            ->where('language', $language)
+            ->get();
+        $faq_title = $primaryTranslation->faq_title;
 
-        $countries = Destination::whereType('country')->orderBy('name', 'ASC')->get();
+        $countries = Country::orderBy('name', 'ASC')->get();
+        
+        // Get the country object for the region
+        $country = $region->country;
 
-        $data = compact('form', 'route', 'method', 'language', 'country_id', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'country', 
+        $data = compact('form', 'route', 'method', 'language', 'country_id', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'body', 'place', 'placeLat', 'placeLng', 'filterCountry', 
             'fish_chart', 'fish_avail_title', 'fish_avail_intro', 
             'fish_size_limit', 'size_limit_title', 'size_limit_intro', 
             'fish_time_limit', 'time_limit_title', 'time_limit_intro', 
-            'faq', 'faq_title', 'city', 'region',
+            'faq', 'faq_title', 'city', 'filterRegion', 'region', 'country',
             'countries');
 
         return view('admin.pages.category.form', $data);
+    }
+
+    public function getTranslation(Request $request, $id)
+    {
+        $language = $request->input('language');
+        $region = Region::with(['translations', 'country'])->find($id);
+
+        if (!$region) {
+            return response()->json(['error' => 'Region not found'], 404);
+        }
+
+        // Get translation for requested language or create default structure
+        $translation = $region->translations->where('language', $language)->first();
+        
+        if (!$translation) {
+            // Return empty structure if translation doesn't exist
+            return response()->json([
+                'exists' => false,
+                'language' => $language,
+                'title' => '',
+                'sub_title' => '',
+                'introduction' => '',
+                'content' => '',
+                'fish_avail_title' => '',
+                'fish_avail_intro' => '',
+                'size_limit_title' => '',
+                'size_limit_intro' => '',
+                'time_limit_title' => '',
+                'time_limit_intro' => '',
+                'faq_title' => '',
+                'fish_chart' => [],
+                'fish_size_limit' => [],
+                'fish_time_limit' => [],
+                'faq' => []
+            ]);
+        }
+
+        // Get language-specific data
+        $fish_chart = DestinationFishChart::where('destination_id', $region->id)->get()->toArray();
+        $fish_size_limit = DestinationFishSizeLimit::where('destination_id', $region->id)->get()->toArray();
+        $fish_time_limit = DestinationFishTimeLimit::where('destination_id', $region->id)->get()->toArray();
+        $faq = DestinationFaq::where('destination_id', $region->id)
+            ->where('destination_type', 'region')
+            ->where('language', $language)
+            ->get()
+            ->toArray();
+
+        return response()->json([
+            'exists' => true,
+            'language' => $language,
+            'title' => $translation->title,
+            'sub_title' => $translation->sub_title,
+            'introduction' => $translation->introduction,
+            'content' => $translation->content,
+            'fish_avail_title' => $translation->fish_avail_title,
+            'fish_avail_intro' => $translation->fish_avail_intro,
+            'size_limit_title' => $translation->size_limit_title,
+            'size_limit_intro' => $translation->size_limit_intro,
+            'time_limit_title' => $translation->time_limit_title,
+            'time_limit_intro' => $translation->time_limit_intro,
+            'faq_title' => $translation->faq_title,
+            'fish_chart' => $fish_chart,
+            'fish_size_limit' => $fish_size_limit,
+            'fish_time_limit' => $fish_time_limit,
+            'faq' => $faq
+        ]);
     }
 
     public function update(Request $request, $id)
     {
         $request->validate([
             'country_id' => [ 'required' ],
-            'name' => [
-                'required',
-                'max:255',
-                Rule::unique('destinations')->where('name', $request->name)->where('type', 'region')->where('country_id', $request->country_id)->where('deleted_at', null)->ignore($id)
-            ],
+            'name' => [ 'required', 'max:255' ],
             'title' => [ 'required', 'max:255' ],
             'sub_title' => [ 'required', 'max:255' ],
-            'filters' => [ 'required' ]
+            'filters' => [ 'required' ],
+            'language' => [ 'required' ]
         ]);
 
         try {
             DB::beginTransaction();
-            $data = $request->only(['language', 'country_id', 'name', 'title', 'sub_title', 'introduction', 'fish_avail_title', 'fish_avail_intro', 'size_limit_title', 'size_limit_intro', 'time_limit_title', 'time_limit_intro', 'faq_title']);
-            $data['filters'] = json_encode($request->filters);
-            $data['content'] = $request->body;
-            $data['slug'] = $this->slug_format($request->name);
+            
+            $region = Region::findOrFail($id);
+            
+            // Update base region data
+            $region->update([
+                'country_id' => $request->country_id,
+                'name' => $request->name,
+                'slug' => $this->slug_format($request->name),
+                'filters' => $request->filters,
+            ]);
 
             if($request->has('thumbnailImage')) {
                 $webp_path = $this->upload_thumbnail($request->thumbnailImage);
-                $data['thumbnail_path'] = $webp_path;
+                $region->update(['thumbnail_path' => $webp_path]);
             }
 
-            Destination::whereId($id)->update($data);
+            // Update translation
+            RegionTranslation::updateOrCreate([
+                'region_id' => $region->id,
+                'language' => $request->language,
+            ], [
+                'title' => $request->title,
+                'sub_title' => $request->sub_title,
+                'introduction' => $request->introduction,
+                'content' => $request->body,
+                'fish_avail_title' => $request->fish_avail_title,
+                'fish_avail_intro' => $request->fish_avail_intro,
+                'size_limit_title' => $request->size_limit_title,
+                'size_limit_intro' => $request->size_limit_intro,
+                'time_limit_title' => $request->time_limit_title,
+                'time_limit_intro' => $request->time_limit_intro,
+                'faq_title' => $request->faq_title,
+            ]);
+
+            $regionId = $region->id;
 
             if ($request->has('fish_chart')) {
                 foreach ($request->fish_chart as $key => $value) {
@@ -277,16 +397,33 @@ class AdminCategoryRegionController extends Controller
         }
     }
 
-    public function show(Destination $destination)
+    public function show()
     {
         //
     }
 
     public function destroy($id)
     {
-        Destination::whereId($id)->delete();
-
-        return redirect()->back()->with('success', 'Region Successfully Deleted!');
+        try {
+            DB::beginTransaction();
+            
+            $region = Region::findOrFail($id);
+            
+            // Delete related records
+            DestinationFaq::where('destination_id', $id)->where('destination_type', 'region')->delete();
+            DestinationFishChart::where('destination_id', $id)->delete();
+            DestinationFishSizeLimit::where('destination_id', $id)->delete();
+            DestinationFishTimeLimit::where('destination_id', $id)->delete();
+            
+            // Delete region (translations cascade delete)
+            $region->delete();
+            
+            DB::commit();
+            return redirect()->back()->with('success', 'Region Successfully Deleted!');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['message' => 'Error deleting region']);
+        }
     }
 
     public function upload_thumbnail($thumbnailImage)
