@@ -67,6 +67,7 @@ class MigrateDestinationsData extends Command
 
         // Note: We don't use DB::transaction() because DDL statements (ALTER TABLE) 
         // cause implicit commits in MySQL, which would break the transaction
+
         try {
             // Migrate in order due to dependencies
             if (!$type || $type === 'country') {
