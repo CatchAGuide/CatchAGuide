@@ -65,7 +65,8 @@ class MigrateDestinationsData extends Command
             return 1;
         }
 
-        DB::beginTransaction();
+        // Note: We don't use DB::transaction() because DDL statements (ALTER TABLE) 
+        // cause implicit commits in MySQL, which would break the transaction
 
         try {
             // Migrate in order due to dependencies
@@ -93,27 +94,23 @@ class MigrateDestinationsData extends Command
                 $this->migrateFishLimits($isDryRun);
             }
 
+            $this->newLine();
             if ($isDryRun) {
-                DB::rollBack();
-                $this->newLine();
                 $this->info('✅ Dry run completed. No changes were made.');
             } else {
-                DB::commit();
-                $this->newLine();
                 $this->info('✅ Migration completed successfully!');
             }
 
-            $this->newLine();
-            $this->displaySummary();
-
-            return 0;
-
         } catch (\Exception $e) {
-            DB::rollBack();
             $this->error('❌ Migration failed: ' . $e->getMessage());
             $this->error('Stack trace: ' . $e->getTraceAsString());
             return 1;
+        } finally {
+            $this->newLine();
+            $this->displaySummary();
         }
+
+        return 0;
     }
 
     /**
@@ -150,9 +147,18 @@ class MigrateDestinationsData extends Command
 
         foreach ($countrySlugs as $slug) {
             // Get all language variants for this country slug
+            // Use groupBy to handle duplicates (take first occurrence of each language)
             $variants = Destination::whereType('country')
                 ->where('slug', $slug)
-                ->get();
+                ->get()
+                ->groupBy('language')
+                ->map(function ($group) {
+                    if ($group->count() > 1) {
+                        $this->warn("   ⚠️  Found duplicate language '{$group->first()->language}' for slug '{$group->first()->slug}' - using ID: {$group->first()->id}");
+                    }
+                    return $group->first(); // Take the first occurrence
+                })
+                ->values();
             
             // Use the first variant as the base data source
             $baseCountry = $variants->first();
@@ -220,10 +226,19 @@ class MigrateDestinationsData extends Command
 
         foreach ($regionGroups as $group) {
             // Get all language variants for this region
+            // Use groupBy to handle duplicates (take first occurrence of each language)
             $variants = Destination::whereType('region')
                 ->where('slug', $group->slug)
                 ->where('country_id', $group->country_id)
-                ->get();
+                ->get()
+                ->groupBy('language')
+                ->map(function ($langGroup) {
+                    if ($langGroup->count() > 1) {
+                        $this->warn("   ⚠️  Found duplicate language '{$langGroup->first()->language}' for region '{$langGroup->first()->slug}' - using ID: {$langGroup->first()->id}");
+                    }
+                    return $langGroup->first();
+                })
+                ->values();
             
             // Use the first variant as the base data source
             $baseRegion = $variants->first();
@@ -298,10 +313,19 @@ class MigrateDestinationsData extends Command
 
         foreach ($cityGroups as $group) {
             // Get all language variants for this city
+            // Use groupBy to handle duplicates (take first occurrence of each language)
             $variants = Destination::whereType('city')
                 ->where('slug', $group->slug)
                 ->where('country_id', $group->country_id)
-                ->get();
+                ->get()
+                ->groupBy('language')
+                ->map(function ($langGroup) {
+                    if ($langGroup->count() > 1) {
+                        $this->warn("   ⚠️  Found duplicate language '{$langGroup->first()->language}' for city '{$langGroup->first()->slug}' - using ID: {$langGroup->first()->id}");
+                    }
+                    return $langGroup->first();
+                })
+                ->values();
             
             // Use the first variant as the base data source
             $baseCity = $variants->first();
