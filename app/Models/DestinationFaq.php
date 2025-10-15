@@ -13,6 +13,7 @@ class DestinationFaq extends Model
 
     protected $fillable = [
         'destination_id',
+        'destination_type',
         'question',
         'answer',
         'language'
