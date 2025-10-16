@@ -4,6 +4,10 @@
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@latest/dist/browser-image-compression.js"></script>
 <script src="{{ asset('assets/js/ImageManager.js') }}"></script>
 
+@push('styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css">
+@endpush
+
 <script>
     window.imageManagerLoaded = window.imageManagerLoaded || null;
     window.currentStep = window.currentStep || 1;
@@ -49,8 +53,21 @@
         // Initialize Select2 for multi-select dropdowns
         initializeSelect2();
         
-        // Initialize tags input
-        initializeTagsInput();
+        // Initialize tagify for camp facilities
+        setTimeout(() => {
+            if (typeof Tagify !== 'undefined') {
+                initializeTagify();
+            } else {
+                console.error('Tagify library not loaded, retrying in 500ms...');
+                setTimeout(() => {
+                    if (typeof Tagify !== 'undefined') {
+                        initializeTagify();
+                    } else {
+                        console.error('Tagify library still not loaded after retry');
+                    }
+                }, 500);
+            }
+        }, 500);
         
         // Initialize selected guidings cards if there are any pre-selected
         updateSelectedGuidingsCards();
@@ -203,8 +220,12 @@ function setupStepNavigation() {
         
         // Step 3 validation
         if (step === 3) {
-            const facilities = $('input[name="camp_facility_checkboxes[]"]:checked').length;
-            if (facilities === 0) {
+            const facilitiesInput = document.querySelector('input[name="camp_facilities"]');
+            let facilities = [];
+            if (facilitiesInput && facilitiesInput.tagify) {
+                facilities = facilitiesInput.tagify.value;
+            }
+            if (facilities.length === 0) {
                 showError('{{ __("camps.at_least_one_facility_required") }}');
                 isValid = false;
             }
@@ -379,17 +400,130 @@ function initializeLazyLoading(container) {
     }
 }
 
-function initializeTagsInput() {
-    // Simple text input for extras - no tagsinput library needed
-    // The extras field will be a regular text input
-    console.log('Extras field initialized as simple text input');
+
+function initializeTagify() {
+    console.log('Initializing Tagify...');
+    
+    // Initialize tagify for camp facilities
+    @if(isset($campFacilities) && count($campFacilities) > 0)
+    const campFacilitiesData = {!! json_encode($campFacilities->map(function($item) { return ['value' => $item->name, 'id' => $item->id]; })->sortBy('value')->values()->toArray()) !!};
+    console.log('Camp facilities data:', campFacilitiesData);
+    
+    const campFacilitiesTagify = initTagify('input[name="camp_facilities"]', {
+        whitelist: campFacilitiesData,
+        dropdown: {
+            maxItems: Infinity,
+            classname: "tagify__dropdown",
+            enabled: 0,
+            closeOnSelect: false
+        }
+    });
+    
+    // Populate with existing data
+    @if(isset($formData['facilities']) && is_array($formData['facilities']))
+    const facilitiesData = {!! json_encode($formData['facilities']) !!};
+    console.log('Existing facilities data:', facilitiesData);
+    if (campFacilitiesTagify && facilitiesData && Array.isArray(facilitiesData)) {
+        campFacilitiesTagify.addTags(facilitiesData.filter(Boolean));
+    }
+    @endif
+    @else
+    console.log('No camp facilities data available');
+    initTagify('input[name="camp_facilities"]', {});
+    @endif
+
+    // Initialize tagify for target fish
+    @if(isset($targetFish) && count($targetFish) > 0)
+    const targetFishData = {!! json_encode($targetFish->map(function($item) { return ['value' => $item->name, 'id' => $item->id]; })->sortBy('value')->values()->toArray()) !!};
+    console.log('Target fish data:', targetFishData);
+    
+    const targetFishTagify = initTagify('input[name="target_fish"]', {
+        whitelist: targetFishData,
+        dropdown: {
+            maxItems: Infinity,
+            classname: "tagify__dropdown",
+            enabled: 0,
+            closeOnSelect: false
+        }
+    });
+    
+    // Populate with existing data
+    @if(isset($formData['target_fish']) && !empty($formData['target_fish']))
+    const existingTargetFish = {!! json_encode(explode(',', $formData['target_fish'])) !!};
+    console.log('Existing target fish data:', existingTargetFish);
+    if (targetFishTagify && existingTargetFish && Array.isArray(existingTargetFish)) {
+        targetFishTagify.addTags(existingTargetFish.filter(Boolean));
+    }
+    @endif
+    @else
+    console.log('No target fish data available');
+    initTagify('input[name="target_fish"]', {});
+    @endif
+
+    // Initialize tagify for extras (without predefined options)
+    const extrasTagify = initTagify('input[name="extras"]', {});
+    console.log('Extras tagify initialized');
+    
+    // Populate with existing data
+    @if(isset($formData['extras']) && !empty($formData['extras']))
+    const existingExtras = {!! json_encode(explode(',', $formData['extras'])) !!};
+    console.log('Existing extras data:', existingExtras);
+    if (extrasTagify && existingExtras && Array.isArray(existingExtras)) {
+        extrasTagify.addTags(existingExtras.filter(Boolean));
+    }
+    @endif
+}
+
+function initTagify(selector, options = {}) {
+    console.log('initTagify called with selector:', selector, 'options:', options);
+    const element = document.querySelector(selector);
+    console.log('Found element:', element);
+    
+    if (!element) {
+        console.error('Element not found for selector:', selector);
+        return null;
+    }
+    
+    if (element.tagify) {
+        console.log('Tagify already initialized on element');
+        return element.tagify;
+    }
+    
+    try {
+        const tagify = new Tagify(element, options);
+        element.tagify = tagify;
+        console.log('Tagify initialized successfully on element:', element);
+        return tagify;
+    } catch (error) {
+        console.error('Error initializing Tagify:', error);
+        return null;
+    }
 }
 
 function initializeCheckboxes() {
-    // Handle checkbox functionality for camp facilities
-    $('input[name="camp_facility_checkboxes[]"]').on('change', function() {
-        updateStepCompletionStatus();
-    });
+    // Handle tagify functionality for camp facilities
+    const facilitiesInput = document.querySelector('input[name="camp_facilities"]');
+    if (facilitiesInput && facilitiesInput.tagify) {
+        facilitiesInput.tagify.on('add remove', function() {
+            updateStepCompletionStatus();
+        });
+    }
+
+    // Handle tagify functionality for target fish
+    const targetFishInput = document.querySelector('input[name="target_fish"]');
+    if (targetFishInput && targetFishInput.tagify) {
+        targetFishInput.tagify.on('add remove', function() {
+            updateStepCompletionStatus();
+        });
+    }
+
+    // Handle tagify functionality for extras
+    const extrasInput = document.querySelector('input[name="extras"]');
+    if (extrasInput && extrasInput.tagify) {
+        extrasInput.tagify.on('add remove', function() {
+            updateStepCompletionStatus();
+        });
+    }
 }
 
 function loadExistingData() {
@@ -483,7 +617,11 @@ function isStepCompleted(step) {
                    $('#description_area').val().trim() !== '' && 
                    $('#description_fishing').val().trim() !== '';
         case 3:
-            return $('input[name="camp_facility_checkboxes[]"]:checked').length > 0;
+            const facilitiesInput = document.querySelector('input[name="camp_facilities"]');
+            if (facilitiesInput && facilitiesInput.tagify) {
+                return facilitiesInput.tagify.value.length > 0;
+            }
+            return false;
         case 4:
             return true; // Target fish and travel info are optional
         case 5:

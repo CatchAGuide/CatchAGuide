@@ -42,6 +42,8 @@ return [
     'camp_facilities_title' => 'Camp Facilities',
     'camp_facilities' => 'Camp Facilities',
     'tooltip_camp_facilities' => 'Select available facilities',
+    'add_camp_facilities' => 'Add camp facilities...',
+    'tooltip_add_camp_facilities' => 'Type to add camp facilities',
     'rental_conditions_title' => 'Rental Conditions',
     'policies_regulations' => 'Policies & Regulations',
     'tooltip_policies_regulations' => 'Enter important policies and regulations',
@@ -52,6 +54,7 @@ return [
     'target_fish' => 'Target Fish',
     'tooltip_target_fish' => 'Enter target fish species',
     'enter_target_fish' => 'Enter target fish species (e.g., Pike, Perch, Trout)',
+    'add_target_fish' => 'Add target fish...',
     'target_fish_help' => 'List the fish species that can be caught at this camp. Separate multiple species with commas.',
     'best_travel_times' => 'Best Travel Times',
     'tooltip_best_travel_times' => 'Recommended travel times',
@@ -62,6 +65,7 @@ return [
     'extras' => 'Extras',
     'tooltip_extras' => 'Additional information',
     'enter_extras' => 'Enter additional information or special features...',
+    'add_extras' => 'Add extras...',
     'extras_help' => 'Add any additional information, special features, or notes about the camp.',
 
     // Step 5 - Accommodations

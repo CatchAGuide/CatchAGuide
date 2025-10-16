@@ -65,49 +65,56 @@ class CampsController extends Controller
     {
         $isDraft = $request->input('is_draft') == '1';
         
+        // Debug: Log the received data
+        \Log::info('Camp Store Request Data:', [
+            'camp_facilities' => $request->input('camp_facilities'),
+            'target_fish' => $request->input('target_fish'),
+            'extras' => $request->input('extras'),
+        ]);
+        
         // Different validation rules for draft vs final submission
-        if ($isDraft) {
-            // Minimal validation for drafts
-            $validated = $request->validate([
-                'title' => 'nullable|string|max:255',
-                'location' => 'nullable|string|max:255',
-                'status' => 'nullable|string|in:active,inactive,draft',
-            ]);
-        } else {
-            // Full validation for final submission
-            $validated = $request->validate([
-                'title' => 'required|string|max:255',
-                'location' => 'required|string|max:255',
-                'description_camp' => 'required|string',
-                'description_area' => 'required|string',
-                'description_fishing' => 'required|string',
-                'latitude' => 'nullable|numeric',
-                'longitude' => 'nullable|numeric',
-                'country' => 'nullable|string|max:255',
-                'city' => 'nullable|string|max:255',
-                'region' => 'nullable|string|max:255',
-                'distance_to_store' => 'nullable|string|max:255',
-                'distance_to_nearest_town' => 'nullable|string|max:255',
-                'distance_to_airport' => 'nullable|string|max:255',
-                'distance_to_ferry_port' => 'nullable|string|max:255',
-                'policies_regulations' => 'nullable|string',
-                'target_fish' => 'nullable|string',
-                'best_travel_times' => 'nullable|string',
-                'travel_information' => 'nullable|string',
-                'extras' => 'nullable|string',
-                'status' => 'nullable|string|in:active,inactive,draft',
-                'camp_facility_checkboxes' => 'nullable|array',
-                'camp_facility_checkboxes.*' => 'exists:camp_facilities,id',
-                'accommodations' => 'nullable|array',
-                'accommodations.*' => 'exists:accommodations,id',
-                'rental_boats' => 'nullable|array',
-                'rental_boats.*' => 'exists:rental_boats,id',
-                'guidings' => 'nullable|array',
-                'guidings.*' => 'exists:guidings,id',
-                'target_fish' => 'nullable|array',
-                'target_fish.*' => 'exists:targets,id',
-            ]);
-        }
+        // if ($isDraft) {
+        //     // Minimal validation for drafts
+        //     $validated = $request->validate([
+        //         'title' => 'nullable|string|max:255',
+        //         'location' => 'nullable|string|max:255',
+        //         'status' => 'nullable|string|in:active,inactive,draft',
+        //     ]);
+        // } else {
+        //     // Full validation for final submission
+        //     $validated = $request->validate([
+        //         'title' => 'required|string|max:255',
+        //         'location' => 'required|string|max:255',
+        //         'description_camp' => 'required|string',
+        //         'description_area' => 'required|string',
+        //         'description_fishing' => 'required|string',
+        //         'latitude' => 'nullable|numeric',
+        //         'longitude' => 'nullable|numeric',
+        //         'country' => 'nullable|string|max:255',
+        //         'city' => 'nullable|string|max:255',
+        //         'region' => 'nullable|string|max:255',
+        //         'distance_to_store' => 'nullable|string|max:255',
+        //         'distance_to_nearest_town' => 'nullable|string|max:255',
+        //         'distance_to_airport' => 'nullable|string|max:255',
+        //         'distance_to_ferry_port' => 'nullable|string|max:255',
+        //         'policies_regulations' => 'nullable|string',
+        //         'target_fish' => 'nullable|string',
+        //         'best_travel_times' => 'nullable|string',
+        //         'travel_information' => 'nullable|string',
+        //         'extras' => 'nullable|string',
+        //         'status' => 'nullable|string|in:active,inactive,draft',
+        //         'camp_facility_checkboxes' => 'nullable|array',
+        //         'camp_facility_checkboxes.*' => 'exists:camp_facilities,id',
+        //         'accommodations' => 'nullable|array',
+        //         'accommodations.*' => 'exists:accommodations,id',
+        //         'rental_boats' => 'nullable|array',
+        //         'rental_boats.*' => 'exists:rental_boats,id',
+        //         'guidings' => 'nullable|array',
+        //         'guidings.*' => 'exists:guidings,id',
+        //         'target_fish' => 'nullable|array',
+        //         'target_fish.*' => 'exists:targets,id',
+        //     ]);
+        // }
 
         try {
             DB::beginTransaction();
@@ -133,6 +140,7 @@ class CampsController extends Controller
                 'distance_to_airport' => $request->input('distance_to_airport'),
                 'distance_to_ferry_port' => $request->input('distance_to_ferry_port'),
                 'policies_regulations' => $request->input('policies_regulations'),
+                'target_fish' => $request->input('target_fish'),
                 'best_travel_times' => $request->input('best_travel_times'),
                 'travel_information' => $request->input('travel_information'),
                 'extras' => $request->input('extras'),
@@ -143,8 +151,16 @@ class CampsController extends Controller
             ]);
 
             // Sync relationships
-            if ($request->has('camp_facility_checkboxes')) {
-                $camp->facilities()->sync($request->input('camp_facility_checkboxes'));
+            if ($request->has('camp_facilities')) {
+                $facilities = $request->input('camp_facilities');
+                if (!empty($facilities)) {
+                    // Parse comma-separated facility names and find their IDs
+                    $facilityNames = array_filter(array_map('trim', explode(',', $facilities)));
+                    $facilityIds = CampFacility::whereIn('name', $facilityNames)->pluck('id')->toArray();
+                    $camp->facilities()->sync($facilityIds);
+                } else {
+                    $camp->facilities()->sync([]);
+                }
             }
 
             if ($request->has('accommodations')) {
@@ -211,6 +227,9 @@ class CampsController extends Controller
         $formData['is_update'] = 1;
         $formData['lat'] = $camp->latitude;
         $formData['lng'] = $camp->longitude;
+        $formData['facilities'] = $camp->facilities->pluck('name')->toArray();
+        $formData['target_fish'] = $camp->target_fish;
+        $formData['extras'] = $camp->extras;
         
         $campFacilities = CampFacility::where('is_active', true)->orderBy('name')->get();
         $accommodations = Accommodation::where('status', 'active')->orderBy('title')->get();
@@ -238,6 +257,13 @@ class CampsController extends Controller
     {
         $camp = Camp::findOrFail($id);
         $isDraft = $request->input('is_draft') == '1';
+        
+        // Debug: Log the received data
+        \Log::info('Camp Update Request Data:', [
+            'camp_facilities' => $request->input('camp_facilities'),
+            'target_fish' => $request->input('target_fish'),
+            'extras' => $request->input('extras'),
+        ]);
         
         // Different validation rules for draft vs final submission
         if ($isDraft) {
@@ -270,8 +296,7 @@ class CampsController extends Controller
                 'travel_information' => 'nullable|string',
                 'extras' => 'nullable|string',
                 'status' => 'nullable|string|in:active,inactive,draft',
-                'camp_facility_checkboxes' => 'nullable|array',
-                'camp_facility_checkboxes.*' => 'exists:camp_facilities,id',
+                'camp_facilities' => 'nullable|string',
                 'accommodations' => 'nullable|array',
                 'accommodations.*' => 'exists:accommodations,id',
                 'rental_boats' => 'nullable|array',
@@ -307,6 +332,7 @@ class CampsController extends Controller
                 'distance_to_airport' => $request->input('distance_to_airport', $camp->distance_to_airport),
                 'distance_to_ferry_port' => $request->input('distance_to_ferry_port', $camp->distance_to_ferry_port),
                 'policies_regulations' => $request->input('policies_regulations', $camp->policies_regulations),
+                'target_fish' => $request->input('target_fish', $camp->target_fish),
                 'best_travel_times' => $request->input('best_travel_times', $camp->best_travel_times),
                 'travel_information' => $request->input('travel_information', $camp->travel_information),
                 'extras' => $request->input('extras', $camp->extras),
@@ -316,8 +342,16 @@ class CampsController extends Controller
             ]);
 
             // Sync relationships
-            if ($request->has('camp_facility_checkboxes')) {
-                $camp->facilities()->sync($request->input('camp_facility_checkboxes'));
+            if ($request->has('camp_facilities')) {
+                $facilities = $request->input('camp_facilities');
+                if (!empty($facilities)) {
+                    // Parse comma-separated facility names and find their IDs
+                    $facilityNames = array_filter(array_map('trim', explode(',', $facilities)));
+                    $facilityIds = CampFacility::whereIn('name', $facilityNames)->pluck('id')->toArray();
+                    $camp->facilities()->sync($facilityIds);
+                } else {
+                    $camp->facilities()->sync([]);
+                }
             }
 
             if ($request->has('accommodations')) {

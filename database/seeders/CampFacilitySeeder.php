@@ -15,7 +15,11 @@ class CampFacilitySeeder extends Seeder
      */
     public function run()
     {
+        // Disable foreign key checks temporarily
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('camp_facilities')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        
         $facilities = [
             [
                 'name' => 'Swimming pool',

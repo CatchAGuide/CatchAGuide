@@ -42,6 +42,8 @@ return [
     'camp_facilities_title' => 'Camp Ausstattung',
     'camp_facilities' => 'Camp Ausstattung',
     'tooltip_camp_facilities' => 'Wählen Sie die verfügbaren Einrichtungen aus',
+    'add_camp_facilities' => 'Camp Einrichtungen hinzufügen...',
+    'tooltip_add_camp_facilities' => 'Tippen Sie, um Camp Einrichtungen hinzuzufügen',
     'rental_conditions_title' => 'Weitere Konditionen',
     'policies_regulations' => 'Richtlinien und Vorschriften',
     'tooltip_policies_regulations' => 'Geben Sie wichtige Richtlinien und Vorschriften an',
@@ -52,6 +54,7 @@ return [
     'target_fish' => 'Zielfisch',
     'tooltip_target_fish' => 'Zielfischarten eingeben',
     'enter_target_fish' => 'Zielfischarten eingeben (z.B. Hecht, Barsch, Forelle)',
+    'add_target_fish' => 'Zielfisch hinzufügen...',
     'target_fish_help' => 'Listen Sie die Fischarten auf, die in diesem Camp gefangen werden können. Trennen Sie mehrere Arten mit Kommas.',
     'best_travel_times' => 'Reisezeit Empfehlung',
     'tooltip_best_travel_times' => 'Empfohlene Reisezeiten',
@@ -62,6 +65,7 @@ return [
     'extras' => 'Extras',
     'tooltip_extras' => 'Zusätzliche Informationen',
     'enter_extras' => 'Zusätzliche Informationen oder besondere Merkmale eingeben...',
+    'add_extras' => 'Extras hinzufügen...',
     'extras_help' => 'Fügen Sie zusätzliche Informationen, besondere Merkmale oder Notizen zum Camp hinzu.',
 
     // Step 5 - Accommodations

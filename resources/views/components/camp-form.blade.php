@@ -224,25 +224,7 @@
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="{{ __('camps.tooltip_camp_facilities') }}"></i>
                     </label>
-                    
-                    <div class="camp-facilities-grid">
-                        @if(isset($campFacilities) && count($campFacilities) > 0)
-                            @foreach($campFacilities as $facility)
-                                <div class="btn-checkbox-container">
-                                    <input type="checkbox" name="camp_facility_checkboxes[]" value="{{ $facility->id }}" id="camp_facility_{{ $facility->id }}" class="facility-checkbox">
-                                    <label for="camp_facility_{{ $facility->id }}" class="btn btn-outline-primary btn-checkbox">
-                                        <i class="fas fa-check me-2" style="display: none;"></i>
-                                        {{ $facility->name }}
-                                    </label>
-                                </div>
-                            @endforeach
-                        @else
-                            <div class="alert alert-warning">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                No camp facilities available. Please contact an administrator.
-                            </div>
-                        @endif
-                    </div>
+                    <input type="text" class="form-control" name="camp_facilities" id="camp_facilities" placeholder="{{ __('camps.add_camp_facilities') }}" data-bs-toggle="tooltip" title="{{ __('camps.tooltip_add_camp_facilities') }}">
                 </div>
 
                 <hr>
@@ -290,8 +272,7 @@
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="{{ __('camps.tooltip_target_fish') }}"></i>
                     </label>
-                    <textarea class="form-control" id="target_fish" name="target_fish" rows="3" placeholder="{{ __('camps.enter_target_fish') }}">{{ $formData['target_fish'] ?? '' }}</textarea>
-                    <small class="form-text text-muted">{{ __('camps.target_fish_help') }}</small>
+                    <input type="text" class="form-control" name="target_fish" id="target_fish" placeholder="{{ __('camps.add_target_fish') }}">
                 </div>
 
                 <hr>
@@ -324,8 +305,7 @@
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="{{ __('camps.tooltip_extras') }}"></i>
                     </label>
-                    <textarea class="form-control" id="extras" name="extras" rows="3" placeholder="{{ __('camps.enter_extras') }}">{{ $formData['extras'] ?? '' }}</textarea>
-                    <small class="form-text text-muted">{{ __('camps.extras_help') }}</small>
+                    <input type="text" class="form-control" name="extras" id="extras" placeholder="{{ __('camps.add_extras') }}">
                 </div>
 
                 <div class="button-group">
