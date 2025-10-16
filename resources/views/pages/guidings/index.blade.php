@@ -2,15 +2,15 @@
 
 @php
     // Generate SEO-friendly title and description
-    $baseTitle = translate('Alle Guidings');
+    $baseTitle = __('homepage.listings-title');
     $filteredTitle = '';
     
     // Add location to title if present
-    if (isset($place) && !empty($place)) {
-        $filteredTitle = translate('Alle Guidings bei ') . $place;
-    } else {
-        $filteredTitle = $baseTitle;
-    }
+    // if (isset($place) && !empty($place)) {
+    //     $filteredTitle = translate('Alle Guidings bei ') . $place;
+    // } else {
+    $filteredTitle = $baseTitle;
+    // }
     
     // Add filter information to title if present
     $activeFilters = [];

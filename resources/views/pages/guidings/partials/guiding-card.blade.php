@@ -14,7 +14,7 @@
                                     <img class="d-block lazy" 
                                          data-src="{{ $gallery_image_link }}"
                                          src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-                                         alt="{{ translate($guiding->title) }}"
+                                         alt="{{ $guiding->title }}"
                                          loading="lazy"
                                          width="800"
                                          height="600"
@@ -41,7 +41,7 @@
                 <a href="{{ route('guidings.show', [$guiding->id, $guiding->slug])}}">
                     <div class="guidings-item">
                         <div class="guidings-item-title">
-                            <h5 class="fw-bolder text-truncate">{{ Str::limit(translate($guiding->title), 70) }}</h5>
+                            <h5 class="fw-bolder text-truncate">{{ Str::limit($guiding->title, 70) }}</h5>
                             <span class="truncate"><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }}</span>                                      
                         </div>
                         @php
