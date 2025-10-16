@@ -85,6 +85,5 @@ return [
     'faq-title' => 'Häufig gestellte Fragen',
     'see-more' => 'Mehr anzeigen',
     
-
-    
+    'listings-title' => 'Alle Angeltouren',
 ];

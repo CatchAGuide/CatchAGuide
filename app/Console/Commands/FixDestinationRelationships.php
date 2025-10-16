@@ -332,25 +332,16 @@ class FixDestinationRelationships extends Command
             }
 
             $mapping = $this->idMapping[$oldDestId];
-            $needsUpdate = false;
-
+            
             // Check if destination_type needs updating
             if ($currentType !== $mapping['type']) {
-                $needsUpdate = true;
-            }
-
-            // Check if destination_id needs updating (if old table existed and IDs changed)
-            if ($oldDestId != $mapping['new_id']) {
-                $needsUpdate = true;
-            }
-
-            if ($needsUpdate) {
                 if (!$isDryRun) {
                     try {
+                        // Only update destination_type to avoid foreign key conflicts
+                        // The destination_id should already be correct
                         DB::table($tableName)
                             ->where('id', $record->id)
                             ->update([
-                                'destination_id' => $mapping['new_id'],
                                 'destination_type' => $mapping['type']
                             ]);
                         $updated++;
