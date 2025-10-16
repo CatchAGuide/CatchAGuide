@@ -58,29 +58,29 @@ class RentalBoatsController extends Controller
         $isDraft = $request->input('is_draft') == '1';
         
         // Different validation rules for draft vs final submission
-        if ($isDraft) {
-            // Minimal validation for drafts
-            $request->validate([
-                'title' => 'nullable|string|max:255',
-                'location' => 'nullable|string|max:255',
-                'boat_type' => 'nullable|string|max:255',
-                'desc_of_boat' => 'nullable|string',
-                'price_type' => 'nullable|string|in:per_hour,per_day,per_week',
-                'base_price' => 'nullable|numeric|min:0',
-                'status' => 'nullable|string|in:active,inactive,draft',
-            ]);
-        } else {
-            // Full validation for final submission
-            $request->validate([
-                'title' => 'required|string|max:255',
-                'location' => 'required|string|max:255',
-                'boat_type' => 'required|string|max:255',
-                'desc_of_boat' => 'required|string',
-                'price_type' => 'required|string|in:per_hour,per_day,per_week',
-                'base_price' => 'required|numeric|min:0',
-                'status' => 'required|string|in:active,inactive,draft',
-            ]);
-        }
+        // if ($isDraft) {
+        //     // Minimal validation for drafts
+        //     $request->validate([
+        //         'title' => 'nullable|string|max:255',
+        //         'location' => 'nullable|string|max:255',
+        //         'boat_type' => 'nullable|string|max:255',
+        //         'desc_of_boat' => 'nullable|string',
+        //         'price_type' => 'nullable|string|in:per_hour,per_day,per_week',
+        //         'base_price' => 'nullable|numeric|min:0',
+        //         'status' => 'nullable|string|in:active,inactive,draft',
+        //     ]);
+        // } else {
+        //     // Full validation for final submission
+        //     $request->validate([
+        //         'title' => 'required|string|max:255',
+        //         'location' => 'required|string|max:255',
+        //         'boat_type' => 'required|string|max:255',
+        //         'desc_of_boat' => 'required|string',
+        //         'price_type' => 'required|string|in:per_hour,per_day,per_week',
+        //         'base_price' => 'required|numeric|min:0',
+        //         'status' => 'required|string|in:active,inactive,draft',
+        //     ]);
+        // }
 
         try {
             $slug = $this->generateUniqueSlug($request->title ?? 'Untitled');

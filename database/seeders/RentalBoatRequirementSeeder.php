@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\RentalBoatRequirement;
+use DB;
 
 class RentalBoatRequirementSeeder extends Seeder
 {
@@ -13,6 +14,7 @@ class RentalBoatRequirementSeeder extends Seeder
      */
     public function run(): void
     {
+        DB::table('rental_boat_requirements')->truncate();
         $requirements = [
             [
                 'name' => 'Führerschein/ Lizenz',

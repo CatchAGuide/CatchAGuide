@@ -192,24 +192,61 @@
         @endif
 
         // Initialize tagify for policies
+        @if(isset($accommodationPolicies) && count($accommodationPolicies) > 0)
+        if (document.getElementById('policies')) {
+            const policiesTagify = initTagify('#policies', {
+                whitelist: {!! json_encode($accommodationPolicies->map(function($item) { return ['value' => $item->name, 'id' => $item->id]; })->sortBy('value')->values()->toArray()) !!},
+                dropdown: {
+                    maxItems: Infinity,
+                    classname: "tagify__dropdown",
+                    enabled: 0,
+                    closeOnSelect: false
+                }
+            });
+        }
+        @else
         if (document.getElementById('policies')) {
             initTagify('#policies', {});
         }
-
-        // Initialize tagify for rental conditions
-        if (document.getElementById('rental_conditions')) {
-            initTagify('#rental_conditions', {});
-        }
+        @endif
 
         // Initialize tagify for extras
+        @if(isset($accommodationExtras) && count($accommodationExtras) > 0)
+        if (document.getElementById('extras')) {
+            const extrasTagify = initTagify('#extras', {
+                whitelist: {!! json_encode($accommodationExtras->map(function($item) { return ['value' => $item->name, 'id' => $item->id]; })->sortBy('value')->values()->toArray()) !!},
+                dropdown: {
+                    maxItems: Infinity,
+                    classname: "tagify__dropdown",
+                    enabled: 0,
+                    closeOnSelect: false
+                }
+            });
+        }
+        @else
         if (document.getElementById('extras')) {
             initTagify('#extras', {});
         }
+        @endif
 
         // Initialize tagify for inclusives
+        @if(isset($accommodationInclusives) && count($accommodationInclusives) > 0)
+        if (document.getElementById('inclusives')) {
+            const inclusivesTagify = initTagify('#inclusives', {
+                whitelist: {!! json_encode($accommodationInclusives->map(function($item) { return ['value' => $item->name, 'id' => $item->id]; })->sortBy('value')->values()->toArray()) !!},
+                dropdown: {
+                    maxItems: Infinity,
+                    classname: "tagify__dropdown",
+                    enabled: 0,
+                    closeOnSelect: false
+                }
+            });
+        }
+        @else
         if (document.getElementById('inclusives')) {
             initTagify('#inclusives', {});
         }
+        @endif
     }
 
     function initTagify(selector, options = {}) {
@@ -590,13 +627,17 @@
 
             if (this.checked) {
                 $label.addClass('active');
-                $input.show();
-                $input.prop('required', true);
+                if ($input.length > 0) {
+                    $input.show();
+                    $input.prop('required', true);
+                }
             } else {
                 $label.removeClass('active');
-                $input.hide();
-                $input.prop('required', false);
-                $input.val('');
+                if ($input.length > 0) {
+                    $input.hide();
+                    $input.prop('required', false);
+                    $input.val('');
+                }
             }
         });
 
@@ -608,9 +649,13 @@
             
             if (this.checked) {
                 $label.addClass('active');
-                $input.show();
+                if ($input.length > 0) {
+                    $input.show();
+                }
             } else {
-                $input.hide();
+                if ($input.length > 0) {
+                    $input.hide();
+                }
             }
         });
 

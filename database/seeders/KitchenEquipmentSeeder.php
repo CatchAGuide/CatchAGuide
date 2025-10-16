@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use DB;
 
 class KitchenEquipmentSeeder extends Seeder
 {
@@ -13,6 +14,7 @@ class KitchenEquipmentSeeder extends Seeder
      */
     public function run()
     {
+        DB::table('kitchen_equipment')->truncate();
         $kitchenEquipment = [
             ['name' => 'Refrigerator', 'name_en' => 'Refrigerator', 'sort_order' => 1],
             ['name' => 'Freezer or freezer compartment', 'name_en' => 'Freezer or freezer compartment', 'sort_order' => 2],

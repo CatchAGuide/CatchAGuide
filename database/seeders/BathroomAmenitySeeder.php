@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use DB;
 
 class BathroomAmenitySeeder extends Seeder
 {
@@ -13,6 +14,7 @@ class BathroomAmenitySeeder extends Seeder
      */
     public function run()
     {
+        DB::table('bathroom_amenities')->truncate();
         $bathroomAmenities = [
             ['name' => 'Iron/ Iron board', 'name_en' => 'Iron/ Iron board', 'sort_order' => 1],
             ['name' => 'Clothes drying rack', 'name_en' => 'Clothes drying rack', 'sort_order' => 2],

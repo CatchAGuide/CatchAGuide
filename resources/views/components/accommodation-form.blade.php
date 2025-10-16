@@ -358,7 +358,7 @@
                            title="{{ __('accommodations.tooltip_policies') }}"></i>
                     </label>
                     <input type="text" class="form-control" name="policies" id="policies" data-role="tagsinput" placeholder="{{ __('accommodations.add_policies') }}" data-bs-toggle="tooltip" title="{{ __('accommodations.tooltip_add_policies') }}">
-                    </div>
+                </div>
                     
                 <hr>
 
@@ -367,8 +367,19 @@
                         {{ __('accommodations.rental_conditions') }}
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="{{ __('accommodations.tooltip_rental_conditions') }}"></i>
-                        </label>
-                    <input type="text" class="form-control" name="rental_conditions" id="rental_conditions" data-role="tagsinput" placeholder="{{ __('accommodations.add_rental_conditions') }}" data-bs-toggle="tooltip" title="{{ __('accommodations.tooltip_add_rental_conditions') }}">
+                    </label>
+                    
+                    <div class="accommodation-details-grid">
+                        @foreach($accommodationRentalConditions ?? [] as $rentalCondition)
+                            <div class="btn-checkbox-container">
+                                <input type="checkbox" name="rental_condition_checkboxes[]" value="{{ $rentalCondition->id }}" id="rental_condition_{{ $rentalCondition->id }}">
+                                <label for="rental_condition_{{ $rentalCondition->id }}" class="btn btn-outline-primary btn-checkbox">
+                                    {{ $rentalCondition->name }}
+                                </label>
+                                <input type="{{ $rentalCondition->input_type }}" class="form-control extra-input" name="rental_condition_{{ $rentalCondition->id }}" placeholder="{{ $rentalCondition->placeholder }}" min="{{ $rentalCondition->input_type === 'number' ? '0' : '' }}">
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
 
                 <hr>
@@ -389,8 +400,78 @@
                         {{ __('accommodations.inclusives') }}
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="{{ __('accommodations.tooltip_inclusives') }}"></i>
-                        </label>
+                    </label>
                     <input type="text" class="form-control" name="inclusives" id="inclusives" data-role="tagsinput" placeholder="{{ __('accommodations.add_inclusives') }}" data-bs-toggle="tooltip" title="{{ __('accommodations.tooltip_add_inclusives') }}">
+                </div>
+
+                <hr>
+
+                <!-- Pricing Section -->
+                <h5>{{ __('accommodations.pricing_title') }}</h5>
+
+                <div class="form-group">
+                    <label for="price_type" class="form-label fw-bold fs-5">
+                        {{ __('accommodations.price_type') }}
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                           title="{{ __('accommodations.tooltip_price_type') }}"></i>
+                    </label>
+                    <div class="d-flex flex-wrap btn-group-toggle">
+                        <input type="radio" name="price_type" value="per_night" id="per_night" 
+                               {{ (isset($formData['price_type']) && $formData['price_type'] == 'per_night') ? 'checked' : '' }}>
+                        <label for="per_night" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(50% - 20px);">
+                            {{ __('accommodations.per_night') }}
+                        </label>
+                        
+                        <input type="radio" name="price_type" value="per_week" id="per_week" 
+                               {{ (isset($formData['price_type']) && $formData['price_type'] == 'per_week') ? 'checked' : '' }}>
+                        <label for="per_week" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(50% - 20px);">
+                            {{ __('accommodations.per_week') }}
+                        </label>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="price_per_night" class="form-label fw-bold fs-5">
+                                {{ __('accommodations.price_per_night') }}
+                                <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                   title="{{ __('accommodations.tooltip_price_per_night') }}"></i>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">€</span>
+                                <input type="number" class="form-control" id="price_per_night" name="price_per_night" value="{{ $formData['price_per_night'] ?? '' }}" placeholder="0.00" step="0.01" min="0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="price_per_week" class="form-label fw-bold fs-5">
+                                {{ __('accommodations.price_per_week') }}
+                                <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                   title="{{ __('accommodations.tooltip_price_per_week') }}"></i>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">€</span>
+                                <input type="number" class="form-control" id="price_per_week" name="price_per_week" value="{{ $formData['price_per_week'] ?? '' }}" placeholder="0.00" step="0.01" min="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="currency" class="form-label fw-bold fs-5">
+                        {{ __('accommodations.currency') }}
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                           title="{{ __('accommodations.tooltip_currency') }}"></i>
+                    </label>
+                    <select class="form-control" id="currency" name="currency">
+                        <option value="EUR" {{ (isset($formData['currency']) && $formData['currency'] == 'EUR') ? 'selected' : '' }}>EUR (€)</option>
+                        <option value="USD" {{ (isset($formData['currency']) && $formData['currency'] == 'USD') ? 'selected' : '' }}>USD ($)</option>
+                        <option value="GBP" {{ (isset($formData['currency']) && $formData['currency'] == 'GBP') ? 'selected' : '' }}>GBP (£)</option>
+                    </select>
                 </div>
 
                 <div class="button-group">

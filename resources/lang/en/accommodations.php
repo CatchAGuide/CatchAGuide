@@ -257,6 +257,19 @@ return [
     
     // Step 6 - Policies
     'policies_title' => 'Policies',
+    
+    // Pricing translations
+    'pricing_title' => 'Pricing',
+    'price_type' => 'Price Type',
+    'per_night' => 'Per Night',
+    'per_week' => 'Per Week',
+    'price_per_night' => 'Price per Night',
+    'price_per_week' => 'Price per Week',
+    'currency' => 'Currency',
+    'tooltip_price_type' => 'Select how the accommodation is priced',
+    'tooltip_price_per_night' => 'Enter the price per night',
+    'tooltip_price_per_week' => 'Enter the price per week',
+    'tooltip_currency' => 'Select the currency for pricing',
     'policies' => 'Policies',
     'tooltip_policies' => 'Set your rental policies',
     'add_policies' => 'Add policies...',

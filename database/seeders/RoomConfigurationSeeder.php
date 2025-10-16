@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use DB;
 
 class RoomConfigurationSeeder extends Seeder
 {
@@ -13,6 +14,7 @@ class RoomConfigurationSeeder extends Seeder
      */
     public function run()
     {
+        DB::table('room_configurations')->truncate();
         $roomConfigurations = [
             ['name' => 'Einzelbett', 'name_en' => 'Single Bed', 'sort_order' => 1],
             ['name' => 'Doppelbett', 'name_en' => 'Double Bed', 'sort_order' => 2],

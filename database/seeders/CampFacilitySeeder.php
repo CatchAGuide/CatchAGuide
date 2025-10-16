@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\CampFacility;
+use DB;
 
 class CampFacilitySeeder extends Seeder
 {
@@ -14,6 +15,7 @@ class CampFacilitySeeder extends Seeder
      */
     public function run()
     {
+        DB::table('camp_facilities')->truncate();
         $facilities = [
             [
                 'name' => 'Swimming pool',

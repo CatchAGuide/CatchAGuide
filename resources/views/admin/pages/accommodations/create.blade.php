@@ -47,6 +47,10 @@
                                 'facilities' => $facilities,
                                 'kitchenEquipment' => $kitchenEquipment,
                                 'bathroomAmenities' => $bathroomAmenities,
+                                'accommodationPolicies' => $accommodationPolicies,
+                                'accommodationRentalConditions' => $accommodationRentalConditions,
+                                'accommodationExtras' => $accommodationExtras,
+                                'accommodationInclusives' => $accommodationInclusives,
                                 'formAction' => route('admin.accommodations.store'),
                                 'targetRedirect' => $targetRedirect
                             ])

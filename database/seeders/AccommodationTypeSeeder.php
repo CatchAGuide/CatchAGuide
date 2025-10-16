@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use DB;
 
 class AccommodationTypeSeeder extends Seeder
 {
@@ -13,6 +14,7 @@ class AccommodationTypeSeeder extends Seeder
      */
     public function run()
     {
+        DB::table('accommodation_types')->truncate();
         $accommodationTypes = [
             ['name' => 'Villa', 'name_en' => 'Villa', 'sort_order' => 1],
             ['name' => 'Ferienhaus', 'name_en' => 'Holiday House', 'sort_order' => 2],

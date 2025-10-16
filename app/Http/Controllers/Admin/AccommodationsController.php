@@ -10,6 +10,10 @@ use App\Models\RoomConfiguration;
 use App\Models\Facility;
 use App\Models\KitchenEquipment;
 use App\Models\BathroomAmenity;
+use App\Models\AccommodationPolicy;
+use App\Models\AccommodationRentalCondition;
+use App\Models\AccommodationExtra;
+use App\Models\AccommodationInclusive;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
@@ -66,6 +70,12 @@ class AccommodationsController extends Controller
             ];
         });
         
+        // Step 6 data
+        $accommodationPolicies = AccommodationPolicy::active()->ordered()->get();
+        $accommodationRentalConditions = AccommodationRentalCondition::active()->ordered()->get();
+        $accommodationExtras = AccommodationExtra::active()->ordered()->get();
+        $accommodationInclusives = AccommodationInclusive::active()->ordered()->get();
+        
         $targetRedirect = route('admin.accommodations.index');
         
         return view('admin.pages.accommodations.create', compact(
@@ -76,7 +86,11 @@ class AccommodationsController extends Controller
             'roomConfigurations',
             'facilities',
             'kitchenEquipment',
-            'bathroomAmenities'
+            'bathroomAmenities',
+            'accommodationPolicies',
+            'accommodationRentalConditions',
+            'accommodationExtras',
+            'accommodationInclusives'
         ));
     }
 
@@ -88,52 +102,52 @@ class AccommodationsController extends Controller
         $isDraft = $request->input('is_draft') == '1';
         
         // Different validation rules for draft vs final submission
-        if ($isDraft) {
-            // Minimal validation for drafts
-            $validated = $request->validate([
-                'title' => 'nullable|string|max:255',
-                'location' => 'nullable|string|max:255',
-                'accommodation_type' => 'nullable|string|max:255',
-                'description' => 'nullable|string',
-                'price_type' => 'nullable|string|in:per_accommodation,per_person',
-                'status' => 'nullable|string|in:active,inactive,draft',
-            ]);
-        } else {
-            // Full validation for final submission
-            $validated = $request->validate([
-                'title' => 'required|string|max:255',
-                'location' => 'required|string|max:255',
-                'city' => 'nullable|string|max:255',
-                'country' => 'nullable|string|max:255',
-                'region' => 'nullable|string|max:255',
-                'accommodation_type' => 'required|string|max:255',
-                'description' => 'nullable|string',
-                'condition_or_style' => 'nullable|string|max:255',
-                'living_area_sqm' => 'nullable|integer|min:0',
-                'floor_layout' => 'nullable|string|max:255',
-                'max_occupancy' => 'nullable|integer|min:1',
-                'number_of_bedrooms' => 'nullable|integer|min:0',
-                'kitchen_type' => 'nullable|string|max:255',
-                'bathroom' => 'nullable|integer|min:0',
-                'location_description' => 'nullable|string',
-                'distance_to_water_m' => 'nullable|integer|min:0',
-                'distance_to_boat_berth_m' => 'nullable|integer|min:0',
-                'distance_to_shop_km' => 'nullable|numeric|min:0',
-                'distance_to_parking_m' => 'nullable|integer|min:0',
-                'distance_to_nearest_town_km' => 'nullable|numeric|min:0',
-                'distance_to_airport_km' => 'nullable|numeric|min:0',
-                'distance_to_ferry_port_km' => 'nullable|numeric|min:0',
-                'changeover_day' => 'nullable|string|max:255',
-                'minimum_stay_nights' => 'nullable|integer|min:1',
-                'price_type' => 'required|string|in:per_accommodation,per_person',
-                'price_per_night' => 'nullable|numeric|min:0',
-                'price_per_week' => 'nullable|numeric|min:0',
-                'currency' => 'nullable|string|max:3',
-                'lat' => 'nullable|numeric|between:-90,90',
-                'lng' => 'nullable|numeric|between:-180,180',
-                'status' => 'nullable|string|in:active,inactive,draft',
-            ]);
-        }
+        // if ($isDraft) {
+        //     // Minimal validation for drafts
+        //     $validated = $request->validate([
+        //         'title' => 'nullable|string|max:255',
+        //         'location' => 'nullable|string|max:255',
+        //         'accommodation_type' => 'nullable|string|max:255',
+        //         'description' => 'nullable|string',
+        //         'price_type' => 'nullable|string|in:per_accommodation,per_person',
+        //         'status' => 'nullable|string|in:active,inactive,draft',
+        //     ]);
+        // } else {
+        //     // Full validation for final submission
+        //     $validated = $request->validate([
+        //         'title' => 'required|string|max:255',
+        //         'location' => 'required|string|max:255',
+        //         'city' => 'nullable|string|max:255',
+        //         'country' => 'nullable|string|max:255',
+        //         'region' => 'nullable|string|max:255',
+        //         'accommodation_type' => 'required|string|max:255',
+        //         'description' => 'nullable|string',
+        //         'condition_or_style' => 'nullable|string|max:255',
+        //         'living_area_sqm' => 'nullable|integer|min:0',
+        //         'floor_layout' => 'nullable|string|max:255',
+        //         'max_occupancy' => 'nullable|integer|min:1',
+        //         'number_of_bedrooms' => 'nullable|integer|min:0',
+        //         'kitchen_type' => 'nullable|string|max:255',
+        //         'bathroom' => 'nullable|integer|min:0',
+        //         'location_description' => 'nullable|string',
+        //         'distance_to_water_m' => 'nullable|integer|min:0',
+        //         'distance_to_boat_berth_m' => 'nullable|integer|min:0',
+        //         'distance_to_shop_km' => 'nullable|numeric|min:0',
+        //         'distance_to_parking_m' => 'nullable|integer|min:0',
+        //         'distance_to_nearest_town_km' => 'nullable|numeric|min:0',
+        //         'distance_to_airport_km' => 'nullable|numeric|min:0',
+        //         'distance_to_ferry_port_km' => 'nullable|numeric|min:0',
+        //         'changeover_day' => 'nullable|string|max:255',
+        //         'minimum_stay_nights' => 'nullable|integer|min:1',
+        //         'price_type' => 'required|string|in:per_accommodation,per_person',
+        //         'price_per_night' => 'nullable|numeric|min:0',
+        //         'price_per_week' => 'nullable|numeric|min:0',
+        //         'currency' => 'nullable|string|max:3',
+        //         'lat' => 'nullable|numeric|between:-90,90',
+        //         'lng' => 'nullable|numeric|between:-180,180',
+        //         'status' => 'nullable|string|in:active,inactive,draft',
+        //     ]);
+        // }
 
         try {
             $slug = $this->generateUniqueSlug($request->title ?? 'Untitled');
@@ -176,6 +190,8 @@ class AccommodationsController extends Controller
                 'amenities' => $this->processFacilities($request),
                 'kitchen_equipment' => $this->processKitchenEquipmentTagify($request),
                 'bathroom_amenities' => $this->processBathroomAmenitiesTagify($request),
+                'accommodation_details' => $this->processAccommodationDetails($request),
+                'room_configurations' => $this->processRoomConfigurations($request),
                 'policies' => $this->processPoliciesTagify($request),
                 'rental_conditions' => $this->processRentalConditionsTagify($request),
                 'extras' => $this->processExtrasTagify($request),
@@ -240,7 +256,52 @@ class AccommodationsController extends Controller
      */
     public function edit(Accommodation $accommodation)
     {
-        return view('admin.pages.accommodations.edit', compact('accommodation'));
+        // Prepare form data similar to create method
+        $accommodationTypes = AccommodationType::active()->ordered()->get();
+        $accommodationDetails = AccommodationDetail::active()->ordered()->get();
+        $roomConfigurations = RoomConfiguration::active()->ordered()->get();
+        
+        // Transform data to have 'value' field for Tagify compatibility
+        $facilities = Facility::active()->ordered()->get()->map(function($item) {
+            return [
+                'value' => $item->name,
+                'id' => $item->id
+            ];
+        });
+        
+        $kitchenEquipment = KitchenEquipment::active()->ordered()->get()->map(function($item) {
+            return [
+                'value' => $item->name,
+                'id' => $item->id
+            ];
+        });
+        
+        $bathroomAmenities = BathroomAmenity::active()->ordered()->get()->map(function($item) {
+            return [
+                'value' => $item->name,
+                'id' => $item->id
+            ];
+        });
+        
+        // Step 6 data
+        $accommodationPolicies = AccommodationPolicy::active()->ordered()->get();
+        $accommodationRentalConditions = AccommodationRentalCondition::active()->ordered()->get();
+        $accommodationExtras = AccommodationExtra::active()->ordered()->get();
+        $accommodationInclusives = AccommodationInclusive::active()->ordered()->get();
+        
+        return view('admin.pages.accommodations.edit', compact(
+            'accommodation',
+            'accommodationTypes',
+            'accommodationDetails',
+            'roomConfigurations',
+            'facilities',
+            'kitchenEquipment',
+            'bathroomAmenities',
+            'accommodationPolicies',
+            'accommodationRentalConditions',
+            'accommodationExtras',
+            'accommodationInclusives'
+        ));
     }
 
     /**
@@ -335,6 +396,8 @@ class AccommodationsController extends Controller
         $validated['amenities'] = $this->processFacilities($request);
         $validated['kitchen_equipment'] = $this->processKitchenEquipmentTagify($request);
         $validated['bathroom_amenities'] = $this->processBathroomAmenitiesTagify($request);
+        $validated['accommodation_details'] = $this->processAccommodationDetails($request);
+        $validated['room_configurations'] = $this->processRoomConfigurations($request);
         $validated['policies'] = $this->processPoliciesTagify($request);
         $validated['rental_conditions'] = $this->processRentalConditionsTagify($request);
         $validated['extras'] = $this->processExtrasTagify($request);
@@ -757,6 +820,48 @@ class AccommodationsController extends Controller
     }
 
     /**
+     * Process accommodation details checkbox data with input fields
+     */
+    private function processAccommodationDetails($request)
+    {
+        $accommodationDetails = [];
+        
+        // Get selected accommodation detail checkboxes
+        $selectedDetails = $request->input('accommodation_detail_checkboxes', []);
+        
+        foreach ($selectedDetails as $detailId) {
+            $detailData = [
+                'id' => $detailId,
+                'value' => $request->input("accommodation_detail_{$detailId}", '')
+            ];
+            $accommodationDetails[] = $detailData;
+        }
+        
+        return empty($accommodationDetails) ? null : $accommodationDetails;
+    }
+
+    /**
+     * Process room configurations checkbox data with input fields
+     */
+    private function processRoomConfigurations($request)
+    {
+        $roomConfigurations = [];
+        
+        // Get selected room configuration checkboxes
+        $selectedConfigs = $request->input('room_config_checkboxes', []);
+        
+        foreach ($selectedConfigs as $configId) {
+            $configData = [
+                'id' => $configId,
+                'value' => $request->input("room_config_{$configId}", '')
+            ];
+            $roomConfigurations[] = $configData;
+        }
+        
+        return empty($roomConfigurations) ? null : $roomConfigurations;
+    }
+
+    /**
      * Process policies Tagify data
      */
     private function processPoliciesTagify($request)
@@ -771,17 +876,24 @@ class AccommodationsController extends Controller
     }
 
     /**
-     * Process rental conditions Tagify data
+     * Process rental conditions checkbox data with input fields
      */
     private function processRentalConditionsTagify($request)
     {
-        if (!$request->has('rental_conditions')) {
-            return null;
+        $rentalConditions = [];
+        
+        // Get selected rental condition checkboxes
+        $selectedConditions = $request->input('rental_condition_checkboxes', []);
+        
+        foreach ($selectedConditions as $conditionId) {
+            $conditionData = [
+                'id' => $conditionId,
+                'value' => $request->input("rental_condition_{$conditionId}", '')
+            ];
+            $rentalConditions[] = $conditionData;
         }
-
-        return is_string($request->rental_conditions) 
-            ? explode(',', $request->rental_conditions) 
-            : $request->rental_conditions;
+        
+        return empty($rentalConditions) ? null : $rentalConditions;
     }
 
     /**
