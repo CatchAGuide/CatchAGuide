@@ -17,10 +17,10 @@
                     <i class="fas fa-map-marker-alt"></i>
                 </button>
                 <button type="button" class="step-button" data-step="5">
-                    <i class="fas fa-list-alt"></i>
+                    <i class="fas fa-euro-sign"></i>
                 </button>
                 <button type="button" class="step-button" data-step="6">
-                    <i class="fas fa-gavel"></i>
+                    <i class="fas fa-list-alt"></i>
                 </button>
             </div>
 
@@ -58,7 +58,7 @@
 
             <!-- Step 1: Gallery, Location and Title -->
             <div class="step active" id="step1">
-                <h5>{{ __('accommodations.upload_images_title') }}</h5>
+                {{-- <h5>{{ __('accommodations.upload_images_title') }}</h5> --}}
 
                 <label for="title_image" class="form-label fw-bold fs-5">
                     {{ __('accommodations.upload_image') }}
@@ -99,7 +99,7 @@
 
                 <div class="form-group">
                     <label for="title" class="form-label fw-bold fs-5">
-                        {{ __('accommodations.title') }}
+                        {{ __('accommodations.fields.title') }}
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('accommodations.tooltip_title') }}"></i>
                     </label>
                     <input type="text" class="form-control" id="title" name="title" value="{{ $formData['title'] ?? '' }}" placeholder="{{ __('accommodations.enter_catchy_title') }}">
@@ -208,7 +208,7 @@
                                 <label for="room_config_{{ $roomConfiguration->id }}" class="btn btn-outline-primary btn-checkbox">
                                     {{ $roomConfiguration->name }}
                     </label>
-                                <input type="number" class="form-control extra-input" name="room_config_{{ $roomConfiguration->id }}" placeholder="{{ __('accommodations.enter_value_for') . ' ' . $roomConfiguration->name }}" min="0">
+                                <input type="text" class="form-control extra-input" name="room_config_{{ $roomConfiguration->id }}" placeholder="{{ __('accommodations.enter_value_for') . ' ' . $roomConfiguration->name }}" min="0">
                             </div>
                         @endforeach
                     </div>
@@ -290,39 +290,57 @@
                 </div>
             </div>
 
-            <!-- Step 5: Facilities -->
+            <!-- Step 5: Pricing -->
             <div class="step" id="step5">
-                <h5>{{ __('accommodations.facilities_title') }}</h5>
+                <h5>{{ __('accommodations.pricing_title') }}</h5>
 
                 <div class="form-group">
-                    <label for="facilities" class="form-label fw-bold fs-5">
-                        {{ __('accommodations.facilities') }}
+                    <label class="form-label fw-bold fs-5">
+                        {{ __('accommodations.price_type') }}
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                           title="{{ __('accommodations.tooltip_facilities') }}"></i>
+                           title="{{ __('accommodations.tooltip_price_type') }}"></i>
                     </label>
-                    <input type="text" class="form-control" name="facilities" id="facilities" data-role="tagsinput" placeholder="{{ __('accommodations.add_facilities') }}" data-bs-toggle="tooltip" title="{{ __('accommodations.tooltip_add_facilities') }}">
+                    
+                    <div class="pricing-types-grid">
+                        <!-- Per Night -->
+                        <div class="btn-checkbox-container">
+                            <input type="checkbox" name="price_type_checkboxes[]" value="per_night" id="price_type_per_night">
+                            <label for="price_type_per_night" class="btn btn-outline-primary btn-checkbox">
+                                {{ __('accommodations.per_night') }}
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">€</span>
+                                <input type="number" class="form-control" name="price_per_night" placeholder="0.00" step="0.01" min="0" value="{{ $formData['price_per_night'] ?? '' }}">
+                            </div>
+                        </div>
+
+                        <!-- Per Week -->
+                        <div class="btn-checkbox-container">
+                            <input type="checkbox" name="price_type_checkboxes[]" value="per_week" id="price_type_per_week">
+                            <label for="price_type_per_week" class="btn btn-outline-primary btn-checkbox">
+                                {{ __('accommodations.per_week') }}
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">€</span>
+                                <input type="number" class="form-control" name="price_per_week" placeholder="0.00" step="0.01" min="0" value="{{ $formData['price_per_week'] ?? '' }}">
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <hr>
 
                 <div class="form-group">
-                    <label for="kitchen_equipment" class="form-label fw-bold fs-5">
-                        {{ __('accommodations.kitchen_equipment') }}
+                    <label for="currency" class="form-label fw-bold fs-5">
+                        {{ __('accommodations.currency') }}
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                           title="{{ __('accommodations.tooltip_kitchen_equipment') }}"></i>
+                           title="{{ __('accommodations.tooltip_currency') }}"></i>
                     </label>
-                    <input type="text" class="form-control" name="kitchen_equipment" id="kitchen_equipment" data-role="tagsinput" placeholder="{{ __('accommodations.add_kitchen_equipment') }}" data-bs-toggle="tooltip" title="{{ __('accommodations.tooltip_add_kitchen_equipment') }}">
-                </div>
-
-                <hr>
-
-                <div class="form-group">
-                    <label for="bathroom_amenities" class="form-label fw-bold fs-5">
-                        {{ __('accommodations.bathroom_amenities') }}
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                           title="{{ __('accommodations.tooltip_bathroom_amenities') }}"></i>
-                        </label>
-                    <input type="text" class="form-control" name="bathroom_amenities" id="bathroom_amenities" data-role="tagsinput" placeholder="{{ __('accommodations.add_bathroom_amenities') }}" data-bs-toggle="tooltip" title="{{ __('accommodations.tooltip_add_bathroom_amenities') }}">
+                    <select class="form-control" id="currency" name="currency">
+                        <option value="EUR" {{ (isset($formData['currency']) && $formData['currency'] == 'EUR') ? 'selected' : '' }}>EUR (€)</option>
+                        <option value="USD" {{ (isset($formData['currency']) && $formData['currency'] == 'USD') ? 'selected' : '' }}>USD ($)</option>
+                        <option value="GBP" {{ (isset($formData['currency']) && $formData['currency'] == 'GBP') ? 'selected' : '' }}>GBP (£)</option>
+                    </select>
                 </div>
 
                 <div class="button-group">
@@ -347,18 +365,58 @@
                 </div>
             </div>
 
-            <!-- Step 6: Policies -->
+            <!-- Step 6: Facilities & Policies -->
             <div class="step" id="step6">
-                <h5>{{ __('accommodations.policies_title') }}</h5>
+                <h5>{{ __('accommodations.sections.policies') }}</h5>
 
-                <div class="form-group">
-                    <label for="policies" class="form-label fw-bold fs-5">
-                        {{ __('accommodations.policies') }}
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                           title="{{ __('accommodations.tooltip_policies') }}"></i>
-                    </label>
-                    <input type="text" class="form-control" name="policies" id="policies" data-role="tagsinput" placeholder="{{ __('accommodations.add_policies') }}" data-bs-toggle="tooltip" title="{{ __('accommodations.tooltip_add_policies') }}">
+                <!-- Facilities Section (Moved here and made smaller) -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="facilities" class="form-label fw-bold fs-6">
+                                {{ __('accommodations.facilities') }}
+                                <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                   title="{{ __('accommodations.tooltip_facilities') }}"></i>
+                            </label>
+                            <input type="text" class="form-control form-control-sm" name="facilities" id="facilities" data-role="tagsinput" placeholder="{{ __('accommodations.add_facilities') }}" data-bs-toggle="tooltip" title="{{ __('accommodations.tooltip_add_facilities') }}">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="kitchen_equipment" class="form-label fw-bold fs-6">
+                                {{ __('accommodations.kitchen_equipment') }}
+                                <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                   title="{{ __('accommodations.tooltip_kitchen_equipment') }}"></i>
+                            </label>
+                            <input type="text" class="form-control form-control-sm" name="kitchen_equipment" id="kitchen_equipment" data-role="tagsinput" placeholder="{{ __('accommodations.add_kitchen_equipment') }}" data-bs-toggle="tooltip" title="{{ __('accommodations.tooltip_add_kitchen_equipment') }}">
+                        </div>
+                    </div>
                 </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="bathroom_amenities" class="form-label fw-bold fs-6">
+                                {{ __('accommodations.bathroom_amenities') }}
+                                <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                   title="{{ __('accommodations.tooltip_bathroom_amenities') }}"></i>
+                            </label>
+                            <input type="text" class="form-control form-control-sm" name="bathroom_amenities" id="bathroom_amenities" data-role="tagsinput" placeholder="{{ __('accommodations.add_bathroom_amenities') }}" data-bs-toggle="tooltip" title="{{ __('accommodations.tooltip_add_bathroom_amenities') }}">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="policies" class="form-label fw-bold fs-6">
+                                {{ __('accommodations.policies') }}
+                                <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                   title="{{ __('accommodations.tooltip_policies') }}"></i>
+                            </label>
+                            <input type="text" class="form-control form-control-sm" name="policies" id="policies" data-role="tagsinput" placeholder="{{ __('accommodations.add_policies') }}" data-bs-toggle="tooltip" title="{{ __('accommodations.tooltip_add_policies') }}">
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
                     
                 <hr>
 
@@ -404,75 +462,6 @@
                     <input type="text" class="form-control" name="inclusives" id="inclusives" data-role="tagsinput" placeholder="{{ __('accommodations.add_inclusives') }}" data-bs-toggle="tooltip" title="{{ __('accommodations.tooltip_add_inclusives') }}">
                 </div>
 
-                <hr>
-
-                <!-- Pricing Section -->
-                <h5>{{ __('accommodations.pricing_title') }}</h5>
-
-                <div class="form-group">
-                    <label for="price_type" class="form-label fw-bold fs-5">
-                        {{ __('accommodations.price_type') }}
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                           title="{{ __('accommodations.tooltip_price_type') }}"></i>
-                    </label>
-                    <div class="d-flex flex-wrap btn-group-toggle">
-                        <input type="radio" name="price_type" value="per_night" id="per_night" 
-                               {{ (isset($formData['price_type']) && $formData['price_type'] == 'per_night') ? 'checked' : '' }}>
-                        <label for="per_night" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(50% - 20px);">
-                            {{ __('accommodations.per_night') }}
-                        </label>
-                        
-                        <input type="radio" name="price_type" value="per_week" id="per_week" 
-                               {{ (isset($formData['price_type']) && $formData['price_type'] == 'per_week') ? 'checked' : '' }}>
-                        <label for="per_week" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(50% - 20px);">
-                            {{ __('accommodations.per_week') }}
-                        </label>
-                    </div>
-                </div>
-
-                <hr>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="price_per_night" class="form-label fw-bold fs-5">
-                                {{ __('accommodations.price_per_night') }}
-                                <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                   title="{{ __('accommodations.tooltip_price_per_night') }}"></i>
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text">€</span>
-                                <input type="number" class="form-control" id="price_per_night" name="price_per_night" value="{{ $formData['price_per_night'] ?? '' }}" placeholder="0.00" step="0.01" min="0">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="price_per_week" class="form-label fw-bold fs-5">
-                                {{ __('accommodations.price_per_week') }}
-                                <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                   title="{{ __('accommodations.tooltip_price_per_week') }}"></i>
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text">€</span>
-                                <input type="number" class="form-control" id="price_per_week" name="price_per_week" value="{{ $formData['price_per_week'] ?? '' }}" placeholder="0.00" step="0.01" min="0">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="currency" class="form-label fw-bold fs-5">
-                        {{ __('accommodations.currency') }}
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                           title="{{ __('accommodations.tooltip_currency') }}"></i>
-                    </label>
-                    <select class="form-control" id="currency" name="currency">
-                        <option value="EUR" {{ (isset($formData['currency']) && $formData['currency'] == 'EUR') ? 'selected' : '' }}>EUR (€)</option>
-                        <option value="USD" {{ (isset($formData['currency']) && $formData['currency'] == 'USD') ? 'selected' : '' }}>USD ($)</option>
-                        <option value="GBP" {{ (isset($formData['currency']) && $formData['currency'] == 'GBP') ? 'selected' : '' }}>GBP (£)</option>
-                    </select>
-                </div>
 
                 <div class="button-group">
                     <div class="left-buttons">
@@ -496,3 +485,5 @@
         </form>
     </div>
 </div>
+
+@include('components.accommodation-form-scripts')

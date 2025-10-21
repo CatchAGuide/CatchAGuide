@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use DB;
 
 class FacilitySeeder extends Seeder
 {
@@ -13,6 +14,8 @@ class FacilitySeeder extends Seeder
      */
     public function run()
     {
+        
+        DB::table('facilities')->truncate();
         $facilities = [
             ['name' => 'Terrasse', 'name_en' => 'Terrace', 'sort_order' => 1],
             ['name' => 'Garten', 'name_en' => 'Garden', 'sort_order' => 2],

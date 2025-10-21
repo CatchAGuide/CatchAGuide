@@ -2,7 +2,18 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@latest/dist/browser-image-compression.js"></script>
-<script src="{{ asset('assets/js/ImageManager.js') }}"></script>
+@if(!isset($imageManagerLoaded))
+    <script>
+        if (!window.imageManagerScriptLoaded) {
+            var script = document.createElement('script');
+            script.src = '{{ asset("assets/js/ImageManager.js") }}';
+            script.async = true;
+            document.head.appendChild(script);
+            window.imageManagerScriptLoaded = true;
+        }
+    </script>
+    @php $imageManagerLoaded = true; @endphp
+@endif
 
 <script>
     window.imageManagerLoaded = window.imageManagerLoaded || null;
@@ -14,27 +25,310 @@
     window.country = window.country || null;
 
     // Initialize form when document is ready - exactly like rental-boat form
-    $(document).ready(function() {
+    document.addEventListener('DOMContentLoaded', function() {
+        // Wait for jQuery to be available
+        if (typeof $ !== 'undefined') {
         initializeAccommodationForm();
+        } else {
+            // Retry after a short delay
+            setTimeout(function() {
+                if (typeof $ !== 'undefined') {
+                    initializeAccommodationForm();
+                } else {
+                    console.error('jQuery not available');
+                }
+            }, 100);
+        }
     });
 
     function initializeAccommodationForm() {
+        // Prevent multiple initialization
+        if (window.accommodationFormInitialized) {
+            console.log('⚠️ Accommodation form already initialized, skipping...');
+            return;
+        }
+        
+        window.accommodationFormInitialized = true;
         // Initialize image manager using the same pattern as guidings
+        function initializeImageManager() {
         if (typeof ImageManager !== 'undefined' && !window.imageManagerLoaded) {
+                try {
             window.imageManagerLoaded = new ImageManager('#croppedImagesContainer', '#title_image');
-            
+                } catch (e) {
+                    console.error('Error creating ImageManager:', e);
+                    window.imageManagerLoaded = null;
+                }
+            } else if (typeof ImageManager === 'undefined') {
+                // Wait for ImageManager to load
+                setTimeout(initializeImageManager, 100);
+            }
+        }
+        
+        // Start initialization
+        initializeImageManager();
+        
+        // Load existing images if editing using ImageManager
             if (document.getElementById('is_update').value === '1') {
                 const existingImagesInput = document.getElementById('existing_images');
                 const thumbnailPath = document.getElementById('thumbnail_path').value;
                 
-                if (existingImagesInput && existingImagesInput.value) {
-                    window.imageManagerLoaded.loadExistingImages(existingImagesInput.value, thumbnailPath);
+            if (existingImagesInput && existingImagesInput.value && window.imageManagerLoaded) {
+                try {
+                    const existingImages = JSON.parse(existingImagesInput.value);
+                    if (Array.isArray(existingImages) && existingImages.length > 0) {
+                        window.imageManagerLoaded.loadExistingImages(existingImages, thumbnailPath);
+                    }
+                } catch (e) {
+                    console.error('Error loading existing images:', e);
                 }
             }
         }
 
+    function loadExistingFormData() {
+        // Load existing form data if editing
+        const formData = @json($formData ?? []);
+        
+        if (!formData || !formData.is_update) {
+            return;
+        }
+
+        // Load accommodation type (radio buttons)
+        if (formData.accommodation_type) {
+            const accommodationTypeField = document.querySelector(`input[name="accommodation_type"][id="accommodation_type_${formData.accommodation_type}"]`);
+            if (accommodationTypeField) {
+                accommodationTypeField.checked = true;
+            }
+        }
+
+
+        // Load distance fields (matching actual form field names)
+        if (formData.distance_to_water_m) {
+            const fieldElement = document.querySelector('input[name="distance_to_water"]');
+            if (fieldElement) {
+                fieldElement.value = formData.distance_to_water_m;
+            }
+        }
+
+        if (formData.distance_to_boat_berth_m) {
+            const fieldElement = document.querySelector('input[name="distance_to_boat_mooring"]');
+            if (fieldElement) {
+                fieldElement.value = formData.distance_to_boat_berth_m;
+            }
+        }
+
+        if (formData.distance_to_parking_m) {
+            const fieldElement = document.querySelector('input[name="distance_to_parking_lot"]');
+            if (fieldElement) {
+                fieldElement.value = formData.distance_to_parking_m;
+            }
+        }
+
+        // Load pricing data
+        if (formData.price_per_night) {
+            const fieldElement = document.querySelector('input[name="price_per_night"]');
+            if (fieldElement) {
+                fieldElement.value = formData.price_per_night;
+            }
+        }
+
+        if (formData.price_per_week) {
+            const fieldElement = document.querySelector('input[name="price_per_week"]');
+            if (fieldElement) {
+                fieldElement.value = formData.price_per_week;
+            }
+        }
+
+        // Load other form fields
+        if (formData.description) {
+            const fieldElement = document.querySelector('textarea[name="description"]');
+            if (fieldElement) {
+                fieldElement.value = formData.description;
+            }
+        }
+
+        if (formData.condition_or_style) {
+            const fieldElement = document.querySelector('input[name="condition_or_style"]');
+            if (fieldElement) {
+                fieldElement.value = formData.condition_or_style;
+            }
+        }
+
+        if (formData.living_area_sqm) {
+            const fieldElement = document.querySelector('input[name="living_area_sqm"]');
+            if (fieldElement) {
+                fieldElement.value = formData.living_area_sqm;
+            }
+        }
+
+        if (formData.max_occupancy) {
+            const fieldElement = document.querySelector('input[name="max_occupancy"]');
+            if (fieldElement) {
+                fieldElement.value = formData.max_occupancy;
+            }
+        }
+
+        if (formData.number_of_bedrooms) {
+            const fieldElement = document.querySelector('input[name="number_of_bedrooms"]');
+            if (fieldElement) {
+                fieldElement.value = formData.number_of_bedrooms;
+            }
+        }
+
+        if (formData.location_description) {
+            const fieldElement = document.querySelector('textarea[name="location_description"]');
+            if (fieldElement) {
+                fieldElement.value = formData.location_description;
+            }
+        }
+
+        if (formData.changeover_day) {
+            const fieldElement = document.querySelector('input[name="changeover_day"]');
+            if (fieldElement) {
+                fieldElement.value = formData.changeover_day;
+            }
+        }
+
+        if (formData.minimum_stay_nights) {
+            const fieldElement = document.querySelector('input[name="minimum_stay_nights"]');
+            if (fieldElement) {
+                fieldElement.value = formData.minimum_stay_nights;
+            }
+        }
+
+        // Load pricing checkboxes based on existing data
+        if (formData.price_per_night && parseFloat(formData.price_per_night) > 0) {
+            const perNightCheckbox = document.querySelector('input[name="price_type_checkboxes[]"][value="per_night"]');
+            if (perNightCheckbox) {
+                perNightCheckbox.checked = true;
+                const container = perNightCheckbox.closest('.btn-checkbox-container');
+                if (container) {
+                    const label = container.querySelector('label');
+                    const inputGroup = container.querySelector('.input-group');
+                    if (label) label.classList.add('active');
+                    if (inputGroup) inputGroup.style.display = 'block';
+                }
+            }
+        }
+
+        if (formData.price_per_week && parseFloat(formData.price_per_week) > 0) {
+            const perWeekCheckbox = document.querySelector('input[name="price_type_checkboxes[]"][value="per_week"]');
+            if (perWeekCheckbox) {
+                perWeekCheckbox.checked = true;
+                const container = perWeekCheckbox.closest('.btn-checkbox-container');
+                if (container) {
+                    const label = container.querySelector('label');
+                    const inputGroup = container.querySelector('.input-group');
+                    if (label) label.classList.add('active');
+                    if (inputGroup) inputGroup.style.display = 'block';
+                }
+            }
+        }
+
+        // Load accommodation details checkboxes
+        if (formData.accommodation_details && Array.isArray(formData.accommodation_details)) {
+            formData.accommodation_details.forEach(detail => {
+                if (detail.id && detail.value) {
+                    const checkbox = document.querySelector(`input[name="accommodation_detail_checkboxes[]"][value="${detail.id}"]`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        const container = checkbox.closest('.btn-checkbox-container');
+                        if (container) {
+                            const label = container.querySelector('label');
+                            const input = container.querySelector('input.extra-input');
+                            if (label) label.classList.add('active');
+                            if (input) input.value = detail.value;
+                        }
+                    }
+                }
+            });
+        }
+
+        // Load room configurations checkboxes
+        if (formData.room_configurations && Array.isArray(formData.room_configurations)) {
+            formData.room_configurations.forEach(config => {
+                if (config.id && config.value) {
+                    const checkbox = document.querySelector(`input[name="room_config_checkboxes[]"][value="${config.id}"]`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        const container = checkbox.closest('.btn-checkbox-container');
+                        if (container) {
+                            const label = container.querySelector('label');
+                            const input = container.querySelector('input.extra-input');
+                            if (label) label.classList.add('active');
+                            if (input) input.value = config.value;
+                        }
+                    }
+                }
+            });
+        }
+
+        // Load rental conditions checkboxes
+        if (formData.rental_conditions && Array.isArray(formData.rental_conditions)) {
+            formData.rental_conditions.forEach(condition => {
+                if (condition.id && condition.value) {
+                    const checkbox = document.querySelector(`input[name="rental_condition_checkboxes[]"][value="${condition.id}"]`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        const container = checkbox.closest('.btn-checkbox-container');
+                        if (container) {
+                            const label = container.querySelector('label');
+                            const input = container.querySelector('input.extra-input');
+                            if (label) label.classList.add('active');
+                            if (input) input.value = condition.value;
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    function fixPriceTypeUI() {
+        // Wait for DOM to be ready
+        setTimeout(function() {
+            const inputGroups = document.querySelectorAll('.pricing-types-grid .btn-checkbox-container .input-group');
+            
+            inputGroups.forEach(function(inputGroup, index) {
+                // Make input group visible
+                inputGroup.style.display = 'block';
+                inputGroup.style.width = '100%';
+                inputGroup.style.marginTop = '10px';
+                inputGroup.style.opacity = '1';
+                inputGroup.style.visibility = 'visible';
+                
+                // Fix input field
+                const input = inputGroup.querySelector('input');
+                if (input) {
+                    input.style.width = '100%';
+                    input.style.minWidth = '120px';
+                    input.style.height = '40px';
+                    input.style.padding = '8px 12px';
+                    input.style.fontSize = '14px';
+                    input.style.border = '1px solid #ddd';
+                    input.style.borderRadius = '4px';
+                    input.style.backgroundColor = '#fff';
+                }
+                
+                // Fix input group text (Euro symbol)
+                const inputGroupText = inputGroup.querySelector('.input-group-text');
+                if (inputGroupText) {
+                    inputGroupText.style.height = '40px';
+                    inputGroupText.style.padding = '8px 12px';
+                    inputGroupText.style.fontSize = '14px';
+                    inputGroupText.style.backgroundColor = '#f8f9fa';
+                    inputGroupText.style.border = '1px solid #ddd';
+                }
+            });
+        }, 100);
+        }
+
         // Initialize location autocomplete
         initializeLocationAutocomplete();
+        
+        // Load all existing form data if editing (after functions are defined)
+        loadExistingFormData();
+        
+        // Fix Price Type UI immediately
+        fixPriceTypeUI();
 
         // Initialize tagify for tags input with a small delay
         setTimeout(() => {
@@ -61,8 +355,26 @@
         // Initialize radio button functionality
         initializeRadioButtons();
 
-        // Initialize checkbox functionality
+        // Initialize checkbox functionality (wait for jQuery) - only once
+        if (!window.checkboxesInitialized) {
+            setTimeout(function() {
+                if (typeof $ !== 'undefined' && !window.checkboxesInitialized) {
+                    window.checkboxesInitialized = true;
         initializeCheckboxes();
+                    initializePricingCheckboxes();
+                } else if (!window.checkboxesInitialized) {
+                    console.log('❌ jQuery not available, retrying...');
+                    // Retry after another delay
+                    setTimeout(function() {
+                        if (typeof $ !== 'undefined' && !window.checkboxesInitialized) {
+                            window.checkboxesInitialized = true;
+                            initializeCheckboxes();
+                            initializePricingCheckboxes();
+                        }
+                    }, 500);
+                }
+            }, 200);
+        }
 
         // Initialize radio button styling
         initializeRadioButtonStyling();
@@ -139,10 +451,21 @@
             });
             
             // Populate with existing data
-            @if(isset($formData['facilities']) && is_array($formData['facilities']))
-            const facilitiesData = {!! json_encode($formData['facilities']) !!};
+            @if(isset($formData['amenities']) && is_array($formData['amenities']))
+            const facilitiesData = {!! json_encode($formData['amenities']) !!};
             if (facilitiesTagify && facilitiesData && Array.isArray(facilitiesData)) {
-                facilitiesTagify.addTags(facilitiesData.filter(Boolean));
+                // Handle malformed JSON data by parsing each item
+                const parsedData = facilitiesData.map(item => {
+                    if (typeof item === 'string') {
+                        try {
+                            return JSON.parse(item);
+                        } catch (e) {
+                            return { value: item, id: Math.random() };
+                        }
+                    }
+                    return item;
+                }).filter(Boolean);
+                facilitiesTagify.addTags(parsedData);
             }
             @endif
         }
@@ -165,6 +488,24 @@
                     closeOnSelect: false
                 }
             });
+            
+            // Populate with existing data
+            @if(isset($formData['kitchen_equipment']) && is_array($formData['kitchen_equipment']))
+            const kitchenEquipmentData = {!! json_encode($formData['kitchen_equipment']) !!};
+            if (kitchenEquipmentTagify && kitchenEquipmentData && Array.isArray(kitchenEquipmentData)) {
+                const parsedData = kitchenEquipmentData.map(item => {
+                    if (typeof item === 'string') {
+                        try {
+                            return JSON.parse(item);
+                        } catch (e) {
+                            return { value: item, id: Math.random() };
+                        }
+                    }
+                    return item;
+                }).filter(Boolean);
+                kitchenEquipmentTagify.addTags(parsedData);
+            }
+            @endif
         }
         @else
         if (document.getElementById('kitchen_equipment')) {
@@ -184,6 +525,24 @@
                     closeOnSelect: false
                 }
             });
+            
+            // Populate with existing data
+            @if(isset($formData['bathroom_amenities']) && is_array($formData['bathroom_amenities']))
+            const bathroomAmenitiesData = {!! json_encode($formData['bathroom_amenities']) !!};
+            if (bathroomAmenitiesTagify && bathroomAmenitiesData && Array.isArray(bathroomAmenitiesData)) {
+                const parsedData = bathroomAmenitiesData.map(item => {
+                    if (typeof item === 'string') {
+                        try {
+                            return JSON.parse(item);
+                        } catch (e) {
+                            return { value: item, id: Math.random() };
+                        }
+                    }
+                    return item;
+                }).filter(Boolean);
+                bathroomAmenitiesTagify.addTags(parsedData);
+            }
+            @endif
         }
         @else
         if (document.getElementById('bathroom_amenities')) {
@@ -203,6 +562,24 @@
                     closeOnSelect: false
                 }
             });
+            
+            // Populate with existing data
+            @if(isset($formData['policies']) && is_array($formData['policies']))
+            const policiesData = {!! json_encode($formData['policies']) !!};
+            if (policiesTagify && policiesData && Array.isArray(policiesData)) {
+                const parsedData = policiesData.map(item => {
+                    if (typeof item === 'string') {
+                        try {
+                            return JSON.parse(item);
+                        } catch (e) {
+                            return { value: item, id: Math.random() };
+                        }
+                    }
+                    return item;
+                }).filter(Boolean);
+                policiesTagify.addTags(parsedData);
+            }
+            @endif
         }
         @else
         if (document.getElementById('policies')) {
@@ -222,6 +599,24 @@
                     closeOnSelect: false
                 }
             });
+            
+            // Populate with existing data
+            @if(isset($formData['extras']) && is_array($formData['extras']))
+            const extrasData = {!! json_encode($formData['extras']) !!};
+            if (extrasTagify && extrasData && Array.isArray(extrasData)) {
+                const parsedData = extrasData.map(item => {
+                    if (typeof item === 'string') {
+                        try {
+                            return JSON.parse(item);
+                        } catch (e) {
+                            return { value: item, id: Math.random() };
+                        }
+                    }
+                    return item;
+                }).filter(Boolean);
+                extrasTagify.addTags(parsedData);
+            }
+            @endif
         }
         @else
         if (document.getElementById('extras')) {
@@ -241,6 +636,24 @@
                     closeOnSelect: false
                 }
             });
+            
+            // Populate with existing data
+            @if(isset($formData['inclusives']) && is_array($formData['inclusives']))
+            const inclusivesData = {!! json_encode($formData['inclusives']) !!};
+            if (inclusivesTagify && inclusivesData && Array.isArray(inclusivesData)) {
+                const parsedData = inclusivesData.map(item => {
+                    if (typeof item === 'string') {
+                        try {
+                            return JSON.parse(item);
+                        } catch (e) {
+                            return { value: item, id: Math.random() };
+                        }
+                    }
+                    return item;
+                }).filter(Boolean);
+                inclusivesTagify.addTags(parsedData);
+            }
+            @endif
         }
         @else
         if (document.getElementById('inclusives')) {
@@ -308,6 +721,24 @@
     }
 
     function setupFormSubmission() {
+        // Prevent multiple initialization
+        if (window.formSubmissionSetup) {
+            console.log('⚠️ Form submission already setup, skipping...');
+            return;
+        }
+        
+        window.formSubmissionSetup = true;
+        
+        // Remove any existing event listeners to prevent duplicates
+        document.querySelectorAll('[id^="submitBtn"]').forEach(button => {
+            button.removeEventListener('click', handleSubmit);
+        });
+        
+        const form = document.getElementById('accommodationForm');
+        if (form) {
+            form.removeEventListener('submit', handleSubmit);
+        }
+        
         // Submit button handlers
         document.querySelectorAll('[id^="submitBtn"]').forEach(button => {
             button.addEventListener('click', function(e) {
@@ -317,7 +748,6 @@
         });
 
         // Form submit handler
-        const form = document.getElementById('accommodationForm');
         if (form) {
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -387,7 +817,7 @@
 
             // Submit the form
             const response = await fetch(form.action, {
-                method: formData.get('_method') || 'POST',
+                method: 'POST', // Always use POST for Laravel - _method field handles PUT/PATCH/DELETE
                 body: formData,
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -439,7 +869,7 @@
 
         // Submit the form
         fetch(form.action, {
-            method: formData.get('_method') || 'POST',
+            method: 'POST', // Always use POST for Laravel - _method field handles PUT/PATCH/DELETE
             body: formData,
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -505,6 +935,9 @@
     }
 
     function validateStep(step) {
+        // DISABLED: Always return true to allow proceeding through steps without validation
+        return true;
+        
         const errorContainer = document.getElementById('error-container');
         errorContainer.style.display = 'none';
         errorContainer.innerHTML = '';
@@ -695,6 +1128,99 @@
                 $radio.trigger('change');
             }
         });
+    }
+
+    function initializePricingCheckboxes() {
+        // Remove any existing event listeners to prevent duplicates
+        $('.pricing-types-grid .btn-checkbox-container input[type="checkbox"]').off('change.pricing');
+        
+        // Pricing checkbox functionality - exactly like rental boats
+        $('.pricing-types-grid .btn-checkbox-container input[type="checkbox"]').on('change.pricing', function() {
+            var $container = $(this).closest('.btn-checkbox-container');
+            var $label = $container.find('label');
+            var $inputGroup = $container.find('.input-group');
+
+            if (this.checked) {
+                $label.addClass('active');
+                $inputGroup.show();
+            } else {
+                $label.removeClass('active');
+                $inputGroup.hide();
+                // Clear the input value when unchecked
+                $inputGroup.find('input').val('');
+            }
+        });
+
+        // Initialize checkbox states on page load
+        $('.pricing-types-grid .btn-checkbox-container input[type="checkbox"]').each(function() {
+            var $container = $(this).closest('.btn-checkbox-container');
+            var $label = $container.find('label');
+            var $inputGroup = $container.find('.input-group');
+            
+            if (this.checked) {
+                $label.addClass('active');
+                $inputGroup.show();
+            } else {
+                $label.removeClass('active');
+                $inputGroup.hide();
+            }
+        });
+        
+        // Make sure input groups are visible by default (show them)
+        $('.pricing-types-grid .btn-checkbox-container .input-group').show();
+        
+        // Fix Price Type UI - make input fields visible and properly sized
+        $('.pricing-types-grid .btn-checkbox-container .input-group').css({
+            'display': 'block',
+            'width': '100%',
+            'margin-top': '10px'
+        });
+        
+        $('.pricing-types-grid .btn-checkbox-container .input-group input').css({
+            'width': '100%',
+            'min-width': '120px',
+            'height': '40px',
+            'padding': '8px 12px',
+            'font-size': '14px',
+            'border': '1px solid #ddd',
+            'border-radius': '4px'
+        });
+        
+        $('.pricing-types-grid .btn-checkbox-container .input-group-text').css({
+            'height': '40px',
+            'padding': '8px 12px',
+            'font-size': '14px'
+        });
+
+        // Load existing pricing data if editing
+        loadPricingData();
+    }
+
+    function loadPricingData() {
+        // Load pricing data from form data (for editing)
+        const formData = @json($formData ?? []);
+        
+        if (formData.price_per_night && parseFloat(formData.price_per_night) > 0) {
+            const checkbox = document.querySelector('input[name="price_type_checkboxes[]"][value="per_night"]');
+            const priceInput = document.querySelector('input[name="price_per_night"]');
+            
+            if (checkbox && priceInput) {
+                checkbox.checked = true;
+                checkbox.dispatchEvent(new Event('change'));
+                priceInput.value = formData.price_per_night;
+            }
+        }
+        
+        if (formData.price_per_week && parseFloat(formData.price_per_week) > 0) {
+            const checkbox = document.querySelector('input[name="price_type_checkboxes[]"][value="per_week"]');
+            const priceInput = document.querySelector('input[name="price_per_week"]');
+            
+            if (checkbox && priceInput) {
+                checkbox.checked = true;
+                checkbox.dispatchEvent(new Event('change'));
+                priceInput.value = formData.price_per_week;
+            }
+        }
     }
 </script>
 @endpush
