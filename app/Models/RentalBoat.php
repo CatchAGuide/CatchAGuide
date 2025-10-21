@@ -46,6 +46,118 @@ class RentalBoat extends Model
         'lng' => 'decimal:8',
     ];
 
+    /**
+     * Get the boat extras attribute with proper JSON handling
+     */
+    public function getBoatExtrasAttribute($value)
+    {
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $decoded;
+            }
+            // If not valid JSON, try comma-separated
+            return explode(',', $value);
+        }
+        return $value;
+    }
+
+    /**
+     * Set the boat extras attribute with proper JSON encoding
+     */
+    public function setBoatExtrasAttribute($value)
+    {
+        if (is_array($value)) {
+            $this->attributes['boat_extras'] = json_encode($value);
+        } else {
+            $this->attributes['boat_extras'] = $value;
+        }
+    }
+
+    /**
+     * Get the inclusions attribute with proper JSON handling
+     */
+    public function getInclusionsAttribute($value)
+    {
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $decoded;
+            }
+            // If not valid JSON, try comma-separated
+            return explode(',', $value);
+        }
+        return $value;
+    }
+
+    /**
+     * Set the inclusions attribute with proper JSON encoding
+     */
+    public function setInclusionsAttribute($value)
+    {
+        if (is_array($value)) {
+            $this->attributes['inclusions'] = json_encode($value);
+        } else {
+            $this->attributes['inclusions'] = $value;
+        }
+    }
+
+    /**
+     * Get the requirements attribute with proper JSON handling
+     */
+    public function getRequirementsAttribute($value)
+    {
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $decoded;
+            }
+            // If not valid JSON, try comma-separated
+            return explode(',', $value);
+        }
+        return $value;
+    }
+
+    /**
+     * Set the requirements attribute with proper JSON encoding
+     */
+    public function setRequirementsAttribute($value)
+    {
+        if (is_array($value)) {
+            $this->attributes['requirements'] = json_encode($value);
+        } else {
+            $this->attributes['requirements'] = $value;
+        }
+    }
+
+    /**
+     * Get the boat information attribute with proper JSON handling
+     */
+    public function getBoatInformationAttribute($value)
+    {
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $decoded;
+            }
+            // If not valid JSON, try comma-separated
+            return explode(',', $value);
+        }
+        return $value;
+    }
+
+    /**
+     * Set the boat information attribute with proper JSON encoding
+     */
+    public function setBoatInformationAttribute($value)
+    {
+        if (is_array($value)) {
+            $this->attributes['boat_information'] = json_encode($value);
+        } else {
+            $this->attributes['boat_information'] = $value;
+        }
+    }
+
     protected $attributes = [
         'status' => 'active',
     ];

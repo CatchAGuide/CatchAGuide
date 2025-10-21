@@ -27,7 +27,7 @@ class RentalBoatRequirementSeeder extends Seeder
             [
                 'name' => 'Mindestalter',
                 'name_en' => 'Minimum age',
-                'input_type' => 'number',
+                'input_type' => 'text',
                 'placeholder' => 'Mindestalter in Jahren',
                 'placeholder_en' => 'Minimum age in years',
                 'sort_order' => 2,
@@ -43,7 +43,7 @@ class RentalBoatRequirementSeeder extends Seeder
             [
                 'name' => 'Kaution',
                 'name_en' => 'Deposit',
-                'input_type' => 'number',
+                'input_type' => 'text',
                 'placeholder' => 'Höhe der Kaution in €',
                 'placeholder_en' => 'Deposit amount in €',
                 'sort_order' => 4,

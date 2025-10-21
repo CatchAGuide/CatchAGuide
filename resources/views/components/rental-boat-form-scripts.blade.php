@@ -19,8 +19,10 @@
         location: { field: 'Location', step: 1 },
         boat_type: { field: 'Boat Type', step: 2 },
         desc_of_boat: { field: 'Boat Description', step: 2 },
-        base_price: { field: 'Base Price', step: 4 },
-        price_type: { field: 'Price Type', step: 4 },
+        price_type_checkboxes: { field: 'Price Types', step: 4 },
+        price_per_hour: { field: 'Price Per Hour', step: 4 },
+        price_per_day: { field: 'Price Per Day', step: 4 },
+        price_per_week: { field: 'Price Per Week', step: 4 },
         status: { field: 'Status', step: 4 },
         booking_advance: { field: 'Booking Advance', step: 4 }
     };
@@ -247,20 +249,21 @@
             addExtraPricingItem();
         });
 
-        function addExtraPricingItem() {
+        // Make addExtraPricingItem globally accessible
+        window.addExtraPricingItem = function(name = '', price = '') {
             const container = document.getElementById('extra-pricing-container');
             const item = document.createElement('div');
             item.className = 'extra-pricing-item';
             item.innerHTML = `
                 <div class="form-group">
                     <label class="form-label">Item Name</label>
-                    <input type="text" class="form-control" name="extra_pricing[${extraPricingCount}][name]" placeholder="e.g., Captain, Fuel, etc.">
+                    <input type="text" class="form-control" name="extra_pricing[${extraPricingCount}][name]" placeholder="e.g., Captain, Fuel, etc." value="${name}">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Price</label>
                     <div class="input-group">
                         <span class="input-group-text">€</span>
-                        <input type="number" class="form-control" name="extra_pricing[${extraPricingCount}][price]" placeholder="0.00" step="0.01" min="0">
+                        <input type="number" class="form-control" name="extra_pricing[${extraPricingCount}][price]" placeholder="0.00" step="0.01" min="0" value="${price}">
                     </div>
                 </div>
                 <button type="button" class="remove-extra" onclick="removeExtraPricingItem(this)">×</button>
@@ -466,6 +469,13 @@
         
         const formData = new FormData(form);
         
+        // DEBUG: Log what's being sent
+        console.log('=== FORM DATA BEING SENT ===');
+        for (let [key, value] of formData.entries()) {
+            console.log(key + ':', value);
+        }
+        console.log('=== END FORM DATA ===');
+        
         // Ensure status is set to 'active' for final submission (not draft)
         const isDraft = formData.get('is_draft') === '1';
         if (!isDraft && !formData.get('status')) {
@@ -488,8 +498,9 @@
         }
 
         // Submit the form
+        // IMPORTANT: Always use POST for FormData, Laravel will handle _method spoofing
         fetch(form.action, {
-            method: formData.get('_method') || 'POST',
+            method: 'POST',
             body: formData,
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -612,18 +623,23 @@
                 break;
 
             case 4:
-                if (!document.querySelector('input[name="price_type"]:checked')) {
-                    errors.push('Please select a price type.');
+                const priceTypeCheckboxes = document.querySelectorAll('input[name="price_type_checkboxes[]"]:checked');
+                if (priceTypeCheckboxes.length === 0) {
+                    errors.push('Please select at least one price type.');
                     isValid = false;
-                }
-                if (!document.getElementById('base_price').value.trim()) {
-                    errors.push('Base price is required.');
-                    isValid = false;
-                }
-                const basePrice = parseFloat(document.getElementById('base_price').value);
-                if (isNaN(basePrice) || basePrice < 0) {
-                    errors.push('Base price must be a valid positive number.');
-                    isValid = false;
+                } else {
+                    // Validate that each selected price type has a valid price
+                    priceTypeCheckboxes.forEach(checkbox => {
+                        const priceType = checkbox.value;
+                        const priceInput = document.querySelector(`input[name="price_${priceType}"]`);
+                        if (priceInput) {
+                            const price = parseFloat(priceInput.value);
+                            if (!priceInput.value.trim() || isNaN(price) || price < 0) {
+                                errors.push(`Please enter a valid price for ${priceType.replace('_', ' ')}.`);
+                                isValid = false;
+                            }
+                        }
+                    });
                 }
                 break;
         }
@@ -723,13 +739,47 @@
         // Load existing form data for edit mode
         const formData = @json($formData ?? []);
         
-        // Load images if they exist
+        // Load images if they exist - DISABLED to prevent duplication
+        // Images are now handled by the croppedImagesContainer only
         if (formData.gallery_images && Array.isArray(formData.gallery_images)) {
+            console.log('Gallery images found:', formData.gallery_images.length, 'images');
+            // Note: Images are now displayed in croppedImagesContainer to avoid duplication
         }
 
         // Load boat type selection
         if (formData.boat_type) {
-            const boatTypeRadio = document.querySelector(`input[name="boat_type"][value="${formData.boat_type}"]`);
+            console.log('Loading boat type:', formData.boat_type);
+            
+            let boatTypeRadio = null;
+            
+            // If it's a numeric ID, find the corresponding boat type from the form data
+            if (!isNaN(formData.boat_type)) {
+                const boatTypeId = parseInt(formData.boat_type);
+                const formDataBoatTypes = @json($rentalBoatTypes ?? []);
+                
+                // Find the boat type by ID
+                const boatType = formDataBoatTypes.find(bt => bt.id === boatTypeId);
+                if (boatType) {
+                    boatTypeRadio = document.querySelector(`input[name="boat_type"][value="${boatType.value}"]`);
+                    console.log('Found boat type by ID:', boatType.value);
+                }
+            } else {
+                // Try to find by value (boat type name)
+                boatTypeRadio = document.querySelector(`input[name="boat_type"][value="${formData.boat_type}"]`);
+            }
+            
+            // If still not found, try to find by matching the boat type name
+            if (!boatTypeRadio) {
+                const allBoatTypes = document.querySelectorAll('input[name="boat_type"]');
+                for (let radio of allBoatTypes) {
+                    const label = radio.nextElementSibling;
+                    if (label && label.textContent.trim().toLowerCase() === formData.boat_type.toLowerCase()) {
+                        boatTypeRadio = radio;
+                        break;
+                    }
+                }
+            }
+            
             if (boatTypeRadio) {
                 boatTypeRadio.checked = true;
                 boatTypeRadio.dispatchEvent(new Event('change'));
@@ -737,23 +787,74 @@
                 if (label && label.tagName === 'LABEL') {
                     label.classList.add('active');
                 }
+                console.log('Boat type selected:', formData.boat_type);
+            } else {
+                console.log('Boat type not found:', formData.boat_type);
+                console.log('Available boat types:', Array.from(document.querySelectorAll('input[name="boat_type"]')).map(input => input.value));
             }
         }
 
+        // Load requirements checkboxes data
+        if (formData.requirements && Array.isArray(formData.requirements)) {
+            console.log('Loading requirements:', formData.requirements);
+            formData.requirements.forEach((item) => {
+                if (item && item.value && item.value.trim() !== '') {
+                    const checkbox = document.querySelector(`input[name="rental_requirement_checkboxes[]"][value="${item.id}"]`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        checkbox.dispatchEvent(new Event('change'));
+                        const container = checkbox.closest('.btn-checkbox-container');
+                        if (container) {
+                            container.classList.add('active');
+                            const input = container.querySelector('.extra-input');
+                            if (input) {
+                                input.value = item.value;
+                                input.style.display = 'block';
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
         // Load boat info checkboxes data from boat_information
-        if (formData.boat_information && typeof formData.boat_information === 'object') {
-            Object.entries(formData.boat_information).forEach(([key, value]) => {
-                const checkbox = document.querySelector(`input[name="boat_info_checkboxes[]"][value="${key}"]`);
-                if (checkbox && value) {
-                    checkbox.checked = true;
-                    checkbox.dispatchEvent(new Event('change'));
-                    const container = checkbox.closest('.btn-checkbox-container');
-                    if (container) {
-                        container.classList.add('active');
-                        const textarea = container.querySelector('textarea');
-                        if (textarea) {
-                            textarea.value = value;
-                            textarea.style.display = 'block';
+        if (formData.boat_information && Array.isArray(formData.boat_information)) {
+            console.log('Loading boat information:', formData.boat_information);
+            formData.boat_information.forEach((item) => {
+                if (item && item.value && item.value.trim() !== '') {
+                    const checkbox = document.querySelector(`input[name="boat_info_checkboxes[]"][value="${item.id}"]`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        checkbox.dispatchEvent(new Event('change'));
+                        const container = checkbox.closest('.btn-checkbox-container');
+                        if (container) {
+                            container.classList.add('active');
+                            const textarea = container.querySelector('textarea');
+                            if (textarea) {
+                                textarea.value = item.value;
+                                textarea.style.display = 'block';
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Load pricing data
+        if (formData.prices && typeof formData.prices === 'object') {
+            Object.entries(formData.prices).forEach(([priceType, price]) => {
+                if (priceType !== 'pricing_extra' && price > 0) {
+                    const checkbox = document.querySelector(`input[name="price_type_checkboxes[]"][value="${priceType}"]`);
+                    const priceInput = document.querySelector(`input[name="price_${priceType}"]`);
+                    
+                    if (checkbox && priceInput) {
+                        checkbox.checked = true;
+                        checkbox.dispatchEvent(new Event('change'));
+                        priceInput.value = price;
+                        
+                        const container = checkbox.closest('.btn-checkbox-container');
+                        if (container) {
+                            container.classList.add('active');
                         }
                     }
                 }
@@ -768,7 +869,16 @@
                 initTagify('#boat_extras', {});
             }
             if (boatExtrasElement && boatExtrasElement.tagify) {
-                boatExtrasElement.tagify.addTags(formData.boat_extras);
+                // Convert array to tagify format
+                const tags = formData.boat_extras.map(item => {
+                    if (typeof item === 'string') {
+                        return { value: item };
+                    } else if (item && item.value) {
+                        return { value: item.value, id: item.id };
+                    }
+                    return { value: item };
+                });
+                boatExtrasElement.tagify.addTags(tags);
             }
         }
 
@@ -778,8 +888,27 @@
                 initTagify('#inclusions', {});
             }
             if (inclusionsElement && inclusionsElement.tagify) {
-                inclusionsElement.tagify.addTags(formData.inclusions);
+                // Convert array to tagify format
+                const tags = formData.inclusions.map(item => {
+                    if (typeof item === 'string') {
+                        return { value: item };
+                    } else if (item && item.value) {
+                        return { value: item.value, id: item.id };
+                    }
+                    return { value: item };
+                });
+                inclusionsElement.tagify.addTags(tags);
             }
+        }
+
+        // Load extra pricing data
+        if (formData.pricing_extra && Array.isArray(formData.pricing_extra)) {
+            console.log('Loading extra pricing:', formData.pricing_extra);
+            formData.pricing_extra.forEach((item, index) => {
+                if (item.name && item.price) {
+                    addExtraPricingItem(item.name, item.price);
+                }
+            });
         }
     }
 
@@ -812,17 +941,20 @@
             var $label = $container.find('label');
             var $textarea = $container.find('textarea');
             var $input = $container.find('.extra-input');
+            var $inputGroup = $container.find('.input-group');
 
             if (this.checked) {
                 $label.addClass('active');
                 $textarea.show();
                 $input.show();
+                $inputGroup.show();
                 $textarea.prop('required', true);
                 $input.prop('required', true);
             } else {
                 $label.removeClass('active');
                 $textarea.hide();
                 $input.hide();
+                $inputGroup.hide();
                 $textarea.prop('required', false);
                 $input.prop('required', false);
                 $textarea.val('');
@@ -836,15 +968,18 @@
             var $label = $container.find('label');
             var $textarea = $container.find('textarea');
             var $input = $container.find('.extra-input');
+            var $inputGroup = $container.find('.input-group');
             
             if (this.checked) {
                 $label.addClass('active');
                 $textarea.show();
                 $input.show();
+                $inputGroup.show();
             } else {
                 $label.removeClass('active');
                 $textarea.hide();
                 $input.hide();
+                $inputGroup.hide();
             }
         });
 
