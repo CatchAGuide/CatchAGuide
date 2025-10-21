@@ -51,6 +51,7 @@ use App\Http\Controllers\CategoryTargetFishController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Category\DestinationCountryController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\TestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -285,7 +286,7 @@ Route::post('password/reset', [ForgotPasswordController::class, 'reset'])->name(
 Route::get('password/reset/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 
-Route::get('test', [\App\Http\Controllers\TestController::class, 'index']);
+Route::get('test-camp', [TestController::class, 'index'])->name('test.camp');
 
 Route::get('robots.txt', function () {
     if (request()->getHost() == 'catchaguide.com') {

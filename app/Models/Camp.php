@@ -13,6 +13,7 @@ class Camp extends Model
 
     protected $fillable = [
         'title',
+        'slug',
         'description_camp',
         'description_area',
         'description_fishing',

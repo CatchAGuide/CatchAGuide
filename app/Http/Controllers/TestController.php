@@ -9,6 +9,6 @@ class TestController extends Controller
 {
     public function index()
     {
-        (new EventService())->getAvailableEvents(3, '2021-01-27', User::first());
+        return view('test.camp-contact');
     }
 }

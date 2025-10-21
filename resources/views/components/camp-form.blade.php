@@ -74,11 +74,11 @@
                             <input id="cropped_image" name="cropped_image[]" type="file" multiple hidden/>
                             <label for="title_image" class="file-upload-btn">{{ __('camps.choose_files') }}</label>
                         </div>
+                        <div id="croppedImagesContainer"></div>
                     </div>
 
                     <div class="image-area" id="imagePreviewContainer"></div>
                     <input type="hidden" name="primaryImage" id="primaryImageInput">
-                    <div id="croppedImagesContainer"></div>
                 </div>
 
                 <hr>

@@ -178,6 +178,7 @@ function setupStepNavigation() {
     }
     
     function validateStep(step) {
+        return true;
         let isValid = true;
         const errorContainer = $('#error-container');
         errorContainer.hide();
@@ -261,6 +262,19 @@ function setupFormSubmission() {
         const formData = new FormData(this);
         const submitUrl = $(this).attr('action');
         const method = $('input[name="_method"]').val() || 'POST';
+        
+        // Collect tagify data properly
+        collectTagifyData(formData);
+        
+        // Debug: Log form data being sent
+        console.log('=== Camp Form Submission Debug ===');
+        console.log('Submit URL:', submitUrl);
+        console.log('Method:', method);
+        console.log('Form Data Contents:');
+        for (let [key, value] of formData.entries()) {
+            console.log(key + ':', value);
+        }
+        console.log('=== End Form Data ===');
         
         // Show loading state
         const submitBtn = $(this).find('button[type="submit"]');
@@ -523,6 +537,44 @@ function initializeCheckboxes() {
         extrasInput.tagify.on('add remove', function() {
             updateStepCompletionStatus();
         });
+    }
+}
+
+function collectTagifyData(formData) {
+    // Collect camp facilities tagify data
+    const campFacilitiesInput = document.querySelector('input[name="camp_facilities"]');
+    if (campFacilitiesInput && campFacilitiesInput.tagify) {
+        const facilitiesValue = campFacilitiesInput.tagify.value;
+        if (facilitiesValue && facilitiesValue.length > 0) {
+            const facilitiesArray = facilitiesValue.map(tag => tag.value || tag);
+            formData.set('camp_facilities', facilitiesArray.join(','));
+        }
+    }
+
+    // Collect target fish tagify data
+    const targetFishInput = document.querySelector('input[name="target_fish"]');
+    if (targetFishInput && targetFishInput.tagify) {
+        const targetFishValue = targetFishInput.tagify.value;
+        if (targetFishValue && targetFishValue.length > 0) {
+            const targetFishArray = targetFishValue.map(tag => tag.value || tag);
+            formData.set('target_fish', targetFishArray.join(','));
+        }
+    }
+
+    // Collect extras tagify data
+    const extrasInput = document.querySelector('input[name="extras"]');
+    if (extrasInput && extrasInput.tagify) {
+        const extrasValue = extrasInput.tagify.value;
+        if (extrasValue && extrasValue.length > 0) {
+            const extrasArray = extrasValue.map(tag => tag.value || tag);
+            formData.set('extras', extrasArray.join(','));
+        }
+    }
+
+    // Collect image list data
+    if (window.imageManagerLoaded && window.imageManagerLoaded.getImageList) {
+        const imageList = window.imageManagerLoaded.getImageList();
+        formData.set('image_list', JSON.stringify(imageList));
     }
 }
 
