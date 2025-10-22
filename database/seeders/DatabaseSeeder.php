@@ -49,7 +49,7 @@ class   DatabaseSeeder extends Seeder
         
         // Rental boat form seeders
         $this->call(RentalBoatRequirementSeeder::class);
-        $this->call(RoomConfiguration::class);
+        $this->call(RoomConfigurationSeeder::class);
 
         #User::factory()->count(50)->create();
         #Employee::factory()->count(50)->create();
