@@ -150,3 +150,4 @@
 @endpush
 
 @stack('js_push')
+@stack('js')

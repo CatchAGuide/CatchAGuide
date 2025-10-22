@@ -184,6 +184,7 @@ return [
         App\Providers\ViewServiceProvider::class,
         App\Providers\ICalServiceProvider::class,
         App\Providers\ICalGeneratorServiceProvider::class,
+        App\Providers\RentalBoatServiceProvider::class,
 
         Spatie\Geocoder\GeocoderServiceProvider::class,
     ],

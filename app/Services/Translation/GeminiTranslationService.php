@@ -9,6 +9,7 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Http\Request;
 use App\Services\DDoSProtectionService;
 use App\Services\DDoSNotificationService;
+use Stichoza\GoogleTranslate\GoogleTranslate;
 
 class GeminiTranslationService implements TranslationServiceInterface
 {
@@ -32,7 +33,7 @@ class GeminiTranslationService implements TranslationServiceInterface
         $this->apiKey   = (string) config('services.gemini.key');
     }
 
-    public function translate(string $text): string
+    public function translate(string $text, string $targetLanguage = 'en'): string
     {
         // IMPORTANT: Check cache FIRST to avoid unnecessary API calls
         $cached = $this->getCachedTranslation($text);
@@ -91,7 +92,25 @@ class GeminiTranslationService implements TranslationServiceInterface
             return $result;
         } catch (\Exception $e) {
             $this->logApiUsage($text, false);
-            throw new TranslationException("Translation failed: {$e->getMessage()}");
+            
+            // Fallback to Google Translate
+            Log::channel('gemini_usage')->warning('Gemini translation failed, falling back to Google Translate', [
+                'error' => $e->getMessage(),
+                'text' => substr($text, 0, 100)
+            ]);
+            
+            try {
+                return $this->googleTranslateFallback($text, $targetLanguage);
+            } catch (\Exception $fallbackError) {
+                Log::error('Both Gemini and Google Translate failed', [
+                    'gemini_error' => $e->getMessage(),
+                    'google_error' => $fallbackError->getMessage(),
+                    'text' => substr($text, 0, 100)
+                ]);
+                
+                // Return original text as last resort
+                return $text;
+            }
         }
     }
 
@@ -397,7 +416,7 @@ class GeminiTranslationService implements TranslationServiceInterface
     }
 
     /**
-     * Batch translate multiple texts using Gemini
+     * Batch translate multiple texts
      *
      * @param array $texts Array of texts to translate (key => value pairs)
      * @param string $toLanguage Target language code (e.g., 'en', 'de')
@@ -423,7 +442,7 @@ class GeminiTranslationService implements TranslationServiceInterface
 
             $fromLanguageName = $languageNames[$fromLanguage] ?? $fromLanguage;
             $toLanguageName = $languageNames[$toLanguage] ?? $toLanguage;
-            
+
             // Format texts for translation
             $forTranslate = json_encode($texts, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
@@ -433,14 +452,14 @@ class GeminiTranslationService implements TranslationServiceInterface
                       "{$forTranslate}";
 
             $translatedJson = $this->translate($prompt);
-            
+
             // Remove markdown code blocks if present
             $translatedJson = preg_replace('/^```json\s*|\s*```\s*$/m', '', $translatedJson);
             $translatedJson = trim($translatedJson);
 
             // Decode the result
             $translated = json_decode($translatedJson, true);
-            
+
             if (json_last_error() !== JSON_ERROR_NONE) {
                 Log::error('Failed to decode Gemini batch translation response', [
                     'json_error' => json_last_error_msg(),
@@ -490,6 +509,43 @@ class GeminiTranslationService implements TranslationServiceInterface
                 'error' => $e->getMessage()
             ]);
             return 'de'; // Default fallback
+        }
+    }
+
+
+    /**
+     * Fallback to Google Translate when Gemini fails
+     * 
+     * @param string $text Text to translate
+     * @param string $targetLanguage Target language code (default: 'en')
+     * @return string Translated text
+     */
+    private function googleTranslateFallback(string $text, string $targetLanguage = 'en'): string
+    {
+        try {
+            $translate = GoogleTranslate::trans($text, $targetLanguage);
+
+            // Apply the same custom replacements as in the translate helper
+            if (strpos($translate, 'Führungen')) {
+                $translate = str_replace('Führungen', 'Angelguidings', $translate);
+            }
+
+            if (strpos($translate, 'Führung')) {
+                $translate = str_replace('Führung', 'guiding', $translate);
+            }
+
+            Log::channel('gemini_usage')->info('Google Translate fallback succeeded', [
+                'text' => substr($text, 0, 50),
+                'result' => substr($translate, 0, 50)
+            ]);
+
+            return ucfirst($translate);
+        } catch (\Exception $e) {
+            Log::error('Google Translate fallback failed', [
+                'error' => $e->getMessage(),
+                'text' => substr($text, 0, 100)
+            ]);
+            throw $e;
         }
     }
 } 

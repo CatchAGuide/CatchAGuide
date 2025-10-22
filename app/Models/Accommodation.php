@@ -49,10 +49,14 @@ class Accommodation extends Model
         'amenities',
         'kitchen_equipment',
         'bathroom_amenities',
+        'accommodation_details',
+        'room_configurations',
         'policies',
         'rental_conditions',
         'bed_types',
         'per_person_pricing',
+        'extras',
+        'inclusives',
     ];
 
     protected $casts = [
@@ -60,10 +64,14 @@ class Accommodation extends Model
         'amenities' => 'array',
         'kitchen_equipment' => 'array',
         'bathroom_amenities' => 'array',
+        'accommodation_details' => 'array',
+        'room_configurations' => 'array',
         'policies' => 'array',
         'rental_conditions' => 'array',
         'bed_types' => 'array',
         'per_person_pricing' => 'array',
+        'extras' => 'array',
+        'inclusives' => 'array',
         'lat' => 'decimal:8',
         'lng' => 'decimal:8',
     ];
