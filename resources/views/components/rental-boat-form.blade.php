@@ -71,7 +71,7 @@
                         <div id="croppedImagesContainer"></div>
                     </div>
 
-                    <div class="image-area" id="imagePreviewContainer"></div>
+                    <div class="image-area" id="imagePreviewContainer" style="display: none;"></div>
                     <input type="hidden" name="primaryImage" id="primaryImageInput">
                 </div>
 
@@ -176,31 +176,6 @@
 
             <!-- Step 3: Boat Information and Extras -->
             <div class="step" id="step3">
-                <h5>{{ __('rental_boats.boat_information_extras') }}</h5>
-
-                <div class="form-group">
-                    <label for="boat_information" class="form-label fw-bold fs-5">
-                        {{ __('rental_boats.boat_information') }}
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                           title="{{ __('rental_boats.tooltip_boat_information') }}"></i>
-                    </label>
-                    
-                    <div class="boat-information-grid">
-                        @if(isset($guidingBoatDescriptions) && !empty($guidingBoatDescriptions))
-                            @foreach($guidingBoatDescriptions as $guiding_boat_description)
-                            <div class="btn-checkbox-container">
-                                <input type="checkbox" name="boat_info_checkboxes[]" value="{{ $guiding_boat_description['id'] }}" id="boat_info_{{ $guiding_boat_description['id'] }}">
-                                <label for="boat_info_{{ $guiding_boat_description['id'] }}" class="btn btn-outline-primary btn-checkbox">
-                                    {{ $guiding_boat_description['value'] }}
-                                </label>
-                                <textarea class="form-control extra-input" name="boat_info_{{ $guiding_boat_description['id'] }}" placeholder="{{ __('rental_boats.enter_value_for') . ' ' . $guiding_boat_description['value'] }}"></textarea>
-                            </div>
-                            @endforeach
-                        @endif
-                    </div>
-                </div>
-
-
                 <hr>
 
                 <div class="form-group">
@@ -215,12 +190,23 @@
                 <hr>
 
                 <div class="form-group">
-                    <label for="requirements" class="form-label fw-bold fs-5">
+                    <label for="rental_requirements" class="form-label fw-bold fs-5">
                         {{ __('rental_boats.requirements') }}
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="{{ __('rental_boats.tooltip_requirements') }}"></i>
                     </label>
-                    <textarea class="form-control" id="requirements" name="requirements" rows="4" placeholder="{{ __('rental_boats.rental_requirements') }}">{{ $formData['requirements'] ?? '' }}</textarea>
+                    
+                    <div class="rental-requirements-grid">
+                        @foreach($rentalBoatRequirements ?? [] as $requirement)
+                            <div class="btn-checkbox-container">
+                                <input type="checkbox" name="rental_requirement_checkboxes[]" value="{{ $requirement->id }}" id="rental_requirement_{{ $requirement->id }}">
+                                <label for="rental_requirement_{{ $requirement->id }}" class="btn btn-outline-primary btn-checkbox">
+                                    {{ $requirement->name }}
+                                </label>
+                                <input type="{{ $requirement->input_type }}" class="form-control extra-input" name="rental_requirement_{{ $requirement->id }}" placeholder="{{ $requirement->placeholder }}" min="{{ $requirement->input_type === 'number' ? '0' : '' }}">
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
 
                 <div class="button-group">
@@ -251,43 +237,74 @@
                 <h5>{{ __('rental_boats.set_pricing_structure') }}</h5>
 
                 <div class="form-group">
-                    <label for="price_type" class="form-label fw-bold fs-5">
+                    <label class="form-label fw-bold fs-5">
                         {{ __('rental_boats.price_type') }}
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="{{ __('rental_boats.tooltip_price_type') }}"></i>
                     </label>
-                    <div class="d-flex flex-wrap btn-group-toggle">
-                        <input type="radio" name="price_type" value="per_hour" id="per_hour" 
-                               {{ (isset($formData['price_type']) && $formData['price_type'] == 'per_hour') ? 'checked' : '' }}>
-                        <label for="per_hour" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">
-                            {{ __('rental_boats.per_hour') }}
-                        </label>
-                        
-                        <input type="radio" name="price_type" value="per_day" id="per_day" 
-                               {{ (isset($formData['price_type']) && $formData['price_type'] == 'per_day') ? 'checked' : '' }}>
-                        <label for="per_day" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">
-                            {{ __('rental_boats.per_day') }}
-                        </label>
-                        
-                        <input type="radio" name="price_type" value="per_week" id="per_week" 
-                               {{ (isset($formData['price_type']) && $formData['price_type'] == 'per_week') ? 'checked' : '' }}>
-                        <label for="per_week" class="btn btn-outline-primary m-2 flex-fill btn-checkbox" style="flex-basis: calc(33.33% - 20px);">
-                            {{ __('rental_boats.per_week') }}
-                        </label>
+                    
+                    <div class="pricing-types-grid">
+                        <!-- Per Hour -->
+                        <div class="btn-checkbox-container">
+                            <input type="checkbox" name="price_type_checkboxes[]" value="per_hour" id="price_type_per_hour">
+                            <label for="price_type_per_hour" class="btn btn-outline-primary btn-checkbox">
+                                {{ __('rental_boats.per_hour') }}
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">€</span>
+                                <input type="number" class="form-control" name="price_per_hour" placeholder="0.00" step="0.01" min="0">
+                            </div>
+                        </div>
+
+                        <!-- Per Day -->
+                        <div class="btn-checkbox-container">
+                            <input type="checkbox" name="price_type_checkboxes[]" value="per_day" id="price_type_per_day">
+                            <label for="price_type_per_day" class="btn btn-outline-primary btn-checkbox">
+                                {{ __('rental_boats.per_day') }}
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">€</span>
+                                <input type="number" class="form-control" name="price_per_day" placeholder="0.00" step="0.01" min="0">
+                            </div>
+                        </div>
+
+                        <!-- Per Week -->
+                        <div class="btn-checkbox-container">
+                            <input type="checkbox" name="price_type_checkboxes[]" value="per_week" id="price_type_per_week">
+                            <label for="price_type_per_week" class="btn btn-outline-primary btn-checkbox">
+                                {{ __('rental_boats.per_week') }}
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">€</span>
+                                <input type="number" class="form-control" name="price_per_week" placeholder="0.00" step="0.01" min="0">
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <hr>
 
+                <h5>{{ __('rental_boats.boat_information_extras') }}</h5>
+
                 <div class="form-group">
-                    <label for="base_price" class="form-label fw-bold fs-5">
-                        {{ __('rental_boats.base_price') }}
+                    <label for="boat_information" class="form-label fw-bold fs-5">
+                        {{ __('rental_boats.boat_information') }}
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                           title="{{ __('rental_boats.tooltip_base_price') }}"></i>
+                           title="{{ __('rental_boats.tooltip_boat_information') }}"></i>
                     </label>
-                    <div class="input-group">
-                        <span class="input-group-text">€</span>
-                        <input type="number" class="form-control" id="base_price" name="base_price" value="{{ isset($formData['prices']['base_price']) ? $formData['prices']['base_price'] : '' }}" placeholder="0.00" step="0.01" min="0">
+                    
+                    <div class="boat-information-grid">
+                        @if(isset($guidingBoatDescriptions) && !empty($guidingBoatDescriptions))
+                            @foreach($guidingBoatDescriptions as $guiding_boat_description)
+                            <div class="btn-checkbox-container">
+                                <input type="checkbox" name="boat_info_checkboxes[]" value="{{ $guiding_boat_description['id'] }}" id="boat_info_{{ $guiding_boat_description['id'] }}">
+                                <label for="boat_info_{{ $guiding_boat_description['id'] }}" class="btn btn-outline-primary btn-checkbox">
+                                    {{ $guiding_boat_description['value'] }}
+                                </label>
+                                <textarea class="form-control extra-input" name="boat_info_{{ $guiding_boat_description['id'] }}" placeholder="{{ __('rental_boats.enter_value_for') . ' ' . $guiding_boat_description['value'] }}"></textarea>
+                            </div>
+                            @endforeach
+                        @endif
                     </div>
                 </div>
 

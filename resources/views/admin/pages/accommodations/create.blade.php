@@ -39,7 +39,21 @@
                             <h3 class="card-title">Accommodation Details</h3>
                         </div>
                         <div class="card-body">
-                            @include('components.accommodation-form', ['accommodation' => new \App\Models\Accommodation()])
+                            @include('components.accommodation-form', [
+                                'formData' => $formData,
+                                'accommodationTypes' => $accommodationTypes,
+                                'accommodationDetails' => $accommodationDetails,
+                                'roomConfigurations' => $roomConfigurations,
+                                'facilities' => $facilities,
+                                'kitchenEquipment' => $kitchenEquipment,
+                                'bathroomAmenities' => $bathroomAmenities,
+                                'accommodationPolicies' => $accommodationPolicies,
+                                'accommodationRentalConditions' => $accommodationRentalConditions,
+                                'accommodationExtras' => $accommodationExtras,
+                                'accommodationInclusives' => $accommodationInclusives,
+                                'formAction' => route('admin.accommodations.store'),
+                                'targetRedirect' => $targetRedirect
+                            ])
                         </div>
                     </div>
                 </div>
@@ -113,4 +127,5 @@
 </style>
 @endpush
 
+@include('components.accommodation-form-scripts')
 @stack('js_push')

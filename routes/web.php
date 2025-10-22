@@ -51,6 +51,7 @@ use App\Http\Controllers\CategoryTargetFishController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Category\DestinationCountryController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\TestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -233,6 +234,7 @@ Route::get('guidings', [GuidingsController::class, 'index'])->name('guidings.ind
 Route::get('guidings/{slug?}', [GuidingsController::class, 'redirectToNewFormat'])->middleware('ddos:search');
 Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'newShow'])->name('guidings.show');
 Route::post('newguidings', [GuidingsController::class, 'guidingsStore'])->name('guidings.store');
+Route::post('guidings/generate-cards', [GuidingsController::class, 'generateCards'])->name('guidings.generate-cards');
 
 Route::get('vacations', [VacationsController::class, 'index'])->name('vacations.index')->middleware('ddos:search');
 Route::resource('vacations', VacationsController::class)->except(['index', 'show']);
@@ -284,7 +286,7 @@ Route::post('password/reset', [ForgotPasswordController::class, 'reset'])->name(
 Route::get('password/reset/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 
-Route::get('test', [\App\Http\Controllers\TestController::class, 'index']);
+Route::get('test-camp', [TestController::class, 'index'])->name('test.camp');
 
 Route::get('robots.txt', function () {
     if (request()->getHost() == 'catchaguide.com') {
@@ -341,6 +343,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::resource('accommodations', AdminAccommodationsController::class);
         Route::get('accommodations/change-status/{id}', [AdminAccommodationsController::class, 'changeStatus'])->name('accommodations.change-status');
+
+        Route::resource('camps', \App\Http\Controllers\Admin\CampsController::class);
+        Route::get('camps/change-status/{id}', [\App\Http\Controllers\Admin\CampsController::class, 'changeStatus'])->name('camps.change-status');
 
         Route::resource('bookings', BookingsController::class);
         Route::get('/bookings/{booking}/email-preview', [BookingsController::class, 'emailPreview'])->name('bookings.email-preview');

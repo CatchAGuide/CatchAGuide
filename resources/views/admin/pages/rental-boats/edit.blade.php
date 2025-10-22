@@ -35,6 +35,7 @@
                                 :boat-extras="$boatExtras"
                                 :inclusions="$inclusions"
                                 :guiding-boat-descriptions="$guiding_boat_descriptions"
+                                :rental-boat-requirements="$rentalBoatRequirements"
                                 form-action="{{ route('admin.rental-boats.update', $formData['id']) }}"
                                 target-redirect="{{ $targetRedirect }}" />
                         </div>

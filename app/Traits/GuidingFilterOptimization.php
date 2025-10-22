@@ -191,35 +191,48 @@ trait GuidingFilterOptimization
      */
     protected function cleanRequestParameters(Request $request)
     {
-        // Only process if price parameters exist
-        if (!$request->has('price_min') && !$request->has('price_max')) {
-            return $request; // Return original request if no price parameters
-        }
-        
-        // Clone the request only if we need to modify it
+        // Clone the request for potential modifications
         $cleanedRequest = clone $request;
         $requestData = $cleanedRequest->all();
-        
-        // Get default values (use cached value for max price)
-        $defaultMinPrice = 50;
-        $defaultMaxPrice = $this->getMaxPriceFromFilterData();
-        
-        // Check and remove price parameters if they match defaults
         $modified = false;
         
-        if (isset($requestData['price_min'])) {
-            $priceMin = (int)$requestData['price_min'];
-            if ($priceMin === $defaultMinPrice || $priceMin <= 0) {
-                unset($requestData['price_min']);
+        // Step 1: Fix HTML-encoded parameter names (amp;paramName -> paramName)
+        $cleanedData = [];
+        foreach ($requestData as $key => $value) {
+            // Remove 'amp;' prefix that appears from HTML entity encoding issues
+            $cleanedKey = preg_replace('/^(amp;)+/', '', $key);
+            
+            if ($cleanedKey !== $key) {
                 $modified = true;
+            }
+            
+            // If the cleaned key already exists, prefer the non-prefixed version
+            if (!isset($cleanedData[$cleanedKey]) || empty($cleanedData[$cleanedKey])) {
+                $cleanedData[$cleanedKey] = $value;
             }
         }
         
-        if (isset($requestData['price_max'])) {
-            $priceMax = (int)$requestData['price_max'];
-            if ($priceMax === $defaultMaxPrice || $priceMax >= $defaultMaxPrice) {
-                unset($requestData['price_max']);
-                $modified = true;
+        $requestData = $cleanedData;
+        
+        // Step 2: Clean price parameters if they match defaults
+        if (isset($requestData['price_min']) || isset($requestData['price_max'])) {
+            $defaultMinPrice = 50;
+            $defaultMaxPrice = $this->getMaxPriceFromFilterData();
+            
+            if (isset($requestData['price_min'])) {
+                $priceMin = (int)$requestData['price_min'];
+                if ($priceMin === $defaultMinPrice || $priceMin <= 0) {
+                    unset($requestData['price_min']);
+                    $modified = true;
+                }
+            }
+            
+            if (isset($requestData['price_max'])) {
+                $priceMax = (int)$requestData['price_max'];
+                if ($priceMax === $defaultMaxPrice || $priceMax >= $defaultMaxPrice) {
+                    unset($requestData['price_max']);
+                    $modified = true;
+                }
             }
         }
         

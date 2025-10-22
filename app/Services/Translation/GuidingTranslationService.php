@@ -8,6 +8,7 @@ use App\Helpers\TranslationHelper;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
+use Stichoza\GoogleTranslate\GoogleTranslate;
 
 class GuidingTranslationService
 {
@@ -88,15 +89,15 @@ class GuidingTranslationService
                 return true; // Nothing to translate
             }
 
-            // Use batch translation from TranslationHelper
-            // $translatedFields = TranslationHelper::simpleBatchTranslate(
-            //     $translatableFields,
-            //     $targetLanguage,
-            //     $fromLanguage
-            // );
+            // Use Google Translate for batch translation
+            $translatedFields = $this->batchTranslateWithGoogle(
+                $translatableFields,
+                $targetLanguage,
+                $fromLanguage
+            );
 
             // Store the translation
-            // $this->storeTranslation($guiding, $targetLanguage, $translatedFields);
+            $this->storeTranslation($guiding, $targetLanguage, $translatedFields);
 
             return true;
         } catch (\Exception $e) {
@@ -378,5 +379,44 @@ class GuidingTranslationService
             ->where('status', 1)
             ->pluck('id')
             ->toArray();
+    }
+
+    /**
+     * Batch translate fields using Google Translate
+     */
+    private function batchTranslateWithGoogle(array $fields, string $toLanguage, string $fromLanguage = 'de'): array
+    {
+        $translatedFields = [];
+
+        foreach ($fields as $key => $text) {
+            if (empty($text)) {
+                $translatedFields[$key] = $text;
+                continue;
+            }
+
+            try {
+                $translated = GoogleTranslate::trans($text, $toLanguage, $fromLanguage);
+
+                // Apply custom replacements
+                if (strpos($translated, 'Führungen')) {
+                    $translated = str_replace('Führungen', 'Angelguidings', $translated);
+                }
+
+                if (strpos($translated, 'Führung')) {
+                    $translated = str_replace('Führung', 'guiding', $translated);
+                }
+
+                $translatedFields[$key] = ucfirst($translated);
+            } catch (\Exception $e) {
+                Log::error('Google Translate failed for field', [
+                    'key' => $key,
+                    'error' => $e->getMessage()
+                ]);
+                // Keep original text if translation fails
+                $translatedFields[$key] = $text;
+            }
+        }
+
+        return $translatedFields;
     }
 } 
