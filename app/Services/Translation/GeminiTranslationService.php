@@ -416,6 +416,104 @@ class GeminiTranslationService implements TranslationServiceInterface
     }
 
     /**
+     * Batch translate multiple texts
+     *
+     * @param array $texts Array of texts to translate (key => value pairs)
+     * @param string $toLanguage Target language code (e.g., 'en', 'de')
+     * @param string $fromLanguage Source language code (e.g., 'en', 'de')
+     * @return array Translated texts with same keys
+     * @throws TranslationException
+     */
+    public function batchTranslate(array $texts, string $toLanguage, string $fromLanguage = 'auto'): array
+    {
+        try {
+            $languageNames = [
+                'de' => 'German', 
+                'en' => 'English', 
+                'es' => 'Spanish', 
+                'fr' => 'French', 
+                'it' => 'Italian', 
+                'ja' => 'Japanese', 
+                'ko' => 'Korean', 
+                'pt' => 'Portuguese', 
+                'ru' => 'Russian', 
+                'zh' => 'Chinese'
+            ];
+
+            $fromLanguageName = $languageNames[$fromLanguage] ?? $fromLanguage;
+            $toLanguageName = $languageNames[$toLanguage] ?? $toLanguage;
+
+            // Format texts for translation
+            $forTranslate = json_encode($texts, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+
+            $prompt = "Translate the following JSON object from {$fromLanguageName} to {$toLanguageName}. " .
+                      "Keep the JSON structure and keys exactly as they are. Only translate the values. " .
+                      "Return only valid JSON without any markdown formatting or code blocks.\n\n" .
+                      "{$forTranslate}";
+
+            $translatedJson = $this->translate($prompt);
+
+            // Remove markdown code blocks if present
+            $translatedJson = preg_replace('/^```json\s*|\s*```\s*$/m', '', $translatedJson);
+            $translatedJson = trim($translatedJson);
+
+            // Decode the result
+            $translated = json_decode($translatedJson, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                Log::error('Failed to decode Gemini batch translation response', [
+                    'json_error' => json_last_error_msg(),
+                    'response' => substr($translatedJson, 0, 500)
+                ]);
+                // Fallback to original texts
+                return $texts;
+            }
+
+            return $translated;
+        } catch (\Exception $e) {
+            Log::error('Gemini Batch Translation failed', [
+                'to_language' => $toLanguage,
+                'from_language' => $fromLanguage,
+                'error' => $e->getMessage()
+            ]);
+            throw new TranslationException("Batch translation failed: {$e->getMessage()}");
+        }
+    }
+
+    /**
+     * Detect the language of given text using Gemini
+     *
+     * @param string $text The text to analyze
+     * @return string The detected language code (e.g., 'en', 'de')
+     * @throws TranslationException
+     */
+    public function detectLanguage(string $text): string
+    {
+        try {
+            $prompt = "Analyze the following text and determine what language it is written in. " .
+                      "Respond with only the 2-letter ISO language code (e.g., 'de' for German, 'en' for English, 'es' for Spanish, etc.).\n\n" .
+                      "Text: {$text}";
+
+            $detectedLanguage = $this->translate($prompt);
+            $detectedLanguage = strtolower(trim($detectedLanguage));
+
+            // Validate the detected language is a 2-letter code
+            if (preg_match('/^[a-z]{2}$/', $detectedLanguage)) {
+                return $detectedLanguage;
+            }
+
+            return 'de'; // Default fallback
+        } catch (\Exception $e) {
+            Log::error('Gemini language detection failed', [
+                'text' => substr($text, 0, 100),
+                'error' => $e->getMessage()
+            ]);
+            return 'de'; // Default fallback
+        }
+    }
+
+
+    /**
      * Fallback to Google Translate when Gemini fails
      * 
      * @param string $text Text to translate
