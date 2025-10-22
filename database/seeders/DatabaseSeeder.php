@@ -14,6 +14,7 @@ use App\Models\GuidingWaterType;
 use App\Models\Media;
 use App\Models\Payment;
 use App\Models\Rating;
+use App\Models\RoomConfiguration;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -34,13 +35,21 @@ class   DatabaseSeeder extends Seeder
         // Accommodation form seeders
         $this->call(AccommodationTypeSeeder::class);
         $this->call(AccommodationDetailSeeder::class);
+        $this->call(AccommodationExtraSeeder::class);
+        $this->call(AccommodationInclusiveSeeder::class);
+        $this->call(AccommodationRentalConditionSeeder::class);
+        $this->call(AccommodationPolicySeeder::class);
+        
         $this->call(RoomConfigurationSeeder::class);
         $this->call(FacilitySeeder::class);
         $this->call(KitchenEquipmentSeeder::class);
         $this->call(BathroomAmenitySeeder::class);
+        $this->call(CampFacilitySeeder::class);
+        $this->call(KitchenEquipmentSeeder::class);
         
         // Rental boat form seeders
         $this->call(RentalBoatRequirementSeeder::class);
+        $this->call(RoomConfiguration::class);
 
         #User::factory()->count(50)->create();
         #Employee::factory()->count(50)->create();

@@ -266,13 +266,37 @@ function setupFormSubmission() {
         // Collect tagify data properly
         collectTagifyData(formData);
         
+        // Process images before submission
+        if (window.imageManagerLoaded && typeof window.imageManagerLoaded.getCroppedImages === 'function') {
+            const croppedImages = window.imageManagerLoaded.getCroppedImages();
+            console.log('Cropped images found:', croppedImages.length);
+            
+            if (croppedImages.length > 0) {
+                // Remove any existing title_image[] from FormData
+                formData.delete('title_image[]');
+                croppedImages.forEach((imgObj, idx) => {
+                    // Convert dataURL to Blob
+                    const blob = dataURLtoBlob(imgObj.dataUrl);
+                    const filename = imgObj.filename || `cropped_${idx}.png`;
+                    formData.append('title_image[]', blob, filename);
+                    console.log(`Added image ${idx}: ${filename}, size: ${blob.size} bytes`);
+                });
+            }
+        } else {
+            console.warn('ImageManager not available or getCroppedImages not a function');
+        }
+        
         // Debug: Log form data being sent
         console.log('=== Camp Form Submission Debug ===');
         console.log('Submit URL:', submitUrl);
         console.log('Method:', method);
         console.log('Form Data Contents:');
         for (let [key, value] of formData.entries()) {
-            console.log(key + ':', value);
+            if (value instanceof Blob) {
+                console.log(key + ': [Blob]', value.size, 'bytes');
+            } else {
+                console.log(key + ':', value);
+            }
         }
         console.log('=== End Form Data ===');
         
@@ -570,12 +594,18 @@ function collectTagifyData(formData) {
             formData.set('extras', extrasArray.join(','));
         }
     }
+}
 
-    // Collect image list data
-    if (window.imageManagerLoaded && window.imageManagerLoaded.getImageList) {
-        const imageList = window.imageManagerLoaded.getImageList();
-        formData.set('image_list', JSON.stringify(imageList));
+function dataURLtoBlob(dataurl) {
+    const arr = dataurl.split(',');
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
     }
+    return new Blob([u8arr], { type: mime });
 }
 
 function loadExistingData() {
