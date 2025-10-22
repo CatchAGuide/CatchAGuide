@@ -1230,20 +1230,6 @@
     box-shadow: 0 2px 8px 0 rgba(59, 130, 246, 0.2);
   }
   
-  // Active/Selected state - matches image 2 design
-  &.active {
-    background-color: #dbeafe;
-    color: #1e40af;
-    border-color: #3b82f6;
-    box-shadow: 0 2px 8px 0 rgba(59, 130, 246, 0.2);
-    
-    &:hover {
-      background-color: #bfdbfe;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px 0 rgba(59, 130, 246, 0.3);
-    }
-  }
-  
   .payment-icon {
     width: 18px;
     height: 18px;

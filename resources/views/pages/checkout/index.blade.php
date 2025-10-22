@@ -2,10 +2,6 @@
 
 @section('title', 'Booking Request')
 
-@push('styles')
-<!-- Modern checkout styles are included in app.css -->
-@endpush
-
 @section('content')
 <div class="checkout-container" x-data="checkoutApp()" x-init="init()">
 
@@ -313,8 +309,7 @@
                 </div>
             </aside>
         </div>
-    </main>
-</div>
+    </section> --}}
+    <!--Page Header End-->
+    <livewire:checkout :guiding="$guiding" :persons="$persons" :initial-selected-date="$selectedDate" />
 @endsection
-
-@include('components.modern-checkout-scripts')
