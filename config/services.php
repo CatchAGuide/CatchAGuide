@@ -37,4 +37,8 @@ return [
         'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta/models'),
     ],
 
+    'translation' => [
+        'driver' => env('TRANSLATION_SERVICE', 'gemini'), // Options: 'gemini' or 'google'
+    ],
+
 ];

@@ -13,6 +13,7 @@ class DestinationFishTimeLimit extends Model
 
     protected $fillable = [
         'destination_id',
+        'destination_type',
         'fish',
         'data',
         'language'

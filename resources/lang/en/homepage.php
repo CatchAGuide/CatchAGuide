@@ -85,5 +85,5 @@ return [
     'faq-title' => 'Frequently Asked Question',
     'see-more' => 'See more',
 
-    
+    'listings-title' => 'All Fishing Tours',
 ];

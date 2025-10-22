@@ -11,11 +11,10 @@ use App\Services\DDoSProtectionService;
 use App\Services\DDoSNotificationService;
 use Stichoza\GoogleTranslate\GoogleTranslate;
 
-class GeminiTranslationService
+class GeminiTranslationService implements TranslationServiceInterface
 {
-    private string $baseUrl;
+    private string $endpoint;
     private string $apiKey;
-    private Request $request;
 
     // Rate limiting constants
     private const MAX_REQUESTS_PER_MINUTE = 10;
@@ -28,31 +27,51 @@ class GeminiTranslationService
 
     public function __construct()
     {
-        $this->baseUrl = config('services.gemini.base_url') . '/' . config('services.gemini.model') . ':generateContent';
-        $this->apiKey = config('services.gemini.key');
-        $this->request = request();
+        $base  = rtrim(config('services.gemini.base_url'), '/');
+        $model = trim(config('services.gemini.model'));
+        $this->endpoint = "{$base}/{$model}:generateContent";
+        $this->apiKey   = (string) config('services.gemini.key');
     }
 
     public function translate(string $text, string $targetLanguage = 'en'): string
     {
-        // DDoS Protection: Check rate limits and validate input
-        $protectionService = app(DDoSProtectionService::class);
-        $config = [
-            'context' => 'gemini',
-            'limits' => [
-                'minute' => 10,
-                'hour' => 100,
-                'day' => 500
-            ],
-            'validate_input' => true,
-            'block_threshold' => 10,
-            'block_multiplier' => 30,
-            'max_block_duration' => 1800
-        ];
-        
-        $result = $protectionService->shouldBlockRequest(request(), $config);
-        if ($result['blocked']) {
-            throw new TranslationException('Rate limit exceeded. Please try again later.');
+        // IMPORTANT: Check cache FIRST to avoid unnecessary API calls
+        $cached = $this->getCachedTranslation($text);
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        // Skip DDoS protection in console context (artisan commands)
+        if (app()->runningInConsole()) {
+            // Use simple rate limiting for console commands
+            if (!$this->checkRateLimit()) {
+                throw new TranslationException('Rate limit exceeded. Please try again later.');
+            }
+        } else {
+            // DDoS Protection for web requests only
+            try {
+                $protectionService = app(DDoSProtectionService::class);
+                $config = [
+                    'context' => 'gemini',
+                    'limits' => [
+                        'minute' => 10,
+                        'hour' => 100,
+                        'day' => 500
+                    ],
+                    'validate_input' => true,
+                    'block_threshold' => 10,
+                    'block_multiplier' => 30,
+                    'max_block_duration' => 1800
+                ];
+                
+                $result = $protectionService->shouldBlockRequest(request(), $config);
+                if ($result['blocked']) {
+                    throw new TranslationException('Rate limit exceeded. Please try again later.');
+                }
+            } catch (\Exception $e) {
+                // If DDoS protection fails (e.g., no session), just continue
+                Log::warning('DDoS protection skipped: ' . $e->getMessage());
+            }
         }
 
         try {
@@ -205,12 +224,22 @@ class GeminiTranslationService
 
     private function getRateLimitIdentifier(): string
     {
-        // Use user ID if authenticated, otherwise IP address
+        // Use user ID if authenticated
         if (auth()->check()) {
             return 'user_' . auth()->id();
         }
         
-        return 'ip_' . $this->request->ip();
+        // If running in console, use 'console' as identifier
+        if (app()->runningInConsole()) {
+            return 'console';
+        }
+        
+        // Otherwise use IP address (for web requests)
+        try {
+            return 'ip_' . request()->ip();
+        } catch (\Exception $e) {
+            return 'unknown';
+        }
     }
 
 
@@ -230,14 +259,11 @@ class GeminiTranslationService
 
     private function makeTranslationRequest(string $text): Response
     {
-        // Optimize prompt to reduce token usage
-        $optimizedText = $this->optimizePrompt($text);
-        
-        return Http::timeout(30)->post("{$this->baseUrl}?key={$this->apiKey}", [
+        $payload = [
             'contents' => [
                 [
                     'parts' => [
-                        ['text' => $optimizedText]
+                        ['text' => $text]
                     ]
                 ]
             ],
@@ -246,20 +272,41 @@ class GeminiTranslationService
                 'topP' => 0.8,
                 'topK' => 40,
                 'maxOutputTokens' => 1024 // Reduced from 8192 to save costs
-            ]
-        ]);
-    }
-
-    private function optimizePrompt(string $text): string
-    {
-        // Truncate very long inputs to save on token costs
-        if (strlen($text) > 200) {
-            $text = substr($text, 0, 200) . '...';
+            ],
+        ];
+    
+        // IMPORTANT: NO RETRY to prevent excessive API usage and costs
+        // Each retry = another API call = more money spent
+        $resp = Http::timeout(20)
+            ->withHeaders([
+                'Content-Type'   => 'application/json',
+                'x-goog-api-key' => $this->apiKey,
+            ])
+            ->post($this->endpoint, $payload);
+    
+        // Helpful message for referrer-locked keys
+        if ($resp->status() === 403 && (
+            str_contains($resp->body(), 'API_KEY_HTTP_REFERRER_BLOCKED') ||
+            str_contains($resp->body(), 'referer') ||
+            str_contains($resp->body(), 'referrer')
+        )) {
+            throw new TranslationException(
+                "Your Gemini API key is restricted to HTTP referrers. " .
+                "Set Application restriction to 'None' (keep API restriction = Generative Language API)."
+            );
         }
-
-        // Add specific prompt for location translation
-        return "Translate the following location name to English. Return only the English name, no explanations: {$text}";
+    
+        // Helpful message for rate limit errors
+        if ($resp->status() === 429) {
+            throw new TranslationException(
+                "Gemini API rate limit exceeded. Free tier limits: 15 requests/minute, 1,500 requests/day. " .
+                "Please wait a moment before trying again or consider upgrading your API plan."
+            );
+        }
+    
+        return $resp;
     }
+
 
     private function parseResponse(Response $response): string
     {
@@ -276,14 +323,24 @@ class GeminiTranslationService
     {
         $logData = [
             'timestamp' => now()->toISOString(),
-            'ip' => $this->request->ip(),
-            'user_agent' => $this->request->userAgent(),
             'user_id' => auth()->id(),
             'text_length' => strlen($text),
             'text_preview' => substr($text, 0, 50),
             'success' => $success,
-            'cost_estimate' => $this->estimateCost($text)
+            'cost_estimate' => $this->estimateCost($text),
+            'context' => app()->runningInConsole() ? 'console' : 'web'
         ];
+
+        // Add request info only if available (web context)
+        if (!app()->runningInConsole()) {
+            try {
+                $logData['ip'] = request()->ip();
+                $logData['user_agent'] = request()->userAgent();
+            } catch (\Exception $e) {
+                $logData['ip'] = 'N/A';
+                $logData['user_agent'] = 'N/A';
+            }
+        }
 
         Log::channel('gemini_usage')->info('Gemini API Usage', $logData);
 

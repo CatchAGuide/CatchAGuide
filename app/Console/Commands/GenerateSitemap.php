@@ -6,7 +6,9 @@ use App\Models\GuideThread;
 use App\Models\Guiding;
 use App\Models\Thread;
 use App\Models\CategoryPage;
-use App\Models\Destination;
+use App\Models\Country;
+use App\Models\Region;
+use App\Models\City;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
@@ -121,18 +123,31 @@ class GenerateSitemap extends Command
 
     protected function generateDestinationSitemap($url, $lang)
     {
-        // Get destinations filtered by language
-        $destinations = Destination::where('language', $lang)
-            ->whereNotNull('slug')
-            ->where('slug', '!=', '')
-            ->get();
-        
         $xml = $this->generateSitemapHeader();
+        $count = 0;
         
-        foreach ($destinations as $destination) {
-            $sUrl = $this->buildDestinationUrl($url, $destination);
-            if ($sUrl) {
-                $xml .= $this->generateUrlEntry($sUrl, 'monthly', 0.7);
+        // Get all countries
+        $countries = Country::whereNotNull('slug')->where('slug', '!=', '')->get();
+        foreach ($countries as $country) {
+            $xml .= $this->generateUrlEntry($url . '/destination/' . $country->slug, 'monthly', 0.7);
+            $count++;
+        }
+        
+        // Get all regions with their country
+        $regions = Region::with('country')->whereNotNull('slug')->where('slug', '!=', '')->get();
+        foreach ($regions as $region) {
+            if ($region->country) {
+                $xml .= $this->generateUrlEntry($url . '/destination/' . $region->country->slug . '/' . $region->slug, 'monthly', 0.7);
+                $count++;
+            }
+        }
+        
+        // Get all cities with their country and region
+        $cities = City::with(['country', 'region'])->whereNotNull('slug')->where('slug', '!=', '')->get();
+        foreach ($cities as $city) {
+            if ($city->country && $city->region) {
+                $xml .= $this->generateUrlEntry($url . '/destination/' . $city->country->slug . '/' . $city->region->slug . '/' . $city->slug, 'monthly', 0.7);
+                $count++;
             }
         }
         
@@ -141,7 +156,7 @@ class GenerateSitemap extends Command
         $filePath = '/sitemap_destinations_' . $lang . '.xml';
         Storage::disk('sitemaps')->put($filePath, $xml);
 
-        $this->info("✓ Generated destination sitemap for {$lang} with " . count($destinations) . " entries");
+        $this->info("✓ Generated destination sitemap for {$lang} with {$count} entries");
         
         return $filePath;
     }

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Category;
 
 use App\Http\Controllers\Controller;
-use App\Models\Destination;
+use App\Models\Country;
+use App\Models\Region;
+use App\Models\City;
 use App\Models\Guiding;
 use App\Models\Method;
 use App\Models\Target;
@@ -17,63 +19,83 @@ use Illuminate\Support\Facades\Session;
 use Spatie\Geocoder\Geocoder;
 use Illuminate\Support\Facades\Log;
 use App\Traits\GuidingFilterOptimization;
+use App\Models\DestinationFaq;
+use App\Models\DestinationFishChart;
+use App\Models\DestinationFishSizeLimit;
+use App\Models\DestinationFishTimeLimit;
+
+
 class DestinationCountryController extends Controller
 {
     use GuidingFilterOptimization;
     public function index()
     {
-        $countries = Destination::whereType('country')->whereLanguage(app()->getLocale())->get();
+        $countries = Country::all();
         return view('pages.countries.index', compact('countries'));
     }
 
     public function country(Request $request, $country, $region = null, $city = null)
     {
-        // Validate existence of parent records first
-        $country_row = Destination::whereSlug($country)
-            ->whereType('country')
-            ->whereLanguage(app()->getLocale())
-            ->firstOrFail(); // Use firstOrFail instead of first()
+        // Validate existence of parent records first and eager load translations
+        $country_row = Country::with('translations')->whereSlug($country)->firstOrFail();
 
         $region_row = null;
         $city_row = null;
 
         if ($region) {
-            $region_row = Destination::whereSlug($region)
-                ->whereType('region')
-                ->whereCountryId($country_row->id)
-                ->whereLanguage(app()->getLocale())
+            $region_row = Region::with('translations')->whereSlug($region)
+                ->where('country_id', $country_row->id)
                 ->firstOrFail();
         }
 
         if ($city) {
-            $city_row = Destination::whereSlug($city)
-                ->whereType('city')
-                ->whereCountryId($country_row->id)
-                ->whereRegionId($region_row->id)
-                ->whereLanguage(app()->getLocale())
+            $city_row = City::with('translations')->whereSlug($city)
+                ->where('country_id', $country_row->id)
+                ->where('region_id', $region_row->id)
                 ->firstOrFail();
         }
 
         $place_location = $country;
-        $query = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit']);
 
+        // Determine which row_data to use (city > region > country)
         if ($city_row) {
-            $query->whereType('city')->whereId($city_row->id);
+            $row_data = $city_row;
         } elseif ($region_row) {
-            $query->whereType('region')->whereId($region_row->id);
+            $row_data = $region_row;
         } else {
-            $query->whereType('country')->whereId($country_row->id);
+            $row_data = $country_row;
         }
 
-        $row_data = $query->firstOrFail();
 
-        $regions = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->whereType('region')->whereCountryId($row_data->id)->whereLanguage(app()->getLocale())->get();
-        $cities = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->whereType('city')->whereCountryId($row_data->id)->whereLanguage(app()->getLocale())->get();
+        // Get regions and cities for this country with relationships
+        $regions = Region::with('country')->where('country_id', $country_row->id)->get();
+        
+        // For cities, if we're viewing a region, only show cities in that region
+        if ($region_row) {
+            $cities = City::with(['country', 'region'])->where('country_id', $country_row->id)
+                        ->where('region_id', $region_row->id)->get();
+        } else {
+            $cities = City::with(['country', 'region'])->where('country_id', $country_row->id)->get();
+        }
 
-        $faq = $row_data->faq;
-        $fish_chart = $row_data->fish_chart;
-        $fish_size_limit = $row_data->fish_size_limit;
-        $fish_time_limit = $row_data->fish_time_limit;
+        // Get related data based on destination type
+        if ($city_row) {
+            $destination_id = $city_row->id;
+            $destination_type = 'city';
+        } elseif ($region_row) {
+            $destination_id = $region_row->id;
+            $destination_type = 'region';
+        } else {
+            $destination_id = $country_row->id;
+            $destination_type = 'country';
+        }
+        
+        $faq = DestinationFaq::where('destination_id', $destination_id)
+            ->where('language', app()->getLocale())
+            ->get();
+        $fish_chart = DestinationFishChart::where('destination_id', $destination_id)->get();
+        $fish_size_limit = DestinationFishSizeLimit::where('destination_id', $destination_id)->get();
+        $fish_time_limit = DestinationFishTimeLimit::where('destination_id', $destination_id)->get();
 
         $locale = Config::get('app.locale');
         $searchMessage = "";
@@ -117,27 +139,34 @@ class DestinationCountryController extends Controller
         // 2. Apply filters to the query
         $filteredQuery = clone $baseQuery;
         
-        // If coming from destination page, get the destination context
-        if ($cleanedRequest->has('from_destination')) {
-            $destination = Destination::where('id', $cleanedRequest->input('destination_id'))->first();
+        // Filter by current destination context using location data from filters field
+        // The filters field contains the exact location names as stored in guidings table
+        $filterData = json_decode($row_data->filters, true);
+        
+        if ($city_row && !empty($filterData['city'])) {
+            $filteredQuery->where('city', $filterData['city']);
             
-            if ($destination) {
-                switch ($destination->type) {
-                    case 'country':
-                        $filteredQuery->where('country', $destination->name);
-                        break;
-                    case 'region':
-                        $filteredQuery->where('region', $destination->name)
-                              ->where('country', $destination->country_name);
-                        break;
-                    case 'city':
-                        $filteredQuery->where('city', $destination->name)
-                              ->where('region', $destination->region_name)
-                              ->where('country', $destination->country_name);
-                        break;
-                }
+            if (!empty($filterData['country'])) {
+                $filteredQuery->where('country', $filterData['country']);
+            }
+            
+            if ($region_row && !empty($filterData['region'])) {
+                $filteredQuery->where('region', $filterData['region']);
+            }
+        } elseif ($region_row && !empty($filterData['region'])) {
+            $filteredQuery->where('region', $filterData['region']);
+            
+            if (!empty($filterData['country'])) {
+                $filteredQuery->where('country', $filterData['country']);
+            }
+        } else {
+            if (!empty($filterData['country'])) {
+                $filteredQuery->where('country', $filterData['country']);
             }
         }
+
+        // dump($filterData);
+        // dd($filteredQuery->get());
 
         // Apply sorting consistent with listings
         $this->applySorting($filteredQuery, $cleanedRequest, $randomSeed);
@@ -255,8 +284,7 @@ class DestinationCountryController extends Controller
             $radius = $cleanedRequest->get('radius');
         }
 
-        // Set default values if $filterData is null
-        $filterData = json_decode($row_data->filters, true);
+        // Get location data from filters for radius filtering
         $placeLat = $filterData['placeLat'] ?? null;
         $placeLng = $filterData['placeLng'] ?? null;
         $city = $filterData['city'] ?? null;
@@ -289,13 +317,13 @@ class DestinationCountryController extends Controller
                 ['path' => request()->url(), 'pageName' => 'page']
             );
         } else {
-            // 3. Get all filtered guidings (for counts and filter options)
-            $allGuidings = $filteredQuery->get();
+            // 3. Get all filtered guidings (for counts and filter options) - paginated for view
+            $allGuidings = $filteredQuery->paginate(20);
         }
         
         // 4. Compute filter counts aligned with listings
-        if ($allGuidings->isNotEmpty()) {
-            $currentResultIds = $allGuidings->pluck('id')->toArray();
+        if ($allGuidings->count() > 0) {
+            $currentResultIds = collect($allGuidings->items())->pluck('id')->toArray();
             $filterCounts = $this->getFilterService()->getFilterCounts($currentResultIds);
         } else {
             $filterCounts = $this->getFilterService()->getFilterCounts();
@@ -328,7 +356,7 @@ class DestinationCountryController extends Controller
 
         // 5. Get other guidings if needed
         $otherguidings = [];
-        if($allGuidings->isEmpty() || count($allGuidings) <= 10){
+        if($allGuidings->count() == 0 || $allGuidings->count() <= 10){
             if($cleanedRequest->has('placeLat') && $cleanedRequest->has('placeLng') && !empty($cleanedRequest->get('placeLat')) && !empty($cleanedRequest->get('placeLng')) ){
                 $latitude = $cleanedRequest->get('placeLat');
                 $longitude = $cleanedRequest->get('placeLng');
@@ -345,11 +373,12 @@ class DestinationCountryController extends Controller
         }
 
         // Pre-compute view data to align with listings performance
-        if ($allGuidings->isNotEmpty()) {
-            $allTargetIds = $allGuidings->flatMap(function($g) { return json_decode($g->target_fish, true) ?: []; })->unique()->filter()->values();
-            $allMethodIds = $allGuidings->flatMap(function($g) { return json_decode($g->fishing_methods, true) ?: []; })->unique()->filter()->values();
-            $allWaterIds = $allGuidings->flatMap(function($g) { return json_decode($g->water_types, true) ?: []; })->unique()->filter()->values();
-            $allInclussionIds = $allGuidings->flatMap(function($g) { return json_decode($g->inclusions, true) ?: []; })->unique()->filter()->values();
+        if ($allGuidings->count() > 0) {
+            $allGuidingsCollection = collect($allGuidings->items());
+            $allTargetIds = $allGuidingsCollection->flatMap(function($g) { return json_decode($g->target_fish, true) ?: []; })->unique()->filter()->values();
+            $allMethodIds = $allGuidingsCollection->flatMap(function($g) { return json_decode($g->fishing_methods, true) ?: []; })->unique()->filter()->values();
+            $allWaterIds = $allGuidingsCollection->flatMap(function($g) { return json_decode($g->water_types, true) ?: []; })->unique()->filter()->values();
+            $allInclussionIds = $allGuidingsCollection->flatMap(function($g) { return json_decode($g->inclusions, true) ?: []; })->unique()->filter()->values();
 
             $targetsMap = $allTargetIds->isNotEmpty() ? Target::whereIn('id', $allTargetIds)->get()->keyBy('id') : collect();
             $methodsMap = $allMethodIds->isNotEmpty() ? Method::whereIn('id', $allMethodIds)->get()->keyBy('id') : collect();
@@ -416,7 +445,7 @@ class DestinationCountryController extends Controller
             $view = view('pages.guidings.partials.guiding-list', $responseData)->render();
             
             // Add guiding data for map updates
-            $guidingsData = $allGuidings->map(function($guiding) {
+            $guidingsData = collect($allGuidings->items())->map(function($guiding) {
                 return [
                     'id' => $guiding->id,
                     'slug' => $guiding->slug,
@@ -441,19 +470,30 @@ class DestinationCountryController extends Controller
             ]));
         }
 
+        // Determine destination type for view
+        $destinationType = 'country';
+        if ($city_row) {
+            $destinationType = 'city';
+        } elseif ($region_row) {
+            $destinationType = 'region';
+        }
+
         // Return full view for non-AJAX requests
         return view('pages.category.country', [ 
             'guidings_total' => $filteredQuery->count(),
             'row_data' => $row_data,
+            'destination_type' => $destinationType,
             'regions' => $regions,
             'cities' => $cities,
+            'region_count' => $regions->count(),
+            'city_count' => $cities->count(),
             'faq' => $faq,
             'fish_chart' => $fish_chart,
             'fish_size_limit' => $fish_size_limit,
             'fish_time_limit' => $fish_time_limit,
             'title' => $title,
             'filter_title' => $filter_title,
-            'guidings' => $guidings,
+            'guidings' => $allGuidings,
             'radius' => $radius,
             'allGuidings' => $allGuidings,
             'searchMessage' => $searchMessage,
