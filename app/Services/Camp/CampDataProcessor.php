@@ -108,10 +108,13 @@ class CampDataProcessor
             'status' => $camp->status,
             'thumbnail_path' => $camp->thumbnail_path,
             'gallery_images' => $camp->gallery_images,
-            'existing_images' => json_encode($camp->gallery_images ?? []),
+            'existing_images' => json_encode($this->formatImagePathsForWeb($camp->gallery_images ?? [])),
             'lat' => $camp->latitude,
             'lng' => $camp->longitude,
             'facilities' => $camp->facilities->pluck('name')->toArray(),
+            'accommodations' => $camp->accommodations->pluck('id')->toArray(),
+            'rental_boats' => $camp->rentalBoats->pluck('id')->toArray(),
+            'guidings' => $camp->guidings->pluck('id')->toArray(),
             // Add slug for edit form
             'slug' => $camp->slug,
         ];
@@ -140,5 +143,26 @@ class CampDataProcessor
             'rental_boats' => $request->input('rental_boats', []),
             'guidings' => $request->input('guidings', []),
         ];
+    }
+
+    /**
+     * Format image paths for web access
+     */
+    private function formatImagePathsForWeb(array $imagePaths): array
+    {
+        return array_map(function($path) {
+            // If the path already starts with 'storage/' or 'assets/', return as is
+            if (str_starts_with($path, 'storage/') || str_starts_with($path, 'assets/')) {
+                return $path;
+            }
+            
+            // For camp images, prefix with 'storage/'
+            if (str_starts_with($path, 'camps/')) {
+                return 'storage/' . $path;
+            }
+            
+            // For other paths, return as is
+            return $path;
+        }, $imagePaths);
     }
 }

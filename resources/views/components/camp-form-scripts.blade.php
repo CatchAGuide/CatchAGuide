@@ -2,7 +2,18 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@latest/dist/browser-image-compression.js"></script>
-<script src="{{ asset('assets/js/ImageManager.js') }}"></script>
+@if(!isset($imageManagerLoaded))
+    <script>
+        if (!window.imageManagerScriptLoaded) {
+            var script = document.createElement('script');
+            script.src = '{{ asset("assets/js/ImageManager.js") }}';
+            script.async = true;
+            document.head.appendChild(script);
+            window.imageManagerScriptLoaded = true;
+        }
+    </script>
+    @php $imageManagerLoaded = true; @endphp
+@endif
 
 @push('styles')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css">
@@ -27,24 +38,67 @@
         camp_facility_checkboxes: { field: 'Camp Facilities', step: 3 }
     };
 
-    // Initialize form when document is ready
-    $(document).ready(function() {
-        initializeCampForm();
+    // Initialize form when document is ready - exactly like accommodation form
+    document.addEventListener('DOMContentLoaded', function() {
+        // Wait for jQuery to be available
+        if (typeof $ !== 'undefined') {
+            initializeCampForm();
+        } else {
+            // Retry after a short delay
+            setTimeout(function() {
+                if (typeof $ !== 'undefined') {
+                    initializeCampForm();
+                } else {
+                    console.error('jQuery not available');
+                }
+            }, 100);
+        }
     });
 
     function initializeCampForm() {
-        // Initialize image manager using the same pattern as rental boats
-        if (typeof ImageManager !== 'undefined' && !window.imageManagerLoaded) {
-            window.imageManagerLoaded = new ImageManager('#croppedImagesContainer', '#title_image');
-            
-            if (document.getElementById('is_update').value === '1') {
+        // Prevent multiple initialization
+        if (window.campFormInitialized) {
+            return;
+        }
+        
+        window.campFormInitialized = true;
+        
+        // Initialize image manager using the same pattern as accommodation form
+        function initializeImageManager() {
+            if (typeof ImageManager !== 'undefined' && !window.imageManagerLoaded) {
+                try {
+                    window.imageManagerLoaded = new ImageManager('#croppedImagesContainer', '#title_image');
+                } catch (e) {
+                    console.error('Error creating ImageManager:', e);
+                    window.imageManagerLoaded = null;
+                }
+            } else if (typeof ImageManager === 'undefined') {
+                // Wait for ImageManager to load
+                setTimeout(initializeImageManager, 100);
+            }
+        }
+        
+        // Start initialization
+        initializeImageManager();
+        
+        // Load existing images if editing using ImageManager
+        if (document.getElementById('is_update').value === '1') {
+            // Add a delay to ensure ImageManager is fully initialized
+            setTimeout(() => {
                 const existingImagesInput = document.getElementById('existing_images');
                 const thumbnailPath = document.getElementById('thumbnail_path').value;
                 
-                if (existingImagesInput && existingImagesInput.value) {
-                    window.imageManagerLoaded.loadExistingImages(existingImagesInput.value, thumbnailPath);
+                if (existingImagesInput && existingImagesInput.value && window.imageManagerLoaded) {
+                    try {
+                        const existingImages = JSON.parse(existingImagesInput.value);
+                        if (Array.isArray(existingImages) && existingImages.length > 0) {
+                            window.imageManagerLoaded.loadExistingImages(existingImages, thumbnailPath);
+                        }
+                    } catch (e) {
+                        console.error('Error loading existing images:', e);
+                    }
                 }
-            }
+            }, 500);
         }
 
         // Initialize location autocomplete
@@ -83,6 +137,25 @@
             setTimeout(() => {
                 loadExistingData();
             }, 100);
+            
+            // Additional fallback for image loading if ImageManager wasn't ready initially
+            setTimeout(() => {
+                if (window.imageManagerLoaded && document.getElementById('is_update').value === '1') {
+                    const existingImagesInput = document.getElementById('existing_images');
+                    const thumbnailPath = document.getElementById('thumbnail_path').value;
+                    
+                    if (existingImagesInput && existingImagesInput.value) {
+                        try {
+                            const existingImages = JSON.parse(existingImagesInput.value);
+                            if (Array.isArray(existingImages) && existingImages.length > 0) {
+                                window.imageManagerLoaded.loadExistingImages(existingImages, thumbnailPath);
+                            }
+                        } catch (e) {
+                            console.error('Fallback: Error loading existing images:', e);
+                        }
+                    }
+                }
+            }, 1000);
         }
 
         // Initialize checkbox functionality
@@ -266,10 +339,8 @@ function setupFormSubmission() {
         // Collect tagify data properly
         collectTagifyData(formData);
         
-        // Process images before submission
         if (window.imageManagerLoaded && typeof window.imageManagerLoaded.getCroppedImages === 'function') {
             const croppedImages = window.imageManagerLoaded.getCroppedImages();
-            console.log('Cropped images found:', croppedImages.length);
             
             if (croppedImages.length > 0) {
                 // Remove any existing title_image[] from FormData
@@ -279,26 +350,12 @@ function setupFormSubmission() {
                     const blob = dataURLtoBlob(imgObj.dataUrl);
                     const filename = imgObj.filename || `cropped_${idx}.png`;
                     formData.append('title_image[]', blob, filename);
-                    console.log(`Added image ${idx}: ${filename}, size: ${blob.size} bytes`);
                 });
-            }
-        } else {
-            console.warn('ImageManager not available or getCroppedImages not a function');
-        }
-        
-        // Debug: Log form data being sent
-        console.log('=== Camp Form Submission Debug ===');
-        console.log('Submit URL:', submitUrl);
-        console.log('Method:', method);
-        console.log('Form Data Contents:');
-        for (let [key, value] of formData.entries()) {
-            if (value instanceof Blob) {
-                console.log(key + ': [Blob]', value.size, 'bytes');
             } else {
-                console.log(key + ':', value);
+                // Check if there are any images in the container
+                const imagePreviews = document.querySelectorAll('#croppedImagesContainer .image-preview-wrapper');
             }
         }
-        console.log('=== End Form Data ===');
         
         // Show loading state
         const submitBtn = $(this).find('button[type="submit"]');
@@ -345,25 +402,95 @@ function setupFormSubmission() {
 }
 
 function initializeSelect2() {
-    // Initialize Select2 for multi-select dropdowns (excluding target_fish which is now a textarea)
-    $('#accommodations, #rental_boats, #guidings').select2({
-        placeholder: '{{ __("camps.select_options") }}',
-        allowClear: true,
-        width: '100%'
-    });
-
-    // Add change event listener for guidings to show cards
-    $('#guidings').on('change', function() {
-        updateSelectedGuidingsCards();
-    });
+    // Use a delay to ensure DOM is fully ready
+    setTimeout(function() {
+        // Check if elements exist and have options
+        const accommodationsEl = $('#accommodations');
+        const rentalBoatsEl = $('#rental_boats');
+        const guidingsEl = $('#guidings');
+        
+        // Initialize each dropdown individually with error handling
+        try {
+            // Check if Select2 is already initialized before destroying
+            if (accommodationsEl.hasClass('select2-hidden-accessible')) {
+                accommodationsEl.select2('destroy');
+            }
+            
+            // Force refresh the options before initializing Select2
+            accommodationsEl.trigger('change');
+            
+            accommodationsEl.select2({
+                placeholder: '{{ __("camps.select_options") }}',
+                allowClear: true,
+                width: '100%',
+                data: accommodationsEl.find('option').map(function() {
+                    return {
+                        id: $(this).val(),
+                        text: $(this).text().trim()
+                    };
+                }).get()
+            });
+        } catch (e) {
+            console.error('Error initializing accommodations Select2:', e);
+        }
+        
+        try {
+            if (rentalBoatsEl.hasClass('select2-hidden-accessible')) {
+                rentalBoatsEl.select2('destroy');
+            }
+            
+            // Force refresh the options before initializing Select2
+            rentalBoatsEl.trigger('change');
+            
+            rentalBoatsEl.select2({
+                placeholder: '{{ __("camps.select_options") }}',
+                allowClear: true,
+                width: '100%',
+                data: rentalBoatsEl.find('option').map(function() {
+                    return {
+                        id: $(this).val(),
+                        text: $(this).text().trim()
+                    };
+                }).get()
+            });
+        } catch (e) {
+            console.error('Error initializing rental boats Select2:', e);
+        }
+        
+        try {
+            if (guidingsEl.hasClass('select2-hidden-accessible')) {
+                guidingsEl.select2('destroy');
+            }
+            
+            // Force refresh the options before initializing Select2
+            guidingsEl.trigger('change');
+            
+            guidingsEl.select2({
+                placeholder: '{{ __("camps.select_options") }}',
+                allowClear: true,
+                width: '100%',
+                data: guidingsEl.find('option').map(function() {
+                    return {
+                        id: $(this).val(),
+                        text: $(this).text().trim()
+                    };
+                }).get()
+            });
+            
+            // Add change event listener for guidings to show cards
+            guidingsEl.on('change', function() {
+                updateSelectedGuidingsCards();
+            });
+        } catch (e) {
+            console.error('Error initializing guidings Select2:', e);
+        }
+    }, 100);
 }
 
 function updateSelectedGuidingsCards() {
     const selectedIds = $('#guidings').val() || [];
     const container = $('#selected-guidings-container');
     const cardsContainer = $('#selected-guidings-cards');
-    
-    console.log('updateSelectedGuidingsCards called with IDs:', selectedIds);
     
     if (selectedIds.length === 0) {
         container.hide();
@@ -389,16 +516,13 @@ function updateSelectedGuidingsCards() {
                 
                 // Apply compact layout based on number of cards
                 const cardCount = cardsContainer.find('.col-lg-4').length;
-                console.log('Card count:', cardCount);
                 
                 container.removeClass('compact-2-cards compact-3-cards');
                 
                 if (cardCount === 2) {
                     container.addClass('compact-2-cards');
-                    console.log('Applied compact-2-cards class');
                 } else if (cardCount === 3) {
                     container.addClass('compact-3-cards');
-                    console.log('Applied compact-3-cards class');
                 }
                 
                 // Initialize carousels for the new cards
@@ -440,12 +564,10 @@ function initializeLazyLoading(container) {
 
 
 function initializeTagify() {
-    console.log('Initializing Tagify...');
     
     // Initialize tagify for camp facilities
     @if(isset($campFacilities) && count($campFacilities) > 0)
     const campFacilitiesData = {!! json_encode($campFacilities->map(function($item) { return ['value' => $item->name, 'id' => $item->id]; })->sortBy('value')->values()->toArray()) !!};
-    console.log('Camp facilities data:', campFacilitiesData);
     
     const campFacilitiesTagify = initTagify('input[name="camp_facilities"]', {
         whitelist: campFacilitiesData,
@@ -460,20 +582,17 @@ function initializeTagify() {
     // Populate with existing data
     @if(isset($formData['facilities']) && is_array($formData['facilities']))
     const facilitiesData = {!! json_encode($formData['facilities']) !!};
-    console.log('Existing facilities data:', facilitiesData);
     if (campFacilitiesTagify && facilitiesData && Array.isArray(facilitiesData)) {
         campFacilitiesTagify.addTags(facilitiesData.filter(Boolean));
     }
     @endif
     @else
-    console.log('No camp facilities data available');
     initTagify('input[name="camp_facilities"]', {});
     @endif
 
     // Initialize tagify for target fish
     @if(isset($targetFish) && count($targetFish) > 0)
     const targetFishData = {!! json_encode($targetFish->map(function($item) { return ['value' => $item->name, 'id' => $item->id]; })->sortBy('value')->values()->toArray()) !!};
-    console.log('Target fish data:', targetFishData);
     
     const targetFishTagify = initTagify('input[name="target_fish"]', {
         whitelist: targetFishData,
@@ -488,24 +607,20 @@ function initializeTagify() {
     // Populate with existing data
     @if(isset($formData['target_fish']) && !empty($formData['target_fish']))
     const existingTargetFish = {!! json_encode(explode(',', $formData['target_fish'])) !!};
-    console.log('Existing target fish data:', existingTargetFish);
     if (targetFishTagify && existingTargetFish && Array.isArray(existingTargetFish)) {
         targetFishTagify.addTags(existingTargetFish.filter(Boolean));
     }
     @endif
     @else
-    console.log('No target fish data available');
     initTagify('input[name="target_fish"]', {});
     @endif
 
     // Initialize tagify for extras (without predefined options)
     const extrasTagify = initTagify('input[name="extras"]', {});
-    console.log('Extras tagify initialized');
     
     // Populate with existing data
     @if(isset($formData['extras']) && !empty($formData['extras']))
     const existingExtras = {!! json_encode(explode(',', $formData['extras'])) !!};
-    console.log('Existing extras data:', existingExtras);
     if (extrasTagify && existingExtras && Array.isArray(existingExtras)) {
         extrasTagify.addTags(existingExtras.filter(Boolean));
     }
@@ -513,24 +628,19 @@ function initializeTagify() {
 }
 
 function initTagify(selector, options = {}) {
-    console.log('initTagify called with selector:', selector, 'options:', options);
     const element = document.querySelector(selector);
-    console.log('Found element:', element);
     
     if (!element) {
-        console.error('Element not found for selector:', selector);
         return null;
     }
     
     if (element.tagify) {
-        console.log('Tagify already initialized on element');
         return element.tagify;
     }
     
     try {
         const tagify = new Tagify(element, options);
         element.tagify = tagify;
-        console.log('Tagify initialized successfully on element:', element);
         return tagify;
     } catch (error) {
         console.error('Error initializing Tagify:', error);
@@ -610,18 +720,11 @@ function dataURLtoBlob(dataurl) {
 
 function loadExistingData() {
     // Load existing form data for editing
-    if (window.imageManagerLoaded) {
-        const existingImages = $('#existing_images').val();
-        const thumbnailPath = $('#thumbnail_path').val();
-        
-        if (existingImages) {
-            try {
-                const images = JSON.parse(existingImages);
-                window.imageManagerLoaded.loadExistingImages(images, thumbnailPath);
-            } catch (e) {
-                console.error('Error loading existing images:', e);
-            }
-        }
+    const formData = @json($formData ?? []);
+    
+    // Load images if they exist - handled by ImageManager
+    if (formData.gallery_images && Array.isArray(formData.gallery_images)) {
+        // Note: Images are now displayed in croppedImagesContainer to avoid duplication
     }
 }
 

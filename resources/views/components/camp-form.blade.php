@@ -77,7 +77,7 @@
                         <div id="croppedImagesContainer"></div>
                     </div>
 
-                    <div class="image-area" id="imagePreviewContainer"></div>
+                    <div class="image-area" id="imagePreviewContainer" style="display: none;"></div>
                     <input type="hidden" name="primaryImage" id="primaryImageInput">
                 </div>
 
@@ -342,7 +342,10 @@
                     </label>
                     <select class="form-control" name="accommodations[]" id="accommodations" multiple>
                         @foreach($accommodations ?? [] as $accommodation)
-                            <option value="{{ $accommodation->id }}">{{ $accommodation->title }}</option>
+                            <option value="{{ $accommodation->id }}" 
+                                {{ (isset($formData['accommodations']) && in_array($accommodation->id, $formData['accommodations'])) ? 'selected' : '' }}>
+                                {{ $accommodation->title }}
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -381,7 +384,10 @@
                     </label>
                     <select class="form-control" name="rental_boats[]" id="rental_boats" multiple>
                         @foreach($rentalBoats ?? [] as $rentalBoat)
-                            <option value="{{ $rentalBoat->id }}">{{ $rentalBoat->title }}</option>
+                            <option value="{{ $rentalBoat->id }}" 
+                                {{ (isset($formData['rental_boats']) && in_array($rentalBoat->id, $formData['rental_boats'])) ? 'selected' : '' }}>
+                                {{ $rentalBoat->title }}
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -420,7 +426,10 @@
                     </label>
                     <select class="form-control" name="guidings[]" id="guidings" multiple>
                         @foreach($guidings ?? [] as $guiding)
-                            <option value="{{ $guiding->id }}">{{ $guiding->title }}</option>
+                            <option value="{{ $guiding->id }}" 
+                                {{ (isset($formData['guidings']) && in_array($guiding->id, $formData['guidings'])) ? 'selected' : '' }}>
+                                {{ $guiding->title }}
+                            </option>
                         @endforeach
                     </select>
                 </div>

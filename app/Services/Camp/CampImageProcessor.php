@@ -55,21 +55,35 @@ class CampImageProcessor
         if ($request->hasFile('title_image')) {
             $imageCount = count($galleryImages);
             $tempSlug = $slug ?: 'temp-camp';
+            $processedFilenames = [];
 
             foreach($request->file('title_image') as $index => $image) {
                 try {
-                    // Generate unique filename
-                    $filename = $this->generateUniqueFilename($image, $tempSlug, $imageCount + $index);
+                    $originalFilename = $image->getClientOriginalName();
+                    $filename = 'camps-images/' . $originalFilename;
                     
-                    // Store in temporary directory first
-                    $path = $image->storeAs("camps/temp/{$tempSlug}", $filename, 'public');
-                    $galleryImages[] = $path;
+                    // Check if this image was already processed (existing image)
+                    if (in_array($originalFilename, $processedFilenames)) continue;
                     
-                    Log::info('Camp Image Stored:', [
-                        'path' => $path, 
-                        'size' => $image->getSize(),
-                        'original_name' => $image->getClientOriginalName()
-                    ]);
+                    // Check if this image is in the image_list (new image that should be kept)
+                    if (in_array($originalFilename, $imageList) || in_array($filename, $imageList) || in_array('/' . $filename, $imageList)) {
+                        $index = $index + $imageCount;
+                        $timestamp = time();
+                        $filename = $tempSlug . "-" . $index . "-" . $timestamp;
+                        
+                        // Use isolated directory structure: camps/{id}/gallery/
+                        $directory = $campId ? "camps/{$campId}/gallery" : "camps/temp/gallery";
+                        
+                        $webp_path = media_upload($image, $directory, $filename, 75, $campId);
+                        $galleryImages[] = $webp_path;
+                        $processedFilenames[] = $originalFilename;
+                        
+                        Log::info('Camp Image Stored:', [
+                            'path' => $webp_path, 
+                            'size' => $image->getSize(),
+                            'original_name' => $image->getClientOriginalName()
+                        ]);
+                    }
                 } catch (\Exception $e) {
                     Log::error('Error storing camp image:', [
                         'error' => $e->getMessage(),
@@ -77,18 +91,25 @@ class CampImageProcessor
                     ]);
                 }
             }
+        } else {
+            Log::info('CampImageProcessor::processImageUploads - No title_image files found');
         }
 
         // Handle cropped images
         if ($request->hasFile('cropped_image')) {
             foreach($request->file('cropped_image') as $image) {
                 try {
-                    $filename = $this->generateUniqueFilename($image, $slug ?: 'temp-camp', count($galleryImages));
-                    $path = $image->storeAs("camps/temp/{$slug}", $filename, 'public');
-                    $galleryImages[] = $path;
+                    $timestamp = time();
+                    $filename = ($slug ?: 'temp-camp') . "-cropped-" . count($galleryImages) . "-" . $timestamp;
+                    
+                    // Use isolated directory structure: camps/{id}/gallery/
+                    $directory = $campId ? "camps/{$campId}/gallery" : "camps/temp/gallery";
+                    
+                    $webp_path = media_upload($image, $directory, $filename, 75, $campId);
+                    $galleryImages[] = $webp_path;
                     
                     Log::info('Camp Cropped Image Stored:', [
-                        'path' => $path, 
+                        'path' => $webp_path, 
                         'size' => $image->getSize()
                     ]);
                 } catch (\Exception $e) {
@@ -119,46 +140,71 @@ class CampImageProcessor
     }
 
     /**
-     * Move images from temp directory to final directory
+     * Move images from temp directory to final directory after camp creation
      */
     public function moveImagesToFinalDirectory(int $campId, string $slug, array $imageData): array
     {
-        $finalGalleryImages = [];
-        $finalThumbnailPath = '';
+        $tempDirectory = "camps/temp/gallery";
+        $finalDirectory = "camps/{$campId}/gallery";
 
-        foreach ($imageData['gallery_images'] as $tempPath) {
-            try {
-                // Create final path
-                $filename = basename($tempPath);
-                $finalPath = "camps/{$campId}/{$filename}";
+        // Ensure final directory exists
+        Storage::disk('public')->makeDirectory($finalDirectory);
+        if (!file_exists(public_path($finalDirectory))) {
+            mkdir(public_path($finalDirectory), 0755, true);
+        }
 
-                // Move file from temp to final location
-                if (Storage::disk('public')->exists($tempPath)) {
-                    Storage::disk('public')->move($tempPath, $finalPath);
-                    $finalGalleryImages[] = $finalPath;
-                    
-                    Log::info('Camp Image Moved:', [
-                        'from' => $tempPath,
-                        'to' => $finalPath
-                    ]);
+        $updatedGalleryImages = [];
+        $updatedThumbnailPath = '';
+
+        // Move gallery images
+        foreach ($imageData['gallery_images'] as $imagePath) {
+            if (strpos($imagePath, $tempDirectory) === 0) {
+                $filename = basename($imagePath);
+                $newPath = $finalDirectory . '/' . $filename;
+                
+                // Move file from temp to final directory
+                if (Storage::disk('public')->exists($imagePath)) {
+                    Storage::disk('public')->move($imagePath, $newPath);
                 }
-            } catch (\Exception $e) {
-                Log::error('Error moving camp image:', [
-                    'error' => $e->getMessage(),
-                    'temp_path' => $tempPath,
-                    'camp_id' => $campId
-                ]);
+                
+                // Move in public directory as well
+                $oldPublicPath = public_path($imagePath);
+                $newPublicPath = public_path($newPath);
+                if (file_exists($oldPublicPath)) {
+                    rename($oldPublicPath, $newPublicPath);
+                }
+                
+                $updatedGalleryImages[] = $newPath;
+            } else {
+                $updatedGalleryImages[] = $imagePath;
             }
         }
 
-        // Set final thumbnail path
-        if (!empty($finalGalleryImages)) {
-            $finalThumbnailPath = $finalGalleryImages[0];
+        // Move thumbnail
+        if ($imageData['thumbnail_path'] && strpos($imageData['thumbnail_path'], $tempDirectory) === 0) {
+            $filename = basename($imageData['thumbnail_path']);
+            $newThumbnailPath = $finalDirectory . '/' . $filename;
+            
+            // Move file from temp to final directory
+            if (Storage::disk('public')->exists($imageData['thumbnail_path'])) {
+                Storage::disk('public')->move($imageData['thumbnail_path'], $newThumbnailPath);
+            }
+            
+            // Move in public directory as well
+            $oldPublicPath = public_path($imageData['thumbnail_path']);
+            $newPublicPath = public_path($newThumbnailPath);
+            if (file_exists($oldPublicPath)) {
+                rename($oldPublicPath, $newPublicPath);
+            }
+            
+            $updatedThumbnailPath = $newThumbnailPath;
+        } else {
+            $updatedThumbnailPath = $imageData['thumbnail_path'];
         }
 
         return [
-            'gallery_images' => $finalGalleryImages,
-            'thumbnail_path' => $finalThumbnailPath,
+            'gallery_images' => $updatedGalleryImages,
+            'thumbnail_path' => $updatedThumbnailPath
         ];
     }
 
@@ -168,10 +214,8 @@ class CampImageProcessor
     private function deleteImage(string $imagePath): void
     {
         try {
-            if (Storage::disk('public')->exists($imagePath)) {
-                Storage::disk('public')->delete($imagePath);
-                Log::info('Camp Image Deleted:', ['path' => $imagePath]);
-            }
+            media_delete($imagePath);
+            Log::info('Camp Image Deleted:', ['path' => $imagePath]);
         } catch (\Exception $e) {
             Log::error('Error deleting camp image:', [
                 'error' => $e->getMessage(),
@@ -180,13 +224,4 @@ class CampImageProcessor
         }
     }
 
-    /**
-     * Generate unique filename for uploaded image
-     */
-    private function generateUniqueFilename($image, string $slug, int $index): string
-    {
-        $extension = $image->getClientOriginalExtension();
-        $timestamp = now()->format('YmdHis');
-        return "{$slug}_{$timestamp}_{$index}.{$extension}";
-    }
 }

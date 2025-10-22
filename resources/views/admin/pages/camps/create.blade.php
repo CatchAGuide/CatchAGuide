@@ -20,7 +20,16 @@
 
             <div class="row">
                 <div class="col-12">
-                    @include('components.camp-form')
+                    @include('components.camp-form', [
+                        'formData' => $formData,
+                        'accommodations' => $accommodations ?? [],
+                        'rentalBoats' => $rentalBoats ?? [],
+                        'guidings' => $guidings ?? [],
+                        'campFacilities' => $campFacilities ?? [],
+                        'targetFish' => $targetFish ?? [],
+                        'formAction' => route('admin.camps.store'),
+                        'targetRedirect' => $targetRedirect
+                    ])
                 </div>
             </div>
         </div>
