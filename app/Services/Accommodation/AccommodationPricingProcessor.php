@@ -11,24 +11,46 @@ class AccommodationPricingProcessor
      */
     public function processPerPersonPricing(Request $request): array
     {
-        if ($request->price_type !== 'per_person') {
-            return [];
-        }
-
         $pricing = [];
         
-        // Process dynamic pricing tiers
-        foreach ($request->all() as $key => $value) {
-            if (strpos($key, 'guest_count_') === 0) {
-                $tierId = str_replace('guest_count_', '', $key);
-                $guestCount = (int)$value;
+        // Process new format: per_person_count[tier_id] and per_person_price_night[tier_id]
+        $personCounts = $request->input('per_person_count', []);
+        $priceNights = $request->input('per_person_price_night', []);
+        $priceWeeks = $request->input('per_person_price_week', []);
+        
+        if (!empty($personCounts) && is_array($personCounts)) {
+            foreach ($personCounts as $tierId => $personCount) {
+                $personCount = (int)$personCount;
+                $pricePerNight = isset($priceNights[$tierId]) ? (float)$priceNights[$tierId] : 0;
+                $pricePerWeek = isset($priceWeeks[$tierId]) ? (float)$priceWeeks[$tierId] : 0;
                 
-                if ($guestCount > 0) {
+                // Only add if person count is valid and at least one price is set
+                if ($personCount > 0 && ($pricePerNight > 0 || $pricePerWeek > 0)) {
                     $pricing[$tierId] = [
-                        'guest_count' => $guestCount,
-                        'price_per_night' => (float)($request->input("price_per_person_night_{$tierId}") ?? 0),
-                        'price_per_week' => (float)($request->input("price_per_person_week_{$tierId}") ?? 0)
+                        'person_count' => $personCount,
+                        'price_per_night' => $pricePerNight,
+                        'price_per_week' => $pricePerWeek
                     ];
+                }
+            }
+        }
+        
+        // Fallback: Process old format for backward compatibility
+        // guest_count_ and price_per_person_night_{tierId}
+        if (empty($pricing)) {
+            foreach ($request->all() as $key => $value) {
+                if (strpos($key, 'guest_count_') === 0) {
+                    $tierId = str_replace('guest_count_', '', $key);
+                    $guestCount = (int)$value;
+                    
+                    if ($guestCount > 0) {
+                        $pricing[$tierId] = [
+                            'person_count' => $guestCount,
+                            'guest_count' => $guestCount, // Keep for backward compatibility
+                            'price_per_night' => (float)($request->input("price_per_person_night_{$tierId}") ?? 0),
+                            'price_per_week' => (float)($request->input("price_per_person_week_{$tierId}") ?? 0)
+                        ];
+                    }
                 }
             }
         }

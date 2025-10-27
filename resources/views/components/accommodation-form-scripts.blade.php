@@ -1131,94 +1131,132 @@
     }
 
     function initializePricingCheckboxes() {
-        // Remove any existing event listeners to prevent duplicates
-        $('.pricing-types-grid .btn-checkbox-container input[type="checkbox"]').off('change.pricing');
-        
-        // Pricing checkbox functionality - exactly like rental boats
-        $('.pricing-types-grid .btn-checkbox-container input[type="checkbox"]').on('change.pricing', function() {
-            var $container = $(this).closest('.btn-checkbox-container');
-            var $label = $container.find('label');
-            var $inputGroup = $container.find('.input-group');
-
-            if (this.checked) {
-                $label.addClass('active');
-                $inputGroup.show();
-            } else {
-                $label.removeClass('active');
-                $inputGroup.hide();
-                // Clear the input value when unchecked
-                $inputGroup.find('input').val('');
-            }
-        });
-
-        // Initialize checkbox states on page load
-        $('.pricing-types-grid .btn-checkbox-container input[type="checkbox"]').each(function() {
-            var $container = $(this).closest('.btn-checkbox-container');
-            var $label = $container.find('label');
-            var $inputGroup = $container.find('.input-group');
-            
-            if (this.checked) {
-                $label.addClass('active');
-                $inputGroup.show();
-            } else {
-                $label.removeClass('active');
-                $inputGroup.hide();
-            }
-        });
-        
-        // Make sure input groups are visible by default (show them)
-        $('.pricing-types-grid .btn-checkbox-container .input-group').show();
-        
-        // Fix Price Type UI - make input fields visible and properly sized
-        $('.pricing-types-grid .btn-checkbox-container .input-group').css({
-            'display': 'block',
-            'width': '100%',
-            'margin-top': '10px'
-        });
-        
-        $('.pricing-types-grid .btn-checkbox-container .input-group input').css({
-            'width': '100%',
-            'min-width': '120px',
-            'height': '40px',
-            'padding': '8px 12px',
-            'font-size': '14px',
-            'border': '1px solid #ddd',
-            'border-radius': '4px'
-        });
-        
-        $('.pricing-types-grid .btn-checkbox-container .input-group-text').css({
-            'height': '40px',
-            'padding': '8px 12px',
-            'font-size': '14px'
-        });
-
-        // Load existing pricing data if editing
-        loadPricingData();
+        // Initialize per-person pricing (only functionality needed now)
+        initializePerPersonPricing();
     }
 
-    function loadPricingData() {
-        // Load pricing data from form data (for editing)
-        const formData = @json($formData ?? []);
+    // Per-Person Pricing Dynamic Rows
+    function initializePerPersonPricing() {
+        const container = $('#per-person-pricing-container');
+        const addButton = $('#add-person-pricing-btn');
         
-        if (formData.price_per_night && parseFloat(formData.price_per_night) > 0) {
-            const checkbox = document.querySelector('input[name="price_type_checkboxes[]"][value="per_night"]');
-            const priceInput = document.querySelector('input[name="price_per_night"]');
-            
-            if (checkbox && priceInput) {
-                checkbox.checked = true;
-                checkbox.dispatchEvent(new Event('change'));
-                priceInput.value = formData.price_per_night;
-            }
+        // Prevent multiple initializations
+        if (container.data('initialized')) {
+            return;
         }
-        
-        if (formData.price_per_week && parseFloat(formData.price_per_week) > 0) {
-            const checkbox = document.querySelector('input[name="price_type_checkboxes[]"][value="per_week"]');
-            const priceInput = document.querySelector('input[name="price_per_week"]');
+        container.data('initialized', true);
+
+        // Function to update all person counts based on row order
+        function updatePersonCounts() {
+            container.find('.per-person-pricing-row').each(function(index) {
+                const personNumber = index + 1;
+                $(this).find('.person-count-badge').text(personNumber);
+                $(this).find('input[name^="per_person_count"]').val(personNumber);
+            });
+        }
+
+        // Function to create a new pricing row
+        function createPricingRow(data = {}) {
+            const rowId = data.id || `tier_${Date.now()}`;
+            const pricePerNight = data.price_per_night || '';
+            const pricePerWeek = data.price_per_week || '';
+
+            const row = $(`
+                <div class="per-person-pricing-row mb-3" data-row-id="${rowId}">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-2">
+                                    <div class="person-count-display">
+                                        <span class="badge bg-primary person-count-badge" style="font-size: 1.2rem; padding: 10px 15px;">1</span>
+                                        <small class="d-block text-muted mt-1">Person(s)</small>
+                                    </div>
+                                    <input type="hidden" name="per_person_count[${rowId}]" value="1">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">Total Price Per Night</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">€</span>
+                                        <input type="number" 
+                                               class="form-control" 
+                                               name="per_person_price_night[${rowId}]" 
+                                               placeholder="0.00" 
+                                               step="0.01" 
+                                               min="0"
+                                               value="${pricePerNight}">
+                                    </div>
+                                    <small class="text-muted">Total for all persons per night</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">Total Price Per Week</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">€</span>
+                                        <input type="number" 
+                                               class="form-control" 
+                                               name="per_person_price_week[${rowId}]" 
+                                               placeholder="0.00" 
+                                               step="0.01" 
+                                               min="0"
+                                               value="${pricePerWeek}">
+                                    </div>
+                                    <small class="text-muted">Total for all persons per week</small>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <button type="button" class="btn btn-danger btn-sm remove-pricing-row w-100" title="Remove">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `);
+
+            // Add remove functionality
+            row.find('.remove-pricing-row').on('click', function() {
+                row.fadeOut(300, function() {
+                    $(this).remove();
+                    updatePersonCounts(); // Update counts after removal
+                });
+            });
+
+            return row;
+        }
+
+        // Add button click handler
+        addButton.off('click').on('click', function() {
+            const row = createPricingRow();
+            container.append(row);
+            updatePersonCounts(); // Update counts after adding
+        });
+
+        // Load existing per-person pricing data if editing
+        const formData = @json($formData ?? []);
+        if (formData.per_person_pricing && typeof formData.per_person_pricing === 'object') {
+            const pricingData = formData.per_person_pricing;
             
-            if (checkbox && priceInput) {
-                checkbox.checked = true;
-                checkbox.dispatchEvent(new Event('change'));
-                priceInput.value = formData.price_per_week;
+            // Check if it's an array or object
+            if (Array.isArray(pricingData) && pricingData.length > 0) {
+                pricingData.forEach((tier, index) => {
+                    const row = createPricingRow({
+                        id: `tier_${index + 1}`,
+                        price_per_night: tier.price_per_night || '',
+                        price_per_week: tier.price_per_week || ''
+                    });
+                    container.append(row);
+                });
+                updatePersonCounts();
+            } else if (!Array.isArray(pricingData) && Object.keys(pricingData).length > 0) {
+                // Handle object format
+                Object.entries(pricingData).forEach(([key, tier]) => {
+                    const row = createPricingRow({
+                        id: key,
+                        price_per_night: tier.price_per_night || '',
+                        price_per_week: tier.price_per_week || ''
+                    });
+                    container.append(row);
+                });
+                updatePersonCounts();
             }
         }
     }

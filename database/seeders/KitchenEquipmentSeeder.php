@@ -31,6 +31,7 @@ class KitchenEquipmentSeeder extends Seeder
             ['name' => 'Pfannen & Töpfe', 'name_en' => 'Pans & Pots', 'sort_order' => 13],
             ['name' => 'Spülbecken', 'name_en' => 'Sink', 'sort_order' => 14],
             ['name' => 'Basics: Spices, Oil, etc.', 'name_en' => 'Basics: Spices, Oil, etc.', 'sort_order' => 15],
+            ['name' => 'Herd & Geschirr', 'name_en' => 'Stove & Dishes ', 'sort_order' => 16],
         ];
 
         foreach ($kitchenEquipment as $equipment) {

@@ -65,7 +65,7 @@ class AccommodationCacheService
         $cacheKey = self::ACCOMMODATIONS_CACHE_KEY . '_page_' . request('page', 1);
         
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($perPage) {
-            return Accommodation::with('user')
+            return Accommodation::with(['user', 'accommodationType'])
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
         });
@@ -80,7 +80,7 @@ class AccommodationCacheService
             self::ACCOMMODATION_CACHE_KEY . $id, 
             self::CACHE_TTL, 
             function () use ($id) {
-                return Accommodation::with('user')->find($id);
+                return Accommodation::with(['user', 'accommodationType'])->find($id);
             }
         );
     }
