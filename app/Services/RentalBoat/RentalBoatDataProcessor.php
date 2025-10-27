@@ -29,6 +29,7 @@ class RentalBoatDataProcessor
             'lat' => $request->latitude ?? null,
             'lng' => $request->longitude ?? null,
             'boat_type' => $this->processBoatType($request->boat_type),
+            'max_persons' => $request->max_persons ?? null,
             'desc_of_boat' => $request->desc_of_boat ?? '',
             'requirements' => $this->requirementsProcessor->process($request),
             'boat_information' => $this->informationProcessor->process($request),

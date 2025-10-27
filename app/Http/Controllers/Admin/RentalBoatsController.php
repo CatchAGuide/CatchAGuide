@@ -294,6 +294,7 @@ class RentalBoatsController extends Controller
             'latitude' => $rentalBoat->lat,
             'longitude' => $rentalBoat->lng,
             'boat_type' => $rentalBoat->boat_type,
+            'max_persons' => $rentalBoat->max_persons,
             'desc_of_boat' => $rentalBoat->desc_of_boat,
             'status' => $rentalBoat->status,
             'thumbnail_path' => $rentalBoat->thumbnail_path,

@@ -144,6 +144,17 @@
                 <hr>
 
                 <div class="form-group">
+                    <label for="max_persons" class="form-label fw-bold fs-5">
+                        {{ __('rental_boats.max_persons') }}
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                           title="{{ __('rental_boats.tooltip_max_persons') }}"></i>
+                    </label>
+                    <input type="number" class="form-control" id="max_persons" name="max_persons" value="{{ $formData['max_persons'] ?? '' }}" placeholder="{{ __('rental_boats.max_persons_placeholder') }}" min="1">
+                </div>
+
+                <hr>
+
+                <div class="form-group">
                     <label for="desc_of_boat" class="form-label fw-bold fs-5">
                         {{ __('rental_boats.boat_description') }}
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 

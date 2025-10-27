@@ -24,6 +24,7 @@ class RentalBoat extends Model
         'lat',
         'lng',
         'boat_type',
+        'max_persons',
         'desc_of_boat',
         'requirements',
         'boat_information',
