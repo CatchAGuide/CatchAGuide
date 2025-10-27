@@ -3,36 +3,115 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\RentalBoat;
+use App\Models\Accommodation;
+use App\Models\Guiding;
+use App\Models\Camp;
 
 class CampOfferController extends Controller
 {
-    public function show()
+    private function getImageUrl($path)
     {
-        $camp = $this->getSampleCamp();
-        $accommodation = $this->getSampleAccommodation();
-        $guiding = $this->getSampleGuiding();
-        $boat = $this->getSampleBoat();
+        if (empty($path)) {
+            return null;
+        }
+        
+        // If path already starts with http or /, return as is
+        if (str_starts_with($path, 'http') || str_starts_with($path, '/')) {
+            return $path;
+        }
+        
+        // Prepend / to make it a public URL
+        return '/' . $path;
+    }
+    
+    /**
+     * Convert array of image paths to public URLs
+     */
+    private function getImageUrls($paths)
+    {
+        if (empty($paths) || !is_array($paths)) {
+            return [];
+        }
+        
+        return array_map(function($path) {
+            return $this->getImageUrl($path);
+        }, $paths);
+    }
+    
 
-        // Process gallery images
-        $campHero = $camp['thumbnail_path'] ?? ($camp['manual_gallery_images'][0] ?? 'https://images.unsplash.com/photo-1512914890250-33530e2f0d72?q=80&w=1600&auto=format&fit=crop');
+    public function show($campId)
+    {
+        // Fetch camp from database with relationships
+        $camp = Camp::with(['accommodations', 'rentalBoats', 'guidings', 'facilities'])
+            ->findOrFail($campId);
+        
+        // Log raw camp data
+        \Log::info('=== CAMP DATA DEBUG ===', [
+            'camp_id' => $camp->id,
+            'camp_title' => $camp->title,
+            'accommodations_count' => $camp->accommodations->count(),
+            'boats_count' => $camp->rentalBoats->count(),
+            'guidings_count' => $camp->guidings->count(),
+            'facilities_count' => $camp->facilities->count(),
+        ]);
+        
+        \Log::info('Raw Camp Model Data:', $camp->toArray());
+        
+        // Map camp data to view format
+        $campData = $this->mapCampData($camp);
+        
+        \Log::info('Mapped Camp Data:', $campData);
+        
+        // Get first accommodation, boat, and guiding from relationships
+        if ($camp->accommodations->first()) {
+            \Log::info('Raw Accommodation Data:', $camp->accommodations->first()->toArray());
+            $accommodation = $this->mapAccommodationData($camp->accommodations->first());
+            \Log::info('Mapped Accommodation Data:', $accommodation);
+        } else {
+            \Log::warning('No accommodations found for camp');
+            $accommodation = null;
+        }
+            
+        if ($camp->rentalBoats->first()) {
+            \Log::info('Raw Boat Data:', $camp->rentalBoats->first()->toArray());
+            $boat = $this->mapBoatData($camp->rentalBoats->first());
+            \Log::info('Mapped Boat Data:', $boat);
+        } else {
+            \Log::warning('No boats found for camp');
+            $boat = null;
+        }
+            
+        if ($camp->guidings->first()) {
+            \Log::info('Raw Guiding Data:', $camp->guidings->first()->toArray());
+            $guiding = $this->mapGuidingData($camp->guidings->first());
+            \Log::info('Mapped Guiding Data:', $guiding);
+        } else {
+            \Log::warning('No guidings found for camp');
+            $guiding = null;
+        }
+
+        // Process gallery images from camp and convert to public URLs
+        $campGallery = $this->getImageUrls($camp->gallery_images ?? []);
+        $campHero = $this->getImageUrl($camp->thumbnail_path) ?? ($campGallery[0] ?? null);
         $galleryImages = array_values(array_filter(array_merge(
-            [$camp['thumbnail_path'] ?? null],
-            $camp['manual_gallery_images'] ?? []
+            [$this->getImageUrl($camp->thumbnail_path) ?? null],
+            $campGallery
         )));
         
         if (empty($galleryImages)) {
             $galleryImages = [$campHero];
         }
         
-        $primaryImage = $galleryImages[0];
+        $primaryImage = $galleryImages[0] ?? null;
         $topRightImages = array_slice($galleryImages, 1, 2);
-        while (count($topRightImages) < 2) {
+        while (count($topRightImages) < 2 && $primaryImage) {
             $topRightImages[] = $primaryImage;
         }
         
         $bottomStripImages = array_slice($galleryImages, 3, 5);
         $fallbackIndex = 0;
-        while (count($bottomStripImages) < 5) {
+        while (count($bottomStripImages) < 5 && !empty($galleryImages)) {
             $bottomStripImages[] = $galleryImages[$fallbackIndex % count($galleryImages)];
             $fallbackIndex++;
             if ($fallbackIndex > 20) break;
@@ -40,14 +119,29 @@ class CampOfferController extends Controller
         $bottomStripImages = array_slice($bottomStripImages, 0, 5);
         $remainingGalleryCount = max(0, count($galleryImages) - 8);
         
-        // For configurator dropdown options
-        $accommodations = [$accommodation];
-        $boats = [$this->getBoatForDropdown()];
-        $guidings = [$this->getGuidingForDropdown()];
+        // For configurator dropdown options - get all related items
+        $accommodations = $camp->accommodations->map(function($acc) {
+            return $this->mapAccommodationData($acc);
+        })->toArray();
+        
+        $boats = $camp->rentalBoats->map(function($boat) {
+            return $this->mapBoatForDropdown($boat);
+        })->toArray();
+        
+        $guidings = $camp->guidings->map(function($guiding) {
+            return $this->mapGuidingForDropdown($guiding);
+        })->toArray();
+        
+        \Log::info('Dropdown Options:', [
+            'accommodations_count' => count($accommodations),
+            'boats_count' => count($boats),
+            'guidings_count' => count($guidings),
+        ]);
+        
         $showCategories = true;
 
         return view('pages.vacations.v2', compact(
-            'camp',
+            'campData',
             'accommodation',
             'guiding',
             'boat',
@@ -59,31 +153,231 @@ class CampOfferController extends Controller
             'topRightImages',
             'bottomStripImages',
             'remainingGalleryCount'
-        ));
+        ))->with('camp', $campData);
     }
     
-    private function getBoatForDropdown()
+    /**
+     * Map Camp model to view format
+     */
+    private function mapCampData(Camp $camp)
     {
+        // Decode JSON fields if they're strings
+        $facilities = $camp->facilities->pluck('name')->toArray();
+        
+        // target_fish and best_travel_times are cast to array in model
+        // but we need to handle old data that might be strings
+        $targetFish = $camp->target_fish;
+        if (is_string($targetFish) && !empty($targetFish)) {
+            $targetFish = json_decode($targetFish, true);
+        }
+        
+        $bestTravelTimes = $camp->best_travel_times;
+        if (is_string($bestTravelTimes) && !empty($bestTravelTimes)) {
+            $bestTravelTimes = json_decode($bestTravelTimes, true);
+        }
+        
+        \Log::info('Camp Mapping Debug:', [
+            'target_fish_raw' => $camp->target_fish,
+            'target_fish_type' => gettype($camp->target_fish),
+            'target_fish_decoded' => $targetFish,
+            'best_travel_times_raw' => $camp->best_travel_times,
+            'best_travel_times_type' => gettype($camp->best_travel_times),
+            'best_travel_times_decoded' => $bestTravelTimes,
+            'facilities_count' => count($facilities),
+        ]);
+        
         return [
-            'id' => 1,
-            'title' => 'Aluminum 4.5m | 15 HP',
-            'seats' => 3,
-            'sonar_gps' => true,
-            'price_per_day' => 65,
-            'currency' => 'EUR',
-            'img' => 'https://images.unsplash.com/photo-1520440229-84f3865cf003?q=80&w=1600&auto=format&fit=crop',
+            'title' => $camp->title,
+            'city' => $camp->city,
+            'region' => $camp->region,
+            'country' => $camp->country,
+            'lat' => $camp->latitude,
+            'lng' => $camp->longitude,
+            'description' => [
+                'camp_area_fishing' => $camp->description_fishing ?? '',
+                'camp_area' => $camp->description_area ?? '',
+                'camp_description' => $camp->description_camp ?? '',
+            ],
+            'distances' => [
+                'to_shop_km' => $camp->distance_to_store,
+                'to_town_km' => $camp->distance_to_nearest_town,
+                'to_airport_km' => $camp->distance_to_airport,
+                'to_ferry_km' => $camp->distance_to_ferry_port,
+            ],
+            'amenities' => $facilities,
+            'policies_regulations' => $camp->policies_regulations ? explode("\n", $camp->policies_regulations) : [],
+            'best_travel_times' => is_array($bestTravelTimes) ? $bestTravelTimes : [],
+            'travel_info' => $camp->travel_information ? explode("\n", $camp->travel_information) : [],
+            'extras' => $camp->extras ? array_map('trim', explode(',', $camp->extras)) : [],
+            'target_fish' => is_array($targetFish) ? $targetFish : [],
+            'conditions' => [
+                'minimum_stay_nights' => null,
+                'booking_window' => null,
+            ],
+            'thumbnail_path' => $this->getImageUrl($camp->thumbnail_path),
+            'manual_gallery_images' => $this->getImageUrls($camp->gallery_images ?? []),
         ];
     }
     
-    private function getGuidingForDropdown()
+    /**
+     * Map RentalBoat model to view format
+     */
+    private function mapBoatData(RentalBoat $boat)
+    {
+        $boatInfo = $boat->boat_information ?? [];
+        $prices = $boat->prices ?? [];
+        $firstPrice = is_array($prices) && !empty($prices) ? $prices[0] : null;
+        
+        return [
+            'id' => $boat->id,
+            'title' => $boat->title,
+            'type' => $boat->boatType->name ?? 'Boat',
+            'location' => $boat->location,
+            'description' => $boat->desc_of_boat,
+            'thumbnail_path' => $this->getImageUrl($boat->thumbnail_path),
+            'gallery_images' => $this->getImageUrls($boat->gallery_images ?? []),
+            'seats' => $boatInfo['seats'] ?? null,
+            'length_m' => $boatInfo['length_m'] ?? null,
+            'width_m' => $boatInfo['width_m'] ?? null,
+            'year_built' => $boatInfo['year_built'] ?? null,
+            'manufacturer' => $boatInfo['manufacturer'] ?? null,
+            'engine' => $boatInfo['engine'] ?? null,
+            'power' => $boatInfo['power'] ?? null,
+            'max_speed_kmh' => $boatInfo['max_speed_kmh'] ?? null,
+            'equipment' => $boat->boat_extras ?? [],
+            'requirements' => $boat->requirements ?? [],
+            'inclusives' => $boat->inclusions ?? [],
+            'extras' => $boat->pricing_extra ?? [],
+            'price' => [
+                'amount' => $firstPrice['amount'] ?? 0,
+                'currency' => $firstPrice['currency'] ?? 'EUR',
+                'type' => $boat->price_type ?? 'per_day'
+            ]
+        ];
+    }
+    
+    /**
+     * Map boat for dropdown
+     */
+    private function mapBoatForDropdown(RentalBoat $boat)
+    {
+        $boatInfo = $boat->boat_information ?? [];
+        $prices = $boat->prices ?? [];
+        $firstPrice = is_array($prices) && !empty($prices) ? $prices[0] : null;
+        
+        return [
+            'id' => $boat->id,
+            'title' => $boat->title,
+            'seats' => $boatInfo['seats'] ?? null,
+            'sonar_gps' => in_array('sonar', $boat->boat_extras ?? []) || in_array('gps', $boat->boat_extras ?? []),
+            'price_per_day' => $firstPrice['amount'] ?? 0,
+            'currency' => $firstPrice['currency'] ?? 'EUR',
+            'img' => $this->getImageUrl($boat->thumbnail_path),
+        ];
+    }
+    
+    /**
+     * Map Accommodation model to view format
+     */
+    private function mapAccommodationData(Accommodation $accommodation)
+    {
+        $accommodationDetails = $accommodation->accommodation_details ?? [];
+        
+        return [
+            'id' => $accommodation->id,
+            'title' => $accommodation->title,
+            'accommodation_type' => $accommodation->accommodation_type,
+            'thumbnail_path' => $this->getImageUrl($accommodation->thumbnail_path),
+            'gallery_images' => $this->getImageUrls($accommodation->gallery_images ?? []),
+            'city' => $accommodation->city,
+            'region' => $accommodation->region,
+            'country' => $accommodation->country,
+            'description' => $accommodation->description,
+            'living_area_sqm' => $accommodation->living_area_sqm,
+            'max_occupancy' => $accommodation->max_occupancy,
+            'number_of_bedrooms' => $accommodation->number_of_bedrooms,
+            'bathrooms' => $accommodation->bathroom,
+            'floors' => $accommodation->floor_layout,
+            'year_or_renovated' => $accommodation->condition_or_style,
+            'living_room' => $accommodationDetails['living_room'] ?? false,
+            'dining_room' => $accommodationDetails['dining_room'] ?? false,
+            'bed_config' => $accommodation->bed_types ?? [],
+            'location_description' => $accommodation->location_description,
+            'distances' => [
+                'to_water_m' => $accommodation->distance_to_water_m,
+                'to_berth_m' => $accommodation->distance_to_boat_berth_m,
+                'to_parking_m' => $accommodation->distance_to_parking_m
+            ],
+            'amenities' => $accommodation->amenities ?? [],
+            'kitchen' => $accommodation->kitchen_equipment ?? [],
+            'bathroom_laundry' => $accommodation->bathroom_amenities ?? [],
+            'policies' => $accommodation->policies ?? [],
+            'extras_inclusives' => [
+                'inclusives' => $accommodation->inclusives ?? [],
+                'extras' => $accommodation->extras ?? [],
+            ],
+            'price' => [
+                'type' => $accommodation->price_type ?? 'per_night',
+                'amount' => $accommodation->price_per_night,
+                'currency' => $accommodation->currency,
+                'per_week' => $accommodation->price_per_week
+            ],
+            'changeover_day' => $accommodation->changeover_day,
+            'minimum_stay_nights' => $accommodation->minimum_stay_nights,
+        ];
+    }
+    
+    /**
+     * Map Guiding model to view format
+     */
+    private function mapGuidingData(Guiding $guiding)
+    {
+        // Decode JSON fields
+        $targetFish = is_string($guiding->target_fish) ? json_decode($guiding->target_fish, true) : $guiding->target_fish;
+        $fishingMethods = is_string($guiding->fishing_methods) ? json_decode($guiding->fishing_methods, true) : $guiding->fishing_methods;
+        $inclusions = is_string($guiding->inclusions) ? json_decode($guiding->inclusions, true) : $guiding->inclusions;
+        
+        return [
+            'id' => $guiding->id,
+            'title' => $guiding->title,
+            'location' => $guiding->location,
+            'description' => $guiding->description ?? $guiding->desc_course_of_action,
+            'thumbnail_path' => $this->getImageUrl($guiding->thumbnail_path),
+            'gallery_images' => $this->getImageUrls($guiding->gallery_images ?? []),
+            'duration_hours' => $guiding->duration_type ?? 4,
+            'max_persons' => $guiding->max_guests,
+            'type' => $guiding->tour_type,
+            'guiding_info' => [
+                'art' => $guiding->fishingFrom->name ?? 'Tour',
+                'dauer' => $guiding->duration_type . ' h',
+                'max_personen' => $guiding->max_guests,
+                'gewaesser' => $guiding->water_name ?? 'Water'
+            ],
+            'target_fish' => $targetFish ?? [],
+            'methods' => $fishingMethods ?? [],
+            'meeting_point' => $guiding->meeting_point,
+            'start_times' => $guiding->desc_starting_time ? explode(',', $guiding->desc_starting_time) : [],
+            'inclusives' => $inclusions ?? [],
+            'price' => [
+                'amount' => $guiding->price,
+                'currency' => 'EUR',
+                'type' => $guiding->price_type ?? 'per_boat'
+            ]
+        ];
+    }
+    
+    /**
+     * Map guiding for dropdown
+     */
+    private function mapGuidingForDropdown(Guiding $guiding)
     {
         return [
-            'id' => 1,
-            'title' => 'Half-day Guiding (4h)',
-            'group_size' => 2,
-            'price' => 180,
+            'id' => $guiding->id,
+            'title' => $guiding->title,
+            'group_size' => $guiding->max_guests,
+            'price' => $guiding->price,
             'currency' => 'EUR',
-            'img' => 'https://images.unsplash.com/photo-1474843148229-3163319fcc00?q=80&w=1600&auto=format&fit=crop',
+            'img' => $this->getImageUrl($guiding->thumbnail_path),
         ];
     }
 

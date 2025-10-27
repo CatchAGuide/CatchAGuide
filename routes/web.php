@@ -287,7 +287,7 @@ Route::get('password/reset/{token}', [ForgotPasswordController::class, 'showRese
 Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 
 Route::get('test-camp', [TestController::class, 'index'])->name('test.camp');
-Route::get('vacations-v2', [\App\Http\Controllers\CampOfferController::class, 'show'])->name('vacations.v2');
+Route::get('vacations-v2/{campId}', [\App\Http\Controllers\CampOfferController::class, 'show'])->name('vacations.v2');
 
 Route::get('robots.txt', function () {
     if (request()->getHost() == 'catchaguide.com') {

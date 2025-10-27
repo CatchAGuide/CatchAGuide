@@ -199,8 +199,9 @@ class CampsController extends Controller
             // Sync relationships
             $this->syncCampRelationships($camp, $request);
 
-            // Clear caches
+            // Clear caches - clear both the specific camp and the list
             $this->cacheService->clearCampCache($camp->id);
+            $this->cacheService->clearCampsListCache();
 
             if ($request->expectsJson()) {
                 return response()->json([
@@ -240,8 +241,9 @@ class CampsController extends Controller
     {
             $camp->delete();
 
-        // Clear caches
+        // Clear caches - clear both the specific camp and the list
         $this->cacheService->clearCampCache($camp->id);
+        $this->cacheService->clearCampsListCache();
 
         return redirect()->route('admin.camps.index')
             ->with('success', 'Camp deleted successfully.');
@@ -256,8 +258,9 @@ class CampsController extends Controller
         $camp->status = $request->status;
         $camp->save();
 
-        // Clear caches
+        // Clear caches - clear both the specific camp and the list
         $this->cacheService->clearCampCache($camp->id);
+        $this->cacheService->clearCampsListCache();
 
         return response()->json([
             'success' => true,
