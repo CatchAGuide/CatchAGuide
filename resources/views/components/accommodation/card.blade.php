@@ -57,22 +57,27 @@
             <div class="accommodation-card__detail-box" data-expanded-only>
                 <div class="accommodation-card__detail-box-title">Included & Extras</div>
                 
+                @if(!empty($accommodation['extras_inclusives']['inclusives']))
                 <div>
                     <div class="accommodation-card__detail-box-title" style="font-size: 11px; margin-bottom: 2px;">Included</div>
                     <div class="accommodation-card__inclusive-extras">
-                        <span class="accommodation-card__inclusive-chip">✅ WiFi</span>
-                        <span class="accommodation-card__inclusive-chip">✅ Electricity/Heating</span>
+                        @foreach($accommodation['extras_inclusives']['inclusives'] as $inclusive)
+                            <span class="accommodation-card__inclusive-chip">✅ {{ is_array($inclusive) ? ($inclusive['name'] ?? $inclusive['value'] ?? json_encode($inclusive)) : $inclusive }}</span>
+                        @endforeach
                     </div>
                 </div>
+                @endif
 
+                @if(!empty($accommodation['extras_inclusives']['extras']))
                 <div style="margin-top: 8px;">
                     <div class="accommodation-card__detail-box-title" style="font-size: 11px; margin-bottom: 2px;">Extras</div>
                     <div class="accommodation-card__inclusive-extras">
-                        <span class="accommodation-card__inclusive-chip">✅ Bed linen</span>
-                        <span class="accommodation-card__inclusive-chip">✅ Towels</span>
-                        <span class="accommodation-card__inclusive-chip">✅ Final cleaning</span>
+                        @foreach($accommodation['extras_inclusives']['extras'] as $extra)
+                            <span class="accommodation-card__inclusive-chip">✅ {{ is_array($extra) ? ($extra['name'] ?? $extra['value'] ?? json_encode($extra)) : $extra }}</span>
+                        @endforeach
                     </div>
                 </div>
+                @endif
             </div>
         </div>
 
@@ -96,15 +101,21 @@
 
             <!-- Distance Chips and Expand Button -->
             <div class="accommodation-card__distance-chips">
-                <span class="accommodation-card__distance-chip">
-                    🌊 Water: <span>{{ $accommodation['distances']['to_water_m'] ?? '40' }}</span> m
-                </span>
-                <span class="accommodation-card__distance-chip">
-                    ⚓ Jetty: <span>{{ $accommodation['distances']['to_berth_m'] ?? '60' }}</span> m
-                </span>
-                <span class="accommodation-card__distance-chip">
-                    🚗 Parking: <span>{{ $accommodation['distances']['to_parking_m'] ?? '20' }}</span> m
-                </span>
+                @if(!empty($accommodation['distances']['to_water_m']))
+                    <span class="accommodation-card__distance-chip">
+                        🌊 Water: <span>{{ is_numeric($accommodation['distances']['to_water_m']) ? $accommodation['distances']['to_water_m'] . ' m' : $accommodation['distances']['to_water_m'] }}</span>
+                    </span>
+                @endif
+                @if(!empty($accommodation['distances']['to_berth_m']))
+                    <span class="accommodation-card__distance-chip">
+                        ⚓ Jetty: <span>{{ is_numeric($accommodation['distances']['to_berth_m']) ? $accommodation['distances']['to_berth_m'] . ' m' : $accommodation['distances']['to_berth_m'] }}</span>
+                    </span>
+                @endif
+                @if(!empty($accommodation['distances']['to_parking_m']))
+                    <span class="accommodation-card__distance-chip">
+                        🚗 Parking: <span>{{ is_numeric($accommodation['distances']['to_parking_m']) ? $accommodation['distances']['to_parking_m'] . ' m' : $accommodation['distances']['to_parking_m'] }}</span>
+                    </span>
+                @endif
                 
                 <!-- Expand/Collapse Button (inline with chips) -->
                 <button class="accommodation-card__expand-btn" data-toggle-btn>
@@ -119,32 +130,132 @@
                 <div class="accommodation-card__info-box">
                     <div class="accommodation-card__info-box-title">Beds & Location</div>
                     <div class="accommodation-card__info-box-content">
-                        <div class="font-medium">2× Single • 1× Double</div>
-                        <div style="margin-top: 8px;">
-                            <div class="accommodation-card__info-box-title">Location</div>
-                            <p style="color: #334155; line-height: 1.4;">{{ $accommodation['location_description'] ?? 'Near the shore' }}</p>
-                        </div>
+                        @if(!empty($accommodation['bed_config']))
+                            @php
+                                $bedTypes = [];
+                                if (!empty($accommodation['bed_config']['single'])) $bedTypes[] = $accommodation['bed_config']['single'] . '× Single';
+                                if (!empty($accommodation['bed_config']['double'])) $bedTypes[] = $accommodation['bed_config']['double'] . '× Double';
+                                if (!empty($accommodation['bed_config']['bunk'])) $bedTypes[] = $accommodation['bed_config']['bunk'] . '× Bunk';
+                                if (!empty($accommodation['bed_config']['sofabed'])) $bedTypes[] = $accommodation['bed_config']['sofabed'] . '× Sofa bed';
+                                if (!empty($accommodation['bed_config']['child'])) $bedTypes[] = $accommodation['bed_config']['child'] . '× Child bed';
+                                if (!empty($accommodation['bed_config']['folding'])) $bedTypes[] = $accommodation['bed_config']['folding'] . '× Folding bed';
+                            @endphp
+                            <div class="font-medium">{{ implode(' • ', $bedTypes) ?: 'Bed configuration not specified' }}</div>
+                        @else
+                            <div class="font-medium">Bed configuration not specified</div>
+                        @endif
+                        @if(!empty($accommodation['location_description']))
+                            <div style="margin-top: 8px;">
+                                <div class="accommodation-card__info-box-title">Location</div>
+                                <p style="color: #334155; line-height: 1.4;">{{ $accommodation['location_description'] }}</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
                 <!-- Box 2: Bath/Laundry -->
                 <div class="accommodation-card__info-box">
                     <div class="accommodation-card__info-box-title">Bath/Laundry</div>
-                    <div class="accommodation-card__info-box-content">Bath details</div>
+                    <div class="accommodation-card__info-box-content">
+                        @if(!empty($accommodation['bathroom_laundry']))
+                            <ul style="list-style: none; padding: 0; margin: 0; font-size: 13px; line-height: 1.8;">
+                                @if(!empty($accommodation['bathroom_laundry']['toilet']))
+                                    <li>🚽 Toilet: {{ $accommodation['bathroom_laundry']['toilet'] }}</li>
+                                @endif
+                                @if(!empty($accommodation['bathroom_laundry']['shower']))
+                                    <li>🚿 Shower: {{ $accommodation['bathroom_laundry']['shower'] }}</li>
+                                @endif
+                                @if(!empty($accommodation['bathroom_laundry']['washbasin']))
+                                    <li>🚰 Washbasin: {{ $accommodation['bathroom_laundry']['washbasin'] }}</li>
+                                @endif
+                                @if(!empty($accommodation['bathroom_laundry']['washing_machine']))
+                                    <li>✅ Washing machine</li>
+                                @endif
+                                @if(!empty($accommodation['bathroom_laundry']['dryer']))
+                                    <li>✅ Dryer</li>
+                                @endif
+                                @if(!empty($accommodation['bathroom_laundry']['iron_board']))
+                                    <li>✅ Iron & board</li>
+                                @endif
+                            </ul>
+                        @else
+                            <p style="color: #64748b; font-size: 13px;">No bathroom details available</p>
+                        @endif
+                    </div>
                 </div>
 
                 <!-- Box 3: Kitchen -->
                 <div class="accommodation-card__info-box">
                     <div class="accommodation-card__info-box-title">Kitchen</div>
-                    <div class="accommodation-card__info-box-content">Kitchen details</div>
+                    <div class="accommodation-card__info-box-content">
+                        @if(!empty($accommodation['kitchen']))
+                            <ul style="list-style: none; padding: 0; margin: 0; font-size: 13px; line-height: 1.8;">
+                                @if(!empty($accommodation['kitchen']['refrigerator_freezer']))
+                                    <li>✅ Refrigerator/Freezer</li>
+                                @endif
+                                @if(!empty($accommodation['kitchen']['oven']))
+                                    <li>✅ Oven</li>
+                                @endif
+                                @if(!empty($accommodation['kitchen']['stove']))
+                                    <li>✅ Stove</li>
+                                @endif
+                                @if(!empty($accommodation['kitchen']['microwave']))
+                                    <li>✅ Microwave</li>
+                                @endif
+                                @if(!empty($accommodation['kitchen']['dishwasher']))
+                                    <li>✅ Dishwasher</li>
+                                @endif
+                                @if(!empty($accommodation['kitchen']['coffee_machine']))
+                                    <li>☕ Coffee machine: {{ $accommodation['kitchen']['coffee_machine'] }}</li>
+                                @endif
+                                @if(!empty($accommodation['kitchen']['kettle']))
+                                    <li>✅ Kettle</li>
+                                @endif
+                                @if(!empty($accommodation['kitchen']['toaster']))
+                                    <li>✅ Toaster</li>
+                                @endif
+                            </ul>
+                        @else
+                            <p style="color: #64748b; font-size: 13px;">No kitchen details available</p>
+                        @endif
+                    </div>
                 </div>
 
                 <!-- Box 4: Policies & Conditions (full width) -->
                 <div class="accommodation-card__info-box">
-                    <div class="accommodation-card__info-box-title">Policies & Conditions</div>
-                    <div class="accommodation-card__info-box-content">Policies</div>
-                    <div class="accommodation-card__info-box-title" style="margin-top: 8px;">Conditions</div>
-                    <div class="accommodation-card__info-box-content">Conditions</div>
+                    @if(!empty($accommodation['policies']))
+                        <div class="accommodation-card__info-box-title">Policies</div>
+                        <div class="accommodation-card__info-box-content">
+                            <ul style="list-style: none; padding: 0; margin: 0; font-size: 13px; line-height: 1.8;">
+                                @if(isset($accommodation['policies']['pets_allowed']))
+                                    <li>{{ $accommodation['policies']['pets_allowed'] ? '✅' : '❌' }} Pets allowed</li>
+                                @endif
+                                @if(isset($accommodation['policies']['smoking_allowed']))
+                                    <li>{{ $accommodation['policies']['smoking_allowed'] ? '✅' : '❌' }} Smoking allowed</li>
+                                @endif
+                                @if(isset($accommodation['policies']['children_allowed']))
+                                    <li>{{ $accommodation['policies']['children_allowed'] ? '✅' : '❌' }} Children allowed</li>
+                                @endif
+                                @if(!empty($accommodation['policies']['quiet_hours']))
+                                    <li>🔇 Quiet hours: {{ $accommodation['policies']['quiet_hours'] }}</li>
+                                @endif
+                            </ul>
+                        </div>
+                    @endif
+                    
+                    @if(!empty($accommodation['changeover_day']) || !empty($accommodation['minimum_stay_nights']))
+                        <div class="accommodation-card__info-box-title" style="margin-top: 8px;">Conditions</div>
+                        <div class="accommodation-card__info-box-content">
+                            <ul style="list-style: none; padding: 0; margin: 0; font-size: 13px; line-height: 1.8;">
+                                @if(!empty($accommodation['changeover_day']))
+                                    <li>📅 Changeover day: <strong>{{ $accommodation['changeover_day'] }}</strong></li>
+                                @endif
+                                @if(!empty($accommodation['minimum_stay_nights']))
+                                    <li>🌙 Minimum stay: <strong>{{ $accommodation['minimum_stay_nights'] }} nights</strong></li>
+                                @endif
+                            </ul>
+                        </div>
+                    @endif
                 </div>
             </div>
 
