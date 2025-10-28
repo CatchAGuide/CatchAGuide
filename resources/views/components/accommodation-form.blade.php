@@ -324,36 +324,6 @@
 
                 <hr>
 
-                <!-- Standard Pricing Fields -->
-                <div class="form-group">
-                    <label class="form-label fw-bold fs-5">
-                        Standard Pricing
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                           title="Set base prices for your accommodation"></i>
-                    </label>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="price_per_night" class="form-label">
-                                Price per Night
-                            </label>
-                            <input type="number" class="form-control" id="price_per_night" name="price_per_night" 
-                                   value="{{ $formData['price_per_night'] ?? '' }}" min="0" step="0.01" 
-                                   placeholder="Enter nightly rate">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="price_per_week" class="form-label">
-                                Price per Week
-                            </label>
-                            <input type="number" class="form-control" id="price_per_week" name="price_per_week" 
-                                   value="{{ $formData['price_per_week'] ?? '' }}" min="0" step="0.01" 
-                                   placeholder="Enter weekly rate">
-                        </div>
-                    </div>
-                </div>
-
-                <hr>
-
                 <!-- Per Person Pricing Section -->
                 <div class="form-group">
                     <label class="form-label fw-bold fs-5">
