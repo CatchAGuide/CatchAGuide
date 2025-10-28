@@ -313,43 +313,21 @@
                     <label for="currency" class="form-label fw-bold fs-5">
                         {{ __('accommodations.currency') }}
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                           title="{{ __('accommodations.tooltip_currency') }}"></i>
-                    </label>
-                    <select class="form-control" id="currency" name="currency">
-                        <option value="EUR" {{ (isset($formData['currency']) && $formData['currency'] == 'EUR') ? 'selected' : '' }}>EUR (€)</option>
-                        <option value="USD" {{ (isset($formData['currency']) && $formData['currency'] == 'USD') ? 'selected' : '' }}>USD ($)</option>
-                        <option value="GBP" {{ (isset($formData['currency']) && $formData['currency'] == 'GBP') ? 'selected' : '' }}>GBP (£)</option>
-                    </select>
-                </div>
-
-                <hr>
-
-                <!-- Standard Pricing Fields -->
-                <div class="form-group">
-                    <label class="form-label fw-bold fs-5">
-                        Standard Pricing
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                           title="Set base prices for your accommodation"></i>
+                           title="Set different prices based on number of guests. Each row represents the total price for that number of persons."></i>
                     </label>
                     
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="price_per_night" class="form-label">
-                                Price per Night
-                            </label>
-                            <input type="number" class="form-control" id="price_per_night" name="price_per_night" 
-                                   value="{{ $formData['price_per_night'] ?? '' }}" min="0" step="0.01" 
-                                   placeholder="Enter nightly rate">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="price_per_week" class="form-label">
-                                Price per Week
-                            </label>
-                            <input type="number" class="form-control" id="price_per_week" name="price_per_week" 
-                                   value="{{ $formData['price_per_week'] ?? '' }}" min="0" step="0.01" 
-                                   placeholder="Enter weekly rate">
-                        </div>
+                    <div class="alert alert-info mb-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small>Add pricing tiers for different guest counts. Click "Add Pricing Tier" to add prices for 1 person, 2 persons, etc. Each row shows the <strong>total price</strong> for that number of guests.</small>
                     </div>
+
+                    <div id="per-person-pricing-container">
+                        <!-- Dynamic rows will be added here -->
+                    </div>
+
+                    <button type="button" class="btn btn-success btn-sm mt-2" id="add-person-pricing-btn">
+                        <i class="fas fa-plus"></i> Add Pricing Tier
+                    </button>
                 </div>
 
                 <hr>
