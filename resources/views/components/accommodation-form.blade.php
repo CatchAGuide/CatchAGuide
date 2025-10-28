@@ -313,21 +313,13 @@
                     <label for="currency" class="form-label fw-bold fs-5">
                         {{ __('accommodations.currency') }}
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                           title="Set different prices based on number of guests. Each row represents the total price for that number of persons."></i>
+                           title="{{ __('accommodations.tooltip_currency') }}"></i>
                     </label>
-                    
-                    <div class="alert alert-info mb-3">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <small>Add pricing tiers for different guest counts. Click "Add Pricing Tier" to add prices for 1 person, 2 persons, etc. Each row shows the <strong>total price</strong> for that number of guests.</small>
-                    </div>
-
-                    <div id="per-person-pricing-container">
-                        <!-- Dynamic rows will be added here -->
-                    </div>
-
-                    <button type="button" class="btn btn-success btn-sm mt-2" id="add-person-pricing-btn">
-                        <i class="fas fa-plus"></i> Add Pricing Tier
-                    </button>
+                    <select class="form-control" id="currency" name="currency">
+                        <option value="EUR" {{ (isset($formData['currency']) && $formData['currency'] == 'EUR') ? 'selected' : '' }}>EUR (€)</option>
+                        <option value="USD" {{ (isset($formData['currency']) && $formData['currency'] == 'USD') ? 'selected' : '' }}>USD ($)</option>
+                        <option value="GBP" {{ (isset($formData['currency']) && $formData['currency'] == 'GBP') ? 'selected' : '' }}>GBP (£)</option>
+                    </select>
                 </div>
 
                 <hr>
@@ -335,7 +327,7 @@
                 <!-- Per Person Pricing Section -->
                 <div class="form-group">
                     <label class="form-label fw-bold fs-5">
-                        Per Person Pricing (Optional)
+                        Per Person Pricing
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="Set different prices based on number of guests. Each row represents the total price for that number of persons."></i>
                     </label>
