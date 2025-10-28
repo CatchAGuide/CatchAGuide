@@ -172,6 +172,20 @@
             <div class="step" id="step3">
                 <h5>{{ __('accommodations.accommodation_details_title') }}</h5>
 
+                <!-- Max Occupancy Field -->
+                <div class="form-group mb-4">
+                    <label for="max_occupancy" class="form-label fw-bold fs-5">
+                        {{ __('accommodations.max_occupancy') }}
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                           title="Maximum number of guests this accommodation can host"></i>
+                    </label>
+                    <input type="number" class="form-control" id="max_occupancy" name="max_occupancy" 
+                           value="{{ $formData['max_occupancy'] ?? '' }}" min="1" 
+                           placeholder="Enter maximum occupancy">
+                </div>
+
+                <hr>
+
                 <div class="form-group">
                     <label for="accommodation_details" class="form-label fw-bold fs-5">
                         {{ __('accommodations.accommodation_details') }}
@@ -294,43 +308,8 @@
             <div class="step" id="step5">
                 <h5>{{ __('accommodations.pricing_title') }}</h5>
 
-                <div class="form-group">
-                    <label class="form-label fw-bold fs-5">
-                        {{ __('accommodations.price_type') }}
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                           title="{{ __('accommodations.tooltip_price_type') }}"></i>
-                    </label>
-                    
-                    <div class="pricing-types-grid">
-                        <!-- Per Night -->
-                        <div class="btn-checkbox-container">
-                            <input type="checkbox" name="price_type_checkboxes[]" value="per_night" id="price_type_per_night">
-                            <label for="price_type_per_night" class="btn btn-outline-primary btn-checkbox">
-                                {{ __('accommodations.per_night') }}
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text">€</span>
-                                <input type="number" class="form-control" name="price_per_night" placeholder="0.00" step="0.01" min="0" value="{{ $formData['price_per_night'] ?? '' }}">
-                            </div>
-                        </div>
-
-                        <!-- Per Week -->
-                        <div class="btn-checkbox-container">
-                            <input type="checkbox" name="price_type_checkboxes[]" value="per_week" id="price_type_per_week">
-                            <label for="price_type_per_week" class="btn btn-outline-primary btn-checkbox">
-                                {{ __('accommodations.per_week') }}
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text">€</span>
-                                <input type="number" class="form-control" name="price_per_week" placeholder="0.00" step="0.01" min="0" value="{{ $formData['price_per_week'] ?? '' }}">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <hr>
-
-                <div class="form-group">
+                <!-- Currency Selection (moved to top) -->
+                <div class="form-group mb-4">
                     <label for="currency" class="form-label fw-bold fs-5">
                         {{ __('accommodations.currency') }}
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
@@ -341,6 +320,60 @@
                         <option value="USD" {{ (isset($formData['currency']) && $formData['currency'] == 'USD') ? 'selected' : '' }}>USD ($)</option>
                         <option value="GBP" {{ (isset($formData['currency']) && $formData['currency'] == 'GBP') ? 'selected' : '' }}>GBP (£)</option>
                     </select>
+                </div>
+
+                <hr>
+
+                <!-- Standard Pricing Fields -->
+                <div class="form-group">
+                    <label class="form-label fw-bold fs-5">
+                        Standard Pricing
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                           title="Set base prices for your accommodation"></i>
+                    </label>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="price_per_night" class="form-label">
+                                Price per Night
+                            </label>
+                            <input type="number" class="form-control" id="price_per_night" name="price_per_night" 
+                                   value="{{ $formData['price_per_night'] ?? '' }}" min="0" step="0.01" 
+                                   placeholder="Enter nightly rate">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="price_per_week" class="form-label">
+                                Price per Week
+                            </label>
+                            <input type="number" class="form-control" id="price_per_week" name="price_per_week" 
+                                   value="{{ $formData['price_per_week'] ?? '' }}" min="0" step="0.01" 
+                                   placeholder="Enter weekly rate">
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- Per Person Pricing Section -->
+                <div class="form-group">
+                    <label class="form-label fw-bold fs-5">
+                        Per Person Pricing (Optional)
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                           title="Set different prices based on number of guests. Each row represents the total price for that number of persons."></i>
+                    </label>
+                    
+                    <div class="alert alert-info mb-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small>Add pricing tiers for different guest counts. Click "Add Pricing Tier" to add prices for 1 person, 2 persons, etc. Each row shows the <strong>total price</strong> for that number of guests.</small>
+                    </div>
+
+                    <div id="per-person-pricing-container">
+                        <!-- Dynamic rows will be added here -->
+                    </div>
+
+                    <button type="button" class="btn btn-success btn-sm mt-2" id="add-person-pricing-btn">
+                        <i class="fas fa-plus"></i> Add Pricing Tier
+                    </button>
                 </div>
 
                 <div class="button-group">

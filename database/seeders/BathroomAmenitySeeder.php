@@ -23,6 +23,7 @@ class BathroomAmenitySeeder extends Seeder
             ['name' => 'Dryer', 'name_en' => 'Dryer', 'sort_order' => 5],
             ['name' => 'Separate Toilet/ Bathroom', 'name_en' => 'Separate Toilet/ Bathroom', 'sort_order' => 6],
             ['name' => 'Waschbecken', 'name_en' => 'Sink', 'sort_order' => 7],
+            ['name' => 'Fön', 'name_en' => 'Hairdryer ', 'sort_order' => 8],
         ];
 
         foreach ($bathroomAmenities as $amenity) {

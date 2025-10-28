@@ -51,10 +51,8 @@
                                     <th>Title</th>
                                     <th>Location</th>
                                     <th>Type</th>
-                                    <th>Max Occupancy</th>
-                                    <th>Price/Night</th>
+                                    <th>Details</th>
                                     <th>Status</th>
-                                    <th>Owner</th>
                                     <th>Created</th>
                                     <th>Actions</th>
                                 </tr>
@@ -65,38 +63,61 @@
                                         <td>{{ $accommodation->id }}</td>
                                         <td>
                                             <div class="accommodation-title">
-                                                <strong>{{ $accommodation->title }}</strong>
                                                 @if($accommodation->thumbnail_path)
                                                     <img src="{{ Storage::url($accommodation->thumbnail_path) }}" 
                                                          alt="Thumbnail" class="accommodation-thumbnail">
                                                 @endif
+                                                <strong>{{ $accommodation->title }}</strong>
                                             </div>
                                         </td>
                                         <td>
                                             <div class="location-info">
-                                                <div>{{ $accommodation->city }}, {{ $accommodation->country }}</div>
-                                                <small class="text-muted">{{ $accommodation->location }}</small>
+                                                @if($accommodation->city && $accommodation->country)
+                                                    <div>{{ $accommodation->city }}, {{ $accommodation->country }}</div>
+                                                @endif
+                                                @if($accommodation->location)
+                                                    <small class="text-muted">{{ $accommodation->location }}</small>
+                                                @endif
                                             </div>
                                         </td>
                                         <td>
-                                            <span class="badge badge-info">
-                                                {{ __('accommodations.options.accommodation_types.' . $accommodation->accommodation_type) }}
-                                            </span>
-                                        </td>
-                                        <td>{{ $accommodation->max_occupancy ?? 'N/A' }}</td>
-                                        <td>
-                                            @if($accommodation->price_per_night)
-                                                <strong>{{ number_format($accommodation->price_per_night, 2) }} {{ $accommodation->currency }}</strong>
+                                            @if($accommodation->accommodationType)
+                                                <span class="badge badge-info">
+                                                    {{ $accommodation->accommodationType->name }}
+                                                </span>
                                             @else
-                                                <span class="text-muted">N/A</span>
+                                                <span class="text-muted">Not set</span>
                                             @endif
                                         </td>
                                         <td>
-                                            <span class="badge badge-{{ $accommodation->status === 'active' ? 'success' : 'secondary' }}">
-                                                {{ __('accommodations.options.statuses.' . $accommodation->status) }}
+                                            <div class="accommodation-details-summary">
+                                                @php
+                                                    $amenitiesCount = is_array($accommodation->amenities) ? count($accommodation->amenities) : 0;
+                                                    $detailsCount = is_array($accommodation->accommodation_details) ? count($accommodation->accommodation_details) : 0;
+                                                    $hasImages = is_array($accommodation->gallery_images) && count($accommodation->gallery_images) > 0;
+                                                @endphp
+                                                @if($detailsCount > 0)
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-info-circle"></i> {{ $detailsCount }} detail(s)
+                                                    </small>
+                                                @endif
+                                                @if($amenitiesCount > 0)
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-check-circle"></i> {{ $amenitiesCount }} amenity/ies
+                                                    </small>
+                                                @endif
+                                                @if($hasImages)
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-images"></i> {{ count($accommodation->gallery_images) }} image(s)
+                                                    </small>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-{{ $accommodation->status === 'active' ? 'success' : ($accommodation->status === 'draft' ? 'warning' : 'secondary') }}">
+                                                {{ ucfirst($accommodation->status) }}
                                             </span>
                                         </td>
-                                        <td>{{ $accommodation->user->name ?? 'N/A' }}</td>
                                         <td>{{ $accommodation->created_at->format('M d, Y') }}</td>
                                         <td>
                                             <div class="btn-group" role="group">
@@ -237,6 +258,23 @@
 .badge {
     font-size: 0.75rem;
     padding: 0.375rem 0.75rem;
+}
+
+.accommodation-details-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.accommodation-details-summary small {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.accommodation-details-summary i {
+    font-size: 0.85rem;
 }
 
 @media (max-width: 768px) {

@@ -334,7 +334,6 @@ function setupFormSubmission() {
         
         const formData = new FormData(this);
         const submitUrl = $(this).attr('action');
-        const method = $('input[name="_method"]').val() || 'POST';
         
         // Collect tagify data properly
         collectTagifyData(formData);
@@ -364,7 +363,7 @@ function setupFormSubmission() {
         
         $.ajax({
             url: submitUrl,
-            type: method,
+            type: 'POST',
             data: formData,
             processData: false,
             contentType: false,
@@ -416,19 +415,22 @@ function initializeSelect2() {
                 accommodationsEl.select2('destroy');
             }
             
-            // Force refresh the options before initializing Select2
-            accommodationsEl.trigger('change');
-            
             accommodationsEl.select2({
                 placeholder: '{{ __("camps.select_options") }}',
                 allowClear: true,
                 width: '100%',
-                data: accommodationsEl.find('option').map(function() {
-                    return {
-                        id: $(this).val(),
-                        text: $(this).text().trim()
-                    };
-                }).get()
+                templateResult: function(data) {
+                    if (!data.id) {
+                        return data.text;
+                    }
+                    return $('<span>(' + data.id + ') | ' + data.text + '</span>');
+                },
+                templateSelection: function(data) {
+                    if (!data.id) {
+                        return data.text;
+                    }
+                    return $('<span>(' + data.id + ') | ' + data.text + '</span>');
+                }
             });
         } catch (e) {
             console.error('Error initializing accommodations Select2:', e);
@@ -439,19 +441,22 @@ function initializeSelect2() {
                 rentalBoatsEl.select2('destroy');
             }
             
-            // Force refresh the options before initializing Select2
-            rentalBoatsEl.trigger('change');
-            
             rentalBoatsEl.select2({
                 placeholder: '{{ __("camps.select_options") }}',
                 allowClear: true,
                 width: '100%',
-                data: rentalBoatsEl.find('option').map(function() {
-                    return {
-                        id: $(this).val(),
-                        text: $(this).text().trim()
-                    };
-                }).get()
+                templateResult: function(data) {
+                    if (!data.id) {
+                        return data.text;
+                    }
+                    return $('<span>(' + data.id + ') | ' + data.text + '</span>');
+                },
+                templateSelection: function(data) {
+                    if (!data.id) {
+                        return data.text;
+                    }
+                    return $('<span>(' + data.id + ') | ' + data.text + '</span>');
+                }
             });
         } catch (e) {
             console.error('Error initializing rental boats Select2:', e);
@@ -462,19 +467,22 @@ function initializeSelect2() {
                 guidingsEl.select2('destroy');
             }
             
-            // Force refresh the options before initializing Select2
-            guidingsEl.trigger('change');
-            
             guidingsEl.select2({
                 placeholder: '{{ __("camps.select_options") }}',
                 allowClear: true,
                 width: '100%',
-                data: guidingsEl.find('option').map(function() {
-                    return {
-                        id: $(this).val(),
-                        text: $(this).text().trim()
-                    };
-                }).get()
+                templateResult: function(data) {
+                    if (!data.id) {
+                        return data.text;
+                    }
+                    return $('<span>(' + data.id + ') | ' + data.text + '</span>');
+                },
+                templateSelection: function(data) {
+                    if (!data.id) {
+                        return data.text;
+                    }
+                    return $('<span>(' + data.id + ') | ' + data.text + '</span>');
+                }
             });
             
             // Add change event listener for guidings to show cards
@@ -739,8 +747,7 @@ function initializeLocationAutocomplete() {
     // Initialize Google Places Autocomplete
     if (typeof google !== 'undefined' && google.maps) {
         const autocomplete = new google.maps.places.Autocomplete(locationInput[0], {
-            types: ['establishment', 'geocode'],
-            componentRestrictions: { country: ['de', 'at', 'ch', 'it', 'fr', 'es', 'pt', 'nl', 'be', 'dk', 'se', 'no', 'fi', 'pl', 'cz', 'sk', 'hu', 'si', 'hr', 'ro', 'bg', 'gr', 'cy', 'mt', 'lu', 'ie', 'gb'] }
+            types: ['geocode'],
         });
         
         autocomplete.addListener('place_changed', function() {

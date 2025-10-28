@@ -493,6 +493,10 @@
             text-align: right;
             flex-shrink: 0;
             min-width: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
         }
         
         .price-type {
@@ -526,22 +530,20 @@
         }
         
         .select-accommodation-btn {
-            background: #f1f5f9;
-            color: #334155;
-            border: 1px solid rgba(15,23,42,.1);
-            border-radius: 12px;
-            padding: 12px 16px;
-            font-size: 14px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 9px 18px;
+            font-size: 13px;
             font-weight: 500;
-            width: 100%;
             cursor: pointer;
-            transition: all 0.2s ease;
-            margin-top: 8px;
+            transition: background-color 0.2s ease;
+            white-space: nowrap;
         }
         
         .select-accommodation-btn:hover {
-            background: #e2e8f0;
-            border-color: rgba(15,23,42,.2);
+            background: #1d4ed8;
         }
         
         .distance-chips {
@@ -639,6 +641,7 @@
             .accommodation-pricing {
                 text-align: left;
                 min-width: auto;
+                align-items: flex-start;
             }
             
             .info-matrix {
@@ -655,14 +658,25 @@
             box-shadow: 0 18px 48px -34px rgba(15,23,42,.3);
         }
         
+        .guiding-card-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 0;
+        }
+        
+        .guiding-left-column {
+            display: flex;
+            flex-direction: column;
+            background: #f8fafc;
+        }
+        
         .guiding-gallery {
             position: relative;
             width: 100%;
             aspect-ratio: 1;
+            min-height: 280px;
             overflow: hidden;
-            border-radius: 12px;
-            border: 1px solid rgba(15,23,42,.08);
-            background: #f1f5f9;
+            background: #e2e8f0;
         }
         
         .guiding-gallery img {
@@ -673,142 +687,277 @@
             object-fit: cover;
         }
         
-        .guiding-header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 8px;
+        .guiding-inclusives-box {
+            background: #fff;
+            border-top: 1px solid rgba(15,23,42,.08);
+            padding: 12px 16px;
         }
         
-        .guiding-info {
-            flex: 1;
-            min-width: 0;
+        .guiding-inclusives-box .inclusives-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0 0 6px 0;
+        }
+        
+        .guiding-right-column {
+            padding: 18px 20px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .guiding-info-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 20px;
+            align-items: start;
+            margin-bottom: 6px;
+        }
+        
+        .guiding-info-grid:last-of-type {
+            margin-bottom: 12px;
         }
         
         .guiding-location {
             display: flex;
             align-items: center;
             gap: 4px;
-            font-size: 12px;
+            font-size: 11px;
             color: #64748b;
-            margin-bottom: 4px;
+        }
+        
+        .location-icon {
+            flex-shrink: 0;
+            color: #94a3b8;
+        }
+        
+        .guiding-location-text {
+            color: #64748b;
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+        
+        .guiding-price-label {
+            font-size: 11px;
+            color: #64748b;
+            line-height: 1;
+            text-align: right;
+            align-self: center;
         }
         
         .guiding-title {
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 19px;
+            font-weight: 700;
             color: #1e293b;
-            margin: 0 0 4px 0;
+            margin: 0;
             line-height: 1.3;
+            align-self: center;
+        }
+        
+        .guiding-price-amount {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1e293b;
+            line-height: 1;
+            text-align: right;
+            align-self: center;
         }
         
         .guiding-description {
             font-size: 13px;
             color: #475569;
-            line-height: 1.4;
+            line-height: 1.5;
             margin: 0;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        
-        .guiding-pricing {
-            text-align: right;
-            flex-shrink: 0;
-            min-width: 140px;
+            align-self: start;
         }
         
         .select-guiding-btn {
             background: #2563eb;
             color: white;
             border: none;
-            border-radius: 12px;
-            padding: 12px 16px;
-            font-size: 14px;
+            border-radius: 10px;
+            padding: 9px 18px;
+            font-size: 13px;
             font-weight: 500;
-            width: 100%;
             cursor: pointer;
             transition: background-color 0.2s ease;
-            margin-top: 12px;
+            white-space: nowrap;
+            align-self: start;
         }
         
         .select-guiding-btn:hover {
             background: #1d4ed8;
         }
         
-        .target-fish {
+        .guiding-info-pills {
             display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .guiding-info-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #f1f5f9;
+            border: 1px solid rgba(15,23,42,.1);
+            border-radius: 999px;
+            padding: 5px 11px;
+            font-size: 12px;
+            color: #475569;
+        }
+        
+        .pill-icon {
+            flex-shrink: 0;
+            color: #94a3b8;
+        }
+        
+        .guiding-info-panels {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 4px;
+        }
+        
+        .guiding-panel {
+            background: #fff;
+            border: 1px solid rgba(15,23,42,.1);
+            border-radius: 12px;
+            padding: 12px 14px;
+        }
+        
+        .guiding-panel-title {
+            color: #1e293b;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .guiding-panel-content {
+            font-size: 12px;
+            color: #475569;
+            line-height: 1.5;
+        }
+        
+        .guiding-panel-content > div {
+            margin-bottom: 4px;
+        }
+        
+        .guiding-panel-content > div:last-child {
+            margin-bottom: 0;
+        }
+        
+        .target-fish-chip {
+            display: inline-flex;
             align-items: center;
             gap: 4px;
+            background: #f1f5f9;
+            border: 1px solid rgba(15,23,42,.1);
+            border-radius: 999px;
+            padding: 6px 12px;
             font-size: 12px;
-            color: #334155;
+            color: #475569;
+        }
+        
+        .target-fish-chip span {
+            color: #475569;
+        }
+        
+        .chip-icon {
+            flex-shrink: 0;
+            color: #94a3b8;
+        }
+        
+        .start-times-chips .start-time-chip {
+            background: #f1f5f9;
+            border: 1px solid rgba(15,23,42,.1);
+            color: #475569;
+        }
+        
+        .check-icon {
+            flex-shrink: 0;
+            color: #10b981;
+        }
+        
+        .inclusive-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
         
         .methods-chips {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
-            margin-top: 4px;
+            margin-top: 8px;
         }
         
         .method-chip {
             display: inline-flex;
             align-items: center;
-            background: rgba(255,255,255,.8);
+            background: #f1f5f9;
             border: 1px solid rgba(15,23,42,.1);
-            border-radius: 12px;
-            padding: 4px 8px;
-            font-size: 11px;
-            color: #334155;
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 12px;
+            color: #475569;
         }
         
         .start-times-chips {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
-            margin-top: 4px;
+            margin-top: 8px;
         }
         
         .start-time-chip {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            background: rgba(255,255,255,.8);
+            gap: 5px;
+            background: #f1f5f9;
             border: 1px solid rgba(15,23,42,.1);
-            border-radius: 12px;
-            padding: 4px 8px;
-            font-size: 11px;
-            color: #334155;
-        }
-        
-        .inclusives-section {
-            margin-top: 12px;
-        }
-        
-        .inclusives-title {
-            color: #64748b;
+            border-radius: 999px;
+            padding: 6px 12px;
             font-size: 12px;
-            font-weight: 500;
-            margin-bottom: 6px;
+            color: #475569;
+        }
+        
+        .start-time-chip .chip-icon {
+            color: #94a3b8;
         }
         
         .inclusives-chips {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
+            gap: 8px;
+        }
+        
+        @media (max-width: 1200px) {
+            .guiding-info-panels {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .guiding-card-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .guiding-gallery {
+                min-height: 300px;
+            }
         }
         
         @media (max-width: 768px) {
-            .guiding-header {
-                flex-direction: column;
-                align-items: stretch;
+            .guiding-info-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
             }
             
-            .guiding-pricing {
+            .guiding-price-label,
+            .guiding-price-amount {
                 text-align: left;
-                min-width: auto;
             }
         }
     </style>
@@ -1273,11 +1422,6 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <!-- Select Accommodation Button -->
-                            <button class="select-accommodation-btn">
-                                Select Accommodation
-                            </button>
                         </div>
 
                         <!-- Right Column: Header, Price, Chips, Matrix, Amenities -->
@@ -1294,6 +1438,9 @@
                                 <div class="accommodation-pricing">
                                     <div class="price-type" x-text="accommodation.price?.type || 'per night'">per night</div>
                                     <div class="price-amount" x-text="accommodation.price?.amount ? fmt(accommodation.price.amount, accommodation.price.currency || 'EUR') : '€110.00'">€110.00</div>
+                                    <button class="select-accommodation-btn">
+                                        Select Accommodation
+                                    </button>
                                 </div>
                             </div>
 
@@ -1410,85 +1557,109 @@
 
             <div x-data="guidingCard(@js($sampleGuiding))" class="space-y-4">
                 <article class="guiding-card">
-                    <div class="grid">
-                        <!-- Left Column: Image -->
-                        <div class="left-column">
+                    <div class="guiding-card-grid">
+                        <!-- Left Column: Image + Inclusives -->
+                        <div class="guiding-left-column">
                             <div class="guiding-gallery">
                                 <img :src="currentImage || 'https://images.unsplash.com/photo-1474843148229-3163319fcc00?q=80&w=1600&auto=format&fit=crop'" :alt="guiding.title || 'Shore-Guiding Nacht - Wels'" />
-                                
-                                <div>
-                                    <button 
-                                        type="button"
-                                        aria-label="Previous image" 
-                                        @click="prevImage()"
-                                        class="gallery-nav-btn prev"
-                                    >
-                                        ‹
-                                    </button>
-                                    <button 
-                                        type="button"
-                                        aria-label="Next image" 
-                                        @click="nextImage()"
-                                        class="gallery-nav-btn next"
-                                    >
-                                        ›
-                                    </button>
-                                    <div class="gallery-counter" x-text="(currentImageIndex + 1) + '/' + (images.length || 3)">1/3</div>
+                            </div>
+                            
+                            <!-- Inclusives Section below Image -->
+                            <div class="guiding-inclusives-box">
+                                <div class="inclusives-title">Inklusive</div>
+                                <div class="inclusives-chips">
+                                    <span class="inclusive-chip">
+                                        <svg class="check-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                            <polyline points="20 6 9 17 4 12"/>
+                                        </svg>
+                                        <span x-text="guiding.inclusives?.[0] || 'Spottransfer'">Spottransfer</span>
+                                    </span>
+                                    <span class="inclusive-chip">
+                                        <svg class="check-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                            <polyline points="20 6 9 17 4 12"/>
+                                        </svg>
+                                        <span x-text="guiding.inclusives?.[1] || 'Signalhorn'">Signalhorn</span>
+                                    </span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Right Column: Information -->
-                        <div class="right-column">
-                            <div class="guiding-header">
-                                <div class="guiding-info">
+                        <!-- Right Column: Content -->
+                        <div class="guiding-right-column">
+                            <!-- Row 1: Location | Preis pro Tour label -->
+                            <div class="guiding-info-grid">
                                     <div class="guiding-location">
-                                        📍 <span x-text="guiding.location || 'Bucht Nord - Riba Roja'">Bucht Nord - Riba Roja</span>
+                                    <svg class="location-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                        <circle cx="12" cy="10" r="3"/>
+                                    </svg>
+                                    <span class="guiding-location-text" x-text="guiding.location || 'Bucht Nord - Riba Roja'">Bucht Nord - Riba Roja</span>
                                     </div>
+                                <div class="guiding-price-label">Preis pro Tour</div>
+                            </div>
+
+                            <!-- Row 2: Title | Price Amount -->
+                            <div class="guiding-info-grid">
                                     <h3 class="guiding-title" x-text="guiding.title">Shore-Guiding Nacht - Wels</h3>
+                                <div class="guiding-price-amount" x-text="guiding.price?.amount ? fmt(guiding.price.amount, guiding.price.currency || 'EUR') : '260,00 €'">260,00 €</div>
+                            </div>
+
+                            <!-- Row 3: Description | Button -->
+                            <div class="guiding-info-grid">
                                     <p class="guiding-description" x-text="guiding.description">Uferbasiertes Nachtangeln auf Wels; Spots an Altarmen & Warmwassereinläufen.</p>
-                                </div>
-                                <div class="guiding-pricing">
-                                    <div class="price-type" x-text="guiding.price?.type || 'pro Tour'">Preis pro Tour</div>
-                                    <div class="price-amount" x-text="guiding.price?.amount ? fmt(guiding.price.amount, guiding.price.currency || 'EUR') : '€260.00'">260,00 €</div>
-                                </div>
+                                <button class="select-guiding-btn">
+                                    Dieses Guiding übernehmen
+                                </button>
                             </div>
 
-                            <!-- Key Information Pills -->
-                            <div class="info-chips">
-                                <span class="info-chip">
-                                    🕐 <span x-text="guiding.duration_hours || '6'">6</span> h
+                            <!-- Information Pills with minimal icons -->
+                            <div class="guiding-info-pills">
+                                <span class="guiding-info-pill">
+                                    <svg class="pill-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <polyline points="12 6 12 12 16 14"/>
+                                    </svg>
+                                    <span x-text="guiding.duration_hours || '6'">6</span> h
                                 </span>
-                                <span class="info-chip">
-                                    👥 <span x-text="guiding.max_persons || '3'">3</span> Pers
+                                <span class="guiding-info-pill">
+                                    <svg class="pill-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="12" cy="7" r="4"/>
+                                    </svg>
+                                    <span x-text="guiding.max_persons || '3'">3</span> Pers
                                 </span>
-                                <span class="info-chip">
-                                    🌊 <span x-text="guiding.type || 'Ufer'">Ufer</span>
+                                <span class="guiding-info-pill">
+                                    <svg class="pill-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M2 6s1.5-2 5-2 5 2 5 2 1.5-2 5-2 5 2 5 2v14s-1.5-2-5-2-5 2-5 2-1.5-2-5-2-5 2-5 2V6z"/>
+                                    </svg>
+                                    <span x-text="guiding.type || 'Ufer'">Ufer</span>
                                 </span>
                             </div>
 
-                            <!-- Detailed Information Grid -->
-                            <div class="info-matrix">
-                                <!-- Column 1: Guiding Information -->
-                                <div class="info-box">
-                                    <div class="info-box-title">Guiding-Informationen</div>
-                                    <div class="info-box-content">
-                                        <div>Art: <span class="font-medium" x-text="guiding.guiding_info?.art || 'Ufer'">Ufer</span></div>
-                                        <div>Dauer: <span class="font-medium" x-text="guiding.guiding_info?.dauer || '6 h'">6 h</span></div>
-                                        <div>Max. Personen: <span class="font-medium" x-text="guiding.guiding_info?.max_personen || '3'">3</span></div>
-                                        <div>Gewässer: <span class="font-medium" x-text="guiding.guiding_info?.gewaesser || 'Stausee / Uferzonen'">Stausee / Uferzonen</span></div>
+                            <!-- Information Panels (2x2 Grid: top 2, bottom 1 spanning) -->
+                            <div class="guiding-info-panels">
+                                <!-- Panel 1: Guiding Information -->
+                                <div class="guiding-panel">
+                                    <div class="guiding-panel-title">Guiding-Informationen</div>
+                                    <div class="guiding-panel-content">
+                                        <div>Art: <strong x-text="guiding.guiding_info?.art || 'Ufer'">Ufer</strong></div>
+                                        <div>Dauer: <strong x-text="guiding.guiding_info?.dauer || '6 h'">6 h</strong></div>
+                                        <div>Max. Personen: <strong x-text="guiding.guiding_info?.max_personen || '3'">3</strong></div>
+                                        <div>Gewässer: <strong x-text="guiding.guiding_info?.gewaesser || 'Stausee / Uferzonen'">Stausee / Uferzonen</strong></div>
                                     </div>
                                 </div>
 
-                                <!-- Column 2: Target Fish & Methods -->
-                                <div class="info-box">
-                                    <div class="info-box-title">Zielfische</div>
-                                    <div class="info-box-content">
-                                        <div class="target-fish">
-                                            🐟 <span x-text="guiding.target_fish?.[0] || 'Wels'">Wels</span>
+                                <!-- Panel 2: Target Fish & Methods (Top Right) -->
+                                <div class="guiding-panel">
+                                    <div class="guiding-panel-title">Zielfische</div>
+                                    <div class="target-fish-chip">
+                                        <svg class="chip-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-1 3.46-3.44 6-7 6s-7.56-2.54-8.5-6z"/>
+                                            <path d="M18 5L22 9M18 19L22 15M6 9L2 5M6 15L2 19"/>
+                                        </svg>
+                                        <span x-text="guiding.target_fish?.[0] || 'Wels'">Wels</span>
                                         </div>
-                                    </div>
-                                    <div class="info-box-title" style="margin-top: 8px;">Methoden</div>
+                                    <div class="guiding-panel-title" style="margin-top: 12px;">Methoden</div>
                                     <div class="methods-chips">
                                         <span class="method-chip" x-text="guiding.methods?.[0] || 'U-Pose'">U-Pose</span>
                                         <span class="method-chip" x-text="guiding.methods?.[1] || 'Boje'">Boje</span>
@@ -1496,31 +1667,277 @@
                                     </div>
                                 </div>
 
-                                <!-- Column 3: Location & Notes -->
-                                <div class="info-box">
-                                    <div class="info-box-title">Ort & Hinweise</div>
-                                    <div class="info-box-content">
-                                        <div>Treffpunkt: <span class="font-medium" x-text="guiding.meeting_point || 'Bucht Nord - Riba Roja'">Bucht Nord - Riba Roja</span></div>
+                                <!-- Panel 3: Location & Notes (Bottom, Full Width) -->
+                                <div class="guiding-panel">
+                                    <div class="guiding-panel-title">Ort & Hinweise</div>
+                                    <div class="guiding-panel-content">
+                                        <div>Treffpunkt: <strong x-text="guiding.meeting_point || 'Bucht Nord - Riba Roja'">Bucht Nord - Riba Roja</strong></div>
                                         <div style="margin-top: 8px;">Startzeiten:</div>
                                         <div class="start-times-chips">
-                                            <span class="start-time-chip">🌅 <span x-text="guiding.start_times?.[0] || 'abends'">abends</span></span>
-                                            <span class="start-time-chip">🌙 <span x-text="guiding.start_times?.[1] || 'nachts'">nachts</span></span>
+                                            <span class="start-time-chip">
+                                                <svg class="chip-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <circle cx="12" cy="12" r="5"/>
+                                                    <line x1="12" y1="1" x2="12" y2="3"/>
+                                                    <line x1="12" y1="21" x2="12" y2="23"/>
+                                                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                                                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                                                    <line x1="1" y1="12" x2="3" y2="12"/>
+                                                    <line x1="21" y1="12" x2="23" y2="12"/>
+                                                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                                                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                                                </svg>
+                                                <span x-text="guiding.start_times?.[0] || 'abends'">abends</span>
+                                            </span>
+                                            <span class="start-time-chip">
+                                                <svg class="chip-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                                                </svg>
+                                                <span x-text="guiding.start_times?.[1] || 'nachts'">nachts</span>
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+                            </div>
 
-                            <!-- Action Button -->
+    <!-- Rental Boats Section -->
+    <div class="camp-container">
+        <section id="boats" class="camp-section">
+            <h2 class="camp-section__title">Rental Boats</h2>
+            
+            @php
+                // Sample boat data
+                $sampleBoat = [
+                    'id' => 1,
+                    'title' => 'Pedal-Kajak 3,6 m',
+                    'type' => 'Kajak',
+                    'location' => 'Flachwasser-Bucht am Camp',
+                    'description' => 'Leises Kayak mit Pedalantrieb für stealthy Ufernähe und Krautfelder. Ideal zum Casting auf Schwarzbarsch.',
+                    'thumbnail_path' => 'https://images.unsplash.com/photo-1520440229-84f3865cf003?q=80&w=1600&auto=format&fit=crop',
+                    'gallery_images' => [
+                        'https://images.unsplash.com/photo-1520440229-84f3865cf003?q=80&w=1600&auto=format&fit=crop',
+                        'https://images.unsplash.com/photo-1505839673365-e3971f8d9184?q=80&w=1600&auto=format&fit=crop',
+                    ],
+                    'seats' => 1,
+                    'length_m' => 3.6,
+                    'width_m' => 0.9,
+                    'year_built' => 2022,
+                    'manufacturer' => 'Hobie',
+                    'engine' => '-',
+                    'power' => '-',
+                    'max_speed_kmh' => 8,
+                    'equipment' => ['Rutenhalter', 'Anker', 'Signalhorn', 'Erste Hilfe', 'Schwimmwesten', 'Ruder'],
+                    'requirements' => ['Führerschein nicht nötig', 'Mindestalter 14', 'Ausweis mitbringen', 'Kaution nein', 'Sicherheitsunterweisung', 'Schwimmwestenpflicht'],
+                    'inclusives' => ['Sicherheitsunterweisung', 'Anker', 'Signalhorn', 'Erste Hilfe Set', 'Schwimmweste'],
+                    'extras' => ['Dry Bag'],
+                    'price' => [
+                        'amount' => 25.00,
+                        'currency' => 'EUR',
+                        'type' => 'pro Tag'
+                    ]
+                ];
+            @endphp
+
+            <div x-data="boatCard(@js($sampleBoat))" class="space-y-4">
+                <article class="guiding-card">
+                    <div class="guiding-card-grid">
+                        <!-- Left Column: Image + Inclusives & Extras -->
+                        <div class="guiding-left-column">
+                            <div class="guiding-gallery">
+                                <img :src="currentImage || 'https://images.unsplash.com/photo-1520440229-84f3865cf003?q=80&w=1600&auto=format&fit=crop'" :alt="boat.title || 'Pedal-Kajak 3,6 m'" />
+                            </div>
+                            
+                            <!-- Inclusives & Extras Section below Image -->
+                            <div class="guiding-inclusives-box">
+                                <div class="inclusives-title">Inklusive & Extras</div>
+                                
+                                <div style="margin-bottom: 12px;">
+                                    <div class="inclusives-title" style="font-size: 12px; margin-bottom: 6px;">Inklusive</div>
+                                    <div class="inclusives-chips" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+                                        <span class="inclusive-chip">
+                                            <svg class="check-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                <polyline points="20 6 9 17 4 12"/>
+                                            </svg>
+                                            <span>Sicherheitsunterweisung</span>
+                                        </span>
+                                        <span class="inclusive-chip">
+                                            <svg class="check-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                <polyline points="20 6 9 17 4 12"/>
+                                            </svg>
+                                            <span>Anker</span>
+                                        </span>
+                                        <span class="inclusive-chip">
+                                            <svg class="check-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                <polyline points="20 6 9 17 4 12"/>
+                                            </svg>
+                                            <span>Signalhorn</span>
+                                        </span>
+                                        <span class="inclusive-chip">
+                                            <svg class="check-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                <polyline points="20 6 9 17 4 12"/>
+                                            </svg>
+                                            <span>Erste Hilfe Set</span>
+                                        </span>
+                                        <span class="inclusive-chip">
+                                            <svg class="check-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                <polyline points="20 6 9 17 4 12"/>
+                                            </svg>
+                                            <span>Schwimmweste</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="inclusives-title" style="font-size: 12px; margin-bottom: 6px;">Extras</div>
+                                    <div class="inclusives-chips">
+                                        <span class="inclusive-chip">
+                                            <svg class="check-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                <polyline points="20 6 9 17 4 12"/>
+                                            </svg>
+                                            <span>Dry Bag</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Content -->
+                        <div class="guiding-right-column">
+                            <!-- Row 1: Location | Preis pro Tag label -->
+                            <div class="guiding-info-grid">
+                                <div class="guiding-location">
+                                    <svg class="location-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                        <circle cx="12" cy="10" r="3"/>
+                                    </svg>
+                                    <span class="guiding-location-text" x-text="boat.location || 'Flachwasser-Bucht am Camp'">Flachwasser-Bucht am Camp</span>
+                                </div>
+                                <div class="guiding-price-label" x-text="boat.price?.type || 'pro Tag'">pro Tag</div>
+                            </div>
+
+                            <!-- Row 2: Title | Price Amount -->
+                            <div class="guiding-info-grid">
+                                <h3 class="guiding-title" x-text="boat.title">Pedal-Kajak 3,6 m</h3>
+                                <div class="guiding-price-amount" x-text="boat.price?.amount ? fmt(boat.price.amount, boat.price.currency || 'EUR') : '€25.00'">25,00 €</div>
+                            </div>
+
+                            <!-- Row 3: Type + Description | Button -->
+                            <div class="guiding-info-grid">
+                                <div>
+                                    <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;" x-text="boat.type">Kajak</div>
+                                    <p class="guiding-description" x-text="boat.description">Leises Kayak mit Pedalantrieb für stealthy Ufernähe und Krautfelder. Ideal zum Casting auf Schwarzbarsch.</p>
+                                </div>
                             <button class="select-guiding-btn">
-                                Dieses Guiding übernehmen
+                                    Dieses Boot übernehmen
                             </button>
+                            </div>
 
-                            <!-- Inclusives Section -->
-                            <div class="inclusives-section">
-                                <div class="inclusives-title">Inklusive</div>
-                                <div class="inclusives-chips">
-                                    <span class="inclusive-chip">✅ <span x-text="guiding.inclusives?.[0] || 'Spottransfer'">Spottransfer</span></span>
-                                    <span class="inclusive-chip">✅ <span x-text="guiding.inclusives?.[1] || 'Signalhorn'">Signalhorn</span></span>
+                            <!-- Information Pills with minimal icons -->
+                            <div class="guiding-info-pills">
+                                <span class="guiding-info-pill">
+                                    <svg class="pill-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="12" cy="7" r="4"/>
+                                    </svg>
+                                    <span x-text="boat.seats || '1'">1</span> Sitze
+                                </span>
+                                <span class="guiding-info-pill">
+                                    <svg class="pill-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="5" y1="12" x2="19" y2="12"/>
+                                        <polyline points="12 5 19 12 12 19"/>
+                                    </svg>
+                                    <span x-text="boat.length_m || '3.6'">3.6</span> m
+                                </span>
+                                <span class="guiding-info-pill">
+                                    <svg class="pill-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="3" y1="12" x2="21" y2="12"/>
+                                        <line x1="3" y1="6" x2="21" y2="6"/>
+                                        <line x1="3" y1="18" x2="21" y2="18"/>
+                                    </svg>
+                                    <span x-text="boat.width_m || '0.9'">0.9</span> m breit
+                                </span>
+                                </div>
+
+                            <!-- Three Information Panels -->
+                            <div class="guiding-info-panels">
+                                <!-- Panel 1: Boat Information -->
+                                <div class="guiding-panel">
+                                    <div class="guiding-panel-title">Bootsinformationen</div>
+                                    <div class="guiding-panel-content">
+                                        <div>Sitzplätze: <strong x-text="boat.seats || '1'">1</strong></div>
+                                        <div>Länge: <strong x-text="boat.length_m + ' m' || '3.6 m'">3.6 m</strong></div>
+                                        <div>Breite: <strong x-text="boat.width_m + ' m' || '0.9 m'">0.9 m</strong></div>
+                                        <div>Baujahr: <strong x-text="boat.year_built || '2022'">2022</strong></div>
+                                        <div>Boot: <strong x-text="boat.manufacturer || 'Hobie'">Hobie</strong></div>
+                                        <div>Motor: <strong x-text="boat.engine || '-'">-</strong></div>
+                                        <div>Leistung: <strong x-text="boat.power || '-'">-</strong></div>
+                                        <div>Vmax: <strong x-text="boat.max_speed_kmh + ' km/h' || '8 km/h'">8 km/h</strong></div>
+                                    </div>
+                                </div>
+
+                                <!-- Panel 2: Equipment -->
+                                <div class="guiding-panel">
+                                    <div class="guiding-panel-title">Ausstattung</div>
+                                    <div class="methods-chips">
+                                        <span class="method-chip">
+                                            <svg class="chip-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="2"/>
+                                                <path d="M12 1v6m0 6v6m-6-6h6m6 0h-6"/>
+                                            </svg>
+                                            Rutenhalter
+                                        </span>
+                                        <span class="method-chip">
+                                            <svg class="chip-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M12 2v20m0-4c-2 0-4-2-4-4s2-4 4-4m0 8c2 0 4-2 4-4s-2-4-4-4"/>
+                                            </svg>
+                                            Anker
+                                        </span>
+                                        <span class="method-chip">
+                                            <svg class="chip-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                                                <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+                                            </svg>
+                                            Signalhorn
+                                        </span>
+                                        <span class="method-chip">
+                                            <svg class="chip-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                                                <polyline points="12 22 12 12"/>
+                                            </svg>
+                                            Erste Hilfe
+                                        </span>
+                                        <span class="method-chip">
+                                            <svg class="chip-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10"/>
+                                            </svg>
+                                            Schwimmwesten
+                                        </span>
+                                        <span class="method-chip">
+                                            <svg class="chip-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <line x1="12" y1="2" x2="12" y2="22"/>
+                                                <polyline points="5 9 12 2 19 9"/>
+                                            </svg>
+                                            Ruder
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Panel 3: Requirements -->
+                                <div class="guiding-panel">
+                                    <div class="guiding-panel-title">Anforderungen</div>
+                                    <div class="methods-chips">
+                                        <span class="method-chip">Führerschein nicht nötig</span>
+                                        <span class="method-chip">Mindestalter 14</span>
+                                        <span class="method-chip">Ausweis mitbringen</span>
+                                        <span class="method-chip">Kaution nein</span>
+                                        <span class="method-chip">Sicherheitsunterweisung</span>
+                                        <span class="method-chip">Schwimmwestenpflicht</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1779,6 +2196,46 @@
 
             get currentImage() {
                 return this.images[this.currentImageIndex] || this.images[0] || 'https://images.unsplash.com/photo-1474843148229-3163319fcc00?q=80&w=1600&auto=format&fit=crop';
+            },
+
+            nextImage() {
+                if (this.images.length > 1) {
+                    this.currentImageIndex = (this.currentImageIndex + 1) % this.images.length;
+                }
+            },
+
+            prevImage() {
+                if (this.images.length > 1) {
+                    this.currentImageIndex = (this.currentImageIndex - 1 + this.images.length) % this.images.length;
+                }
+            },
+
+            fmt(value, currency = 'EUR') {
+                try {
+                    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(value ?? 0);
+                } catch (error) {
+                    const amount = typeof value === 'number' ? value.toFixed(2) : '0.00';
+                    return `${amount} ${currency}`;
+                }
+            }
+        }));
+
+        // Boat Card Alpine.js Component
+        Alpine.data('boatCard', (boat) => ({
+            boat,
+            images: [],
+            currentImageIndex: 0,
+
+            init() {
+                // Build images array from thumbnail and gallery
+                this.images = [
+                    boat.thumbnail_path,
+                    ...(boat.gallery_images || [])
+                ].filter(Boolean);
+            },
+
+            get currentImage() {
+                return this.images[this.currentImageIndex] || this.images[0] || 'https://images.unsplash.com/photo-1520440229-84f3865cf003?q=80&w=1600&auto=format&fit=crop';
             },
 
             nextImage() {

@@ -42,6 +42,8 @@ class Camp extends Model
         'gallery_images' => 'array',
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8',
+        'target_fish' => 'array',
+        'best_travel_times' => 'array',
     ];
 
     public function user(): BelongsTo

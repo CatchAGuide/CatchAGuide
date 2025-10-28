@@ -1,0 +1,562 @@
+// Vacations V2 - Camp Offer Page Styles
+:root {
+    --brand: #313041;
+    --accent: #e8604c;
+    --camp-brand: #313041;
+    --camp-accent: #e8604c;
+    --camp-border: rgba(15, 23, 42, .08);
+    --camp-radius: 18px;
+    --camp-shadow: 0 18px 48px -34px rgba(15, 23, 42, .3);
+}
+
+// Brand Components
+.brand-btn {
+    background: var(--brand);
+    color: #fff;
+    border-radius: 0.75rem;
+    padding: 0.5rem 0.75rem;
+
+    &:hover {
+        filter: brightness(0.95);
+    }
+}
+
+.accent-badge {
+    position: relative;
+    background: #fff;
+    border: 1px solid rgba(49, 48, 65, .2);
+    color: #444;
+    border-radius: 0.75rem;
+    padding: 0.5rem 0.6rem;
+    font-size: 0.8rem;
+
+    &:before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 6px;
+        background: rgba(232, 96, 76, .35);
+        border-top-left-radius: 0.75rem;
+        border-bottom-left-radius: 0.75rem;
+    }
+
+    strong {
+        font-weight: 600;
+    }
+}
+
+// Camp Page Layout
+.camp-page {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+    padding-bottom: 40px;
+}
+
+.camp-container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+// Camp Topbar
+.camp-topbar {
+    padding: 32px 0 20px;
+    position: relative;
+    z-index: 20;
+
+    &__inner {
+        max-width: 1100px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 24px;
+    }
+
+    &__info {
+        flex: 1 1 60%;
+        min-width: 260px;
+    }
+
+    &__title {
+        margin: 0;
+        font-size: 2.1rem;
+        font-weight: 700;
+        color: #222133;
+        line-height: 1.2;
+    }
+
+    &__meta {
+        margin-top: 6px;
+        font-size: 0.95rem;
+        color: #5b6171;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    &__dot {
+        color: #d1d5db;
+    }
+
+    &__link {
+        color: var(--camp-accent);
+        font-weight: 600;
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    &__actions {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 6px;
+        min-width: 180px;
+    }
+
+    &__cta {
+        border-radius: 999px;
+        padding: 10px 22px;
+        font-weight: 600;
+        box-shadow: 0 10px 24px -18px rgba(17, 24, 39, .6);
+    }
+
+    &__note {
+        font-size: 0.8rem;
+        color: #6b7280;
+    }
+
+    @media (max-width: 768px) {
+        &__inner {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        &__actions {
+            align-items: flex-start;
+        }
+    }
+}
+
+// Camp Gallery
+.camp-gallery {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 16px;
+    margin: 24px auto;
+
+    @media (max-width: 900px) {
+        grid-template-columns: 1fr;
+    }
+
+    &__main {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        background: #e2e8f0;
+        min-height: 240px;
+        box-shadow: 0 26px 52px -40px rgba(17, 24, 39, .35);
+
+        @media (min-width: 768px) {
+            min-height: 340px;
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    }
+
+    &__right {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+
+        .camp-gallery__thumb {
+            flex: 1;
+            min-height: 150px;
+        }
+    }
+
+    &__thumb {
+        position: relative;
+        border-radius: 18px;
+        overflow: hidden;
+        background: #e2e8f0;
+        min-height: 120px;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    }
+
+    &__more {
+        position: absolute;
+        inset: 0;
+        background: rgba(17, 24, 39, .55);
+        color: #fff;
+        font-weight: 600;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &__bottom {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 12px;
+
+        @media (max-width: 900px) {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        @media (max-width: 600px) {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+}
+
+// Camp Layout
+.camp-layout {
+    display: grid;
+    gap: 24px;
+    margin-bottom: 32px;
+
+    @media (min-width: 1024px) {
+        grid-template-columns: minmax(0, 3fr) 320px;
+        align-items: flex-start;
+    }
+
+    &__content {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        flex: 1;
+    }
+}
+
+// Camp Config Sidebar
+.camp-config {
+    @media (min-width: 1024px) {
+        position: sticky;
+        top: 110px;
+    }
+}
+
+.camp-config-card {
+    border-radius: 20px;
+    box-shadow: 0 24px 46px -34px rgba(17, 24, 39, .45);
+    padding: 24px;
+    background: #fff;
+
+    .text-lg {
+        font-size: 1.125rem;
+        line-height: 1.75rem;
+    }
+
+    .font-semibold {
+        font-weight: 600;
+    }
+
+    .brand-btn {
+        border-radius: 12px;
+        padding: 12px 18px;
+        width: 100%;
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-top: 1rem;
+    }
+
+    .accent-badge {
+        margin-top: 12px;
+        font-size: .82rem;
+        background: #fef2f2;
+        border-color: rgba(232, 96, 76, .25);
+        padding: 10px 12px;
+    }
+}
+
+// Camp Navigation
+.camp-nav {
+    margin-top: 18px;
+    margin-bottom: 12px;
+
+    .nav-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+.nav-pill {
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    transition: all .2s ease;
+    border: 1px solid rgba(49, 48, 65, .25);
+
+    &:hover {
+        background: rgba(49, 48, 65, .06);
+    }
+
+    &.nav-pill-active {
+        background: var(--brand);
+        color: #fff;
+    }
+}
+
+// Camp Info Grid
+.camp-info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+
+    @media (min-width: 992px) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+// Camp Sections
+.camp-sections {
+    display: grid;
+    gap: 18px;
+}
+
+.camp-section {
+    background: #fff;
+    border: 1px solid var(--camp-border);
+    border-radius: var(--camp-radius);
+    padding: 26px;
+    box-shadow: var(--camp-shadow);
+
+    &.section-card {
+        border-top: 2px solid rgba(232, 96, 76, .2);
+    }
+
+    &__title {
+        margin-bottom: 16px;
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    &__subtitle {
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #1f2a37;
+    }
+
+    &__body {
+        font-size: 0.95rem;
+        color: #333d4d;
+        line-height: 1.55;
+    }
+
+    &__list {
+        margin: 0;
+        padding-left: 1rem;
+        color: #333d4d;
+    }
+
+    &__cols {
+        display: grid;
+        gap: 12px;
+
+        @media (min-width: 768px) {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+}
+
+// Camp Pills
+.camp-pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.camp-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 999px;
+    background: #f4f6fb;
+    border: 1px solid rgba(49, 48, 65, .12);
+    color: #1f2a40;
+}
+
+// Camp Form
+.camp-form {
+    margin-top: 18px;
+
+    &-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+
+        @media (min-width: 768px) {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    &-field {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+
+        &.full-span {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: .875rem;
+            font-weight: 600;
+            color: #374151;
+            line-height: 1.2;
+        }
+
+        &__note {
+            font-size: .75rem;
+            color: #6b7280;
+            margin-top: 2px;
+            line-height: 1.3;
+        }
+    }
+
+    &__status {
+        margin-top: 8px;
+        font-size: .8rem;
+        color: #475569;
+        font-weight: 500;
+    }
+}
+
+.camp-control {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    padding: 10px 14px;
+    font-size: .9rem;
+    background: #fff;
+    transition: all .2s ease;
+    color: #1f2937;
+
+    &:hover {
+        border-color: #9ca3af;
+    }
+
+    &:focus {
+        outline: none;
+        border-color: var(--camp-accent);
+        box-shadow: 0 0 0 3px rgba(232, 96, 76, .12);
+    }
+
+    &::placeholder {
+        color: #9ca3af;
+    }
+}
+
+// Camp Summary
+.camp-summary {
+    margin-top: 20px;
+    border-radius: 14px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    padding: 16px;
+
+    &__row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+        font-size: .9rem;
+        color: #374151;
+
+        span:first-child {
+            color: #6b7280;
+        }
+
+        span:last-child {
+            font-weight: 500;
+            color: #1f2937;
+        }
+    }
+
+    &__total {
+        border-top: 2px solid #e5e7eb;
+        margin-top: 12px;
+        padding-top: 12px;
+        font-weight: 700;
+        font-size: 1rem;
+
+        span:last-child {
+            font-weight: 700;
+            color: #1f2937;
+            font-size: 1.1rem;
+        }
+    }
+
+    &__note {
+        margin-top: 10px;
+        font-size: .75rem;
+        color: #6b7280;
+        line-height: 1.4;
+    }
+}
+
+.section-card {
+    border-top: 2px solid rgba(232, 96, 76, .2);
+}
+
+// Utility Classes
+.mt-4 {
+    margin-top: 1rem;
+}
+
+.mt-3 {
+    margin-top: 0.75rem;
+}
+
+.mb-5 {
+    margin-bottom: 3rem;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.space-y-3 > * + * {
+    margin-top: 0.75rem;
+}
+
+.font-medium {
+    font-weight: 500;
+}
+
+.text-gray-700 {
+    color: #374151;
+}
+
+// Additional configurator improvements
+.camp-config-card {
+    border: 1px solid rgba(15, 23, 42, .08);
+    
+    h3 {
+        margin-bottom: 0;
+    }
+}
+

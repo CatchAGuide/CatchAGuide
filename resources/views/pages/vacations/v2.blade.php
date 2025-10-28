@@ -1,0 +1,402 @@
+@extends('layouts.app')
+@section('title', 'Camp Offers - Vacations V2')
+
+@section('content')
+<div 
+    x-data="campConfigurator({
+        camp: @json($camp),
+        accommodations: @json($accommodations),
+        boats: @json($boats),
+        guidings: @json($guidings),
+        showCategories: {{ $showCategories ? 'true' : 'false' }}
+    })"
+    x-init="init()"
+    class="camp-page min-h-screen bg-gradient-to-b from-slate-50 to-white"
+>
+    
+    <!-- Camp Header -->
+    <header class="camp-topbar">
+        <div class="camp-container camp-topbar__inner">
+            <div class="camp-topbar__info">
+                <h1 class="camp-topbar__title">{{ $camp['title'] }}</h1>
+                <div class="camp-topbar__meta">
+                    <span>{{ $camp['city'] }}, {{ $camp['region'] }}, {{ $camp['country'] }}</span>
+                    <span class="camp-topbar__dot">•</span>
+                    <a class="camp-topbar__link" href="#map">Show on map</a>
+                </div>
+            </div>
+            <div class="camp-topbar__actions">
+                <a href="#configurator" class="brand-btn camp-topbar__cta">Make Inquiry</a>
+                <span class="camp-topbar__note">Best Price Guarantee</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Gallery -->
+    <div class="camp-container camp-gallery">
+        <div class="camp-gallery__main">
+            <img src="{{ $primaryImage }}" alt="{{ $camp['title'] }}">
+        </div>
+        <div class="camp-gallery__right">
+            @foreach ($topRightImages as $image)
+                <div class="camp-gallery__thumb">
+                    <img src="{{ $image }}" alt="{{ $camp['title'] }}">
+                </div>
+            @endforeach
+        </div>
+        <div class="camp-gallery__bottom">
+            @foreach ($bottomStripImages as $index => $image)
+                <div class="camp-gallery__thumb">
+                    <img src="{{ $image }}" alt="{{ $camp['title'] }}">
+                    @if($loop->last && $remainingGalleryCount > 0)
+                        <div class="camp-gallery__more">+{{ $remainingGalleryCount }} more</div>
+                    @endif
+                </div>
+            @endforeach
+        </div>
+    </div>
+
+    <!-- Main Content with Sidebar -->
+    <div class="camp-container camp-layout">
+        <div class="camp-layout__content">
+            <!-- Navigation -->
+            <nav class="camp-nav flex flex-wrap text-sm">
+                <a href="#general-info" class="nav-pill">General Information</a>
+                <a href="#accommodations" class="nav-pill">Accommodations</a>
+                <a href="#guidings" class="nav-pill">Guidings & Tours</a>
+                <a href="#boats" class="nav-pill">Rental Boats</a>
+            </nav>
+
+            <!-- General Information -->
+            <main id="general-info" class="camp-info-grid">
+                <div class="camp-sections">
+                    <section id="description" class="camp-section">
+                        <h2 class="camp-section__title">Description</h2>
+                        <div class="camp-section__body space-y-3">
+                            <div>
+                                <h3 class="font-semibold text-gray-700">Camp</h3>
+                                <p>Our camp is located directly at the reservoir and offers short distances to pier, slipway and service areas. The accommodations are modernly equipped and designed for the needs of fishing groups.</p>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-700">Fishing</h3>
+                                <p>{{ $camp['description']['camp_area_fishing'] }}</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="distances" class="camp-section">
+                        <h2 class="camp-section__title">Distances</h2>
+                        <div class="camp-pill-row">
+                            <span class="camp-pill">Shop: {{ $camp['distances']['to_shop_km'] }} km</span>
+                            <span class="camp-pill">Town: {{ $camp['distances']['to_town_km'] }} km</span>
+                            <span class="camp-pill">Airport: {{ $camp['distances']['to_airport_km'] }} km</span>
+                            <span class="camp-pill">Ferry: {{ $camp['distances']['to_ferry_km'] }} km</span>
+                        </div>
+                    </section>
+
+                    <section id="amenities-section" class="camp-section">
+                        <h2 class="camp-section__title">Camp Amenities</h2>
+                        <div class="camp-section__cols">
+                            @foreach($camp['amenities'] as $key => $value)
+                                <div>{{ ucwords(str_replace('_', ' ', $key)) }}: <strong>{{ $value ? 'Yes' : 'No' }}</strong></div>
+                            @endforeach
+                        </div>
+                    </section>
+
+                    <section id="policies" class="camp-section">
+                        <h2 class="camp-section__title">Policies & Regulations</h2>
+                        <ul class="camp-section__list">
+                            @foreach($camp['policies_regulations'] as $policy)
+                                <li>{{ $policy }}</li>
+                            @endforeach
+                        </ul>
+                    </section>
+
+                    <section id="target-fish" class="camp-section">
+                        <h2 class="camp-section__title">Target Fish & Best Times</h2>
+                        <div class="camp-pill-row">
+                            @foreach($camp['target_fish'] as $fish)
+                                <span class="camp-pill">{{ $fish }}</span>
+                            @endforeach
+                        </div>
+                        <div class="mt-4">
+                            <h3 class="camp-section__subtitle">Best Travel Times</h3>
+                            <ul class="camp-section__list">
+                                @foreach($camp['best_travel_times'] as $time)
+                                    <li><strong>{{ $time['month'] }}</strong>: {{ $time['note'] }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section id="travel-info" class="camp-section">
+                        <h2 class="camp-section__title">Travel Information</h2>
+                        <ul class="camp-section__list">
+                            @foreach($camp['travel_info'] as $info)
+                                <li>{{ $info }}</li>
+                            @endforeach
+                        </ul>
+                    </section>
+
+                    <section id="extras" class="camp-section">
+                        <h2 class="camp-section__title">Extras</h2>
+                        <div class="camp-pill-row">
+                            @foreach($camp['extras'] as $extra)
+                                <span class="camp-pill">{{ $extra }}</span>
+                            @endforeach
+                        </div>
+                    </section>
+
+                    <section id="conditions" class="camp-section">
+                        <h2 class="camp-section__title">Camp Conditions</h2>
+                        <div class="camp-section__cols">
+                            <div>Minimum stay: <strong>{{ $camp['conditions']['minimum_stay_nights'] }} nights</strong></div>
+                            <div>Booking window: <strong>{{ $camp['conditions']['booking_window'] }}</strong></div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+
+        <!-- Sidebar Configurator -->
+        <aside id="configurator" class="camp-config">
+            <div class="camp-config-card section-card">
+                <h3 class="text-lg font-semibold" style="color: var(--brand); margin: 0;">Configure Trip</h3>
+                <div class="accent-badge">
+                    This offer is an <strong>inquiry</strong>. We confirm or decline within <strong>48 hours</strong>.
+                </div>
+                <div class="camp-form mt-4">
+                    <div class="camp-form-grid">
+                        <div class="camp-form-field full-span">
+                            <label for="accSelect">Accommodation</label>
+                            <select
+                                id="accSelect"
+                                class="camp-control"
+                                x-model="selectedAccId"
+                                @change="selectedAccId = $event.target.value"
+                            >
+                                @foreach ($accommodations as $acc)
+                                    <option value="{{ $acc['id'] }}">
+                                        {{ $acc['title'] }} - {{ number_format($acc['price']['amount'], 2, ',', '.') }} {{ $acc['price']['currency'] }} / night
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="camp-form-field">
+                            <label for="boatSelect">Boat Rental</label>
+                            <select
+                                id="boatSelect"
+                                class="camp-control"
+                                x-model="selectedBoatId"
+                                @change="selectedBoatId = $event.target.value || null"
+                            >
+                                <option value="">No boat</option>
+                                @foreach ($boats as $b)
+                                    <option value="{{ $b['id'] }}">
+                                        {{ $b['title'] }} - {{ number_format($b['price_per_day'], 2, ',', '.') }} {{ $b['currency'] }} / day
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="camp-form-field">
+                            <label for="guideSelect">Guiding</label>
+                            <select
+                                id="guideSelect"
+                                class="camp-control"
+                                x-model="selectedGuideId"
+                                @change="selectedGuideId = $event.target.value || null"
+                            >
+                                <option value="">No guiding</option>
+                                @foreach ($guidings as $g)
+                                    <option value="{{ $g['id'] }}">
+                                        {{ $g['title'] }} - {{ number_format($g['price'], 2, ',', '.') }} {{ $g['currency'] }} fixed price
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="camp-form-field full-span">
+                            <label for="guestInput">Persons</label>
+                            <input
+                                id="guestInput"
+                                type="number"
+                                min="1"
+                                :max="selectedAcc ? selectedAcc.max_occupancy : 10"
+                                x-model.number="guests"
+                                @input="
+                                    const max = selectedAcc ? selectedAcc.max_occupancy : 10;
+                                    if (!guests || guests < 1) { guests = 1; }
+                                    if (guests > max) { guests = max; }
+                                "
+                                class="camp-control"
+                            >
+                            <p class="camp-form-field__note" x-text="selectedAcc ? 'Maximum ' + selectedAcc.max_occupancy + ' persons for the selected accommodation.' : 'Maximum 10 persons.'"></p>
+                        </div>
+                        <div class="camp-form-field">
+                            <label for="checkInInput">Check-in</label>
+                            <input
+                                id="checkInInput"
+                                type="date"
+                                x-model="checkIn"
+                                class="camp-control"
+                            >
+                        </div>
+                        <div class="camp-form-field">
+                            <label for="checkOutInput">Check-out</label>
+                            <input
+                                id="checkOutInput"
+                                type="date"
+                                x-model="checkOut"
+                                class="camp-control"
+                            >
+                        </div>
+                    </div>
+                    <div class="camp-form__status" x-text="nights ? nights + ' nights selected' : 'Please select travel dates'"></div>
+                </div>
+                <div class="camp-summary mt-4">
+                    <div class="camp-summary__row">
+                        <span>Accommodation</span>
+                        <span x-text="selectedAcc ? fmt(accPrice, selectedAcc?.price?.currency ?? 'EUR') : '--'"></span>
+                    </div>
+                    <div class="camp-summary__row">
+                        <span>Boat Rental</span>
+                        <span x-text="selectedBoat ? fmt(boatPrice, selectedBoat?.currency ?? 'EUR') : '--'"></span>
+                    </div>
+                    <div class="camp-summary__row">
+                        <span>Guiding</span>
+                        <span x-text="selectedGuide ? fmt(guidePrice, selectedGuide?.currency ?? 'EUR') : '--'"></span>
+                    </div>
+                    <div class="camp-summary__row camp-summary__total">
+                        <span>Total</span>
+                        <span x-text="total ? fmt(total, 'EUR') : '--'"></span>
+                    </div>
+                    <p class="camp-summary__note">Send inquiry - binding confirmation within 48 hours.</p>
+                </div>
+                <button class="brand-btn">Send Inquiry</button>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Full Width Card Sections -->
+    <div class="camp-container">
+        <!-- Accommodations Section -->
+        <section id="accommodations" class="camp-section mb-3">
+            <h2 class="camp-section__title">Accommodations</h2>
+            <x-accommodation.card :accommodation="$accommodation" />
+        </section>
+
+        <!-- Guidings Section -->
+        <section id="guidings" class="camp-section mb-3">
+            <h2 class="camp-section__title">Guidings & Tours</h2>
+            <x-guiding.card :guiding="$guiding" />
+        </section>
+
+        <!-- Rental Boats Section -->
+        <section id="boats" class="camp-section mb-3">
+            <h2 class="camp-section__title">Rental Boats</h2>
+            <x-rental-boat.card :boat="$boat" />
+        </section>
+    </div>
+</div>
+@endsection
+
+@push('scripts')
+    @once
+        <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    @endonce
+    
+    <script>
+        document.addEventListener('alpine:init', () => {
+            // Camp Configurator Component
+            Alpine.data('campConfigurator', ({ camp, accommodations, boats, guidings, showCategories = true }) => ({
+                camp,
+                accommodations,
+                boats,
+                guidings,
+                showCategories,
+                checkIn: '',
+                checkOut: '',
+                guests: Math.min(2, accommodations[0]?.max_occupancy ?? 2),
+                selectedAccId: accommodations[0]?.id ? String(accommodations[0].id) : null,
+                selectedBoatId: null,
+                selectedGuideId: null,
+                
+                init() {
+                    this.$watch('selectedAccId', () => {
+                        const max = this.selectedAcc ? this.selectedAcc.max_occupancy : 10;
+                        if (this.guests > max) {
+                            this.guests = max;
+                        }
+                        if (!this.guests || this.guests < 1) {
+                            this.guests = 1;
+                        }
+                    });
+                },
+                
+                fmt(value, currency = 'EUR') {
+                    try {
+                        return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(value ?? 0);
+                    } catch (error) {
+                        const amount = typeof value === 'number' ? value.toFixed(2) : '0.00';
+                        return `${amount} ${currency}`;
+                    }
+                },
+                
+                nightsBetween(start, end) {
+                    if (!start || !end) return 0;
+                    const startDate = new Date(start);
+                    const endDate = new Date(end);
+                    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) return 0;
+                    const diff = Math.floor((endDate.getTime() - startDate.getTime()) / 86400000);
+                    return diff > 0 ? diff : 0;
+                },
+                
+                blendedPrice(nights, perNight, perWeek) {
+                    if (!nights || !perNight) return 0;
+                    if (perWeek && nights >= 7) {
+                        const weeks = Math.floor(nights / 7);
+                        const rest = nights % 7;
+                        return weeks * perWeek + rest * perNight;
+                    }
+                    return nights * perNight;
+                },
+                
+                get selectedAcc() {
+                    return this.accommodations.find(item => String(item.id) === String(this.selectedAccId)) ?? null;
+                },
+                
+                get selectedBoat() {
+                    return this.boats.find(item => String(item.id) === String(this.selectedBoatId)) ?? null;
+                },
+                
+                get selectedGuide() {
+                    return this.guidings.find(item => String(item.id) === String(this.selectedGuideId)) ?? null;
+                },
+                
+                get nights() {
+                    return this.nightsBetween(this.checkIn, this.checkOut);
+                },
+                
+                get accPrice() {
+                    if (!this.selectedAcc) return 0;
+                    return this.blendedPrice(this.nights, this.selectedAcc.price?.amount, this.selectedAcc.price?.per_week);
+                },
+                
+                get boatPrice() {
+                    if (!this.selectedBoat) return 0;
+                    return (this.selectedBoat.price_per_day || 0) * (this.nights || 0);
+                },
+                
+                get guidePrice() {
+                    if (!this.selectedGuide) return 0;
+                    return this.selectedGuide.price || 0;
+                },
+                
+                get total() {
+                    return this.accPrice + this.boatPrice + this.guidePrice;
+                },
+            }));
+        });
+    </script>
+    
+    <x-cards-scripts />
+@endpush
