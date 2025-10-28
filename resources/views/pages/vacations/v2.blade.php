@@ -379,15 +379,12 @@
 
 <!-- Gallery Modal Script -->
 <script>
-    console.log('Gallery script loading...');
     // Gallery Modal Functions
     (function() {
         const galleryImages = @json($galleryImages);
-        console.log('Gallery images loaded:', galleryImages.length);
         let currentGalleryIndex = 0;
 
             function openGalleryModal(index) {
-                console.log('Opening gallery at index:', index);
                 currentGalleryIndex = index;
                 updateGalleryModal();
                 document.getElementById('galleryModal').style.display = 'flex';
@@ -395,7 +392,6 @@
             }
 
             function closeGalleryModal() {
-                console.log('Closing gallery');
                 document.getElementById('galleryModal').style.display = 'none';
                 document.body.style.overflow = 'auto';
             }
@@ -413,16 +409,12 @@
             }
 
             function initGallery() {
-                console.log('Initializing gallery modal, images count:', galleryImages.length);
-                
                 // Add click handlers to all gallery items
                 const galleryItems = document.querySelectorAll('[data-gallery-index]');
-                console.log('Found gallery items:', galleryItems.length);
                 
                 galleryItems.forEach(function(item) {
                     item.addEventListener('click', function() {
                         const index = parseInt(this.getAttribute('data-gallery-index'));
-                        console.log('Gallery item clicked, index:', index);
                         openGalleryModal(index);
                     });
                 });
