@@ -90,36 +90,61 @@
                     <section id="description" class="camp-section">
                         <h2 class="camp-section__title">Description</h2>
                         <div class="camp-section__body space-y-3">
+                            @if(!empty($camp['description']['camp_description']))
                             <div>
                                 <h3 class="font-semibold text-gray-700">Camp</h3>
-                                <p>Our camp is located directly at the reservoir and offers short distances to pier, slipway and service areas. The accommodations are modernly equipped and designed for the needs of fishing groups.</p>
+                                <p>{{ $camp['description']['camp_description'] }}</p>
                             </div>
+                            @endif
+                            @if(!empty($camp['description']['camp_area']))
+                            <div>
+                                <h3 class="font-semibold text-gray-700">Area</h3>
+                                <p>{{ $camp['description']['camp_area'] }}</p>
+                            </div>
+                            @endif
+                            @if(!empty($camp['description']['camp_area_fishing']))
                             <div>
                                 <h3 class="font-semibold text-gray-700">Fishing</h3>
                                 <p>{{ $camp['description']['camp_area_fishing'] }}</p>
                             </div>
+                            @endif
                         </div>
                     </section>
 
                     <section id="distances" class="camp-section">
                         <h2 class="camp-section__title">Distances</h2>
                         <div class="camp-pill-row">
-                            <span class="camp-pill">Shop: {{ $camp['distances']['to_shop_km'] }} km</span>
-                            <span class="camp-pill">Town: {{ $camp['distances']['to_town_km'] }} km</span>
-                            <span class="camp-pill">Airport: {{ $camp['distances']['to_airport_km'] }} km</span>
-                            <span class="camp-pill">Ferry: {{ $camp['distances']['to_ferry_km'] }} km</span>
+                            @if(!empty($camp['distances']['to_shop_label']))
+                                <span class="camp-pill">Shop: {{ $camp['distances']['to_shop_label'] }}</span>
+                            @endif
+                            @if(!empty($camp['distances']['to_town_label']))
+                                <span class="camp-pill">Town: {{ $camp['distances']['to_town_label'] }}</span>
+                            @endif
+                            @if(!empty($camp['distances']['to_airport_label']))
+                                <span class="camp-pill">Airport: {{ $camp['distances']['to_airport_label'] }}</span>
+                            @endif
+                            @if(!empty($camp['distances']['to_ferry_label']))
+                                <span class="camp-pill">Ferry: {{ $camp['distances']['to_ferry_label'] }}</span>
+                            @endif
                         </div>
                     </section>
 
+                    @if(!empty($camp['amenities']))
                     <section id="amenities-section" class="camp-section">
                         <h2 class="camp-section__title">Camp Amenities</h2>
                         <div class="camp-section__cols">
-                            @foreach($camp['amenities'] as $key => $value)
-                                <div>{{ ucwords(str_replace('_', ' ', $key)) }}: <strong>{{ $value ? 'Yes' : 'No' }}</strong></div>
+                            {{-- Dynamic amenities from camp_facility_camp pivot table --}}
+                            @foreach($camp['amenities'] as $amenity)
+                                <div class="flex items-center gap-2">
+                                    <span>{{ $amenity['name'] }}</span>
+                                    <i class="fa fa-check text-green-600"></i>
+                                </div>
                             @endforeach
                         </div>
                     </section>
+                    @endif
 
+                    @if(!empty($camp['policies_regulations']))
                     <section id="policies" class="camp-section">
                         <h2 class="camp-section__title">Policies & Regulations</h2>
                         <ul class="camp-section__list">
@@ -128,33 +153,55 @@
                             @endforeach
                         </ul>
                     </section>
+                    @endif
 
+                    @if(!empty($camp['best_travel_times']) || !empty($camp['best_travel_times_text']) || !empty($camp['target_fish']))
                     <section id="target-fish" class="camp-section">
-                        <h2 class="camp-section__title">Target Fish & Best Times</h2>
-                        <div class="camp-pill-row">
-                            @foreach($camp['target_fish'] as $fish)
-                                <span class="camp-pill">{{ $fish }}</span>
-                            @endforeach
-                        </div>
-                        <div class="mt-4">
-                            <h3 class="camp-section__subtitle">Best Travel Times</h3>
-                            <ul class="camp-section__list">
-                                @foreach($camp['best_travel_times'] as $time)
-                                    <li><strong>{{ $time['month'] }}</strong>: {{ $time['note'] }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
+                        <h2 class="camp-section__title">Best Travel Times & Target Fish</h2>
+                        
+                        @if(!empty($camp['best_travel_times']))
+                            <div class="mb-4">
+                                <h3 class="camp-section__subtitle">Best Travel Times</h3>
+                                <ul class="camp-section__list">
+                                    @foreach($camp['best_travel_times'] as $time)
+                                        <li><strong>{{ $time['month'] }}</strong>: {{ $time['note'] }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @elseif(!empty($camp['best_travel_times_text']))
+                            <div class="mb-4">
+                                <h3 class="camp-section__subtitle">Best Travel Times</h3>
+                                <div class="text-sm text-gray-700 whitespace-pre-line">{{ $camp['best_travel_times_text'] }}</div>
+                            </div>
+                        @endif
+                        
+                        @if(!empty($camp['target_fish']))
+                            <div>
+                                <h3 class="camp-section__subtitle">Target Fish</h3>
+                                <div class="camp-pill-row">
+                                    @foreach($camp['target_fish'] as $fish)
+                                        <span class="camp-pill">{{ $fish }}</span>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                     </section>
+                    @endif
 
+                    @if(!empty($camp['travel_info']))
                     <section id="travel-info" class="camp-section">
                         <h2 class="camp-section__title">Travel Information</h2>
                         <ul class="camp-section__list">
                             @foreach($camp['travel_info'] as $info)
-                                <li>{{ $info }}</li>
+                                @if(!empty($info))
+                                    <li>{{ $info }}</li>
+                                @endif
                             @endforeach
                         </ul>
                     </section>
+                    @endif
 
+                    @if(!empty($camp['extras']))
                     <section id="extras" class="camp-section">
                         <h2 class="camp-section__title">Extras</h2>
                         <div class="camp-pill-row">
@@ -163,14 +210,21 @@
                             @endforeach
                         </div>
                     </section>
+                    @endif
 
+                    @if(!empty($camp['conditions']['minimum_stay_nights']) || !empty($camp['conditions']['booking_window']))
                     <section id="conditions" class="camp-section">
                         <h2 class="camp-section__title">Camp Conditions</h2>
                         <div class="camp-section__cols">
-                            <div>Minimum stay: <strong>{{ $camp['conditions']['minimum_stay_nights'] }} nights</strong></div>
-                            <div>Booking window: <strong>{{ $camp['conditions']['booking_window'] }}</strong></div>
+                            @if(!empty($camp['conditions']['minimum_stay_nights']))
+                                <div>Minimum stay: <strong>{{ $camp['conditions']['minimum_stay_nights'] }} nights</strong></div>
+                            @endif
+                            @if(!empty($camp['conditions']['booking_window']))
+                                <div>Booking window: <strong>{{ $camp['conditions']['booking_window'] }}</strong></div>
+                            @endif
                         </div>
                     </section>
+                    @endif
                 </div>
             </main>
         </div>
