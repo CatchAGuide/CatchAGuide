@@ -43,61 +43,39 @@ class CampOfferController extends Controller
     public function show($campId)
     {
         // Fetch camp from database with relationships
-        $camp = Camp::with(['accommodations', 'rentalBoats', 'guidings', 'facilities'])
-            ->findOrFail($campId);
-        
-        // Log raw camp data
-        \Log::info('=== CAMP DATA DEBUG ===', [
-            'camp_id' => $camp->id,
-            'camp_title' => $camp->title,
-            'accommodations_count' => $camp->accommodations->count(),
-            'boats_count' => $camp->rentalBoats->count(),
-            'guidings_count' => $camp->guidings->count(),
-            'facilities_count' => $camp->facilities->count(),
-        ]);
-        
-        \Log::info('Raw Camp Model Data:', $camp->toArray());
+        $camp = Camp::with([
+            'accommodations.accommodationType',
+            'rentalBoats',
+            'guidings',
+            'facilities'
+        ])->findOrFail($campId);
         
         // Map camp data to view format
         $campData = $this->mapCampData($camp);
         
-        \Log::info('Mapped Camp Data:', $campData);
-        
-        // Get first accommodation, boat, and guiding from relationships
-        if ($camp->accommodations->first()) {
-            \Log::info('Raw Accommodation Data:', $camp->accommodations->first()->toArray());
-            $accommodation = $this->mapAccommodationData($camp->accommodations->first());
-            \Log::info('Mapped Accommodation Data:', $accommodation);
-        } else {
-            \Log::warning('No accommodations found for camp');
-            $accommodation = null;
-        }
-            
+        // Get first boat and guiding from relationships (for single card display)
         if ($camp->rentalBoats->first()) {
-            \Log::info('Raw Boat Data:', $camp->rentalBoats->first()->toArray());
             $boat = $this->mapBoatData($camp->rentalBoats->first());
-            \Log::info('Mapped Boat Data:', $boat);
         } else {
-            \Log::warning('No boats found for camp');
             $boat = null;
         }
             
         if ($camp->guidings->first()) {
-            \Log::info('Raw Guiding Data:', $camp->guidings->first()->toArray());
             $guiding = $this->mapGuidingData($camp->guidings->first());
-            \Log::info('Mapped Guiding Data:', $guiding);
         } else {
-            \Log::warning('No guidings found for camp');
             $guiding = null;
         }
 
         // Process gallery images from camp and convert to public URLs
         $campGallery = $this->getImageUrls($camp->gallery_images ?? []);
         $campHero = $this->getImageUrl($camp->thumbnail_path) ?? ($campGallery[0] ?? null);
-        $galleryImages = array_values(array_filter(array_merge(
+        
+        // Merge and remove duplicates
+        $allImages = array_merge(
             [$this->getImageUrl($camp->thumbnail_path) ?? null],
             $campGallery
-        )));
+        );
+        $galleryImages = array_values(array_filter(array_unique($allImages)));
         
         if (empty($galleryImages)) {
             $galleryImages = [$campHero];
@@ -105,18 +83,7 @@ class CampOfferController extends Controller
         
         $primaryImage = $galleryImages[0] ?? null;
         $topRightImages = array_slice($galleryImages, 1, 2);
-        while (count($topRightImages) < 2 && $primaryImage) {
-            $topRightImages[] = $primaryImage;
-        }
-        
         $bottomStripImages = array_slice($galleryImages, 3, 5);
-        $fallbackIndex = 0;
-        while (count($bottomStripImages) < 5 && !empty($galleryImages)) {
-            $bottomStripImages[] = $galleryImages[$fallbackIndex % count($galleryImages)];
-            $fallbackIndex++;
-            if ($fallbackIndex > 20) break;
-        }
-        $bottomStripImages = array_slice($bottomStripImages, 0, 5);
         $remainingGalleryCount = max(0, count($galleryImages) - 8);
         
         // For configurator dropdown options - get all related items
@@ -132,17 +99,10 @@ class CampOfferController extends Controller
             return $this->mapGuidingForDropdown($guiding);
         })->toArray();
         
-        \Log::info('Dropdown Options:', [
-            'accommodations_count' => count($accommodations),
-            'boats_count' => count($boats),
-            'guidings_count' => count($guidings),
-        ]);
-        
         $showCategories = true;
 
         return view('pages.vacations.v2', compact(
             'campData',
-            'accommodation',
             'guiding',
             'boat',
             'accommodations',
@@ -152,7 +112,8 @@ class CampOfferController extends Controller
             'primaryImage',
             'topRightImages',
             'bottomStripImages',
-            'remainingGalleryCount'
+            'remainingGalleryCount',
+            'galleryImages'
         ))->with('camp', $campData);
     }
     
@@ -161,30 +122,56 @@ class CampOfferController extends Controller
      */
     private function mapCampData(Camp $camp)
     {
-        // Decode JSON fields if they're strings
-        $facilities = $camp->facilities->pluck('name')->toArray();
-        
-        // target_fish and best_travel_times are cast to array in model
-        // but we need to handle old data that might be strings
-        $targetFish = $camp->target_fish;
-        if (is_string($targetFish) && !empty($targetFish)) {
-            $targetFish = json_decode($targetFish, true);
+        // Process target fish - could be comma-separated string or JSON array
+        $targetFish = [];
+        if (!empty($camp->target_fish)) {
+            if (is_string($camp->target_fish)) {
+                // Try JSON decode first
+                $decoded = json_decode($camp->target_fish, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    $targetFish = $decoded;
+                } else {
+                    // Fall back to comma-separated
+                    $targetFish = array_map('trim', explode(',', $camp->target_fish));
+                }
+            } elseif (is_array($camp->target_fish)) {
+                $targetFish = $camp->target_fish;
+            }
         }
         
-        $bestTravelTimes = $camp->best_travel_times;
-        if (is_string($bestTravelTimes) && !empty($bestTravelTimes)) {
-            $bestTravelTimes = json_decode($bestTravelTimes, true);
+        // Process best travel times - currently stored as text, not structured data
+        $bestTravelTimes = [];
+        if (!empty($camp->best_travel_times)) {
+            if (is_string($camp->best_travel_times)) {
+                // Try JSON decode first
+                $decoded = json_decode($camp->best_travel_times, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    $bestTravelTimes = $decoded;
+                }
+                // Otherwise it's just text - leave as empty array for now
+            } elseif (is_array($camp->best_travel_times)) {
+                $bestTravelTimes = $camp->best_travel_times;
+            }
         }
         
-        \Log::info('Camp Mapping Debug:', [
-            'target_fish_raw' => $camp->target_fish,
-            'target_fish_type' => gettype($camp->target_fish),
-            'target_fish_decoded' => $targetFish,
-            'best_travel_times_raw' => $camp->best_travel_times,
-            'best_travel_times_type' => gettype($camp->best_travel_times),
-            'best_travel_times_decoded' => $bestTravelTimes,
-            'facilities_count' => count($facilities),
-        ]);
+        // Get amenities directly from the camp_facility_camp pivot table relationship
+        // This is fully dynamic - whatever facilities are assigned to the camp will show
+        $amenities = [];
+        
+        foreach ($camp->facilities as $facility) {
+            $amenities[] = [
+                'id' => $facility->id,
+                'name' => $facility->name,
+                'name_en' => $facility->name_en ?? $facility->name,
+                'name_de' => $facility->name_de ?? $facility->name,
+            ];
+        }
+        
+        // Parse distances to extract numeric values
+        $distanceToShop = $this->extractDistanceValue($camp->distance_to_store);
+        $distanceToTown = $this->extractDistanceValue($camp->distance_to_nearest_town);
+        $distanceToAirport = $this->extractDistanceValue($camp->distance_to_airport);
+        $distanceToFerry = $this->extractDistanceValue($camp->distance_to_ferry_port);
         
         return [
             'title' => $camp->title,
@@ -194,29 +181,56 @@ class CampOfferController extends Controller
             'lat' => $camp->latitude,
             'lng' => $camp->longitude,
             'description' => [
-                'camp_area_fishing' => $camp->description_fishing ?? '',
-                'camp_area' => $camp->description_area ?? '',
                 'camp_description' => $camp->description_camp ?? '',
+                'camp_area' => $camp->description_area ?? '',
+                'camp_area_fishing' => $camp->description_fishing ?? '',
             ],
             'distances' => [
-                'to_shop_km' => $camp->distance_to_store,
-                'to_town_km' => $camp->distance_to_nearest_town,
-                'to_airport_km' => $camp->distance_to_airport,
-                'to_ferry_km' => $camp->distance_to_ferry_port,
+                'to_shop_km' => $distanceToShop,
+                'to_shop_label' => $camp->distance_to_store,
+                'to_town_km' => $distanceToTown,
+                'to_town_label' => $camp->distance_to_nearest_town,
+                'to_airport_km' => $distanceToAirport,
+                'to_airport_label' => $camp->distance_to_airport,
+                'to_ferry_km' => $distanceToFerry,
+                'to_ferry_label' => $camp->distance_to_ferry_port,
             ],
-            'amenities' => $facilities,
-            'policies_regulations' => $camp->policies_regulations ? explode("\n", $camp->policies_regulations) : [],
-            'best_travel_times' => is_array($bestTravelTimes) ? $bestTravelTimes : [],
-            'travel_info' => $camp->travel_information ? explode("\n", $camp->travel_information) : [],
-            'extras' => $camp->extras ? array_map('trim', explode(',', $camp->extras)) : [],
-            'target_fish' => is_array($targetFish) ? $targetFish : [],
+            'amenities' => $amenities, // Dynamic from pivot table camp_facility_camp
+            'policies_regulations' => $camp->policies_regulations ? array_filter(array_map('trim', explode("\n", $camp->policies_regulations))) : [],
+            'best_travel_times' => $bestTravelTimes,
+            'best_travel_times_text' => is_string($camp->best_travel_times) ? $camp->best_travel_times : null,
+            'travel_info' => $camp->travel_information ? array_filter(array_map('trim', explode("\n", $camp->travel_information))) : [],
+            'extras' => $camp->extras ? array_filter(array_map('trim', explode(',', $camp->extras))) : [],
+            'target_fish' => $targetFish,
             'conditions' => [
-                'minimum_stay_nights' => null,
-                'booking_window' => null,
+                'minimum_stay_nights' => $camp->minimum_stay_nights ?? null,
+                'booking_window' => $camp->booking_window ?? null,
             ],
             'thumbnail_path' => $this->getImageUrl($camp->thumbnail_path),
             'manual_gallery_images' => $this->getImageUrls($camp->gallery_images ?? []),
         ];
+    }
+    
+    /**
+     * Extract numeric distance value from string like "Fayón – 4 km"
+     */
+    private function extractDistanceValue($distanceString)
+    {
+        if (empty($distanceString)) {
+            return null;
+        }
+        
+        // Try to extract number followed by km
+        if (preg_match('/(\d+(?:\.\d+)?)\s*km/i', $distanceString, $matches)) {
+            return floatval($matches[1]);
+        }
+        
+        // Try to extract just any number
+        if (preg_match('/(\d+(?:\.\d+)?)/', $distanceString, $matches)) {
+            return floatval($matches[1]);
+        }
+        
+        return null;
     }
     
     /**
@@ -320,7 +334,7 @@ class CampOfferController extends Controller
         return [
             'id' => $accommodation->id,
             'title' => $accommodation->title,
-            'accommodation_type' => $accommodation->accommodation_type,
+            'accommodation_type' => $accommodation->accommodationType->name ?? 'Accommodation',
             'thumbnail_path' => $this->getImageUrl($accommodation->thumbnail_path),
             'gallery_images' => $this->getImageUrls($accommodation->gallery_images ?? []),
             'city' => $accommodation->city,

@@ -38,25 +38,38 @@
 
     <!-- Gallery -->
     <div class="camp-container camp-gallery">
-        <div class="camp-gallery__main">
+        <div class="camp-gallery__main" data-gallery-index="0">
             <img src="{{ $primaryImage }}" alt="{{ $camp['title'] }}">
         </div>
         <div class="camp-gallery__right">
-            @foreach ($topRightImages as $image)
-                <div class="camp-gallery__thumb">
+            @foreach ($topRightImages as $index => $image)
+                <div class="camp-gallery__thumb" data-gallery-index="{{ $index + 1 }}">
                     <img src="{{ $image }}" alt="{{ $camp['title'] }}">
                 </div>
             @endforeach
         </div>
         <div class="camp-gallery__bottom">
             @foreach ($bottomStripImages as $index => $image)
-                <div class="camp-gallery__thumb">
+                <div class="camp-gallery__thumb" data-gallery-index="{{ $index + 3 }}">
                     <img src="{{ $image }}" alt="{{ $camp['title'] }}">
                     @if($loop->last && $remainingGalleryCount > 0)
-                        <div class="camp-gallery__more">+{{ $remainingGalleryCount }} more</div>
+                        <div class="camp-gallery__more">+{{ $remainingGalleryCount }}</div>
                     @endif
                 </div>
             @endforeach
+        </div>
+    </div>
+
+    <!-- Gallery Modal -->
+    <div id="galleryModal" class="gallery-modal">
+        <div class="gallery-modal__content">
+            <button class="gallery-modal__close">&times;</button>
+            <button class="gallery-modal__prev">&#10094;</button>
+            <button class="gallery-modal__next">&#10095;</button>
+            <img id="galleryModalImage" src="" alt="{{ $camp['title'] }}">
+            <div class="gallery-modal__counter">
+                <span id="galleryCurrentIndex">1</span> / <span id="galleryTotalCount">{{ count($galleryImages) }}</span>
+            </div>
         </div>
     </div>
 
@@ -77,36 +90,61 @@
                     <section id="description" class="camp-section">
                         <h2 class="camp-section__title">Description</h2>
                         <div class="camp-section__body space-y-3">
+                            @if(!empty($camp['description']['camp_description']))
                             <div>
                                 <h3 class="font-semibold text-gray-700">Camp</h3>
-                                <p>Our camp is located directly at the reservoir and offers short distances to pier, slipway and service areas. The accommodations are modernly equipped and designed for the needs of fishing groups.</p>
+                                <p>{{ $camp['description']['camp_description'] }}</p>
                             </div>
+                            @endif
+                            @if(!empty($camp['description']['camp_area']))
+                            <div>
+                                <h3 class="font-semibold text-gray-700">Area</h3>
+                                <p>{{ $camp['description']['camp_area'] }}</p>
+                            </div>
+                            @endif
+                            @if(!empty($camp['description']['camp_area_fishing']))
                             <div>
                                 <h3 class="font-semibold text-gray-700">Fishing</h3>
                                 <p>{{ $camp['description']['camp_area_fishing'] }}</p>
                             </div>
+                            @endif
                         </div>
                     </section>
 
                     <section id="distances" class="camp-section">
                         <h2 class="camp-section__title">Distances</h2>
                         <div class="camp-pill-row">
-                            <span class="camp-pill">Shop: {{ $camp['distances']['to_shop_km'] }} km</span>
-                            <span class="camp-pill">Town: {{ $camp['distances']['to_town_km'] }} km</span>
-                            <span class="camp-pill">Airport: {{ $camp['distances']['to_airport_km'] }} km</span>
-                            <span class="camp-pill">Ferry: {{ $camp['distances']['to_ferry_km'] }} km</span>
+                            @if(!empty($camp['distances']['to_shop_label']))
+                                <span class="camp-pill">Shop: {{ $camp['distances']['to_shop_label'] }}</span>
+                            @endif
+                            @if(!empty($camp['distances']['to_town_label']))
+                                <span class="camp-pill">Town: {{ $camp['distances']['to_town_label'] }}</span>
+                            @endif
+                            @if(!empty($camp['distances']['to_airport_label']))
+                                <span class="camp-pill">Airport: {{ $camp['distances']['to_airport_label'] }}</span>
+                            @endif
+                            @if(!empty($camp['distances']['to_ferry_label']))
+                                <span class="camp-pill">Ferry: {{ $camp['distances']['to_ferry_label'] }}</span>
+                            @endif
                         </div>
                     </section>
 
+                    @if(!empty($camp['amenities']))
                     <section id="amenities-section" class="camp-section">
                         <h2 class="camp-section__title">Camp Amenities</h2>
                         <div class="camp-section__cols">
-                            @foreach($camp['amenities'] as $key => $value)
-                                <div>{{ ucwords(str_replace('_', ' ', $key)) }}: <strong>{{ $value ? 'Yes' : 'No' }}</strong></div>
+                            {{-- Dynamic amenities from camp_facility_camp pivot table --}}
+                            @foreach($camp['amenities'] as $amenity)
+                                <div class="flex items-center gap-2">
+                                    <span>{{ $amenity['name'] }}</span>
+                                    <i class="fa fa-check text-green-600"></i>
+                                </div>
                             @endforeach
                         </div>
                     </section>
+                    @endif
 
+                    @if(!empty($camp['policies_regulations']))
                     <section id="policies" class="camp-section">
                         <h2 class="camp-section__title">Policies & Regulations</h2>
                         <ul class="camp-section__list">
@@ -115,33 +153,55 @@
                             @endforeach
                         </ul>
                     </section>
+                    @endif
 
+                    @if(!empty($camp['best_travel_times']) || !empty($camp['best_travel_times_text']) || !empty($camp['target_fish']))
                     <section id="target-fish" class="camp-section">
-                        <h2 class="camp-section__title">Target Fish & Best Times</h2>
-                        <div class="camp-pill-row">
-                            @foreach($camp['target_fish'] as $fish)
-                                <span class="camp-pill">{{ $fish }}</span>
-                            @endforeach
-                        </div>
-                        <div class="mt-4">
-                            <h3 class="camp-section__subtitle">Best Travel Times</h3>
-                            <ul class="camp-section__list">
-                                @foreach($camp['best_travel_times'] as $time)
-                                    <li><strong>{{ $time['month'] }}</strong>: {{ $time['note'] }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
+                        <h2 class="camp-section__title">Best Travel Times & Target Fish</h2>
+                        
+                        @if(!empty($camp['best_travel_times']))
+                            <div class="mb-4">
+                                <h3 class="camp-section__subtitle">Best Travel Times</h3>
+                                <ul class="camp-section__list">
+                                    @foreach($camp['best_travel_times'] as $time)
+                                        <li><strong>{{ $time['month'] }}</strong>: {{ $time['note'] }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @elseif(!empty($camp['best_travel_times_text']))
+                            <div class="mb-4">
+                                <h3 class="camp-section__subtitle">Best Travel Times</h3>
+                                <div class="text-sm text-gray-700 whitespace-pre-line">{{ $camp['best_travel_times_text'] }}</div>
+                            </div>
+                        @endif
+                        
+                        @if(!empty($camp['target_fish']))
+                            <div>
+                                <h3 class="camp-section__subtitle">Target Fish</h3>
+                                <div class="camp-pill-row">
+                                    @foreach($camp['target_fish'] as $fish)
+                                        <span class="camp-pill">{{ $fish }}</span>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                     </section>
+                    @endif
 
+                    @if(!empty($camp['travel_info']))
                     <section id="travel-info" class="camp-section">
                         <h2 class="camp-section__title">Travel Information</h2>
                         <ul class="camp-section__list">
                             @foreach($camp['travel_info'] as $info)
-                                <li>{{ $info }}</li>
+                                @if(!empty($info))
+                                    <li>{{ $info }}</li>
+                                @endif
                             @endforeach
                         </ul>
                     </section>
+                    @endif
 
+                    @if(!empty($camp['extras']))
                     <section id="extras" class="camp-section">
                         <h2 class="camp-section__title">Extras</h2>
                         <div class="camp-pill-row">
@@ -150,14 +210,21 @@
                             @endforeach
                         </div>
                     </section>
+                    @endif
 
+                    @if(!empty($camp['conditions']['minimum_stay_nights']) || !empty($camp['conditions']['booking_window']))
                     <section id="conditions" class="camp-section">
                         <h2 class="camp-section__title">Camp Conditions</h2>
                         <div class="camp-section__cols">
-                            <div>Minimum stay: <strong>{{ $camp['conditions']['minimum_stay_nights'] }} nights</strong></div>
-                            <div>Booking window: <strong>{{ $camp['conditions']['booking_window'] }}</strong></div>
+                            @if(!empty($camp['conditions']['minimum_stay_nights']))
+                                <div>Minimum stay: <strong>{{ $camp['conditions']['minimum_stay_nights'] }} nights</strong></div>
+                            @endif
+                            @if(!empty($camp['conditions']['booking_window']))
+                                <div>Booking window: <strong>{{ $camp['conditions']['booking_window'] }}</strong></div>
+                            @endif
                         </div>
                     </section>
+                    @endif
                 </div>
             </main>
         </div>
@@ -285,7 +352,11 @@
         <!-- Accommodations Section -->
         <section id="accommodations" class="camp-section mb-3">
             <h2 class="camp-section__title">Accommodations</h2>
-            <x-accommodation.card :accommodation="$accommodation" />
+            @foreach($accommodations as $accommodation)
+                <div class="mb-4">
+                    <x-accommodation.card :accommodation="$accommodation" />
+                </div>
+            @endforeach
         </section>
 
         <!-- Guidings Section -->
@@ -301,15 +372,120 @@
         </section>
     </div>
 </div>
-@endsection
 
-@push('scripts')
-    @once
-        <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    @endonce
-    
-    <script>
-        document.addEventListener('alpine:init', () => {
+<!-- Gallery Modal Script -->
+<script>
+    console.log('Gallery script loading...');
+    // Gallery Modal Functions
+    (function() {
+        const galleryImages = @json($galleryImages);
+        console.log('Gallery images loaded:', galleryImages.length);
+        let currentGalleryIndex = 0;
+
+            function openGalleryModal(index) {
+                console.log('Opening gallery at index:', index);
+                currentGalleryIndex = index;
+                updateGalleryModal();
+                document.getElementById('galleryModal').style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeGalleryModal() {
+                console.log('Closing gallery');
+                document.getElementById('galleryModal').style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+
+            function changeGalleryImage(direction) {
+                currentGalleryIndex += direction;
+                if (currentGalleryIndex < 0) currentGalleryIndex = galleryImages.length - 1;
+                if (currentGalleryIndex >= galleryImages.length) currentGalleryIndex = 0;
+                updateGalleryModal();
+            }
+
+            function updateGalleryModal() {
+                document.getElementById('galleryModalImage').src = galleryImages[currentGalleryIndex];
+                document.getElementById('galleryCurrentIndex').textContent = currentGalleryIndex + 1;
+            }
+
+            function initGallery() {
+                console.log('Initializing gallery modal, images count:', galleryImages.length);
+                
+                // Add click handlers to all gallery items
+                const galleryItems = document.querySelectorAll('[data-gallery-index]');
+                console.log('Found gallery items:', galleryItems.length);
+                
+                galleryItems.forEach(function(item) {
+                    item.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-gallery-index'));
+                        console.log('Gallery item clicked, index:', index);
+                        openGalleryModal(index);
+                    });
+                });
+
+                // Modal close button
+                const closeBtn = document.querySelector('.gallery-modal__close');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        closeGalleryModal();
+                    });
+                }
+
+                // Click outside to close
+                const modal = document.getElementById('galleryModal');
+                if (modal) {
+                    modal.addEventListener('click', function(e) {
+                        if (e.target.id === 'galleryModal') {
+                            closeGalleryModal();
+                        }
+                    });
+                }
+
+                // Navigation buttons
+                const prevBtn = document.querySelector('.gallery-modal__prev');
+                const nextBtn = document.querySelector('.gallery-modal__next');
+                
+                if (prevBtn) {
+                    prevBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        changeGalleryImage(-1);
+                    });
+                }
+                
+                if (nextBtn) {
+                    nextBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        changeGalleryImage(1);
+                    });
+                }
+
+                // Keyboard navigation
+                document.addEventListener('keydown', function(event) {
+                    if (modal && modal.style.display === 'flex') {
+                        if (event.key === 'Escape') {
+                            closeGalleryModal();
+                        } else if (event.key === 'ArrowLeft') {
+                            changeGalleryImage(-1);
+                        } else if (event.key === 'ArrowRight') {
+                            changeGalleryImage(1);
+                        }
+                    }
+                });
+            }
+
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initGallery);
+            } else {
+                // DOM is already ready
+                initGallery();
+        }
+    })();
+</script>
+
+<script>
+    document.addEventListener('alpine:init', () => {
             // Camp Configurator Component
             Alpine.data('campConfigurator', ({ camp, accommodations, boats, guidings, showCategories = true }) => ({
                 camp,
@@ -397,10 +573,17 @@
                 
                 get total() {
                     return this.accPrice + this.boatPrice + this.guidePrice;
-                },
-            }));
-        });
-    </script>
+            },
+        }));
+    });
+</script>
+
+@endsection
+
+@push('scripts')
+    @once
+        <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    @endonce
     
     <x-cards-scripts />
 @endpush
