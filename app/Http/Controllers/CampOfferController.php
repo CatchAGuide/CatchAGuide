@@ -226,7 +226,24 @@ class CampOfferController extends Controller
     {
         $boatInfo = $boat->boat_information ?? [];
         $prices = $boat->prices ?? [];
-        $firstPrice = is_array($prices) && !empty($prices) ? $prices[0] : null;
+        
+        // Handle both indexed and associative price arrays
+        $firstPrice = null;
+        if (is_array($prices) && !empty($prices)) {
+            if (isset($prices[0])) {
+                // Indexed array format
+                $firstPrice = $prices[0];
+            } else {
+                // Associative array format - get price based on boat's price type
+                $priceType = $boat->price_type ?? 'per_day';
+                if (isset($prices[$priceType])) {
+                    $firstPrice = ['amount' => $prices[$priceType], 'currency' => 'EUR'];
+                } else {
+                    // Fallback to first available price
+                    $firstPrice = ['amount' => reset($prices), 'currency' => 'EUR'];
+                }
+            }
+        }
         
         return [
             'id' => $boat->id,
@@ -263,7 +280,24 @@ class CampOfferController extends Controller
     {
         $boatInfo = $boat->boat_information ?? [];
         $prices = $boat->prices ?? [];
-        $firstPrice = is_array($prices) && !empty($prices) ? $prices[0] : null;
+        
+        // Handle both indexed and associative price arrays
+        $firstPrice = null;
+        if (is_array($prices) && !empty($prices)) {
+            if (isset($prices[0])) {
+                // Indexed array format
+                $firstPrice = $prices[0];
+            } else {
+                // Associative array format - get price based on boat's price type
+                $priceType = $boat->price_type ?? 'per_day';
+                if (isset($prices[$priceType])) {
+                    $firstPrice = ['amount' => $prices[$priceType], 'currency' => 'EUR'];
+                } else {
+                    // Fallback to first available price
+                    $firstPrice = ['amount' => reset($prices), 'currency' => 'EUR'];
+                }
+            }
+        }
         
         return [
             'id' => $boat->id,
