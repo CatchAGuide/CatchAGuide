@@ -5,10 +5,20 @@
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 0 18px 48px -34px rgba(15, 23, 42, .3);
+    transition: all 0.3s ease-in-out;
+    contain: layout style paint;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+
+    // Hover effect when not expanded
+    &:not(.accommodation-card--expanded):hover {
+        box-shadow: 0 20px 56px -34px rgba(15, 23, 42, .4);
+        transform: translateY(-2px) translateZ(0);
+    }
 
     &__grid {
         display: grid;
-        grid-template-columns: 1fr 2fr;
+        grid-template-columns: 320px 1fr; // Fixed image width
         gap: 16px;
         padding: 16px;
 
@@ -19,14 +29,68 @@
         }
     }
 
-    &__left-column,
-    &__right-column {
+    // Grid stays the same when expanded - only image height changes
+    &--expanded &__grid {
+        grid-template-columns: 320px 1fr; // Keep same width
+    }
+
+    &__left-column {
         display: flex;
         flex-direction: column;
         gap: 12px;
 
         @media (max-width: 768px) {
             gap: 8px;
+        }
+    }
+
+    &__right-column {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-width: 0; // Prevent flex overflow
+
+        @media (max-width: 768px) {
+            gap: 8px;
+        }
+    }
+
+    // Hide expandable content by default
+    [data-expanded-only] {
+        display: none !important;
+    }
+    
+    // Show expandable content when card is expanded
+    &--expanded {
+        .accommodation-gallery__info-chips[data-expanded-only] {
+            display: flex !important;
+            animation: fadeInUp 0.4s ease forwards;
+        }
+        
+        .accommodation-card__detail-box[data-expanded-only] {
+            display: block !important;
+            animation: fadeInUp 0.4s ease forwards;
+        }
+        
+        .accommodation-card__info-matrix[data-expanded-only] {
+            display: grid !important;
+            animation: fadeInUp 0.4s ease forwards;
+        }
+        
+        .accommodation-card__amenities-section[data-expanded-only] {
+            display: block !important;
+            animation: fadeInUp 0.4s ease forwards;
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
     }
 
@@ -184,6 +248,7 @@
     &__distance-chips {
         display: flex;
         flex-wrap: wrap;
+        align-items: center;
         gap: 6px;
         margin: 8px 0;
     }
@@ -201,13 +266,13 @@
     }
 
     &__info-matrix {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
         gap: 12px;
         margin: 12px 0;
 
-        @media (max-width: 1024px) {
-            grid-template-columns: 1fr;
+        @media (max-width: 640px) {
+            grid-template-columns: 1fr !important;
         }
     }
 
@@ -217,8 +282,8 @@
         border-radius: 12px;
         padding: 8px;
 
-        &:last-child {
-            grid-column: 1 / -1;
+        &:nth-child(4) {
+            grid-column: 1 / -1 !important;
         }
 
         &-title {
@@ -237,6 +302,7 @@
 
     &__amenities-section {
         margin-top: 12px;
+        animation: fadeInUp 0.5s ease-out;
     }
 
     &__amenities-title {
@@ -263,17 +329,50 @@
         font-size: 11px;
         color: #334155;
     }
+
+    // Expand/Collapse Button (inline with chips)
+    &__expand-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        background: rgba(37, 99, 235, 0.1);
+        color: #2563eb;
+        border: 1px solid rgba(37, 99, 235, 0.2);
+        border-radius: 12px;
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        margin-left: auto; // Push to the right
+
+        &:hover {
+            background: rgba(37, 99, 235, 0.15);
+            border-color: rgba(37, 99, 235, 0.3);
+        }
+
+        span:last-child {
+            font-size: 10px;
+        }
+    }
 }
 
 // Gallery Component (separate from accommodation-card)
 .accommodation-gallery {
     position: relative;
     width: 100%;
-    aspect-ratio: 1;
     overflow: hidden;
     border-radius: 12px;
     border: 1px solid rgba(15, 23, 42, .08);
     background: #f1f5f9;
+    aspect-ratio: 16/9; // Collapsed state
+    
+    // Expanded state - square aspect ratio
+    .accommodation-card--expanded & {
+        aspect-ratio: 1;
+    }
 
     img {
         position: absolute;
@@ -281,6 +380,12 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
 
     &__nav-btn {
@@ -348,4 +453,9 @@
         color: #334155;
         box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
     }
+}
+
+// Alpine.js x-cloak
+[x-cloak] {
+    display: none !important;
 }
