@@ -94,10 +94,13 @@ class CampOfferController extends Controller
         // Process gallery images from camp and convert to public URLs
         $campGallery = $this->getImageUrls($camp->gallery_images ?? []);
         $campHero = $this->getImageUrl($camp->thumbnail_path) ?? ($campGallery[0] ?? null);
-        $galleryImages = array_values(array_filter(array_merge(
+        
+        // Merge and remove duplicates
+        $allImages = array_merge(
             [$this->getImageUrl($camp->thumbnail_path) ?? null],
             $campGallery
-        )));
+        );
+        $galleryImages = array_values(array_filter(array_unique($allImages)));
         
         if (empty($galleryImages)) {
             $galleryImages = [$campHero];
@@ -105,18 +108,7 @@ class CampOfferController extends Controller
         
         $primaryImage = $galleryImages[0] ?? null;
         $topRightImages = array_slice($galleryImages, 1, 2);
-        while (count($topRightImages) < 2 && $primaryImage) {
-            $topRightImages[] = $primaryImage;
-        }
-        
         $bottomStripImages = array_slice($galleryImages, 3, 5);
-        $fallbackIndex = 0;
-        while (count($bottomStripImages) < 5 && !empty($galleryImages)) {
-            $bottomStripImages[] = $galleryImages[$fallbackIndex % count($galleryImages)];
-            $fallbackIndex++;
-            if ($fallbackIndex > 20) break;
-        }
-        $bottomStripImages = array_slice($bottomStripImages, 0, 5);
         $remainingGalleryCount = max(0, count($galleryImages) - 8);
         
         // For configurator dropdown options - get all related items
@@ -152,7 +144,8 @@ class CampOfferController extends Controller
             'primaryImage',
             'topRightImages',
             'bottomStripImages',
-            'remainingGalleryCount'
+            'remainingGalleryCount',
+            'galleryImages'
         ))->with('camp', $campData);
     }
     

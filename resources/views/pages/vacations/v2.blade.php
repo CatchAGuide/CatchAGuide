@@ -38,25 +38,38 @@
 
     <!-- Gallery -->
     <div class="camp-container camp-gallery">
-        <div class="camp-gallery__main">
+        <div class="camp-gallery__main" data-gallery-index="0">
             <img src="{{ $primaryImage }}" alt="{{ $camp['title'] }}">
         </div>
         <div class="camp-gallery__right">
-            @foreach ($topRightImages as $image)
-                <div class="camp-gallery__thumb">
+            @foreach ($topRightImages as $index => $image)
+                <div class="camp-gallery__thumb" data-gallery-index="{{ $index + 1 }}">
                     <img src="{{ $image }}" alt="{{ $camp['title'] }}">
                 </div>
             @endforeach
         </div>
         <div class="camp-gallery__bottom">
             @foreach ($bottomStripImages as $index => $image)
-                <div class="camp-gallery__thumb">
+                <div class="camp-gallery__thumb" data-gallery-index="{{ $index + 3 }}">
                     <img src="{{ $image }}" alt="{{ $camp['title'] }}">
                     @if($loop->last && $remainingGalleryCount > 0)
-                        <div class="camp-gallery__more">+{{ $remainingGalleryCount }} more</div>
+                        <div class="camp-gallery__more">+{{ $remainingGalleryCount }}</div>
                     @endif
                 </div>
             @endforeach
+        </div>
+    </div>
+
+    <!-- Gallery Modal -->
+    <div id="galleryModal" class="gallery-modal">
+        <div class="gallery-modal__content">
+            <button class="gallery-modal__close">&times;</button>
+            <button class="gallery-modal__prev">&#10094;</button>
+            <button class="gallery-modal__next">&#10095;</button>
+            <img id="galleryModalImage" src="" alt="{{ $camp['title'] }}">
+            <div class="gallery-modal__counter">
+                <span id="galleryCurrentIndex">1</span> / <span id="galleryTotalCount">{{ count($galleryImages) }}</span>
+            </div>
         </div>
     </div>
 
@@ -301,15 +314,120 @@
         </section>
     </div>
 </div>
-@endsection
 
-@push('scripts')
-    @once
-        <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    @endonce
-    
-    <script>
-        document.addEventListener('alpine:init', () => {
+<!-- Gallery Modal Script -->
+<script>
+    console.log('Gallery script loading...');
+    // Gallery Modal Functions
+    (function() {
+        const galleryImages = @json($galleryImages);
+        console.log('Gallery images loaded:', galleryImages.length);
+        let currentGalleryIndex = 0;
+
+            function openGalleryModal(index) {
+                console.log('Opening gallery at index:', index);
+                currentGalleryIndex = index;
+                updateGalleryModal();
+                document.getElementById('galleryModal').style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeGalleryModal() {
+                console.log('Closing gallery');
+                document.getElementById('galleryModal').style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+
+            function changeGalleryImage(direction) {
+                currentGalleryIndex += direction;
+                if (currentGalleryIndex < 0) currentGalleryIndex = galleryImages.length - 1;
+                if (currentGalleryIndex >= galleryImages.length) currentGalleryIndex = 0;
+                updateGalleryModal();
+            }
+
+            function updateGalleryModal() {
+                document.getElementById('galleryModalImage').src = galleryImages[currentGalleryIndex];
+                document.getElementById('galleryCurrentIndex').textContent = currentGalleryIndex + 1;
+            }
+
+            function initGallery() {
+                console.log('Initializing gallery modal, images count:', galleryImages.length);
+                
+                // Add click handlers to all gallery items
+                const galleryItems = document.querySelectorAll('[data-gallery-index]');
+                console.log('Found gallery items:', galleryItems.length);
+                
+                galleryItems.forEach(function(item) {
+                    item.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-gallery-index'));
+                        console.log('Gallery item clicked, index:', index);
+                        openGalleryModal(index);
+                    });
+                });
+
+                // Modal close button
+                const closeBtn = document.querySelector('.gallery-modal__close');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        closeGalleryModal();
+                    });
+                }
+
+                // Click outside to close
+                const modal = document.getElementById('galleryModal');
+                if (modal) {
+                    modal.addEventListener('click', function(e) {
+                        if (e.target.id === 'galleryModal') {
+                            closeGalleryModal();
+                        }
+                    });
+                }
+
+                // Navigation buttons
+                const prevBtn = document.querySelector('.gallery-modal__prev');
+                const nextBtn = document.querySelector('.gallery-modal__next');
+                
+                if (prevBtn) {
+                    prevBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        changeGalleryImage(-1);
+                    });
+                }
+                
+                if (nextBtn) {
+                    nextBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        changeGalleryImage(1);
+                    });
+                }
+
+                // Keyboard navigation
+                document.addEventListener('keydown', function(event) {
+                    if (modal && modal.style.display === 'flex') {
+                        if (event.key === 'Escape') {
+                            closeGalleryModal();
+                        } else if (event.key === 'ArrowLeft') {
+                            changeGalleryImage(-1);
+                        } else if (event.key === 'ArrowRight') {
+                            changeGalleryImage(1);
+                        }
+                    }
+                });
+            }
+
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initGallery);
+            } else {
+                // DOM is already ready
+                initGallery();
+        }
+    })();
+</script>
+
+<script>
+    document.addEventListener('alpine:init', () => {
             // Camp Configurator Component
             Alpine.data('campConfigurator', ({ camp, accommodations, boats, guidings, showCategories = true }) => ({
                 camp,
@@ -397,10 +515,17 @@
                 
                 get total() {
                     return this.accPrice + this.boatPrice + this.guidePrice;
-                },
-            }));
-        });
-    </script>
+            },
+        }));
+    });
+</script>
+
+@endsection
+
+@push('scripts')
+    @once
+        <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    @endonce
     
     <x-cards-scripts />
 @endpush
