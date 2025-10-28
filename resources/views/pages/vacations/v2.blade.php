@@ -352,7 +352,11 @@
         <!-- Accommodations Section -->
         <section id="accommodations" class="camp-section mb-3">
             <h2 class="camp-section__title">Accommodations</h2>
-            <x-accommodation.card :accommodation="$accommodation" />
+            @foreach($accommodations as $accommodation)
+                <div class="mb-4">
+                    <x-accommodation.card :accommodation="$accommodation" />
+                </div>
+            @endforeach
         </section>
 
         <!-- Guidings Section -->

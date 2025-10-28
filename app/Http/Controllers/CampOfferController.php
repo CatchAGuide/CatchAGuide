@@ -43,61 +43,26 @@ class CampOfferController extends Controller
     public function show($campId)
     {
         // Fetch camp from database with relationships
-        $camp = Camp::with(['accommodations', 'rentalBoats', 'guidings', 'facilities'])
-            ->findOrFail($campId);
-        
-        // Log comprehensive camp data
-        \Log::info('=== CAMP DATA DEBUG ===', [
-            'camp_id' => $camp->id,
-            'camp_title' => $camp->title,
-            'accommodations_count' => $camp->accommodations->count(),
-            'boats_count' => $camp->rentalBoats->count(),
-            'guidings_count' => $camp->guidings->count(),
-            'facilities_count' => $camp->facilities->count(),
-        ]);
-        
-        // Log facilities from relationship
-        \Log::info('=== FACILITIES FROM RELATIONSHIP ===', [
-            'facilities' => $camp->facilities->map(function($facility) {
-                return [
-                    'id' => $facility->id,
-                    'name' => $facility->name,
-                    'name_en' => $facility->name_en ?? null,
-                    'name_de' => $facility->name_de ?? null,
-                ];
-            })->toArray()
-        ]);
+        $camp = Camp::with([
+            'accommodations.accommodationType',
+            'rentalBoats',
+            'guidings',
+            'facilities'
+        ])->findOrFail($campId);
         
         // Map camp data to view format
         $campData = $this->mapCampData($camp);
         
-        \Log::info('Mapped Camp Data:', $campData);
-        
-        // Get first accommodation, boat, and guiding from relationships
-        if ($camp->accommodations->first()) {
-            \Log::info('Raw Accommodation Data:', $camp->accommodations->first()->toArray());
-            $accommodation = $this->mapAccommodationData($camp->accommodations->first());
-            \Log::info('Mapped Accommodation Data:', $accommodation);
-        } else {
-            \Log::warning('No accommodations found for camp');
-            $accommodation = null;
-        }
-            
+        // Get first boat and guiding from relationships (for single card display)
         if ($camp->rentalBoats->first()) {
-            \Log::info('Raw Boat Data:', $camp->rentalBoats->first()->toArray());
             $boat = $this->mapBoatData($camp->rentalBoats->first());
-            \Log::info('Mapped Boat Data:', $boat);
         } else {
-            \Log::warning('No boats found for camp');
             $boat = null;
         }
             
         if ($camp->guidings->first()) {
-            \Log::info('Raw Guiding Data:', $camp->guidings->first()->toArray());
             $guiding = $this->mapGuidingData($camp->guidings->first());
-            \Log::info('Mapped Guiding Data:', $guiding);
         } else {
-            \Log::warning('No guidings found for camp');
             $guiding = null;
         }
 
@@ -134,17 +99,10 @@ class CampOfferController extends Controller
             return $this->mapGuidingForDropdown($guiding);
         })->toArray();
         
-        \Log::info('Dropdown Options:', [
-            'accommodations_count' => count($accommodations),
-            'boats_count' => count($boats),
-            'guidings_count' => count($guidings),
-        ]);
-        
         $showCategories = true;
 
         return view('pages.vacations.v2', compact(
             'campData',
-            'accommodation',
             'guiding',
             'boat',
             'accommodations',
@@ -214,19 +172,6 @@ class CampOfferController extends Controller
         $distanceToTown = $this->extractDistanceValue($camp->distance_to_nearest_town);
         $distanceToAirport = $this->extractDistanceValue($camp->distance_to_airport);
         $distanceToFerry = $this->extractDistanceValue($camp->distance_to_ferry_port);
-        
-        \Log::info('=== CAMP MAPPING DETAILS ===', [
-            'target_fish_raw' => $camp->target_fish,
-            'target_fish_processed' => $targetFish,
-            'best_travel_times_raw' => substr($camp->best_travel_times ?? '', 0, 100) . '...',
-            'best_travel_times_processed' => $bestTravelTimes,
-            'amenities_from_pivot_table' => $amenities,
-            'amenities_count' => count($amenities),
-            'distance_to_store_raw' => $camp->distance_to_store,
-            'distance_to_store_processed' => $distanceToShop,
-            'policies_regulations_exists' => !empty($camp->policies_regulations),
-            'extras_raw' => $camp->extras,
-        ]);
         
         return [
             'title' => $camp->title,
@@ -389,7 +334,7 @@ class CampOfferController extends Controller
         return [
             'id' => $accommodation->id,
             'title' => $accommodation->title,
-            'accommodation_type' => $accommodation->accommodation_type,
+            'accommodation_type' => $accommodation->accommodationType->name ?? 'Accommodation',
             'thumbnail_path' => $this->getImageUrl($accommodation->thumbnail_path),
             'gallery_images' => $this->getImageUrls($accommodation->gallery_images ?? []),
             'city' => $accommodation->city,
