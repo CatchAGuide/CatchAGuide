@@ -11,7 +11,7 @@
         camp: @json($camp),
         accommodations: @json($accommodations),
         boats: @json($boats),
-        guidings: @json($guidings),
+        guidings: @json($guidingsDropdown),
         showCategories: {{ $showCategories ? 'true' : 'false' }}
     })"
     x-init="init()"
@@ -278,7 +278,7 @@
                                 @change="selectedGuideId = $event.target.value || null"
                             >
                                 <option value="">No guiding</option>
-                                @foreach ($guidings as $g)
+                                @foreach ($guidingsDropdown as $g)
                                     <option value="{{ $g['id'] }}">
                                         {{ $g['title'] }} - {{ number_format($g['price'], 2, ',', '.') }} {{ $g['currency'] }} fixed price
                                     </option>
@@ -362,7 +362,11 @@
         <!-- Guidings Section -->
         <section id="guidings" class="camp-section mb-3">
             <h2 class="camp-section__title">Guidings & Tours</h2>
-            <x-guiding.card :guiding="$guiding" />
+            @foreach($guidings as $guiding)
+                <div class="mb-4">
+                    <x-guiding.card :guiding="$guiding" />
+                </div>
+            @endforeach
         </section>
 
         <!-- Rental Boats Section -->
@@ -375,15 +379,12 @@
 
 <!-- Gallery Modal Script -->
 <script>
-    console.log('Gallery script loading...');
     // Gallery Modal Functions
     (function() {
         const galleryImages = @json($galleryImages);
-        console.log('Gallery images loaded:', galleryImages.length);
         let currentGalleryIndex = 0;
 
             function openGalleryModal(index) {
-                console.log('Opening gallery at index:', index);
                 currentGalleryIndex = index;
                 updateGalleryModal();
                 document.getElementById('galleryModal').style.display = 'flex';
@@ -391,7 +392,6 @@
             }
 
             function closeGalleryModal() {
-                console.log('Closing gallery');
                 document.getElementById('galleryModal').style.display = 'none';
                 document.body.style.overflow = 'auto';
             }
@@ -409,16 +409,12 @@
             }
 
             function initGallery() {
-                console.log('Initializing gallery modal, images count:', galleryImages.length);
-                
                 // Add click handlers to all gallery items
                 const galleryItems = document.querySelectorAll('[data-gallery-index]');
-                console.log('Found gallery items:', galleryItems.length);
                 
                 galleryItems.forEach(function(item) {
                     item.addEventListener('click', function() {
                         const index = parseInt(this.getAttribute('data-gallery-index'));
-                        console.log('Gallery item clicked, index:', index);
                         openGalleryModal(index);
                     });
                 });

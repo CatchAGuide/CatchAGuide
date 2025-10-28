@@ -5,36 +5,103 @@
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 0 18px 48px -34px rgba(15, 23, 42, .3);
+    transition: all 0.3s ease-in-out;
+    contain: layout style paint;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+
+    // Hover effect when not expanded
+    &:not(.rental-boat-card--expanded):hover {
+        box-shadow: 0 20px 56px -34px rgba(15, 23, 42, .4);
+        transform: translateY(-2px) translateZ(0);
+    }
 
     &__grid {
         display: grid;
-        grid-template-columns: 1fr 2fr;
-        gap: 0;
+        grid-template-columns: 320px 1fr;
+        gap: 16px;
+        padding: 16px;
 
         @media (max-width: 992px) {
             grid-template-columns: 1fr;
+            gap: 12px;
+            padding: 12px;
         }
+    }
+
+    // Grid stays the same when expanded
+    &--expanded &__grid {
+        grid-template-columns: 320px 1fr;
     }
 
     &__left-column {
         display: flex;
         flex-direction: column;
-        background: #f8fafc;
+        gap: 12px;
+
+        @media (max-width: 768px) {
+            gap: 8px;
+        }
     }
 
     &__right-column {
-        padding: 18px 20px 20px;
         display: flex;
         flex-direction: column;
+        gap: 12px;
+        min-width: 0;
+
+        @media (max-width: 768px) {
+            gap: 8px;
+        }
+    }
+
+    // Hide expandable content by default
+    [data-expanded-only] {
+        display: none !important;
+    }
+    
+    // Show expandable content when card is expanded
+    &--expanded {
+        .rental-boat-gallery__info-chips[data-expanded-only] {
+            display: flex !important;
+            animation: fadeInUp 0.4s ease forwards;
+        }
+        
+        .rental-boat-card__detail-box[data-expanded-only] {
+            display: block !important;
+            animation: fadeInUp 0.4s ease forwards;
+        }
+        
+        .rental-boat-card__info-matrix[data-expanded-only] {
+            display: grid !important;
+            animation: fadeInUp 0.4s ease forwards;
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     &__gallery {
         position: relative;
         width: 100%;
-        aspect-ratio: 1;
-        min-height: 280px;
         overflow: hidden;
+        border-radius: 12px;
+        border: 1px solid rgba(15, 23, 42, .08);
         background: #e2e8f0;
+        aspect-ratio: 16/9;
+        
+        // Expanded state - square aspect ratio
+        .rental-boat-card--expanded & {
+            aspect-ratio: 1;
+        }
 
         img {
             position: absolute;
@@ -42,6 +109,12 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         @media (max-width: 992px) {
@@ -49,93 +122,100 @@
         }
     }
 
-    &__inclusives-box {
-        background: #fff;
-        border-top: 1px solid rgba(15, 23, 42, .08);
-        padding: 12px 16px;
-    }
+    // Detail boxes
+    &__detail-box {
+        background: rgba(241, 245, 249, .6);
+        border: 1px solid rgba(15, 23, 42, .08);
+        border-radius: 12px;
+        padding: 8px;
 
-    &__inclusives-title {
-        font-size: 13px;
-        font-weight: 600;
-        color: #1e293b;
-        margin: 0 0 6px 0;
-    }
+        &-title {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
 
-    &__inclusives-subtitle {
-        font-size: 12px;
-        font-weight: 600;
-        color: #1e293b;
-        margin-bottom: 6px;
-    }
-
-    &__inclusives-list {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 4px;
+        &-subtitle {
+            font-size: 11px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 6px;
+        }
     }
 
     &__inclusives-chips {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
+        gap: 6px;
+        margin-top: 4px;
     }
 
     &__inclusive-chip {
         display: inline-flex;
         align-items: center;
         gap: 4px;
+        background: rgba(255, 255, 255, .8);
+        border: 1px solid rgba(15, 23, 42, .1);
+        border-radius: 12px;
+        padding: 4px 8px;
+        font-size: 11px;
+        color: #334155;
+
+        .rental-boat-card__check-icon {
+            color: #16a34a;
+        }
     }
 
     &__check-icon {
         flex-shrink: 0;
-        color: #10b981;
+        color: #16a34a;
     }
 
-    &__info-grid {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 20px;
-        align-items: start;
-        margin-bottom: 6px;
-
-        &:last-of-type {
-            margin-bottom: 12px;
-        }
+    // Header & Pricing
+    &__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 8px;
 
         @media (max-width: 768px) {
-            grid-template-columns: 1fr;
-            gap: 8px;
+            flex-direction: column;
+            align-items: stretch;
         }
+    }
+
+    &__info {
+        flex: 1;
+        min-width: 0;
     }
 
     &__location {
         display: flex;
         align-items: center;
         gap: 4px;
-        font-size: 11px;
+        font-size: 12px;
         color: #64748b;
-    }
+        margin-bottom: 4px;
 
-    &__location-icon {
-        flex-shrink: 0;
-        color: #94a3b8;
-    }
+        &-icon {
+            flex-shrink: 0;
+        }
 
-    &__location-text {
-        color: #64748b;
-        word-wrap: break-word;
-        word-break: break-word;
+        &-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
     }
 
     &__title {
-        font-size: 19px;
-        font-weight: 700;
+        font-size: 16px;
+        font-weight: 600;
         color: #1e293b;
-        margin: 0;
+        margin: 0 0 4px 0;
         line-height: 1.3;
-        align-self: center;
     }
 
     &__type {
@@ -144,37 +224,44 @@
         margin-bottom: 4px;
     }
 
-    &__price-label {
-        font-size: 11px;
-        color: #64748b;
-        line-height: 1;
-        text-align: right;
-        align-self: center;
-
-        @media (max-width: 768px) {
-            text-align: left;
-        }
-    }
-
-    &__price-amount {
-        font-size: 22px;
-        font-weight: 700;
-        color: #1e293b;
-        line-height: 1;
-        text-align: right;
-        align-self: center;
-
-        @media (max-width: 768px) {
-            text-align: left;
-        }
-    }
-
     &__description {
         font-size: 13px;
         color: #475569;
-        line-height: 1.5;
+        line-height: 1.4;
         margin: 0;
-        align-self: start;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    &__pricing {
+        text-align: right;
+        flex-shrink: 0;
+        min-width: 140px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 8px;
+
+        @media (max-width: 768px) {
+            text-align: left;
+            min-width: auto;
+            align-items: flex-start;
+        }
+    }
+
+    &__price-type {
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 2px;
+    }
+
+    &__price-amount {
+        font-size: 20px;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 8px;
     }
 
     &__select-btn {
@@ -188,79 +275,101 @@
         cursor: pointer;
         transition: background-color 0.2s ease;
         white-space: nowrap;
-        align-self: start;
 
         &:hover {
             background: #1d4ed8;
         }
     }
 
+    // Info Pills
     &__info-pills {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
-        margin-bottom: 12px;
+        align-items: center;
+        gap: 6px;
+        margin: 8px 0;
     }
 
     &__info-pill {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
-        background: #f1f5f9;
+        gap: 4px;
+        background: rgba(255, 255, 255, .8);
         border: 1px solid rgba(15, 23, 42, .1);
-        border-radius: 999px;
-        padding: 5px 11px;
+        border-radius: 12px;
+        padding: 4px 8px;
         font-size: 12px;
-        color: #475569;
-    }
+        color: #334155;
 
-    &__pill-icon {
-        flex-shrink: 0;
-        color: #94a3b8;
-    }
-
-    &__info-panels {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-        margin-top: 4px;
-
-        @media (max-width: 1200px) {
-            grid-template-columns: 1fr;
+        &-icon {
+            flex-shrink: 0;
+            color: #64748b;
         }
     }
 
-    &__panel {
-        background: #fff;
-        border: 1px solid rgba(15, 23, 42, .1);
+    // Expand/Collapse Button (inline with pills)
+    &__expand-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        background: rgba(37, 99, 235, 0.1);
+        color: #2563eb;
+        border: 1px solid rgba(37, 99, 235, 0.2);
         border-radius: 12px;
-        padding: 12px 14px;
-    }
-
-    &__panel-title {
-        color: #1e293b;
-        font-size: 13px;
-        font-weight: 600;
-        margin-bottom: 8px;
-    }
-
-    &__panel-content {
+        padding: 4px 10px;
         font-size: 12px;
-        color: #475569;
-        line-height: 1.5;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        margin-left: auto; // Push to the right
 
-        > div {
+        &:hover {
+            background: rgba(37, 99, 235, 0.15);
+            border-color: rgba(37, 99, 235, 0.3);
+        }
+
+        span:last-child {
+            font-size: 10px;
+        }
+    }
+
+    // Info Matrix
+    &__info-matrix {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 12px;
+        margin: 12px 0;
+
+        @media (max-width: 640px) {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
+    &__info-box {
+        background: rgba(241, 245, 249, .6);
+        border: 1px solid rgba(15, 23, 42, .08);
+        border-radius: 12px;
+        padding: 8px;
+
+        &-title {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 500;
             margin-bottom: 4px;
+        }
 
-            &:last-child {
-                margin-bottom: 0;
-            }
+        &-content {
+            font-size: 12px;
+            color: #334155;
+            line-height: 1.4;
         }
     }
 
     &__chip-icon {
         flex-shrink: 0;
-        color: #94a3b8;
+        color: #64748b;
     }
 
     &__equipment-chips,
@@ -268,7 +377,7 @@
         display: flex;
         flex-wrap: wrap;
         gap: 6px;
-        margin-top: 8px;
+        margin-top: 4px;
     }
 
     &__equipment-chip,
@@ -276,11 +385,78 @@
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        background: #f1f5f9;
+        background: rgba(255, 255, 255, .8);
         border: 1px solid rgba(15, 23, 42, .1);
-        border-radius: 999px;
-        padding: 6px 12px;
-        font-size: 12px;
-        color: #475569;
+        border-radius: 12px;
+        padding: 4px 8px;
+        font-size: 11px;
+        color: #334155;
     }
+}
+
+// Gallery Navigation Components
+.rental-boat-gallery__nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, .9);
+    border: 1px solid rgba(15, 23, 42, .1);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
+
+    &:hover {
+        background: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+    }
+
+    &--prev {
+        left: 4px;
+    }
+
+    &--next {
+        right: 4px;
+    }
+}
+
+.rental-boat-gallery__counter {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    background: rgba(255, 255, 255, .9);
+    border-radius: 12px;
+    padding: 2px 6px;
+    font-size: 10px;
+    color: #64748b;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
+}
+
+.rental-boat-gallery__info-chips {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.rental-boat-gallery__info-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, .8);
+    border: 1px solid rgba(15, 23, 42, .1);
+    border-radius: 12px;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: #334155;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
 }

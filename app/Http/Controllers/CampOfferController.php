@@ -46,7 +46,7 @@ class CampOfferController extends Controller
         $camp = Camp::with([
             'accommodations.accommodationType',
             'rentalBoats',
-            'guidings',
+            'guidings.fishingFrom',
             'facilities'
         ])->findOrFail($campId);
         
@@ -95,7 +95,13 @@ class CampOfferController extends Controller
             return $this->mapBoatForDropdown($boat);
         })->toArray();
         
+        // Map all guidings with full data for display
         $guidings = $camp->guidings->map(function($guiding) {
+            return $this->mapGuidingData($guiding);
+        })->toArray();
+        
+        // For dropdown - simplified version
+        $guidingsDropdown = $camp->guidings->map(function($guiding) {
             return $this->mapGuidingForDropdown($guiding);
         })->toArray();
         
@@ -108,6 +114,7 @@ class CampOfferController extends Controller
             'accommodations',
             'boats',
             'guidings',
+            'guidingsDropdown',
             'showCategories',
             'primaryImage',
             'topRightImages',
@@ -380,10 +387,15 @@ class CampOfferController extends Controller
      */
     private function mapGuidingData(Guiding $guiding)
     {
-        // Decode JSON fields
-        $targetFish = is_string($guiding->target_fish) ? json_decode($guiding->target_fish, true) : $guiding->target_fish;
-        $fishingMethods = is_string($guiding->fishing_methods) ? json_decode($guiding->fishing_methods, true) : $guiding->fishing_methods;
-        $inclusions = is_string($guiding->inclusions) ? json_decode($guiding->inclusions, true) : $guiding->inclusions;
+        // Decode gallery_images if it's a JSON string
+        $galleryImages = is_string($guiding->gallery_images) 
+            ? json_decode($guiding->gallery_images, true) 
+            : $guiding->gallery_images;
+        
+        // Use model methods to get actual names instead of IDs
+        $targetFish = $guiding->getTargetFishNames();
+        $fishingMethods = $guiding->getFishingMethodNames();
+        $inclusions = $guiding->getInclusionNames();
         
         return [
             'id' => $guiding->id,
@@ -391,7 +403,7 @@ class CampOfferController extends Controller
             'location' => $guiding->location,
             'description' => $guiding->description ?? $guiding->desc_course_of_action,
             'thumbnail_path' => $this->getImageUrl($guiding->thumbnail_path),
-            'gallery_images' => $this->getImageUrls($guiding->gallery_images ?? []),
+            'gallery_images' => $this->getImageUrls($galleryImages ?? []),
             'duration_hours' => $guiding->duration_type ?? 4,
             'max_persons' => $guiding->max_guests,
             'type' => $guiding->tour_type,
@@ -401,11 +413,11 @@ class CampOfferController extends Controller
                 'max_personen' => $guiding->max_guests,
                 'gewaesser' => $guiding->water_name ?? 'Water'
             ],
-            'target_fish' => $targetFish ?? [],
-            'methods' => $fishingMethods ?? [],
+            'target_fish' => $targetFish,
+            'methods' => $fishingMethods,
             'meeting_point' => $guiding->meeting_point,
             'start_times' => $guiding->desc_starting_time ? explode(',', $guiding->desc_starting_time) : [],
-            'inclusives' => $inclusions ?? [],
+            'inclusives' => $inclusions,
             'price' => [
                 'amount' => $guiding->price,
                 'currency' => 'EUR',
