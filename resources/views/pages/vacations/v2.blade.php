@@ -11,7 +11,7 @@
         camp: @json($camp),
         accommodations: @json($accommodations),
         boats: @json($boats),
-        guidings: @json($guidings),
+        guidings: @json($guidingsDropdown),
         showCategories: {{ $showCategories ? 'true' : 'false' }}
     })"
     x-init="init()"
@@ -278,7 +278,7 @@
                                 @change="selectedGuideId = $event.target.value || null"
                             >
                                 <option value="">No guiding</option>
-                                @foreach ($guidings as $g)
+                                @foreach ($guidingsDropdown as $g)
                                     <option value="{{ $g['id'] }}">
                                         {{ $g['title'] }} - {{ number_format($g['price'], 2, ',', '.') }} {{ $g['currency'] }} fixed price
                                     </option>
@@ -362,7 +362,11 @@
         <!-- Guidings Section -->
         <section id="guidings" class="camp-section mb-3">
             <h2 class="camp-section__title">Guidings & Tours</h2>
-            <x-guiding.card :guiding="$guiding" />
+            @foreach($guidings as $guiding)
+                <div class="mb-4">
+                    <x-guiding.card :guiding="$guiding" />
+                </div>
+            @endforeach
         </section>
 
         <!-- Rental Boats Section -->
