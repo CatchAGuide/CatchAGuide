@@ -18,41 +18,58 @@
 
     &__grid {
         display: grid;
-        grid-template-columns: 320px 1fr; // Fixed image width
+        grid-template-columns: 320px minmax(0, 1fr) minmax(220px, 260px);
+        grid-template-areas:
+            "media summary actions"
+            "media features features";
         gap: 16px;
         padding: 16px;
+        align-items: flex-start;
+
+        @media (max-width: 1200px) {
+            grid-template-columns: 280px minmax(0, 1fr) minmax(200px, 240px);
+        }
+
+        @media (max-width: 1024px) {
+            grid-template-columns: 260px minmax(0, 1fr);
+            grid-template-areas:
+                "media summary"
+                "media summary"
+                "features features"
+                "actions actions";
+        }
 
         @media (max-width: 768px) {
             grid-template-columns: 1fr;
+            grid-template-areas:
+                "media"
+                "summary"
+                "features"
+                "actions";
             gap: 12px;
             padding: 12px;
         }
     }
 
-    // Grid stays the same when expanded - only image height changes
-    &--expanded &__grid {
-        grid-template-columns: 320px 1fr; // Keep same width
+    &__media {
+        grid-area: media;
     }
 
-    &__left-column {
+    &__summary {
+        grid-area: summary;
         display: flex;
         flex-direction: column;
         gap: 12px;
-
-        @media (max-width: 768px) {
-            gap: 8px;
-        }
+        min-width: 0;
     }
 
-    &__right-column {
+    &__actions {
+        grid-area: actions;
         display: flex;
         flex-direction: column;
-        gap: 12px;
-        min-width: 0; // Prevent flex overflow
-
-        @media (max-width: 768px) {
-            gap: 8px;
-        }
+        align-items: stretch;
+        justify-content: flex-start;
+        gap: 16px;
     }
 
     // Hide expandable content by default
@@ -62,23 +79,18 @@
     
     // Show expandable content when card is expanded
     &--expanded {
-        .accommodation-gallery__info-chips[data-expanded-only] {
-            display: flex !important;
-            animation: fadeInUp 0.4s ease forwards;
-        }
-        
-        .accommodation-card__detail-box[data-expanded-only] {
-            display: block !important;
-            animation: fadeInUp 0.4s ease forwards;
-        }
-        
-        .accommodation-card__info-matrix[data-expanded-only] {
+        .accommodation-card__feature-grid[data-expanded-only] {
             display: grid !important;
             animation: fadeInUp 0.4s ease forwards;
         }
-        
-        .accommodation-card__amenities-section[data-expanded-only] {
+
+        .accommodation-card__expanded[data-expanded-only] {
             display: block !important;
+            animation: fadeInUp 0.4s ease forwards;
+        }
+
+        .accommodation-card__left-panels[data-expanded-only] {
+            display: flex !important;
             animation: fadeInUp 0.4s ease forwards;
         }
     }
@@ -94,85 +106,7 @@
         }
     }
 
-    // Gallery
-    &__detail-box {
-        background: rgba(241, 245, 249, .6);
-        border: 1px solid rgba(15, 23, 42, .08);
-        border-radius: 12px;
-        padding: 8px;
-        margin-top: 12px;
-
-        &-title {
-            color: #64748b;
-            font-size: 12px;
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
-    }
-
-    &__detail-list {
-        margin: 0;
-        padding: 0;
-        list-style: none;
-
-        li {
-            font-size: 12px;
-            color: #334155;
-            margin-bottom: 2px;
-
-            &:last-child {
-                margin-bottom: 0;
-            }
-        }
-    }
-
-    &__inclusive-extras {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-        margin-top: 4px;
-    }
-
-    &__inclusive-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        background: rgba(255, 255, 255, .8);
-        border: 1px solid rgba(15, 23, 42, .1);
-        border-radius: 12px;
-        padding: 4px 8px;
-        font-size: 11px;
-        color: #334155;
-    }
-
     // Header & Pricing
-    &__header {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 12px;
-        margin-bottom: 8px;
-
-        @media (max-width: 768px) {
-            flex-direction: column;
-            align-items: stretch;
-        }
-    }
-
-    &__info {
-        flex: 1;
-        min-width: 0;
-    }
-
-    &__location {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        font-size: 12px;
-        color: #64748b;
-        margin-bottom: 4px;
-    }
-
     &__title {
         font-size: 16px;
         font-weight: 600;
@@ -187,44 +121,88 @@
         margin-bottom: 4px;
     }
 
-    &__description {
-        font-size: 13px;
+    &__summary-header {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    &__stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        font-size: 12px;
+        color: #334155;
+    }
+
+    &__stat {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(15, 23, 42, .1);
+        background: rgba(241, 245, 249, .6);
+        line-height: 1;
+    }
+
+    &__stat-icon {
+        font-size: 14px;
+        line-height: 1;
+    }
+
+    &__beds {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: baseline;
+        font-size: 12px;
+        color: #334155;
+    }
+
+    &__beds-label {
+        font-weight: 500;
         color: #475569;
-        line-height: 1.4;
-        margin: 0;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+    }
+
+    &__actions-column {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+
+        align-self: flex-end;
+
+        @media (max-width: 1024px) {
+            align-items: flex-start;
+            align-self: flex-start;
+        }
     }
 
     &__pricing {
         text-align: right;
-        flex-shrink: 0;
-        min-width: 140px;
         display: flex;
         flex-direction: column;
         align-items: flex-end;
-        gap: 8px;
+        gap: 4px;
 
-        @media (max-width: 768px) {
-            text-align: left;
-            min-width: auto;
+        @media (max-width: 1024px) {
             align-items: flex-start;
+            text-align: left;
         }
     }
 
     &__price-type {
         font-size: 12px;
         color: #64748b;
-        margin-bottom: 2px;
+        margin: 0;
     }
 
     &__price-amount {
         font-size: 20px;
         font-weight: 600;
         color: #1e293b;
-        margin-bottom: 8px;
+        margin: 0;
     }
 
     &__select-btn {
@@ -245,12 +223,30 @@
     }
 
     // Info Sections
-    &__distance-chips {
+    &__distance-row {
         display: flex;
-        flex-wrap: wrap;
         align-items: center;
-        gap: 6px;
-        margin: 8px 0;
+        gap: 12px;
+        margin: 8px 0 0;
+        width: 100%;
+
+        @media (max-width: 640px) {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+        }
+    }
+
+    &__distance-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: nowrap;
+        overflow: visible;
+
+        @media (max-width: 640px) {
+            flex-wrap: wrap;
+        }
     }
 
     &__distance-chip {
@@ -263,74 +259,27 @@
         padding: 4px 8px;
         font-size: 12px;
         color: #334155;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
 
-    &__info-matrix {
-        display: grid !important;
-        grid-template-columns: repeat(3, 1fr) !important;
+    &__feature-grid {
+        grid-area: features;
+        margin-top: 0;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 12px;
-        margin: 12px 0;
+        width: 100%;
+
+        @media (max-width: 1200px) {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
 
         @media (max-width: 640px) {
-            grid-template-columns: 1fr !important;
+            grid-template-columns: 1fr;
         }
     }
 
-    &__info-box {
-        background: rgba(241, 245, 249, .6);
-        border: 1px solid rgba(15, 23, 42, .08);
-        border-radius: 12px;
-        padding: 8px;
-
-        &:nth-child(4) {
-            grid-column: 1 / -1 !important;
-        }
-
-        &-title {
-            color: #64748b;
-            font-size: 12px;
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
-
-        &-content {
-            font-size: 12px;
-            color: #334155;
-            line-height: 1.4;
-        }
-    }
-
-    &__amenities-section {
-        margin-top: 12px;
-        animation: fadeInUp 0.5s ease-out;
-    }
-
-    &__amenities-title {
-        color: #64748b;
-        font-size: 12px;
-        font-weight: 500;
-        margin-bottom: 6px;
-    }
-
-    &__amenities-chips {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-    }
-
-    &__amenity-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        background: rgba(255, 255, 255, .8);
-        border: 1px solid rgba(15, 23, 42, .1);
-        border-radius: 12px;
-        padding: 4px 8px;
-        font-size: 11px;
-        color: #334155;
-    }
-
-    // Expand/Collapse Button (inline with chips)
     &__expand-btn {
         display: inline-flex;
         align-items: center;
@@ -346,7 +295,6 @@
         cursor: pointer;
         transition: all 0.2s ease;
         white-space: nowrap;
-        margin-left: auto; // Push to the right
 
         &:hover {
             background: rgba(37, 99, 235, 0.15);
@@ -356,6 +304,126 @@
         span:last-child {
             font-size: 10px;
         }
+    }
+
+    &__expand-btn--secondary {
+        align-self: flex-end;
+
+        @media (max-width: 1024px) {
+            align-self: flex-start;
+        }
+    }
+
+    &__expanded {
+        margin-top: 16px;
+        display: block;
+    }
+
+    &__expanded-left {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    &__left-panels {
+        margin-top: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    &__panel {
+        background: rgba(241, 245, 249, .6);
+        border: 1px solid rgba(15, 23, 42, .08);
+        border-radius: 12px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    &__panel-title {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    &__panel-subtitle {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    &__bullet-list {
+        margin: 0;
+        padding-left: 16px;
+        font-size: 12px;
+        color: #334155;
+        line-height: 1.6;
+
+        li {
+            margin-bottom: 4px;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+    }
+
+    &__chip-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    &__chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(255, 255, 255, .85);
+        border: 1px solid rgba(15, 23, 42, .1);
+        border-radius: 12px;
+        padding: 4px 8px;
+        font-size: 11px;
+        color: #334155;
+    }
+
+    &__panel--extras {
+        grid-column: 1 / -1;
+    }
+
+    &__panel-columns {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 12px;
+    }
+
+    &__inclusive-extras {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    &__inclusive-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(255, 255, 255, .8);
+        border: 1px solid rgba(15, 23, 42, .1);
+        border-radius: 12px;
+        padding: 4px 8px;
+        font-size: 11px;
+        color: #334155;
+    }
+
+    &__empty {
+        font-size: 12px;
+        color: #64748b;
     }
 }
 
