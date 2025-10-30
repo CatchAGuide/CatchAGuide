@@ -844,6 +844,21 @@ class GuidingsController extends Controller
             // Filter out null/empty entries just in case
             $totalImageCount = count(array_filter($galleryImages));
 
+            // Safety net: also check the image_list payload which represents the intended final order
+            $imageListFromRequest = json_decode($request->input('image_list', '[]'), true);
+            if (is_array($imageListFromRequest)) {
+                $totalImageCount = max($totalImageCount, count(array_filter($imageListFromRequest)));
+            }
+
+            Log::debug('guidingsStore image validation', [
+                'guiding_id' => $guiding->id ?? null,
+                'is_update' => $isUpdate,
+                'is_draft' => $isDraft,
+                'gallery_images_count' => count($galleryImages),
+                'image_list_count' => is_array($imageListFromRequest) ? count(array_filter($imageListFromRequest)) : null,
+                'total_image_count' => $totalImageCount
+            ]);
+
             if (!$isDraft && $totalImageCount < 5) {
                 throw new \Exception('Please upload at least 5 images');
             }
