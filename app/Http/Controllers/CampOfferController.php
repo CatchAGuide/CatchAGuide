@@ -337,26 +337,120 @@ class CampOfferController extends Controller
     private function mapAccommodationData(Accommodation $accommodation)
     {
         $accommodationDetails = $accommodation->accommodation_details ?? [];
+        $galleryImages = $this->getImageUrls($accommodation->gallery_images ?? []);
+
+        $minOccupancy = $accommodation->min_occupancy;
+        $maxOccupancy = $accommodation->max_occupancy;
+        $occupancyLabel = null;
+
+        if ($minOccupancy && $maxOccupancy) {
+            $occupancyLabel = (int) $minOccupancy === (int) $maxOccupancy
+                ? (string) $maxOccupancy
+                : $minOccupancy . '–' . $maxOccupancy;
+        } elseif ($maxOccupancy) {
+            $occupancyLabel = (string) $maxOccupancy;
+        } elseif ($minOccupancy) {
+            $occupancyLabel = (string) $minOccupancy;
+        }
+
+        $bathroomRaw = $accommodation->bathroom ?? $accommodation->bathrooms ?? null;
+        $bathroomCount = null;
+        $bathroomStat = 'Keine Angabe';
+
+        if ($bathroomRaw !== null && $bathroomRaw !== '') {
+            if (is_numeric($bathroomRaw)) {
+                $bathroomCount = (int) $bathroomRaw;
+                $bathroomStat = $bathroomCount . ' ' . ($bathroomCount === 1 ? 'Bad' : 'Bäder');
+            } else {
+                $bathroomStat = (string) $bathroomRaw;
+            }
+        }
+
+        $livingAreaRaw = $accommodation->living_area_sqm;
+        $livingAreaValue = null;
+        $livingAreaStat = 'Keine Angabe';
+
+        if ($livingAreaRaw !== null && $livingAreaRaw !== '') {
+            if (is_numeric($livingAreaRaw)) {
+                $livingAreaValue = (float) $livingAreaRaw;
+                $livingAreaStat = $livingAreaValue . ' m²';
+            } else {
+                $livingAreaStat = (string) $livingAreaRaw;
+            }
+        }
+
+        $bedConfig = $accommodation->bed_types ?? [];
+        $bedSummaryParts = [];
+
+        if (!empty($bedConfig['single'])) {
+            $bedSummaryParts[] = $bedConfig['single'] . '× Einzel';
+        }
+
+        if (!empty($bedConfig['double'])) {
+            $bedSummaryParts[] = $bedConfig['double'] . '× Doppel';
+        }
+
+        $extraBedKeys = ['extra', 'extra_bed', 'additional', 'folding', 'sofabed'];
+        foreach ($extraBedKeys as $key) {
+            if (!empty($bedConfig[$key])) {
+                $extraBedValue = $bedConfig[$key];
+                $bedSummaryParts[] = is_numeric($extraBedValue)
+                    ? $extraBedValue . '× Zustellbett'
+                    : (string) $extraBedValue;
+                break;
+            }
+        }
+
+        if (empty($bedSummaryParts) && !empty($bedConfig['child'])) {
+            $bedSummaryParts[] = $bedConfig['child'] . '× Kinderbett';
+        }
+
+        if (empty($bedSummaryParts)) {
+            $bedSummaryParts[] = 'Keine Angaben zur Bettenanzahl';
+        }
+
+        $bedSummary = implode(' • ', $bedSummaryParts);
+
+        $occupancyStat = 'Keine Angabe';
+        if ($occupancyLabel) {
+            $occupancyStat = $occupancyLabel . ' Personen';
+        }
+
+        $galleryTotal = max(count($galleryImages), 1);
+
+        $extras = $accommodation->extras ?? [];
+        $inclusives = $accommodation->inclusives ?? ($accommodation->extras_included ?? []);
         
         return [
             'id' => $accommodation->id,
             'title' => $accommodation->title,
             'accommodation_type' => $accommodation->accommodationType->name ?? 'Accommodation',
             'thumbnail_path' => $this->getImageUrl($accommodation->thumbnail_path),
-            'gallery_images' => $this->getImageUrls($accommodation->gallery_images ?? []),
+            'gallery_images' => $galleryImages,
+            'gallery_total' => $galleryTotal,
+            'min_occupancy' => $minOccupancy,
+            'max_occupancy' => $maxOccupancy,
+            'occupancy_label' => $occupancyLabel,
             'city' => $accommodation->city,
             'region' => $accommodation->region,
             'country' => $accommodation->country,
             'description' => $accommodation->description,
-            'living_area_sqm' => $accommodation->living_area_sqm,
-            'max_occupancy' => $accommodation->max_occupancy,
+            'living_area_sqm' => $livingAreaRaw,
+            'living_area_value' => $livingAreaValue,
+            'stats' => [
+                'occupancy' => $occupancyStat,
+                'bathrooms' => $bathroomStat,
+                'living_area' => $livingAreaStat,
+            ],
             'number_of_bedrooms' => $accommodation->number_of_bedrooms,
-            'bathrooms' => $accommodation->bathroom,
+            'bathroom_count' => $bathroomCount,
+            'bathrooms' => $bathroomRaw,
+            'bed_summary' => $bedSummary,
             'floors' => $accommodation->floor_layout,
             'year_or_renovated' => $accommodation->condition_or_style,
             'living_room' => $accommodationDetails['living_room'] ?? false,
             'dining_room' => $accommodationDetails['dining_room'] ?? false,
-            'bed_config' => $accommodation->bed_types ?? [],
+            'bed_config' => $bedConfig,
             'location_description' => $accommodation->location_description,
             'distances' => [
                 'to_water_m' => $accommodation->distance_to_water_m,
@@ -368,8 +462,8 @@ class CampOfferController extends Controller
             'bathroom_laundry' => $accommodation->bathroom_amenities ?? [],
             'policies' => $accommodation->policies ?? [],
             'extras_inclusives' => [
-                'inclusives' => $accommodation->inclusives ?? [],
-                'extras' => $accommodation->extras ?? [],
+                'inclusives' => $inclusives,
+                'extras' => $extras,
             ],
             'price' => [
                 'type' => $accommodation->price_type ?? 'per_night',
