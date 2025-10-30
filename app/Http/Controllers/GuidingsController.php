@@ -831,26 +831,19 @@ class GuidingsController extends Controller
             }
 
             // Only enforce strict requirements if not draft
-            // Count images from both existing and new uploads
-            $totalImageCount = 0;
-            if ($request->input('is_update') == '1') {
-                $existingImagesJson = $request->input('existing_images');
-                $existingImages = json_decode($existingImagesJson, true) ?? [];
-                $imageList = json_decode($request->input('image_list', '[]')) ?? [];
-                $keepImages = array_filter($imageList);
-                
-                foreach ($existingImages as $existingImage) {
-                    $imagePath = $existingImage;
-                    $imagePathWithSlash = '/' . $existingImage;
-                    if (in_array($imagePath, $keepImages) || in_array($imagePathWithSlash, $keepImages)) {
-                        $totalImageCount++;
-                    }
-                }
-            } else {
-                $galleryImages = json_decode($guiding->gallery_images, true) ?? [];
-                $totalImageCount = count($galleryImages);
+            // Count images based on the guiding's final gallery state
+            $galleryImages = json_decode($guiding->gallery_images ?? '[]', true) ?? [];
+
+            // If this is an update and no gallery images were explicitly provided in the request,
+            // fall back to the original gallery so we don't miscount existing images.
+            if ($isUpdate && empty($galleryImages)) {
+                $originalGallery = json_decode($guiding->getOriginal('gallery_images') ?? '[]', true) ?? [];
+                $galleryImages = $originalGallery;
             }
-            
+
+            // Filter out null/empty entries just in case
+            $totalImageCount = count(array_filter($galleryImages));
+
             if (!$isDraft && $totalImageCount < 5) {
                 throw new \Exception('Please upload at least 5 images');
             }
