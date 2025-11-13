@@ -844,6 +844,21 @@ class GuidingsController extends Controller
             // Filter out null/empty entries just in case
             $totalImageCount = count(array_filter($galleryImages));
 
+            // Safety net: also check the image_list payload which represents the intended final order
+            $imageListFromRequest = json_decode($request->input('image_list', '[]'), true);
+            if (is_array($imageListFromRequest)) {
+                $totalImageCount = max($totalImageCount, count(array_filter($imageListFromRequest)));
+            }
+
+            Log::debug('guidingsStore image validation', [
+                'guiding_id' => $guiding->id ?? null,
+                'is_update' => $isUpdate,
+                'is_draft' => $isDraft,
+                'gallery_images_count' => count($galleryImages),
+                'image_list_count' => is_array($imageListFromRequest) ? count(array_filter($imageListFromRequest)) : null,
+                'total_image_count' => $totalImageCount
+            ]);
+
             if (!$isDraft && $totalImageCount < 5) {
                 throw new \Exception('Please upload at least 5 images');
             }
@@ -1262,21 +1277,45 @@ class GuidingsController extends Controller
 
         // Step 1: Images
         $galeryImages = [];
-        $imageList = json_decode($request->input('image_list', '[]')) ?? [];
+        $imageListRaw = json_decode($request->input('image_list', '[]'), true) ?? [];
         $processedFilenames = []; // Track processed filenames to prevent duplicates
+
+        $normalizePath = function ($path) {
+            if (is_array($path)) {
+                $path = $path['path'] ?? $path['value'] ?? $path['url'] ?? reset($path);
+            }
+
+            if (!is_string($path)) {
+                return null;
+            }
+
+            $parsedPath = parse_url($path, PHP_URL_PATH);
+            if ($parsedPath) {
+                $path = $parsedPath;
+            }
+
+            return ltrim($path, '/');
+        };
+
+        $imageListNormalized = array_values(array_filter(array_map($normalizePath, (array) $imageListRaw)));
+        $imageListLookup = array_flip($imageListNormalized);
 
         if ($request->input('is_update') == '1') {
             $existingImagesJson = $request->input('existing_images');
             $existingImages = json_decode($existingImagesJson, true) ?? [];
-            $keepImages = array_filter($imageList);
 
             foreach ($existingImages as $existingImage) {
-                $imagePath = $existingImage;
-                $imagePathWithSlash = '/' . $existingImage;
-                if (in_array($imagePath, $keepImages) || in_array($imagePathWithSlash, $keepImages)) {
-                    $galeryImages[] = $existingImage;
-                    // Track this image as processed to prevent duplicates
-                    $processedFilenames[] = basename($existingImage);
+                $normalizedExisting = $normalizePath($existingImage);
+
+                if (!$normalizedExisting) {
+                    continue;
+                }
+
+                if (isset($imageListLookup[$normalizedExisting])) {
+                    $galeryImages[$normalizedExisting] = $normalizedExisting === $existingImage
+                        ? $existingImage
+                        : ltrim($existingImage, '/');
+                    $processedFilenames[] = basename($normalizedExisting);
                 } else {
                     media_delete($existingImage);
                 }
@@ -1285,33 +1324,59 @@ class GuidingsController extends Controller
 
         if ($request->has('title_image')) {
             $imageCount = count($galeryImages);
-            foreach($request->file('title_image') as $index => $image) {
+            foreach ($request->file('title_image') as $index => $image) {
                 $originalFilename = $image->getClientOriginalName();
-                $filename = 'guidings-images/'.$originalFilename;
-                
-                // Check if this image was already processed (existing image)
-                if (in_array($originalFilename, $processedFilenames)) {
+
+                if (in_array($originalFilename, $processedFilenames, true)) {
                     continue;
                 }
-                
-                // Check if this image is in the image_list (new image that should be kept)
-                if (in_array($filename, $imageList) || in_array('/' . $filename, $imageList)) {
-                    $index = $index + $imageCount;
-                    $webp_path = media_upload($image, 'guidings-images', $guiding->slug. "-". $index . "-" . time(), 75, $guiding->id);
-                    $galeryImages[] = $webp_path;
-                    $processedFilenames[] = $originalFilename; // Track as processed
+
+                $index = $index + $imageCount;
+                $webpPath = media_upload($image, 'guidings-images', $guiding->slug . "-" . $index . "-" . time(), 75, $guiding->id);
+                $webpPath = ltrim($webpPath, '/');
+                $normalizedNew = $normalizePath($webpPath);
+
+                if ($normalizedNew) {
+                    $galeryImages[$normalizedNew] = $webpPath;
+                    $processedFilenames[] = $originalFilename;
                 }
             }
         }
 
-        // Set the primary image if available, only if $galeryImages is not null or empty
+        if (empty($galeryImages) && !empty($imageListNormalized)) {
+            foreach ($imageListNormalized as $normalizedPath) {
+                $galeryImages[$normalizedPath] = $normalizedPath;
+            }
+        }
+
         if (!empty($galeryImages)) {
-            foreach($galeryImages as $index => $image) {
-                if($index == $request->input('primaryImage', 0)) {
-                    $guiding->thumbnail_path = $image;
+            $orderedGallery = [];
+
+            if (!empty($imageListNormalized)) {
+                foreach ($imageListNormalized as $normalizedPath) {
+                    if (isset($galeryImages[$normalizedPath])) {
+                        $orderedGallery[] = $galeryImages[$normalizedPath];
+                        unset($galeryImages[$normalizedPath]);
+                    }
                 }
             }
-            $guiding->gallery_images = json_encode($galeryImages);
+
+            if (!empty($galeryImages)) {
+                $orderedGallery = array_merge($orderedGallery, array_values($galeryImages));
+            }
+
+            $orderedGallery = array_values(array_filter($orderedGallery));
+
+            if (!empty($orderedGallery)) {
+                $primaryImageIndex = (int) $request->input('primaryImage', 0);
+                if (isset($orderedGallery[$primaryImageIndex])) {
+                    $guiding->thumbnail_path = $orderedGallery[$primaryImageIndex];
+                } else {
+                    $guiding->thumbnail_path = $orderedGallery[0];
+                }
+
+                $guiding->gallery_images = json_encode($orderedGallery);
+            }
         }
 
         // Step 2: Boat and fishing info

@@ -55,48 +55,25 @@
                 <div class="accommodation-card__panel">
                     <div class="accommodation-card__panel-title">Details</div>
                     <ul class="accommodation-card__bullet-list">
-                        <li>Floor(s): <span class="font-medium">{{ $accommodation['floors'] ?? 'EG' }}</span></li>
-                        <li>Built/Renovated: <span class="font-medium">{{ $accommodation['year_or_renovated'] ?? 'Renovated 2023' }}</span></li>
-                        <li>Living room: <span class="font-medium">{{ isset($accommodation['living_room']) ? ($accommodation['living_room'] ? 'Yes' : 'No') : 'No data' }}</span></li>
-                        <li>Dining room: <span class="font-medium">{{ isset($accommodation['dining_room']) ? ($accommodation['dining_room'] ? 'Yes' : 'No') : 'No data' }}</span></li>
+                        @foreach($accommodation['accommodation_details'] as $detail)
+                            <li>{{ $detail['name'] }}: <span class="font-medium">{{ $detail['value'] }}</span></li>
+                        @endforeach
                     </ul>
                 </div>
 
-                @if(!empty($accommodation['policies']) || !empty($accommodation['changeover_day']) || !empty($accommodation['minimum_stay_nights']))
+                @if(!empty($accommodation['policies']))
                     <div class="accommodation-card__panel">
                         <div class="accommodation-card__panel-title">Policies</div>
                         @if(!empty($accommodation['policies']))
                             <ul class="accommodation-card__bullet-list">
-                                @if(isset($accommodation['policies']['pets_allowed']))
-                                    <li>{{ $accommodation['policies']['pets_allowed'] ? '✅' : '❌' }} Pets allowed</li>
-                                @endif
-                                @if(isset($accommodation['policies']['smoking_allowed']))
-                                    <li>{{ $accommodation['policies']['smoking_allowed'] ? '✅' : '❌' }} Smoking allowed</li>
-                                @endif
-                                @if(isset($accommodation['policies']['children_allowed']))
-                                    <li>{{ $accommodation['policies']['children_allowed'] ? '✅' : '❌' }} Children allowed</li>
-                                @endif
-                                @if(!empty($accommodation['policies']['quiet_hours']))
-                                    <li>🔇 Quiet hours: {{ $accommodation['policies']['quiet_hours'] }}</li>
-                                @endif
-                            </ul>
-                        @endif
-
-                        @if(!empty($accommodation['changeover_day']) || !empty($accommodation['minimum_stay_nights']))
-                            <div class="accommodation-card__panel-subtitle">Conditions</div>
-                            <ul class="accommodation-card__bullet-list">
-                                @if(!empty($accommodation['changeover_day']))
-                                    <li>📅 Changeover day: <strong>{{ $accommodation['changeover_day'] }}</strong></li>
-                                @endif
-                                @if(!empty($accommodation['minimum_stay_nights']))
-                                    <li>🌙 Minimum stay: <strong>{{ $accommodation['minimum_stay_nights'] }} nights</strong></li>
-                                @endif
+                                @foreach ($accommodation['policies'] as $policy)
+                                    <li>{{ $policy['name'] }}: {{$policy['value']}}</li>
+                                @endforeach
                             </ul>
                         @endif
                     </div>
                 @endif
             </div>
-        </div>
 
         <div class="accommodation-card__summary">
             <div class="accommodation-card__summary-header">
@@ -107,15 +84,15 @@
             <div class="accommodation-card__stats">
                 <span class="accommodation-card__stat">
                     <span class="accommodation-card__stat-icon">👥</span>
-                    <span>{{ $stats['occupancy'] ?? 'Keine Angabe' }}</span>
+                    <span>{{ $accommodation['max_occupancy'] ?? 'Keine Angabe' }}</span>
                 </span>
                 <span class="accommodation-card__stat">
                     <span class="accommodation-card__stat-icon">🛁</span>
-                    <span>{{ $stats['bathrooms'] ?? 'Keine Angabe' }}</span>
+                    <span>{{ $accommodation['number_of_bathrooms'] ?? 'Keine Angabe' }}</span>
                 </span>
                 <span class="accommodation-card__stat">
                     <span class="accommodation-card__stat-icon">📐</span>
-                    <span>{{ $stats['living_area'] ?? 'Keine Angabe' }}</span>
+                    <span>{{ $accommodation['living_area_sqm'] ?? 'Keine Angabe' }}</span>
                 </span>
             </div>
 
@@ -154,17 +131,6 @@
                         @foreach($accommodation['amenities'] as $amenity)
                             <li class="accommodation-card__chip">{{ is_array($amenity) ? ($amenity['value'] ?? $amenity['name'] ?? '') : $amenity }}</li>
                         @endforeach
-                    @else
-                        <li class="accommodation-card__chip">WiFi</li>
-                        <li class="accommodation-card__chip">Fishing room</li>
-                        <li class="accommodation-card__chip">Filleting station</li>
-                        <li class="accommodation-card__chip">Fish freezer</li>
-                        <li class="accommodation-card__chip">BBQ Area</li>
-                        <li class="accommodation-card__chip">Parking spaces</li>
-                        <li class="accommodation-card__chip">TV</li>
-                        <li class="accommodation-card__chip">Terrace</li>
-                        <li class="accommodation-card__chip">Keybox</li>
-                        <li class="accommodation-card__chip">Heating</li>
                     @endif
                 </ul>
             </div>
@@ -173,30 +139,9 @@
                 <div class="accommodation-card__panel-title">Kitchen Equipment</div>
                 @if(!empty($accommodation['kitchen']))
                     <ul class="accommodation-card__bullet-list">
-                        @if(!empty($accommodation['kitchen']['refrigerator_freezer']))
-                            <li>✅ Refrigerator/Freezer</li>
-                        @endif
-                        @if(!empty($accommodation['kitchen']['oven']))
-                            <li>✅ Oven</li>
-                        @endif
-                        @if(!empty($accommodation['kitchen']['stove']))
-                            <li>✅ Stove</li>
-                        @endif
-                        @if(!empty($accommodation['kitchen']['microwave']))
-                            <li>✅ Microwave</li>
-                        @endif
-                        @if(!empty($accommodation['kitchen']['dishwasher']))
-                            <li>✅ Dishwasher</li>
-                        @endif
-                        @if(!empty($accommodation['kitchen']['coffee_machine']))
-                            <li>☕ Coffee machine: {{ $accommodation['kitchen']['coffee_machine'] }}</li>
-                        @endif
-                        @if(!empty($accommodation['kitchen']['kettle']))
-                            <li>✅ Kettle</li>
-                        @endif
-                        @if(!empty($accommodation['kitchen']['toaster']))
-                            <li>✅ Toaster</li>
-                        @endif
+                        @foreach($accommodation['kitchen'] as $kitchen)
+                            <li class="accommodation-card__chip">{{ is_array($kitchen) ? ($kitchen['value'] ?? $kitchen['name'] ?? '') : $kitchen }}</li>
+                        @endforeach
                     </ul>
                 @else
                     <p class="accommodation-card__empty">No kitchen details available</p>
@@ -207,24 +152,9 @@
                 <div class="accommodation-card__panel-title">Bathroom Equipment</div>
                 @if(!empty($accommodation['bathroom_laundry']))
                     <ul class="accommodation-card__bullet-list">
-                        @if(!empty($accommodation['bathroom_laundry']['toilet']))
-                            <li>🚽 Toilet: {{ $accommodation['bathroom_laundry']['toilet'] }}</li>
-                        @endif
-                        @if(!empty($accommodation['bathroom_laundry']['shower']))
-                            <li>🚿 Shower: {{ $accommodation['bathroom_laundry']['shower'] }}</li>
-                        @endif
-                        @if(!empty($accommodation['bathroom_laundry']['washbasin']))
-                            <li>🚰 Washbasin: {{ $accommodation['bathroom_laundry']['washbasin'] }}</li>
-                        @endif
-                        @if(!empty($accommodation['bathroom_laundry']['washing_machine']))
-                            <li>✅ Washing machine</li>
-                        @endif
-                        @if(!empty($accommodation['bathroom_laundry']['dryer']))
-                            <li>✅ Dryer</li>
-                        @endif
-                        @if(!empty($accommodation['bathroom_laundry']['iron_board']))
-                            <li>✅ Iron & board</li>
-                        @endif
+                        @foreach($accommodation['bathroom_laundry'] as $bathroom_laundry)
+                            <li class="accommodation-card__chip">{{ is_array($bathroom_laundry) ? ($bathroom_laundry['value'] ?? $bathroom_laundry['name'] ?? '') : $bathroom_laundry }}</li>
+                        @endforeach
                     </ul>
                 @else
                     <p class="accommodation-card__empty">No bathroom details available</p>
@@ -263,8 +193,8 @@
         <div class="accommodation-card__actions">
             <div class="accommodation-card__actions-column">
                 <div class="accommodation-card__pricing">
-                    <div class="accommodation-card__price-type">per night</div>
-                    <div class="accommodation-card__price-amount">€{{ number_format($accommodation['price']['amount'] ?? 110, 2) }}</div>
+                    <div class="accommodation-card__price-type">{{$accommodation['price']['type']}}</div>
+                    <div class="accommodation-card__price-amount">€{{ number_format($accommodation['price']['amount'] ?? 0, 2) }}</div>
                 </div>
                 <button class="accommodation-card__select-btn">
                     Select Accommodation

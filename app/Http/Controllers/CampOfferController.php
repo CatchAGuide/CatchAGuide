@@ -7,6 +7,7 @@ use App\Models\RentalBoat;
 use App\Models\Accommodation;
 use App\Models\Guiding;
 use App\Models\Camp;
+use Illuminate\Support\Str;
 
 class CampOfferController extends Controller
 {
@@ -37,6 +38,88 @@ class CampOfferController extends Controller
         return array_map(function($path) {
             return $this->getImageUrl($path);
         }, $paths);
+    }
+
+    /**
+     * Normalize per-person pricing data to a consistent array format.
+     */
+    private function normalizePerPersonPricing($perPersonPricing): array
+    {
+        if (empty($perPersonPricing)) {
+            return [];
+        }
+
+        if (is_string($perPersonPricing)) {
+            $decodedPricing = json_decode($perPersonPricing, true);
+            $perPersonPricing = is_array($decodedPricing) ? $decodedPricing : [];
+        }
+
+        if (!is_array($perPersonPricing)) {
+            return [];
+        }
+
+        $normalized = [];
+
+        foreach ($perPersonPricing as $tierId => $tierData) {
+            if (!is_array($tierData)) {
+                continue;
+            }
+
+            $normalized[$tierId] = [
+                'person_count' => array_key_exists('person_count', $tierData) ? (int) $tierData['person_count'] : null,
+                'price_per_night' => array_key_exists('price_per_night', $tierData) ? (float) $tierData['price_per_night'] : null,
+                'price_per_week' => array_key_exists('price_per_week', $tierData) ? (float) $tierData['price_per_week'] : null,
+            ];
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * Build the price payload for an accommodation, prioritising per-person tiers when available.
+     */
+    private function formatAccommodationPrice(Accommodation $accommodation): array
+    {
+        $currency = $accommodation->currency ?? 'EUR';
+        $perPersonPricing = $this->normalizePerPersonPricing($accommodation->per_person_pricing);
+
+        if (!empty($perPersonPricing)) {
+            $primaryTier = collect($perPersonPricing)
+                ->filter(fn ($tier) => is_array($tier) && (!is_null($tier['price_per_night']) || !is_null($tier['price_per_week'])))
+                ->sortBy(function ($tier) {
+                    if (!is_null($tier['price_per_night'])) {
+                        return $tier['price_per_night'];
+                    }
+
+                    if (!is_null($tier['price_per_week'])) {
+                        return $tier['price_per_week'];
+                    }
+
+                    return PHP_INT_MAX;
+                })
+                ->first();
+
+            if (empty($primaryTier)) {
+                $primaryTier = reset($perPersonPricing) ?: [];
+            }
+
+            $amount = $primaryTier['price_per_night'] ?? $primaryTier['price_per_week'] ?? null;
+
+            return [
+                'type' => 'per_person',
+                'currency' => $currency,
+                'amount' => $amount,
+                'per_week' => $primaryTier['price_per_week'] ?? null,
+                'tiers' => $perPersonPricing,
+            ];
+        }
+
+        return [
+            'type' => $accommodation->price_type ?? 'per_night',
+            'amount' => $accommodation->price_per_night,
+            'currency' => $currency,
+            'per_week' => $accommodation->price_per_week
+        ];
     }
     
 
@@ -94,7 +177,7 @@ class CampOfferController extends Controller
         $boats = $camp->rentalBoats->map(function($boat) {
             return $this->mapBoatForDropdown($boat);
         })->toArray();
-        
+    
         // Map all guidings with full data for display
         $guidings = $camp->guidings->map(function($guiding) {
             return $this->mapGuidingData($guiding);
@@ -336,7 +419,6 @@ class CampOfferController extends Controller
      */
     private function mapAccommodationData(Accommodation $accommodation)
     {
-        $accommodationDetails = $accommodation->accommodation_details ?? [];
         $galleryImages = $this->getImageUrls($accommodation->gallery_images ?? []);
 
         $minOccupancy = $accommodation->min_occupancy;
@@ -353,74 +435,15 @@ class CampOfferController extends Controller
             $occupancyLabel = (string) $minOccupancy;
         }
 
-        $bathroomRaw = $accommodation->bathroom ?? $accommodation->bathrooms ?? null;
-        $bathroomCount = null;
-        $bathroomStat = 'Keine Angabe';
-
-        if ($bathroomRaw !== null && $bathroomRaw !== '') {
-            if (is_numeric($bathroomRaw)) {
-                $bathroomCount = (int) $bathroomRaw;
-                $bathroomStat = $bathroomCount . ' ' . ($bathroomCount === 1 ? 'Bad' : 'Bäder');
-            } else {
-                $bathroomStat = (string) $bathroomRaw;
-            }
-        }
-
-        $livingAreaRaw = $accommodation->living_area_sqm;
-        $livingAreaValue = null;
-        $livingAreaStat = 'Keine Angabe';
-
-        if ($livingAreaRaw !== null && $livingAreaRaw !== '') {
-            if (is_numeric($livingAreaRaw)) {
-                $livingAreaValue = (float) $livingAreaRaw;
-                $livingAreaStat = $livingAreaValue . ' m²';
-            } else {
-                $livingAreaStat = (string) $livingAreaRaw;
-            }
-        }
-
         $bedConfig = $accommodation->bed_types ?? [];
+
         $bedSummaryParts = [];
-
-        if (!empty($bedConfig['single'])) {
-            $bedSummaryParts[] = $bedConfig['single'] . '× Einzel';
-        }
-
-        if (!empty($bedConfig['double'])) {
-            $bedSummaryParts[] = $bedConfig['double'] . '× Doppel';
-        }
-
-        $extraBedKeys = ['extra', 'extra_bed', 'additional', 'folding', 'sofabed'];
-        foreach ($extraBedKeys as $key) {
-            if (!empty($bedConfig[$key])) {
-                $extraBedValue = $bedConfig[$key];
-                $bedSummaryParts[] = is_numeric($extraBedValue)
-                    ? $extraBedValue . '× Zustellbett'
-                    : (string) $extraBedValue;
-                break;
-            }
-        }
-
-        if (empty($bedSummaryParts) && !empty($bedConfig['child'])) {
-            $bedSummaryParts[] = $bedConfig['child'] . '× Kinderbett';
-        }
-
-        if (empty($bedSummaryParts)) {
-            $bedSummaryParts[] = 'Keine Angaben zur Bettenanzahl';
-        }
-
-        $bedSummary = implode(' • ', $bedSummaryParts);
-
-        $occupancyStat = 'Keine Angabe';
-        if ($occupancyLabel) {
-            $occupancyStat = $occupancyLabel . ' Personen';
+        foreach ($accommodation->room_configurations as $roomConfig) {
+            array_push( $bedSummaryParts, $roomConfig['name']);
         }
 
         $galleryTotal = max(count($galleryImages), 1);
-
-        $extras = $accommodation->extras ?? [];
-        $inclusives = $accommodation->inclusives ?? ($accommodation->extras_included ?? []);
-        
+        // dd($accommodation->kitchen_equipment);
         return [
             'id' => $accommodation->id,
             'title' => $accommodation->title,
@@ -435,21 +458,10 @@ class CampOfferController extends Controller
             'region' => $accommodation->region,
             'country' => $accommodation->country,
             'description' => $accommodation->description,
-            'living_area_sqm' => $livingAreaRaw,
-            'living_area_value' => $livingAreaValue,
-            'stats' => [
-                'occupancy' => $occupancyStat,
-                'bathrooms' => $bathroomStat,
-                'living_area' => $livingAreaStat,
-            ],
+            'living_area_sqm' => $accommodation->living_area_sqm,
             'number_of_bedrooms' => $accommodation->number_of_bedrooms,
-            'bathroom_count' => $bathroomCount,
-            'bathrooms' => $bathroomRaw,
-            'bed_summary' => $bedSummary,
-            'floors' => $accommodation->floor_layout,
-            'year_or_renovated' => $accommodation->condition_or_style,
-            'living_room' => $accommodationDetails['living_room'] ?? false,
-            'dining_room' => $accommodationDetails['dining_room'] ?? false,
+            'bathroom_count' => $accommodation->number_of_bathrooms,
+            'bed_summary' => implode(', ',$bedSummaryParts),
             'bed_config' => $bedConfig,
             'location_description' => $accommodation->location_description,
             'distances' => [
@@ -460,19 +472,15 @@ class CampOfferController extends Controller
             'amenities' => $accommodation->amenities ?? [],
             'kitchen' => $accommodation->kitchen_equipment ?? [],
             'bathroom_laundry' => $accommodation->bathroom_amenities ?? [],
-            'policies' => $accommodation->policies ?? [],
+            'policies' => $accommodation->policies,
             'extras_inclusives' => [
-                'inclusives' => $inclusives,
-                'extras' => $extras,
+                'inclusives' => $accommodation->inclusives,
+                'extras' => $accommodation->extras,
             ],
-            'price' => [
-                'type' => $accommodation->price_type ?? 'per_night',
-                'amount' => $accommodation->price_per_night,
-                'currency' => $accommodation->currency,
-                'per_week' => $accommodation->price_per_week
-            ],
+            'price' => $this->formatAccommodationPrice($accommodation),
             'changeover_day' => $accommodation->changeover_day,
             'minimum_stay_nights' => $accommodation->minimum_stay_nights,
+            'accommodation_details' => $accommodation->accommodation_details,
         ];
     }
     
