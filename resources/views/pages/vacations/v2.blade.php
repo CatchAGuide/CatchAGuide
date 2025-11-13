@@ -74,7 +74,7 @@
     </div>
 
     <!-- Main Content with Sidebar -->
-    <div class="camp-container camp-layout">
+    <div class="camp-container camp-layout" style="grid-template-columns: 1fr;">
         <div class="camp-layout__content">
             <!-- Navigation -->
             <nav class="camp-nav flex flex-wrap text-sm">
@@ -149,7 +149,7 @@
                         <h2 class="camp-section__title">Policies & Regulations</h2>
                         <ul class="camp-section__list">
                             @foreach($camp['policies_regulations'] as $policy)
-                                <li>{{ $policy }}</li>
+                                <li>{!! $policy !!}</li>
                             @endforeach
                         </ul>
                     </section>
@@ -164,7 +164,7 @@
                                 <h3 class="camp-section__subtitle">Best Travel Times</h3>
                                 <ul class="camp-section__list">
                                     @foreach($camp['best_travel_times'] as $time)
-                                        <li><strong>{{ $time['month'] }}</strong>: {{ $time['note'] }}</li>
+                                        <li><strong>{!! $time['month'] !!}</strong>: {!! $time['note'] !!}</li>
                                     @endforeach
                                 </ul>
                             </div>
@@ -229,8 +229,8 @@
             </main>
         </div>
 
-        <!-- Sidebar Configurator -->
-        <aside id="configurator" class="camp-config">
+        {{-- Sidebar Configurator - Commented out to hide Configure Trip section --}}
+        {{-- <aside id="configurator" class="camp-config">
             <div class="camp-config-card section-card">
                 <h3 class="text-lg font-semibold" style="color: var(--brand); margin: 0;">Configure Trip</h3>
                 <div class="accent-badge">
@@ -344,12 +344,13 @@
                 </div>
                 <button class="brand-btn">Send Inquiry</button>
             </div>
-        </aside>
+        </aside> --}}
     </div>
 
     <!-- Full Width Card Sections -->
     <div class="camp-container">
         <!-- Accommodations Section -->
+        @if (count($accommodations) > 0)
         <section id="accommodations" class="camp-section mb-3">
             <h2 class="camp-section__title">Accommodations</h2>
             @foreach($accommodations as $accommodation)
@@ -358,8 +359,10 @@
                 </div>
             @endforeach
         </section>
+        @endif
 
         <!-- Guidings Section -->
+        {{-- @if (count($guidings) > 0)
         <section id="guidings" class="camp-section mb-3">
             <h2 class="camp-section__title">Guidings & Tours</h2>
             @foreach($guidings as $guiding)
@@ -368,12 +371,19 @@
                 </div>
             @endforeach
         </section>
+        @endif --}}
 
         <!-- Rental Boats Section -->
+        @if (count($boats) > 0)
         <section id="boats" class="camp-section mb-3">
             <h2 class="camp-section__title">Rental Boats</h2>
-            <x-rental-boat.card :boat="$boat" />
+            @foreach($boats as $boat)
+                <div class="mb-4">
+                    <x-rental-boat.card :boat="$boat" />
+                </div>
+            @endforeach
         </section>
+        @endif
     </div>
 </div>
 

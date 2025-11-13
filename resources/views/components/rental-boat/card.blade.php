@@ -132,13 +132,6 @@
             <!-- Header & Pricing -->
             <div class="rental-boat-card__header">
                 <div class="rental-boat-card__info">
-                    <div class="rental-boat-card__location">
-                        <svg class="rental-boat-card__location-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                            <circle cx="12" cy="10" r="3"/>
-                        </svg>
-                        <span class="rental-boat-card__location-text">{{ $boat['location'] ?? 'Location' }}</span>
-                    </div>
                     <h3 class="rental-boat-card__title">{{ $boat['title'] ?? 'Boat Title' }}</h3>
                     <div class="rental-boat-card__type">{{ $boat['type'] ?? 'Boat Type' }}</div>
                     <p class="rental-boat-card__description">{{ $boat['description'] ?? 'Description' }}</p>

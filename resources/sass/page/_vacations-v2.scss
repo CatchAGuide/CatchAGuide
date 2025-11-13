@@ -507,8 +507,8 @@
     }
 
     &__title {
-        margin-bottom: 16px;
-        font-size: 1.05rem;
+        margin-bottom: 18px;
+        font-size: 1.2rem;
         font-weight: 600;
         color: #1f2937;
     }
@@ -524,6 +524,19 @@
         font-size: 0.95rem;
         color: #333d4d;
         line-height: 1.55;
+
+        h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1f2a37;
+            margin: 0 0 0.4rem;
+        }
+
+        p {
+            margin: 0;
+            color: #4b5563;
+            line-height: 1.6;
+        }
     }
 
     &__list {
