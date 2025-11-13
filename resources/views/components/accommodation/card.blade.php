@@ -74,7 +74,6 @@
                     </div>
                 @endif
             </div>
-        </div>
 
         <div class="accommodation-card__summary">
             <div class="accommodation-card__summary-header">
