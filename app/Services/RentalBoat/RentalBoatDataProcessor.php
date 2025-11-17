@@ -19,6 +19,11 @@ class RentalBoatDataProcessor
      */
     public function processRequestData(Request $request, $existingRentalBoat = null): array
     {
+        $pricing = $this->pricingProcessor->process($request);
+        $pricingExtra = $pricing['pricing_extra'] ?? null;
+    
+        unset($pricing['pricing_extra']);
+        $prices = $pricing;
         return [
             'user_id' => $request->user_id ?? auth()->id(),
             'title' => $request->title ?? 'Untitled',
@@ -35,7 +40,8 @@ class RentalBoatDataProcessor
             'boat_information' => $this->informationProcessor->process($request),
             'boat_extras' => $this->extrasProcessor->processBoatExtras($request),
             'inclusions' => $this->extrasProcessor->processInclusions($request),
-            'prices' => $this->pricingProcessor->process($request),
+            'prices' => $prices,
+            'pricing_extra' => $pricingExtra,
             'price_type' => $this->pricingProcessor->determinePrimaryPriceType($request),
         ];
     }
