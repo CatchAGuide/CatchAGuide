@@ -9,7 +9,7 @@
         $extraItems = $boat['extras'] ?? [];
         $requirementItems = $boat['requirements'] ?? [];
         $specs = $boat['specs'] ?? [];
-        $boatInfoList = $boat['boat_info_list'] ?? [];
+        $boatInfoList = $boat['boat_info'] ?? [];
     @endphp
 
     <div class="rental-boat-card__grid">
@@ -92,7 +92,7 @@
             </div>
         </div>
 
-        <div class="rental-boat-card__info-matrix" data-expanded-only>
+        <div class="rental-boat-card__extras-inclusives" data-expanded-only>
             <div class="rental-boat-card__info-box">
                 <div class="rental-boat-card__info-box-title">{{ __('Payable Extras') }}</div>
                 <div class="rental-boat-card__info-box-content">
@@ -107,7 +107,9 @@
                     @endif
                 </div>
             </div>
+        </div>
 
+        <div class="rental-boat-card__info-matrix" data-expanded-only>
             <div class="rental-boat-card__info-box">
                 <div class="rental-boat-card__info-box-title">{{ __('Boat Information') }}</div>
                 <div class="rental-boat-card__info-box-content">
@@ -115,7 +117,7 @@
                         <ul class="rental-boat-card__info-list">
                             @foreach($boatInfoList as $info)
                                 <li>
-                                    <span>{{ $info['label'] }}:</span>
+                                    <span>{{ $info['name'] }}:</span>
                                     <strong>{{ $info['value'] }}</strong>
                                 </li>
                             @endforeach

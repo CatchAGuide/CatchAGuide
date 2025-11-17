@@ -17,7 +17,7 @@
         grid-template-columns: 320px minmax(0, 1fr) minmax(220px, 260px);
         grid-template-areas:
             "media summary actions"
-            "media matrix matrix";
+            "extras-inclusives info-matrix info-matrix";
         gap: 16px;
         padding: 16px;
         align-items: flex-start;
@@ -31,7 +31,8 @@
             grid-template-areas:
                 "media summary"
                 "media summary"
-                "matrix matrix"
+                "extras-inclusives extras-inclusives"
+                "info-matrix info-matrix"
                 "actions actions";
         }
 
@@ -40,7 +41,8 @@
             grid-template-areas:
                 "media"
                 "summary"
-                "matrix"
+                "extras-inclusives"
+                "info-matrix"
                 "actions";
             gap: 12px;
             padding: 12px;
@@ -49,6 +51,13 @@
 
     &__media {
         grid-area: media;
+    }
+
+    &__extras-inclusives {
+        grid-area: extras-inclusives;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
     }
 
     &__gallery {
@@ -327,6 +336,11 @@
             animation: fadeInUp 0.4s ease forwards;
         }
 
+        .rental-boat-card__extras-inclusives[data-expanded-only] {
+            display: flex !important;
+            animation: fadeInUp 0.4s ease forwards;
+        }
+
         [data-expanded-only] {
             display: block !important;
             animation: fadeInUp 0.4s ease forwards;
@@ -334,16 +348,12 @@
     }
 
     &__info-matrix {
-        grid-area: matrix;
+        grid-area: info-matrix;
         margin-top: 0;
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
         width: 100%;
-
-        @media (max-width: 1200px) {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
 
         @media (max-width: 640px) {
             grid-template-columns: 1fr;

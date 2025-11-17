@@ -136,15 +136,51 @@ class RentalBoat extends Model
      */
     public function getBoatInformationAttribute($value)
     {
-        if (is_string($value)) {
-            $decoded = json_decode($value, true);
-            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                return $decoded;
-            }
-            // If not valid JSON, try comma-separated
-            return explode(',', $value);
+        if (is_null($value)) {
+            return [];
         }
-        return $value;
+
+        $configurations = is_string($value) ? json_decode($value, true) : $value;
+
+        if (!is_array($configurations) || empty($configurations)) {
+            return [];
+        }
+
+        $configIds = collect($configurations)
+            ->pluck('id')
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        $definitions = GuidingBoatDescription::whereIn('id', $configIds)
+            ->get()
+            ->keyBy('id');
+
+        return collect($configurations)
+            ->filter(fn ($item) => is_array($item) && !empty($item['id']))
+            ->map(function ($item) use ($definitions) {
+                $id = (int) $item['id'];
+                $definition = $definitions->get($id);
+
+                return [
+                    'id' => $id,
+                    'value' => $item['value'] ?? null,
+                    'name' => $definition?->name
+                ];
+            })
+            ->values()
+            ->all();
+
+        // if (is_string($value)) {
+        //     $decoded = json_decode($value, true);
+        //     if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+        //         return $decoded;
+        //     }
+        //     // If not valid JSON, try comma-separated
+        //     return explode(',', $value);
+        // }
+        // return $value;
     }
 
     /**
