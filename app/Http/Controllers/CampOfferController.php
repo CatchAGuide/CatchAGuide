@@ -174,7 +174,13 @@ class CampOfferController extends Controller
             return $this->mapAccommodationData($acc);
         })->toArray();
         
+        // Map all boats with full data for card display
         $boats = $camp->rentalBoats->map(function($boat) {
+            return $this->mapBoatData($boat);
+        })->toArray();
+        
+        // For dropdown - simplified version
+        $boatsDropdown = $camp->rentalBoats->map(function($boat) {
             return $this->mapBoatForDropdown($boat);
         })->toArray();
     
@@ -348,6 +354,122 @@ class CampOfferController extends Controller
                 }
             }
         }
+
+        $priceType = $boat->price_type ?? 'per_day';
+        $priceAmount = (float) ($firstPrice['amount'] ?? 0);
+        $priceTypeMap = [
+            'per_day' => __('per day'),
+            'per_hour' => __('per hour'),
+            'per_week' => __('per week'),
+            'per_night' => __('per night'),
+        ];
+
+        // Process gallery images
+        $galleryImages = $this->getImageUrls($boat->gallery_images ?? []);
+        $galleryCount = count($galleryImages);
+
+        // Process inclusives
+        $defaultInclusives = [
+            __('Safety briefing'),
+            __('Anchor'),
+            __('Signal horn'),
+            __('First aid kit'),
+            __('Life vests'),
+        ];
+
+        $inclusiveItems = collect(is_array($boat->inclusions) ? $boat->inclusions : [])
+            ->map(function ($item) {
+                return is_array($item) ? ($item['name'] ?? ($item['value'] ?? json_encode($item))) : $item;
+            })
+            ->filter(fn ($value) => filled($value))
+            ->values()
+            ->toArray();
+
+        if (count($inclusiveItems) === 0) {
+            $inclusiveItems = $defaultInclusives;
+        }
+
+        // Process extras
+        $extraItems = collect(is_array($boat->pricing_extra) ? $boat->pricing_extra : [])
+            ->map(function ($item) {
+                return is_array($item) ? ($item['name'] ?? ($item['value'] ?? json_encode($item))) : $item;
+            })
+            ->filter(fn ($value) => filled($value))
+            ->values()
+            ->toArray();
+
+        // Process requirements
+        $requirementsRaw = $boat->requirements ?? [];
+        $requirementItems = collect(is_array($requirementsRaw) ? $requirementsRaw : [])
+            ->map(function ($item) {
+                return is_array($item) ? ($item['name'] ?? ($item['value'] ?? json_encode($item))) : $item;
+            })
+            ->filter(fn ($value) => filled($value))
+            ->values()
+            ->toArray();
+
+        // Find license requirement
+        $licenseRequirement = null;
+        if (!empty($requirementsRaw) && is_array($requirementsRaw)) {
+            foreach ($requirementsRaw as $requirement) {
+                $value = is_array($requirement) ? ($requirement['name'] ?? ($requirement['value'] ?? null)) : $requirement;
+                if ($value && (stripos($value, 'license') !== false || stripos($value, 'führerschein') !== false)) {
+                    $licenseRequirement = $value;
+                    break;
+                }
+            }
+        }
+
+        // Build specs array
+        $specs = [];
+        
+        // Motor/Power
+        $motorValue = $boatInfo['power'] ?? $boatInfo['engine'] ?? null;
+        if ($motorValue) {
+            $specs[] = [
+                'label' => __('Motor'),
+                'value' => is_numeric($motorValue) ? $motorValue . ' HP' : $motorValue,
+            ];
+        }
+        
+        // License requirement
+        if ($licenseRequirement) {
+            $specs[] = [
+                'label' => __('License'),
+                'value' => $licenseRequirement,
+            ];
+        }
+        
+        // Capacity
+        $seats = $boatInfo['seats'] ?? null;
+        if ($seats) {
+            $specs[] = [
+                'label' => __('Capacity'),
+                'value' => $seats . ' ' . __('persons'),
+            ];
+        }
+
+        // Build boat information list for expanded view
+        $boatInfoList = [];
+        $infoFields = [
+            __('Seats') => $boatInfo['seats'] ?? null,
+            __('Length') => isset($boatInfo['length_m']) ? $boatInfo['length_m'] . ' m' : null,
+            __('Width') => isset($boatInfo['width_m']) ? $boatInfo['width_m'] . ' m' : null,
+            __('Year built') => $boatInfo['year_built'] ?? null,
+            __('Manufacturer') => $boatInfo['manufacturer'] ?? null,
+            __('Engine') => $boatInfo['engine'] ?? null,
+            __('Power') => $boatInfo['power'] ?? null,
+            __('Top speed') => isset($boatInfo['max_speed_kmh']) ? $boatInfo['max_speed_kmh'] . ' km/h' : null,
+        ];
+
+        foreach ($infoFields as $label => $value) {
+            if (filled($value)) {
+                $boatInfoList[] = [
+                    'label' => $label,
+                    'value' => $value,
+                ];
+            }
+        }
         
         return [
             'id' => $boat->id,
@@ -357,6 +479,7 @@ class CampOfferController extends Controller
             'description' => $boat->desc_of_boat,
             'thumbnail_path' => $this->getImageUrl($boat->thumbnail_path),
             'gallery_images' => $this->getImageUrls($boat->gallery_images ?? []),
+            'gallery_count' => $galleryCount,
             'seats' => $boatInfo['seats'] ?? null,
             'length_m' => $boatInfo['length_m'] ?? null,
             'width_m' => $boatInfo['width_m'] ?? null,
@@ -365,14 +488,18 @@ class CampOfferController extends Controller
             'engine' => $boatInfo['engine'] ?? null,
             'power' => $boatInfo['power'] ?? null,
             'max_speed_kmh' => $boatInfo['max_speed_kmh'] ?? null,
+            'boat_info' => $boatInfo,
             'equipment' => $boat->boat_extras ?? [],
-            'requirements' => $boat->requirements ?? [],
-            'inclusives' => $boat->inclusions ?? [],
-            'extras' => $boat->pricing_extra ?? [],
+            'requirements' => $requirementItems,
+            'inclusives' => $inclusiveItems,
+            'extras' => $extraItems,
+            'specs' => $specs,
+            'boat_info_list' => $boatInfoList,
             'price' => [
-                'amount' => $firstPrice['amount'] ?? 0,
+                'amount' => $priceAmount,
                 'currency' => $firstPrice['currency'] ?? 'EUR',
-                'type' => $boat->price_type ?? 'per_day'
+                'type' => $priceType,
+                'display_type' => $priceTypeMap[$priceType] ?? $priceType,
             ]
         ];
     }
