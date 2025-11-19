@@ -51,6 +51,29 @@
         }
     }
 
+    // When feature-grid is hidden, adjust grid layout
+    &:not(&--expanded) &__grid {
+        grid-template-areas:
+            "media summary actions"
+            "media . .";
+    }
+
+    &:not(&--expanded) &__grid {
+        @media (max-width: 1024px) {
+            grid-template-areas:
+                "media summary"
+                "media summary"
+                "actions actions";
+        }
+
+        @media (max-width: 768px) {
+            grid-template-areas:
+                "media"
+                "summary"
+                "actions";
+        }
+    }
+
     &__media {
         grid-area: media;
     }
@@ -76,11 +99,18 @@
     [data-expanded-only] {
         display: none !important;
     }
+
+    // Feature grid needs special handling - remove from grid when hidden
+    &__feature-grid[data-expanded-only] {
+        display: none !important;
+        grid-area: auto !important; // Remove from grid layout when hidden
+    }
     
     // Show expandable content when card is expanded
     &--expanded {
         .accommodation-card__feature-grid[data-expanded-only] {
             display: grid !important;
+            grid-area: features !important; // Restore grid area when shown
             animation: fadeInUp 0.4s ease forwards;
         }
 
