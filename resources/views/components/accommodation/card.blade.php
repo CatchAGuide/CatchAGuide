@@ -26,7 +26,7 @@
     <div class="accommodation-card__grid">
         <div class="accommodation-card__media">
             <div class="accommodation-gallery" data-gallery-images='@json($galleryImages)'>
-                <img src="{{ $accommodation['thumbnail_path'] ?? 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?q=80&w=1600&auto=format&fit=crop' }}" alt="{{ $accommodation['title'] ?? 'Apartment' }}" data-gallery-image />
+                <img src="{{ $accommodation['thumbnail_path'] ?? 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?q=80&w=1600&auto=format&fit=crop' }}" alt="{{ $accommodation['title'] ?? 'Apartment' }}" data-gallery-image data-open-modal style="cursor: pointer;" />
 
                 <div>
                     <button
@@ -194,7 +194,15 @@
         <div class="accommodation-card__actions">
             <div class="accommodation-card__actions-column">
                 <div class="accommodation-card__pricing">
-                    <div class="accommodation-card__price-type">{{$accommodation['price']['type']}}</div>
+                    @php
+                        $priceType = $accommodation['price']['type'] ?? 'per_night';
+                        $translatedPriceType = match($priceType) {
+                            'per_person' => __('vacations.per_person'),
+                            'per_night' => __('accommodations.per_night'),
+                            default => ucfirst(str_replace('_', ' ', $priceType))
+                        };
+                    @endphp
+                    <div class="accommodation-card__price-type">{{ $translatedPriceType }}</div>
                     <div class="accommodation-card__price-amount">€{{ number_format($accommodation['price']['amount'] ?? 0, 2) }}</div>
                 </div>
                 {{-- <button class="accommodation-card__select-btn">
@@ -204,6 +212,19 @@
                     <span data-toggle-text>Show More</span>
                     <span data-toggle-icon>▼</span>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accommodation Gallery Modal -->
+    <div class="accommodation-gallery-modal" data-accommodation-modal>
+        <div class="accommodation-gallery-modal__content">
+            <button class="accommodation-gallery-modal__close">&times;</button>
+            <button class="accommodation-gallery-modal__prev">&#10094;</button>
+            <button class="accommodation-gallery-modal__next">&#10095;</button>
+            <img class="accommodation-gallery-modal__image" src="" alt="{{ $accommodation['title'] ?? 'Apartment' }}">
+            <div class="accommodation-gallery-modal__counter">
+                <span class="accommodation-gallery-modal__current">1</span> / <span class="accommodation-gallery-modal__total">{{ $galleryTotal }}</span>
             </div>
         </div>
     </div>

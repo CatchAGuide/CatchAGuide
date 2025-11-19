@@ -155,36 +155,36 @@
                     </section>
                     @endif
 
-                    @if(!empty($camp['best_travel_times']) || !empty($camp['best_travel_times_text']) || !empty($camp['target_fish']))
-                    <section id="target-fish" class="camp-section">
-                        <h2 class="camp-section__title">Best Travel Times & Target Fish</h2>
+                    @if(!empty($camp['best_travel_times']) || !empty($camp['best_travel_times_parsed']))
+                    <section id="best-travel-times" class="camp-section">
+                        <h2 class="camp-section__title">Best Travel Times</h2>
                         
                         @if(!empty($camp['best_travel_times']))
-                            <div class="mb-4">
-                                <h3 class="camp-section__subtitle">Best Travel Times</h3>
-                                <ul class="camp-section__list">
-                                    @foreach($camp['best_travel_times'] as $time)
-                                        <li><strong>{!! $time['month'] !!}</strong>: {!! $time['note'] !!}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @elseif(!empty($camp['best_travel_times_text']))
-                            <div class="mb-4">
-                                <h3 class="camp-section__subtitle">Best Travel Times</h3>
-                                <div class="text-sm text-gray-700 whitespace-pre-line">{{ $camp['best_travel_times_text'] }}</div>
-                            </div>
+                            <ul class="camp-section__list">
+                                @foreach($camp['best_travel_times'] as $time)
+                                    <li><strong>{!! $time['month'] !!}</strong>: {!! $time['note'] !!}</li>
+                                @endforeach
+                            </ul>
+                        @elseif(!empty($camp['best_travel_times_parsed']))
+                            @foreach($camp['best_travel_times_parsed'] as $item)
+                                @if(!empty($item['description']))
+                                    <ul class="camp-section__list">
+                                        <li><b>{{ $item['title'] }}:</b> {{ $item['description'] }}</li>
+                                    </ul>
+                                @endif
+                            @endforeach
                         @endif
-                        
-                        @if(!empty($camp['target_fish']))
-                            <div>
-                                <h3 class="camp-section__subtitle">Target Fish</h3>
-                                <div class="camp-pill-row">
-                                    @foreach($camp['target_fish'] as $fish)
-                                        <span class="camp-pill">{{ $fish }}</span>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
+                    </section>
+                    @endif
+                    
+                    @if(!empty($camp['target_fish']))
+                    <section id="target-fish" class="camp-section">
+                        <h2 class="camp-section__title">Target Fish</h2>
+                        <div class="camp-pill-row">
+                            @foreach($camp['target_fish'] as $fish)
+                                <span class="camp-pill">{{ $fish }}</span>
+                            @endforeach
+                        </div>
                     </section>
                     @endif
 
