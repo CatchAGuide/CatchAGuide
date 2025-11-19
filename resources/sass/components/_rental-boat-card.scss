@@ -317,33 +317,14 @@
         }
     }
 
-    [data-expanded-only] {
+    // Hide expandable content by default - scoped to rental-boat-card only
+    // Using specific class selectors to prevent affecting accommodation cards
+    &__info-matrix[data-expanded-only],
+    &__extras-inclusives[data-expanded-only] {
         display: none !important;
     }
-
-    &--expanded {
-        [data-expanded-only] {
-            display: block !important;
-            animation: fadeInUp 0.35s ease forwards;
-        }
-
-        .rental-boat-card__info-matrix {
-            display: grid !important;
-        }
-    }
-
-    &__expand-btn--secondary {
-        align-self: flex-end;
-
-        @media (max-width: 920px) {
-            align-self: flex-start;
-        }
-    }
-
-    [data-expanded-only] {
-        display: none !important;
-    }
-
+    
+    // Show expandable content when card is expanded
     &--expanded {
         .rental-boat-card__info-matrix[data-expanded-only] {
             display: grid !important;
@@ -354,10 +335,13 @@
             display: flex !important;
             animation: fadeInUp 0.4s ease forwards;
         }
+    }
 
-        [data-expanded-only] {
-            display: block !important;
-            animation: fadeInUp 0.4s ease forwards;
+    &__expand-btn--secondary {
+        align-self: flex-end;
+
+        @media (max-width: 920px) {
+            align-self: flex-start;
         }
     }
 

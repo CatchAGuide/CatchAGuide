@@ -84,9 +84,9 @@
                     <div class="rental-boat-card__price-type">{{ $displayPriceType }}</div>
                     <div class="rental-boat-card__price-amount">€{{ number_format($priceAmount, 2) }}</div>
                 </div>
-                <button class="rental-boat-card__select-btn">
+                {{-- <button class="rental-boat-card__select-btn">
                     {{ __('Select Boat') }}
-                </button>
+                </button> --}}
                 <button class="rental-boat-card__expand-btn rental-boat-card__expand-btn--secondary" data-toggle-btn>
                     <span data-toggle-text>{{ __('Show More') }}</span>
                     <span data-toggle-icon>▼</span>

@@ -74,6 +74,7 @@
                     </div>
                 @endif
             </div>
+        </div>
 
         <div class="accommodation-card__summary">
             <div class="accommodation-card__summary-header">
@@ -196,9 +197,9 @@
                     <div class="accommodation-card__price-type">{{$accommodation['price']['type']}}</div>
                     <div class="accommodation-card__price-amount">€{{ number_format($accommodation['price']['amount'] ?? 0, 2) }}</div>
                 </div>
-                <button class="accommodation-card__select-btn">
+                {{-- <button class="accommodation-card__select-btn">
                     Select Accommodation
-                </button>
+                </button> --}}
                 <button class="accommodation-card__expand-btn accommodation-card__expand-btn--secondary" data-toggle-btn>
                     <span data-toggle-text>Show More</span>
                     <span data-toggle-icon>▼</span>
