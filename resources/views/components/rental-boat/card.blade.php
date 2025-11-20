@@ -45,6 +45,21 @@
                     </div>
                 @endif
             </div>
+
+            @if(count($extraItems) > 0)
+                <div class="rental-boat-card__extras-inclusives" data-expanded-only>
+                    <div class="rental-boat-card__info-box">
+                        <div class="rental-boat-card__info-box-title">{{ __('Payable Extras') }}</div>
+                        <div class="rental-boat-card__info-box-content">
+                            <ul class="rental-boat-card__info-list">
+                                @foreach($extraItems as $extra)
+                                    <li>{{ $extra }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
 
         <div class="rental-boat-card__summary">
@@ -95,21 +110,6 @@
                 </button>
             </div>
         </div>
-
-        @if(count($extraItems) > 0)
-            <div class="rental-boat-card__extras-inclusives" data-expanded-only>
-                <div class="rental-boat-card__info-box">
-                    <div class="rental-boat-card__info-box-title">{{ __('Payable Extras') }}</div>
-                    <div class="rental-boat-card__info-box-content">
-                        <ul class="rental-boat-card__info-list">
-                            @foreach($extraItems as $extra)
-                                <li>{{ $extra }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        @endif
 
         <div class="rental-boat-card__info-matrix" data-expanded-only>
             <div class="rental-boat-card__info-box">

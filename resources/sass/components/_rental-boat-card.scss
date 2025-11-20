@@ -17,7 +17,7 @@
         grid-template-columns: 320px minmax(0, 1fr) minmax(220px, 260px);
         grid-template-areas:
             "media summary actions"
-            "extras-inclusives info-matrix info-matrix";
+            "media info-matrix info-matrix";
         gap: 16px;
         padding: 16px;
         align-items: flex-start;
@@ -31,7 +31,6 @@
             grid-template-areas:
                 "media summary"
                 "media summary"
-                "extras-inclusives extras-inclusives"
                 "info-matrix info-matrix"
                 "actions actions";
         }
@@ -41,7 +40,6 @@
             grid-template-areas:
                 "media"
                 "summary"
-                "extras-inclusives"
                 "info-matrix"
                 "actions";
             gap: 12px;
@@ -54,7 +52,7 @@
     }
 
     &__extras-inclusives {
-        grid-area: extras-inclusives;
+        margin-top: 16px;
         display: flex;
         flex-direction: column;
         gap: 12px;
@@ -323,17 +321,45 @@
     &__extras-inclusives[data-expanded-only] {
         display: none !important;
     }
+
+    &__info-matrix[data-expanded-only] {
+        grid-area: auto !important; // Remove from grid layout when hidden
+    }
     
     // Show expandable content when card is expanded
     &--expanded {
         .rental-boat-card__info-matrix[data-expanded-only] {
             display: grid !important;
+            grid-area: info-matrix !important; // Restore grid area when shown
             animation: fadeInUp 0.4s ease forwards;
         }
 
         .rental-boat-card__extras-inclusives[data-expanded-only] {
             display: flex !important;
             animation: fadeInUp 0.4s ease forwards;
+        }
+    }
+
+    // When info-matrix is hidden, adjust grid layout
+    &:not(&--expanded) &__grid {
+        grid-template-areas:
+            "media summary actions"
+            "media . .";
+    }
+
+    &:not(&--expanded) &__grid {
+        @media (max-width: 1024px) {
+            grid-template-areas:
+                "media summary"
+                "media summary"
+                "actions actions";
+        }
+
+        @media (max-width: 768px) {
+            grid-template-areas:
+                "media"
+                "summary"
+                "actions";
         }
     }
 

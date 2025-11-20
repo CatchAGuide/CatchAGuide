@@ -121,15 +121,82 @@ class CampImageProcessor
             }
         }
 
-        // Set thumbnail path (first image or existing)
+        // Set thumbnail path - check if user selected a specific thumbnail from request
+        $requestedThumbnail = $request->input('thumbnail_path');
+        $originalRequestedThumbnail = $requestedThumbnail;
+        
+        // Extract relative path from full URL if needed
+        if ($requestedThumbnail && !empty($requestedThumbnail)) {
+            // If it's a full URL, extract the path
+            if (filter_var($requestedThumbnail, FILTER_VALIDATE_URL)) {
+                $parsedUrl = parse_url($requestedThumbnail);
+                $requestedThumbnail = ltrim($parsedUrl['path'] ?? '', '/');
+                Log::info('Extracted path from URL', [
+                    'original_url' => $originalRequestedThumbnail,
+                    'extracted_path' => $requestedThumbnail
+                ]);
+            }
+            // Remove leading slash if present
+            $requestedThumbnail = ltrim($requestedThumbnail, '/');
+        }
+        
         if (!empty($galleryImages)) {
-            $thumbnailPath = $galleryImages[0];
+            // If user selected a specific thumbnail, use it if it exists in gallery
+            if ($requestedThumbnail && !empty($requestedThumbnail)) {
+                // Check if the requested thumbnail exists in the gallery images
+                // Compare by basename or full path
+                $foundThumbnail = null;
+                foreach ($galleryImages as $galleryImage) {
+                    $normalizedGalleryImage = ltrim($galleryImage, '/');
+                    $normalizedRequested = ltrim($requestedThumbnail, '/');
+                    
+                    // Match by full path or basename
+                    if ($normalizedGalleryImage === $normalizedRequested || 
+                        basename($normalizedGalleryImage) === basename($normalizedRequested)) {
+                        $foundThumbnail = $galleryImage;
+                        Log::info('Thumbnail match found', [
+                            'requested' => $normalizedRequested,
+                            'matched_gallery_image' => $normalizedGalleryImage,
+                            'final_path' => $foundThumbnail
+                        ]);
+                        break;
+                    }
+                }
+                
+                if ($foundThumbnail) {
+                    // Use the exact path from gallery to maintain consistency
+                    $thumbnailPath = $foundThumbnail;
+                } else {
+                    // Requested thumbnail not in gallery, use first image
+                    $thumbnailPath = $galleryImages[0];
+                    Log::warning('Requested thumbnail not found in gallery', [
+                        'original_requested' => $originalRequestedThumbnail,
+                        'normalized_requested' => $requestedThumbnail,
+                        'gallery_images' => $galleryImages,
+                        'normalized_gallery' => array_map(function($img) {
+                            return ltrim($img, '/');
+                        }, $galleryImages)
+                    ]);
+                }
+            } else {
+                // No specific thumbnail requested, use first image
+                $thumbnailPath = $galleryImages[0];
+            }
+        } elseif ($requestedThumbnail && !empty($requestedThumbnail)) {
+            // No new images uploaded, but user selected a thumbnail
+            // This will be handled separately in the controller for updates
+            $thumbnailPath = $requestedThumbnail;
         }
 
-        Log::info('Final Camp Gallery Images Array:', $galleryImages);
+        Log::info('Final Camp Gallery Images Array:', [
+            'gallery_images' => $galleryImages,
+            'requested_thumbnail' => $requestedThumbnail,
+            'final_thumbnail' => $thumbnailPath
+        ]);
 
         // Return null if no images to avoid overwriting existing data
-        if (empty($galleryImages)) {
+        // BUT if thumbnail_path was explicitly set, we should still return it
+        if (empty($galleryImages) && empty($requestedThumbnail)) {
             return null;
         }
 

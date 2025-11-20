@@ -72,6 +72,9 @@ class CampsController extends Controller
             if ($imageData) {
                 $campData['thumbnail_path'] = $imageData['thumbnail_path'];
                 $campData['gallery_images'] = $imageData['gallery_images'];
+            } elseif ($request->has('thumbnail_path') && !empty($request->input('thumbnail_path'))) {
+                // Handle case where no new images uploaded but thumbnail_path was updated
+                $campData['thumbnail_path'] = $request->input('thumbnail_path');
             }
 
             // Create camp
@@ -182,6 +185,43 @@ class CampsController extends Controller
             if ($imageData) {
                 $campData['thumbnail_path'] = $imageData['thumbnail_path'];
                 $campData['gallery_images'] = $imageData['gallery_images'];
+            } elseif ($request->has('thumbnail_path') && !empty($request->input('thumbnail_path'))) {
+                // Handle case where no new images uploaded but thumbnail_path was updated
+                $requestedThumbnail = $request->input('thumbnail_path');
+                
+                // Extract relative path from full URL if needed
+                if (filter_var($requestedThumbnail, FILTER_VALIDATE_URL)) {
+                    $parsedUrl = parse_url($requestedThumbnail);
+                    $requestedThumbnail = ltrim($parsedUrl['path'] ?? '', '/');
+                }
+                $requestedThumbnail = ltrim($requestedThumbnail, '/');
+                
+                // Verify the thumbnail exists in existing gallery images
+                $existingImages = json_decode($request->input('existing_images', '[]'), true) ?? [];
+                $normalizedExisting = array_map(function($img) {
+                    return ltrim($img, '/');
+                }, $existingImages);
+                
+                $foundThumbnail = null;
+                foreach ($existingImages as $existingImage) {
+                    $normalizedExistingImage = ltrim($existingImage, '/');
+                    $normalizedRequested = ltrim($requestedThumbnail, '/');
+                    
+                    if ($normalizedExistingImage === $normalizedRequested || 
+                        basename($normalizedExistingImage) === basename($normalizedRequested)) {
+                        $foundThumbnail = $existingImage;
+                        break;
+                    }
+                }
+                
+                if ($foundThumbnail) {
+                    $campData['thumbnail_path'] = $foundThumbnail;
+                } else {
+                    Log::warning('Requested thumbnail not found in existing images', [
+                        'requested' => $requestedThumbnail,
+                        'existing_images' => $existingImages
+                    ]);
+                }
             }
 
             // Update camp
