@@ -26,7 +26,7 @@
     <div class="accommodation-card__grid">
         <div class="accommodation-card__media">
             <div class="accommodation-gallery" data-gallery-images='@json($galleryImages)'>
-                <img src="{{ $accommodation['thumbnail_path'] ?? 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?q=80&w=1600&auto=format&fit=crop' }}" alt="{{ $accommodation['title'] ?? 'Apartment' }}" data-gallery-image />
+                <img src="{{ $accommodation['thumbnail_path'] ?? 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?q=80&w=1600&auto=format&fit=crop' }}" alt="{{ $accommodation['title'] ?? 'Apartment' }}" data-gallery-image data-open-modal style="cursor: pointer;" />
 
                 <div>
                     <button
@@ -56,7 +56,7 @@
                     <div class="accommodation-card__panel-title">Details</div>
                     <ul class="accommodation-card__bullet-list">
                         @foreach($accommodation['accommodation_details'] as $detail)
-                            <li>{{ $detail['name'] }}: <span class="font-medium">{{ $detail['value'] }}</span></li>
+                            <li>{{ translate($detail['name']) }}: <span class="font-medium">{{ translate($detail['value']) }}</span></li>
                         @endforeach
                     </ul>
                 </div>
@@ -67,7 +67,7 @@
                         @if(!empty($accommodation['policies']))
                             <ul class="accommodation-card__bullet-list">
                                 @foreach ($accommodation['policies'] as $policy)
-                                    <li>{{ $policy['name'] }}: {{$policy['value']}}</li>
+                                    <li>{{ translate($policy['name']) }}: {{ translate($policy['value']) }}</li>
                                 @endforeach
                             </ul>
                         @endif
@@ -78,7 +78,7 @@
 
         <div class="accommodation-card__summary">
             <div class="accommodation-card__summary-header">
-                <h3 class="accommodation-card__title">{{ $accommodation['title'] ?? 'Apartment Title' }}</h3>
+                <h3 class="accommodation-card__title">{{ translate($accommodation['title']) ?? 'Apartment Title' }}</h3>
                 <div class="accommodation-card__type">{{ $accommodation['accommodation_type'] ?? 'Apartment / Holiday Home' }}</div>
             </div>
 
@@ -99,24 +99,24 @@
 
             <div class="accommodation-card__beds">
                 <span class="accommodation-card__beds-label">Schlafzimmer:</span>
-                <span class="accommodation-card__beds-value">{{ $bedSummary }}</span>
+                <span class="accommodation-card__beds-value">{{ translate($bedSummary) }}</span>
             </div>
 
             <div class="accommodation-card__distance-row">
                 <div class="accommodation-card__distance-group">
                     @if(!empty($accommodation['distances']['to_water_m']))
                         <span class="accommodation-card__distance-chip">
-                            🌊 Water: <span>{{ is_numeric($accommodation['distances']['to_water_m']) ? $accommodation['distances']['to_water_m'] . ' m' : $accommodation['distances']['to_water_m'] }}</span>
+                            🌊 Water: <span>{{ is_numeric($accommodation['distances']['to_water_m']) ? $accommodation['distances']['to_water_m'] . ' m' : translate($accommodation['distances']['to_water_m']) }}</span>
                         </span>
                     @endif
                     @if(!empty($accommodation['distances']['to_berth_m']))
                         <span class="accommodation-card__distance-chip">
-                            ⚓ Jetty: <span>{{ is_numeric($accommodation['distances']['to_berth_m']) ? $accommodation['distances']['to_berth_m'] . ' m' : $accommodation['distances']['to_berth_m'] }}</span>
+                            ⚓ Jetty: <span>{{ is_numeric($accommodation['distances']['to_berth_m']) ? $accommodation['distances']['to_berth_m'] . ' m' : translate($accommodation['distances']['to_berth_m']) }}</span>
                         </span>
                     @endif
                     @if(!empty($accommodation['distances']['to_parking_m']))
                         <span class="accommodation-card__distance-chip">
-                            🚗 Parking: <span>{{ is_numeric($accommodation['distances']['to_parking_m']) ? $accommodation['distances']['to_parking_m'] . ' m' : $accommodation['distances']['to_parking_m'] }}</span>
+                            🚗 Parking: <span>{{ is_numeric($accommodation['distances']['to_parking_m']) ? $accommodation['distances']['to_parking_m'] . ' m' : translate($accommodation['distances']['to_parking_m']) }}</span>
                         </span>
                     @endif
                 </div>
@@ -194,7 +194,15 @@
         <div class="accommodation-card__actions">
             <div class="accommodation-card__actions-column">
                 <div class="accommodation-card__pricing">
-                    <div class="accommodation-card__price-type">{{$accommodation['price']['type']}}</div>
+                    @php
+                        $priceType = $accommodation['price']['type'] ?? 'per_night';
+                        $translatedPriceType = match($priceType) {
+                            'per_person' => __('vacations.per_person'),
+                            'per_night' => __('accommodations.per_night'),
+                            default => ucfirst(str_replace('_', ' ', $priceType))
+                        };
+                    @endphp
+                    <div class="accommodation-card__price-type">{{ $translatedPriceType }}</div>
                     <div class="accommodation-card__price-amount">€{{ number_format($accommodation['price']['amount'] ?? 0, 2) }}</div>
                 </div>
                 {{-- <button class="accommodation-card__select-btn">
@@ -204,6 +212,19 @@
                     <span data-toggle-text>Show More</span>
                     <span data-toggle-icon>▼</span>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accommodation Gallery Modal -->
+    <div class="accommodation-gallery-modal" data-accommodation-modal>
+        <div class="accommodation-gallery-modal__content">
+            <button class="accommodation-gallery-modal__close">&times;</button>
+            <button class="accommodation-gallery-modal__prev">&#10094;</button>
+            <button class="accommodation-gallery-modal__next">&#10095;</button>
+            <img class="accommodation-gallery-modal__image" src="" alt="{{ $accommodation['title'] ?? 'Apartment' }}">
+            <div class="accommodation-gallery-modal__counter">
+                <span class="accommodation-gallery-modal__current">1</span> / <span class="accommodation-gallery-modal__total">{{ $galleryTotal }}</span>
             </div>
         </div>
     </div>

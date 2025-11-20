@@ -19,6 +19,8 @@
                     src="{{ $boat['thumbnail_path'] ?? 'https://images.unsplash.com/photo-1520440229-84f3865cf003?q=80&w=1600&auto=format&fit=crop' }}"
                     alt="{{ $boat['title'] ?? 'Boat' }}"
                     data-gallery-image
+                    data-open-modal
+                    style="cursor: pointer;"
                 />
 
                 @if($galleryCount > 1)
@@ -43,6 +45,21 @@
                     </div>
                 @endif
             </div>
+
+            @if(count($extraItems) > 0)
+                <div class="rental-boat-card__extras-inclusives" data-expanded-only>
+                    <div class="rental-boat-card__info-box">
+                        <div class="rental-boat-card__info-box-title">{{ __('Payable Extras') }}</div>
+                        <div class="rental-boat-card__info-box-content">
+                            <ul class="rental-boat-card__info-list">
+                                @foreach($extraItems as $extra)
+                                    <li>{{ $extra }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
 
         <div class="rental-boat-card__summary">
@@ -94,21 +111,6 @@
             </div>
         </div>
 
-        @if(count($extraItems) > 0)
-            <div class="rental-boat-card__extras-inclusives" data-expanded-only>
-                <div class="rental-boat-card__info-box">
-                    <div class="rental-boat-card__info-box-title">{{ __('Payable Extras') }}</div>
-                    <div class="rental-boat-card__info-box-content">
-                        <ul class="rental-boat-card__info-list">
-                            @foreach($extraItems as $extra)
-                                <li>{{ $extra }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        @endif
-
         <div class="rental-boat-card__info-matrix" data-expanded-only>
             <div class="rental-boat-card__info-box">
                 <div class="rental-boat-card__info-box-title">{{ __('Boat Information') }}</div>
@@ -141,6 +143,19 @@
                         <p class="rental-boat-card__info-empty">{{ __('No special requirements') }}</p>
                     @endif
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rental Boat Gallery Modal -->
+    <div class="rental-boat-gallery-modal" data-rental-boat-modal>
+        <div class="rental-boat-gallery-modal__content">
+            <button class="rental-boat-gallery-modal__close">&times;</button>
+            <button class="rental-boat-gallery-modal__prev">&#10094;</button>
+            <button class="rental-boat-gallery-modal__next">&#10095;</button>
+            <img class="rental-boat-gallery-modal__image" src="" alt="{{ $boat['title'] ?? 'Boat' }}">
+            <div class="rental-boat-gallery-modal__counter">
+                <span class="rental-boat-gallery-modal__current">1</span> / <span class="rental-boat-gallery-modal__total">{{ $galleryCount }}</span>
             </div>
         </div>
     </div>
