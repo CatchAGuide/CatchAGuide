@@ -22,16 +22,16 @@
     <header class="camp-topbar">
         <div class="camp-container camp-topbar__inner">
             <div class="camp-topbar__info">
-                <h1 class="camp-topbar__title">{{ $camp['title'] }}</h1>
+                <h1 class="camp-topbar__title">{{ translate($camp['title']) }}</h1>
                 <div class="camp-topbar__meta">
                     <span>{{ $camp['city'] }}, {{ $camp['region'] }}, {{ $camp['country'] }}</span>
                     <span class="camp-topbar__dot">•</span>
-                    <a class="camp-topbar__link" href="#map">Show on map</a>
+                    <a class="camp-topbar__link" href="#map">{{ __('vacations.show_on_map') }}</a>
                 </div>
             </div>
             <div class="camp-topbar__actions">
-                <a href="#configurator" class="brand-btn camp-topbar__cta">Make Inquiry</a>
-                <span class="camp-topbar__note">Best Price Guarantee</span>
+                <a href="#configurator" class="brand-btn camp-topbar__cta">{{ __('vacations.make_inquiry') }}</a>
+                <span class="camp-topbar__note">{{ __('vacations.best_price_guarantee') }}</span>
             </div>
         </div>
     </header>
@@ -78,60 +78,60 @@
         <div class="camp-layout__content">
             <!-- Navigation -->
             <nav class="camp-nav flex flex-wrap text-sm">
-                <a href="#general-info" class="nav-pill">General Information</a>
-                <a href="#accommodations" class="nav-pill">Accommodations</a>
-                <a href="#guidings" class="nav-pill">Guidings & Tours</a>
-                <a href="#boats" class="nav-pill">Rental Boats</a>
+                <a href="#general-info" class="nav-pill">{{ __('vacations.general_information') }}</a>
+                <a href="#accommodations" class="nav-pill">{{ __('vacations.accommodations') }}</a>
+                <a href="#guidings" class="nav-pill">{{ __('vacations.guidings_tours') }}</a>
+                <a href="#boats" class="nav-pill">{{ __('vacations.rental_boats') }}</a>
             </nav>
 
             <!-- General Information -->
             <main id="general-info" class="camp-info-grid">
                 <div class="camp-sections">
                     <section id="description" class="camp-section">
-                        <h2 class="camp-section__title">Description</h2>
+                        <h2 class="camp-section__title">{{ __('vacations.description') }}</h2>
                         <div class="camp-section__body space-y-3">
                             @if(!empty($camp['description']['camp_description']))
                             <div>
-                                <h3 class="font-semibold text-gray-700">Camp</h3>
-                                <p>{{ $camp['description']['camp_description'] }}</p>
+                                <h3 class="font-semibold text-gray-700">{{ __('vacations.camp') }}</h3>
+                                <p>{{ translate($camp['description']['camp_description']) }}</p>
                             </div>
                             @endif
                             @if(!empty($camp['description']['camp_area']))
                             <div>
-                                <h3 class="font-semibold text-gray-700">Area</h3>
-                                <p>{{ $camp['description']['camp_area'] }}</p>
+                                <h3 class="font-semibold text-gray-700">{{ __('vacations.area') }}</h3>
+                                <p>{{ translate($camp['description']['camp_area']) }}</p>
                             </div>
                             @endif
                             @if(!empty($camp['description']['camp_area_fishing']))
                             <div>
-                                <h3 class="font-semibold text-gray-700">Fishing</h3>
-                                <p>{{ $camp['description']['camp_area_fishing'] }}</p>
+                                <h3 class="font-semibold text-gray-700">{{ __('vacations.fishing') }}</h3>
+                                <p>{{ translate($camp['description']['camp_area_fishing']) }}</p>
                             </div>
                             @endif
                         </div>
                     </section>
 
                     <section id="distances" class="camp-section">
-                        <h2 class="camp-section__title">Distances</h2>
+                        <h2 class="camp-section__title">{{ __('vacations.distances') }}</h2>
                         <div class="camp-pill-row">
                             @if(!empty($camp['distances']['to_shop_label']))
-                                <span class="camp-pill">Shop: {{ $camp['distances']['to_shop_label'] }}</span>
+                                <span class="camp-pill">{{ __('vacations.shop') }}: {{ translate($camp['distances']['to_shop_label']) }}</span>
                             @endif
                             @if(!empty($camp['distances']['to_town_label']))
-                                <span class="camp-pill">Town: {{ $camp['distances']['to_town_label'] }}</span>
+                                <span class="camp-pill">{{ __('vacations.town') }}: {{ translate($camp['distances']['to_town_label']) }}</span>
                             @endif
                             @if(!empty($camp['distances']['to_airport_label']))
-                                <span class="camp-pill">Airport: {{ $camp['distances']['to_airport_label'] }}</span>
+                                <span class="camp-pill">{{ __('vacations.airport') }}: {{ translate($camp['distances']['to_airport_label']) }}</span>
                             @endif
                             @if(!empty($camp['distances']['to_ferry_label']))
-                                <span class="camp-pill">Ferry: {{ $camp['distances']['to_ferry_label'] }}</span>
+                                <span class="camp-pill">{{ __('vacations.ferry') }}: {{ translate($camp['distances']['to_ferry_label']) }}</span>
                             @endif
                         </div>
                     </section>
 
                     @if(!empty($camp['amenities']))
                     <section id="amenities-section" class="camp-section">
-                        <h2 class="camp-section__title">Camp Amenities</h2>
+                        <h2 class="camp-section__title">{{ __('vacations.camp_amenities') }}</h2>
                         <div class="camp-section__cols">
                             {{-- Dynamic amenities from camp_facility_camp pivot table --}}
                             @foreach($camp['amenities'] as $amenity)
@@ -146,10 +146,10 @@
 
                     @if(!empty($camp['policies_regulations']))
                     <section id="policies" class="camp-section">
-                        <h2 class="camp-section__title">Policies & Regulations</h2>
+                        <h2 class="camp-section__title">{{ __('vacations.policies_regulations') }}</h2>
                         <ul class="camp-section__list">
                             @foreach($camp['policies_regulations'] as $policy)
-                                <li>{!! $policy !!}</li>
+                                <li>{!! translate($policy) !!}</li>
                             @endforeach
                         </ul>
                     </section>
@@ -157,7 +157,7 @@
 
                     @if(!empty($camp['best_travel_times']) || !empty($camp['best_travel_times_parsed']))
                     <section id="best-travel-times" class="camp-section">
-                        <h2 class="camp-section__title">Best Travel Times</h2>
+                        <h2 class="camp-section__title">{{ __('vacations.best_travel_times') }}</h2>
                         
                         @if(!empty($camp['best_travel_times']))
                             <ul class="camp-section__list">
@@ -169,7 +169,7 @@
                             @foreach($camp['best_travel_times_parsed'] as $item)
                                 @if(!empty($item['description']))
                                     <ul class="camp-section__list">
-                                        <li><b>{{ $item['title'] }}:</b> {{ $item['description'] }}</li>
+                                        <li><b>{{ translate($item['title']) }}:</b> {{ translate($item['description']) }}</li>
                                     </ul>
                                 @endif
                             @endforeach
@@ -179,7 +179,7 @@
                     
                     @if(!empty($camp['target_fish']))
                     <section id="target-fish" class="camp-section">
-                        <h2 class="camp-section__title">Target Fish</h2>
+                        <h2 class="camp-section__title">{{ __('vacations.target_fish') }}</h2>
                         <div class="camp-pill-row">
                             @foreach($camp['target_fish'] as $fish)
                                 <span class="camp-pill">{{ $fish }}</span>
@@ -190,11 +190,11 @@
 
                     @if(!empty($camp['travel_info']))
                     <section id="travel-info" class="camp-section">
-                        <h2 class="camp-section__title">Travel Information</h2>
+                        <h2 class="camp-section__title">{{ __('vacations.travel_information') }}</h2>
                         <ul class="camp-section__list">
                             @foreach($camp['travel_info'] as $info)
                                 @if(!empty($info))
-                                    <li>{{ $info }}</li>
+                                    <li>{{ translate($info) }}</li>
                                 @endif
                             @endforeach
                         </ul>
@@ -203,10 +203,10 @@
 
                     @if(!empty($camp['extras']))
                     <section id="extras" class="camp-section">
-                        <h2 class="camp-section__title">Extras</h2>
+                        <h2 class="camp-section__title">{{ __('vacations.extras') }}</h2>
                         <div class="camp-pill-row">
                             @foreach($camp['extras'] as $extra)
-                                <span class="camp-pill">{{ $extra }}</span>
+                                <span class="camp-pill">{{ translate($extra) }}</span>
                             @endforeach
                         </div>
                     </section>
@@ -214,13 +214,13 @@
 
                     @if(!empty($camp['conditions']['minimum_stay_nights']) || !empty($camp['conditions']['booking_window']))
                     <section id="conditions" class="camp-section">
-                        <h2 class="camp-section__title">Camp Conditions</h2>
+                        <h2 class="camp-section__title">{{ __('vacations.camp_conditions') }}</h2>
                         <div class="camp-section__cols">
                             @if(!empty($camp['conditions']['minimum_stay_nights']))
-                                <div>Minimum stay: <strong>{{ $camp['conditions']['minimum_stay_nights'] }} nights</strong></div>
+                                <div>{{ __('vacations.minimum_stay') }}: <strong>{{ $camp['conditions']['minimum_stay_nights'] }} {{ __('vacations.nights') }}</strong></div>
                             @endif
                             @if(!empty($camp['conditions']['booking_window']))
-                                <div>Booking window: <strong>{{ $camp['conditions']['booking_window'] }}</strong></div>
+                                <div>{{ __('vacations.booking_window') }}: <strong>{{ translate($camp['conditions']['booking_window']) }}</strong></div>
                             @endif
                         </div>
                     </section>
@@ -232,14 +232,14 @@
         {{-- Sidebar Configurator - Commented out to hide Configure Trip section --}}
         {{-- <aside id="configurator" class="camp-config">
             <div class="camp-config-card section-card">
-                <h3 class="text-lg font-semibold" style="color: var(--brand); margin: 0;">Configure Trip</h3>
+                <h3 class="text-lg font-semibold" style="color: var(--brand); margin: 0;">{{ __('vacations.configure_trip') }}</h3>
                 <div class="accent-badge">
-                    This offer is an <strong>inquiry</strong>. We confirm or decline within <strong>48 hours</strong>.
+                    {!! __('vacations.inquiry_notice') !!}
                 </div>
                 <div class="camp-form mt-4">
                     <div class="camp-form-grid">
                         <div class="camp-form-field full-span">
-                            <label for="accSelect">Accommodation</label>
+                            <label for="accSelect">{{ __('vacations.accommodation') }}</label>
                             <select
                                 id="accSelect"
                                 class="camp-control"
@@ -248,45 +248,45 @@
                             >
                                 @foreach ($accommodations as $acc)
                                     <option value="{{ $acc['id'] }}">
-                                        {{ $acc['title'] }} - {{ number_format($acc['price']['amount'], 2, ',', '.') }} {{ $acc['price']['currency'] }} / night
+                                        {{ $acc['title'] }} - {{ number_format($acc['price']['amount'], 2, ',', '.') }} {{ $acc['price']['currency'] }} {{ __('vacations.per_night') }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="camp-form-field">
-                            <label for="boatSelect">Boat Rental</label>
+                            <label for="boatSelect">{{ __('vacations.boat_rental') }}</label>
                             <select
                                 id="boatSelect"
                                 class="camp-control"
                                 x-model="selectedBoatId"
                                 @change="selectedBoatId = $event.target.value || null"
                             >
-                                <option value="">No boat</option>
+                                <option value="">{{ __('vacations.no_boat') }}</option>
                                 @foreach ($boats as $b)
                                     <option value="{{ $b['id'] }}">
-                                        {{ $b['title'] }} - {{ number_format($b['price_per_day'], 2, ',', '.') }} {{ $b['currency'] }} / day
+                                        {{ $b['title'] }} - {{ number_format($b['price_per_day'], 2, ',', '.') }} {{ $b['currency'] }} {{ __('vacations.per_day') }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="camp-form-field">
-                            <label for="guideSelect">Guiding</label>
+                            <label for="guideSelect">{{ __('vacations.guidings') }}</label>
                             <select
                                 id="guideSelect"
                                 class="camp-control"
                                 x-model="selectedGuideId"
                                 @change="selectedGuideId = $event.target.value || null"
                             >
-                                <option value="">No guiding</option>
+                                <option value="">{{ __('vacations.no_guiding') }}</option>
                                 @foreach ($guidingsDropdown as $g)
                                     <option value="{{ $g['id'] }}">
-                                        {{ $g['title'] }} - {{ number_format($g['price'], 2, ',', '.') }} {{ $g['currency'] }} fixed price
+                                        {{ $g['title'] }} - {{ number_format($g['price'], 2, ',', '.') }} {{ $g['currency'] }} {{ __('vacations.fixed_price') }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="camp-form-field full-span">
-                            <label for="guestInput">Persons</label>
+                            <label for="guestInput">{{ __('vacations.persons') }}</label>
                             <input
                                 id="guestInput"
                                 type="number"
@@ -300,10 +300,10 @@
                                 "
                                 class="camp-control"
                             >
-                            <p class="camp-form-field__note" x-text="selectedAcc ? 'Maximum ' + selectedAcc.max_occupancy + ' persons for the selected accommodation.' : 'Maximum 10 persons.'"></p>
+                            <p class="camp-form-field__note" x-text="selectedAcc ? '{{ __('vacations.maximum') }} ' + selectedAcc.max_occupancy + ' {{ __('vacations.persons_for_accommodation') }}' : '{{ __('vacations.maximum_persons') }}'"></p>
                         </div>
                         <div class="camp-form-field">
-                            <label for="checkInInput">Check-in</label>
+                            <label for="checkInInput">{{ __('vacations.check_in') }}</label>
                             <input
                                 id="checkInInput"
                                 type="date"
@@ -312,7 +312,7 @@
                             >
                         </div>
                         <div class="camp-form-field">
-                            <label for="checkOutInput">Check-out</label>
+                            <label for="checkOutInput">{{ __('vacations.check_out') }}</label>
                             <input
                                 id="checkOutInput"
                                 type="date"
@@ -321,28 +321,28 @@
                             >
                         </div>
                     </div>
-                    <div class="camp-form__status" x-text="nights ? nights + ' nights selected' : 'Please select travel dates'"></div>
+                    <div class="camp-form__status" x-text="nights ? nights + ' {{ __('vacations.nights_selected') }}' : '{{ __('vacations.select_travel_dates') }}'"></div>
                 </div>
                 <div class="camp-summary mt-4">
                     <div class="camp-summary__row">
-                        <span>Accommodation</span>
+                        <span>{{ __('vacations.accommodation') }}</span>
                         <span x-text="selectedAcc ? fmt(accPrice, selectedAcc?.price?.currency ?? 'EUR') : '--'"></span>
                     </div>
                     <div class="camp-summary__row">
-                        <span>Boat Rental</span>
+                        <span>{{ __('vacations.boat_rental') }}</span>
                         <span x-text="selectedBoat ? fmt(boatPrice, selectedBoat?.currency ?? 'EUR') : '--'"></span>
                     </div>
                     <div class="camp-summary__row">
-                        <span>Guiding</span>
+                        <span>{{ __('vacations.guidings') }}</span>
                         <span x-text="selectedGuide ? fmt(guidePrice, selectedGuide?.currency ?? 'EUR') : '--'"></span>
                     </div>
                     <div class="camp-summary__row camp-summary__total">
-                        <span>Total</span>
+                        <span>{{ __('vacations.total') }}</span>
                         <span x-text="total ? fmt(total, 'EUR') : '--'"></span>
                     </div>
-                    <p class="camp-summary__note">Send inquiry - binding confirmation within 48 hours.</p>
+                    <p class="camp-summary__note">{{ __('vacations.send_inquiry_notice') }}</p>
                 </div>
-                <button class="brand-btn">Send Inquiry</button>
+                <button class="brand-btn">{{ __('vacations.send_inquiry') }}</button>
             </div>
         </aside> --}}
     </div>
@@ -352,7 +352,7 @@
         <!-- Accommodations Section -->
         @if (count($accommodations) > 0)
         <section id="accommodations" class="camp-section mb-3">
-            <h2 class="camp-section__title">Accommodations</h2>
+            <h2 class="camp-section__title">{{ __('vacations.accommodations') }}</h2>
             @foreach($accommodations as $accommodation)
                 <div class="mb-4">
                     <x-accommodation.card :accommodation="$accommodation" />
@@ -364,7 +364,7 @@
         <!-- Guidings Section -->
         {{-- @if (count($guidings) > 0)
         <section id="guidings" class="camp-section mb-3">
-            <h2 class="camp-section__title">Guidings & Tours</h2>
+            <h2 class="camp-section__title">{{ __('vacations.guidings_tours') }}</h2>
             @foreach($guidings as $guiding)
                 <div class="mb-4">
                     <x-guiding.card :guiding="$guiding" />
@@ -376,7 +376,7 @@
         <!-- Rental Boats Section -->
         @if (count($boats) > 0)
         <section id="boats" class="camp-section mb-3">
-            <h2 class="camp-section__title">Rental Boats</h2>
+            <h2 class="camp-section__title">{{ __('vacations.rental_boats') }}</h2>
             @foreach($boats as $boat)
                 <div class="mb-4">
                     <x-rental-boat.card :boat="$boat" />

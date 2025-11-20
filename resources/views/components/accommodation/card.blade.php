@@ -56,7 +56,7 @@
                     <div class="accommodation-card__panel-title">Details</div>
                     <ul class="accommodation-card__bullet-list">
                         @foreach($accommodation['accommodation_details'] as $detail)
-                            <li>{{ $detail['name'] }}: <span class="font-medium">{{ $detail['value'] }}</span></li>
+                            <li>{{ translate($detail['name']) }}: <span class="font-medium">{{ translate($detail['value']) }}</span></li>
                         @endforeach
                     </ul>
                 </div>
@@ -67,7 +67,7 @@
                         @if(!empty($accommodation['policies']))
                             <ul class="accommodation-card__bullet-list">
                                 @foreach ($accommodation['policies'] as $policy)
-                                    <li>{{ $policy['name'] }}: {{$policy['value']}}</li>
+                                    <li>{{ translate($policy['name']) }}: {{ translate($policy['value']) }}</li>
                                 @endforeach
                             </ul>
                         @endif
@@ -78,7 +78,7 @@
 
         <div class="accommodation-card__summary">
             <div class="accommodation-card__summary-header">
-                <h3 class="accommodation-card__title">{{ $accommodation['title'] ?? 'Apartment Title' }}</h3>
+                <h3 class="accommodation-card__title">{{ translate($accommodation['title']) ?? 'Apartment Title' }}</h3>
                 <div class="accommodation-card__type">{{ $accommodation['accommodation_type'] ?? 'Apartment / Holiday Home' }}</div>
             </div>
 
@@ -99,24 +99,24 @@
 
             <div class="accommodation-card__beds">
                 <span class="accommodation-card__beds-label">Schlafzimmer:</span>
-                <span class="accommodation-card__beds-value">{{ $bedSummary }}</span>
+                <span class="accommodation-card__beds-value">{{ translate($bedSummary) }}</span>
             </div>
 
             <div class="accommodation-card__distance-row">
                 <div class="accommodation-card__distance-group">
                     @if(!empty($accommodation['distances']['to_water_m']))
                         <span class="accommodation-card__distance-chip">
-                            🌊 Water: <span>{{ is_numeric($accommodation['distances']['to_water_m']) ? $accommodation['distances']['to_water_m'] . ' m' : $accommodation['distances']['to_water_m'] }}</span>
+                            🌊 Water: <span>{{ is_numeric($accommodation['distances']['to_water_m']) ? $accommodation['distances']['to_water_m'] . ' m' : translate($accommodation['distances']['to_water_m']) }}</span>
                         </span>
                     @endif
                     @if(!empty($accommodation['distances']['to_berth_m']))
                         <span class="accommodation-card__distance-chip">
-                            ⚓ Jetty: <span>{{ is_numeric($accommodation['distances']['to_berth_m']) ? $accommodation['distances']['to_berth_m'] . ' m' : $accommodation['distances']['to_berth_m'] }}</span>
+                            ⚓ Jetty: <span>{{ is_numeric($accommodation['distances']['to_berth_m']) ? $accommodation['distances']['to_berth_m'] . ' m' : translate($accommodation['distances']['to_berth_m']) }}</span>
                         </span>
                     @endif
                     @if(!empty($accommodation['distances']['to_parking_m']))
                         <span class="accommodation-card__distance-chip">
-                            🚗 Parking: <span>{{ is_numeric($accommodation['distances']['to_parking_m']) ? $accommodation['distances']['to_parking_m'] . ' m' : $accommodation['distances']['to_parking_m'] }}</span>
+                            🚗 Parking: <span>{{ is_numeric($accommodation['distances']['to_parking_m']) ? $accommodation['distances']['to_parking_m'] . ' m' : translate($accommodation['distances']['to_parking_m']) }}</span>
                         </span>
                     @endif
                 </div>
