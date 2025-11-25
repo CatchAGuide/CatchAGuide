@@ -66,7 +66,7 @@ body {
 
 // Camp Topbar
 .camp-topbar {
-    padding: 32px 0 0;
+    padding: 15px 0 0;
     position: relative;
     z-index: 20;
 
@@ -742,6 +742,78 @@ body {
     
     h3 {
         margin-bottom: 0;
+    }
+}
+
+// Contact Card Styles for Vacations V2
+.contact-card {
+    &__content {
+        @media (max-width: 767px) {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 1rem !important;
+        }
+    }
+
+    &__header {
+        min-width: 0; // Allow text to wrap
+        flex: 1 1 auto;
+        
+        @media (max-width: 767px) {
+            width: 100%;
+        }
+    }
+
+    &__title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #313041;
+        margin-bottom: 0.25rem;
+        
+        @media (max-width: 767px) {
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    &__message {
+        font-size: 0.9rem;
+        line-height: 1.4;
+        
+        @media (max-width: 767px) {
+            font-size: 0.85rem;
+        }
+    }
+
+    .contact-info {
+        white-space: nowrap;
+        flex-shrink: 0;
+        
+        @media (max-width: 767px) {
+            width: 100%;
+            white-space: normal;
+        }
+        
+        i {
+            color: #E85B40;
+        }
+        
+        a {
+            color: #313041;
+            font-weight: 500;
+            
+            &:hover {
+                color: #E85B40;
+            }
+        }
+    }
+
+    .btn-outline-orange {
+        white-space: nowrap;
+        
+        @media (max-width: 767px) {
+            width: 100%;
+            justify-content: center;
+        }
     }
 }
 

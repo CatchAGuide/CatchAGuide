@@ -318,6 +318,7 @@ class CampOfferController extends Controller
         $distanceToFerry = $this->extractDistanceValue($camp->distance_to_ferry_port);
         
         return [
+            'id' => $camp->id,
             'title' => $camp->title,
             'city' => $camp->city,
             'region' => $camp->region,

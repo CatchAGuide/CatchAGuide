@@ -29,10 +29,10 @@
                     <a class="camp-topbar__link" href="#map">{{ __('vacations.show_on_map') }}</a>
                 </div>
             </div>
-            <div class="camp-topbar__actions">
-                <a href="#configurator" class="brand-btn camp-topbar__cta">{{ __('vacations.make_inquiry') }}</a>
-                <span class="camp-topbar__note">{{ __('vacations.best_price_guarantee') }}</span>
-            </div>
+            {{-- <div class="camp-topbar__actions"> --}}
+                {{-- <a href="#configurator" class="brand-btn camp-topbar__cta">{{ __('vacations.make_inquiry') }}</a>
+                <span class="camp-topbar__note">{{ __('vacations.best_price_guarantee') }}</span> --}}
+            {{-- </div> --}}
         </div>
     </header>
 
@@ -83,6 +83,24 @@
                 <a href="#guidings" class="nav-pill">{{ __('vacations.guidings_tours') }}</a>
                 <a href="#boats" class="nav-pill">{{ __('vacations.rental_boats') }}</a>
             </nav>
+
+            <!-- Contact Card -->
+            <div class="contact-card card p-3 mb-4">
+                <div class="contact-card__content d-flex flex-wrap align-items-center gap-3">
+                    <div class="contact-card__header flex-grow-1">
+                        <h5 class="contact-card__title mb-1">@lang('vacations.contact_us')</h5>
+                        <p class="contact-card__message mb-0 text-muted small">@lang('vacations.contact_us_message')</p>
+                    </div>
+                    <div class="contact-info d-flex align-items-center">
+                        <i class="fas fa-phone-alt me-2"></i>
+                        <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>
+                    </div>
+                    <a href="#" id="contact-product" class="btn btn-outline-orange flex-shrink-0" data-bs-toggle="modal" data-bs-target="#contactModal">
+                        @lang('vacations.contact_us_button')
+                        <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
 
             <!-- General Information -->
             <main id="general-info" class="camp-info-grid">
@@ -582,6 +600,151 @@
             },
         }));
     });
+</script>
+
+<!-- Contact Modal -->
+<div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contactModalLabel">{{ __('contact.shareYourQuestion') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {!! ReCaptcha::htmlScriptTagJsApi() !!}
+                <div id="contactFormContainer">
+                    <form id="contactModalForm">
+                        @csrf
+                        <input type="hidden" name="source_type" value="camp">
+                        <input type="hidden" name="source_id" value="{{ $camp['id'] }}">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="@lang('contact.yourName')" name="name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="email" class="form-control" placeholder="@lang('contact.email')" name="email" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mb-3">
+                            @include('includes.forms.phone-input', [
+                                'placeholder' => 'contact.phone'
+                            ])
+                        </div>
+                        <div class="form-group mb-3">
+                            <textarea name="description" class="form-control" rows="4" placeholder="@lang('contact.feedback')" required></textarea>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            {!! htmlFormSnippet() !!}
+                            <button type="button" id="contactSubmitBtn" class="btn btn-orange">@lang('contact.btnSend')</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- Loading Overlay -->
+                <div id="contactLoadingOverlay" style="display: none;">
+                    <div class="d-flex justify-content-center align-items-center flex-column p-4">
+                        <div class="spinner-border text-orange mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-center">@lang('contact.submitting')...</p>
+                    </div>
+                </div>
+                <div class="alert alert-success mt-3" id="contactSuccessMessage" style="display: none;">
+                    @lang('contact.successMessage')
+                </div>
+                <div class="alert alert-danger mt-3" id="contactError" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function(){
+    // Contact form submission handler
+    $('#contactSubmitBtn').on('click', function() {
+        handleContactFormSubmission();
+    });
+    
+    // Also bind on modal shown event to ensure button exists
+    $('#contactModal').on('shown.bs.modal', function() {
+        $('#contactSubmitBtn').off('click').on('click', function() {
+            handleContactFormSubmission();
+        });
+    });
+    
+    function handleContactFormSubmission() {
+        const contactForm = document.getElementById('contactModalForm');
+        const contactFormContainer = document.getElementById('contactFormContainer');
+        const loadingOverlay = document.getElementById('contactLoadingOverlay');
+        const successMessage = document.getElementById('contactSuccessMessage');
+        const contactError = document.getElementById('contactError');
+        
+        // Hide previous messages
+        contactError.style.display = 'none';
+        successMessage.style.display = 'none';
+        
+        // Validate form
+        if (!contactForm.checkValidity()) {
+            contactForm.reportValidity();
+            return;
+        }
+        
+        // Get form data
+        const formData = new FormData(contactForm);
+        
+        // Show loading overlay
+        contactFormContainer.style.display = 'none';
+        loadingOverlay.style.display = 'block';
+        
+        // Submit form via AJAX
+        fetch('{{route('sendcontactmail')}}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Hide loading overlay
+            loadingOverlay.style.display = 'none';
+            
+            if (data.success) {
+                // Reset form
+                contactForm.reset();
+                
+                // Show success message
+                successMessage.style.display = 'block';
+                
+                // Hide contact modal after 2 seconds
+                setTimeout(() => {
+                    const contactModal = bootstrap.Modal.getInstance(document.getElementById('contactModal'));
+                    if (contactModal) {
+                        contactModal.hide();
+                    }
+                    successMessage.style.display = 'none';
+                    contactFormContainer.style.display = 'block';
+                }, 2000);
+            } else {
+                contactError.style.display = 'block';
+                contactError.innerHTML = data.message || 'An error occurred. Please try again.';
+                contactFormContainer.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            // Hide loading overlay and show form again on error
+            loadingOverlay.style.display = 'none';
+            contactFormContainer.style.display = 'block';
+            
+            contactError.style.display = 'block';
+            contactError.innerHTML = error.message || 'An error occurred. Please try again.';
+        });
+    }
+});
 </script>
 
 @endsection
