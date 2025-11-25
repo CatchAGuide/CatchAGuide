@@ -83,18 +83,24 @@
             </div>
 
             <div class="accommodation-card__stats">
+                @if(!empty($accommodation['max_occupancy']))
                 <span class="accommodation-card__stat">
                     <span class="accommodation-card__stat-icon">👥</span>
-                    <span>{{ $accommodation['max_occupancy'] ?? 'Keine Angabe' }}</span>
+                    <span>{{ $accommodation['max_occupancy'] }}</span>
                 </span>
+                @endif
+                @if(!empty($accommodation['number_of_bathrooms']))
                 <span class="accommodation-card__stat">
                     <span class="accommodation-card__stat-icon">🛁</span>
-                    <span>{{ $accommodation['number_of_bathrooms'] ?? 'Keine Angabe' }}</span>
+                    <span>{{ $accommodation['number_of_bathrooms'] }}</span>
                 </span>
+                @endif
+                @if(!empty($accommodation['living_area_sqm']))
                 <span class="accommodation-card__stat">
                     <span class="accommodation-card__stat-icon">📐</span>
-                    <span>{{ $accommodation['living_area_sqm'] ?? 'Keine Angabe' }}</span>
+                    <span>{{ $accommodation['living_area_sqm'] }}</span>
                 </span>
+                @endif
             </div>
 
             <div class="accommodation-card__beds">

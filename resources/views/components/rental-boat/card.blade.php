@@ -98,7 +98,7 @@
         <div class="rental-boat-card__actions">
             <div class="rental-boat-card__actions-column">
                 <div class="rental-boat-card__price">
-                    <div class="rental-boat-card__price-type">{{ $displayPriceType }}</div>
+                    <div class="rental-boat-card__price-type">{{ __('per day') }}</div>
                     <div class="rental-boat-card__price-amount">€{{ number_format($priceAmount, 2) }}</div>
                 </div>
                 {{-- <button class="rental-boat-card__select-btn">

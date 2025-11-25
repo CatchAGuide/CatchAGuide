@@ -1,7 +1,12 @@
 @include('layouts.modal.loginModal')
 @include('layouts.modal.registerModal')
 
-<nav class="navbar-custom short-header {{ request()->is('/') ? 'with-bg' : '' }} {{ request()->is('guidings*') ? 'no-search' : '' }} {{ (request()->is('checkout') || request()->is('checkout/thank-you/*')) ? 'checkout-minimal' : '' }}">
+@php
+    $isCheckout = (request()->is('checkout') || request()->is('checkout/thank-you/*')) ? 1 : 0;
+    $isVacationV2 = (request()->is('vacations-v2') || request()->is('vacations-v2/*')) ? 1 : 0;
+@endphp
+
+<nav class="navbar-custom short-header {{ request()->is('/') ? 'with-bg' : '' }} {{ request()->is('guidings*') ? 'no-search' : '' }} {{ $isCheckout ? 'checkout-minimal' : '' }} {{ ($isCheckout || $isVacationV2) ? 'no-searchbar' : '' }}">
     <div class="container">
         <!-- Top Row -->
         <div class="row align-items-center">
@@ -33,7 +38,7 @@
                         </form>
                     </div>
                     
-                    @if(!(request()->is('checkout') || request()->is('checkout/thank-you/*')))
+                    @if(!$isCheckout)
                     <a href="#" class="nav-link become-guide-link" data-bs-toggle="modal" data-bs-target="#registerModal">
                         @lang('homepage.header-become-guide')
                     </a>
@@ -94,7 +99,7 @@
             </div>
             @endif
             <!-- Categories Row - Mobile -->
-            @if(!(request()->is('checkout') || request()->is('checkout/thank-you/*')))
+            @if(!$isCheckout)
             <div class="col-12 d-md-none mt-2">
                 <div class="d-flex categories-mobile">
                     <a href="{{ route('guidings.index') }}" 
@@ -125,7 +130,7 @@
             @endphp
 
             <!-- Mobile Search Summary -->
-            @if(!$isVacation && !(request()->is('checkout') || request()->is('checkout/thank-you/*')))
+            @if(!$isVacation && !$isCheckout)
                 <div class="col-12 d-md-none mt-2">
                     <div class="search-summary" role="button" id="headerSearchTrigger">
                         <i class="fas fa-search me-2"></i>
@@ -148,7 +153,7 @@
                         @endif
                     </div>
                 </div>
-            @elseif(!(request()->is('checkout') || request()->is('checkout/thank-you/*')))
+            @elseif(!($isCheckout || $isVacationV2))
                 <div id="filterContainer" class="col-12 d-md-none mt-3">
                     <form class="search-form row gx-2 pe-0" id="global-search1" action="{{ $isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index') }}" method="get">                
                         <div id="mobileherofilter" class="shadow-lg bg-white p-2 rounded">
@@ -171,7 +176,7 @@
         </div>
 
         <!-- Categories Row - Desktop -->
-        @if(!(request()->is('checkout') || request()->is('checkout/thank-you/*')))
+        @if(!$isCheckout)
         <div class="row categories-row d-none d-md-block">
             <div class="col-12">
                 <div class="d-flex">
@@ -194,7 +199,7 @@
     </div>
 
     <!-- Search Row - Floating (Desktop Only) -->
-    @if(!(request()->is('checkout') || request()->is('checkout/thank-you/*')))
+    @if(!($isCheckout || $isVacationV2))
     <div class="floating-search-container d-none d-md-block">
         <div class="container">
             <form id="global-search" action="{{$isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index')}}" method="get" onsubmit="return validateSearch(event, 'searchPlaceShortDesktop')">
@@ -269,6 +274,12 @@
     padding: 16px 0 35px;
     position: relative;
     margin-bottom: 30px;
+}
+
+/* Adjust spacing when searchbar is hidden */
+.short-header.navbar-custom.no-searchbar {
+    padding-bottom: 16px;
+    margin-bottom: 0;
 }
 
 .short-header .floating-search-container {
@@ -352,6 +363,12 @@ input[type=number] {
         padding: 16px 0 16px;
         margin-bottom: 15px;
     }
+    
+    /* Adjust spacing when searchbar is hidden on mobile */
+    .short-header.navbar-custom.no-searchbar {
+        padding-bottom: 16px;
+        margin-bottom: 0;
+    }
     /* Categories container with hidden scrollbar */
     .short-header.navbar-custom .categories-mobile {
         margin: 8px 20px 0 !important;
@@ -434,6 +451,13 @@ input[type=number] {
     .new-filter-btn.mobile{
         display: none;
     }
+    
+    /* Adjust spacing when searchbar is hidden on desktop */
+    .short-header.navbar-custom.no-searchbar {
+        padding-bottom: 16px;
+        margin-bottom: 0;
+    }
+    
     .short-header .container {
         max-width: 1200px;
         padding: 0 15px;
@@ -535,6 +559,11 @@ input[type=number] {
     margin-bottom: 45px !important;
     position: relative;
     z-index: 1;
+}
+
+/* Adjust categories row margin when searchbar is hidden */
+.short-header.navbar-custom.no-searchbar .categories-row {
+    margin-bottom: 16px !important;
 }
 
 /* Profile Image Styles - Scoped to navbar-custom header only */
