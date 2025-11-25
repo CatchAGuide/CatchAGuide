@@ -385,6 +385,11 @@
 
     <!-- Full Width Card Sections -->
     <div class="camp-container">
+        <!-- Map Section -->
+        <div id="map" class="mb-5" style="height: 400px;">
+            <!-- Google Map will be rendered here -->
+        </div>
+
         <!-- Accommodations Section -->
         @if (count($accommodations) > 0)
         <section id="accommodations" class="camp-section mb-3">
@@ -686,7 +691,7 @@ $(document).ready(function(){
         handleContactFormSubmission();
     });
     
-    // Also bind on modal shown event to ensure button exists
+    // Also bind on modal shown event to ensure the button exists
     $('#contactModal').on('shown.bs.modal', function() {
         $('#contactSubmitBtn').off('click').on('click', function() {
             handleContactFormSubmission();
@@ -765,6 +770,36 @@ $(document).ready(function(){
 });
 </script>
 
+@endsection
+
+@section('js_after')
+<script>
+$(document).ready(function(){
+    initMap();
+});
+
+function initMap() {
+    @php
+        // Try to get coordinates from camp data (support multiple possible field names)
+        $lat = $camp['latitude'] ?? $camp['lat'] ?? 41.40338;
+        $lng = $camp['longitude'] ?? $camp['lng'] ?? 2.17403;
+    @endphp
+    var location = { lat: {{ $lat }}, lng: {{ $lng }} };
+    var map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 10,
+        center: location,
+        mapTypeControl: false,
+        streetViewControl: false,
+        mapId: '8f348c2f6c51f6f0'
+    });
+
+    // Create an AdvancedMarkerElement with the required Map ID
+    const marker = new google.maps.marker.AdvancedMarkerElement({
+        map,
+        position: location,
+    });
+}
+</script>
 @endsection
 
 @push('scripts')
