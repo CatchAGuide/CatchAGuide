@@ -37,27 +37,45 @@
     </header>
 
     <!-- Gallery -->
-    <div class="camp-container camp-gallery">
-        <div class="camp-gallery__main" data-gallery-index="0">
-            <img src="{{ $primaryImage }}" alt="{{ $camp['title'] }}">
+    <div class="camp-container">
+        <div class="camp-gallery">
+            <div class="camp-gallery__main" data-gallery-index="0">
+                <img src="{{ $primaryImage }}" alt="{{ $camp['title'] }}">
+            </div>
+            <div class="camp-gallery__right">
+                @foreach ($topRightImages as $index => $image)
+                    <div class="camp-gallery__thumb" data-gallery-index="{{ $index + 1 }}">
+                        <img src="{{ $image }}" alt="{{ $camp['title'] }}">
+                    </div>
+                @endforeach
+            </div>
+            <div class="camp-gallery__bottom">
+                @foreach ($bottomStripImages as $index => $image)
+                    <div class="camp-gallery__thumb" data-gallery-index="{{ $index + 3 }}">
+                        <img src="{{ $image }}" alt="{{ $camp['title'] }}">
+                        @if($loop->last && $remainingGalleryCount > 0)
+                            <div class="camp-gallery__more">+{{ $remainingGalleryCount }}</div>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
         </div>
-        <div class="camp-gallery__right">
-            @foreach ($topRightImages as $index => $image)
-                <div class="camp-gallery__thumb" data-gallery-index="{{ $index + 1 }}">
-                    <img src="{{ $image }}" alt="{{ $camp['title'] }}">
-                </div>
-            @endforeach
+        
+        <!-- Mobile Horizontal Scrollable Gallery (hidden on desktop) -->
+        @php
+            $mobileCarouselImages = array_slice($galleryImages, 1); // All images except the first (primary)
+        @endphp
+        @if(count($mobileCarouselImages) > 0)
+        <div class="camp-gallery__mobile-carousel">
+            <div class="camp-gallery__mobile-carousel-scroll">
+                @foreach($mobileCarouselImages as $index => $image)
+                    <div class="camp-gallery__mobile-carousel-item" data-gallery-index="{{ $index + 1 }}">
+                        <img src="{{ $image }}" alt="{{ $camp['title'] }} - Image {{ $index + 2 }}">
+                    </div>
+                @endforeach
+            </div>
         </div>
-        <div class="camp-gallery__bottom">
-            @foreach ($bottomStripImages as $index => $image)
-                <div class="camp-gallery__thumb" data-gallery-index="{{ $index + 3 }}">
-                    <img src="{{ $image }}" alt="{{ $camp['title'] }}">
-                    @if($loop->last && $remainingGalleryCount > 0)
-                        <div class="camp-gallery__more">+{{ $remainingGalleryCount }}</div>
-                    @endif
-                </div>
-            @endforeach
-        </div>
+        @endif
     </div>
 
     <!-- Gallery Modal -->
