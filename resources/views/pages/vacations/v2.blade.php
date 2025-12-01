@@ -772,6 +772,40 @@ document.addEventListener('DOMContentLoaded', function () {
 
 @endsection
 
+@section('css_after')
+<style>
+  /* Mobile optimizations for contact modal form */
+  @media (max-width: 576px) {
+    /* Stack phone country code + number vertically inside modal */
+    #contactModal .phone-input-container .d-flex {
+      flex-direction: column;
+    }
+
+    #contactModal .phone-input-container .d-flex > * {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin-bottom: 0.5rem;
+      border-radius: 0.25rem !important;
+    }
+
+    /* Stack ReCaptcha + submit button vertically and make button full width */
+    #contactModal .modal-body .d-flex.justify-content-between {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1rem;
+    }
+
+    #contactModal .modal-body .d-flex.justify-content-between > * {
+      width: 100% !important;
+    }
+
+    #contactModal .btn.btn-orange {
+      width: 100%;
+    }
+  }
+</style>
+@endsection
+
 @section('js_after')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
