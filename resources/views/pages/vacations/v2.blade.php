@@ -685,7 +685,7 @@
 </div>
 
 <script>
-$(document).ready(function(){
+document.addEventListener('DOMContentLoaded', function () {
     // Contact form submission handler
     $('#contactSubmitBtn').on('click', function() {
         handleContactFormSubmission();
@@ -774,7 +774,7 @@ $(document).ready(function(){
 
 @section('js_after')
 <script>
-$(document).ready(function(){
+document.addEventListener('DOMContentLoaded', function () {
     initMap();
 });
 

@@ -52,7 +52,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'included_services' => 'Inclusive services',
     'per_person' => 'per Person',
     'overall' => 'Overall',
-    'contact_us' => 'Contact us',
+    'contact_us' => 'Request Booking',
     'contact_us_message' => 'Do you have questions about this vacation? Our team is here to help!',
     'contact_us_button' => 'Contact Form',
     'book_vacations' => 'Book Vacation',
