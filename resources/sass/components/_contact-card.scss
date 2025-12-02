@@ -1,26 +1,36 @@
 /* Add Contact Card styles */
 
 .contact-card {
-    background: $card !important;
-    border-radius: 8px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    border: 1px solid #eee;
+    background: $card;
+    border-radius: 12px;
+    padding: 1.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    transition: box-shadow 0.2s ease;
+    
+    &:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+    
     .contact-card__title {
         color: #313041;
         margin-bottom: 1rem;
         font-weight: 600;
     }
+    
     .contact-card__content {
         color: #313041;
     }
+    
     .contact-info {
         color: #313041;
         font-weight: 500;
         margin-bottom: 1rem;
+        
         a {
             color: inherit;
         }
+        
         &:hover {
             a,
             i {
@@ -28,14 +38,22 @@
             }
         }
     }
+    
     .btn-outline-orange {
-        border-color: #E85B40 !important;
-        transition: all 0.3s ease;
+        border-color: #E85B40;
+        transition: all 0.2s ease;
         background-color: #E85B40;
         color: #fff;
+        
         &:hover {
-            background-color: #fff !important;
-            color: #E85B40 !important;
+            background-color: #d14a2e;
+            border-color: #d14a2e;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(232, 91, 64, 0.3);
+        }
+        
+        &:active {
+            transform: translateY(0);
         }
     }
 }

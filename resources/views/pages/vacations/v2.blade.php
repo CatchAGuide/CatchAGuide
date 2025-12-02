@@ -104,16 +104,16 @@
 
             <!-- Contact Card -->
             <div class="contact-card card p-3 mb-4">
-                <div class="contact-card__content d-flex flex-wrap align-items-center gap-3">
-                    <div class="contact-card__header flex-grow-1">
+                <div class="contact-card__content">
+                    <div class="contact-card__header">
                         <h5 class="contact-card__title mb-1">@lang('vacations.contact_us')</h5>
                         <p class="contact-card__message mb-0 text-muted small">@lang('vacations.contact_us_message')</p>
                     </div>
-                    <div class="contact-info d-flex align-items-center">
+                    <div class="contact-info">
                         <i class="fas fa-phone-alt me-2"></i>
                         <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>
                     </div>
-                    <a href="#" id="contact-product" class="btn btn-outline-orange flex-shrink-0" data-bs-toggle="modal" data-bs-target="#contactModal">
+                    <a href="#" id="contact-product" class="btn btn-outline-orange" data-bs-toggle="modal" data-bs-target="#contactModal">
                         @lang('vacations.contact_us_button')
                         <i class="fas fa-arrow-right ms-2"></i>
                     </a>
