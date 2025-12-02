@@ -50,9 +50,9 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'included_services' => 'Inklusivleistungen',
     'per_person' => 'pro Person',
     'overall' => 'Insgesamt',
-    'contact_us' => 'Kontaktieren Sie uns',
-    'contact_us_message' => 'Haben Sie Fragen zu diesem Urlaub? Unser Team ist hier, um zu helfen!',
-    'contact_us_button' => 'Kontaktformular',
+    'contact_us' => 'Unverbindliche Buchungsanfrage',
+    'contact_us_message' => 'Stell eine kurze Anfrage zu deinem gewünschten Zeitraum. Wir bestätigen dir in Kürze, ob der Angelurlaub verfügbar ist.',
+    'contact_us_button' => 'Jetzt anfragen',
     'book_vacations' => 'Urlaub buchen',
     'facilities' => 'Ausstattung',
 

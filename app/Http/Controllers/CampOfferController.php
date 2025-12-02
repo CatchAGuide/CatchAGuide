@@ -418,7 +418,7 @@ class CampOfferController extends Controller
         $galleryCount = count($galleryImages);
 
         // Process inclusives
-        $inclusiveItems = collect(is_array($boat->inclusions) ? $boat->inclusions : [])
+        $inclusiveItems = collect(is_array($boat->boat_extras) ? $boat->boat_extras : [])
             ->map(function ($item) {
                 return is_array($item) ? ($item['name'] ?? ($item['value'] ?? json_encode($item))) : $item;
             })

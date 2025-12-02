@@ -839,58 +839,86 @@ body {
 // Contact Card Styles for Vacations V2
 .contact-card {
     &__content {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto auto;
+        gap: 1rem 1.5rem;
+        align-items: start;
+        
         @media (max-width: 767px) {
-            flex-direction: column;
-            align-items: flex-start !important;
-            gap: 1rem !important;
+            grid-template-columns: 1fr;
+            grid-template-rows: auto;
+            gap: 1rem;
         }
     }
 
     &__header {
-        min-width: 0; // Allow text to wrap
-        flex: 1 1 auto;
+        grid-column: 1;
+        grid-row: 1;
+        min-width: 0;
         
         @media (max-width: 767px) {
-            width: 100%;
+            grid-column: 1;
+            grid-row: 1;
         }
     }
 
     &__title {
-        font-size: 1.1rem;
+        font-size: 1.25rem;
         font-weight: 600;
         color: #313041;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
         
         @media (max-width: 767px) {
+            font-size: 1.1rem;
             margin-bottom: 0.5rem;
         }
     }
 
     &__message {
-        font-size: 0.9rem;
-        line-height: 1.4;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: #6b7280;
+        margin: 0;
         
         @media (max-width: 767px) {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
     }
 
     .contact-info {
+        grid-column: 2;
+        grid-row: 2;
+        display: flex;
+        align-items: center;
         white-space: nowrap;
-        flex-shrink: 0;
+        align-self: start;
+        
+        @media (min-width: 768px) {
+            // On desktop, position above button on the right
+            margin-bottom: 0.5rem;
+        }
         
         @media (max-width: 767px) {
+            grid-column: 1;
+            grid-row: 2;
             width: 100%;
             white-space: normal;
+            margin-bottom: 0;
         }
         
         i {
             color: #E85B40;
+            font-size: 1.1rem;
+            margin-right: 0.5rem;
         }
         
         a {
             color: #313041;
             font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.2s ease;
             
             &:hover {
                 color: #E85B40;
@@ -899,11 +927,26 @@ body {
     }
 
     .btn-outline-orange {
+        grid-column: 1;
+        grid-row: 2;
         white-space: nowrap;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        border-radius: 0.5rem;
+        transition: all 0.2s ease;
+        align-self: end;
+        
+        @media (min-width: 768px) {
+            width: auto;
+            max-width: fit-content;
+        }
         
         @media (max-width: 767px) {
+            grid-column: 1;
+            grid-row: 3;
             width: 100%;
             justify-content: center;
+            align-self: stretch;
         }
     }
 }
