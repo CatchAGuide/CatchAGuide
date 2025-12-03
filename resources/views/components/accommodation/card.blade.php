@@ -208,7 +208,8 @@
                             default => ucfirst(str_replace('_', ' ', $priceType))
                         };
                     @endphp
-                    <div class="accommodation-card__price-type">{{ $translatedPriceType }}</div>
+                    {{-- <div class="accommodation-card__price-type">{{ $translatedPriceType }}</div> --}}
+                    <div class="accommodation-card__price-type">Per Day</div>
                     <div class="accommodation-card__price-amount">€{{ number_format($accommodation['price']['amount'] ?? 0, 2) }}</div>
                 </div>
                 {{-- <button class="accommodation-card__select-btn">

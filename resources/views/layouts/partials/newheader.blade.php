@@ -98,10 +98,10 @@
                        class="me-4 text-white text-decoration-none {{ request()->is('guidings*') ? 'active' : '' }}">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
-                    {{-- <a href="{{ route('vacations.index') }}" 
+                    <a href="{{ route('vacations.index') }}" 
                        class="me-4 text-white text-decoration-none {{ request()->is('vacations*') ? 'active' : '' }}">
                         <i class="fas fa-map-signs me-2"></i>@lang('homepage.header-vacations')
-                    </a> --}}
+                    </a>
                     <a href="{{ route($blogPrefix.'.index') }}" 
                        class="text-white text-decoration-none {{ request()->is('angelmagazin*') ? 'active' : '' }}">
                         <i class="fas fa-book-open me-2"></i>@lang('homepage.filter-magazine')
@@ -195,10 +195,10 @@
                        class="me-4 text-white text-decoration-none {{ request()->is('guidings*') ? 'active' : '' }}">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
-                    {{-- <a href="{{ route('vacations.index') }}" 
+                    <a href="{{ route('vacations.index') }}" 
                        class="me-4 text-white text-decoration-none {{ request()->is('vacations*') ? 'active' : '' }}">
                         <i class="fas fa-map-signs me-2"></i>@lang('homepage.header-vacations')
-                    </a> --}}
+                    </a>
                     <a href="{{ route($blogPrefix.'.index') }}" 
                        class="me-4 text-white text-decoration-none {{ request()->is('angelmagazin*') ? 'active' : '' }}">
                         <i class="fas fa-book-open me-2"></i>@lang('homepage.filter-magazine')

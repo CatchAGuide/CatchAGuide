@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Vacation;
+use App\Models\Camp;
 use App\Models\Destination;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Session;
@@ -184,7 +185,8 @@ class VacationsController extends Controller
             Session::put('random_seed', $randomSeed);
         }
 
-        $query = Vacation::where('status', 1)->where('country', $country);
+        // $query = Vacation::where('status', 1)->where('country', $country);
+        $query = Camp::where('status', 'active')->where('country', $country);
 
         // Build title based on filters
         if($request->has('page')){
@@ -235,21 +237,21 @@ class VacationsController extends Controller
 
         $title .= __('vacations.Country') . ' ' . $country . ' | ';
         if(!empty($placeLat) && !empty($placeLng) && !empty($request->get('place'))){
-            $title .= __('vacations.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
-            $vacationFilter = Vacation::locationFilter($request->get('city'), $request->get('country'), $request->get('region') ?? null, $placeLat, $placeLng);
-            $searchMessage = $vacationFilter['message'];
+            // $title .= __('vacations.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
+            // $vacationFilter = Vacation::locationFilter($request->get('city'), $request->get('country'), $request->get('region') ?? null, $placeLat, $placeLng);
+            // $searchMessage = $vacationFilter['message'];
             
-            // Add a subquery to order by the position in the filtered IDs array
-            if (!empty($vacationFilter['ids'])) {
-                $orderByCase = 'CASE vacations.id ';
-                foreach($vacationFilter['ids'] as $position => $id) {
-                    $orderByCase .= "WHEN $id THEN $position ";
-                }
-                $orderByCase .= 'ELSE ' . count($vacationFilter['ids']) . ' END';
+            // // Add a subquery to order by the position in the filtered IDs array
+            // if (!empty($vacationFilter['ids'])) {
+            //     $orderByCase = 'CASE vacations.id ';
+            //     foreach($vacationFilter['ids'] as $position => $id) {
+            //         $orderByCase .= "WHEN $id THEN $position ";
+            //     }
+            //     $orderByCase .= 'ELSE ' . count($vacationFilter['ids']) . ' END';
                 
-                $query->whereIn('vacations.id', $vacationFilter['ids'])
-                      ->orderByRaw($orderByCase);
-            }
+            //     $query->whereIn('vacations.id', $vacationFilter['ids'])
+            //           ->orderByRaw($orderByCase);
+            // }
         }
 
         $vacations_total = $query->count();
@@ -269,7 +271,7 @@ class VacationsController extends Controller
         }
        
         // Use select distinct on id to ensure no duplicates
-        $query->select('vacations.*')->distinct('id');
+        $query->select('camps.*')->distinct('id');
         
         // Apply pagination - use a smaller number like 5 for testing
         $vacations = $query->paginate(6)->appends(request()->except('page'));

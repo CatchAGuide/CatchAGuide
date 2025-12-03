@@ -3,10 +3,9 @@
 
 @php
     $isCheckout = (request()->is('checkout') || request()->is('checkout/thank-you/*')) ? 1 : 0;
-    $isVacationV2 = (request()->is('vacations-v2') || request()->is('vacations-v2/*')) ? 1 : 0;
 @endphp
 
-<nav class="navbar-custom short-header {{ request()->is('/') ? 'with-bg' : '' }} {{ request()->is('guidings*') ? 'no-search' : '' }} {{ $isCheckout ? 'checkout-minimal' : '' }} {{ ($isCheckout || $isVacationV2) ? 'no-searchbar' : '' }}">
+<nav class="navbar-custom short-header {{ request()->is('/') ? 'with-bg' : '' }} {{ request()->is('guidings*') ? 'no-search' : '' }} {{ $isCheckout ? 'checkout-minimal' : '' }} {{ ($isCheckout) ? 'no-searchbar' : '' }}">
     <div class="container">
         <!-- Top Row -->
         <div class="row align-items-center">
@@ -106,10 +105,10 @@
                        class="me-4 text-white text-decoration-none {{ request()->is('guidings*') ? 'active' : '' }}">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
-                    {{-- <a href="{{ route('vacations.index') }}" 
+                    <a href="{{ route('vacations.index') }}" 
                        class="me-4 text-white text-decoration-none {{ request()->is('vacations*') ? 'active' : '' }}">
                         <i class="fas fa-map-signs me-2"></i>@lang('homepage.header-vacations')
-                    </a> --}}
+                    </a>
                     <a href="{{ route($blogPrefix.'.index') }}" 
                        class="me-4 text-white text-decoration-none {{ request()->is('angelmagazin*') ? 'active' : '' }}">
                         <i class="fas fa-book-open me-2"></i>@lang('homepage.filter-magazine')
@@ -153,7 +152,7 @@
                         @endif
                     </div>
                 </div>
-            @elseif(!($isCheckout || $isVacationV2))
+            @elseif(!($isCheckout))
                 <div id="filterContainer" class="col-12 d-md-none mt-3">
                     <form class="search-form row gx-2 pe-0" id="global-search1" action="{{ $isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index') }}" method="get">                
                         <div id="mobileherofilter" class="shadow-lg bg-white p-2 rounded">
@@ -184,10 +183,10 @@
                        class="me-4 text-white text-decoration-none {{ request()->is('guidings*') ? 'active' : '' }}">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
-                    {{-- <a href="{{ route('vacations.index') }}" 
+                    <a href="{{ route('vacations.index') }}" 
                        class="me-4 text-white text-decoration-none {{ request()->is('vacations*') ? 'active' : '' }}">
                         <i class="fas fa-map-signs me-2"></i>@lang('homepage.header-vacations')
-                    </a> --}}
+                    </a>
                     <a href="{{ route($blogPrefix.'.index') }}" 
                        class="me-4 text-white text-decoration-none {{ request()->is('angelmagazin*') ? 'active' : '' }}">
                         <i class="fas fa-book-open me-2"></i>@lang('homepage.filter-magazine')
@@ -199,7 +198,7 @@
     </div>
 
     <!-- Search Row - Floating (Desktop Only) -->
-    @if(!($isCheckout || $isVacationV2))
+    @if(!($isCheckout))
     <div class="floating-search-container d-none d-md-block">
         <div class="container">
             <form id="global-search" action="{{$isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index')}}" method="get" onsubmit="return validateSearch(event, 'searchPlaceShortDesktop')">

@@ -46,6 +46,50 @@ class Camp extends Model
         'best_travel_times' => 'array',
     ];
 
+    public function getLowestPrice(): float
+    {
+        $lowestPackagePrice = $this->packages->map(function ($package) {
+            $dynamicFields = is_string($package->dynamic_fields) ? json_decode($package->dynamic_fields, true) : $package->dynamic_fields;
+            if (!isset($dynamicFields['prices']) || empty($dynamicFields['prices'])) {
+                return PHP_FLOAT_MAX;
+            }
+
+            // Calculate price per person for each capacity and round to whole numbers
+            $pricesPerPerson = collect($dynamicFields['prices'])->map(function ($price, $index) {
+                $personCount = $index + 1; // Index 0 = 1 person, 1 = 2 persons, etc.
+                return round((float)$price / $personCount); // Round to whole number
+            });
+
+            return $pricesPerPerson->min();
+        })->filter(function($price) {
+            return $price !== PHP_FLOAT_MAX;
+        })->min();
+
+        $lowestAccommodationPrice = $this->accommodations->map(function ($accommodation) {
+            $dynamicFields = is_string($accommodation->dynamic_fields) ? json_decode($accommodation->dynamic_fields, true) : $accommodation->dynamic_fields;
+            if (!isset($dynamicFields['prices']) || empty($dynamicFields['prices'])) {
+                return PHP_FLOAT_MAX;
+            }
+
+            // Calculate price per person for each capacity and round to whole numbers
+            $pricesPerPerson = collect($dynamicFields['prices'])->map(function ($price, $index) {
+                $personCount = $index + 1;
+                return round((float)$price / $personCount); // Round to whole number
+            });
+
+            return $pricesPerPerson->min();
+        })->filter(function($price) {
+            return $price !== PHP_FLOAT_MAX;
+        })->min();
+
+        // Return the lower of the two prices, defaulting to the non-PHP_FLOAT_MAX value if one exists
+        $lowestPrice = $lowestPackagePrice && $lowestAccommodationPrice 
+            ? min($lowestPackagePrice, $lowestAccommodationPrice)
+            : ($lowestPackagePrice ?: $lowestAccommodationPrice ?: 0);
+
+        return round((float)$lowestPrice); // Round the final result to whole number
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

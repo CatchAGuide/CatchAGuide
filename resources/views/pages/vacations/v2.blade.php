@@ -96,9 +96,9 @@
         <div class="camp-layout__content">
             <!-- Navigation -->
             <nav class="camp-nav flex flex-wrap text-sm">
-                <a href="#general-info" class="nav-pill">{{ __('vacations.general_information') }}</a>
+                {{-- <a href="#general-info" class="nav-pill">{{ __('vacations.general_information') }}</a> --}}
                 <a href="#accommodations" class="nav-pill">{{ __('vacations.accommodations') }}</a>
-                <a href="#guidings" class="nav-pill">{{ __('vacations.guidings_tours') }}</a>
+                {{-- <a href="#guidings" class="nav-pill">{{ __('vacations.guidings_tours') }}</a> --}}
                 <a href="#boats" class="nav-pill">{{ __('vacations.rental_boats') }}</a>
             </nav>
 
