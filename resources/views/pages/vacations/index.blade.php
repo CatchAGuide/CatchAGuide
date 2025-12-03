@@ -167,6 +167,71 @@
         margin: 0;
         white-space: nowrap;
     }
+    
+    /* Fix layout for vacations listing */
+    .country-listing-item {
+        padding-left: 15px;
+    }
+    
+    @media (max-width: 991px) {
+        .country-listing-item {
+            padding-left: 0;
+            margin-top: 20px;
+        }
+    }
+    
+    /* Ensure proper spacing for vacation cards */
+    .guiding-list-item {
+        margin-bottom: 20px !important;
+    }
+    
+    .carousel-image {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+    
+    /* Fix vacation item details layout */
+    .vacations-item-row {
+        margin-top: 15px;
+    }
+    
+    .vacations-info-container {
+        margin-bottom: 0;
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+    }
+    
+    .vacations-item-row .d-flex {
+        flex-wrap: wrap;
+    }
+    
+    @media (max-width: 768px) {
+        .vacations-item-row .d-flex {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px !important;
+        }
+        .vacations-info-container {
+            display: flex;
+        }
+    }
+    
+    /* Ensure map placeholder button is centered - override SCSS */
+    #vacations-category #map-placeholder {
+        position: relative !important;
+    }
+    
+    #vacations-category #map-placeholder button {
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: auto !important;
+        margin: 0 !important;
+    }
 </style>
 @endsection
 
@@ -215,7 +280,8 @@
                 </div>
                 <h5 class="mb-2">{{ translate('Vacations in ' . $row_data->name) }}</h5>
                 <div class="row mb-5">
-                    <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
+                    {{-- Mobile sorting and filter section - commented out --}}
+                    {{-- <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
                         <div class="d-grid gap-2 w-100">
                             <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
                                 <div class="btn-group border rounded-start cag-btn-inverted" role="group" style=" width:30%;">
@@ -249,14 +315,15 @@
 
                             </div>
                         </div>
-                    </div>
+                    </div> --}}
                     <div class="col-sm-12 col-lg-3">
                         <div class="card mb-2 d-none d-sm-block">
                             <div id="map-placeholder">
                                 <button class="btn btn-primary read-more-btn" data-bs-target="#mapModal" data-bs-toggle="modal">@lang('vacations.show_on_map')</button>
                             </div>
                         </div>
-                        <div class="card d-block d-none d-sm-block mb-1">
+                        {{-- Sorting section - commented out --}}
+                        {{-- <div class="card d-block d-none d-sm-block mb-1">
                             <div class="card-header">
                                 @lang('message.sortby'):
                             </div>
@@ -284,8 +351,9 @@
                                     </ul>
                                 </div>
                             </div>
-                        </div>
-                        <div class="card d-block d-none d-sm-block">
+                        </div> --}}
+                        {{-- Filter section - commented out --}}
+                        {{-- <div class="card d-block d-none d-sm-block">
                             <div class="card-header">
                                 @lang('vacations.filter_by'):
                             </div>
@@ -323,7 +391,7 @@
                                     <button class="btn btn-sm theme-primary btn-theme-new w-100" type="submit">@lang('vacations.search')</button>
                                 </form> 
                             </div>
-                        </div>
+                        </div> --}}
                     </div>
                     <div class="col-sm-12 col-lg-9 country-listing-item">
                         @foreach($vacations as $vacation)
@@ -354,7 +422,7 @@
                                         </div>
                                     </div>
                                     <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 p-md-3 mt-md-1">
-                                    <a href="{{ route('vacations.show', [$vacation->id, $vacation->slug]) }}" 
+                                    <a href="{{ route('vacations.show', [$vacation->slug]) }}" 
                                        onclick="event.preventDefault(); 
                                                 document.getElementById('store-destination-{{ $vacation->id }}').submit();">
                                         <div class="guidings-item">
@@ -369,7 +437,7 @@
                                             </div>
                                             <div class="inclusions-price">
                                             <div class="guiding-item-price">
-                                                <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$vacation->getLowestPrice()}}€ p.P.</span></h5>
+                                                {{-- <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$vacation->getLowestPrice()}}€ p.P.</span></h5> --}}
                                                 <div class="d-none d-flex flex-column mt-4">
                                                 </div>
                                             </div>
@@ -378,31 +446,31 @@
                                         <div class="vacations-item-row">
                                             <div class="vacations-item-row-top">
                                             </div>
+                                            <div class="d-flex flex-wrap gap-3 align-items-center">
                                                 <div class="vacations-info-container"> 
                                                     <span class="fw-bold">{{translate('Boat Available')}}:</span>
-                                                    <span class="text-regular">{{ count($vacation->boats) || $vacation->has_boat > 0 ? translate('Available') : translate('Unavailable') }}</span>
+                                                    {{-- <span class="text-regular">{{ count($vacation->boats) || $vacation->has_boat > 0 ? translate('Available') : translate('Unavailable') }}</span> --}}
                                                 </div>
                                                 <div class="vacations-info-container"> 
                                                     <span class="fw-bold">{{translate('Distance to the water')}}:</span>
-                                                    <div class="">
-                                                        {{ $vacation->water_distance }}
-                                                    </div>
+                                                    <span class="ms-1">{{ $vacation->water_distance }}</span>
                                                 </div>
-                                            <div class="vacations-info-container"> 
-                                                <span class="fw-bold">{{translate('Target Fish')}}:</span>
-                                                <div class="d-flex">
-                                                    @php
-                                                        $target_fish = $vacation->target_fish;
-                                                    @endphp
-                                                    <ul class="list-unstyled mb-0 d-flex">
-                                                        {{ translate(\Str::limit(implode(', ', $target_fish), limit:50 )) }}
-                                                    </ul>
+                                                <div class="vacations-info-container"> 
+                                                    <span class="fw-bold">{{translate('Target Fish')}}:</span>
+                                                    <div class="d-inline-flex ms-1">
+                                                        @php
+                                                            $target_fish = $vacation->target_fish;
+                                                        @endphp
+                                                        <ul class="list-unstyled mb-0 d-flex">
+                                                            {{-- {{ translate(\Str::limit(implode(', ', $target_fish), limit:50 )) }} --}}
+                                                        </ul>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>  
                                     </a>
                                     <form id="store-destination-{{ $vacation->id }}" 
-                                          action="{{ route('vacations.show', [$vacation->id, $vacation->slug]) }}" 
+                                          action="{{ route('vacations.show', [$vacation->slug]) }}" 
                                           method="GET" style="display: none;">
                                         @php
                                             session(['vacation_destination_id' => $row_data->id]);
@@ -668,12 +736,6 @@
         const infowindows = [];
         const uniqueCoordinates = [];
         let isDuplicateCoordinate;  
-    
-        @if($allVacations->isEmpty())
-            @include('pages.vacations.partials.maps',['vacations' => $othervacations])
-        @else
-            @include('pages.vacations.partials.maps',['vacations' => $allVacations])
-        @endif
     
         function getRandomOffset() {
           return (Math.random() - 0.5) * 0.0080;

@@ -123,7 +123,7 @@ class CampOfferController extends Controller
     }
     
 
-    public function show($campId)
+    public function show($slug)
     {
         // Fetch camp from database with relationships
         $camp = Camp::with([
@@ -131,7 +131,8 @@ class CampOfferController extends Controller
             'rentalBoats',
             'guidings.fishingFrom',
             'facilities'
-        ])->findOrFail($campId);
+        ])->where('slug', $slug)
+        ->firstOrFail();
         
         // Map camp data to view format
         $campData = $this->mapCampData($camp);

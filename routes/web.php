@@ -33,9 +33,11 @@ use App\Http\Controllers\RatingsController;
 use App\Http\Controllers\SiteMapController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\GuidingsController;
 use App\Http\Controllers\LanguageController;
+use \App\Http\Controllers\CampOfferController;
 use App\Http\Controllers\Blog\BlogController;
 use App\Http\Controllers\VacationsController;
 use App\Http\Controllers\FileUploadController;
@@ -50,7 +52,6 @@ use App\Http\Controllers\VacationBookingController;
 use App\Http\Controllers\CategoryTargetFishController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Category\DestinationCountryController;
-use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TestController;
 
 /*
@@ -238,11 +239,12 @@ Route::post('guidings/generate-cards', [GuidingsController::class, 'generateCard
 
 Route::get('vacations', [VacationsController::class, 'index'])->name('vacations.index')->middleware('ddos:search');
 Route::resource('vacations', VacationsController::class)->except(['index', 'show']);
-Route::get('vacations/{slug}', [VacationsController::class, 'show'])->name('vacations.show');
+Route::get('vacations/{slug}', [CampOfferController::class, 'show'])->name('vacations.show');
 Route::post('/vacation-booking', [VacationBookingController::class, 'store'])
     ->name('vacation.booking.store')
     ->middleware('web');
-Route::get('vacations/location/{country}', [VacationsController::class, 'category'])->name('vacations.category')->middleware('ddos:search');
+Route::get('vacations/c/{country}', [VacationsController::class, 'category'])->name('vacations.category')->middleware('ddos:search');
+Route::get('vacations-v2/{campId}', [CampOfferController::class, 'show'])->name('vacations.v2');
 
 Route::get('searchrequest', [GuidingsController::class, 'bookingrequest'])->name('guidings.request');
 Route::post('searchrequest/store', [GuidingsController::class, 'bookingRequestStore'])->name('store.request');
@@ -285,9 +287,6 @@ Route::get('password/reset', [ForgotPasswordController::class, 'index'])->name('
 Route::post('password/reset', [ForgotPasswordController::class, 'reset'])->name('password.update');
 Route::get('password/reset/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
-
-Route::get('test-camp', [TestController::class, 'index'])->name('test.camp');
-Route::get('vacations-v2/{campId}', [\App\Http\Controllers\CampOfferController::class, 'show'])->name('vacations.v2');
 
 Route::get('robots.txt', function () {
     if (request()->getHost() == 'catchaguide.com') {
