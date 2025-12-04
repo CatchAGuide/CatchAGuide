@@ -23,6 +23,8 @@ Croatia: Crystal-clear waters, historic coastal towns, and stunning islands make
 Italy: A treasure trove of art, history, and culinary delights, Italy captivates visitors with its timeless charm. From the romantic canals of Venice to the Renaissance splendor of Florence and the eternal city of Rome, every corner of Italy tells a fascinating story.',
     'read_more' => 'Read More',
     'read_less' => 'Read Less',
+    'see_more' => 'See More',
+    'see_less' => 'See Less',
     'all_region' => 'All Region',
     'all_cities' => 'All Cities',
     'listing' => 'Listing',

@@ -109,6 +109,11 @@
         color: #fff !important;
         border: 2px solid #E8604C !important;
     }
+    .show-more-maps {
+        background-color: var(--thm-black) !important;
+        color: #fff !important;
+        border: 2px solid !important;
+    }
     .cag-btn {
         background-color: #E8604C !important;
         color: #fff !important;
@@ -185,40 +190,6 @@
         margin-bottom: 20px !important;
     }
     
-    .carousel-image {
-        width: 100%;
-        height: 300px;
-        object-fit: cover;
-        border-radius: 4px;
-    }
-    
-    /* Fix vacation item details layout */
-    .vacations-item-row {
-        margin-top: 15px;
-    }
-    
-    .vacations-info-container {
-        margin-bottom: 0;
-        display: inline-flex;
-        align-items: center;
-        white-space: nowrap;
-    }
-    
-    .vacations-item-row .d-flex {
-        flex-wrap: wrap;
-    }
-    
-    @media (max-width: 768px) {
-        .vacations-item-row .d-flex {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 8px !important;
-        }
-        .vacations-info-container {
-            display: flex;
-        }
-    }
-    
     /* Ensure map placeholder button is centered - override SCSS */
     #vacations-category #map-placeholder {
         position: relative !important;
@@ -281,10 +252,10 @@
                 <h5 class="mb-2">{{ translate('Vacations in ' . $row_data->name) }}</h5>
                 <div class="row mb-5">
                     {{-- Mobile sorting and filter section - commented out --}}
-                    {{-- <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
+                    <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
                         <div class="d-grid gap-2 w-100">
                             <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-                                <div class="btn-group border rounded-start cag-btn-inverted" role="group" style=" width:30%;">
+                                {{-- <div class="btn-group border rounded-start cag-btn-inverted" role="group" style=" width:30%;">
                                     <button type="button" class="btn dropdown-toggle text-white" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-arrow-down-arrow-up me-1"></i>@lang('message.sortby')</button>
                                     <ul class="dropdown-menu">
                                         <li><a class="dropdown-item" href="{{ url()->current() }}?sortby=newest">@lang('message.newest')</a></li>
@@ -310,16 +281,16 @@
                                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="guiding-filter-counter">{{ $vacations->count() }}</span>
                                         @endif
                                     @endif
-                                </a>
+                                </a> --}}
                                 <a class="btn border cag-btn-inverted" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)" style=" border-left: 2px solid #ccc!important; width:40%;"><i class="fa fa-map-marker-alt me-2"></i>@lang('vacations.show_on_map')</a>
 
                             </div>
                         </div>
-                    </div> --}}
+                    </div>
                     <div class="col-sm-12 col-lg-3">
                         <div class="card mb-2 d-none d-sm-block">
                             <div id="map-placeholder">
-                                <button class="btn btn-primary read-more-btn" data-bs-target="#mapModal" data-bs-toggle="modal">@lang('vacations.show_on_map')</button>
+                                <button class="btn btn-primary show-more-maps" data-bs-target="#mapModal" data-bs-toggle="modal">@lang('vacations.show_on_map')</button>
                             </div>
                         </div>
                         {{-- Sorting section - commented out --}}
@@ -399,26 +370,60 @@
                             <div class="tours-list__right col-md-12">
                                 <div class="row p-2 border shadow-sm bg-white rounded">
                                     <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-0">
-                                        <div id="carouselExampleControls-{{$vacation->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
-                                            <div class="carousel-inner">
-                                                @if(count(get_galleries_image_link($vacation, 1)))
-                                                    @foreach(get_galleries_image_link($vacation, 1) as $index => $gallery_image_link)
-                                                        <div class="carousel-item @if($index == 0) active @endif">
-                                                            <img  class="carousel-image" src="{{asset($gallery_image_link)}}">
-                                                        </div>
-                                                    @endforeach
+                                        @php
+                                            $gallery_images = get_galleries_image_link($vacation, 1);
+                                            $gallery_images_full = array_map(function($img) {
+                                                return asset($img);
+                                            }, $gallery_images);
+                                            $gallery_count = count($gallery_images);
+                                        @endphp
+                                        <div class="vacation-card__gallery" data-vacation-gallery="{{ $vacation->id }}" data-gallery-images='@json($gallery_images_full)'>
+                                            @if($gallery_count > 0)
+                                                <img 
+                                                    src="{{ asset($gallery_images[0]) }}" 
+                                                    alt="{{ translate($vacation->title) }}"
+                                                    data-vacation-gallery-image
+                                                    data-vacation-open-modal
+                                                    style="cursor: pointer;"
+                                                />
+                                                @if($gallery_count > 1)
+                                                    <button
+                                                        type="button"
+                                                        aria-label="{{ __('Previous image') }}"
+                                                        class="vacation-gallery__nav-btn vacation-gallery__nav-btn--prev"
+                                                        data-vacation-prev-image
+                                                    >
+                                                        ‹
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        aria-label="{{ __('Next image') }}"
+                                                        class="vacation-gallery__nav-btn vacation-gallery__nav-btn--next"
+                                                        data-vacation-next-image
+                                                    >
+                                                        ›
+                                                    </button>
+                                                    <div class="vacation-gallery__counter" data-vacation-image-counter>1/{{ $gallery_count }}</div>
                                                 @endif
-                                            </div>
-                                            @if(count(get_galleries_image_link($vacation, 1)) > 1)
-                                                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls-{{$vacation->id}}" data-bs-slide="prev">
-                                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                                    <span class="visually-hidden">Previous</span>
-                                                </button>
-                                                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls-{{$vacation->id}}" data-bs-slide="next">
-                                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                                    <span class="visually-hidden">Next</span>
-                                                </button>
+                                            @else
+                                                <img 
+                                                    src="{{ asset('images/placeholder_guide.jpg') }}" 
+                                                    alt="{{ translate($vacation->title) }}"
+                                                />
                                             @endif
+                                        </div>
+                                        
+                                        <!-- Vacation Gallery Modal -->
+                                        <div class="vacation-gallery-modal" data-vacation-modal="{{ $vacation->id }}">
+                                            <div class="vacation-gallery-modal__content">
+                                                <button class="vacation-gallery-modal__close">&times;</button>
+                                                <button class="vacation-gallery-modal__prev">&#10094;</button>
+                                                <button class="vacation-gallery-modal__next">&#10095;</button>
+                                                <img class="vacation-gallery-modal__image" src="" alt="{{ translate($vacation->title) }}">
+                                                <div class="vacation-gallery-modal__counter">
+                                                    <span class="vacation-gallery-modal__current">1</span> / <span class="vacation-gallery-modal__total">{{ $gallery_count }}</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 p-md-3 mt-md-1">
@@ -436,34 +441,65 @@
                                                 <span class=""><i class="fas fa-map-marker-alt me-2"></i>{{ $vacation->location }} </span>                                      
                                             </div>
                                             <div class="inclusions-price">
-                                            <div class="guiding-item-price">
-                                                {{-- <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$vacation->getLowestPrice()}}€ p.P.</span></h5> --}}
-                                                <div class="d-none d-flex flex-column mt-4">
+                                                <div class="guidings-inclusions-container">
+                                                </div>
+                                                <div class="guiding-item-price">
+                                                    <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{two($vacation->getLowestPrice())}}€ p.P.</span></h5>
                                                 </div>
                                             </div>
-                                        </div>
                                         </div>
                                         <div class="vacations-item-row">
                                             <div class="vacations-item-row-top">
                                             </div>
-                                            <div class="d-flex flex-wrap gap-3 align-items-center">
-                                                <div class="vacations-info-container"> 
-                                                    <span class="fw-bold">{{translate('Boat Available')}}:</span>
-                                                    {{-- <span class="text-regular">{{ count($vacation->boats) || $vacation->has_boat > 0 ? translate('Available') : translate('Unavailable') }}</span> --}}
-                                                </div>
-                                                <div class="vacations-info-container"> 
-                                                    <span class="fw-bold">{{translate('Distance to the water')}}:</span>
-                                                    <span class="ms-1">{{ $vacation->water_distance }}</span>
-                                                </div>
-                                                <div class="vacations-info-container"> 
+                                            <div class="vacations-info-section">
+                                                <div class="vacations-info-item"> 
                                                     <span class="fw-bold">{{translate('Target Fish')}}:</span>
-                                                    <div class="d-inline-flex ms-1">
-                                                        @php
-                                                            $target_fish = $vacation->target_fish;
-                                                        @endphp
-                                                        <ul class="list-unstyled mb-0 d-flex">
-                                                            {{-- {{ translate(\Str::limit(implode(', ', $target_fish), limit:50 )) }} --}}
-                                                        </ul>
+                                                    <div class="vacation-target-fish-container">
+                                                        <div class="vacation-target-fish-row">
+                                                            @php
+                                                                $target_fish = explode(",",$vacation->target_fish);
+                                                                $target_fish_count = count($target_fish);
+                                                            @endphp
+                                                            @foreach($target_fish as $index => $targetFish)
+                                                                <span class="vacation-target-fish-pill @if($index >= 3) vacation-item-hidden @endif">{{ $targetFish }}</span>
+                                                            @endforeach
+                                                            @if($target_fish_count > 3)
+                                                                <button type="button" class="vacation-see-more-btn" data-target="target-fish-{{ $vacation->id }}" data-expanded="false">
+                                                                    <span class="see-more-text">...</span>
+                                                                    <span class="see-less-text" style="display: none;">...</span>
+                                                                </button>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="vacations-info-item"> 
+                                                    <span class="fw-bold">{{translate('Boat Available')}}:</span>
+                                                    @if(count($vacation->rentalBoats) > 0)
+                                                        <i class="fa fa-check text-success ms-1"></i>
+                                                    @else
+                                                        <i class="fa fa-times text-danger ms-1"></i>
+                                                    @endif
+                                                </div>
+                                                <div class="vacations-info-item vacations-amenities-wrapper"> 
+                                                    <span class="fw-bold">{{translate('Camp Amenities')}}:</span>
+                                                    <div class="vacations-amenities-container">
+                                                        <div class="vacations-amenities-list">
+                                                            @php
+                                                                $facilities_count = count($vacation->facilities);
+                                                            @endphp
+                                                            @foreach($vacation->facilities as $index => $facility)
+                                                            <div class="vacation-amenity-item @if($index >= 3) vacation-item-hidden @endif">
+                                                                <i class="fa fa-check text-success"></i>
+                                                                <span>{{ $facility['name'] }}</span>
+                                                            </div>
+                                                            @endforeach
+                                                            @if($facilities_count > 3)
+                                                                <button type="button" class="vacation-see-more-btn vacation-amenity-ellipsis" data-target="amenities-{{ $vacation->id }}" data-expanded="false">
+                                                                    <span class="see-more-text">...</span>
+                                                                    <span class="see-less-text" style="display: none;">...</span>
+                                                                </button>
+                                                            @endif
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -736,6 +772,14 @@
         const infowindows = [];
         const uniqueCoordinates = [];
         let isDuplicateCoordinate;  
+        
+        @php
+            $grayIds = collect($vacations->items())->pluck('id')->toArray();
+        @endphp
+        @include('pages.vacations.partials.maps',[
+            'vacations' => $vacations ?? [],
+            'grayIds' => $grayIds ?? [],
+        ])
     
         function getRandomOffset() {
           return (Math.random() - 0.5) * 0.0080;
@@ -947,5 +991,139 @@
         // Trigger change event to update Select2 display
         selectMethod.trigger('change');
     }
+    
+    // Vacation Gallery Navigation
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('[data-vacation-gallery]').forEach(function(gallery) {
+            const galleryId = gallery.getAttribute('data-vacation-gallery');
+            const images = JSON.parse(gallery.getAttribute('data-gallery-images') || '[]');
+            const imageEl = gallery.querySelector('[data-vacation-gallery-image]');
+            const prevBtn = gallery.querySelector('[data-vacation-prev-image]');
+            const nextBtn = gallery.querySelector('[data-vacation-next-image]');
+            const counter = gallery.querySelector('[data-vacation-image-counter]');
+            const modal = document.querySelector(`[data-vacation-modal="${galleryId}"]`);
+            const modalImage = modal ? modal.querySelector('.vacation-gallery-modal__image') : null;
+            const modalPrev = modal ? modal.querySelector('.vacation-gallery-modal__prev') : null;
+            const modalNext = modal ? modal.querySelector('.vacation-gallery-modal__next') : null;
+            const modalClose = modal ? modal.querySelector('.vacation-gallery-modal__close') : null;
+            const modalCurrent = modal ? modal.querySelector('.vacation-gallery-modal__current') : null;
+            const modalTotal = modal ? modal.querySelector('.vacation-gallery-modal__total') : null;
+            
+            if (images.length === 0) return;
+            
+            let currentIndex = 0;
+            
+            function updateImage(index) {
+                if (index < 0) index = images.length - 1;
+                if (index >= images.length) index = 0;
+                currentIndex = index;
+                
+                if (imageEl) {
+                    imageEl.src = images[currentIndex];
+                }
+                if (counter) {
+                    counter.textContent = (currentIndex + 1) + '/' + images.length;
+                }
+                if (modalImage) {
+                    modalImage.src = images[currentIndex];
+                }
+                if (modalCurrent) {
+                    modalCurrent.textContent = currentIndex + 1;
+                }
+            }
+            
+            if (prevBtn) {
+                prevBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    updateImage(currentIndex - 1);
+                });
+            }
+            
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    updateImage(currentIndex + 1);
+                });
+            }
+            
+            if (imageEl && modal) {
+                imageEl.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (modal) {
+                        modal.classList.add('show');
+                        updateImage(currentIndex);
+                    }
+                });
+            }
+            
+            if (modalPrev) {
+                modalPrev.addEventListener('click', function() {
+                    updateImage(currentIndex - 1);
+                });
+            }
+            
+            if (modalNext) {
+                modalNext.addEventListener('click', function() {
+                    updateImage(currentIndex + 1);
+                });
+            }
+            
+            if (modalClose) {
+                modalClose.addEventListener('click', function() {
+                    if (modal) {
+                        modal.classList.remove('show');
+                    }
+                });
+            }
+            
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        modal.classList.remove('show');
+                    }
+                });
+            }
+        });
+    });
+    
+    // Handle See More/Less for Target Fish and Amenities
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.vacation-see-more-btn').forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                var target = this.getAttribute('data-target');
+                var isExpanded = this.getAttribute('data-expanded') === 'true';
+                var container = this.closest('.vacation-target-fish-container, .vacations-amenities-container');
+                
+                if (!container) return;
+                
+                // Find all hidden items in this container
+                var hiddenItems = container.querySelectorAll('.vacation-item-hidden');
+                
+                if (isExpanded) {
+                    // Collapse - hide items
+                    hiddenItems.forEach(function(item) {
+                        item.classList.remove('show');
+                    });
+                    this.setAttribute('data-expanded', 'false');
+                    this.querySelector('.see-more-text').style.display = 'inline';
+                    this.querySelector('.see-less-text').style.display = 'none';
+                } else {
+                    // Expand - show items
+                    hiddenItems.forEach(function(item) {
+                        item.classList.add('show');
+                    });
+                    this.setAttribute('data-expanded', 'true');
+                    this.querySelector('.see-more-text').style.display = 'none';
+                    this.querySelector('.see-less-text').style.display = 'inline';
+                }
+            });
+        });
+    });
 </script>
 @endsection
