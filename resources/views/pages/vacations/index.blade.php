@@ -109,6 +109,11 @@
         color: #fff !important;
         border: 2px solid #E8604C !important;
     }
+    .show-more-maps {
+        background-color: var(--thm-black) !important;
+        color: #fff !important;
+        border: 2px solid !important;
+    }
     .cag-btn {
         background-color: #E8604C !important;
         color: #fff !important;
@@ -285,7 +290,7 @@
                     <div class="col-sm-12 col-lg-3">
                         <div class="card mb-2 d-none d-sm-block">
                             <div id="map-placeholder">
-                                <button class="btn btn-primary read-more-btn" data-bs-target="#mapModal" data-bs-toggle="modal">@lang('vacations.show_on_map')</button>
+                                <button class="btn btn-primary show-more-maps" data-bs-target="#mapModal" data-bs-toggle="modal">@lang('vacations.show_on_map')</button>
                             </div>
                         </div>
                         {{-- Sorting section - commented out --}}
