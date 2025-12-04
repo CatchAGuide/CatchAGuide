@@ -73,7 +73,7 @@ class Camp extends Model
                     
                     // Check price_per_week and convert to per-night
                     if (isset($tier['price_per_week']) && $tier['price_per_week'] > 0) {
-                        $prices[] = (float) $tier['price_per_week'] / 7;
+                        $prices[] = (float) $tier['price_per_week'];
                     }
                 }
             }
