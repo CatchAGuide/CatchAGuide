@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Cache;
 
 class CampCacheService
 {
-    private const CACHE_TTL = 3600; // 1 hour
+    private const CACHE_TTL = 300; // 1 hour
     private const CAMPS_LIST_CACHE_KEY = 'camps_list';
     private const CAMP_CACHE_KEY = 'camp_';
     private const FORM_DATA_CACHE_KEY = 'camp_form_data';
@@ -22,8 +22,8 @@ class CampCacheService
      */
     public function getCampsList(int $perPage = 15)
     {
-        $cacheKey = self::CAMPS_LIST_CACHE_KEY . '_' . $perPage;
-
+        $cacheKey = self::CAMPS_LIST_CACHE_KEY . '_page_' . request('page', 1);
+        
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($perPage) {
             return Camp::with('user')
                 ->orderBy('created_at', 'desc')

@@ -27,7 +27,7 @@ class CampsController extends Controller
      */
     public function index()
     {
-        $camps = $this->cacheService->getCampsList(15);
+        $camps = $this->cacheService->getCampsList();
         return view('admin.pages.camps.index', compact('camps'));
     }
 

@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Config;
 
 class AccommodationCacheService
 {
-    private const CACHE_TTL = 3600; // 1 hour
+    private const CACHE_TTL = 300; // 1 hour
     private const FORM_DATA_CACHE_KEY = 'accommodation_form_data';
     private const ACCOMMODATIONS_CACHE_KEY = 'accommodations_list';
     private const ACCOMMODATION_CACHE_KEY = 'accommodation_';

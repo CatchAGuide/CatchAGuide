@@ -131,6 +131,16 @@
         </div>
 
         <div class="accommodation-card__feature-grid" data-expanded-only>
+            {{-- Mobile-only Details panel (appears before Amenities on mobile) --}}
+            <div class="accommodation-card__panel accommodation-card__panel--mobile-only accommodation-card__panel--mobile-details">
+                <div class="accommodation-card__panel-title">Details</div>
+                <ul class="accommodation-card__bullet-list">
+                    @foreach($accommodation['accommodation_details'] as $detail)
+                        <li>{{ translate($detail['name']) }}: <span class="font-medium">{{ translate($detail['value']) }}</span></li>
+                    @endforeach
+                </ul>
+            </div>
+
             <div class="accommodation-card__panel">
                 <div class="accommodation-card__panel-title">Amenities</div>
                 <ul class="accommodation-card__chip-list">
@@ -141,6 +151,18 @@
                     @endif
                 </ul>
             </div>
+
+            {{-- Mobile-only Policies panel (appears after Amenities on mobile) --}}
+            @if(!empty($accommodation['policies']))
+                <div class="accommodation-card__panel accommodation-card__panel--mobile-only accommodation-card__panel--mobile-policies">
+                    <div class="accommodation-card__panel-title">Policies</div>
+                    <ul class="accommodation-card__bullet-list">
+                        @foreach ($accommodation['policies'] as $policy)
+                            <li>{{ translate($policy['name']) }}: {{ translate($policy['value']) }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
             <div class="accommodation-card__panel">
                 <div class="accommodation-card__panel-title">Kitchen Equipment</div>
