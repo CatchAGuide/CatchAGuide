@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Config;
 
 class RentalBoatCacheService
 {
-    private const CACHE_TTL = 3600; // 1 hour
+    private const CACHE_TTL = 300; // 1 hour
     private const FORM_DATA_CACHE_KEY = 'rental_boat_form_data';
     private const RENTAL_BOATS_CACHE_KEY = 'rental_boats_list';
     private const RENTAL_BOAT_CACHE_KEY = 'rental_boat_';

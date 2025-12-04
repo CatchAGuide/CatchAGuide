@@ -112,6 +112,12 @@
             display: grid !important;
             grid-area: features !important; // Restore grid area when shown
             animation: fadeInUp 0.4s ease forwards;
+
+            // On mobile, use flexbox to enable CSS order property
+            @media (max-width: 768px) {
+                display: flex !important;
+                flex-direction: column;
+            }
         }
 
         .accommodation-card__expanded[data-expanded-only] {
@@ -305,8 +311,43 @@
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
+        @media (max-width: 768px) {
+            // Switch to flexbox on mobile to enable CSS order property
+            display: flex;
+            flex-direction: column;
+        }
+
         @media (max-width: 640px) {
-            grid-template-columns: 1fr;
+            // Already flexbox, no change needed
+        }
+    }
+
+    // Mobile-only panels (Details and Policies) - hidden by default
+    &__panel--mobile-only {
+        display: none !important;
+    }
+
+    // Show mobile panels and set order on mobile when expanded
+    @media (max-width: 768px) {
+        &--expanded {
+            .accommodation-card__feature-grid[data-expanded-only] {
+                .accommodation-card__panel--mobile-only {
+                    display: flex !important;
+                }
+
+                .accommodation-card__panel--mobile-details {
+                    order: -1; // Before Amenities
+                }
+
+                .accommodation-card__panel--mobile-policies {
+                    order: 1; // After Amenities
+                }
+
+                // Ensure Amenities panel and other panels have order 0 (default)
+                .accommodation-card__panel:not(.accommodation-card__panel--mobile-only) {
+                    order: 0;
+                }
+            }
         }
     }
 
@@ -360,6 +401,11 @@
         display: flex;
         flex-direction: column;
         gap: 12px;
+
+        // Hide on mobile - will show mobile versions in feature-grid instead
+        @media (max-width: 768px) {
+            display: none !important;
+        }
     }
 
     &__panel {
