@@ -48,7 +48,92 @@ class Camp extends Model
 
     public function getLowestPrice(): float
     {
-        return 0;
+        $prices = [];
+
+        // Get lowest price from accommodations - check per_person_pricing field
+        $accommodations = $this->accommodations()->where('status', 'active')->get();
+        foreach ($accommodations as $accommodation) {
+            $perPersonPricing = $accommodation->per_person_pricing;
+            
+            // Handle string JSON or already decoded array
+            if (is_string($perPersonPricing)) {
+                $perPersonPricing = json_decode($perPersonPricing, true);
+            }
+            
+            if (is_array($perPersonPricing) && !empty($perPersonPricing)) {
+                foreach ($perPersonPricing as $tier) {
+                    if (!is_array($tier)) {
+                        continue;
+                    }
+                    
+                    // Check price_per_night
+                    if (isset($tier['price_per_night']) && $tier['price_per_night'] > 0) {
+                        $prices[] = (float) $tier['price_per_night'];
+                    }
+                    
+                    // Check price_per_week and convert to per-night
+                    if (isset($tier['price_per_week']) && $tier['price_per_week'] > 0) {
+                        $prices[] = (float) $tier['price_per_week'] / 7;
+                    }
+                }
+            }
+        }
+
+        // Get lowest price from rental boats - check prices field
+        $rentalBoats = $this->rentalBoats()->where('status', 'active')->get();
+        foreach ($rentalBoats as $rentalBoat) {
+            $boatPrices = $rentalBoat->prices;
+            
+            // Handle string JSON or already decoded array (since it's cast as array)
+            if (is_string($boatPrices)) {
+                $boatPrices = json_decode($boatPrices, true);
+            }
+            
+            if (is_array($boatPrices) && !empty($boatPrices)) {
+                // Handle indexed array format [0 => ['amount' => ...]]
+                if (isset($boatPrices[0]) && is_array($boatPrices[0])) {
+                    foreach ($boatPrices as $price) {
+                        if (isset($price['amount']) && $price['amount'] > 0) {
+                            $prices[] = (float) $price['amount'];
+                        }
+                    }
+                } 
+                // Handle associative array format ['per_day' => amount, ...]
+                else {
+                    foreach ($boatPrices as $key => $value) {
+                        if (is_array($value) && isset($value['amount'])) {
+                            if ($value['amount'] > 0) {
+                                $prices[] = (float) $value['amount'];
+                            }
+                        } elseif (is_numeric($value) && $value > 0) {
+                            $prices[] = (float) $value;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Get lowest price from guidings - check prices field directly
+        // $guidings = $this->guidings()->where('status', 1)->get();
+        // foreach ($guidings as $guiding) {
+        //     $guidingPrices = decode_if_json($guiding->prices, true);
+            
+        //     if (is_array($guidingPrices) && !empty($guidingPrices)) {
+        //         foreach ($guidingPrices as $price) {
+        //             if (is_array($price) && isset($price['amount']) && $price['amount'] > 0) {
+        //                 $amount = (float) $price['amount'];
+        //                 // Calculate per-person price if person count is specified
+        //                 if (isset($price['person']) && $price['person'] > 1) {
+        //                     $amount = $amount / $price['person'];
+        //                 }
+        //                 $prices[] = $amount;
+        //             }
+        //         }
+        //     }
+        // }
+
+        // Return the minimum price, or 0 if no prices found
+        return !empty($prices) ? (float) min($prices) : 0.0;
     }
 
     public function user(): BelongsTo

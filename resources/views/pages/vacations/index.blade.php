@@ -247,10 +247,10 @@
                 <h5 class="mb-2">{{ translate('Vacations in ' . $row_data->name) }}</h5>
                 <div class="row mb-5">
                     {{-- Mobile sorting and filter section - commented out --}}
-                    {{-- <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
+                    <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
                         <div class="d-grid gap-2 w-100">
                             <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-                                <div class="btn-group border rounded-start cag-btn-inverted" role="group" style=" width:30%;">
+                                {{-- <div class="btn-group border rounded-start cag-btn-inverted" role="group" style=" width:30%;">
                                     <button type="button" class="btn dropdown-toggle text-white" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-arrow-down-arrow-up me-1"></i>@lang('message.sortby')</button>
                                     <ul class="dropdown-menu">
                                         <li><a class="dropdown-item" href="{{ url()->current() }}?sortby=newest">@lang('message.newest')</a></li>
@@ -276,12 +276,12 @@
                                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="guiding-filter-counter">{{ $vacations->count() }}</span>
                                         @endif
                                     @endif
-                                </a>
+                                </a> --}}
                                 <a class="btn border cag-btn-inverted" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)" style=" border-left: 2px solid #ccc!important; width:40%;"><i class="fa fa-map-marker-alt me-2"></i>@lang('vacations.show_on_map')</a>
 
                             </div>
                         </div>
-                    </div> --}}
+                    </div>
                     <div class="col-sm-12 col-lg-3">
                         <div class="card mb-2 d-none d-sm-block">
                             <div id="map-placeholder">
@@ -439,7 +439,7 @@
                                                 <div class="guidings-inclusions-container">
                                                 </div>
                                                 <div class="guiding-item-price">
-                                                    <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$vacation->getLowestPrice()}}€ p.P.</span></h5>
+                                                    <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{two($vacation->getLowestPrice())}}€ p.P.</span></h5>
                                                 </div>
                                             </div>
                                         </div>
@@ -767,6 +767,14 @@
         const infowindows = [];
         const uniqueCoordinates = [];
         let isDuplicateCoordinate;  
+        
+        @php
+            $grayIds = collect($vacations->items())->pluck('id')->toArray();
+        @endphp
+        @include('pages.vacations.partials.maps',[
+            'vacations' => $vacations ?? [],
+            'grayIds' => $grayIds ?? [],
+        ])
     
         function getRandomOffset() {
           return (Math.random() - 0.5) * 0.0080;
