@@ -281,3 +281,538 @@
         }
     }
 }
+
+// Vacation Category Page - Card Styling
+#vacations-category {
+    // Vacation Card Gallery Styling
+    .vacation-card__gallery {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        min-height: 300px;
+        overflow: hidden;
+        border-radius: 8px;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        background: #f1f5f9;
+
+        img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            transition: opacity 0.3s ease;
+        }
+    }
+
+    .guiding-list-item {
+        margin-bottom: 12px !important;
+        position: relative;
+
+        .row {
+            align-items: stretch;
+            padding: 6px 8px !important;
+
+            @media (max-width: 768px) {
+                align-items: flex-start;
+                padding: 4px 6px !important;
+            }
+        }
+
+        .border {
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .vacation-card__gallery {
+            height: 100%;
+            min-height: 200px;
+
+            @media (min-width: 768px) {
+                min-height: 220px;
+            }
+        }
+
+        .guiding-item-desc {
+            padding: 6px 8px !important;
+
+            @media (min-width: 768px) {
+                padding: 8px 10px !important;
+            }
+        }
+
+        [class*="col-"] {
+            padding-left: 4px;
+            padding-right: 4px;
+
+            @media (min-width: 768px) {
+                padding-left: 6px;
+                padding-right: 6px;
+            }
+        }
+    }
+
+    .guiding-item-desc {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+
+        .guidings-item {
+            gap: 4px;
+        }
+
+        .guidings-item-title {
+            margin-bottom: 2px;
+
+            h5 {
+                margin-bottom: 1px;
+                font-size: 1rem;
+                line-height: 1.2;
+            }
+
+            span {
+                font-size: 0.8rem;
+                line-height: 1.3;
+            }
+        }
+
+        .inclusions-price {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 6px;
+
+            @media (max-width: 768px) {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+
+        .guidings-inclusions-container {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .guiding-item-price {
+            text-align: right;
+            min-width: fit-content;
+            padding-left: 10px;
+
+            h5 {
+                margin: 0;
+                white-space: nowrap;
+                font-size: clamp(14px, 2vw, 18px);
+            }
+
+            span {
+                display: inline-block;
+                padding: 4px 8px;
+            }
+
+            @media (max-width: 768px) {
+                width: 100%;
+                text-align: left;
+                padding-left: 0;
+
+                h5 {
+                    font-size: 16px;
+                }
+            }
+        }
+
+        @media (max-width: 768px) {
+            margin-top: 6px;
+
+            .guidings-item-title h5 {
+                font-size: 0.95rem;
+            }
+        }
+    }
+
+    // Vacation Gallery Navigation
+    .vacation-gallery__nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        border-radius: 50%;
+        width: 34px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: 300;
+        color: #1e293b;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 6px 14px -8px rgba(15, 23, 42, 0.4);
+        z-index: 10;
+
+        &:hover {
+            background: #ffffff;
+            box-shadow: 0 10px 18px -12px rgba(15, 23, 42, 0.45);
+        }
+
+        &--prev {
+            left: 10px;
+        }
+
+        &--next {
+            right: 10px;
+        }
+    }
+
+    .vacation-gallery__counter {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        padding: 4px 8px;
+        font-size: 11px;
+        font-weight: 500;
+        color: #64748b;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+    }
+
+    // Vacation Info Section Styling
+    .vacations-info-section {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 4px;
+
+        @media (max-width: 768px) {
+            gap: 5px;
+        }
+    }
+
+    .vacations-info-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 6px;
+        width: 100%;
+
+        .fw-bold {
+            white-space: nowrap;
+            flex-shrink: 0;
+            min-width: fit-content;
+            font-size: 0.8rem;
+            line-height: 1.3;
+        }
+
+        @media (max-width: 768px) {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 3px;
+
+            .fw-bold {
+                margin-bottom: 1px;
+                width: 100%;
+            }
+        }
+    }
+
+    .vacations-amenities-wrapper {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        width: 100%;
+    }
+
+    .vacation-target-fish-container {
+        flex: 1;
+        min-width: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+
+        @media (max-width: 768px) {
+            width: 100%;
+        }
+    }
+
+    // Vacation Target Fish Styling (separate from camp-pill)
+    .vacation-target-fish-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        align-items: center;
+        flex: 1;
+
+        @media (max-width: 768px) {
+            gap: 3px;
+        }
+    }
+
+    .vacation-target-fish-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2px 10px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border-radius: 14px;
+        background: rgba(232, 96, 76, 0.1);
+        border: 1px solid rgba(232, 96, 76, 0.25);
+        color: #E8604C;
+        white-space: nowrap;
+        line-height: 1.2;
+
+        @media (max-width: 768px) {
+            padding: 2px 8px;
+            font-size: 0.75rem;
+        }
+    }
+
+    // Vacation Amenities Styling
+    .vacations-amenities-list {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px 12px;
+        margin-top: 2px;
+        width: 100%;
+        align-items: center;
+
+        @media (max-width: 992px) {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 4px 10px;
+        }
+
+        @media (max-width: 768px) {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 4px 8px;
+            margin-top: 2px;
+        }
+
+        @media (max-width: 480px) {
+            grid-template-columns: 1fr;
+            gap: 4px;
+        }
+    }
+
+    .vacation-amenity-item {
+        display: flex;
+        align-items: center;
+        font-size: 0.8rem;
+        color: #475569;
+        gap: 4px;
+        line-height: 1.2;
+
+        .fa-check {
+            color: #10b981;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 768px) {
+            font-size: 0.75rem;
+            gap: 3px;
+
+            .fa-check {
+                font-size: 0.7rem;
+            }
+        }
+    }
+
+    .vacations-amenities-container {
+        width: 100%;
+
+        @media (max-width: 768px) {
+            width: 100%;
+        }
+    }
+
+    // See More/Less Functionality
+    .vacation-item-hidden {
+        display: none !important;
+
+        &.show {
+            display: inline-flex !important;
+        }
+    }
+
+    .vacations-amenities-list .vacation-item-hidden.show {
+        display: flex !important;
+    }
+
+    .vacation-see-more-btn {
+        padding: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #E8604C;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        height: auto;
+        vertical-align: middle;
+        margin-left: 4px;
+
+        &:hover {
+            color: #d04a3a;
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 768px) {
+            font-size: 1.1rem;
+            margin-left: 2px;
+        }
+    }
+
+    .vacation-amenity-ellipsis {
+        grid-column: span 1;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        margin-left: 0;
+    }
+}
+
+// Vacation Gallery Modal (global scope needed for fixed positioning)
+.vacation-gallery-modal {
+    display: none;
+    position: fixed !important;
+    z-index: 99999 !important;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.95);
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+    margin: 0;
+    padding: 0;
+
+    &.show {
+        display: flex;
+    }
+
+    &__content {
+        position: relative;
+        width: 90%;
+        max-width: 1200px;
+        height: 90vh;
+        max-height: 90vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: zoomIn 0.2s ease;
+    }
+
+    &__image {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 90vh;
+        object-fit: contain;
+        border-radius: 8px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    &__close {
+        position: absolute;
+        top: -50px;
+        right: 0;
+        font-size: 40px;
+        font-weight: 300;
+        color: #fff;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s ease;
+        z-index: 10000;
+
+        &:hover {
+            transform: scale(1.1);
+        }
+    }
+
+    &__prev,
+    &__next {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        z-index: 10000;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    }
+
+    &__prev {
+        left: 20px;
+    }
+
+    &__next {
+        right: 20px;
+    }
+
+    &__counter {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #64748b;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

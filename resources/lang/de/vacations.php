@@ -21,6 +21,8 @@ Kroatien: Kristallklares Wasser, historische Küstenstädte und atemberaubende I
 Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Italien fasziniert Besucher mit seinem zeitlosen Charme. Von den romantischen Kanälen Venedigs über die Renaissance-Pracht Florenz\' bis zur ewigen Stadt Rom erzählt jede Ecke Italiens eine faszinierende Geschichte.',
     'read_more' => 'Mehr lesen',
     'read_less' => 'Weniger lesen',
+    'see_more' => 'Mehr anzeigen',
+    'see_less' => 'Weniger anzeigen',
     'all_region' => 'Alle Regionen',
     'all_cities' => 'Alle Städte',
     'listing' => 'Auflistung',
