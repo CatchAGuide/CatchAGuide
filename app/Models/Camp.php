@@ -160,4 +160,9 @@ class Camp extends Model
     {
         return $this->belongsToMany(Guiding::class, 'camp_guiding');
     }
+
+    public function specialOffers(): BelongsToMany
+    {
+        return $this->belongsToMany(SpecialOffer::class, 'camp_special_offer');
+    }
 }

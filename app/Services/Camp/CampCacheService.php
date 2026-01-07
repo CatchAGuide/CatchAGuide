@@ -7,6 +7,7 @@ use App\Models\CampFacility;
 use App\Models\Accommodation;
 use App\Models\RentalBoat;
 use App\Models\Guiding;
+use App\Models\SpecialOffer;
 use App\Models\Target;
 use Illuminate\Support\Facades\Cache;
 
@@ -39,7 +40,7 @@ class CampCacheService
         $cacheKey = self::CAMP_CACHE_KEY . $campId;
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($campId) {
-            return Camp::with(['user', 'facilities', 'accommodations', 'rentalBoats', 'guidings'])
+            return Camp::with(['user', 'facilities', 'accommodations', 'rentalBoats', 'guidings', 'specialOffers'])
                 ->find($campId);
         });
     }
@@ -55,6 +56,7 @@ class CampCacheService
                 'accommodations' => Accommodation::where('status', 'active')->orderBy('title')->get(),
                 'rentalBoats' => RentalBoat::where('status', 'active')->orderBy('title')->get(),
                 'guidings' => Guiding::where('status', 'active')->orderBy('title')->get(),
+                'specialOffers' => SpecialOffer::where('status', 'active')->orderBy('title')->get(),
                 'targetFish' => Target::orderBy('name')->get(),
             ];
         });

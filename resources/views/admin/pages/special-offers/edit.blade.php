@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', __('camps.create'))
+@section('title', 'Edit Special Offer')
 
 @section('content')
 <div class="container-fluid">
@@ -8,27 +8,27 @@
         <div class="col-12">
             <div class="page-header">
                 <div class="page-title">
-                    <h1>{{ __('camps.create') }}</h1>
-                    <p class="text-muted">Create a new camp</p>
+                    <h1>Edit Special Offer</h1>
+                    <p class="text-muted">Edit special offer: {{ $formData['title'] ?: 'Untitled' }}</p>
                 </div>
                 <div class="page-actions">
-                    <a href="{{ route('admin.camps.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> {{ __('camps.back_to_list') }}
+                    <a href="{{ route('admin.special-offers.index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                    <a href="{{ route('admin.special-offers.show', $formData['id']) }}" class="btn btn-info">
+                        <i class="fas fa-eye"></i> View
                     </a>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-12">
-                    @include('components.camp-form', [
+                    @include('components.special-offer-form', [
                         'formData' => $formData,
                         'accommodations' => $accommodations ?? [],
                         'rentalBoats' => $rentalBoats ?? [],
                         'guidings' => $guidings ?? [],
-                        'specialOffers' => $specialOffers ?? [],
-                        'campFacilities' => $campFacilities ?? [],
-                        'targetFish' => $targetFish ?? [],
-                        'formAction' => route('admin.camps.store'),
+                        'formAction' => route('admin.special-offers.update', $formData['id']),
                         'targetRedirect' => $targetRedirect
                     ])
                 </div>
@@ -47,3 +47,4 @@
 <link rel="stylesheet" href="{{ asset('css/select2.min.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
 @endpush
+

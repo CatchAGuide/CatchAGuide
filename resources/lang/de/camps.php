@@ -84,6 +84,11 @@ return [
     'selected_guidings' => 'Ausgewählte Guidings',
     'tooltip_guidings' => 'Wählen Sie verfügbare Guidings aus',
 
+    // Step 8 - Special Offers
+    'special_offers_title' => 'Sonderangebote',
+    'special_offers' => 'Sonderangebote',
+    'tooltip_special_offers' => 'Wählen Sie verfügbare Sonderangebote aus',
+
     // Common
     'select_options' => 'Optionen auswählen...',
     'saving' => 'Speichern...',

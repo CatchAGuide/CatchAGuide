@@ -25,6 +25,9 @@
                 <button type="button" class="step-button" data-step="7">
                     <i class="fas fa-anchor"></i>
                 </button>
+                <button type="button" class="step-button" data-step="8">
+                    <i class="fas fa-gift"></i>
+                </button>
             </div>
 
             <div class="step-line"></div>
@@ -453,9 +456,51 @@
                             <button type="button" class="btn btn-info" id="prevBtn7">
                                 {{ __('camps.previous') }}
                             </button>
+                            <button type="button" class="btn btn-primary" id="nextBtn7">
+                                {{ __('camps.next') }}
+                            </button>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="submitBtn7" style="display: none;">
+                            {{ __('camps.submit_publish') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 8: Special Offers -->
+            <div class="step" id="step8">
+                <h5>{{ __('camps.special_offers_title') }}</h5>
+
+                <div class="form-group">
+                    <label for="special_offers" class="form-label fw-bold fs-5">
+                        {{ __('camps.special_offers') }}
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                           title="{{ __('camps.tooltip_special_offers') }}"></i>
+                    </label>
+                    <select class="form-control" name="special_offers[]" id="special_offers" multiple>
+                        @foreach($specialOffers ?? [] as $specialOffer)
+                            <option value="{{ $specialOffer->id }}" 
+                                {{ (isset($formData['special_offers']) && in_array($specialOffer->id, $formData['special_offers'])) ? 'selected' : '' }}>
+                                {{ $specialOffer->title }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="button-group">
+                    <div class="left-buttons">
+                        <button type="button" class="btn btn-secondary" id="saveDraftBtn8">
+                            {{ __('camps.leave_save_draft') }}
+                        </button>
+                    </div>
+                    <div class="right-buttons">
+                        <div class="row-button">
+                            <button type="button" class="btn btn-info" id="prevBtn8">
+                                {{ __('camps.previous') }}
+                            </button>
                             <div></div>
                         </div>
-                        <button type="submit" class="btn btn-primary" id="submitBtn7" onclick="document.getElementById('is_draft').value = '0';">
+                        <button type="submit" class="btn btn-primary" id="submitBtn8" onclick="document.getElementById('is_draft').value = '0';">
                             {{ __('camps.submit_publish') }}
                         </button>
                     </div>

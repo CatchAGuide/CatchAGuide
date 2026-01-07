@@ -22,7 +22,7 @@
 <script>
     window.imageManagerLoaded = window.imageManagerLoaded || null;
     window.currentStep = window.currentStep || 1;
-    window.totalSteps = window.totalSteps || 7;
+    window.totalSteps = window.totalSteps || 8;
     window.autocomplete = window.autocomplete || null;
     window.city = window.city || null;
     window.region = window.region || null;
@@ -179,7 +179,7 @@
     }
 
 function setupStepNavigation() {
-    const totalSteps = 7;
+    const totalSteps = 8;
     let currentStep = 1;
     
     // Step navigation - Allow free switching between all steps
@@ -221,8 +221,21 @@ function setupStepNavigation() {
         $('.step-button').removeClass('active');
         
         // Show current step
-        $(`#step${step}`).addClass('active');
-        $(`.step-button[data-step="${step}"]`).addClass('active');
+        const stepElement = $(`#step${step}`);
+        const stepButton = $(`.step-button[data-step="${step}"]`);
+        
+        if (stepElement.length === 0) {
+            console.error(`Step ${step} not found!`);
+            return;
+        }
+        
+        if (stepButton.length === 0) {
+            console.error(`Step button ${step} not found!`);
+            return;
+        }
+        
+        stepElement.addClass('active');
+        stepButton.addClass('active');
         
         // Update step button states based on completion
         $('.step-button').each(function() {
@@ -407,6 +420,7 @@ function initializeSelect2() {
         const accommodationsEl = $('#accommodations');
         const rentalBoatsEl = $('#rental_boats');
         const guidingsEl = $('#guidings');
+        const specialOffersEl = $('#special_offers');
         
         // Initialize each dropdown individually with error handling
         try {
@@ -491,6 +505,32 @@ function initializeSelect2() {
             });
         } catch (e) {
             console.error('Error initializing guidings Select2:', e);
+        }
+        
+        try {
+            if (specialOffersEl.hasClass('select2-hidden-accessible')) {
+                specialOffersEl.select2('destroy');
+            }
+            
+            specialOffersEl.select2({
+                placeholder: '{{ __("camps.select_options") }}',
+                allowClear: true,
+                width: '100%',
+                templateResult: function(data) {
+                    if (!data.id) {
+                        return data.text;
+                    }
+                    return $('<span>(' + data.id + ') | ' + data.text + '</span>');
+                },
+                templateSelection: function(data) {
+                    if (!data.id) {
+                        return data.text;
+                    }
+                    return $('<span>(' + data.id + ') | ' + data.text + '</span>');
+                }
+            });
+        } catch (e) {
+            console.error('Error initializing special offers Select2:', e);
         }
     }, 100);
 }
@@ -822,6 +862,8 @@ function isStepCompleted(step) {
             return true; // Rental boats are optional
         case 7:
             return true; // Guidings are optional
+        case 8:
+            return true; // Special offers are optional
         default:
             return false;
     }

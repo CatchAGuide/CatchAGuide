@@ -84,6 +84,11 @@ return [
     'selected_guidings' => 'Selected Guidings',
     'tooltip_guidings' => 'Select available guidings',
 
+    // Step 8 - Special Offers
+    'special_offers_title' => 'Special Offers',
+    'special_offers' => 'Special Offers',
+    'tooltip_special_offers' => 'Select available special offers',
+
     // Common
     'select_options' => 'Select options...',
     'saving' => 'Saving...',

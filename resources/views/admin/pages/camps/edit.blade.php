@@ -28,6 +28,7 @@
                         'accommodations' => $accommodations ?? [],
                         'rentalBoats' => $rentalBoats ?? [],
                         'guidings' => $guidings ?? [],
+                        'specialOffers' => $specialOffers ?? [],
                         'campFacilities' => $campFacilities ?? [],
                         'targetFish' => $targetFish ?? [],
                         'formAction' => route('admin.camps.update', $formData['id']),
