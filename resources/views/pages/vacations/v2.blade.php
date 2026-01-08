@@ -390,6 +390,18 @@
             <!-- Google Map will be rendered here -->
         </div>
 
+        <!-- Special Offers Section -->
+        @if (isset($specialOffers) && count($specialOffers) > 0)
+        <section id="special-offers" class="camp-section mb-3">
+            <h2 class="camp-section__title">{{ __('Special Offers') }}</h2>
+            @foreach($specialOffers as $specialOffer)
+                <div class="mb-4">
+                    <x-special-offer.card :specialOffer="$specialOffer" />
+                </div>
+            @endforeach
+        </section>
+        @endif
+
         <!-- Accommodations Section -->
         @if (count($accommodations) > 0)
         <section id="accommodations" class="camp-section mb-3">
