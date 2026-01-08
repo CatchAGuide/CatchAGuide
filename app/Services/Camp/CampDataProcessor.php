@@ -115,6 +115,7 @@ class CampDataProcessor
             'accommodations' => $camp->accommodations->pluck('id')->toArray(),
             'rental_boats' => $camp->rentalBoats->pluck('id')->toArray(),
             'guidings' => $camp->guidings->pluck('id')->toArray(),
+            'special_offers' => $camp->specialOffers->pluck('id')->toArray(),
             // Add slug for edit form
             'slug' => $camp->slug,
         ];
@@ -142,6 +143,7 @@ class CampDataProcessor
             'accommodations' => $request->input('accommodations', []),
             'rental_boats' => $request->input('rental_boats', []),
             'guidings' => $request->input('guidings', []),
+            'special_offers' => $request->input('special_offers', []),
         ];
     }
 

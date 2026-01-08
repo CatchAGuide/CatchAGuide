@@ -7,6 +7,7 @@ use App\Models\RentalBoat;
 use App\Models\Accommodation;
 use App\Models\Guiding;
 use App\Models\Camp;
+use App\Models\SpecialOffer;
 use Illuminate\Support\Str;
 
 class CampOfferController extends Controller
@@ -130,7 +131,8 @@ class CampOfferController extends Controller
             'accommodations.accommodationType',
             'rentalBoats',
             'guidings.fishingFrom',
-            'facilities'
+            'facilities',
+            'specialOffers'
         ])->where('slug', $slug)
         ->firstOrFail();
         
@@ -195,6 +197,14 @@ class CampOfferController extends Controller
             return $this->mapGuidingForDropdown($guiding);
         })->toArray();
         
+        // Map all special offers with full data for display
+        $specialOffers = $camp->specialOffers()
+            ->where('status', 'active')
+            ->get()
+            ->map(function($specialOffer) {
+                return $this->mapSpecialOfferData($specialOffer);
+            })->toArray();
+        
         $showCategories = true;
 
         return view('pages.vacations.v2', compact(
@@ -205,6 +215,7 @@ class CampOfferController extends Controller
             'boats',
             'guidings',
             'guidingsDropdown',
+            'specialOffers',
             'showCategories',
             'primaryImage',
             'topRightImages',
@@ -689,6 +700,100 @@ class CampOfferController extends Controller
             'price' => $guiding->price,
             'currency' => 'EUR',
             'img' => $this->getImageUrl($guiding->thumbnail_path),
+        ];
+    }
+    
+    /**
+     * Map SpecialOffer model to view format
+     */
+    private function mapSpecialOfferData(SpecialOffer $specialOffer)
+    {
+        $galleryImages = $this->getImageUrls($specialOffer->gallery_images ?? []);
+        $galleryCount = max(count($galleryImages), 1);
+        
+        // Get related items
+        $accommodationNames = $specialOffer->accommodations->pluck('title')->toArray();
+        $boatNames = $specialOffer->rentalBoats->pluck('title')->toArray();
+        $guidingNames = $specialOffer->guidings->pluck('title')->toArray();
+        
+        // Process whats_included
+        $whatsIncluded = [];
+        if (!empty($specialOffer->whats_included)) {
+            if (is_string($specialOffer->whats_included)) {
+                $whatsIncluded = json_decode($specialOffer->whats_included, true) ?? [];
+            } elseif (is_array($specialOffer->whats_included)) {
+                $whatsIncluded = $specialOffer->whats_included;
+            }
+            
+            // Normalize to array of strings
+            $whatsIncluded = collect($whatsIncluded)->map(function($item) {
+                if (is_array($item)) {
+                    return $item['name'] ?? $item['value'] ?? json_encode($item);
+                }
+                return $item;
+            })->filter()->values()->toArray();
+        }
+        
+        // Process pricing
+        $pricing = $specialOffer->pricing ?? [];
+        if (is_string($pricing)) {
+            $pricing = json_decode($pricing, true) ?? [];
+        }
+        
+        // Get price amount - try to find per person price first
+        $priceAmount = null;
+        $priceType = $specialOffer->price_type ?? 'per_person';
+        $currency = $specialOffer->currency ?? 'EUR';
+        
+        if (is_array($pricing) && !empty($pricing)) {
+            // Look for per_person pricing
+            foreach ($pricing as $tier) {
+                if (is_array($tier)) {
+                    if (isset($tier['price_per_person']) && $tier['price_per_person'] > 0) {
+                        $priceAmount = (float) $tier['price_per_person'];
+                        break;
+                    }
+                    if (isset($tier['amount']) && $tier['amount'] > 0) {
+                        $priceAmount = (float) $tier['amount'];
+                    }
+                }
+            }
+        }
+        
+        // Fallback to getLowestPrice if no amount found
+        if ($priceAmount === null) {
+            $priceAmount = $specialOffer->getLowestPrice();
+        }
+        
+        // Build location string
+        $locationParts = array_filter([
+            $specialOffer->city,
+            $specialOffer->region,
+            $specialOffer->country
+        ]);
+        $location = !empty($locationParts) 
+            ? implode(', ', $locationParts)
+            : ($specialOffer->location ?? '');
+        
+        return [
+            'id' => $specialOffer->id,
+            'title' => $specialOffer->title,
+            'location' => $location,
+            'city' => $specialOffer->city,
+            'region' => $specialOffer->region,
+            'country' => $specialOffer->country,
+            'thumbnail_path' => $this->getImageUrl($specialOffer->thumbnail_path),
+            'gallery_images' => $galleryImages,
+            'gallery_count' => $galleryCount,
+            'accommodation_names' => $accommodationNames,
+            'boat_names' => $boatNames,
+            'guiding_names' => $guidingNames,
+            'whats_included' => $whatsIncluded,
+            'price' => [
+                'amount' => $priceAmount,
+                'currency' => $currency,
+                'type' => $priceType,
+            ],
         ];
     }
 }

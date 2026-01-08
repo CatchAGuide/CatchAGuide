@@ -347,6 +347,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('camps', \App\Http\Controllers\Admin\CampsController::class);
         Route::get('camps/change-status/{id}', [\App\Http\Controllers\Admin\CampsController::class, 'changeStatus'])->name('camps.change-status');
 
+        Route::resource('special-offers', \App\Http\Controllers\Admin\SpecialOffersController::class);
+        Route::get('special-offers/change-status/{id}', [\App\Http\Controllers\Admin\SpecialOffersController::class, 'changeStatus'])->name('special-offers.change-status');
+
         Route::resource('bookings', BookingsController::class);
         Route::get('/bookings/{booking}/email-preview', [BookingsController::class, 'emailPreview'])->name('bookings.email-preview');
         Route::post('/bookings/{booking}/send-booking-request-emails', [BookingsController::class, 'sendBookingRequestEmails'])->name('bookings.send-booking-request-emails');

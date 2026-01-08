@@ -339,5 +339,10 @@ class CampsController extends Controller
         if ($request->has('guidings')) {
             $camp->guidings()->sync($request->input('guidings'));
         }
+
+        // Sync special offers
+        if ($request->has('special_offers')) {
+            $camp->specialOffers()->sync($request->input('special_offers'));
+        }
     }
 }

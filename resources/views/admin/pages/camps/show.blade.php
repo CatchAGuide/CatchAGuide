@@ -222,6 +222,17 @@
                             @else
                                 <p class="text-muted small">No guidings linked</p>
                             @endif
+
+                            <h6>Special Offers ({{ $camp->specialOffers->count() }})</h6>
+                            @if($camp->specialOffers->count() > 0)
+                                <ul class="list-unstyled">
+                                    @foreach($camp->specialOffers as $specialOffer)
+                                        <li><a href="{{ route('admin.special-offers.show', $specialOffer->id) }}">{{ $specialOffer->title }}</a></li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <p class="text-muted small">No special offers linked</p>
+                            @endif
                         </div>
                     </div>
                 </div>

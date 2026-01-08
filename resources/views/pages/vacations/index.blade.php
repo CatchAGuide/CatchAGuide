@@ -444,7 +444,7 @@
                                                 <div class="guidings-inclusions-container">
                                                 </div>
                                                 <div class="guiding-item-price">
-                                                    <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{two($vacation->getLowestPrice())}}€ p.P.</span></h5>
+                                                    <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{two($vacation->getLowestPrice())}}€ per day</span></h5>
                                                 </div>
                                             </div>
                                         </div>
