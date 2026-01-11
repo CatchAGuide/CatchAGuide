@@ -78,17 +78,48 @@ class SpecialOfferDataProcessor
             return null;
         }
 
+        // If it's a string, try to decode JSON
+        if (is_string($pricing)) {
+            $decoded = json_decode($pricing, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $pricing = $decoded;
+            } else {
+                return null;
+            }
+        }
+
+        // Handle extra pricing if provided (similar to RentalBoatPricingProcessor)
+        if ($request->has('extra_pricing') && is_array($request->extra_pricing)) {
+            // Filter out empty entries
+            $extraPricing = array_filter($request->extra_pricing, function($item) {
+                return !empty($item['name']) && !empty($item['price']);
+            });
+            
+            if (!empty($extraPricing)) {
+                // If pricing is an array, convert first element to object and add pricing_extra
+                if (is_array($pricing) && !empty($pricing)) {
+                    $pricingObj = $pricing[0] ?? [];
+                    $pricingObj['pricing_extra'] = array_values($extraPricing);
+                    return [$pricingObj];
+                } elseif (is_array($pricing)) {
+                    // If pricing is empty array, create new structure
+                    return [['pricing_extra' => array_values($extraPricing)]];
+                } else {
+                    // If pricing is already an object, add pricing_extra
+                    $pricing['pricing_extra'] = array_values($extraPricing);
+                    return [$pricing];
+                }
+            }
+        }
+
         // If it's already an array, return as is
         if (is_array($pricing)) {
             return $pricing;
         }
 
-        // If it's a string, try to decode JSON
-        if (is_string($pricing)) {
-            $decoded = json_decode($pricing, true);
-            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                return $decoded;
-            }
+        // If it's an object, wrap it in an array
+        if (is_array($pricing) || is_object($pricing)) {
+            return [$pricing];
         }
 
         return null;

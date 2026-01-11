@@ -120,6 +120,9 @@
         // Pricing management
         setupPricing();
         
+        // Initialize extra pricing functionality
+        initializeExtraPricing();
+        
         // Set up form submission
         setupFormSubmission();
         
@@ -666,8 +669,72 @@
                 }
             });
             
-            $('#pricing_input').val(JSON.stringify(pricing));
+            // Collect extra pricing
+            const extraPricing = [];
+            $('.extra-pricing-item').each(function() {
+                const name = $(this).find('input[name*="[name]"]').val();
+                const price = $(this).find('input[name*="[price]"]').val();
+                
+                if (name && price) {
+                    extraPricing.push({
+                        name: name.trim(),
+                        price: parseFloat(price) || 0
+                    });
+                }
+            });
+            
+            // Build pricing structure - store as array with first element containing main price and pricing_extra
+            let pricingData = pricing.length > 0 ? pricing[0] : { amount: 0, currency: 'EUR', type: 'fixed' };
+            if (extraPricing.length > 0) {
+                pricingData.pricing_extra = extraPricing;
+            }
+            
+            // Store as array format (consistent with existing format)
+            $('#pricing_input').val(JSON.stringify([pricingData]));
         });
+    }
+
+    function initializeExtraPricing() {
+        // Add extra pricing button
+        const addButton = document.getElementById('add-extra-pricing');
+        if (addButton) {
+            addButton.addEventListener('click', function() {
+                addExtraPricingItem();
+            });
+        }
+
+        // Make addExtraPricingItem globally accessible
+        window.addExtraPricingItem = function(name = '', price = '') {
+            const container = document.getElementById('extra-pricing-container');
+            if (!container) return;
+            
+            // Get current count from existing items
+            const existingItems = container.querySelectorAll('.extra-pricing-item');
+            const extraPricingCount = existingItems.length;
+            
+            const item = document.createElement('div');
+            item.className = 'extra-pricing-item';
+            item.innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Item Name</label>
+                    <input type="text" class="form-control" name="extra_pricing[${extraPricingCount}][name]" placeholder="e.g., Captain, Fuel, etc." value="${name}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Price</label>
+                    <div class="input-group">
+                        <span class="input-group-text">€</span>
+                        <input type="number" class="form-control" name="extra_pricing[${extraPricingCount}][price]" placeholder="0.00" step="0.01" min="0" value="${price}">
+                    </div>
+                </div>
+                <button type="button" class="remove-extra" onclick="removeExtraPricingItem(this)">×</button>
+            `;
+            container.appendChild(item);
+        }
+
+        // Remove extra pricing item
+        window.removeExtraPricingItem = function(button) {
+            button.parentElement.remove();
+        };
     }
 
     function setupFormSubmission() {
@@ -785,38 +852,61 @@
         const pricingInput = document.getElementById('pricing_input');
         if (pricingInput && pricingInput.value) {
             try {
-                const pricing = JSON.parse(pricingInput.value);
-                if (Array.isArray(pricing) && pricing.length > 0) {
+                const pricingData = JSON.parse(pricingInput.value);
+                
+                // Handle both array and object formats
+                if (Array.isArray(pricingData) && pricingData.length > 0) {
                     // Clear existing pricing tiers except the first one
                     $('.pricing-tier').slice(1).remove();
                     
-                    // Update first tier or create new ones
-                    pricing.forEach((tier, index) => {
-                        // Support both old format (price_per_night, price_per_week) and new format (amount)
-                        const amount = tier.amount || tier.price_per_night || tier.price_per_week || 0;
-                        
-                        if (index === 0) {
-                            // Update first tier
-                            $('.pricing-tier').first().find('.pricing-amount').val(amount);
-                        } else {
-                            // Create new tier
-                            const tierHtml = `
-                                <div class="pricing-tier mb-3 p-3 border rounded">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <label>Price</label>
-                                            <input type="number" class="form-control pricing-amount" step="0.01" min="0" value="${amount}" placeholder="0.00">
-                                        </div>
+                    // Get the first pricing tier (which may contain pricing_extra)
+                    const firstTier = pricingData[0];
+                    const amount = firstTier.amount || firstTier.price_per_night || firstTier.price_per_week || 0;
+                    
+                    // Update first tier
+                    $('.pricing-tier').first().find('.pricing-amount').val(amount);
+                    
+                    // Load extra pricing if it exists in the first tier
+                    if (firstTier.pricing_extra && Array.isArray(firstTier.pricing_extra)) {
+                        firstTier.pricing_extra.forEach((item) => {
+                            if (item.name && item.price) {
+                                addExtraPricingItem(item.name, item.price);
+                            }
+                        });
+                    }
+                    
+                    // Handle additional tiers if any (rare case)
+                    pricingData.slice(1).forEach((tier, index) => {
+                        const tierAmount = tier.amount || tier.price_per_night || tier.price_per_week || 0;
+                        const tierHtml = `
+                            <div class="pricing-tier mb-3 p-3 border rounded">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label>Price</label>
+                                        <input type="number" class="form-control pricing-amount" step="0.01" min="0" value="${tierAmount}" placeholder="0.00">
                                     </div>
-                                    <button type="button" class="btn btn-sm btn-danger mt-2 remove-tier">Remove</button>
                                 </div>
-                            `;
-                            $('#pricing-container').append(tierHtml);
-                        }
+                                <button type="button" class="btn btn-sm btn-danger mt-2 remove-tier">Remove</button>
+                            </div>
+                        `;
+                        $('#pricing-container').append(tierHtml);
                     });
                     
                     if ($('.pricing-tier').length > 1) {
                         $('.remove-tier').show();
+                    }
+                } else if (typeof pricingData === 'object' && pricingData !== null) {
+                    // Handle object format (new format with pricing_extra)
+                    const amount = pricingData.amount || pricingData.price_per_night || pricingData.price_per_week || 0;
+                    $('.pricing-tier').first().find('.pricing-amount').val(amount);
+                    
+                    // Load extra pricing if it exists
+                    if (pricingData.pricing_extra && Array.isArray(pricingData.pricing_extra)) {
+                        pricingData.pricing_extra.forEach((item) => {
+                            if (item.name && item.price) {
+                                addExtraPricingItem(item.name, item.price);
+                            }
+                        });
                     }
                 }
             } catch (e) {

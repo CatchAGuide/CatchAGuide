@@ -250,6 +250,18 @@
                     {{-- <button type="button" class="btn btn-sm btn-primary" id="add-pricing-tier">Add Pricing Tier</button> --}}
                 </div>
 
+                <hr>
+
+                <div class="form-group">
+                    <label for="pricing_extra" class="form-label fw-bold fs-5">
+                        {{ __('rental_boats.extra_pricing') }}
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                           title="{{ __('rental_boats.tooltip_extra_pricing') }}"></i>
+                        <button type="button" id="add-extra-pricing" class="btn btn-sm btn-secondary ms-2"><i class="fas fa-plus"></i></button>
+                    </label>
+                    <div id="extra-pricing-container"></div>
+                </div>
+
                 <div class="button-group">
                     <div class="left-buttons">
                         <button type="button" class="btn btn-secondary" id="saveDraftBtn3">

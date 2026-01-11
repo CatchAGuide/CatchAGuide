@@ -103,4 +103,5 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'total' => 'Total',
     'send_inquiry_notice' => 'Send inquiry - binding confirmation within 48 hours.',
     'send_inquiry' => 'Send Inquiry',
+    'special_offers' => 'Special Offers',
 ];
