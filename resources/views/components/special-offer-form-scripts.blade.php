@@ -383,7 +383,6 @@
         const hiddenInput = document.querySelector('#accommodations_ids');
         if (input && input.tagify && hiddenInput) {
             const tags = input.tagify.value || [];
-            console.log('updateAccommodationsIds - tags:', tags);
             const ids = tags.map(tag => {
                 if (typeof tag === 'object' && tag.id) {
                     return tag.id;
@@ -396,9 +395,7 @@
                 }
                 return null;
             }).filter(Boolean);
-            console.log('updateAccommodationsIds - extracted IDs:', ids);
             hiddenInput.value = ids.join(',');
-            console.log('updateAccommodationsIds - hidden input value:', hiddenInput.value);
         } else {
             console.warn('updateAccommodationsIds - Missing input or tagify:', { input, hiddenInput, hasTagify: input && input.tagify });
         }
@@ -409,7 +406,6 @@
         const hiddenInput = document.querySelector('#rental_boats_ids');
         if (input && input.tagify && hiddenInput) {
             const tags = input.tagify.value || [];
-            console.log('updateRentalBoatsIds - tags:', tags);
             const ids = tags.map(tag => {
                 if (typeof tag === 'object' && tag.id) {
                     return tag.id;
@@ -422,9 +418,7 @@
                 }
                 return null;
             }).filter(Boolean);
-            console.log('updateRentalBoatsIds - extracted IDs:', ids);
             hiddenInput.value = ids.join(',');
-            console.log('updateRentalBoatsIds - hidden input value:', hiddenInput.value);
         } else {
             console.warn('updateRentalBoatsIds - Missing input or tagify:', { input, hiddenInput, hasTagify: input && input.tagify });
         }
@@ -435,7 +429,6 @@
         const hiddenInput = document.querySelector('#guidings_ids');
         if (input && input.tagify && hiddenInput) {
             const tags = input.tagify.value || [];
-            console.log('updateGuidingsIds - tags:', tags);
             const ids = tags.map(tag => {
                 if (typeof tag === 'object' && tag.id) {
                     return tag.id;
@@ -448,9 +441,7 @@
                 }
                 return null;
             }).filter(Boolean);
-            console.log('updateGuidingsIds - extracted IDs:', ids);
             hiddenInput.value = ids.join(',');
-            console.log('updateGuidingsIds - hidden input value:', hiddenInput.value);
         } else {
             console.warn('updateGuidingsIds - Missing input or tagify:', { input, hiddenInput, hasTagify: input && input.tagify });
         }
@@ -640,17 +631,9 @@
             const tierHtml = `
                 <div class="pricing-tier mb-3 p-3 border rounded">
                     <div class="row">
-                        <div class="col-md-4">
-                            <label>Number of Persons</label>
-                            <input type="number" class="form-control pricing-persons" min="1" placeholder="e.g., 1, 2, 3...">
-                        </div>
-                        <div class="col-md-4">
-                            <label>Price per Night</label>
-                            <input type="number" class="form-control pricing-per-night" step="0.01" min="0" placeholder="0.00">
-                        </div>
-                        <div class="col-md-4">
-                            <label>Price per Week</label>
-                            <input type="number" class="form-control pricing-per-week" step="0.01" min="0" placeholder="0.00">
+                        <div class="col-md-12">
+                            <label>Price</label>
+                            <input type="number" class="form-control pricing-amount" step="0.01" min="0" placeholder="0.00">
                         </div>
                     </div>
                     <button type="button" class="btn btn-sm btn-danger mt-2 remove-tier">Remove</button>
@@ -672,15 +655,13 @@
         $('#specialOfferForm').on('submit', function() {
             const pricing = [];
             $('.pricing-tier').each(function() {
-                const persons = $(this).find('.pricing-persons').val();
-                const perNight = $(this).find('.pricing-per-night').val();
-                const perWeek = $(this).find('.pricing-per-week').val();
+                const amount = $(this).find('.pricing-amount').val();
                 
-                if (persons || perNight || perWeek) {
+                if (amount) {
                     pricing.push({
-                        persons: parseInt(persons) || 1,
-                        price_per_night: parseFloat(perNight) || 0,
-                        price_per_week: parseFloat(perWeek) || 0
+                        amount: parseFloat(amount) || 0,
+                        currency: 'EUR',
+                        type: 'fixed'
                     });
                 }
             });
@@ -698,18 +679,8 @@
             updateRentalBoatsIds();
             updateGuidingsIds();
             
-            // Debug: Log the hidden field values
-            console.log('Accommodations IDs:', $('#accommodations_ids').val());
-            console.log('Rental Boats IDs:', $('#rental_boats_ids').val());
-            console.log('Guidings IDs:', $('#guidings_ids').val());
-            
             const formData = new FormData(this);
             const submitUrl = $(this).attr('action');
-            
-            // Debug: Log what's in FormData
-            console.log('FormData accommodations_ids:', formData.get('accommodations_ids'));
-            console.log('FormData rental_boats_ids:', formData.get('rental_boats_ids'));
-            console.log('FormData guidings_ids:', formData.get('guidings_ids'));
             
             // Collect tagify data properly
             collectTagifyData(formData);
@@ -821,27 +792,20 @@
                     
                     // Update first tier or create new ones
                     pricing.forEach((tier, index) => {
+                        // Support both old format (price_per_night, price_per_week) and new format (amount)
+                        const amount = tier.amount || tier.price_per_night || tier.price_per_week || 0;
+                        
                         if (index === 0) {
                             // Update first tier
-                            $('.pricing-tier').first().find('.pricing-persons').val(tier.persons || '');
-                            $('.pricing-tier').first().find('.pricing-per-night').val(tier.price_per_night || '');
-                            $('.pricing-tier').first().find('.pricing-per-week').val(tier.price_per_week || '');
+                            $('.pricing-tier').first().find('.pricing-amount').val(amount);
                         } else {
                             // Create new tier
                             const tierHtml = `
                                 <div class="pricing-tier mb-3 p-3 border rounded">
                                     <div class="row">
-                                        <div class="col-md-4">
-                                            <label>Number of Persons</label>
-                                            <input type="number" class="form-control pricing-persons" min="1" value="${tier.persons || ''}" placeholder="e.g., 1, 2, 3...">
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label>Price per Night</label>
-                                            <input type="number" class="form-control pricing-per-night" step="0.01" min="0" value="${tier.price_per_night || ''}" placeholder="0.00">
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label>Price per Week</label>
-                                            <input type="number" class="form-control pricing-per-week" step="0.01" min="0" value="${tier.price_per_week || ''}" placeholder="0.00">
+                                        <div class="col-md-12">
+                                            <label>Price</label>
+                                            <input type="number" class="form-control pricing-amount" step="0.01" min="0" value="${amount}" placeholder="0.00">
                                         </div>
                                     </div>
                                     <button type="button" class="btn btn-sm btn-danger mt-2 remove-tier">Remove</button>

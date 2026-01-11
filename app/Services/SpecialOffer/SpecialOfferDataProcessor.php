@@ -29,8 +29,8 @@ class SpecialOfferDataProcessor
             'region' => $request->region ?? '',
             'whats_included' => $whatsIncluded,
             'pricing' => $pricing,
-            'price_type' => $request->price_type ?? null,
-            'currency' => $request->currency ?? 'USD',
+            'price_type' => 'fixed',
+            'currency' => 'EUR',
         ];
     }
 
@@ -113,8 +113,8 @@ class SpecialOfferDataProcessor
             'region' => $specialOffer->region,
             'whats_included' => $specialOffer->whats_included ?? [],
             'pricing' => $specialOffer->pricing ?? null,
-            'price_type' => $specialOffer->price_type,
-            'currency' => $specialOffer->currency ?? 'EUR',
+            'price_type' => 'fixed',
+            'currency' => 'EUR',
             'status' => $specialOffer->status,
             'thumbnail_path' => $specialOffer->thumbnail_path,
             'gallery_images' => $specialOffer->gallery_images,
