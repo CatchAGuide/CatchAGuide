@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Camp Offers - Vacations V2')
+@section('title', $camp['title'] ?? 'Camp Offers - Vacations V2')
 
 @section('meta_robots')
 <meta name="robots" content="noindex, nofollow">

@@ -627,21 +627,21 @@
 
     function setupPricing() {
         // Add pricing tier
-        $('#add-pricing-tier').on('click', function() {
-            const tierHtml = `
-                <div class="pricing-tier mb-3 p-3 border rounded">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <label>Price</label>
-                            <input type="number" class="form-control pricing-amount" step="0.01" min="0" placeholder="0.00">
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-sm btn-danger mt-2 remove-tier">Remove</button>
-                </div>
-            `;
-            $('#pricing-container').append(tierHtml);
-            $('.remove-tier').show();
-        });
+        // $('#add-pricing-tier').on('click', function() {
+        //     const tierHtml = `
+        //         <div class="pricing-tier mb-3 p-3 border rounded">
+        //             <div class="row">
+        //                 <div class="col-md-12">
+        //                     <label>Price</label>
+        //                     <input type="number" class="form-control pricing-amount" step="0.01" min="0" placeholder="0.00">
+        //                 </div>
+        //             </div>
+        //             <button type="button" class="btn btn-sm btn-danger mt-2 remove-tier">Remove</button>
+        //         </div>
+        //     `;
+        //     $('#pricing-container').append(tierHtml);
+        //     $('.remove-tier').show();
+        // });
         
         // Remove pricing tier
         $(document).on('click', '.remove-tier', function() {

@@ -13,7 +13,6 @@ class RentalBoatExtrasProcessor
     public function processBoatExtras(Request $request): ?array
     {
         if (!$request->has('boat_extras')) {
-            Log::info('RentalBoatExtrasProcessor::processBoatExtras - No boat extras found');
             return null;
         }
 
@@ -38,7 +37,6 @@ class RentalBoatExtrasProcessor
     public function processInclusions(Request $request): ?array
     {
         if (!$request->has('inclusions')) {
-            Log::info('RentalBoatExtrasProcessor::processInclusions - No inclusions found');
             return null;
         }
 

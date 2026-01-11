@@ -247,7 +247,7 @@
                             <button type="button" class="btn btn-sm btn-danger mt-2 remove-tier" style="display: none;">Remove</button>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-sm btn-primary" id="add-pricing-tier">Add Pricing Tier</button>
+                    {{-- <button type="button" class="btn btn-sm btn-primary" id="add-pricing-tier">Add Pricing Tier</button> --}}
                 </div>
 
                 <div class="button-group">
