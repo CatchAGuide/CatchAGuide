@@ -580,6 +580,121 @@ body {
     }
 }
 
+// Enhanced Camp Navigation (3-row layout)
+.camp-nav-enhanced {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 18px;
+    margin-bottom: 24px;
+
+    @media (max-width: 768px) {
+        gap: 0.5rem;
+    }
+
+    @media (max-width: 480px) {
+        gap: 0.5rem;
+    }
+}
+
+.camp-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: none;
+    background-color: #6b7280;
+    color: #fff;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    min-width: 100px;
+    width: auto;
+
+    &:hover {
+        background-color: #4b5563;
+        transform: translateY(-1px);
+        color: #fff;
+        text-decoration: none;
+    }
+
+    &:active {
+        transform: translateY(0);
+        background-color: #374151;
+    }
+
+    @media (max-width: 768px) {
+        padding: 0.625rem 0.875rem;
+        min-width: 90px;
+    }
+
+    @media (max-width: 480px) {
+        padding: 0.5rem 0.75rem;
+        min-width: 80px;
+        border-radius: 6px;
+    }
+}
+
+.camp-nav-item__icon {
+    font-size: 1.25rem;
+    margin-bottom: 0.375rem;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+
+    .camp-nav-item:hover & {
+        transform: scale(1.05);
+    }
+
+    @media (max-width: 768px) {
+        font-size: 1.125rem;
+        margin-bottom: 0.25rem;
+    }
+
+    @media (max-width: 480px) {
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+}
+
+.camp-nav-item__name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 0.25rem;
+    line-height: 1.2;
+    color: #fff;
+
+    @media (max-width: 768px) {
+        font-size: 0.8125rem;
+        margin-bottom: 0.2rem;
+    }
+
+    @media (max-width: 480px) {
+        font-size: 0.75rem;
+        margin-bottom: 0.2rem;
+    }
+}
+
+.camp-nav-item__count {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    text-align: center;
+
+    @media (max-width: 768px) {
+        font-size: 0.9375rem;
+    }
+
+    @media (max-width: 480px) {
+        font-size: 0.875rem;
+    }
+}
+
 // Camp Info Grid
 .camp-info-grid {
     display: grid;

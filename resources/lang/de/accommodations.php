@@ -286,4 +286,5 @@ return [
     'tooltip_inclusives' => 'Fügen Sie hinzu, was in der Miete enthalten ist',
     'add_inclusives' => 'Inklusive hinzufügen...',
     'tooltip_add_inclusives' => 'Tippen Sie, um Inklusive hinzuzufügen',
+    'max_occupancy' => 'Max. Belegung',
 ];

@@ -48,10 +48,6 @@ class RentalBoatPricingProcessor
             ]);
         }
 
-        Log::info('RentalBoatPricingProcessor::process - Final pricing', [
-            'pricing' => $pricing
-        ]);
-
         return $pricing;
     }
 

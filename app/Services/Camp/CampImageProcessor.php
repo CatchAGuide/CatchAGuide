@@ -17,27 +17,11 @@ class CampImageProcessor
         $thumbnailPath = '';
         $imageList = json_decode($request->input('image_list', '[]')) ?? [];
 
-        // Log image upload data
-        Log::info('Camp Image Upload Debug:', [
-            'has_title_image' => $request->hasFile('title_image'),
-            'title_image_count' => $request->hasFile('title_image') ? count($request->file('title_image')) : 0,
-            'has_cropped_image' => $request->hasFile('cropped_image'),
-            'cropped_image_count' => $request->hasFile('cropped_image') ? count($request->file('cropped_image')) : 0,
-            'image_list' => $imageList,
-            'camp_id' => $campId,
-            'slug' => $slug,
-        ]);
-
         // Handle existing images for updates
         if ($request->input('is_update') == '1' && $campId) {
             $existingImagesJson = $request->input('existing_images');
             $existingImages = json_decode($existingImagesJson, true) ?? [];
             $keepImages = array_filter($imageList);
-
-            Log::info('Camp Update - Existing Images:', [
-                'existing_images' => $existingImages,
-                'keep_images' => $keepImages
-            ]);
 
             foreach ($existingImages as $existingImage) {
                 $imagePath = $existingImage;
@@ -77,12 +61,6 @@ class CampImageProcessor
                         $webp_path = media_upload($image, $directory, $filename, 75, $campId);
                         $galleryImages[] = $webp_path;
                         $processedFilenames[] = $originalFilename;
-                        
-                        Log::info('Camp Image Stored:', [
-                            'path' => $webp_path, 
-                            'size' => $image->getSize(),
-                            'original_name' => $image->getClientOriginalName()
-                        ]);
                     }
                 } catch (\Exception $e) {
                     Log::error('Error storing camp image:', [
@@ -107,11 +85,6 @@ class CampImageProcessor
                     
                     $webp_path = media_upload($image, $directory, $filename, 75, $campId);
                     $galleryImages[] = $webp_path;
-                    
-                    Log::info('Camp Cropped Image Stored:', [
-                        'path' => $webp_path, 
-                        'size' => $image->getSize()
-                    ]);
                 } catch (\Exception $e) {
                     Log::error('Error storing cropped camp image:', [
                         'error' => $e->getMessage(),
@@ -130,11 +103,6 @@ class CampImageProcessor
             // If it's a full URL, extract the path
             if (filter_var($requestedThumbnail, FILTER_VALIDATE_URL)) {
                 $parsedUrl = parse_url($requestedThumbnail);
-                $requestedThumbnail = ltrim($parsedUrl['path'] ?? '', '/');
-                Log::info('Extracted path from URL', [
-                    'original_url' => $originalRequestedThumbnail,
-                    'extracted_path' => $requestedThumbnail
-                ]);
             }
             // Remove leading slash if present
             $requestedThumbnail = ltrim($requestedThumbnail, '/');
@@ -154,11 +122,6 @@ class CampImageProcessor
                     if ($normalizedGalleryImage === $normalizedRequested || 
                         basename($normalizedGalleryImage) === basename($normalizedRequested)) {
                         $foundThumbnail = $galleryImage;
-                        Log::info('Thumbnail match found', [
-                            'requested' => $normalizedRequested,
-                            'matched_gallery_image' => $normalizedGalleryImage,
-                            'final_path' => $foundThumbnail
-                        ]);
                         break;
                     }
                 }
@@ -169,14 +132,6 @@ class CampImageProcessor
                 } else {
                     // Requested thumbnail not in gallery, use first image
                     $thumbnailPath = $galleryImages[0];
-                    Log::warning('Requested thumbnail not found in gallery', [
-                        'original_requested' => $originalRequestedThumbnail,
-                        'normalized_requested' => $requestedThumbnail,
-                        'gallery_images' => $galleryImages,
-                        'normalized_gallery' => array_map(function($img) {
-                            return ltrim($img, '/');
-                        }, $galleryImages)
-                    ]);
                 }
             } else {
                 // No specific thumbnail requested, use first image
@@ -187,12 +142,6 @@ class CampImageProcessor
             // This will be handled separately in the controller for updates
             $thumbnailPath = $requestedThumbnail;
         }
-
-        Log::info('Final Camp Gallery Images Array:', [
-            'gallery_images' => $galleryImages,
-            'requested_thumbnail' => $requestedThumbnail,
-            'final_thumbnail' => $thumbnailPath
-        ]);
 
         // Return null if no images to avoid overwriting existing data
         // BUT if thumbnail_path was explicitly set, we should still return it
@@ -282,7 +231,6 @@ class CampImageProcessor
     {
         try {
             media_delete($imagePath);
-            Log::info('Camp Image Deleted:', ['path' => $imagePath]);
         } catch (\Exception $e) {
             Log::error('Error deleting camp image:', [
                 'error' => $e->getMessage(),

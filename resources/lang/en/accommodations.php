@@ -286,4 +286,5 @@ return [
     'tooltip_inclusives' => 'Add what is included in the rental',
     'add_inclusives' => 'Add inclusives...',
     'tooltip_add_inclusives' => 'Type to add inclusives',
+    'max_occupancy' => 'Max Occupancy',
 ];

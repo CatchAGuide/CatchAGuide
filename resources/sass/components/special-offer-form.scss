@@ -493,6 +493,40 @@
         }
     }
 
+    // Extra Pricing Container
+    .extra-pricing-item {
+        display: flex;
+        gap: 1rem;
+        align-items: end;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+        position: relative;
+
+        .form-group {
+            margin-bottom: 0;
+            flex: 1;
+        }
+
+        .remove-extra {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 1.25rem;
+            line-height: 1;
+            transition: all 0.2s ease;
+
+            &:hover {
+                background-color: #c82333;
+            }
+        }
+    }
+
     // Tagify Styling
     .tagify {
         border: 2px solid #e9ecef;
@@ -574,6 +608,16 @@
 
         .pricing-tier {
             padding: 16px;
+        }
+
+        .extra-pricing-item {
+            flex-direction: column;
+            align-items: stretch;
+
+            .remove-extra {
+                align-self: flex-end;
+                width: fit-content;
+            }
         }
     }
 

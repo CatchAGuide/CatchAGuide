@@ -88,19 +88,7 @@ class SpecialOffersController extends Controller
                 $specialOffer->refresh();
             }
 
-            // Sync relationships
-            Log::info('SpecialOffersController::store - Before sync relationships', [
-                'accommodations_ids' => $request->input('accommodations_ids'),
-                'rental_boats_ids' => $request->input('rental_boats_ids'),
-                'guidings_ids' => $request->input('guidings_ids'),
-                'all_input_keys' => array_keys($request->all()),
-            ]);
             $this->syncSpecialOfferRelationships($specialOffer, $request);
-            Log::info('SpecialOffersController::store - After sync relationships', [
-                'accommodations_count' => $specialOffer->accommodations()->count(),
-                'rental_boats_count' => $specialOffer->rentalBoats()->count(),
-                'guidings_count' => $specialOffer->guidings()->count(),
-            ]);
 
             // Clear caches
             $this->cacheService->clearAllCaches();
@@ -238,18 +226,7 @@ class SpecialOffersController extends Controller
                 ]);
             }
 
-            // Sync relationships
-            Log::info('SpecialOffersController::update - Before sync relationships', [
-                'accommodations_ids' => $request->input('accommodations_ids'),
-                'rental_boats_ids' => $request->input('rental_boats_ids'),
-                'guidings_ids' => $request->input('guidings_ids'),
-            ]);
             $this->syncSpecialOfferRelationships($specialOffer, $request);
-            Log::info('SpecialOffersController::update - After sync relationships', [
-                'accommodations_count' => $specialOffer->accommodations()->count(),
-                'rental_boats_count' => $specialOffer->rentalBoats()->count(),
-                'guidings_count' => $specialOffer->guidings()->count(),
-            ]);
 
             // Clear caches - clear both the specific special offer and the list
             $this->cacheService->clearSpecialOfferCache($specialOffer->id);
@@ -328,87 +305,48 @@ class SpecialOffersController extends Controller
         // Sync accommodations - prioritize accommodations_ids, fallback to accommodations array
         $accommodationIds = $request->input('accommodations_ids');
         
-        Log::info('SpecialOffersController::syncSpecialOfferRelationships - Accommodations', [
-            'raw_value' => $accommodationIds,
-            'type' => gettype($accommodationIds),
-            'is_null' => is_null($accommodationIds),
-            'is_empty_string' => $accommodationIds === '',
-        ]);
-        
         if ($accommodationIds !== null && $accommodationIds !== '') {
             // Process comma-separated string or array
             $ids = is_array($accommodationIds) ? $accommodationIds : explode(',', $accommodationIds);
             $ids = array_filter(array_map('intval', $ids));
-            Log::info('SpecialOffersController::syncSpecialOfferRelationships - Syncing accommodations', [
-                'ids' => $ids,
-                'special_offer_id' => $specialOffer->id,
-            ]);
             $specialOffer->accommodations()->sync($ids);
         } elseif ($request->has('accommodations') && is_array($request->input('accommodations'))) {
             // Fallback to old format
-            Log::info('SpecialOffersController::syncSpecialOfferRelationships - Using fallback accommodations');
             $specialOffer->accommodations()->sync($request->input('accommodations', []));
         } else {
             // Clear if neither format is present
-            Log::info('SpecialOffersController::syncSpecialOfferRelationships - Clearing accommodations');
             $specialOffer->accommodations()->sync([]);
         }
 
         // Sync rental boats - prioritize rental_boats_ids, fallback to rental_boats array
         $rentalBoatIds = $request->input('rental_boats_ids');
         
-        Log::info('SpecialOffersController::syncSpecialOfferRelationships - Rental Boats', [
-            'raw_value' => $rentalBoatIds,
-            'type' => gettype($rentalBoatIds),
-            'is_null' => is_null($rentalBoatIds),
-            'is_empty_string' => $rentalBoatIds === '',
-        ]);
-        
         if ($rentalBoatIds !== null && $rentalBoatIds !== '') {
             // Process comma-separated string or array
             $ids = is_array($rentalBoatIds) ? $rentalBoatIds : explode(',', $rentalBoatIds);
             $ids = array_filter(array_map('intval', $ids));
-            Log::info('SpecialOffersController::syncSpecialOfferRelationships - Syncing rental_boats', [
-                'ids' => $ids,
-                'special_offer_id' => $specialOffer->id,
-            ]);
             $specialOffer->rentalBoats()->sync($ids);
         } elseif ($request->has('rental_boats') && is_array($request->input('rental_boats'))) {
             // Fallback to old format
-            Log::info('SpecialOffersController::syncSpecialOfferRelationships - Using fallback rental_boats');
             $specialOffer->rentalBoats()->sync($request->input('rental_boats', []));
         } else {
             // Clear if neither format is present
-            Log::info('SpecialOffersController::syncSpecialOfferRelationships - Clearing rental_boats');
             $specialOffer->rentalBoats()->sync([]);
         }
 
         // Sync guidings - prioritize guidings_ids, fallback to guidings array
         $guidingIds = $request->input('guidings_ids');
         
-        Log::info('SpecialOffersController::syncSpecialOfferRelationships - Guidings', [
-            'raw_value' => $guidingIds,
-            'type' => gettype($guidingIds),
-            'is_null' => is_null($guidingIds),
-            'is_empty_string' => $guidingIds === '',
-        ]);
-        
         if ($guidingIds !== null && $guidingIds !== '') {
             // Process comma-separated string or array
             $ids = is_array($guidingIds) ? $guidingIds : explode(',', $guidingIds);
             $ids = array_filter(array_map('intval', $ids));
-            Log::info('SpecialOffersController::syncSpecialOfferRelationships - Syncing guidings', [
-                'ids' => $ids,
-                'special_offer_id' => $specialOffer->id,
-            ]);
             $specialOffer->guidings()->sync($ids);
         } elseif ($request->has('guidings') && is_array($request->input('guidings'))) {
             // Fallback to old format
-            Log::info('SpecialOffersController::syncSpecialOfferRelationships - Using fallback guidings');
             $specialOffer->guidings()->sync($request->input('guidings', []));
         } else {
             // Clear if neither format is present
-            Log::info('SpecialOffersController::syncSpecialOfferRelationships - Clearing guidings');
             $specialOffer->guidings()->sync([]);
         }
     }

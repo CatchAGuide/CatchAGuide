@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Camp Offers - Vacations V2')
+@section('title', $camp['title'] ?? 'Camp Offers - Vacations V2')
 
 @section('meta_robots')
 <meta name="robots" content="noindex, nofollow">
@@ -95,11 +95,53 @@
     <div class="camp-container camp-layout" style="grid-template-columns: 1fr;">
         <div class="camp-layout__content">
             <!-- Navigation -->
-            <nav class="camp-nav flex flex-wrap text-sm">
-                {{-- <a href="#general-info" class="nav-pill">{{ __('vacations.general_information') }}</a> --}}
-                <a href="#accommodations" class="nav-pill">{{ __('vacations.accommodations') }}</a>
-                {{-- <a href="#guidings" class="nav-pill">{{ __('vacations.guidings_tours') }}</a> --}}
-                <a href="#boats" class="nav-pill">{{ __('vacations.rental_boats') }}</a>
+            <nav class="camp-nav-enhanced">
+                @php
+                    $accommodationsCount = count($accommodations ?? []);
+                    $boatsCount = count($boats ?? []);
+                    $specialOffersCount = isset($specialOffers) ? count($specialOffers) : 0;
+                    $guidingsCount = isset($guidings) ? count($guidings) : 0;
+                @endphp
+                
+                @if($accommodationsCount > 0)
+                <a href="#accommodations" class="camp-nav-item">
+                    <div class="camp-nav-item__icon">
+                        <i class="fas fa-bed"></i>
+                    </div>
+                    <div class="camp-nav-item__name">{{ __('vacations.accommodations') }}</div>
+                    <div class="camp-nav-item__count">{{ $accommodationsCount }}</div>
+                </a>
+                @endif
+                
+                @if($boatsCount > 0)
+                <a href="#boats" class="camp-nav-item">
+                    <div class="camp-nav-item__icon">
+                        <i class="fas fa-ship"></i>
+                    </div>
+                    <div class="camp-nav-item__name">{{ __('vacations.rental_boats') }}</div>
+                    <div class="camp-nav-item__count">{{ $boatsCount }}</div>
+                </a>
+                @endif
+                
+                @if($specialOffersCount > 0)
+                <a href="#special-offers" class="camp-nav-item">
+                    <div class="camp-nav-item__icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="camp-nav-item__name">{{ __('vacations.special_offers') }}</div>
+                    <div class="camp-nav-item__count">{{ $specialOffersCount }}</div>
+                </a>
+                @endif
+                
+                @if($guidingsCount > 0)
+                <a href="#guidings" class="camp-nav-item">
+                    <div class="camp-nav-item__icon">
+                        <i class="fas fa-compass"></i>
+                    </div>
+                    <div class="camp-nav-item__name">{{ __('vacations.guidings_tours') }}</div>
+                    <div class="camp-nav-item__count">{{ $guidingsCount }}</div>
+                </a>
+                @endif
             </nav>
 
             <!-- Contact Card -->
@@ -415,7 +457,7 @@
         @endif
 
         <!-- Guidings Section -->
-        {{-- @if (count($guidings) > 0)
+        @if (isset($guidings) && count($guidings) > 0)
         <section id="guidings" class="camp-section mb-3">
             <h2 class="camp-section__title">{{ __('vacations.guidings_tours') }}</h2>
             @foreach($guidings as $guiding)
@@ -424,7 +466,7 @@
                 </div>
             @endforeach
         </section>
-        @endif --}}
+        @endif
 
         <!-- Rental Boats Section -->
         @if (count($boats) > 0)

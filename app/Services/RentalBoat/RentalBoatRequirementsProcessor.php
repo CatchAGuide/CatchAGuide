@@ -3,7 +3,6 @@
 namespace App\Services\RentalBoat;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class RentalBoatRequirementsProcessor
 {
@@ -15,7 +14,6 @@ class RentalBoatRequirementsProcessor
         $rentalRequirements = [];
         
         if (!$request->has('rental_requirement_checkboxes')) {
-            Log::info('RentalBoatRequirementsProcessor::process - No requirement checkboxes found');
             return $rentalRequirements;
         }
 
