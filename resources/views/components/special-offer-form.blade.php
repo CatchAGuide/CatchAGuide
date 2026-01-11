@@ -232,46 +232,16 @@
 
                 <h5>Pricing</h5>
                 
-                <div class="form-group">
-                    <label for="price_type" class="form-label fw-bold fs-5">
-                        Price Type
-                    </label>
-                    <select class="form-control" name="price_type" id="price_type">
-                        <option value="">Select Price Type</option>
-                        <option value="per_person" {{ ($formData['price_type'] ?? '') == 'per_person' ? 'selected' : '' }}>Per Person</option>
-                        <option value="per_night" {{ ($formData['price_type'] ?? '') == 'per_night' ? 'selected' : '' }}>Per Night</option>
-                        <option value="per_week" {{ ($formData['price_type'] ?? '') == 'per_week' ? 'selected' : '' }}>Per Week</option>
-                        <option value="fixed" {{ ($formData['price_type'] ?? '') == 'fixed' ? 'selected' : '' }}>Fixed Price</option>
-                    </select>
-                </div>
+                <input type="hidden" name="price_type" id="price_type" value="fixed">
+                <input type="hidden" name="currency" id="currency" value="EUR">
 
                 <div class="form-group">
-                    <label for="currency" class="form-label fw-bold fs-5">
-                        Currency
-                    </label>
-                    <select class="form-control" name="currency" id="currency">
-                        <option value="USD" {{ ($formData['currency'] ?? 'USD') == 'USD' ? 'selected' : '' }}>USD</option>
-                        <option value="EUR" {{ ($formData['currency'] ?? '') == 'EUR' ? 'selected' : '' }}>EUR</option>
-                        <option value="GBP" {{ ($formData['currency'] ?? '') == 'GBP' ? 'selected' : '' }}>GBP</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label fw-bold fs-5">Pricing Tiers</label>
                     <div id="pricing-container">
                         <div class="pricing-tier mb-3 p-3 border rounded">
                             <div class="row">
-                                <div class="col-md-4">
-                                    <label>Number of Persons</label>
-                                    <input type="number" class="form-control pricing-persons" min="1" placeholder="e.g., 1, 2, 3...">
-                                </div>
-                                <div class="col-md-4">
-                                    <label>Price per Night</label>
-                                    <input type="number" class="form-control pricing-per-night" step="0.01" min="0" placeholder="0.00">
-                                </div>
-                                <div class="col-md-4">
-                                    <label>Price per Week</label>
-                                    <input type="number" class="form-control pricing-per-week" step="0.01" min="0" placeholder="0.00">
+                                <div class="col-md-12">
+                                    <label>Price</label>
+                                    <input type="number" class="form-control pricing-amount" step="0.01" min="0" placeholder="0.00">
                                 </div>
                             </div>
                             <button type="button" class="btn btn-sm btn-danger mt-2 remove-tier" style="display: none;">Remove</button>
