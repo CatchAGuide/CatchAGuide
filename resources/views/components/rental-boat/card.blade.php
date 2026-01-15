@@ -1,4 +1,4 @@
-<div class="rental-boat-card" data-rental-boat-card>
+<div class="rental-boat-card" id="rental-boat-{{ $boat['id'] ?? '' }}" data-rental-boat-card data-rental-boat-id="{{ $boat['id'] ?? '' }}">
     @php
         $galleryImages = $boat['gallery_images'] ?? [];
         $galleryCount = $boat['gallery_count'] ?? count($galleryImages);

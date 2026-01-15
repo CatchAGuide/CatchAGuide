@@ -3,46 +3,12 @@
         $galleryImages = $specialOffer['gallery_images'] ?? [];
         $galleryTotal = $specialOffer['gallery_count'] ?? max(count($galleryImages), 1);
         $whatsIncluded = $specialOffer['whats_included'] ?? [];
-        $accommodationNames = $specialOffer['accommodation_names'] ?? [];
-        $boatNames = $specialOffer['boat_names'] ?? [];
-        $guidingNames = $specialOffer['guiding_names'] ?? [];
+        $accommodations = $specialOffer['accommodations'] ?? [];
+        $rentalBoats = $specialOffer['rental_boats'] ?? [];
+        $guidings = $specialOffer['guidings'] ?? [];
         $price = $specialOffer['price'] ?? [];
         $priceAmount = (float) ($price['amount'] ?? 0);
         $currency = $price['currency'] ?? 'EUR';
-        $priceType = $price['type'] ?? 'per_person';
-        $location = $specialOffer['location'] ?? '';
-        $city = $specialOffer['city'] ?? '';
-        $region = $specialOffer['region'] ?? '';
-        $country = $specialOffer['country'] ?? '';
-        
-        // Build details array
-        $offerDetails = [];
-        if (!empty($accommodationNames)) {
-            $offerDetails[] = [
-                'name' => __('Accommodation'),
-                'value' => implode(', ', array_map('translate', $accommodationNames))
-            ];
-        }
-        if (!empty($boatNames)) {
-            $offerDetails[] = [
-                'name' => __('Boat'),
-                'value' => implode(', ', array_map('translate', $boatNames))
-            ];
-        }
-        if (!empty($guidingNames)) {
-            $offerDetails[] = [
-                'name' => __('Guiding'),
-                'value' => implode(', ', array_map('translate', $guidingNames))
-            ];
-        }
-        
-        // Price type translation
-        $translatedPriceType = match($priceType) {
-            'per_person' => __('Preis p.P.:'),
-            'per_night' => __('Per Night'),
-            'per_week' => __('Per Week'),
-            default => ucfirst(str_replace('_', ' ', $priceType))
-        };
     @endphp
 
     <div class="special-offer-card__grid">
@@ -79,15 +45,73 @@
                 <h3 class="special-offer-card__title">{{ translate($specialOffer['title']) ?? 'Special Offer' }}</h3>
             </div>
 
-            @if(!empty($offerDetails))
-                <div class="special-offer-card__details">
-                    <ul class="special-offer-card__bullet-list">
-                        @foreach($offerDetails as $detail)
-                            <li>{{ translate($detail['name']) }}: <span class="font-medium">{{ translate($detail['value']) }}</span></li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+            <div class="special-offer-card__anchor-points">
+                @if(count($accommodations) > 0)
+                    <div class="special-offer-card__anchor-category" data-category-type="accommodation">
+                        <span class="special-offer-card__anchor-category-label">{{ __('Accommodation') }}</span>
+                        <div class="special-offer-card__anchor-buttons">
+                            @foreach($accommodations as $index => $accommodation)
+                                <a href="#accommodation-{{ $accommodation['id'] }}" 
+                                   class="special-offer-card__anchor-box special-offer-card__anchor-box--accommodation {{ $index >= 3 ? 'special-offer-card__anchor-box--hidden' : '' }}" 
+                                   data-anchor-type="accommodation"
+                                   data-anchor-id="{{ $accommodation['id'] }}"
+                                   data-anchor-scroll>
+                                    <span class="special-offer-card__anchor-box-text">{{ translate($accommodation['title'] ?? '{Title}') }}</span>
+                                </a>
+                            @endforeach
+                            @if(count($accommodations) > 3)
+                                <button type="button" class="special-offer-card__anchor-toggle" data-toggle-category="accommodation" aria-label="Show more">
+                                    <span class="special-offer-card__anchor-toggle-text">...</span>
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
+                @if(count($rentalBoats) > 0)
+                    <div class="special-offer-card__anchor-category" data-category-type="boat">
+                        <span class="special-offer-card__anchor-category-label">{{ __('Rental Boat') }}</span>
+                        <div class="special-offer-card__anchor-buttons">
+                            @foreach($rentalBoats as $index => $boat)
+                                <a href="#rental-boat-{{ $boat['id'] }}" 
+                                   class="special-offer-card__anchor-box special-offer-card__anchor-box--boat {{ $index >= 3 ? 'special-offer-card__anchor-box--hidden' : '' }}" 
+                                   data-anchor-type="boat"
+                                   data-anchor-id="{{ $boat['id'] }}"
+                                   data-anchor-scroll>
+                                    <span class="special-offer-card__anchor-box-text">{{ translate($boat['title'] ?? '{Title}') }}</span>
+                                </a>
+                            @endforeach
+                            @if(count($rentalBoats) > 3)
+                                <button type="button" class="special-offer-card__anchor-toggle" data-toggle-category="boat" aria-label="Show more">
+                                    <span class="special-offer-card__anchor-toggle-text">...</span>
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
+                @if(count($guidings) > 0)
+                    <div class="special-offer-card__anchor-category" data-category-type="guiding">
+                        <span class="special-offer-card__anchor-category-label">Guidings</span>
+                        <div class="special-offer-card__anchor-buttons">
+                            @foreach($guidings as $index => $guiding)
+                                <a href="#guiding-{{ $guiding['id'] }}" 
+                                   class="special-offer-card__anchor-box special-offer-card__anchor-box--guiding {{ $index >= 3 ? 'special-offer-card__anchor-box--hidden' : '' }}" 
+                                   data-anchor-type="guiding"
+                                   data-anchor-id="{{ $guiding['id'] }}"
+                                   data-anchor-scroll>
+                                    <span class="special-offer-card__anchor-box-text">{{ translate($guiding['title'] ?? '{Title}') }}</span>
+                                </a>
+                            @endforeach
+                            @if(count($guidings) > 3)
+                                <button type="button" class="special-offer-card__anchor-toggle" data-toggle-category="guiding" aria-label="Show more">
+                                    <span class="special-offer-card__anchor-toggle-text">...</span>
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+            </div>
         </div>
 
         <div class="special-offer-card__feature-grid" data-expanded-only>
@@ -105,8 +129,8 @@
 
         <div class="special-offer-card__actions">
             <div class="special-offer-card__actions-column">
+                <div class="special-offer-card__price-label">{{ __('Fixed') }}</div>
                 <div class="special-offer-card__pricing">
-                    <div class="special-offer-card__price-type">{{ $translatedPriceType }}</div>
                     <div class="special-offer-card__price-amount">{{ $currency === 'EUR' ? '€' : $currency }}{{ number_format($priceAmount, 2, ',', '.') }}</div>
                 </div>
                 <button class="special-offer-card__expand-btn special-offer-card__expand-btn--secondary" data-toggle-btn>

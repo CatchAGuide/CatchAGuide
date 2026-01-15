@@ -105,41 +105,25 @@
                 
                 @if($accommodationsCount > 0)
                 <a href="#accommodations" class="camp-nav-item">
-                    <div class="camp-nav-item__icon">
-                        <i class="fas fa-bed"></i>
-                    </div>
                     <div class="camp-nav-item__name">{{ __('vacations.accommodations') }}</div>
-                    <div class="camp-nav-item__count">{{ $accommodationsCount }}</div>
                 </a>
                 @endif
                 
                 @if($boatsCount > 0)
                 <a href="#boats" class="camp-nav-item">
-                    <div class="camp-nav-item__icon">
-                        <i class="fas fa-ship"></i>
-                    </div>
                     <div class="camp-nav-item__name">{{ __('vacations.rental_boats') }}</div>
-                    <div class="camp-nav-item__count">{{ $boatsCount }}</div>
                 </a>
                 @endif
                 
                 @if($specialOffersCount > 0)
                 <a href="#special-offers" class="camp-nav-item">
-                    <div class="camp-nav-item__icon">
-                        <i class="fas fa-star"></i>
-                    </div>
                     <div class="camp-nav-item__name">{{ __('vacations.special_offers') }}</div>
-                    <div class="camp-nav-item__count">{{ $specialOffersCount }}</div>
                 </a>
                 @endif
                 
                 @if($guidingsCount > 0)
                 <a href="#guidings" class="camp-nav-item">
-                    <div class="camp-nav-item__icon">
-                        <i class="fas fa-compass"></i>
-                    </div>
                     <div class="camp-nav-item__name">{{ __('vacations.guidings_tours') }}</div>
-                    <div class="camp-nav-item__count">{{ $guidingsCount }}</div>
                 </a>
                 @endif
             </nav>
