@@ -1,4 +1,4 @@
-<div class="accommodation-card" data-accommodation-card>
+<div class="accommodation-card" id="accommodation-{{ $accommodation['id'] ?? '' }}" data-accommodation-card data-accommodation-id="{{ $accommodation['id'] ?? '' }}">
     @php
         $galleryImages = $accommodation['gallery_images'] ?? [];
         $galleryTotal = $accommodation['gallery_total'] ?? max(count($galleryImages), 1);

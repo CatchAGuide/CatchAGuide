@@ -711,12 +711,47 @@ class CampOfferController extends Controller
         $galleryImages = $this->getImageUrls($specialOffer->gallery_images ?? []);
         $galleryCount = max(count($galleryImages), 1);
         
-        // Get related items
+        // Helper function to safely extract scalar ID from model or array
+        $getScalarId = function($item) {
+            if (is_object($item)) {
+                $id = $item->id ?? null;
+            } elseif (is_array($item)) {
+                $id = $item['id'] ?? null;
+            } else {
+                return null;
+            }
+            
+            // Ensure ID is scalar (not array)
+            if (!is_scalar($id)) {
+                $id = is_array($id) ? (isset($id[0]) ? $id[0] : null) : (string)$id;
+            }
+            
+            return $id ? (int)$id : null;
+        };
+        
+        // Get related items with IDs for anchor links - normalized and validated
+        $accommodations = $specialOffer->accommodations->map(function($acc) use ($getScalarId) {
+            $id = $getScalarId($acc);
+            $title = is_object($acc) ? ($acc->title ?? '') : (is_array($acc) ? ($acc['title'] ?? '') : '');
+            return $id ? ['id' => $id, 'title' => (string)$title] : null;
+        })->filter()->values()->toArray();
         $accommodationNames = $specialOffer->accommodations->pluck('title')->toArray();
+        
+        $rentalBoats = $specialOffer->rentalBoats->map(function($boat) use ($getScalarId) {
+            $id = $getScalarId($boat);
+            $title = is_object($boat) ? ($boat->title ?? '') : (is_array($boat) ? ($boat['title'] ?? '') : '');
+            return $id ? ['id' => $id, 'title' => (string)$title] : null;
+        })->filter()->values()->toArray();
         $boatNames = $specialOffer->rentalBoats->pluck('title')->toArray();
+        
+        $guidings = $specialOffer->guidings->map(function($guiding) use ($getScalarId) {
+            $id = $getScalarId($guiding);
+            $title = is_object($guiding) ? ($guiding->title ?? '') : (is_array($guiding) ? ($guiding['title'] ?? '') : '');
+            return $id ? ['id' => $id, 'title' => (string)$title] : null;
+        })->filter()->values()->toArray();
         $guidingNames = $specialOffer->guidings->pluck('title')->toArray();
         
-        // Process whats_included
+        // Process whats_included - normalize to array of strings
         $whatsIncluded = [];
         if (!empty($specialOffer->whats_included)) {
             if (is_string($specialOffer->whats_included)) {
@@ -725,12 +760,12 @@ class CampOfferController extends Controller
                 $whatsIncluded = $specialOffer->whats_included;
             }
             
-            // Normalize to array of strings
+            // Normalize to array of strings - handle both array and string items
             $whatsIncluded = collect($whatsIncluded)->map(function($item) {
                 if (is_array($item)) {
-                    return $item['name'] ?? $item['value'] ?? json_encode($item);
+                    return $item['name'] ?? $item['value'] ?? (isset($item[0]) ? $item[0] : json_encode($item));
                 }
-                return $item;
+                return is_scalar($item) ? (string)$item : json_encode($item);
             })->filter()->values()->toArray();
         }
         
@@ -775,6 +810,9 @@ class CampOfferController extends Controller
             ? implode(', ', $locationParts)
             : ($specialOffer->location ?? '');
         
+        // Determine if price type is fixed
+        $isFixed = ($priceType === 'fixed' || $priceType === 'per_week');
+        
         return [
             'id' => $specialOffer->id,
             'title' => $specialOffer->title,
@@ -785,8 +823,11 @@ class CampOfferController extends Controller
             'thumbnail_path' => $this->getImageUrl($specialOffer->thumbnail_path),
             'gallery_images' => $galleryImages,
             'gallery_count' => $galleryCount,
+            'accommodations' => $accommodations,
             'accommodation_names' => $accommodationNames,
+            'rental_boats' => $rentalBoats,
             'boat_names' => $boatNames,
+            'guidings' => $guidings,
             'guiding_names' => $guidingNames,
             'whats_included' => $whatsIncluded,
             'price' => [
@@ -794,6 +835,7 @@ class CampOfferController extends Controller
                 'currency' => $currency,
                 'type' => $priceType,
             ],
+            'is_fixed' => $isFixed,
         ];
     }
 }

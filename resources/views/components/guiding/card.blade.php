@@ -1,4 +1,4 @@
-<div class="guiding-card" data-guiding-card>
+<div class="guiding-card" id="guiding-{{ $guiding['id'] ?? '' }}" data-guiding-card data-guiding-id="{{ $guiding['id'] ?? '' }}">
     <div class="guiding-card__grid">
         <!-- Left Column: Gallery (+ Inclusives when expanded) -->
         <div class="guiding-card__left-column">
