@@ -51,6 +51,61 @@
                 </div>
             </div>
 
+            {{-- Title and Summary right after gallery - Mobile version --}}
+            <div class="accommodation-card__title-after-gallery accommodation-card__title-after-gallery--mobile">
+                <div class="accommodation-card__summary-header">
+                    <h3 class="accommodation-card__title">{{ translate($accommodation['title']) ?? 'Apartment Title' }}</h3>
+                    <div class="accommodation-card__type">{{ $accommodation['accommodation_type'] ?? 'Apartment / Holiday Home' }}</div>
+                </div>
+
+                <div class="accommodation-card__stats">
+                    @if(!empty($accommodation['max_occupancy']))
+                    <span class="accommodation-card__stat">
+                        <span class="accommodation-card__stat-icon">👥</span>
+                        <span>{{ $accommodation['max_occupancy'] }}</span>
+                    </span>
+                    @endif
+                    @if(!empty($accommodation['number_of_bathrooms']))
+                    <span class="accommodation-card__stat">
+                        <span class="accommodation-card__stat-icon">🛁</span>
+                        <span>{{ $accommodation['number_of_bathrooms'] }}</span>
+                    </span>
+                    @endif
+                    @if(!empty($accommodation['living_area_sqm']))
+                    <span class="accommodation-card__stat">
+                        <span class="accommodation-card__stat-icon">📐</span>
+                        <span>{{ $accommodation['living_area_sqm'] }}</span>
+                    </span>
+                    @endif
+                </div>
+
+                <div class="accommodation-card__beds">
+                    <span class="accommodation-card__beds-label">Schlafzimmer:</span>
+                    <span class="accommodation-card__beds-value">{{ translate($bedSummary) }}</span>
+                </div>
+
+                <div class="accommodation-card__distance-row">
+                    <div class="accommodation-card__distance-group">
+                        @if(!empty($accommodation['distances']['to_water_m']))
+                            <span class="accommodation-card__distance-chip">
+                                🌊 Water: <span>{{ is_numeric($accommodation['distances']['to_water_m']) ? $accommodation['distances']['to_water_m'] . ' m' : translate($accommodation['distances']['to_water_m']) }}</span>
+                            </span>
+                        @endif
+                        @if(!empty($accommodation['distances']['to_berth_m']))
+                            <span class="accommodation-card__distance-chip">
+                                ⚓ Jetty: <span>{{ is_numeric($accommodation['distances']['to_berth_m']) ? $accommodation['distances']['to_berth_m'] . ' m' : translate($accommodation['distances']['to_berth_m']) }}</span>
+                            </span>
+                        @endif
+                        @if(!empty($accommodation['distances']['to_parking_m']))
+                            <span class="accommodation-card__distance-chip">
+                                🚗 Parking: <span>{{ is_numeric($accommodation['distances']['to_parking_m']) ? $accommodation['distances']['to_parking_m'] . ' m' : translate($accommodation['distances']['to_parking_m']) }}</span>
+                            </span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            {{-- Details panel appears after gallery (desktop expanded only) --}}
             <div class="accommodation-card__left-panels" data-expanded-only>
                 <div class="accommodation-card__panel">
                     <div class="accommodation-card__panel-title">Details</div>
@@ -76,6 +131,7 @@
             </div>
         </div>
 
+        {{-- Summary section - Desktop: right column, Mobile: hidden (uses title-after-gallery instead) --}}
         <div class="accommodation-card__summary">
             <div class="accommodation-card__summary-header">
                 <h3 class="accommodation-card__title">{{ translate($accommodation['title']) ?? 'Apartment Title' }}</h3>

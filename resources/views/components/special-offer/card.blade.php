@@ -40,6 +40,81 @@
                 </div>
             </div>
 
+            {{-- Title and Summary right after gallery - Mobile version --}}
+            <div class="special-offer-card__title-after-gallery special-offer-card__title-after-gallery--mobile">
+                <div class="special-offer-card__summary-header">
+                    <h3 class="special-offer-card__title">{{ translate($specialOffer['title']) ?? 'Special Offer' }}</h3>
+                </div>
+
+                <div class="special-offer-card__anchor-points">
+                    @if(count($accommodations) > 0)
+                        <div class="special-offer-card__anchor-category" data-category-type="accommodation">
+                            <span class="special-offer-card__anchor-category-label">{{ __('Accommodation') }}</span>
+                            <div class="special-offer-card__anchor-buttons">
+                                @foreach($accommodations as $index => $accommodation)
+                                    <a href="#accommodation-{{ $accommodation['id'] }}" 
+                                       class="special-offer-card__anchor-box special-offer-card__anchor-box--accommodation {{ $index >= 3 ? 'special-offer-card__anchor-box--hidden' : '' }}" 
+                                       data-anchor-type="accommodation"
+                                       data-anchor-id="{{ $accommodation['id'] }}"
+                                       data-anchor-scroll>
+                                        <span class="special-offer-card__anchor-box-text">{{ $accommodation['title'] ?? '{Title}' }}</span>
+                                    </a>
+                                @endforeach
+                                @if(count($accommodations) > 3)
+                                    <button type="button" class="special-offer-card__anchor-toggle" data-toggle-category="accommodation" aria-label="Show more">
+                                        <span class="special-offer-card__anchor-toggle-text">...</span>
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
+                    @if(count($rentalBoats) > 0)
+                        <div class="special-offer-card__anchor-category" data-category-type="boat">
+                            <span class="special-offer-card__anchor-category-label">{{ __('Rental Boat') }}</span>
+                            <div class="special-offer-card__anchor-buttons">
+                                @foreach($rentalBoats as $index => $boat)
+                                    <a href="#rental-boat-{{ $boat['id'] }}" 
+                                       class="special-offer-card__anchor-box special-offer-card__anchor-box--boat {{ $index >= 3 ? 'special-offer-card__anchor-box--hidden' : '' }}" 
+                                       data-anchor-type="boat"
+                                       data-anchor-id="{{ $boat['id'] }}"
+                                       data-anchor-scroll>
+                                        <span class="special-offer-card__anchor-box-text">{{ $boat['title'] ?? '{Title}' }}</span>
+                                    </a>
+                                @endforeach
+                                @if(count($rentalBoats) > 3)
+                                    <button type="button" class="special-offer-card__anchor-toggle" data-toggle-category="boat" aria-label="Show more">
+                                        <span class="special-offer-card__anchor-toggle-text">...</span>
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
+                    @if(count($guidings) > 0)
+                        <div class="special-offer-card__anchor-category" data-category-type="guiding">
+                            <span class="special-offer-card__anchor-category-label">Guidings</span>
+                            <div class="special-offer-card__anchor-buttons">
+                                @foreach($guidings as $index => $guiding)
+                                    <a href="#guiding-{{ $guiding['id'] }}" 
+                                       class="special-offer-card__anchor-box special-offer-card__anchor-box--guiding {{ $index >= 3 ? 'special-offer-card__anchor-box--hidden' : '' }}" 
+                                       data-anchor-type="guiding"
+                                       data-anchor-id="{{ $guiding['id'] }}"
+                                       data-anchor-scroll>
+                                        <span class="special-offer-card__anchor-box-text">{{ $guiding['title'] ?? '{Title}' }}</span>
+                                    </a>
+                                @endforeach
+                                @if(count($guidings) > 3)
+                                    <button type="button" class="special-offer-card__anchor-toggle" data-toggle-category="guiding" aria-label="Show more">
+                                        <span class="special-offer-card__anchor-toggle-text">...</span>
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
             @if(count($whatsIncluded) > 0 || count($pricingExtras) > 0)
                 <div class="special-offer-card__media-extras" data-expanded-only>
                     @if(count($whatsIncluded) > 0)
@@ -72,6 +147,7 @@
             @endif
         </div>
 
+        {{-- Summary section - Desktop: middle column, Mobile: hidden (uses title-after-gallery instead) --}}
         <div class="special-offer-card__summary">
             <div class="special-offer-card__summary-header">
                 <h3 class="special-offer-card__title">{{ translate($specialOffer['title']) ?? 'Special Offer' }}</h3>

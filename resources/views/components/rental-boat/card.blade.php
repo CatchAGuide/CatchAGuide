@@ -46,6 +46,40 @@
                 @endif
             </div>
 
+            {{-- Title and Summary right after gallery - Mobile version --}}
+            <div class="rental-boat-card__title-after-gallery rental-boat-card__title-after-gallery--mobile">
+                <div class="rental-boat-card__summary-header">
+                    <h3 class="rental-boat-card__title">{{ $boat['title'] ?? __('Boat Title') }}</h3>
+                    @if(!empty($boat['type']))
+                        <div class="rental-boat-card__category">{{ $boat['type'] }}</div>
+                    @endif
+                </div>
+
+                @if(count($specs) > 0)
+                    <div class="rental-boat-card__spec-row">
+                        @foreach($specs as $spec)
+                            <span class="rental-boat-card__spec-item">
+                                <span class="rental-boat-card__spec-label">{{ $spec['label'] }}:</span>
+                                <span class="rental-boat-card__spec-value">{{ $spec['value'] }}</span>
+                            </span>
+                        @endforeach
+                    </div>
+                @endif
+
+                @if (count($inclusiveItems) > 0 )
+                    <div class="rental-boat-card__included">
+                        <div class="rental-boat-card__included-title">{{ __('Included in the price') }}</div>
+                        <div class="rental-boat-card__included-chips">
+                            @foreach($inclusiveItems as $inclusive)
+                                <span class="rental-boat-card__included-chip">
+                                    ✅ {{ $inclusive }}
+                                </span>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            </div>
+
             @if(count($extraItems) > 0)
                 <div class="rental-boat-card__extras-inclusives" data-expanded-only>
                     <div class="rental-boat-card__info-box">
@@ -62,6 +96,7 @@
             @endif
         </div>
 
+        {{-- Summary section - Desktop: middle column, Mobile: hidden (uses title-after-gallery instead) --}}
         <div class="rental-boat-card__summary">
             <div class="rental-boat-card__summary-header">
                 <h3 class="rental-boat-card__title">{{ $boat['title'] ?? __('Boat Title') }}</h3>

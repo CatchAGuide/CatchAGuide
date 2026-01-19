@@ -45,6 +45,40 @@
                     </span>
                 </div>
             </div>
+
+            {{-- Title and Summary right after gallery - Mobile version --}}
+            <div class="guiding-card__title-after-gallery guiding-card__title-after-gallery--mobile">
+                <div class="guiding-card__header">
+                    <div class="guiding-card__info">
+                        <h3 class="guiding-card__title">{{ $guiding['title'] ?? 'Guiding Title' }}</h3>
+                        <p class="guiding-card__description">{{ $guiding['description'] ?? 'Description' }}</p>
+                    </div>
+                </div>
+
+                <!-- Information Pills -->
+                <div class="guiding-card__info-pills">
+                    <span class="guiding-card__info-pill">
+                        <svg class="guiding-card__pill-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        <span>{{ $guiding['duration_hours'] ?? '6' }}</span> h
+                    </span>
+                    <span class="guiding-card__info-pill">
+                        <svg class="guiding-card__pill-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        <span>{{ $guiding['max_persons'] ?? '3' }}</span> Pers
+                    </span>
+                    <span class="guiding-card__info-pill">
+                        <svg class="guiding-card__pill-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M2 6s1.5-2 5-2 5 2 5 2 1.5-2 5-2 5 2 5 2v14s-1.5-2-5-2-5 2-5 2-1.5-2-5-2-5 2-5 2V6z"/>
+                        </svg>
+                        <span>{{ $guiding['type'] ?? 'Shore' }}</span>
+                    </span>
+                </div>
+            </div>
             
             <!-- Inclusives Section (only visible when expanded) -->
             <div class="guiding-card__detail-box" data-expanded-only>

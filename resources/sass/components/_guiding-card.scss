@@ -44,6 +44,22 @@
         }
     }
 
+    // Title and summary right after gallery
+    &__title-after-gallery {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        
+        // Mobile version - shown only on mobile
+        &--mobile {
+            display: flex;
+            
+            @media (min-width: 769px) {
+                display: none !important;
+            }
+        }
+    }
+
     &__right-column {
         display: flex;
         flex-direction: column;
@@ -52,6 +68,12 @@
 
         @media (max-width: 768px) {
             gap: 8px;
+            
+            // Hide on mobile since we use title-after-gallery instead
+            .guiding-card__header,
+            .guiding-card__info-pills {
+                display: none !important;
+            }
         }
     }
 

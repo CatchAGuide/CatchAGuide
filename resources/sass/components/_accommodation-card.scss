@@ -43,7 +43,6 @@
             grid-template-columns: 1fr;
             grid-template-areas:
                 "media"
-                "summary"
                 "features"
                 "actions";
             gap: 12px;
@@ -69,13 +68,36 @@
         @media (max-width: 768px) {
             grid-template-areas:
                 "media"
-                "summary"
                 "actions";
         }
     }
 
     &__media {
         grid-area: media;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    // Title and summary right after gallery
+    &__title-after-gallery {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        
+        // Mobile version - shown only on mobile
+        &--mobile {
+            display: flex;
+            
+            @media (min-width: 769px) {
+                display: none !important;
+            }
+        }
+        
+        // Desktop version - hidden (desktop uses summary in right column)
+        &--desktop {
+            display: none !important;
+        }
     }
 
     &__summary {
@@ -84,6 +106,11 @@
         flex-direction: column;
         gap: 12px;
         min-width: 0;
+        
+        // Hide on mobile since we use title-after-gallery instead
+        @media (max-width: 768px) {
+            display: none !important;
+        }
     }
 
     &__actions {
@@ -126,8 +153,11 @@
         }
 
         .accommodation-card__left-panels[data-expanded-only] {
-            display: flex !important;
-            animation: fadeInUp 0.4s ease forwards;
+            // Only show on desktop (mobile uses mobile-only panels in feature-grid)
+            @media (min-width: 769px) {
+                display: flex !important;
+                animation: fadeInUp 0.4s ease forwards;
+            }
         }
     }
 
@@ -322,9 +352,14 @@
         }
     }
 
-    // Mobile-only panels (Details and Policies) - hidden by default
+    // Mobile-only panels (Details and Policies) - hidden by default and on desktop
     &__panel--mobile-only {
         display: none !important;
+        
+        // Force hide on desktop
+        @media (min-width: 769px) {
+            display: none !important;
+        }
     }
 
     // Show mobile panels and set order on mobile when expanded
@@ -398,13 +433,20 @@
 
     &__left-panels {
         margin-top: 16px;
-        display: flex;
+        display: none; // Hidden by default (data-expanded-only)
         flex-direction: column;
         gap: 12px;
 
         // Hide on mobile - will show mobile versions in feature-grid instead
         @media (max-width: 768px) {
             display: none !important;
+        }
+        
+        // Only show on desktop when expanded
+        @media (min-width: 769px) {
+            .accommodation-card--expanded & {
+                display: flex !important;
+            }
         }
     }
 

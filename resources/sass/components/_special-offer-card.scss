@@ -88,6 +88,22 @@
         gap: 12px;
     }
 
+    // Title and summary right after gallery
+    &__title-after-gallery {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        
+        // Mobile version - shown only on mobile
+        &--mobile {
+            display: flex;
+            
+            @media (min-width: 769px) {
+                display: none !important;
+            }
+        }
+    }
+
     &__media-extras {
         display: flex;
         flex-direction: column;
@@ -101,6 +117,11 @@
         flex-direction: column;
         gap: 12px;
         min-width: 0;
+        
+        // Hide on mobile since we use title-after-gallery instead
+        @media (max-width: 768px) {
+            display: none !important;
+        }
     }
 
     &__actions {
