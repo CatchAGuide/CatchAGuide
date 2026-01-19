@@ -3,6 +3,7 @@
         $galleryImages = $specialOffer['gallery_images'] ?? [];
         $galleryTotal = $specialOffer['gallery_count'] ?? max(count($galleryImages), 1);
         $whatsIncluded = $specialOffer['whats_included'] ?? [];
+        $pricingExtras = $specialOffer['pricing_extras'] ?? [];
         $accommodations = $specialOffer['accommodations'] ?? [];
         $rentalBoats = $specialOffer['rental_boats'] ?? [];
         $guidings = $specialOffer['guidings'] ?? [];
@@ -38,6 +39,37 @@
                     </div>
                 </div>
             </div>
+
+            @if(count($whatsIncluded) > 0 || count($pricingExtras) > 0)
+                <div class="special-offer-card__media-extras" data-expanded-only>
+                    @if(count($whatsIncluded) > 0)
+                        <div class="special-offer-card__panel special-offer-card__panel--inclusives">
+                            <div class="special-offer-card__panel-title">INCLUSIVES</div>
+                            <div class="special-offer-card__inclusive-extras">
+                                @foreach($whatsIncluded as $item)
+                                    <span class="special-offer-card__inclusive-chip">✔ {{ translate($item) }}</span>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    @if(count($pricingExtras) > 0)
+                        <div class="special-offer-card__panel special-offer-card__panel--pricing-extras">
+                            <div class="special-offer-card__panel-title">PRICING EXTRAS</div>
+                            <div class="special-offer-card__pricing-extras-list">
+                                @foreach($pricingExtras as $extra)
+                                    <div class="special-offer-card__pricing-extra-item">
+                                        <span class="special-offer-card__pricing-extra-name">{{ translate($extra['name'] ?? '') }}</span>
+                                        <span class="special-offer-card__pricing-extra-price">
+                                            {{ $currency === 'EUR' ? '€' : $currency }}{{ number_format((float)($extra['price'] ?? 0), 2, ',', '.') }}
+                                        </span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            @endif
         </div>
 
         <div class="special-offer-card__summary">
@@ -114,18 +146,91 @@
             </div>
         </div>
 
-        <div class="special-offer-card__feature-grid" data-expanded-only>
-            @if(count($whatsIncluded) > 0)
-                <div class="special-offer-card__panel special-offer-card__panel--extras">
-                    <div class="special-offer-card__panel-title">Inclusives</div>
-                    <div class="special-offer-card__inclusive-extras">
-                        @foreach($whatsIncluded as $item)
-                            <span class="special-offer-card__inclusive-chip">✅ {{ translate($item) }}</span>
-                        @endforeach
+        @php
+            $accommodationsFull = $specialOffer['accommodations_full'] ?? [];
+            $rentalBoatsFull = $specialOffer['rental_boats_full'] ?? [];
+            $guidingsFull = $specialOffer['guidings_full'] ?? [];
+            $allComponents = array_merge($accommodationsFull, $rentalBoatsFull, $guidingsFull);
+        @endphp
+
+        @if(count($allComponents) > 0)
+            <div class="special-offer-card__component-cards" data-expanded-only>
+                @foreach($accommodationsFull as $acc)
+                    <div class="special-offer-card__component-card special-offer-card__component-card--accommodation" id="accommodation-{{ $acc['id'] }}">
+                        <h4 class="special-offer-card__component-title">{{ $acc['title'] ?? '' }}</h4>
+                        <div class="special-offer-card__component-subtitle">{{ translate($acc['accommodation_type'] ?? '') }}</div>
+                        
+                        @if(!empty($acc['living_area_sqm']))
+                            <div class="special-offer-card__component-badge">
+                                <span class="special-offer-card__component-badge-icon">📐</span>
+                                <span>{{ $acc['living_area_sqm'] }} qm</span>
+                            </div>
+                        @endif
+
+                        @if(!empty($acc['bed_summary']))
+                            <div class="special-offer-card__component-text">
+                                Schlafzimmer: {{ translate($acc['bed_summary']) }}
+                            </div>
+                        @endif
+
+                        <div class="special-offer-card__component-badges">
+                            @if(!empty($acc['distances']['to_water_m']))
+                                <div class="special-offer-card__component-badge">
+                                    <span class="special-offer-card__component-badge-icon">🌊</span>
+                                    <span>Water: {{ is_numeric($acc['distances']['to_water_m']) ? $acc['distances']['to_water_m'] . 'm' : translate($acc['distances']['to_water_m']) }}</span>
+                                </div>
+                            @endif
+                            @if(!empty($acc['distances']['to_parking_m']))
+                                <div class="special-offer-card__component-badge">
+                                    <span class="special-offer-card__component-badge-icon">🚗</span>
+                                    <span>Parking: {{ is_numeric($acc['distances']['to_parking_m']) ? $acc['distances']['to_parking_m'] . 'm' : translate($acc['distances']['to_parking_m']) }}</span>
+                                </div>
+                            @endif
+                        </div>
                     </div>
-                </div>
-            @endif
-        </div>
+                @endforeach
+
+                @foreach($rentalBoatsFull as $boat)
+                    <div class="special-offer-card__component-card special-offer-card__component-card--boat" id="rental-boat-{{ $boat['id'] }}">
+                        <h4 class="special-offer-card__component-title">{{ $boat['title'] ?? '' }}</h4>
+                        <div class="special-offer-card__component-subtitle">{{ translate($boat['type'] ?? '') }}</div>
+                        
+                        @if(!empty($boat['specs']))
+                            @foreach($boat['specs'] as $spec)
+                                <div class="special-offer-card__component-badge">
+                                    <span>{{ translate($spec['label']) }}: {{ translate($spec['value']) }}</span>
+                                </div>
+                            @endforeach
+                        @endif
+                    </div>
+                @endforeach
+
+                @foreach($guidingsFull as $guiding)
+                    <div class="special-offer-card__component-card special-offer-card__component-card--guiding" id="guiding-{{ $guiding['id'] }}">
+                        <h4 class="special-offer-card__component-title">{{ $guiding['title'] ?? '' }}</h4>
+                        @if(!empty($guiding['guiding_info']['art']))
+                            <div class="special-offer-card__component-subtitle">{{ translate($guiding['guiding_info']['art'] ?? '') }}</div>
+                        @endif
+                        
+                        @if(!empty($guiding['guiding_info']))
+                            <div class="special-offer-card__component-badges">
+                                @if(!empty($guiding['guiding_info']['dauer']))
+                                    <div class="special-offer-card__component-badge">
+                                        <span>Duration: {{ translate($guiding['guiding_info']['dauer']) }}</span>
+                                    </div>
+                                @endif
+                                @if(!empty($guiding['guiding_info']['max_personen']))
+                                    <div class="special-offer-card__component-badge">
+                                        <span>Max Persons: {{ translate($guiding['guiding_info']['max_personen']) }}</span>
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        @endif
+
 
         <div class="special-offer-card__actions">
             <div class="special-offer-card__actions-column">

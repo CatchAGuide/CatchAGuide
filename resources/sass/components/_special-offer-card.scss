@@ -21,7 +21,8 @@
         grid-template-columns: 320px minmax(0, 1fr) minmax(220px, 260px);
         grid-template-areas:
             "media summary actions"
-            "media features features";
+            "media features features"
+            "media components components";
         gap: 16px;
         padding: 16px;
         align-items: flex-start;
@@ -36,6 +37,7 @@
                 "media summary"
                 "media summary"
                 "features features"
+                "components components"
                 "actions actions";
         }
 
@@ -45,6 +47,7 @@
                 "media"
                 "summary"
                 "features"
+                "components"
                 "actions";
             gap: 12px;
             padding: 12px;
@@ -74,8 +77,22 @@
         }
     }
 
+    &__component-cards {
+        grid-area: components;
+    }
+
     &__media {
         grid-area: media;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    &__media-extras {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 0;
     }
 
     &__summary {
@@ -105,6 +122,12 @@
         display: none !important;
         grid-area: auto !important; // Remove from grid layout when hidden
     }
+
+    // Component cards need special handling - remove from grid when hidden
+    &__component-cards[data-expanded-only] {
+        display: none !important;
+        grid-area: auto !important; // Remove from grid layout when hidden
+    }
     
     // Show expandable content when card is expanded
     &--expanded {
@@ -122,6 +145,17 @@
 
         .special-offer-card__expanded[data-expanded-only] {
             display: block !important;
+            animation: fadeInUp 0.4s ease forwards;
+        }
+
+        .special-offer-card__media-extras[data-expanded-only] {
+            display: flex !important;
+            animation: fadeInUp 0.4s ease forwards;
+        }
+
+        .special-offer-card__component-cards[data-expanded-only] {
+            display: grid !important;
+            grid-area: components !important; // Restore grid area when shown
             animation: fadeInUp 0.4s ease forwards;
         }
     }
@@ -523,6 +557,11 @@
         grid-column: 1 / -1;
     }
 
+    &__panel--inclusives,
+    &__panel--pricing-extras {
+        margin-top: 0;
+    }
+
     &__inclusive-extras {
         display: flex;
         flex-wrap: wrap;
@@ -541,6 +580,37 @@
         color: #334155;
     }
 
+    &__pricing-extras-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    &__pricing-extra-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(15, 23, 42, .05);
+        
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+
+    &__pricing-extra-name {
+        font-size: 12px;
+        color: #334155;
+        flex: 1;
+    }
+
+    &__pricing-extra-price {
+        font-size: 12px;
+        font-weight: 600;
+        color: #1e293b;
+        margin-left: 12px;
+    }
+
     &__feature-grid {
         grid-area: features;
         margin-top: 0;
@@ -552,6 +622,91 @@
         @media (max-width: 768px) {
             display: flex;
             flex-direction: column;
+        }
+    }
+
+    &__component-cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 16px;
+        width: 100%;
+
+        @media (max-width: 1024px) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        @media (max-width: 768px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    &__component-card {
+        background: rgba(241, 245, 249, .6);
+        border: 1px solid rgba(15, 23, 42, .08);
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: rgba(241, 245, 249, .8);
+            border-color: rgba(15, 23, 42, .12);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
+        }
+    }
+
+    &__component-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0;
+        line-height: 1.3;
+    }
+
+    &__component-subtitle {
+        font-size: 13px;
+        color: #64748b;
+        margin-top: -4px;
+    }
+
+    &__component-text {
+        font-size: 12px;
+        color: #475569;
+        line-height: 1.5;
+    }
+
+    &__component-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 4px;
+    }
+
+    &__component-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(255, 255, 255, .8);
+        border: 1px solid rgba(15, 23, 42, .1);
+        border-radius: 8px;
+        padding: 4px 8px;
+        font-size: 11px;
+        color: #334155;
+    }
+
+    &__component-badge-icon {
+        font-size: 12px;
+    }
+
+    // Show component cards when expanded
+    &--expanded {
+        .special-offer-card__component-cards[data-expanded-only] {
+            display: grid !important;
+            animation: fadeInUp 0.4s ease forwards;
         }
     }
 }
