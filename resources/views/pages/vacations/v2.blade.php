@@ -128,46 +128,78 @@
                 @endif
             </nav>
 
-            <!-- Contact Card -->
-            <div class="contact-card card p-3 mb-4">
-                <div class="contact-card__content">
-                    <div class="contact-card__header">
-                        <h5 class="contact-card__title mb-1">@lang('vacations.contact_us')</h5>
-                        <p class="contact-card__message mb-0 text-muted small">@lang('vacations.contact_us_message')</p>
-                    </div>
-                    <div class="contact-info">
-                        <i class="fas fa-phone-alt me-2"></i>
-                        <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>
-                    </div>
-                    <a href="#" id="contact-product" class="btn btn-outline-orange" data-bs-toggle="modal" data-bs-target="#contactModal">
-                        @lang('vacations.contact_us_button')
-                        <i class="fas fa-arrow-right ms-2"></i>
-                    </a>
-                </div>
-            </div>
-
             <!-- General Information -->
             <main id="general-info" class="camp-info-grid">
                 <div class="camp-sections">
+                    <!-- Contact Card - Mobile only, positioned before description -->
+                    <div class="contact-card card contact-card--mobile-top">
+                        <div class="contact-card__content">
+                            <div class="contact-card__header">
+                                <h5 class="contact-card__title mb-1">@lang('vacations.contact_us')</h5>
+                                <p class="contact-card__message mb-0 text-muted small">@lang('vacations.contact_us_message')</p>
+                            </div>
+                            <div class="contact-info">
+                                <i class="fas fa-phone-alt me-2"></i>
+                                <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>
+                            </div>
+                            <a href="#" id="contact-product-mobile" class="btn btn-outline-orange" data-bs-toggle="modal" data-bs-target="#contactModal">
+                                @lang('vacations.contact_us_button')
+                                <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
                     <section id="description" class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.description') }}</h2>
                         <div class="camp-section__body space-y-3">
+                            <!-- Contact Card - Desktop only, floats inside description -->
+                            <div class="contact-card card contact-card--desktop-float">
+                                <div class="contact-card__content">
+                                    <div class="contact-card__header">
+                                        <h5 class="contact-card__title mb-1">@lang('vacations.contact_us')</h5>
+                                        <p class="contact-card__message mb-0 text-muted small">@lang('vacations.contact_us_message')</p>
+                                    </div>
+                                    <div class="contact-info">
+                                        <i class="fas fa-phone-alt me-2"></i>
+                                        <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>
+                                    </div>
+                                    <a href="#" id="contact-product" class="btn btn-outline-orange" data-bs-toggle="modal" data-bs-target="#contactModal">
+                                        @lang('vacations.contact_us_button')
+                                        <i class="fas fa-arrow-right ms-2"></i>
+                                    </a>
+                                </div>
+                            </div>
                             @if(!empty($camp['description']['camp_description']))
-                            <div>
+                            <div class="description-item-toggle">
                                 <h3 class="font-semibold text-gray-700">{{ __('vacations.camp') }}</h3>
-                                <p>{{ translate($camp['description']['camp_description']) }}</p>
+                                <p class="description-text description-text-wrapper">
+                                    <span class="description-loading">
+                                        <i class="fas fa-spinner fa-spin me-2"></i>
+                                        <span>@lang('vacations.loading')</span>
+                                    </span>
+                                </p>
                             </div>
                             @endif
                             @if(!empty($camp['description']['camp_area']))
-                            <div>
+                            <div class="description-item-toggle">
                                 <h3 class="font-semibold text-gray-700">{{ __('vacations.area') }}</h3>
-                                <p>{{ translate($camp['description']['camp_area']) }}</p>
+                                <p class="description-text description-text-wrapper">
+                                    <span class="description-loading">
+                                        <i class="fas fa-spinner fa-spin me-2"></i>
+                                        <span>@lang('vacations.loading')</span>
+                                    </span>
+                                </p>
                             </div>
                             @endif
                             @if(!empty($camp['description']['camp_area_fishing']))
-                            <div>
+                            <div class="description-item-toggle">
                                 <h3 class="font-semibold text-gray-700">{{ __('vacations.fishing') }}</h3>
-                                <p>{{ translate($camp['description']['camp_area_fishing']) }}</p>
+                                <p class="description-text description-text-wrapper">
+                                    <span class="description-loading">
+                                        <i class="fas fa-spinner fa-spin me-2"></i>
+                                        <span>@lang('vacations.loading')</span>
+                                    </span>
+                                </p>
                             </div>
                             @endif
                         </div>
@@ -848,7 +880,142 @@ document.addEventListener('DOMContentLoaded', function () {
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     initMap();
+    initDescriptionToggles();
 });
+
+// Description expand/collapse functionality
+function initDescriptionToggles() {
+    const descriptionItems = document.querySelectorAll('.description-item-toggle');
+    
+    // Store original text content before processing
+    const originalTexts = {
+        'camp_description': @json(translate($camp['description']['camp_description'] ?? '')),
+        'camp_area': @json(translate($camp['description']['camp_area'] ?? '')),
+        'camp_area_fishing': @json(translate($camp['description']['camp_area_fishing'] ?? ''))
+    };
+    
+    descriptionItems.forEach((item, index) => {
+        const textElement = item.querySelector('.description-text-wrapper');
+        if (!textElement) return;
+        
+        // Get the correct original text based on position
+        let originalText = '';
+        if (index === 0 && originalTexts.camp_description) {
+            originalText = originalTexts.camp_description;
+        } else if (index === 1 && originalTexts.camp_area) {
+            originalText = originalTexts.camp_area;
+        } else if (index === 2 && originalTexts.camp_area_fishing) {
+            originalText = originalTexts.camp_area_fishing;
+        }
+        
+        if (!originalText) {
+            // Hide loading if no text available
+            const loadingElement = textElement.querySelector('.description-loading');
+            if (loadingElement) {
+                loadingElement.remove();
+            }
+            return;
+        }
+        
+        // Remove loading indicator
+        const loadingElement = textElement.querySelector('.description-loading');
+        if (loadingElement) {
+            loadingElement.remove();
+        }
+        
+        // Set the original text
+        textElement.innerHTML = originalText;
+        
+        // Add truncated class initially
+        textElement.classList.add('description-text--truncated');
+        
+        // Use setTimeout to ensure layout is calculated
+        setTimeout(() => {
+            // Check if truncation is needed by comparing full height to ~3 lines
+            const lineHeight = parseFloat(window.getComputedStyle(textElement).lineHeight) || 24;
+            const maxHeight = lineHeight * 3; // 3 lines
+            
+            // Temporarily remove truncation to measure full height
+            textElement.classList.remove('description-text--truncated');
+            const fullHeight = textElement.scrollHeight;
+            const needsTruncation = fullHeight > maxHeight;
+            
+            if (needsTruncation) {
+                let isExpanded = false;
+                
+                // Calculate truncation point manually (no CSS line-clamp)
+                const words = originalText.split(/\s+/);
+                const tempDiv = document.createElement('div');
+                tempDiv.style.cssText = window.getComputedStyle(textElement).cssText;
+                tempDiv.style.position = 'absolute';
+                tempDiv.style.visibility = 'hidden';
+                tempDiv.style.width = textElement.offsetWidth + 'px';
+                tempDiv.style.height = 'auto';
+                tempDiv.style.lineHeight = window.getComputedStyle(textElement).lineHeight;
+                tempDiv.style.fontSize = window.getComputedStyle(textElement).fontSize;
+                tempDiv.style.fontFamily = window.getComputedStyle(textElement).fontFamily;
+                document.body.appendChild(tempDiv);
+                
+                // Find optimal truncation point for ~3 lines
+                let bestFit = words.length;
+                
+                // Binary search for best fit
+                let low = 20;
+                let high = words.length;
+                
+                while (low <= high) {
+                    const mid = Math.floor((low + high) / 2);
+                    tempDiv.innerHTML = words.slice(0, mid).join(' ') + ' <span style="color: #E85B40; cursor: pointer;">...</span>';
+                    const height = tempDiv.scrollHeight;
+                    
+                    if (height <= maxHeight) {
+                        bestFit = mid;
+                        low = mid + 1;
+                    } else {
+                        high = mid - 1;
+                    }
+                }
+                
+                // Ensure we don't exceed word count
+                if (bestFit >= words.length) {
+                    bestFit = words.length - 1;
+                }
+                
+                document.body.removeChild(tempDiv);
+                
+                // Function to update content
+                const updateContent = (expanded) => {
+                    if (expanded) {
+                        // Show full text with "Show less" icon at the end
+                        textElement.innerHTML = originalText + ' <span class="description-ellipsis-clickable"><i class="fas fa-chevron-up"></i></span>';
+                        textElement.classList.remove('description-text--truncated');
+                    } else {
+                        // Show truncated with clickable "..." at the end
+                        const visibleText = words.slice(0, bestFit).join(' ');
+                        textElement.innerHTML = visibleText + ' <span class="description-ellipsis-clickable">...</span>';
+                        textElement.classList.remove('description-text--truncated');
+                    }
+                };
+                
+                // Set initial truncated state
+                updateContent(false);
+                
+                // Add click handler to ellipsis
+                textElement.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('description-ellipsis-clickable')) {
+                        e.preventDefault();
+                        isExpanded = !isExpanded;
+                        updateContent(isExpanded);
+                    }
+                });
+            } else {
+                // Text doesn't need truncation - set it directly
+                textElement.innerHTML = originalText;
+                textElement.classList.remove('description-text--truncated');
+            }
+        }, 100);
+    });
+}
 
 function initMap() {
     @php

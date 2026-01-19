@@ -737,6 +737,11 @@ class CampOfferController extends Controller
         })->filter()->values()->toArray();
         $accommodationNames = $specialOffer->accommodations->pluck('title')->toArray();
         
+        // Map full accommodation data for minimized cards
+        $accommodationsFull = $specialOffer->accommodations->map(function($acc) {
+            return $this->mapAccommodationData($acc);
+        })->toArray();
+        
         $rentalBoats = $specialOffer->rentalBoats->map(function($boat) use ($getScalarId) {
             $id = $getScalarId($boat);
             $title = is_object($boat) ? ($boat->title ?? '') : (is_array($boat) ? ($boat['title'] ?? '') : '');
@@ -744,12 +749,22 @@ class CampOfferController extends Controller
         })->filter()->values()->toArray();
         $boatNames = $specialOffer->rentalBoats->pluck('title')->toArray();
         
+        // Map full rental boat data for minimized cards
+        $rentalBoatsFull = $specialOffer->rentalBoats->map(function($boat) {
+            return $this->mapBoatData($boat);
+        })->toArray();
+        
         $guidings = $specialOffer->guidings->map(function($guiding) use ($getScalarId) {
             $id = $getScalarId($guiding);
             $title = is_object($guiding) ? ($guiding->title ?? '') : (is_array($guiding) ? ($guiding['title'] ?? '') : '');
             return $id ? ['id' => $id, 'title' => (string)$title] : null;
         })->filter()->values()->toArray();
         $guidingNames = $specialOffer->guidings->pluck('title')->toArray();
+        
+        // Map full guiding data for minimized cards
+        $guidingsFull = $specialOffer->guidings->map(function($guiding) {
+            return $this->mapGuidingData($guiding);
+        })->toArray();
         
         // Process whats_included - normalize to array of strings
         $whatsIncluded = [];
@@ -779,11 +794,17 @@ class CampOfferController extends Controller
         $priceAmount = null;
         $priceType = $specialOffer->price_type ?? 'per_person';
         $currency = $specialOffer->currency ?? 'EUR';
+        $pricingExtras = [];
         
         if (is_array($pricing) && !empty($pricing)) {
-            // Look for per_person pricing
+            // Look for per_person pricing and extract pricing_extra
             foreach ($pricing as $tier) {
                 if (is_array($tier)) {
+                    // Extract pricing extras if available
+                    if (isset($tier['pricing_extra']) && is_array($tier['pricing_extra'])) {
+                        $pricingExtras = $tier['pricing_extra'];
+                    }
+                    
                     if (isset($tier['price_per_person']) && $tier['price_per_person'] > 0) {
                         $priceAmount = (float) $tier['price_per_person'];
                         break;
@@ -825,11 +846,15 @@ class CampOfferController extends Controller
             'gallery_count' => $galleryCount,
             'accommodations' => $accommodations,
             'accommodation_names' => $accommodationNames,
+            'accommodations_full' => $accommodationsFull,
             'rental_boats' => $rentalBoats,
             'boat_names' => $boatNames,
+            'rental_boats_full' => $rentalBoatsFull,
             'guidings' => $guidings,
             'guiding_names' => $guidingNames,
+            'guidings_full' => $guidingsFull,
             'whats_included' => $whatsIncluded,
+            'pricing_extras' => $pricingExtras,
             'price' => [
                 'amount' => $priceAmount,
                 'currency' => $currency,
