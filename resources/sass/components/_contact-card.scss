@@ -20,12 +20,30 @@
     
     .contact-card__content {
         color: #313041;
+        
+        // Only apply flexbox layout when there's no .contact-card__header (guidings page structure)
+        // This preserves the grid layout used in vacations pages
+        &:not(:has(.contact-card__header)) {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            
+            > p {
+                margin-bottom: 0;
+            }
+            
+            > div {
+                display: flex;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+        }
     }
     
     .contact-info {
         color: #313041;
         font-weight: 500;
-        margin-bottom: 1rem;
+        margin-bottom: 0;
         
         a {
             color: inherit;

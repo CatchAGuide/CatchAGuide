@@ -25,6 +25,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'read_less' => 'Read Less',
     'see_more' => 'See More',
     'see_less' => 'See Less',
+    'loading' => 'Loading...',
     'all_region' => 'All Region',
     'all_cities' => 'All Cities',
     'listing' => 'Listing',

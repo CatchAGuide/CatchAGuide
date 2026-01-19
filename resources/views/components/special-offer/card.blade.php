@@ -56,7 +56,7 @@
                                    data-anchor-type="accommodation"
                                    data-anchor-id="{{ $accommodation['id'] }}"
                                    data-anchor-scroll>
-                                    <span class="special-offer-card__anchor-box-text">{{ translate($accommodation['title'] ?? '{Title}') }}</span>
+                                    <span class="special-offer-card__anchor-box-text">{{ $accommodation['title'] ?? '{Title}' }}</span>
                                 </a>
                             @endforeach
                             @if(count($accommodations) > 3)
@@ -78,7 +78,7 @@
                                    data-anchor-type="boat"
                                    data-anchor-id="{{ $boat['id'] }}"
                                    data-anchor-scroll>
-                                    <span class="special-offer-card__anchor-box-text">{{ translate($boat['title'] ?? '{Title}') }}</span>
+                                    <span class="special-offer-card__anchor-box-text">{{ $boat['title'] ?? '{Title}' }}</span>
                                 </a>
                             @endforeach
                             @if(count($rentalBoats) > 3)
@@ -100,7 +100,7 @@
                                    data-anchor-type="guiding"
                                    data-anchor-id="{{ $guiding['id'] }}"
                                    data-anchor-scroll>
-                                    <span class="special-offer-card__anchor-box-text">{{ translate($guiding['title'] ?? '{Title}') }}</span>
+                                    <span class="special-offer-card__anchor-box-text">{{ $guiding['title'] ?? '{Title}' }}</span>
                                 </a>
                             @endforeach
                             @if(count($guidings) > 3)
@@ -129,7 +129,7 @@
 
         <div class="special-offer-card__actions">
             <div class="special-offer-card__actions-column">
-                <div class="special-offer-card__price-label">{{ __('Fixed') }}</div>
+                <div class="special-offer-card__price-label">{{ 'per person' }}</div>
                 <div class="special-offer-card__pricing">
                     <div class="special-offer-card__price-amount">{{ $currency === 'EUR' ? '€' : $currency }}{{ number_format($priceAmount, 2, ',', '.') }}</div>
                 </div>

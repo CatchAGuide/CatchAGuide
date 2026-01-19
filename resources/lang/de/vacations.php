@@ -23,6 +23,7 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'read_less' => 'Weniger lesen',
     'see_more' => 'Mehr anzeigen',
     'see_less' => 'Weniger anzeigen',
+    'loading' => 'Lädt...',
     'all_region' => 'Alle Regionen',
     'all_cities' => 'Alle Städte',
     'listing' => 'Auflistung',

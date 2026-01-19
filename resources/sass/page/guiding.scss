@@ -597,28 +597,47 @@
     justify-content: center;
     margin: 0 auto;
 
-    .litepicker,
-    .litepicker .container__days,
-    .litepicker .container__months {
+    .litepicker {
+      width: 100%;
+      // Remove max-width constraint - let container__months control width
+      // Single month calendars will be constrained by container__months:not(.columns-2)
+      // Two month calendars need full width
+    }
+
+    .litepicker .container__days {
       width: 100%;
       max-width: 600px;
     }
 
-    .container__months.columns-2 {
-      width: 100% !important;
+    .litepicker .container__months:not(.columns-2) {
+      width: 100%;
+      max-width: 600px;
+    }
+
+    // Ensure columns-2 layout displays months side by side
+    // Using higher specificity (#guidings-page div#lite-datepicker .litepicker) to override other rules
+    .litepicker .container__months.columns-2 {
+      width: 100%;
+      max-width: 100%;
       display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
       justify-content: center;
+      align-items: flex-start;
       gap: 10px;
 
       .month-item {
-        width: 48% !important;
+        width: calc(50% - 5px);
         min-width: 280px;
+        max-width: none;
+        flex: 0 0 calc(50% - 5px);
+        flex-shrink: 0;
 
         .container__days {
 
           .day-item,
           div {
-            width: calc(100% / 7) !important;
+            width: calc(100% / 7);
             height: 36px;
             display: flex;
             align-items: center;
@@ -1456,7 +1475,7 @@ div#masonry-grid {
   }
 
   #lite-datepicker {
-    .container__months {
+    .container__months:not(.columns-2) {
       .month-item {
         width: 100%;
 
@@ -1466,6 +1485,32 @@ div#masonry-grid {
           div {
             font-size: 90%;
           }
+        }
+      }
+    }
+
+    // Mobile: stack months vertically for single month, but keep side-by-side for columns-2 on tablets+
+    // Using nested selector for higher specificity within media query
+    #lite-datepicker .container__months.columns-2 {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      gap: 10px;
+      
+      .month-item {
+        width: 48%;
+        min-width: 280px;
+        flex: 0 0 48%;
+      }
+      
+      // On small mobile, stack vertically if space is too tight
+      @media (max-width: 640px) {
+        flex-direction: column;
+        
+        .month-item {
+          width: 100%;
+          min-width: unset;
+          flex: 1 1 100%;
         }
       }
     }

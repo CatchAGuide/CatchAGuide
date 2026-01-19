@@ -160,9 +160,9 @@ body {
     gap: 12px;
     margin: 24px auto;
 
-    @media (min-width: 768px) {
-        padding: 0 24px;
-    }
+    // @media (min-width: 768px) {
+    //     padding: 0 24px;
+    // }
 
     @media (max-width: 900px) {
         grid-template-columns: 1fr; // Single column on mobile
@@ -746,12 +746,96 @@ body {
             font-weight: 600;
             color: #1f2a37;
             margin: 0 0 0.4rem;
+            
+            &.description-toggle-header {
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                transition: color 0.2s ease;
+                
+                &:hover {
+                    color: #E85B40;
+                }
+                
+                .description-toggle-link {
+                    font-size: 0.875rem;
+                    color: #E85B40;
+                    font-weight: 500;
+                    margin-left: 0.5rem;
+                }
+            }
         }
 
         p {
             margin: 0;
             color: #4b5563;
             line-height: 1.6;
+        }
+        
+        // Description item with expand/collapse
+        .description-item-toggle {
+            margin-bottom: 1rem;
+            
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+        
+        .description-text {
+            margin-top: 0.5rem;
+            
+            &-wrapper {
+                margin-top: 0.5rem;
+            }
+            
+            &--truncated {
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                line-clamp: 3;
+            }
+            
+            .description-loading {
+                color: #6b7280;
+                font-style: italic;
+                display: inline-flex;
+                align-items: center;
+                
+                i {
+                    color: #E85B40;
+                }
+            }
+            
+            .description-ellipsis-clickable {
+                color: #E85B40;
+                cursor: pointer;
+                font-weight: 500;
+                transition: opacity 0.2s ease, transform 0.2s ease;
+                display: inline-flex;
+                align-items: center;
+                margin-left: 0.25rem;
+                
+                i {
+                    font-size: 0.875rem;
+                    transition: transform 0.2s ease;
+                }
+                
+                &:hover {
+                    opacity: 0.8;
+                    
+                    i {
+                        transform: translateY(-2px);
+                    }
+                }
+                
+                // Only underline text (not icons)
+                &:not(:has(i)):hover {
+                    text-decoration: underline;
+                }
+            }
         }
     }
 
@@ -954,36 +1038,51 @@ body {
 
 // Contact Card Styles for Vacations V2
 .contact-card {
-    &__content {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        grid-template-rows: auto auto;
-        gap: 1rem 1.5rem;
-        align-items: start;
+    padding: 1.25rem 1.5rem;
+    
+    // Mobile-only contact card - positioned before description section
+    &--mobile-top {
+        display: none;
+        margin-bottom: 1rem;
         
         @media (max-width: 767px) {
-            grid-template-columns: 1fr;
-            grid-template-rows: auto;
-            gap: 1rem;
+            display: block;
+        }
+    }
+    
+    // Desktop-only contact card - floats inside description section for text wrapping
+    &--desktop-float {
+        display: block;
+        float: right;
+        max-width: 320px;
+        width: 100%;
+        margin: 0 0 1rem 1.5rem;
+        clear: right;
+        
+        @media (max-width: 767px) {
+            display: none;
+        }
+    }
+    
+    &__content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.875rem;
+        
+        @media (max-width: 767px) {
+            gap: 0.75rem;
         }
     }
 
     &__header {
-        grid-column: 1;
-        grid-row: 1;
         min-width: 0;
-        
-        @media (max-width: 767px) {
-            grid-column: 1;
-            grid-row: 1;
-        }
     }
 
     &__title {
         font-size: 1.25rem;
         font-weight: 600;
         color: #313041;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.375rem;
         line-height: 1.3;
         
         @media (max-width: 767px) {
@@ -994,7 +1093,7 @@ body {
 
     &__message {
         font-size: 0.95rem;
-        line-height: 1.5;
+        line-height: 1.4;
         color: #6b7280;
         margin: 0;
         
@@ -1004,24 +1103,13 @@ body {
     }
 
     .contact-info {
-        grid-column: 2;
-        grid-row: 2;
         display: flex;
         align-items: center;
         white-space: nowrap;
-        align-self: start;
-        
-        @media (min-width: 768px) {
-            // On desktop, position above button on the right
-            margin-bottom: 0.5rem;
-        }
+        margin-top: 0;
         
         @media (max-width: 767px) {
-            grid-column: 1;
-            grid-row: 2;
-            width: 100%;
             white-space: normal;
-            margin-bottom: 0;
         }
         
         i {
@@ -1043,14 +1131,13 @@ body {
     }
 
     .btn-outline-orange {
-        grid-column: 1;
-        grid-row: 2;
         white-space: nowrap;
-        padding: 0.75rem 1.5rem;
+        padding: 0.625rem 1.25rem;
         font-weight: 500;
         border-radius: 0.5rem;
         transition: all 0.2s ease;
-        align-self: end;
+        align-self: flex-start;
+        margin-top: 0;
         
         @media (min-width: 768px) {
             width: auto;
@@ -1058,11 +1145,9 @@ body {
         }
         
         @media (max-width: 767px) {
-            grid-column: 1;
-            grid-row: 3;
             width: 100%;
             justify-content: center;
-            align-self: stretch;
+            padding: 0.75rem 1.5rem;
         }
     }
 }
