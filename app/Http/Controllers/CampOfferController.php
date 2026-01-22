@@ -472,11 +472,15 @@ class CampOfferController extends Controller
         // Build specs array
         $specs = [];
         foreach ($boatInfo as $boatIn) {
-            if ($boatIn['id'] == 1 && $boatIn['value'] != "") {
-                $specs[] = [
-                    'label' => __('Capacity'),
-                    'value' => $boatIn['value'],
-                ];
+            if ($boatIn['id'] == 1) {
+                // Use max_persons for Capacity if available, otherwise fall back to boat_info value
+                $capacityValue = $boat->max_persons ?? ($boatIn['value'] ?? '');
+                if ($capacityValue != "") {
+                    $specs[] = [
+                        'label' => __('Capacity'),
+                        'value' => $capacityValue,
+                    ];
+                }
             }
             if ($boatIn['id'] == 6 && $boatIn['value'] != "") {
                 $specs[] = [
@@ -503,6 +507,7 @@ class CampOfferController extends Controller
             'thumbnail_path' => $this->getImageUrl($boat->thumbnail_path),
             'gallery_images' => $this->getImageUrls($boat->gallery_images ?? []),
             'gallery_count' => $galleryCount,
+            'max_persons' => $boat->max_persons,
             'seats' => $boatInfo['seats'] ?? null,
             'length_m' => $boatInfo['length_m'] ?? null,
             'width_m' => $boatInfo['width_m'] ?? null,

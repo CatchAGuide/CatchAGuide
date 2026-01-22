@@ -46,20 +46,18 @@ class CampCacheService
     }
 
     /**
-     * Get form data for create/edit forms with caching
+     * Get form data for create/edit forms - always returns fresh data
      */
     public function getFormData(): array
     {
-        return Cache::remember(self::FORM_DATA_CACHE_KEY, self::CACHE_TTL, function () {
-            return [
-                'campFacilities' => CampFacility::where('is_active', true)->orderBy('name')->get(),
-                'accommodations' => Accommodation::where('status', 'active')->orderBy('title')->get(),
-                'rentalBoats' => RentalBoat::where('status', 'active')->orderBy('title')->get(),
-                'guidings' => Guiding::where('status', 'active')->orderBy('title')->get(),
-                'specialOffers' => SpecialOffer::where('status', 'active')->orderBy('title')->get(),
-                'targetFish' => Target::orderBy('name')->get(),
-            ];
-        });
+        return [
+            'campFacilities' => CampFacility::where('is_active', true)->orderBy('name')->get(),
+            'accommodations' => Accommodation::where('status', 'active')->orderBy('title')->get(),
+            'rentalBoats' => RentalBoat::where('status', 'active')->orderBy('title')->get(),
+            'guidings' => Guiding::where('status', 'active')->orderBy('title')->get(),
+            'specialOffers' => SpecialOffer::where('status', 'active')->orderBy('title')->get(),
+            'targetFish' => Target::orderBy('name')->get(),
+        ];
     }
 
     /**
