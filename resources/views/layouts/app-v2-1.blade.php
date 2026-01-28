@@ -23,6 +23,7 @@
     
     <!-- Canonical URL to prevent duplicate content -->
     <link rel="canonical" href="{{ request()->url() }}" />
+    @include('components.seo.hreflang')
     
     @yield('meta_robots')
     

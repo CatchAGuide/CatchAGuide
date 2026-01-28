@@ -20,6 +20,7 @@
 
     <!-- Canonical URL to prevent duplicate content -->
     <link rel="canonical" href="{{ request()->url() }}" />
+    @include('components.seo.hreflang')
     @yield('meta_robots')
     <meta name="keywords" content="online catch guide" >
     <meta name="robots" content="INDEX,FOLLOW" >

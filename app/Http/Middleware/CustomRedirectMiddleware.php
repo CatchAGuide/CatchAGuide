@@ -17,8 +17,15 @@ class CustomRedirectMiddleware
     public function handle(Request $request, Closure $next)
     {
         // Redirect URLs that start with /public to remove the /public segment
+        // Check both the path() and the full request URI to catch all cases
         $path = $request->path();
-        if (str_starts_with($path, 'public') || str_starts_with($path, 'public/')) {
+        $requestUri = $request->getRequestUri();
+        
+        // Check if /public appears in the path or request URI
+        if (str_starts_with($path, 'public') || 
+            str_starts_with($path, 'public/') ||
+            preg_match('#^/public(/|$)#', $requestUri)) {
+            
             // Remove 'public' or 'public/' from the beginning
             $newPath = preg_replace('#^public/?#', '', $path);
             

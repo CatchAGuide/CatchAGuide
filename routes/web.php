@@ -289,13 +289,25 @@ Route::get('password/reset/{token}', [ForgotPasswordController::class, 'showRese
 Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 
 Route::get('robots.txt', function () {
-    if (request()->getHost() == 'catchaguide.com') {
-        return response("User-agent: *\nDisallow: \nSitemap:https://catchaguide.com/NewENSitemap.xml", 200)
-        ->header('Content-Type', 'text/plain');
+    $host = request()->getHost();
+
+    // Normalize host so both with and without "www." are handled correctly
+    $normalizedHost = str_replace('www.', '', $host);
+
+    if ($normalizedHost === 'catchaguide.com') {
+        // Point Google and other crawlers to the main EN sitemap
+        $content = "User-agent: *\n";
+        $content .= "Disallow: \n";
+        $content .= "Sitemap: https://www.catchaguide.com/sitemap.xml\n";
     } else {
-        return response("User-agent: *\nDisallow: \nSitemap:https://catchaguide.de/de/catchaguideDE.xml", 200)
-        ->header('Content-Type', 'text/plain');
+        // Default to the DE domain sitemap
+        $content = "User-agent: *\n";
+        $content .= "Disallow: \n";
+        $content .= "Sitemap: https://www.catchaguide.de/sitemap.xml\n";
     }
+
+    return response($content, 200)
+        ->header('Content-Type', 'text/plain');
 });
 
 Route::post('/change-password', [PasswordController::class, 'changePassword'])
