@@ -263,7 +263,6 @@ if (!function_exists('getLocationDetailsGoogle')) {
             ->first();
 
             if ($location && ($location->city || $location->country || $location->region)) {
-                Log::info('Location JSON lookup successful in getLocationDetailsGoogle', ['location' => $location]);
                 return [
                     'city' => $location->city,
                     'country' => $location->country,

@@ -66,7 +66,25 @@ use App\Http\Controllers\TestController;
 */
 
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
-Route::get('sitemap.xml',[SiteMapController::class, 'index']);
+// Lightweight sitemap entry point that serves the pre-generated sitemap index
+Route::get('sitemap.xml', function () {
+    $host = request()->getHost();
+    $normalizedHost = str_replace('www.', '', $host);
+
+    // Map domain to language code used in generated sitemap index files
+    $lang = $normalizedHost === 'catchaguide.de' ? 'de' : 'en';
+
+    $path = public_path("sitemaps/sitemap_index_{$lang}.xml");
+
+    if (! file_exists($path)) {
+        abort(404, 'Sitemap index not found');
+    }
+
+    return response()->file($path, [
+        'Content-Type' => 'application/xml; charset=UTF-8',
+    ]);
+});
+
 Route::post('/get-user-location', [WelcomeController::class,'getUserLocation'])->name('user.location');
 Route::post('/language/switch', [App\Http\Controllers\LanguageController::class, 'switchLanguage'])->name('language.switch');
 
