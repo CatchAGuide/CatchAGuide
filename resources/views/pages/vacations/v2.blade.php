@@ -1,10 +1,6 @@
 @extends('layouts.app')
 @section('title', $camp['title'] ?? 'Camp Offers - Vacations V2')
 
-@section('meta_robots')
-<meta name="robots" content="noindex, nofollow">
-@endsection
-
 @section('content')
 <div 
     x-data="campConfigurator({

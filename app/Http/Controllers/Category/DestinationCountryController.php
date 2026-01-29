@@ -43,13 +43,13 @@ class DestinationCountryController extends Controller
         $city_row = null;
 
         if ($region) {
-            $region_row = Region::with('translations')->whereSlug($region)
+            $region_row = Region::with(['translations', 'country'])->whereSlug($region)
                 ->where('country_id', $country_row->id)
                 ->firstOrFail();
         }
 
         if ($city) {
-            $city_row = City::with('translations')->whereSlug($city)
+            $city_row = City::with(['translations', 'country', 'region'])->whereSlug($city)
                 ->where('country_id', $country_row->id)
                 ->where('region_id', $region_row->id)
                 ->firstOrFail();

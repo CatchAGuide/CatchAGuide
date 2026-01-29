@@ -551,7 +551,6 @@ class Guiding extends Model
         }
 
         $locationParts = array_merge(['city' => $city, 'country' => $country, 'region' => $region], $locationParts ?? []);
-        Log::info('locationParts', ['locationParts' => $locationParts]); 
 
         $returnData = [
             'message' => '',

@@ -562,21 +562,27 @@
                                         <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
                                     
                                     @elseif($destination_type == 'region')
-                                        <li><a href="{{ route('destination.country', ['country' => $row_data->country->slug]) }}">
-                                            {{ translate('Fishing Destinations in ')}} {{ $row_data->country->name }}
-                                        </a></li>
-                                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>  
-                                        <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
-                                    
-                                    @elseif($destination_type == 'city')
+                                        @if($row_data->country)
                                         <li><a href="{{ route('destination.country', ['country' => $row_data->country->slug]) }}">
                                             {{ translate('Fishing Destinations in ')}} {{ $row_data->country->name }}
                                         </a></li>
                                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                                        @endif
+                                        <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
+                                    
+                                    @elseif($destination_type == 'city')
+                                        @if($row_data->country)
+                                        <li><a href="{{ route('destination.country', ['country' => $row_data->country->slug]) }}">
+                                            {{ translate('Fishing Destinations in ')}} {{ $row_data->country->name }}
+                                        </a></li>
+                                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                                        @endif
+                                        @if($row_data->region && $row_data->country)
                                         <li><a href="{{ route('destination.country', ['country' => $row_data->country->slug, 'region' => $row_data->region->slug]) }}">
                                             {{ translate('Fishing Destinations in ')}} {{ $row_data->region->name }}
                                         </a></li>
                                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                                        @endif
                                         <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
                                     @endif
                             </ul>
@@ -602,6 +608,7 @@
                         <h5 class="mb-2">@lang('destination.all_region')</h5>
                         <div id="carousel-regions" class="owl-carousel owl-theme mb-4">
                             @foreach($regions as $region)
+                                @if($region->country)
                                 <div class="item">
                                     <div class="col-sm-12">
                                         <a href="{{ route('destination.country', ['country' => $region->country->slug, 'region' => $region->slug]) }}">
@@ -616,6 +623,7 @@
                                         </a>
                                     </div>
                                 </div>
+                                @endif
                             @endforeach
                         </div>
                     @endif
@@ -625,6 +633,7 @@
                     <h5 class="mb-2">@lang('destination.all_cities')</h5>
                     <div id="carousel-cities" class="owl-carousel owl-theme mb-4">
                         @foreach($cities as $city)
+                            @if($city->country && $city->region)
                             <div class="item">
                                 <div class="col-sm-12 col-lgs-3">
                                     <a href="{{ route('destination.country', ['country' => $city->country->slug, 'region' => $city->region->slug, 'city' => $city->slug]) }}">
@@ -639,6 +648,7 @@
                                     </a>
                                 </div>
                             </div>
+                            @endif
                         @endforeach
                     </div>
                     @endif
