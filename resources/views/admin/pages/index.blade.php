@@ -85,6 +85,27 @@
         </div>
     </div>
 
+    <!-- Guide Analytics Summary -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card border-secondary">
+                <div class="card-body d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="d-flex align-items-center">
+                        <i class="fa fa-chart-line fa-2x text-secondary me-3"></i>
+                        <div>
+                            <h6 class="mb-0">Guides Without Active or Draft Guidings</h6>
+                            <small class="text-muted">Guides who have no active (1) or draft (2) guidings - either none created or all deactivated</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <h2 class="mb-0 text-secondary">{{ $guidesWithoutActiveOrDraftGuidings }}</h2>
+                        <a href="{{ route('admin.guide-analytics.index') }}" class="btn btn-outline-secondary btn-sm">View Full Analytics <i class="fa fa-arrow-right ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Charts Row -->
     <div class="row g-4 mb-4">
         <div class="col-12 col-xl-8">

@@ -33,12 +33,11 @@ class Kernel extends ConsoleKernel
                 ->withoutOverlapping()
                 ->runInBackground();
                 
-        // Clean up guiding images weekly on Sundays at 3 AM
-        // $schedule->command('guidings:cleanup-images --db-only --backup')
+        // Image cleanup: report + fix DB refs to missing files (no orphan deletion by default)
+        // $schedule->command('images:cleanup --report-only')
         //         ->weeklyOn(0, '03:00')
-        //         ->withoutOverlapping()
-        //         ->runInBackground()
         //         ->appendOutputTo(storage_path('logs/image-cleanup.log'));
+        // To also fix DB: add --fix-db --no-dry-run. To delete orphans: --delete-orphans --backup --no-dry-run
                 
         $schedule->command('generate:sitemap')->daily()->runInBackground();
         

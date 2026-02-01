@@ -9,6 +9,15 @@
     <div class="offcanvas-body small">
         <form id="filterContainerOffCanvas" action="{{ $formAction }}" method="get">
             <input type="hidden" name="ismobile" value="1">
+            {{-- Carry over location/search params so filters don't drop them on mobile --}}
+            <input type="hidden" name="place" value="{{ request()->get('place', '') }}">
+            <input type="hidden" name="city" value="{{ request()->get('city', '') }}">
+            <input type="hidden" name="country" value="{{ request()->get('country', '') }}">
+            <input type="hidden" name="region" value="{{ request()->get('region', '') }}">
+            <input type="hidden" name="placeLat" value="{{ request()->get('placeLat', '') }}">
+            <input type="hidden" name="placeLng" value="{{ request()->get('placeLng', '') }}">
+            <input type="hidden" name="radius" value="{{ request()->get('radius', '') }}">
+            <input type="hidden" name="sortby" value="{{ request()->get('sortby', '') }}">
             
             {{-- Price Range Section --}}
             <div class="filter-section mb-4">

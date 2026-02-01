@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\GuidesController;
+use App\Http\Controllers\Admin\GuideAnalyticsController;
 use App\Http\Controllers\Admin\BookingsController;
 use App\Http\Controllers\Admin\CustomersController;
 use App\Http\Controllers\Admin\EmployeesController;
@@ -346,6 +347,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('customersdelete/{id}', [CustomersController::class, 'customersdelete'])->name('customersdelete');
         Route::resource('guides', GuidesController::class);
         Route::get('guides/change-status/{guide}', [GuidesController::class, 'changeGuideStatus'])->name('guides.change-status');
+        Route::get('guide-analytics', [GuideAnalyticsController::class, 'index'])->name('guide-analytics.index');
 
         Route::prefix('page-attribute')->name('page-attribute.')->group(function () {
             Route::get('/en', [PageAttributeController::class,'index'])->name('en');

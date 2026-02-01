@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Guiding;
 use App\Services\Translation\GuidingTranslationService;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class GuidingTranslationCommand extends Command
 {
@@ -20,6 +20,8 @@ class GuidingTranslationCommand extends Command
                             {--detect-language : Detect and update source language for all guidings}
                             {--force : Force retranslation even if translations exist}
                             {--admin-changes : Only process guidings with admin changes}
+                            {--missing-only : Only process guidings that have no translation for at least one target language}
+                            {--report-missing : List guidings missing translations (no translation performed)}
                             {--dry-run : Show what would be translated without actually doing it}';
 
     /**
@@ -27,7 +29,7 @@ class GuidingTranslationCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Translate guiding content using Gemini AI. Defaults to EN and DE languages. Use --admin-changes to only process guidings with admin changes, or --guiding=1,2,3 for specific IDs.';
+    protected $description = 'Translate guiding content using Gemini AI. Defaults to EN and DE languages. Use --admin-changes to only process guidings with admin changes, --missing-only for guidings without translations, --report-missing to list them, or --guiding=1,2,3 for specific IDs.';
 
     private GuidingTranslationService $translationService;
 
@@ -60,8 +62,14 @@ class GuidingTranslationCommand extends Command
         // Get target languages (defaults to EN and DE if not specified)
         $targetLanguages = $this->getTargetLanguages();
 
+        // Report missing translations only (no translation)
+        if ($this->option('report-missing')) {
+            $this->reportMissingTranslations($targetLanguages);
+            return 0;
+        }
+
         // Get guidings to process
-        $guidings = $this->getGuidingsToProcess();
+        $guidings = $this->getGuidingsToProcess($targetLanguages);
         if ($guidings->isEmpty()) {
             $this->warn('No guidings found to process.');
             return 0;
@@ -196,8 +204,10 @@ class GuidingTranslationCommand extends Command
 
     /**
      * Get guidings to process based on options
+     *
+     * @param array|null $targetLanguages Required when using --missing-only
      */
-    private function getGuidingsToProcess()
+    private function getGuidingsToProcess(?array $targetLanguages = null)
     {
         $guidingIds = $this->option('guiding');
         
@@ -223,10 +233,51 @@ class GuidingTranslationCommand extends Command
                           ->get();
         }
 
+        // Only guidings that have no translation for at least one target language
+        if ($this->option('missing-only') && $targetLanguages) {
+            return $this->translationService->getGuidingsMissingTranslations($targetLanguages);
+        }
+
         // Default: get all active guidings
         return Guiding::where('status', 1)
                       ->with(['user', 'guidingTargets', 'guidingMethods', 'guidingWaters'])
                       ->get();
+    }
+
+    /**
+     * Output a report of guidings missing translations for the given target languages.
+     */
+    private function reportMissingTranslations(array $targetLanguages): void
+    {
+        $guidings = $this->translationService->getGuidingsMissingTranslations($targetLanguages);
+
+        if ($guidings->isEmpty()) {
+            $this->info('All active guidings have translations for: ' . implode(', ', $targetLanguages));
+            return;
+        }
+
+        $this->info('Guidings missing at least one translation for [' . implode(', ', $targetLanguages) . ']:');
+        $this->newLine();
+
+        $rows = $guidings->map(function ($guiding) use ($targetLanguages) {
+            $missing = [];
+            foreach ($targetLanguages as $lang) {
+                if (!$this->translationService->hasTranslation($guiding, $lang)) {
+                    $missing[] = $lang;
+                }
+            }
+            return [
+                $guiding->id,
+                Str::limit($guiding->title ?? '-', 50),
+                $guiding->language ?? '-',
+                implode(', ', $missing),
+            ];
+        })->toArray();
+
+        $this->table(['ID', 'Title', 'Source lang', 'Missing languages'], $rows);
+        $this->newLine();
+        $this->info("Total: {$guidings->count()} guiding(s) with missing translations.");
+        $this->info('Run: php artisan guiding:translate --missing-only [--language=en,de] to translate them.');
     }
 
     /**

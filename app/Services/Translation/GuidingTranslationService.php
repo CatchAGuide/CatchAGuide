@@ -382,6 +382,45 @@ class GuidingTranslationService
     }
 
     /**
+     * Check if a guiding has an existing translation in the Language table for a given language.
+     */
+    public function hasTranslation(Guiding $guiding, string $targetLanguage): bool
+    {
+        if ($guiding->language === $targetLanguage) {
+            return true; // Same as source, no translation row needed
+        }
+
+        return Language::where([
+            'source_id' => $guiding->id,
+            'type' => 'guidings',
+            'language' => $targetLanguage
+        ])->exists();
+    }
+
+    /**
+     * Get guidings that are missing at least one translation for the given target languages.
+     * Only considers active guidings (status = 1).
+     *
+     * @param array $targetLanguages e.g. ['en', 'de']
+     * @return \Illuminate\Support\Collection Guiding models
+     */
+    public function getGuidingsMissingTranslations(array $targetLanguages): \Illuminate\Support\Collection
+    {
+        $guidings = Guiding::where('status', 1)
+            ->with(['user', 'guidingTargets', 'guidingMethods', 'guidingWaters'])
+            ->get();
+
+        return $guidings->filter(function (Guiding $guiding) use ($targetLanguages) {
+            foreach ($targetLanguages as $lang) {
+                if (!$this->hasTranslation($guiding, $lang)) {
+                    return true; // Missing at least one language
+                }
+            }
+            return false;
+        })->values();
+    }
+
+    /**
      * Batch translate fields using Google Translate
      */
     private function batchTranslateWithGoogle(array $fields, string $toLanguage, string $fromLanguage = 'de'): array

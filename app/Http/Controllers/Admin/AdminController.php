@@ -50,6 +50,13 @@ class AdminController extends Controller
             })
             ->count();
 
+        // Guides without active or draft guidings (no guidings yet, or only deactivated)
+        $guidesWithoutActiveOrDraftGuidings = User::where('is_guide', true)
+            ->whereDoesntHave('guidings', function($query) {
+                $query->whereIn('status', [1, 2]);
+            })
+            ->count();
+
         // Recent Bookings with guest support
         $recentBookings = Booking::with(['user', 'guiding'])
             ->orderBy('id', 'desc')
@@ -107,6 +114,7 @@ class AdminController extends Controller
             'activeTours',
             'totalGuides',
             'guidesWithActiveTours',
+            'guidesWithoutActiveOrDraftGuidings',
             'recentBookings',
             'upcomingTours',
             'revenueData',
