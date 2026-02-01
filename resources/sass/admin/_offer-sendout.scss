@@ -1,0 +1,92 @@
+// Admin Offer Sendout page – form + live email preview
+// OOP-style layout and components
+
+$offer-sendout-preview-bg: #f1f5f9;
+$offer-sendout-preview-max-width: 600px;
+$offer-sendout-card-radius: 12px;
+$offer-sendout-transition: 0.2s ease;
+
+.offer-sendout-page {
+  .offer-sendout-form-card,
+  .offer-sendout-preview-card {
+    border-radius: $offer-sendout-card-radius;
+    transition: box-shadow $offer-sendout-transition;
+  }
+
+  .offer-sendout-form-card:hover,
+  .offer-sendout-preview-card:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  .offer-sendout-form {
+    .recipient-wrap {
+      transition: opacity $offer-sendout-transition;
+    }
+
+    .form-label {
+      color: #374151;
+    }
+
+    .btn-check:checked + .btn-outline-primary {
+      background-color: var(--bs-primary);
+      color: #fff;
+      border-color: var(--bs-primary);
+    }
+
+    .tagify {
+      border-radius: 6px;
+      min-height: 38px;
+      padding: 4px 8px;
+    }
+    .tagify__tag {
+      margin: 2px 4px 2px 0;
+    }
+    .tagify__input {
+      margin: 2px 0;
+    }
+    .tagify__dropdown__item--connected {
+      background-color: rgba(var(--bs-primary-rgb), 0.12);
+      font-weight: 600;
+      border-left: 3px solid var(--bs-primary);
+    }
+    .tagify__dropdown__item--connected:hover {
+      background-color: rgba(var(--bs-primary-rgb), 0.2);
+    }
+  }
+
+  .offer-preview-wrapper {
+    min-height: 420px;
+    background-color: $offer-sendout-preview-bg;
+    padding: 1.5rem;
+  }
+
+  .offer-preview-content {
+    max-width: $offer-sendout-preview-max-width;
+    margin-left: auto;
+    margin-right: auto;
+    background: #fff;
+    border-radius: $offer-sendout-card-radius;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+
+    // Email content lives inside; ensure images and links don’t break layout
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    a {
+      word-break: break-word;
+    }
+
+    table {
+      max-width: 100%;
+    }
+  }
+}
+
+@media (max-width: 991.98px) {
+  .offer-sendout-page .offer-preview-wrapper {
+    min-height: 360px;
+  }
+}

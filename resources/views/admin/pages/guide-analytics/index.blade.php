@@ -145,9 +145,8 @@
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center gap-2">
-                                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px;">
-                                                        <i class="fa fa-user text-muted small"></i>
-                                                    </div>
+                                                    @php $guideImgSrc = $stat['guide']->profil_image ? asset('images/' . $stat['guide']->profil_image) : asset('images/placeholder_guide.jpg'); @endphp
+                                                    <img src="{{ $guideImgSrc }}" alt="{{ $stat['guide']->full_name }}" class="rounded-circle object-fit-cover flex-shrink-0" style="width: 40px; height: 40px;" onerror="this.onerror=null; this.src='{{ asset('images/placeholder_guide.jpg') }}';">
                                                     <div>
                                                         <strong>{{ $stat['guide']->full_name }}</strong>
                                                         <br><small class="text-muted">{{ $stat['guide']->email }}</small>

@@ -18,6 +18,7 @@ mix.webpackConfig({
 });
 
 mix.sass("resources/sass/app.scss", "public/css/app.css");
+mix.sass("resources/sass/admin/_offer-sendout.scss", "public/css/admin-offer-sendout.css");
 // creates 'dist/app.css'
 
 mix.js("resources/js/app.js", "public/js/app.js");

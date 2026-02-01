@@ -16,6 +16,8 @@ return [
     'payout_requests' => 'Auszahlungsanfragen',
     'approved' => 'freigegeben',
     'requested' => 'angefragt',
+
+    'offer_sendout_language' => 'E-Mail-Sprache',
 ];
 
 ?>

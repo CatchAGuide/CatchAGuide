@@ -483,6 +483,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('email-logs', [EmailLogsController::class, 'index'])->name('email-logs.index');
         Route::get('contact-requests', [ContactRequestsController::class, 'index'])->name('contact-requests.index');
+
+        Route::prefix('offer-sendout')->name('offer-sendout.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\OfferSendoutController::class, 'index'])->name('index');
+            Route::get('/camp-options/{camp}', [\App\Http\Controllers\Admin\OfferSendoutController::class, 'campOptions'])->name('camp-options');
+            Route::post('/preview', [\App\Http\Controllers\Admin\OfferSendoutController::class, 'preview'])->name('preview');
+            Route::post('/send', [\App\Http\Controllers\Admin\OfferSendoutController::class, 'send'])->name('send');
+        });
     });
 });
 

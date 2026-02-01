@@ -16,6 +16,8 @@ return [
     'payout_requests' => 'Payout Requests',
     'approved' => 'Approved',
     'requested' => 'Requested',
+
+    'offer_sendout_language' => 'Email language',
 ];
 
 ?>

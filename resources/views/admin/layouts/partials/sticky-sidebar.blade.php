@@ -58,6 +58,10 @@
                 </li>
 
                 <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.offer-sendout.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.offer-sendout.index') }}"><i class="side-menu__icon fe fe-send"></i><span class="side-menu__label">Camps Offer Sendout</span></a>
+                </li>
+
+                <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.email-logs.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.email-logs.index') }}"><i class="side-menu__icon fe fe-mail"></i><span class="side-menu__label">Email Logs</span></a>
                 </li>
 

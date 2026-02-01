@@ -13,7 +13,9 @@
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-K6VGF9NQ');</script>
     <!-- End Google Tag Manager -->
-    
+
+    <link rel="canonical" href="{{ request()->url() }}" />
+    @include('components.seo.hreflang')
     <meta name="keywords" content="online catch guide" >
     <meta name="robots" content="INDEX,FOLLOW" >
     @yield('meta_robots')
