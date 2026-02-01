@@ -24,7 +24,7 @@ class GuideAnalyticsController extends Controller
             ->whereDoesntHave('guidings', function ($query) {
                 $query->whereIn('status', [1, 2]);
             })
-            ->with(['information', 'guidings' => fn ($q) => $q->where('status', 0)->orderByDesc('updated_at')])
+            ->with(['information', 'guidings' => fn ($q) => $q->orderByRaw('CASE WHEN status = 1 THEN 1 WHEN status = 2 THEN 2 ELSE 3 END')->orderByDesc('updated_at')])
             ->withCount('guidings')
             ->orderBy('guidings_count', 'desc')
             ->get();
@@ -54,6 +54,11 @@ class GuideAnalyticsController extends Controller
                     ->orderByDesc('updated_at')
                     ->get(['id', 'title', 'status', 'updated_at', 'created_at']);
 
+                $allGuidings = Guiding::where('user_id', $guide->id)
+                    ->orderByRaw('CASE WHEN status = 1 THEN 1 WHEN status = 2 THEN 2 ELSE 3 END')
+                    ->orderByDesc('updated_at')
+                    ->get(['id', 'title', 'status', 'updated_at', 'created_at']);
+
                 return [
                     'guide' => $guide,
                     'total_guidings' => $guide->guidings_count,
@@ -61,6 +66,7 @@ class GuideAnalyticsController extends Controller
                     'draft_count' => $guide->draft_guidings_count ?? 0,
                     'deactivated_count' => $guide->deactivated_guidings_count ?? 0,
                     'deactivated_guidings' => $deactivatedGuidings,
+                    'all_guidings' => $allGuidings,
                     'last_deactivation_date' => $deactivatedGuidings->first()?->updated_at,
                 ];
             });

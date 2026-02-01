@@ -175,34 +175,21 @@
                                                 <div class="btn-group btn-group-sm">
                                                     <a href="{{ route('admin.guides.edit', $stat['guide']) }}" class="btn btn-primary btn-sm" title="Edit Guide"><i class="fas fa-pen"></i></a>
                                                     <a href="{{ route('admin.guides.show', $stat['guide']) }}" class="btn btn-secondary btn-sm" title="Profile"><i class="fas fa-user"></i></a>
-                                                    <a href="{{ route('admin.guidings.index') }}?user_id={{ $stat['guide']->id }}" class="btn btn-info btn-sm text-white" title="Guidings"><i class="fas fa-briefcase"></i></a>
-                                                    @if($stat['deactivated_count'] > 0)
-                                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#deactivated-{{ $stat['guide']->id }}" title="View deactivated">
-                                                            <i class="fas fa-chevron-down"></i>
-                                                        </button>
-                                                    @endif
+                                                    @php
+                                                        $guidingsData = $stat['all_guidings']->map(function($g) {
+                                                            return ['id' => $g->id, 'title' => $g->title, 'status' => $g->status, 'updated_at' => $g->updated_at ? $g->updated_at->format('M d, Y') : null];
+                                                        })->values();
+                                                        $guidingsJsonB64 = base64_encode(json_encode($guidingsData));
+                                                    @endphp
+                                                    <button type="button" class="btn btn-info btn-sm text-white guidings-modal-btn" title="Guidings"
+                                                            data-guide-name="{{ $stat['guide']->full_name }}"
+                                                            data-guidings="{{ $guidingsJsonB64 }}"
+                                                            data-bs-toggle="modal" data-bs-target="#guidingsModal">
+                                                        <i class="fas fa-briefcase"></i>
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
-                                        @if($stat['deactivated_count'] > 0)
-                                            <tr class="table-light collapse" id="deactivated-{{ $stat['guide']->id }}">
-                                                <td colspan="7" class="py-3">
-                                                    <div class="ps-4 border-start border-2 border-secondary">
-                                                        <h6 class="small fw-semibold text-muted mb-2">Deactivated Guidings</h6>
-                                                        <div class="row g-2">
-                                                            @foreach($stat['deactivated_guidings'] as $guiding)
-                                                                <div class="col-12 col-md-6">
-                                                                    <a href="{{ route('admin.guidings.edit', $guiding) }}" class="d-flex align-items-center justify-content-between p-2 rounded bg-white border text-decoration-none text-dark hover-shadow">
-                                                                        <span class="small text-truncate">#{{ $guiding->id }} {{ Str::limit($guiding->title, 35) }}</span>
-                                                                        <span class="badge bg-light text-muted small">{{ $guiding->updated_at?->format('M d, Y') }}</span>
-                                                                    </a>
-                                                                </div>
-                                                            @endforeach
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @endif
                                     @endforeach
                                 </tbody>
                             </table>
@@ -276,33 +263,21 @@
                                                     <div class="btn-group btn-group-sm">
                                                         <a href="{{ route('admin.guides.edit', $guide) }}" class="btn btn-primary btn-sm" title="Edit Guide"><i class="fas fa-pen"></i></a>
                                                         <a href="{{ route('admin.guides.show', $guide) }}" class="btn btn-secondary btn-sm" title="Profile"><i class="fas fa-user"></i></a>
-                                                        @if($guide->guidings_count > 0)
-                                                            <button type="button" class="btn btn-info btn-sm text-white" data-bs-toggle="collapse" data-bs-target="#guide-guidings-{{ $guide->id }}" title="View Guidings"><i class="fas fa-briefcase"></i></button>
-                                                        @else
-                                                            <a href="{{ route('admin.guidings.index') }}?user_id={{ $guide->id }}" class="btn btn-info btn-sm text-white" title="View Guidings"><i class="fas fa-briefcase"></i></a>
-                                                        @endif
+                                                        @php
+                                                            $guideGuidingsData = $guide->guidings->map(function($g) {
+                                                                return ['id' => $g->id, 'title' => $g->title, 'status' => $g->status, 'updated_at' => $g->updated_at ? $g->updated_at->format('M d, Y') : null];
+                                                            })->values();
+                                                            $guideGuidingsJsonB64 = base64_encode(json_encode($guideGuidingsData));
+                                                        @endphp
+                                                        <button type="button" class="btn btn-info btn-sm text-white guidings-modal-btn" title="Guidings"
+                                                                data-guide-name="{{ $guide->full_name }}"
+                                                                data-guidings="{{ $guideGuidingsJsonB64 }}"
+                                                                data-bs-toggle="modal" data-bs-target="#guidingsModal">
+                                                            <i class="fas fa-briefcase"></i>
+                                                        </button>
                                                     </div>
                                                 </td>
                                             </tr>
-                                            @if($guide->guidings_count > 0)
-                                                <tr class="table-light collapse" id="guide-guidings-{{ $guide->id }}">
-                                                    <td colspan="8" class="py-3">
-                                                        <div class="ps-4 border-start border-3 border-secondary">
-                                                            <h6 class="small fw-semibold text-muted mb-2">Deactivated Guidings</h6>
-                                                            <div class="row g-2">
-                                                                @foreach($guide->guidings as $guiding)
-                                                                    <div class="col-12 col-md-6 col-lg-4">
-                                                                        <a href="{{ route('admin.guidings.edit', $guiding) }}" class="d-flex align-items-center justify-content-between p-2 rounded bg-white border text-decoration-none text-dark hover-shadow">
-                                                                            <span class="small text-truncate">#{{ $guiding->id }} {{ Str::limit($guiding->title, 40) }}</span>
-                                                                            <span class="badge bg-light text-muted small">{{ $guiding->updated_at?->format('M d, Y') }}</span>
-                                                                        </a>
-                                                                    </div>
-                                                                @endforeach
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            @endif
                                         @endforeach
                                     </tbody>
                                 </table>
@@ -359,6 +334,25 @@
             </div>
         </div>
 
+        <!-- Guidings Modal -->
+        <div class="modal fade" id="guidingsModal" tabindex="-1" aria-labelledby="guidingsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="guidingsModalLabel">
+                            <i class="fas fa-briefcase me-2"></i>Guidings for <span id="guidingsModalGuideName"></span>
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="guidingsModalContent">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -395,6 +389,40 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Guidings modal - populate when opened
+    const guidingsModal = document.getElementById('guidingsModal');
+    const guidingsEditBaseUrl = '{{ url("admin/guidings") }}';
+    if (guidingsModal) {
+        guidingsModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            if (button && button.classList.contains('guidings-modal-btn')) {
+                const guideName = button.dataset.guideName || '';
+                try {
+                    const guidingsEncoded = button.dataset.guidings || '';
+                    const guidings = guidingsEncoded ? JSON.parse(atob(guidingsEncoded)) : [];
+                document.getElementById('guidingsModalGuideName').textContent = guideName;
+                const content = document.getElementById('guidingsModalContent');
+                if (guidings.length === 0) {
+                    content.innerHTML = '<p class="text-muted mb-0">No guidings created yet.</p>';
+                } else {
+                    content.innerHTML = guidings.map(function(g) {
+                        var statusBadge = g.status === 1 ? '<span class="badge bg-success">Active</span>' :
+                            g.status === 2 ? '<span class="badge bg-info">Draft</span>' :
+                            '<span class="badge bg-danger">Deactivated</span>';
+                        var editUrl = guidingsEditBaseUrl + '/' + g.id + '/edit';
+                        return '<a href="' + editUrl + '" class="d-flex align-items-center justify-content-between p-2 rounded bg-light border text-decoration-none text-dark hover-shadow mb-2">' +
+                            '<span class="small text-truncate flex-grow-1">#' + g.id + ' ' + (g.title || '').substring(0, 50) + (g.title && g.title.length > 50 ? '...' : '') + '</span>' +
+                            '<span class="d-flex align-items-center gap-2 flex-shrink-0">' + statusBadge +
+                            '<span class="badge bg-light text-muted small">' + (g.updated_at || '') + '</span></span></a>';
+                    }).join('');
+                }
+                } catch (e) {
+                    document.getElementById('guidingsModalContent').innerHTML = '<p class="text-danger mb-0">Error loading guidings data.</p>';
+                }
+            }
+        });
+    }
+
     // Filter and search for Guides Needing Attention table
     const guidesTable = document.getElementById('guidesNeedingAttentionTable');
     if (guidesTable) {
@@ -406,20 +434,10 @@ document.addEventListener('DOMContentLoaded', function() {
         function applyFilters() {
             const rows = guidesTable.querySelectorAll('tbody tr');
             rows.forEach(row => {
-                if (row.classList.contains('collapse')) {
-                    const prev = row.previousElementSibling;
-                    row.style.display = (prev && prev.style.display !== 'none') ? '' : 'none';
-                } else {
-                    const status = row.dataset.filterStatus || '';
-                    const matchesFilter = currentFilter === 'all' || status === currentFilter;
-                    const matchesSearch = !searchTerm || row.textContent.toLowerCase().includes(searchTerm.toLowerCase());
-                    const show = matchesFilter && matchesSearch;
-                    row.style.display = show ? '' : 'none';
-                    const next = row.nextElementSibling;
-                    if (next && next.classList.contains('collapse')) {
-                        next.style.display = show ? '' : 'none';
-                    }
-                }
+                const status = row.dataset.filterStatus || '';
+                const matchesFilter = currentFilter === 'all' || status === currentFilter;
+                const matchesSearch = !searchTerm || row.textContent.toLowerCase().includes(searchTerm.toLowerCase());
+                row.style.display = (matchesFilter && matchesSearch) ? '' : 'none';
             });
         }
 
@@ -444,23 +462,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Search filter for guidings overview table (handles expandable rows)
+    // Search filter for guidings overview table
     const searchInput = document.getElementById('guidingsSearch');
     if (searchInput) {
         searchInput.addEventListener('input', function() {
             const term = this.value.toLowerCase();
             document.querySelectorAll('#guidingsOverviewTable tbody tr').forEach(row => {
-                if (row.classList.contains('collapse')) {
-                    const prev = row.previousElementSibling;
-                    row.style.display = (prev && prev.style.display !== 'none') ? '' : 'none';
-                } else {
-                    const show = row.textContent.toLowerCase().includes(term);
-                    row.style.display = show ? '' : 'none';
-                    const next = row.nextElementSibling;
-                    if (next && next.classList.contains('collapse')) {
-                        next.style.display = show ? '' : 'none';
-                    }
-                }
+                row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
             });
         });
     }
