@@ -287,4 +287,5 @@ return [
     'add_inclusives' => 'Inklusive hinzufügen...',
     'tooltip_add_inclusives' => 'Tippen Sie, um Inklusive hinzuzufügen',
     'max_occupancy' => 'Max. Belegung',
+    'bedrooms' => 'Schlafzimmer',
 ];

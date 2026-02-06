@@ -287,4 +287,5 @@ return [
     'add_inclusives' => 'Add inclusives...',
     'tooltip_add_inclusives' => 'Type to add inclusives',
     'max_occupancy' => 'Max Occupancy',
+    'bedrooms' => 'Bedrooms',
 ];

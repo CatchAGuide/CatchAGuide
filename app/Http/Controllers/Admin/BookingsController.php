@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\EmailLog;
+use App\Models\BlockedEvent;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\Guest\GuestBookingRequestMail;
 use App\Mail\Guide\GuideBookingRequestMail;
+use App\Events\BookingStatusChanged;
 
 class BookingsController extends Controller
 {
@@ -58,6 +60,8 @@ class BookingsController extends Controller
         ]);
 
         $updated = false;
+        $statusChanged = false;
+        
         if (isset($data['email'])) {
             $booking->email = $data['email'];
             $updated = true;
@@ -69,11 +73,27 @@ class BookingsController extends Controller
         // Only allow status change if initial status is cancelled or rejected
         if (isset($data['status']) && in_array($booking->status, ['cancelled', 'rejected'])) {
             $booking->status = $data['status'];
+            $statusChanged = true;
             $updated = true;
         }
+        
         if ($updated) {
             $booking->save();
+            
+            // If status changed to 'accepted', trigger the full acceptance flow
+            if ($statusChanged && $booking->status === 'accepted') {
+                // Update blocked_event type to 'booking' (same as email acceptance flow)
+                $blockedEvent = BlockedEvent::find($booking->blocked_event_id);
+                if ($blockedEvent) {
+                    $blockedEvent->type = 'booking';
+                    $blockedEvent->save();
+                }
+                
+                // Fire the BookingStatusChanged event to trigger email notifications
+                event(new BookingStatusChanged($booking, 'accepted'));
+            }
         }
+        
         return response()->json([
             'success' => true,
             'message' => 'Booking updated successfully.',

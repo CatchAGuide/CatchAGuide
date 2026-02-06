@@ -50,8 +50,8 @@
             <div class="guiding-card__title-after-gallery guiding-card__title-after-gallery--mobile">
                 <div class="guiding-card__header">
                     <div class="guiding-card__info">
-                        <h3 class="guiding-card__title">{{ $guiding['title'] ?? 'Guiding Title' }}</h3>
-                        <p class="guiding-card__description">{{ $guiding['description'] ?? 'Description' }}</p>
+                        <h3 class="guiding-card__title">{{ translate($guiding['title']) ?? 'Guiding Title' }}</h3>
+                        <p class="guiding-card__description">{{ translate($guiding['description']) ?? 'Description' }}</p>
                     </div>
                 </div>
 
@@ -90,7 +90,7 @@
                                 <svg class="guiding-card__check-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                                     <polyline points="20 6 9 17 4 12"/>
                                 </svg>
-                                <span>{{ $inclusive['name'] ?? $inclusive }}</span>
+                                <span>{{ translate($inclusive['name']) ?? $inclusive }}</span>
                             </span>
                         @endforeach
                     @else
@@ -116,11 +116,11 @@
             <!-- Header & Pricing -->
             <div class="guiding-card__header">
                 <div class="guiding-card__info">
-                    <h3 class="guiding-card__title">{{ $guiding['title'] ?? 'Guiding Title' }}</h3>
-                    <p class="guiding-card__description">{{ $guiding['description'] ?? 'Description' }}</p>
+                    <h3 class="guiding-card__title">{{ translate($guiding['title']) ?? 'Guiding Title' }}</h3>
+                    <p class="guiding-card__description">{{ translate($guiding['description']) ?? 'Description' }}</p>
                 </div>
                 <div class="guiding-card__pricing">
-                    <div class="guiding-card__price-type">{{ $guiding['price']['type'] ?? 'per tour' }}</div>
+                    <div class="guiding-card__price-type">{{ translate($guiding['price']['type']) ?? 'per tour' }}</div>
                     <div class="guiding-card__price-amount">€{{ number_format($guiding['price']['amount'] ?? 260, 2) }}</div>
                     <button class="guiding-card__select-btn">
                         Select This Guiding
@@ -135,20 +135,20 @@
                         <circle cx="12" cy="12" r="10"/>
                         <polyline points="12 6 12 12 16 14"/>
                     </svg>
-                    <span>{{ $guiding['duration_hours'] ?? '6' }}</span> h
+                    <span>{{ translate($guiding['duration_hours']) ?? '6' }}</span> h
                 </span>
                 <span class="guiding-card__info-pill">
                     <svg class="guiding-card__pill-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                         <circle cx="12" cy="7" r="4"/>
                     </svg>
-                    <span>{{ $guiding['max_persons'] ?? '3' }}</span> Pers
+                    <span>{{ translate($guiding['max_persons']) ?? '3' }}</span> Pers
                 </span>
                 <span class="guiding-card__info-pill">
                     <svg class="guiding-card__pill-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M2 6s1.5-2 5-2 5 2 5 2 1.5-2 5-2 5 2 5 2v14s-1.5-2-5-2-5 2-5 2-1.5-2-5-2-5 2-5 2V6z"/>
                     </svg>
-                    <span>{{ $guiding['type'] ?? 'Shore' }}</span>
+                    <span>{{ translate($guiding['type']) ?? 'Shore' }}</span>
                 </span>
                 
                 <!-- Expand/Collapse Button (inline with pills) -->
@@ -167,16 +167,16 @@
                         @if(!empty($guiding['guiding_info']))
                             <ul style="list-style: none; padding: 0; margin: 0; font-size: 13px; line-height: 1.8;">
                                 @if(!empty($guiding['guiding_info']['art']))
-                                    <li>Type: <strong>{{ $guiding['guiding_info']['art'] }}</strong></li>
+                                    <li>Type: <strong>{{ translate($guiding['guiding_info']['art']) }}</strong></li>
                                 @endif
                                 @if(!empty($guiding['guiding_info']['dauer']))
-                                    <li>Duration: <strong>{{ $guiding['guiding_info']['dauer'] }}</strong></li>
+                                    <li>Duration: <strong>{{ translate($guiding['guiding_info']['dauer']) }}</strong></li>
                                 @endif
                                 @if(!empty($guiding['guiding_info']['max_personen']))
-                                    <li>Max Persons: <strong>{{ $guiding['guiding_info']['max_personen'] }}</strong></li>
+                                    <li>Max Persons: <strong>{{ translate($guiding['guiding_info']['max_personen']) }}</strong></li>
                                 @endif
                                 @if(!empty($guiding['guiding_info']['gewaesser']))
-                                    <li>Water: <strong>{{ $guiding['guiding_info']['gewaesser'] }}</strong></li>
+                                    <li>Water: <strong>{{ translate($guiding['guiding_info']['gewaesser']) }}</strong></li>
                                 @endif
                             </ul>
                         @else
@@ -197,7 +197,7 @@
                                             <path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-1 3.46-3.44 6-7 6s-7.56-2.54-8.5-6z"/>
                                             <path d="M18 5L22 9M18 19L22 15M6 9L2 5M6 15L2 19"/>
                                         </svg>
-                                        <span>{{ $fish['name'] ?? $fish }}</span>
+                                        <span>{{ translate($fish['name']) ?? $fish }}</span>
                                     </span>
                                 @endforeach
                             </div>
@@ -211,7 +211,7 @@
                         <div class="guiding-card__info-box-content">
                             <div class="guiding-card__methods-chips">
                                 @foreach($guiding['methods'] as $method)
-                                    <span class="guiding-card__method-chip">{{ $method['name'] ?? $method }}</span>
+                                    <span class="guiding-card__method-chip">{{ translate($method['name']) ?? $method }}</span>
                                 @endforeach
                             </div>
                         </div>

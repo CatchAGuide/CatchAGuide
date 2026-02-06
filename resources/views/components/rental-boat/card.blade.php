@@ -49,7 +49,7 @@
             {{-- Title and Summary right after gallery - Mobile version --}}
             <div class="rental-boat-card__title-after-gallery rental-boat-card__title-after-gallery--mobile">
                 <div class="rental-boat-card__summary-header">
-                    <h3 class="rental-boat-card__title">{{ $boat['title'] ?? __('Boat Title') }}</h3>
+                    <h3 class="rental-boat-card__title">{{ translate($boat['title']) ?? __('Boat Title') }}</h3>
                     @if(!empty($boat['type']))
                         <div class="rental-boat-card__category">{{ $boat['type'] }}</div>
                     @endif
@@ -72,7 +72,7 @@
                         <div class="rental-boat-card__included-chips">
                             @foreach($inclusiveItems as $inclusive)
                                 <span class="rental-boat-card__included-chip">
-                                    ✅ {{ $inclusive }}
+                                    ✅ {{ translate($inclusive) }}
                                 </span>
                             @endforeach
                         </div>
@@ -87,7 +87,7 @@
                         <div class="rental-boat-card__info-box-content">
                             <ul class="rental-boat-card__info-list">
                                 @foreach($extraItems as $extra)
-                                    <li>{{ $extra }}</li>
+                                    <li>{{ translate($extra) }}</li>
                                 @endforeach
                             </ul>
                         </div>
@@ -99,9 +99,9 @@
         {{-- Summary section - Desktop: middle column, Mobile: hidden (uses title-after-gallery instead) --}}
         <div class="rental-boat-card__summary">
             <div class="rental-boat-card__summary-header">
-                <h3 class="rental-boat-card__title">{{ $boat['title'] ?? __('Boat Title') }}</h3>
+                <h3 class="rental-boat-card__title">{{ translate($boat['title']) ?? __('Boat Title') }}</h3>
                 @if(!empty($boat['type']))
-                    <div class="rental-boat-card__category">{{ $boat['type'] }}</div>
+                    <div class="rental-boat-card__category">{{ translate($boat['type']) }}</div>
                 @endif
             </div>
 
@@ -109,8 +109,8 @@
                 <div class="rental-boat-card__spec-row">
                     @foreach($specs as $spec)
                         <span class="rental-boat-card__spec-item">
-                            <span class="rental-boat-card__spec-label">{{ $spec['label'] }}:</span>
-                            <span class="rental-boat-card__spec-value">{{ $spec['value'] }}</span>
+                            <span class="rental-boat-card__spec-label">{{ translate($spec['label']) }}:</span>
+                            <span class="rental-boat-card__spec-value">{{ translate($spec['value']) }}</span>
                         </span>
                     @endforeach
                 </div>
@@ -122,7 +122,7 @@
                     <div class="rental-boat-card__included-chips">
                         @foreach($inclusiveItems as $inclusive)
                             <span class="rental-boat-card__included-chip">
-                                ✅ {{ $inclusive }}
+                                ✅ {{ translate($inclusive) }}
                             </span>
                         @endforeach
                     </div>
@@ -154,8 +154,8 @@
                         <ul class="rental-boat-card__info-list">
                             @foreach($boatInfoList as $info)
                                 <li>
-                                    <span>{{ $info['name'] }}:</span>
-                                    <strong>{{ $info['value'] }}</strong>
+                                    <span>{{ translate($info['name']) }}:</span>
+                                    <strong>{{ translate($info['value']) }}</strong>
                                 </li>
                             @endforeach
                         </ul>
@@ -171,7 +171,7 @@
                     @if(count($requirementItems) > 0)
                         <ul class="rental-boat-card__info-list">
                             @foreach($requirementItems as $requirement)
-                                <li>{{ $requirement }}</li>
+                                <li>{{ translate($requirement) }}</li>
                             @endforeach
                         </ul>
                     @else
@@ -188,7 +188,7 @@
             <button class="rental-boat-gallery-modal__close">&times;</button>
             <button class="rental-boat-gallery-modal__prev">&#10094;</button>
             <button class="rental-boat-gallery-modal__next">&#10095;</button>
-            <img class="rental-boat-gallery-modal__image" src="" alt="{{ $boat['title'] ?? 'Boat' }}">
+            <img class="rental-boat-gallery-modal__image" src="" alt="{{ translate($boat['title']) ?? 'Boat' }}">
             <div class="rental-boat-gallery-modal__counter">
                 <span class="rental-boat-gallery-modal__current">1</span> / <span class="rental-boat-gallery-modal__total">{{ $galleryCount }}</span>
             </div>

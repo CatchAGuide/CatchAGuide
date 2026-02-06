@@ -55,7 +55,7 @@
             <div class="accommodation-card__title-after-gallery accommodation-card__title-after-gallery--mobile">
                 <div class="accommodation-card__summary-header">
                     <h3 class="accommodation-card__title">{{ translate($accommodation['title']) ?? 'Apartment Title' }}</h3>
-                    <div class="accommodation-card__type">{{ $accommodation['accommodation_type'] ?? 'Apartment / Holiday Home' }}</div>
+                    <div class="accommodation-card__type">{{ translate($accommodation['accommodation_type'] ?? 'Apartment / Holiday Home') }}</div>
                 </div>
 
                 <div class="accommodation-card__stats">
@@ -80,7 +80,7 @@
                 </div>
 
                 <div class="accommodation-card__beds">
-                    <span class="accommodation-card__beds-label">Schlafzimmer:</span>
+                    <span class="accommodation-card__beds-label">{{ __('accommodations.bedrooms') }}:</span>
                     <span class="accommodation-card__beds-value">{{ translate($bedSummary) }}</span>
                 </div>
 
@@ -135,7 +135,7 @@
         <div class="accommodation-card__summary">
             <div class="accommodation-card__summary-header">
                 <h3 class="accommodation-card__title">{{ translate($accommodation['title']) ?? 'Apartment Title' }}</h3>
-                <div class="accommodation-card__type">{{ $accommodation['accommodation_type'] ?? 'Apartment / Holiday Home' }}</div>
+                <div class="accommodation-card__type">{{ translate($accommodation['accommodation_type'] ?? 'Apartment / Holiday Home') }}</div>
             </div>
 
             <div class="accommodation-card__stats">

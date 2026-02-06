@@ -57,7 +57,7 @@
                                        data-anchor-type="accommodation"
                                        data-anchor-id="{{ $accommodation['id'] }}"
                                        data-anchor-scroll>
-                                        <span class="special-offer-card__anchor-box-text">{{ $accommodation['title'] ?? '{Title}' }}</span>
+                                        <span class="special-offer-card__anchor-box-text">{{ translate($accommodation['title']) ?? '{Title}' }}</span>
                                     </a>
                                 @endforeach
                                 @if(count($accommodations) > 3)
@@ -79,7 +79,7 @@
                                        data-anchor-type="boat"
                                        data-anchor-id="{{ $boat['id'] }}"
                                        data-anchor-scroll>
-                                        <span class="special-offer-card__anchor-box-text">{{ $boat['title'] ?? '{Title}' }}</span>
+                                        <span class="special-offer-card__anchor-box-text">{{ translate($boat['title']) ?? '{Title}' }}</span>
                                     </a>
                                 @endforeach
                                 @if(count($rentalBoats) > 3)
@@ -101,7 +101,7 @@
                                        data-anchor-type="guiding"
                                        data-anchor-id="{{ $guiding['id'] }}"
                                        data-anchor-scroll>
-                                        <span class="special-offer-card__anchor-box-text">{{ $guiding['title'] ?? '{Title}' }}</span>
+                                        <span class="special-offer-card__anchor-box-text">{{ translate($guiding['title']) ?? '{Title}' }}</span>
                                     </a>
                                 @endforeach
                                 @if(count($guidings) > 3)
@@ -164,7 +164,7 @@
                                    data-anchor-type="accommodation"
                                    data-anchor-id="{{ $accommodation['id'] }}"
                                    data-anchor-scroll>
-                                    <span class="special-offer-card__anchor-box-text">{{ $accommodation['title'] ?? '{Title}' }}</span>
+                                    <span class="special-offer-card__anchor-box-text">{{ translate($accommodation['title']) ?? '{Title}' }}</span>
                                 </a>
                             @endforeach
                             @if(count($accommodations) > 3)
@@ -186,7 +186,7 @@
                                    data-anchor-type="boat"
                                    data-anchor-id="{{ $boat['id'] }}"
                                    data-anchor-scroll>
-                                    <span class="special-offer-card__anchor-box-text">{{ $boat['title'] ?? '{Title}' }}</span>
+                                    <span class="special-offer-card__anchor-box-text">{{ translate($boat['title']) ?? '{Title}' }}</span>
                                 </a>
                             @endforeach
                             @if(count($rentalBoats) > 3)
@@ -208,7 +208,7 @@
                                    data-anchor-type="guiding"
                                    data-anchor-id="{{ $guiding['id'] }}"
                                    data-anchor-scroll>
-                                    <span class="special-offer-card__anchor-box-text">{{ $guiding['title'] ?? '{Title}' }}</span>
+                                    <span class="special-offer-card__anchor-box-text">{{ translate($guiding['title']) ?? '{Title}' }}</span>
                                 </a>
                             @endforeach
                             @if(count($guidings) > 3)
@@ -233,7 +233,7 @@
             <div class="special-offer-card__component-cards" data-expanded-only>
                 @foreach($accommodationsFull as $acc)
                     <div class="special-offer-card__component-card special-offer-card__component-card--accommodation" id="accommodation-{{ $acc['id'] }}">
-                        <h4 class="special-offer-card__component-title">{{ $acc['title'] ?? '' }}</h4>
+                        <h4 class="special-offer-card__component-title">{{ translate($acc['title']) ?? '' }}</h4>
                         <div class="special-offer-card__component-subtitle">{{ translate($acc['accommodation_type'] ?? '') }}</div>
                         
                         @if(!empty($acc['living_area_sqm']))
@@ -283,7 +283,7 @@
 
                 @foreach($guidingsFull as $guiding)
                     <div class="special-offer-card__component-card special-offer-card__component-card--guiding" id="guiding-{{ $guiding['id'] }}">
-                        <h4 class="special-offer-card__component-title">{{ $guiding['title'] ?? '' }}</h4>
+                        <h4 class="special-offer-card__component-title">{{ translate($guiding['title']) ?? '' }}</h4>
                         @if(!empty($guiding['guiding_info']['art']))
                             <div class="special-offer-card__component-subtitle">{{ translate($guiding['guiding_info']['art'] ?? '') }}</div>
                         @endif
@@ -328,7 +328,7 @@
             <button class="special-offer-gallery-modal__close">&times;</button>
             <button class="special-offer-gallery-modal__prev">&#10094;</button>
             <button class="special-offer-gallery-modal__next">&#10095;</button>
-            <img class="special-offer-gallery-modal__image" src="" alt="{{ $specialOffer['title'] ?? 'Special Offer' }}">
+            <img class="special-offer-gallery-modal__image" src="" alt="{{ translate($specialOffer['title']) ?? 'Special Offer' }}">
             <div class="special-offer-gallery-modal__counter">
                 <span class="special-offer-gallery-modal__current">1</span> / <span class="special-offer-gallery-modal__total">{{ $galleryTotal }}</span>
             </div>

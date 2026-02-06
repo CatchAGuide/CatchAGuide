@@ -20,7 +20,7 @@
             <div class="camp-topbar__info">
                 <h1 class="camp-topbar__title">{{ translate($camp['title']) }}</h1>
                 <div class="camp-topbar__meta">
-                    <span>{{ $camp['city'] }}, {{ $camp['region'] }}, {{ $camp['country'] }}</span>
+                    <span>{{ translate($camp['city']) }}, {{ translate($camp['region']) }}, {{ translate($camp['country']) }}</span>
                     <span class="camp-topbar__dot">•</span>
                     <a class="camp-topbar__link" href="#map">{{ __('vacations.show_on_map') }}</a>
                 </div>
@@ -131,15 +131,15 @@
                     <div class="contact-card card contact-card--mobile-top">
                         <div class="contact-card__content">
                             <div class="contact-card__header">
-                                <h5 class="contact-card__title mb-1">@lang('vacations.contact_us')</h5>
-                                <p class="contact-card__message mb-0 text-muted small">@lang('vacations.contact_us_message')</p>
+                                <h5 class="contact-card__title mb-1">{{ __('vacations.contact_us') }}</h5>
+                                <p class="contact-card__message mb-0 text-muted small">{{ __('vacations.contact_us_message') }}</p>
                             </div>
                             <div class="contact-info">
                                 <i class="fas fa-phone-alt me-2"></i>
                                 <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>
                             </div>
                             <a href="#" id="contact-product-mobile" class="btn btn-outline-orange" data-bs-toggle="modal" data-bs-target="#contactModal">
-                                @lang('vacations.contact_us_button')
+                                {{ __('vacations.contact_us_button') }}
                                 <i class="fas fa-arrow-right ms-2"></i>
                             </a>
                         </div>
@@ -152,15 +152,15 @@
                             <div class="contact-card card contact-card--desktop-float">
                                 <div class="contact-card__content">
                                     <div class="contact-card__header">
-                                        <h5 class="contact-card__title mb-1">@lang('vacations.contact_us')</h5>
-                                        <p class="contact-card__message mb-0 text-muted small">@lang('vacations.contact_us_message')</p>
+                                        <h5 class="contact-card__title mb-1">{{ __('vacations.contact_us') }}</h5>
+                                        <p class="contact-card__message mb-0 text-muted small">{{ __('vacations.contact_us_message') }}</p>
                                     </div>
                                     <div class="contact-info">
                                         <i class="fas fa-phone-alt me-2"></i>
                                         <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>
                                     </div>
                                     <a href="#" id="contact-product" class="btn btn-outline-orange" data-bs-toggle="modal" data-bs-target="#contactModal">
-                                        @lang('vacations.contact_us_button')
+                                        {{ __('vacations.contact_us_button') }}
                                         <i class="fas fa-arrow-right ms-2"></i>
                                     </a>
                                 </div>
@@ -171,7 +171,7 @@
                                 <p class="description-text description-text-wrapper">
                                     <span class="description-loading">
                                         <i class="fas fa-spinner fa-spin me-2"></i>
-                                        <span>@lang('vacations.loading')</span>
+                                        <span>{{ __('vacations.loading') }}</span>
                                     </span>
                                 </p>
                             </div>
@@ -182,7 +182,7 @@
                                 <p class="description-text description-text-wrapper">
                                     <span class="description-loading">
                                         <i class="fas fa-spinner fa-spin me-2"></i>
-                                        <span>@lang('vacations.loading')</span>
+                                        <span>{{ __('vacations.loading') }}</span>
                                     </span>
                                 </p>
                             </div>
@@ -193,7 +193,7 @@
                                 <p class="description-text description-text-wrapper">
                                     <span class="description-loading">
                                         <i class="fas fa-spinner fa-spin me-2"></i>
-                                        <span>@lang('vacations.loading')</span>
+                                        <span>{{ __('vacations.loading') }}</span>
                                     </span>
                                 </p>
                             </div>
@@ -226,7 +226,7 @@
                             {{-- Dynamic amenities from camp_facility_camp pivot table --}}
                             @foreach($camp['amenities'] as $amenity)
                                 <div class="flex items-center gap-2">
-                                    <span>{{ $amenity['name'] }}</span>
+                                    <span>{{ translate($amenity['name']) }}</span>
                                     <i class="fa fa-check text-green-600"></i>
                                 </div>
                             @endforeach
@@ -252,7 +252,7 @@
                         @if(!empty($camp['best_travel_times']))
                             <ul class="camp-section__list">
                                 @foreach($camp['best_travel_times'] as $time)
-                                    <li><strong>{!! $time['month'] !!}</strong>: {!! $time['note'] !!}</li>
+                                    <li><strong>{!! translate($time['month']) !!}</strong>: {!! translate($time['note']) !!}</li>
                                 @endforeach
                             </ul>
                         @elseif(!empty($camp['best_travel_times_parsed']))
@@ -272,7 +272,7 @@
                         <h2 class="camp-section__title">{{ __('vacations.target_fish') }}</h2>
                         <div class="camp-pill-row">
                             @foreach($camp['target_fish'] as $fish)
-                                <span class="camp-pill">{{ $fish }}</span>
+                                <span class="camp-pill">{{ translate($fish) }}</span>
                             @endforeach
                         </div>
                     </section>
@@ -307,7 +307,7 @@
                         <h2 class="camp-section__title">{{ __('vacations.camp_conditions') }}</h2>
                         <div class="camp-section__cols">
                             @if(!empty($camp['conditions']['minimum_stay_nights']))
-                                <div>{{ __('vacations.minimum_stay') }}: <strong>{{ $camp['conditions']['minimum_stay_nights'] }} {{ __('vacations.nights') }}</strong></div>
+                                <div>{{ __('vacations.minimum_stay') }}: <strong>{{ translate($camp['conditions']['minimum_stay_nights']) }} {{ __('vacations.nights') }}</strong></div>
                             @endif
                             @if(!empty($camp['conditions']['booking_window']))
                                 <div>{{ __('vacations.booking_window') }}: <strong>{{ translate($camp['conditions']['booking_window']) }}</strong></div>
@@ -709,12 +709,12 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <input type="text" class="form-control" placeholder="@lang('contact.yourName')" name="name" required>
+                                    <input type="text" class="form-control" placeholder="{{ __('contact.yourName') }}" name="name" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <input type="email" class="form-control" placeholder="@lang('contact.email')" name="email" required>
+                                    <input type="email" class="form-control" placeholder="{{ __('contact.email') }}" name="email" required>
                                 </div>
                             </div>
                         </div>
@@ -724,11 +724,11 @@
                             ])
                         </div>
                         <div class="form-group mb-3">
-                            <textarea name="description" class="form-control" rows="4" placeholder="@lang('contact.feedback')" required></textarea>
+                            <textarea name="description" class="form-control" rows="4" placeholder="{{ __('contact.feedback') }}" required></textarea>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             {!! htmlFormSnippet() !!}
-                            <button type="button" id="contactSubmitBtn" class="btn btn-orange">@lang('contact.btnSend')</button>
+                            <button type="button" id="contactSubmitBtn" class="btn btn-orange">{{ __('contact.btnSend') }}</button>
                         </div>
                     </form>
                 </div>
@@ -738,11 +738,11 @@
                         <div class="spinner-border text-orange mb-3" role="status">
                             <span class="visually-hidden">Loading...</span>
                         </div>
-                        <p class="text-center">@lang('contact.submitting')...</p>
+                        <p class="text-center">{{ __('contact.submitting') }}...</p>
                     </div>
                 </div>
                 <div class="alert alert-success mt-3" id="contactSuccessMessage" style="display: none;">
-                    @lang('contact.successMessage')
+                    {{ __('contact.successMessage') }}
                 </div>
                 <div class="alert alert-danger mt-3" id="contactError" style="display: none;"></div>
             </div>
