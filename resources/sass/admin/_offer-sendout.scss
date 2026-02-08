@@ -52,6 +52,24 @@ $offer-sendout-transition: 0.2s ease;
     .tagify__dropdown__item--connected:hover {
       background-color: rgba(var(--bs-primary-rgb), 0.2);
     }
+
+    .component-prices-container {
+      margin-top: 4px;
+      padding-left: 2px;
+
+      .component-price-row {
+        max-width: 100%;
+
+        .input-group-text {
+          font-size: 0.8rem;
+          min-width: 0;
+        }
+
+        .component-price-input {
+          max-width: 90px;
+        }
+      }
+    }
   }
 
   .offer-preview-wrapper {

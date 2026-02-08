@@ -91,14 +91,17 @@
                                                 @endforeach
                                             </select>
                                             <label class="form-label small text-muted mb-1 mt-2">Accommodations</label>
-                                            <input type="text" id="offer_0_accommodation_tagify" class="form-control form-control-sm mb-2" placeholder="Select accommodations" aria-label="Accommodations">
+                                            <input type="text" id="offer_0_accommodation_tagify" class="form-control form-control-sm mb-1" placeholder="Select accommodations" aria-label="Accommodations">
                                             <input type="hidden" name="offers[0][accommodation_ids]" id="offer_0_accommodation_ids" value="">
+                                            <div id="offer_0_accommodation_prices" class="component-prices-container mb-2"></div>
                                             <label class="form-label small text-muted mb-1 mt-2">Boats</label>
-                                            <input type="text" id="offer_0_boat_tagify" class="form-control form-control-sm mb-2" placeholder="Select boats" aria-label="Boats">
+                                            <input type="text" id="offer_0_boat_tagify" class="form-control form-control-sm mb-1" placeholder="Select boats" aria-label="Boats">
                                             <input type="hidden" name="offers[0][boat_ids]" id="offer_0_boat_ids" value="">
+                                            <div id="offer_0_boat_prices" class="component-prices-container mb-2"></div>
                                             <label class="form-label small text-muted mb-1 mt-2">Guidings</label>
-                                            <input type="text" id="offer_0_guiding_tagify" class="form-control form-control-sm mb-2" placeholder="Select guidings" aria-label="Guidings">
+                                            <input type="text" id="offer_0_guiding_tagify" class="form-control form-control-sm mb-1" placeholder="Select guidings" aria-label="Guidings">
                                             <input type="hidden" name="offers[0][guiding_ids]" id="offer_0_guiding_ids" value="">
+                                            <div id="offer_0_guiding_prices" class="component-prices-container mb-2"></div>
                                         </div>
                                         <div class="mb-0">
                                             <label class="form-label fw-semibold small">Details</label>
@@ -143,14 +146,17 @@
                                                 @endforeach
                                             </select>
                                             <label class="form-label small text-muted mb-1 mt-2">Accommodations</label>
-                                            <input type="text" id="offer___INDEX___accommodation_tagify" class="form-control form-control-sm mb-2" placeholder="Select accommodations" aria-label="Accommodations">
+                                            <input type="text" id="offer___INDEX___accommodation_tagify" class="form-control form-control-sm mb-1" placeholder="Select accommodations" aria-label="Accommodations">
                                             <input type="hidden" name="offers[__INDEX__][accommodation_ids]" id="offer___INDEX___accommodation_ids" value="">
+                                            <div id="offer___INDEX___accommodation_prices" class="component-prices-container mb-2"></div>
                                             <label class="form-label small text-muted mb-1 mt-2">Boats</label>
-                                            <input type="text" id="offer___INDEX___boat_tagify" class="form-control form-control-sm mb-2" placeholder="Select boats" aria-label="Boats">
+                                            <input type="text" id="offer___INDEX___boat_tagify" class="form-control form-control-sm mb-1" placeholder="Select boats" aria-label="Boats">
                                             <input type="hidden" name="offers[__INDEX__][boat_ids]" id="offer___INDEX___boat_ids" value="">
+                                            <div id="offer___INDEX___boat_prices" class="component-prices-container mb-2"></div>
                                             <label class="form-label small text-muted mb-1 mt-2">Guidings</label>
-                                            <input type="text" id="offer___INDEX___guiding_tagify" class="form-control form-control-sm mb-2" placeholder="Select guidings" aria-label="Guidings">
+                                            <input type="text" id="offer___INDEX___guiding_tagify" class="form-control form-control-sm mb-1" placeholder="Select guidings" aria-label="Guidings">
                                             <input type="hidden" name="offers[__INDEX__][guiding_ids]" id="offer___INDEX___guiding_ids" value="">
+                                            <div id="offer___INDEX___guiding_prices" class="component-prices-container mb-2"></div>
                                         </div>
                                         <div class="mb-0">
                                             <label class="form-label fw-semibold small">Details</label>
@@ -271,6 +277,29 @@
         hiddenEl.value = ids.join(',');
     }
 
+    function updateComponentPrices(blockIndex, type, tagify, whitelist) {
+        const container = document.getElementById('offer_' + blockIndex + '_' + type + '_prices');
+        if (!container) return;
+        container.innerHTML = '';
+        const tags = tagify && tagify.value ? tagify.value : [];
+        const list = type === 'accommodation' ? fullOptions.accommodations : (type === 'boat' ? fullOptions.boats : fullOptions.guidings);
+        tags.forEach(function (tag) {
+            const id = tag.id || (tag.value && String(tag.value).match(/^#?\d+/) ? String(tag.value).replace(/^#?(\d+).*/, '$1') : null) || tag.value;
+            const title = tag.value || (list && list.find(function (i) { return String(i.id) === String(id); }))?.value || 'Item ' + id;
+            const displayTitle = typeof title === 'string' ? title.replace(/^\(\d+\)\s*\|\s*/, '').trim() : (title || '');
+            const row = document.createElement('div');
+            row.className = 'input-group input-group-sm mb-1 component-price-row';
+            row.setAttribute('data-component-id', id);
+            row.setAttribute('data-title', displayTitle || '');
+            row.innerHTML = '<label class="input-group-text flex-grow-0 text-truncate" style="max-width: 140px;" title="' + (displayTitle || '').replace(/"/g, '&quot;') + '">' + (displayTitle || 'Price') + '</label><span class="input-group-text">€</span><input type="number" class="form-control form-control-sm component-price-input" data-id="' + id + '" data-type="' + type + '" data-title="' + (displayTitle || '').replace(/"/g, '&quot;') + '" step="0.01" min="0" placeholder="0.00" value="">';
+            container.appendChild(row);
+        });
+        container.querySelectorAll('.component-price-input').forEach(function (el) {
+            el.addEventListener('input', updatePreview);
+            el.addEventListener('change', updatePreview);
+        });
+    }
+
     function syncAllTagify() {
         Object.keys(tagifyByBlock).forEach(function (idx) {
             const t = tagifyByBlock[idx];
@@ -295,6 +324,7 @@
             offers: []
         };
         document.querySelectorAll('#offer-blocks-container .offer-block').forEach(function (block) {
+            var idx = block.getAttribute('data-offer-index');
             var campEl = block.querySelector('select[name*="[camp_id]"]');
             var accEl = block.querySelector('input[name*="[accommodation_ids]"]');
             var boatEl = block.querySelector('input[name*="[boat_ids]"]');
@@ -304,11 +334,32 @@
             var personsEl = block.querySelector('input[name*="[number_of_persons]"]');
             var priceEl = block.querySelector('input[name*="[price]"]');
             var additionalEl = block.querySelector('textarea[name*="[additional_info]"]');
+            var accPrices = [];
+            var boatPrices = [];
+            var guidingPrices = [];
+            block.querySelectorAll('#offer_' + idx + '_accommodation_prices .component-price-input').forEach(function (el) {
+                var title = el.dataset.title || el.closest('.component-price-row')?.getAttribute('data-title') || '';
+                var price = parseFloat(el.value) || 0;
+                if (el.dataset.id) accPrices.push({ id: el.dataset.id, title: title, price: price });
+            });
+            block.querySelectorAll('#offer_' + idx + '_boat_prices .component-price-input').forEach(function (el) {
+                var title = el.dataset.title || el.closest('.component-price-row')?.getAttribute('data-title') || '';
+                var price = parseFloat(el.value) || 0;
+                if (el.dataset.id) boatPrices.push({ id: el.dataset.id, title: title, price: price });
+            });
+            block.querySelectorAll('#offer_' + idx + '_guiding_prices .component-price-input').forEach(function (el) {
+                var title = el.dataset.title || el.closest('.component-price-row')?.getAttribute('data-title') || '';
+                var price = parseFloat(el.value) || 0;
+                if (el.dataset.id) guidingPrices.push({ id: el.dataset.id, title: title, price: price });
+            });
             obj.offers.push({
                 camp_id: (campEl && campEl.value) ? campEl.value : null,
                 accommodation_ids: accEl ? accEl.value : '',
                 boat_ids: boatEl ? boatEl.value : '',
                 guiding_ids: guidingEl ? guidingEl.value : '',
+                accommodation_prices: accPrices,
+                boat_prices: boatPrices,
+                guiding_prices: guidingPrices,
                 date_from: dateFromEl ? dateFromEl.value : '',
                 date_to: dateToEl ? dateToEl.value : '',
                 number_of_persons: personsEl ? personsEl.value : '',
@@ -357,7 +408,7 @@
         toast.show();
     }
 
-    function initTagify(inputEl, hiddenEl, whitelist) {
+    function initTagify(inputEl, hiddenEl, whitelist, blockIndex, type) {
         if (!inputEl || typeof Tagify === 'undefined') return null;
         var t = new Tagify(inputEl, {
             whitelist: whitelist || [],
@@ -392,6 +443,7 @@
         });
         t.on('change', function () {
             syncTagifyHidden(t, hiddenEl);
+            if (blockIndex !== undefined && type) updateComponentPrices(blockIndex, type, t, whitelist);
             updatePreview();
         });
         return t;
@@ -422,10 +474,13 @@
             tagifyByBlock[blockIndex].guiding.destroy();
         }
         tagifyByBlock[blockIndex] = {
-            acc: initTagify(accInput, accHidden, fullOptions.accommodations),
-            boat: initTagify(boatInput, boatHidden, fullOptions.boats),
-            guiding: initTagify(guidingInput, guidingHidden, fullOptions.guidings)
+            acc: initTagify(accInput, accHidden, fullOptions.accommodations, blockIndex, 'accommodation'),
+            boat: initTagify(boatInput, boatHidden, fullOptions.boats, blockIndex, 'boat'),
+            guiding: initTagify(guidingInput, guidingHidden, fullOptions.guidings, blockIndex, 'guiding')
         };
+        updateComponentPrices(blockIndex, 'accommodation', tagifyByBlock[blockIndex].acc, fullOptions.accommodations);
+        updateComponentPrices(blockIndex, 'boat', tagifyByBlock[blockIndex].boat, fullOptions.boats);
+        updateComponentPrices(blockIndex, 'guiding', tagifyByBlock[blockIndex].guiding, fullOptions.guidings);
     }
 
     function wireDateFromTo(blockIndex) {

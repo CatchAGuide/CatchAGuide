@@ -50,10 +50,13 @@
                                                             </p>
                                                             @endif
                                                         </td>
-                                                        @if(!empty($offer['price']))
+                                                        @php
+                                                            $displayPrice = !empty($offer['component_total']) ? $offer['component_total'] : ($offer['price'] ?? null);
+                                                        @endphp
+                                                        @if($displayPrice !== null && $displayPrice !== '')
                                                         <td style="vertical-align: top; text-align: right; white-space: nowrap; padding-left: 12px;">
                                                             <div style="background: rgba(232, 96, 76, 0.15); border: 1px solid rgba(232, 96, 76, 0.3); border-radius: 6px; padding: 8px 12px; display: inline-block;">
-                                                                <div style="font-size: 20px; color: #ffffff; font-weight: 700; line-height: 1;">€ {{ $offer['price'] }}</div>
+                                                                <div style="font-size: 20px; color: #ffffff; font-weight: 700; line-height: 1;">€ {{ is_numeric($displayPrice) ? number_format((float)$displayPrice, 2) : $displayPrice }}</div>
                                                             </div>
                                                         </td>
                                                         @endif
@@ -76,7 +79,32 @@
                                         <tr>
                                             <td>
                                                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="font-size: 13px; color: #111827;">
-                                                    @if(isset($offer['accommodations']) && $offer['accommodations']->isNotEmpty())
+                                                    @if(isset($offer['accommodation_items']) && count($offer['accommodation_items']) > 0)
+                                                    <tr>
+                                                        <td style="padding: 6px 0 4px; font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600;">{{ __('emails.offer_sendout_accommodations') }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="padding: 0 0 12px;">
+                                                            @foreach($offer['accommodation_items'] as $item)
+                                                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: #fef3f2; border-left: 3px solid #e8604c; margin-bottom: 4px; border-radius: 3px;">
+                                                                <tr>
+                                                                    <td style="padding: 8px 10px; width: 100%;">
+                                                                        <span style="font-size: 14px; color: #0f172a; font-weight: 600;">{{ $item['title'] ?? $item['model']->title ?? '' }}</span>
+                                                                        @if(!empty($item['model']->max_occupancy))
+                                                                        <span style="font-size: 12px; color: #64748b;"> · {{ __('emails.up_to') }} {{ $item['model']->max_occupancy }} {{ __('emails.guests') }}</span>
+                                                                        @endif
+                                                                    </td>
+                                                                    @if(isset($item['price']) && $item['price'] > 0)
+                                                                    <td style="padding: 8px 10px; text-align: right; white-space: nowrap;">
+                                                                        <span style="font-size: 14px; color: #0f172a; font-weight: 600;">€ {{ number_format((float)$item['price'], 2) }}</span>
+                                                                    </td>
+                                                                    @endif
+                                                                </tr>
+                                                            </table>
+                                                            @endforeach
+                                                        </td>
+                                                    </tr>
+                                                    @elseif(isset($offer['accommodations']) && $offer['accommodations']->isNotEmpty())
                                                     <tr>
                                                         <td style="padding: 6px 0 4px; font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600;">{{ __('emails.offer_sendout_accommodations') }}</td>
                                                     </tr>
@@ -97,7 +125,32 @@
                                                         </td>
                                                     </tr>
                                                     @endif
-                                                    @if(isset($offer['boats']) && $offer['boats']->isNotEmpty())
+                                                    @if(isset($offer['boat_items']) && count($offer['boat_items']) > 0)
+                                                    <tr>
+                                                        <td style="padding: 6px 0 4px; font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600;">{{ __('emails.offer_sendout_boats') }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="padding: 0 0 12px;">
+                                                            @foreach($offer['boat_items'] as $item)
+                                                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: #f0f9ff; border-left: 3px solid #0ea5e9; margin-bottom: 4px; border-radius: 3px;">
+                                                                <tr>
+                                                                    <td style="padding: 8px 10px; width: 100%;">
+                                                                        <span style="font-size: 14px; color: #0f172a; font-weight: 600;">{{ $item['title'] ?? $item['model']->title ?? '' }}</span>
+                                                                        @if(!empty($item['model']->max_persons))
+                                                                        <span style="font-size: 12px; color: #64748b;"> · {{ __('emails.up_to') }} {{ $item['model']->max_persons }} {{ __('emails.persons') }}</span>
+                                                                        @endif
+                                                                    </td>
+                                                                    @if(isset($item['price']) && $item['price'] > 0)
+                                                                    <td style="padding: 8px 10px; text-align: right; white-space: nowrap;">
+                                                                        <span style="font-size: 14px; color: #0f172a; font-weight: 600;">€ {{ number_format((float)$item['price'], 2) }}</span>
+                                                                    </td>
+                                                                    @endif
+                                                                </tr>
+                                                            </table>
+                                                            @endforeach
+                                                        </td>
+                                                    </tr>
+                                                    @elseif(isset($offer['boats']) && $offer['boats']->isNotEmpty())
                                                     <tr>
                                                         <td style="padding: 6px 0 4px; font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600;">{{ __('emails.offer_sendout_boats') }}</td>
                                                     </tr>
@@ -118,7 +171,32 @@
                                                         </td>
                                                     </tr>
                                                     @endif
-                                                    @if(isset($offer['guidings']) && $offer['guidings']->isNotEmpty())
+                                                    @if(isset($offer['guiding_items']) && count($offer['guiding_items']) > 0)
+                                                    <tr>
+                                                        <td style="padding: 6px 0 4px; font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600;">{{ __('emails.offer_sendout_guidings') }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="padding: 0 0 12px;">
+                                                            @foreach($offer['guiding_items'] as $item)
+                                                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: #f0fdf4; border-left: 3px solid #10b981; margin-bottom: 4px; border-radius: 3px;">
+                                                                <tr>
+                                                                    <td style="padding: 8px 10px; width: 100%;">
+                                                                        <span style="font-size: 14px; color: #0f172a; font-weight: 600;">{{ $item['title'] ?? $item['model']->title ?? '' }}</span>
+                                                                        @if(!empty($item['model']->duration))
+                                                                        <span style="font-size: 12px; color: #64748b;"> · {{ $item['model']->duration }}</span>
+                                                                        @endif
+                                                                    </td>
+                                                                    @if(isset($item['price']) && $item['price'] > 0)
+                                                                    <td style="padding: 8px 10px; text-align: right; white-space: nowrap;">
+                                                                        <span style="font-size: 14px; color: #0f172a; font-weight: 600;">€ {{ number_format((float)$item['price'], 2) }}</span>
+                                                                    </td>
+                                                                    @endif
+                                                                </tr>
+                                                            </table>
+                                                            @endforeach
+                                                        </td>
+                                                    </tr>
+                                                    @elseif(isset($offer['guidings']) && $offer['guidings']->isNotEmpty())
                                                     <tr>
                                                         <td style="padding: 6px 0 4px; font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600;">{{ __('emails.offer_sendout_guidings') }}</td>
                                                     </tr>
@@ -136,6 +214,18 @@
                                                                 </tr>
                                                             </table>
                                                             @endforeach
+                                                        </td>
+                                                    </tr>
+                                                    @endif
+                                                    @if(!empty($offer['component_total']) && $offer['component_total'] > 0)
+                                                    <tr>
+                                                        <td style="padding: 10px 0 4px; border-top: 2px solid #e2e8f0;">
+                                                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                                                                <tr>
+                                                                    <td style="font-size: 14px; color: #0f172a; font-weight: 700;">{{ __('emails.offer_sendout_total_price') }}</td>
+                                                                    <td style="text-align: right; font-size: 16px; color: #0f172a; font-weight: 700;">€ {{ number_format((float)$offer['component_total'], 2) }}</td>
+                                                                </tr>
+                                                            </table>
                                                         </td>
                                                     </tr>
                                                     @endif
