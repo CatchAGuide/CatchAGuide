@@ -203,4 +203,12 @@ return [
     'offer_sendout_closing_message' => 'Unser Team von Angel-Experten steht bereit, um Ihre Fragen zu beantworten und Ihnen bei der Buchung zu helfen. Wir setzen uns dafür ein, Ihr Angelabenteuer reibungslos und unvergesslich zu gestalten.',
     'offer_sendout_closing_secondary' => 'Buchen Sie mit Vertrauen - wir bieten flexible Stornierungsbedingungen und engagierten Support während Ihrer gesamten Reise.',
     'offer_sendout_subject' => 'Ihr persönliches Angebot – :name',
+
+    'offer_followup_title' => 'Einfach mal Hallo sagen',
+    'offer_followup_subject' => 'Kurzes Hallo – der Angelplan, den wir für Sie zusammengestellt haben :name',
+    'offer_followup_intro' => 'Hoffentlich geht es Ihnen gut! Wir haben gerade an den Plan gedacht, den wir für Sie zusammengestellt haben, und wollten einfach mal Hallo sagen.',
+    'offer_followup_reminder' => 'Falls Sie schon reingeschaut haben und Gedanken dazu haben—oder noch am Träumen sind—hören wir gern von Ihnen. Genauso, wenn etwas nicht ganz passt oder Sie etwas anpassen möchten.',
+    'offer_followup_feedback_ask' => 'Wann immer Sie möchten, antworten Sie einfach auf diese E-Mail oder melden Sie sich. Es eilt überhaupt nicht.',
+    'offer_followup_offer_ref' => 'Der Plan, den wir zusammengestellt haben',
+    'offer_followup_closing' => 'So oder so sind wir für Sie da. Passen Sie auf sich auf!',
 ];

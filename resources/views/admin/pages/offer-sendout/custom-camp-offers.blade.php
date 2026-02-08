@@ -44,7 +44,7 @@
                                 </thead>
                                 <tbody>
                                     @forelse($customCampOffers as $offer)
-                                        <tr data-id="{{ $offer->id }}">
+                                        <tr data-id="{{ $offer->id }}" data-recipient-email="{{ $offer->recipient_email }}">
                                             <td><strong>{{ $offer->name }}</strong></td>
                                             <td>
                                                 @php
@@ -128,11 +128,9 @@
                                             <td><small>{{ $offer->creator ? $offer->creator->firstname . ' ' . $offer->creator->lastname : '-' }}</small></td>
                                             <td>
                                                 <div class="btn-group btn-group-sm">
+                                                    <button type="button" class="btn btn-outline-primary" onclick="openFollowUpConfirm({{ $offer->id }})" title="Send follow-up email (CC CEO)"><i class="fe fe-bell"></i></button>
                                                     @if(($offer->status ?? 'sent') !== 'accepted')
                                                         <button type="button" class="btn btn-success" onclick="updateOfferStatus({{ $offer->id }}, 'accepted')" title="Approve"><i class="fe fe-check"></i></button>
-                                                    @endif
-                                                    @if(($offer->status ?? 'sent') !== 'follow_up')
-                                                        <button type="button" class="btn btn-warning" onclick="updateOfferStatus({{ $offer->id }}, 'follow_up')" title="Follow up"><i class="fe fe-bell"></i></button>
                                                     @endif
                                                     @if(($offer->status ?? 'sent') !== 'rejected')
                                                         <button type="button" class="btn btn-danger" onclick="updateOfferStatus({{ $offer->id }}, 'rejected')" title="Cancel"><i class="fe fe-x"></i></button>
@@ -160,6 +158,37 @@
         </div>
         <!-- End Row -->
 
+    </div>
+</div>
+
+<div id="offer-followup-toast" class="toast align-items-center text-bg-success border-0 position-fixed bottom-0 end-0 m-3" role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 1060;">
+    <div class="d-flex">
+        <div class="toast-body" id="offer-followup-toast-body">Follow-up email sent.</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+</div>
+
+{{-- Follow-up email confirmation modal --}}
+<div class="modal fade" id="followUpConfirmModal" tabindex="-1" aria-labelledby="followUpConfirmLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="followUpConfirmLabel">
+                    <i class="fe fe-bell me-2"></i>Send follow-up email
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">Send follow-up email to <strong id="followUpConfirmEmail"></strong>?</p>
+                <p class="text-muted small mb-0 mt-2">A copy will be sent to the CEO (CC).</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="followUpConfirmBtn">
+                    <i class="fe fe-bell me-2"></i>Send follow-up email
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -291,6 +320,71 @@ function viewOfferDetails(offerId) {
             console.error('Error:', error);
             content.innerHTML = '<div class="alert alert-danger">Error loading offer details.</div>';
         });
+}
+
+function openFollowUpConfirm(offerId) {
+    const row = document.querySelector('tr[data-id="' + offerId + '"]');
+    const email = row ? (row.getAttribute('data-recipient-email') || '') : '';
+    document.getElementById('followUpConfirmEmail').textContent = email || '(no email)';
+    const modal = document.getElementById('followUpConfirmModal');
+    const confirmBtn = document.getElementById('followUpConfirmBtn');
+    confirmBtn.dataset.offerId = offerId;
+    const modalInstance = new bootstrap.Modal(modal);
+    modalInstance.show();
+}
+
+document.getElementById('followUpConfirmBtn').addEventListener('click', function() {
+    const offerId = this.dataset.offerId;
+    if (!offerId) return;
+    sendFollowUpEmail(offerId);
+    bootstrap.Modal.getInstance(document.getElementById('followUpConfirmModal'))?.hide();
+});
+
+function sendFollowUpEmail(offerId) {
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    if (!csrf) return;
+    const confirmBtn = document.getElementById('followUpConfirmBtn');
+    const originalHtml = confirmBtn ? confirmBtn.innerHTML : '';
+    if (confirmBtn) {
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending…';
+    }
+    fetch('{{ route("admin.offer-sendout.custom-camp-offers.follow-up", ["customCampOffer" => "__ID__"]) }}'.replace('__ID__', offerId), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrf,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({})
+    })
+    .then(r => r.json())
+    .then(data => {
+        const toastEl = document.getElementById('offer-followup-toast');
+        const bodyEl = document.getElementById('offer-followup-toast-body');
+        if (toastEl && bodyEl) {
+            bodyEl.textContent = data.success ? (data.message || 'Follow-up email sent.') : (data.message || 'Failed to send.');
+            toastEl.classList.remove('text-bg-success', 'text-bg-danger');
+            toastEl.classList.add(data.success ? 'text-bg-success' : 'text-bg-danger');
+            new bootstrap.Toast(toastEl).show();
+        }
+    })
+    .catch(err => {
+        const toastEl = document.getElementById('offer-followup-toast');
+        const bodyEl = document.getElementById('offer-followup-toast-body');
+        if (toastEl && bodyEl) {
+            bodyEl.textContent = 'Error sending follow-up email.';
+            toastEl.classList.remove('text-bg-success', 'text-bg-danger');
+            toastEl.classList.add('text-bg-danger');
+            new bootstrap.Toast(toastEl).show();
+        }
+    })
+    .finally(() => {
+        if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = originalHtml || '<i class="fe fe-bell me-2"></i>Send follow-up email';
+        }
+    });
 }
 
 function updateOfferStatus(offerId, status) {

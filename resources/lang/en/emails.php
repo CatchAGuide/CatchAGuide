@@ -207,4 +207,12 @@ return [
     'offer_sendout_closing_message' => 'Our team of fishing experts is ready to answer any questions and help you finalize your booking. We\'re committed to making your fishing adventure seamless and memorable.',
     'offer_sendout_closing_secondary' => 'Book with confidence - we offer flexible cancellation policies and dedicated support throughout your journey.',
     'offer_sendout_subject' => 'Your personalized offer – :name',
+
+    'offer_followup_title' => 'Just saying hi',
+    'offer_followup_subject' => 'Quick hello – that fishing plan we put together :name',
+    'offer_followup_intro' => 'Hope you\'re doing well! We were just thinking about the plan we put together for you and thought we\'d say hi.',
+    'offer_followup_reminder' => 'If you\'ve had a chance to look at it and have any thoughts—or even if you\'re still daydreaming about it—we\'d be chuffed to hear from you. Same goes if something\'s not quite right or you\'d like to tweak a few things.',
+    'offer_followup_feedback_ask' => 'Whenever you feel like it, just reply to this email or drop us a line. No rush at all.',
+    'offer_followup_offer_ref' => 'The plan we put together',
+    'offer_followup_closing' => 'Either way, we\'re here when you need us. Take care!',
 ];
