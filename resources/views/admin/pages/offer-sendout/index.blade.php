@@ -17,9 +17,15 @@
                 <h1 class="page-title mb-1">Offer Sendout</h1>
                 <p class="text-muted small mb-0">Build a package offer and send a beautiful email to the customer (CC admin)</p>
             </div>
+            <div class="d-flex gap-2 align-items-center">
+                <a href="{{ route('admin.offer-sendout.index') }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fe fe-arrow-left me-1"></i>Back to List
+                </a>
+            </div>
             <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">Dashboard</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Offer Sendout</li>
+                <li class="breadcrumb-item"><a href="{{ route('admin.offer-sendout.index') }}">Custom Camp Offers</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Create Offer</li>
             </ol>
         </div>
         <!-- PAGE-HEADER END -->

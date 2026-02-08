@@ -485,7 +485,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('contact-requests', [ContactRequestsController::class, 'index'])->name('contact-requests.index');
 
         Route::prefix('offer-sendout')->name('offer-sendout.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Admin\OfferSendoutController::class, 'index'])->name('index');
+            Route::get('/', [\App\Http\Controllers\Admin\OfferSendoutController::class, 'customCampOffers'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\OfferSendoutController::class, 'create'])->name('create');
+            Route::get('/custom-camp-offers/{customCampOffer}', [\App\Http\Controllers\Admin\OfferSendoutController::class, 'getCustomCampOffer'])->name('custom-camp-offers.show');
+            Route::patch('/custom-camp-offers/{customCampOffer}/status', [\App\Http\Controllers\Admin\OfferSendoutController::class, 'updateStatus'])->name('custom-camp-offers.update-status');
             Route::get('/camp-options/{camp}', [\App\Http\Controllers\Admin\OfferSendoutController::class, 'campOptions'])->name('camp-options');
             Route::post('/preview', [\App\Http\Controllers\Admin\OfferSendoutController::class, 'preview'])->name('preview');
             Route::post('/send', [\App\Http\Controllers\Admin\OfferSendoutController::class, 'send'])->name('send');
