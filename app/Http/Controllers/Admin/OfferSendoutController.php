@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\Admin\OfferFollowUpMail;
 use App\Mail\Admin\OfferSendoutMail;
 use App\Models\Accommodation;
 use App\Models\Camp;
@@ -11,6 +12,7 @@ use App\Models\RentalBoat;
 use App\Models\User;
 use Carbon\Carbon;
 use App\Models\EmailLog;
+use App\Models\CustomCampOffer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -19,9 +21,9 @@ use Illuminate\Validation\Rule;
 class OfferSendoutController extends Controller
 {
     /**
-     * Display the offer builder / sendout page.
+     * Display the offer builder / sendout page (create new offer).
      */
-    public function index()
+    public function create()
     {
         $customers = User::whereNotNull('email')
             ->orderBy('firstname')
@@ -49,6 +51,170 @@ class OfferSendoutController extends Controller
             'accommodations' => $accommodations,
             'boats' => $boats,
             'guidings' => $guidings,
+        ]);
+    }
+
+    /**
+     * Display a listing of saved custom camp offers (base page).
+     */
+    public function customCampOffers()
+    {
+        $customCampOffers = CustomCampOffer::with(['customer', 'creator'])
+            ->orderBy('id', 'desc')
+            ->get();
+
+        return view('admin.pages.offer-sendout.custom-camp-offers', [
+            'customCampOffers' => $customCampOffers,
+        ]);
+    }
+
+    /**
+     * Update custom camp offer status (Approve, Follow up, Cancel).
+     */
+    public function updateStatus(Request $request, CustomCampOffer $customCampOffer)
+    {
+        $request->validate(['status' => ['required', Rule::in([CustomCampOffer::STATUS_ACCEPTED, CustomCampOffer::STATUS_FOLLOW_UP, CustomCampOffer::STATUS_REJECTED])]]);
+        $customCampOffer->update(['status' => $request->status]);
+        return response()->json(['success' => true, 'message' => 'Status updated.', 'status' => $customCampOffer->status]);
+    }
+
+    /**
+     * Send a friendly follow-up email for a custom camp offer (CC CEO).
+     */
+    public function sendFollowUp(Request $request, CustomCampOffer $customCampOffer)
+    {
+        $email = $customCampOffer->recipient_email;
+        if (empty($email)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No recipient email for this offer.',
+            ], 422);
+        }
+
+        $locale = $customCampOffer->locale ?? config('app.locale', 'en');
+        if (! in_array($locale, ['en', 'de'])) {
+            $locale = 'en';
+        }
+
+        $recipientName = $customCampOffer->recipient_name ?: $email;
+        $offerSummary = $this->buildFollowUpOfferSummary($customCampOffer);
+        $ceoEmail = config('mail.admin_email', config('mail.from.address'));
+
+        $payload = [
+            'recipient_name' => $recipientName,
+            'offer_summary' => $offerSummary,
+        ];
+
+        try {
+            Mail::to($email)
+                ->locale($locale)
+                ->cc($ceoEmail)
+                ->send(new OfferFollowUpMail($payload));
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send follow-up email: ' . $e->getMessage(),
+            ], 500);
+        }
+
+        $subject = __('emails.offer_followup_subject', ['name' => config('app.name')]);
+        EmailLog::create([
+            'email' => $email,
+            'language' => $locale,
+            'subject' => $subject,
+            'type' => 'offer_followup',
+            'status' => 1,
+            'target' => 'offer_followup_' . $customCampOffer->id . '_' . now()->format('Y-m-d_H-i-s'),
+            'additional_info' => json_encode([
+                'recipient_name' => $recipientName,
+                'cc' => $ceoEmail,
+                'custom_camp_offer_id' => $customCampOffer->id,
+            ]),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Follow-up email sent to ' . $email . ' (CC: CEO).',
+        ]);
+    }
+
+    /**
+     * Build a short one-line summary of the offer for the follow-up email.
+     */
+    private function buildFollowUpOfferSummary(CustomCampOffer $customCampOffer): string
+    {
+        $ro = $customCampOffer->resolvedOffers;
+        if (empty($ro)) {
+            return '';
+        }
+        $parts = [];
+        foreach ($ro as $r) {
+            $campTitle = $r['camp'] ? $r['camp']->title : null;
+            $df = $r['date_from'] ?? null;
+            $dt = $r['date_to'] ?? null;
+            $dateStr = '';
+            if ($df || $dt) {
+                $dateStr = $df ? Carbon::parse($df)->format('d.m.Y') : '';
+                if ($dt) {
+                    $dateStr .= ($dateStr ? ' – ' : '') . Carbon::parse($dt)->format('d.m.Y');
+                }
+            }
+            $line = $campTitle ?: __('emails.offer_sendout_offer');
+            if ($dateStr) {
+                $line .= ' · ' . $dateStr;
+            }
+            if (! empty($r['price'])) {
+                $line .= ' · ' . $r['price'];
+            }
+            $parts[] = $line;
+        }
+        return implode(' | ', $parts);
+    }
+
+    /**
+     * Get custom camp offer details (AJAX).
+     */
+    public function getCustomCampOffer(CustomCampOffer $customCampOffer)
+    {
+        $customCampOffer->load(['customer', 'creator']);
+
+        $resolvedOffers = [];
+        foreach ($customCampOffer->resolvedOffers as $ro) {
+            $resolvedOffers[] = [
+                'camp' => $ro['camp'] ? ['id' => $ro['camp']->id, 'title' => $ro['camp']->title] : null,
+                'accommodations' => $ro['accommodations']->map(fn ($a) => ['id' => $a->id, 'title' => $a->title])->values()->all(),
+                'boats' => $ro['boats']->map(fn ($b) => ['id' => $b->id, 'title' => $b->title])->values()->all(),
+                'guidings' => $ro['guidings']->map(fn ($g) => ['id' => $g->id, 'title' => $g->title])->values()->all(),
+                'date_from' => $ro['date_from'] ? Carbon::parse($ro['date_from'])->format('d.m.Y') : null,
+                'date_to' => $ro['date_to'] ? Carbon::parse($ro['date_to'])->format('d.m.Y') : null,
+                'number_of_persons' => $ro['number_of_persons'],
+                'price' => $ro['price'],
+                'additional_info' => $ro['additional_info'],
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'offer' => [
+                'id' => $customCampOffer->id,
+                'name' => $customCampOffer->name,
+                'recipient_type' => $customCampOffer->recipient_type,
+                'recipient_name' => $customCampOffer->recipient_name,
+                'recipient_email' => $customCampOffer->recipient_email,
+                'recipient_phone' => $customCampOffer->recipient_phone,
+                'camp' => $customCampOffer->camp ? ['id' => $customCampOffer->camp->id, 'title' => $customCampOffer->camp->title] : null,
+                'date_from' => $customCampOffer->date_from ? Carbon::parse($customCampOffer->date_from)->format('d.m.Y') : null,
+                'date_to' => $customCampOffer->date_to ? Carbon::parse($customCampOffer->date_to)->format('d.m.Y') : null,
+                'number_of_persons' => $customCampOffer->number_of_persons,
+                'price' => $customCampOffer->price,
+                'additional_info' => $customCampOffer->additional_info,
+                'free_text' => $customCampOffer->free_text,
+                'resolved_offers' => $resolvedOffers,
+                'offers' => $customCampOffer->offers,
+                'status' => $customCampOffer->status ?? 'sent',
+                'sent_at' => $customCampOffer->sent_at ? $customCampOffer->sent_at->format('d.m.Y H:i') : null,
+                'created_by' => $customCampOffer->creator ? $customCampOffer->creator->firstname . ' ' . $customCampOffer->creator->lastname : null,
+            ],
         ]);
     }
 
@@ -98,6 +264,18 @@ class OfferSendoutController extends Controller
             'offers.*.number_of_persons' => ['nullable', 'string', 'max:50'],
             'offers.*.price' => ['nullable', 'string', 'max:100'],
             'offers.*.additional_info' => ['nullable', 'string'],
+            'offers.*.accommodation_prices' => ['nullable', 'array'],
+            'offers.*.accommodation_prices.*.id' => ['nullable'],
+            'offers.*.accommodation_prices.*.title' => ['nullable', 'string'],
+            'offers.*.accommodation_prices.*.price' => ['nullable', 'numeric'],
+            'offers.*.boat_prices' => ['nullable', 'array'],
+            'offers.*.boat_prices.*.id' => ['nullable'],
+            'offers.*.boat_prices.*.title' => ['nullable', 'string'],
+            'offers.*.boat_prices.*.price' => ['nullable', 'numeric'],
+            'offers.*.guiding_prices' => ['nullable', 'array'],
+            'offers.*.guiding_prices.*.id' => ['nullable'],
+            'offers.*.guiding_prices.*.title' => ['nullable', 'string'],
+            'offers.*.guiding_prices.*.price' => ['nullable', 'numeric'],
         ];
         $validated = $request->validate($rules);
 
@@ -156,6 +334,9 @@ class OfferSendoutController extends Controller
             ]),
         ]);
 
+        // Save the offer as a custom camp offer
+        $this->saveCustomCampOffer($validated, $recipientEmail, $recipientName, $locale);
+
         return response()->json([
             'success' => true,
             'message' => 'Offer email sent successfully to ' . $recipientEmail . ' (CC: ' . $adminEmail . ').',
@@ -179,6 +360,9 @@ class OfferSendoutController extends Controller
                 'accommodation_ids' => $validated['accommodation_ids'] ?? '',
                 'boat_ids' => $validated['boat_ids'] ?? '',
                 'guiding_ids' => $validated['guiding_ids'] ?? '',
+                'accommodation_prices' => $validated['accommodation_prices'] ?? [],
+                'boat_prices' => $validated['boat_prices'] ?? [],
+                'guiding_prices' => $validated['guiding_prices'] ?? [],
                 'date_from' => $validated['date_from'] ?? '',
                 'date_to' => $validated['date_to'] ?? '',
                 'number_of_persons' => $validated['number_of_persons'] ?? '',
@@ -196,6 +380,7 @@ class OfferSendoutController extends Controller
 
     /**
      * Build one offer block for the catalog (camp highlight + details, no item images).
+     * Merges component prices (accommodation_prices, boat_prices, guiding_prices) with loaded models.
      */
     private function buildSingleOfferData(array $input): array
     {
@@ -204,9 +389,30 @@ class OfferSendoutController extends Controller
         $boatIds = $this->parseIds($input['boat_ids'] ?? '');
         $guidingIds = $this->parseIds($input['guiding_ids'] ?? '');
 
-        $accommodations = $accommodationIds ? Accommodation::whereIn('id', $accommodationIds)->orderBy('title')->get() : collect();
-        $boats = $boatIds ? RentalBoat::whereIn('id', $boatIds)->orderBy('title')->get() : collect();
+        $accommodations = $accommodationIds ? Accommodation::with('accommodationType')->whereIn('id', $accommodationIds)->orderBy('title')->get() : collect();
+        $boats = $boatIds ? RentalBoat::with('boatType')->whereIn('id', $boatIds)->orderBy('title')->get() : collect();
         $guidings = $guidingIds ? Guiding::whereIn('id', $guidingIds)->orderBy('title')->get() : collect();
+
+        $accPrices = collect($input['accommodation_prices'] ?? [])->keyBy(fn ($p) => (string) ($p['id'] ?? ''));
+        $boatPrices = collect($input['boat_prices'] ?? [])->keyBy(fn ($p) => (string) ($p['id'] ?? ''));
+        $guidingPrices = collect($input['guiding_prices'] ?? [])->keyBy(fn ($p) => (string) ($p['id'] ?? ''));
+
+        $accommodation_items = $accommodations->map(function ($acc) use ($accPrices) {
+            $p = $accPrices->get((string) $acc->id);
+            return ['model' => $acc, 'price' => $p ? (float) ($p['price'] ?? 0) : 0, 'title' => $p['title'] ?? $acc->title];
+        })->values()->all();
+        $boat_items = $boats->map(function ($boat) use ($boatPrices) {
+            $p = $boatPrices->get((string) $boat->id);
+            return ['model' => $boat, 'price' => $p ? (float) ($p['price'] ?? 0) : 0, 'title' => $p['title'] ?? $boat->title];
+        })->values()->all();
+        $guiding_items = $guidings->map(function ($g) use ($guidingPrices) {
+            $p = $guidingPrices->get((string) $g->id);
+            return ['model' => $g, 'price' => $p ? (float) ($p['price'] ?? 0) : 0, 'title' => $p['title'] ?? $g->title];
+        })->values()->all();
+
+        $componentTotal = collect($accommodation_items)->pluck('price')->sum()
+            + collect($boat_items)->pluck('price')->sum()
+            + collect($guiding_items)->pluck('price')->sum();
 
         $dateFrom = $input['date_from'] ?? '';
         $dateTo = $input['date_to'] ?? '';
@@ -226,6 +432,10 @@ class OfferSendoutController extends Controller
             'accommodations' => $accommodations,
             'boats' => $boats,
             'guidings' => $guidings,
+            'accommodation_items' => $accommodation_items,
+            'boat_items' => $boat_items,
+            'guiding_items' => $guiding_items,
+            'component_total' => $componentTotal,
             'date_from' => $dateFrom,
             'date_to' => $dateTo,
             'date_from_formatted' => $this->formatDateForEmail($dateFrom),
@@ -236,12 +446,13 @@ class OfferSendoutController extends Controller
         ];
     }
 
-    private function parseIds(?string $value): array
+    private function parseIds(mixed $value): array
     {
-        if (empty($value)) {
+        if ($value === null || $value === '') {
             return [];
         }
-        $ids = is_string($value) ? array_map('intval', array_filter(explode(',', $value))) : (array) $value;
+        $ids = is_array($value) ? $value : (is_string($value) ? explode(',', $value) : []);
+        $ids = array_map('intval', array_filter($ids));
         return array_values(array_filter($ids));
     }
 
@@ -288,6 +499,9 @@ class OfferSendoutController extends Controller
                 'accommodation_ids' => $input['accommodation_ids'] ?? '',
                 'boat_ids' => $input['boat_ids'] ?? '',
                 'guiding_ids' => $input['guiding_ids'] ?? '',
+                'accommodation_prices' => $input['accommodation_prices'] ?? [],
+                'boat_prices' => $input['boat_prices'] ?? [],
+                'guiding_prices' => $input['guiding_prices'] ?? [],
                 'date_from' => $input['date_from'] ?? '',
                 'date_to' => $input['date_to'] ?? '',
                 'number_of_persons' => $input['number_of_persons'] ?? '',
@@ -367,5 +581,111 @@ class OfferSendoutController extends Controller
             }
         }
         return array_merge($connected, $others);
+    }
+
+    /**
+     * Save the offer as a custom camp offer for future retrieval.
+     */
+    private function saveCustomCampOffer(array $validated, string $recipientEmail, ?string $recipientName, string $locale): void
+    {
+        $offersInput = $validated['offers'] ?? null;
+        $hasMultipleOffers = is_array($offersInput) && count($offersInput) > 0;
+
+        // Prepare offers array and determine top-level values
+        $offersArray = null;
+        $campIds = [];
+        $accommodationIds = $this->parseIds($validated['accommodation_ids'] ?? '');
+        $boatIds = $this->parseIds($validated['boat_ids'] ?? '');
+        $guidingIds = $this->parseIds($validated['guiding_ids'] ?? '');
+        $dateFrom = $validated['date_from'] ?? null;
+        $dateTo = $validated['date_to'] ?? null;
+        $numberOfPersons = $validated['number_of_persons'] ?? null;
+        $price = $validated['price'] ?? null;
+        $additionalInfo = $validated['additional_info'] ?? null;
+
+        if ($hasMultipleOffers) {
+            $offersArray = [];
+            foreach ($offersInput as $index => $offer) {
+                $campId = !empty($offer['camp_id']) ? (int) $offer['camp_id'] : null;
+                if ($campId) {
+                    $campIds[] = $campId;
+                }
+                $accIds = $this->parseIds($offer['accommodation_ids'] ?? '');
+                $bIds = $this->parseIds($offer['boat_ids'] ?? '');
+                $gIds = $this->parseIds($offer['guiding_ids'] ?? '');
+                $offersArray[] = [
+                    'camp_id' => $campId,
+                    'accommodation_ids' => $accIds,
+                    'boat_ids' => $bIds,
+                    'guiding_ids' => $gIds,
+                    'accommodation_prices' => $offer['accommodation_prices'] ?? [],
+                    'boat_prices' => $offer['boat_prices'] ?? [],
+                    'guiding_prices' => $offer['guiding_prices'] ?? [],
+                    'date_from' => $offer['date_from'] ?? '',
+                    'date_to' => $offer['date_to'] ?? '',
+                    'number_of_persons' => $offer['number_of_persons'] ?? '',
+                    'price' => $offer['price'] ?? '',
+                    'additional_info' => $offer['additional_info'] ?? '',
+                ];
+                // Use first offer for top-level columns
+                if ($index === 0) {
+                    $accommodationIds = $accIds;
+                    $boatIds = $bIds;
+                    $guidingIds = $gIds;
+                    $dateFrom = $offer['date_from'] ?? null;
+                    $dateTo = $offer['date_to'] ?? null;
+                    $numberOfPersons = $offer['number_of_persons'] ?? null;
+                    $price = $offer['price'] ?? null;
+                    $additionalInfo = $offer['additional_info'] ?? null;
+                }
+            }
+        } else {
+            $campId = $validated['camp_id'] ?? null;
+            if ($campId) {
+                $campIds = [(int) $campId];
+            }
+            // Build single-offer array for consistency
+            $offersArray = [[
+                'camp_id' => $campId ? (int) $campId : null,
+                'accommodation_ids' => $accommodationIds,
+                'boat_ids' => $boatIds,
+                'guiding_ids' => $guidingIds,
+                'accommodation_prices' => $validated['accommodation_prices'] ?? [],
+                'boat_prices' => $validated['boat_prices'] ?? [],
+                'guiding_prices' => $validated['guiding_prices'] ?? [],
+                'date_from' => $dateFrom ?? '',
+                'date_to' => $dateTo ?? '',
+                'number_of_persons' => $numberOfPersons ?? '',
+                'price' => $price ?? '',
+                'additional_info' => $additionalInfo ?? '',
+            ]];
+        }
+
+        $customerName = trim($recipientName ?? $recipientEmail ?? 'Unknown');
+        $name = $customerName . ' - ' . now()->format('Y-m-d');
+
+        CustomCampOffer::create([
+            'name' => $name,
+            'status' => CustomCampOffer::STATUS_SENT,
+            'recipient_type' => $validated['recipient_type'],
+            'customer_id' => $validated['recipient_type'] === 'customer' ? ($validated['customer_id'] ?? null) : null,
+            'recipient_email' => $recipientEmail,
+            'recipient_name' => $recipientName,
+            'recipient_phone' => $validated['manual_phone'] ?? null,
+            'camp_ids' => array_values(array_unique($campIds)),
+            'accommodation_ids' => $accommodationIds,
+            'boat_ids' => $boatIds,
+            'guiding_ids' => $guidingIds,
+            'date_from' => $dateFrom,
+            'date_to' => $dateTo,
+            'number_of_persons' => $numberOfPersons,
+            'price' => $price,
+            'additional_info' => $additionalInfo,
+            'free_text' => $validated['free_text'] ?? null,
+            'offers' => $offersArray,
+            'locale' => $locale,
+            'created_by' => auth()->id(),
+            'sent_at' => now(),
+        ]);
     }
 }
