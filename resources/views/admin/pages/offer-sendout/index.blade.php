@@ -117,9 +117,6 @@
                                                 <div class="col-6">
                                                     <input type="text" name="offers[0][number_of_persons]" id="offer_0_number_of_persons" class="form-control form-control-sm" placeholder="No. of persons">
                                                 </div>
-                                                <div class="col-6">
-                                                    <input type="text" name="offers[0][price]" id="offer_0_price" class="form-control form-control-sm" placeholder="Price (e.g. 1,500 €)">
-                                                </div>
                                             </div>
                                             <textarea name="offers[0][additional_info]" id="offer_0_additional_info" class="form-control form-control-sm mt-2" rows="2" placeholder="Additional information"></textarea>
                                         </div>
@@ -261,6 +258,12 @@
     const campOptionsUrl = '{{ route("admin.offer-sendout.camp-options", ["camp" => "__CAMP__"]) }}';
     const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || form?.querySelector('input[name="_token"]')?.value;
 
+    const componentData = {
+        accommodations: @json($accommodationsData ?? []),
+        boats: @json($boatsData ?? []),
+        guidings: @json($guidingsData ?? [])
+    };
+
     const fullOptions = {
         accommodations: @json($accommodations->map(fn($a) => ['id' => $a->id, 'value' => $a->title, 'connected' => false])),
         boats: @json($boats->map(fn($b) => ['id' => $b->id, 'value' => $b->title, 'connected' => false])),
@@ -283,20 +286,89 @@
         container.innerHTML = '';
         const tags = tagify && tagify.value ? tagify.value : [];
         const list = type === 'accommodation' ? fullOptions.accommodations : (type === 'boat' ? fullOptions.boats : fullOptions.guidings);
+        const dataList = type === 'accommodation' ? componentData.accommodations : (type === 'boat' ? componentData.boats : componentData.guidings);
         tags.forEach(function (tag) {
             const id = tag.id || (tag.value && String(tag.value).match(/^#?\d+/) ? String(tag.value).replace(/^#?(\d+).*/, '$1') : null) || tag.value;
             const title = tag.value || (list && list.find(function (i) { return String(i.id) === String(id); }))?.value || 'Item ' + id;
             const displayTitle = typeof title === 'string' ? title.replace(/^\(\d+\)\s*\|\s*/, '').trim() : (title || '');
+            
+            // Get component data (price and capacity) - check whitelist first, then componentData
+            let componentInfo = null;
+            let defaultPrice = 0;
+            let capacity = 0;
+            
+            // Check whitelist first (for camp-filtered items)
+            if (tagify && tagify.settings && tagify.settings.whitelist) {
+                const whitelistItem = tagify.settings.whitelist.find(function (i) { return String(i.id) === String(id); });
+                if (whitelistItem) {
+                    defaultPrice = whitelistItem.price || 0;
+                    capacity = whitelistItem.capacity || 0;
+                    componentInfo = whitelistItem;
+                }
+            }
+            
+            // Fallback to componentData
+            if (!componentInfo) {
+                componentInfo = dataList.find(function (item) { return String(item.id) === String(id); });
+                if (componentInfo) {
+                    defaultPrice = componentInfo.price || 0;
+                    capacity = componentInfo.capacity || 0;
+                }
+            }
+            
             const row = document.createElement('div');
             row.className = 'input-group input-group-sm mb-1 component-price-row';
             row.setAttribute('data-component-id', id);
             row.setAttribute('data-title', displayTitle || '');
-            row.innerHTML = '<label class="input-group-text flex-grow-0 text-truncate" style="max-width: 140px;" title="' + (displayTitle || '').replace(/"/g, '&quot;') + '">' + (displayTitle || 'Price') + '</label><span class="input-group-text">€</span><input type="number" class="form-control form-control-sm component-price-input" data-id="' + id + '" data-type="' + type + '" data-title="' + (displayTitle || '').replace(/"/g, '&quot;') + '" step="0.01" min="0" placeholder="0.00" value="">';
+            row.setAttribute('data-capacity', capacity);
+            row.innerHTML = ''
+                + '<label class="input-group-text flex-grow-0 text-truncate" style="max-width: 140px;"'
+                + ' title="' + (displayTitle || '').replace(/"/g, '&quot;') + '">'
+                + (displayTitle || 'Price')
+                + '</label>'
+                + '<span class="input-group-text">€</span>'
+                + '<input type="number" class="form-control form-control-sm component-price-input"'
+                + ' data-id="' + id + '" data-type="' + type + '"'
+                + ' data-title="' + (displayTitle || '').replace(/"/g, '&quot;') + '"'
+                + ' step="0.01" min="0" placeholder="0.00" value="' + defaultPrice + '">'
+                + '<span class="input-group-text">Qty</span>'
+                + '<input type="number" class="form-control form-control-sm component-qty-input"'
+                + ' data-id="' + id + '" data-type="' + type + '"'
+                + ' data-capacity="' + capacity + '"'
+                + ' step="1" min="1" placeholder="1" value="1">'
+                + '<span class="input-group-text">Days</span>'
+                + '<input type="number" class="form-control form-control-sm component-days-input"'
+                + ' data-id="' + id + '" data-type="' + type + '"'
+                + ' step="1" min="1" placeholder="1" value="1">';
             container.appendChild(row);
         });
-        container.querySelectorAll('.component-price-input').forEach(function (el) {
+        container.querySelectorAll('.component-price-input, .component-qty-input, .component-days-input').forEach(function (el) {
             el.addEventListener('input', updatePreview);
             el.addEventListener('change', updatePreview);
+        });
+        
+        // Auto-calculate quantities based on number of persons if set
+        autoCalculateQuantities(blockIndex);
+    }
+    
+    function autoCalculateQuantities(blockIndex) {
+        const block = document.querySelector('.offer-block[data-offer-index="' + blockIndex + '"]');
+        if (!block) return;
+        
+        const personsInput = block.querySelector('input[name*="[number_of_persons]"]');
+        if (!personsInput) return;
+        
+        const numberOfPersons = parseInt(personsInput.value) || 0;
+        if (numberOfPersons <= 0) return;
+        
+        // Update quantities for all components in this block
+        block.querySelectorAll('.component-qty-input').forEach(function (qtyInput) {
+            const capacity = parseInt(qtyInput.getAttribute('data-capacity')) || 0;
+            if (capacity > 0) {
+                // Calculate required quantity: ceil(numberOfPersons / capacity)
+                const requiredQty = Math.ceil(numberOfPersons / capacity);
+                qtyInput.value = requiredQty;
+            }
         });
     }
 
@@ -337,21 +409,34 @@
             var accPrices = [];
             var boatPrices = [];
             var guidingPrices = [];
-            block.querySelectorAll('#offer_' + idx + '_accommodation_prices .component-price-input').forEach(function (el) {
-                var title = el.dataset.title || el.closest('.component-price-row')?.getAttribute('data-title') || '';
-                var price = parseFloat(el.value) || 0;
-                if (el.dataset.id) accPrices.push({ id: el.dataset.id, title: title, price: price });
-            });
-            block.querySelectorAll('#offer_' + idx + '_boat_prices .component-price-input').forEach(function (el) {
-                var title = el.dataset.title || el.closest('.component-price-row')?.getAttribute('data-title') || '';
-                var price = parseFloat(el.value) || 0;
-                if (el.dataset.id) boatPrices.push({ id: el.dataset.id, title: title, price: price });
-            });
-            block.querySelectorAll('#offer_' + idx + '_guiding_prices .component-price-input').forEach(function (el) {
-                var title = el.dataset.title || el.closest('.component-price-row')?.getAttribute('data-title') || '';
-                var price = parseFloat(el.value) || 0;
-                if (el.dataset.id) guidingPrices.push({ id: el.dataset.id, title: title, price: price });
-            });
+
+            function collectComponentPrices(containerId, targetArray) {
+                var rows = block.querySelectorAll('#offer_' + idx + '_' + containerId + ' .component-price-row');
+                rows.forEach(function (row) {
+                    var priceEl = row.querySelector('.component-price-input');
+                    var qtyEl = row.querySelector('.component-qty-input');
+                    var daysEl = row.querySelector('.component-days-input');
+                    if (!priceEl) return;
+                    var title = priceEl.dataset.title || row.getAttribute('data-title') || '';
+                    var id = priceEl.dataset.id || row.getAttribute('data-component-id') || '';
+                    var price = parseFloat(priceEl.value) || 0;
+                    var qty = parseFloat(qtyEl && qtyEl.value ? qtyEl.value : 1) || 1;
+                    var days = parseFloat(daysEl && daysEl.value ? daysEl.value : 1) || 1;
+                    if (id) {
+                        targetArray.push({
+                            id: id,
+                            title: title,
+                            price: price,
+                            qty: qty,
+                            days: days
+                        });
+                    }
+                });
+            }
+
+            collectComponentPrices('accommodation_prices', accPrices);
+            collectComponentPrices('boat_prices', boatPrices);
+            collectComponentPrices('guiding_prices', guidingPrices);
             obj.offers.push({
                 camp_id: (campEl && campEl.value) ? campEl.value : null,
                 accommodation_ids: accEl ? accEl.value : '',
@@ -452,10 +537,33 @@
     function setTagifyWhitelist(tagify, items) {
         if (!tagify) return;
         var list = (items || []).map(function (i) {
-            return { id: i.id, value: i.value, connected: i.connected === true };
+            return { id: i.id, value: i.value, connected: i.connected === true, price: i.price || 0, capacity: i.capacity || 0 };
         });
         tagify.settings.whitelist = list;
         if (typeof tagify.removeAllTags === 'function') tagify.removeAllTags();
+    }
+    
+    function updateComponentDataFromWhitelist(blockIndex, type, tagify) {
+        if (!tagify || !tagify.settings || !tagify.settings.whitelist) return;
+        
+        const dataList = type === 'accommodation' ? componentData.accommodations : (type === 'boat' ? componentData.boats : componentData.guidings);
+        const whitelist = tagify.settings.whitelist;
+        
+        // Update componentData with whitelist data (for camp-filtered items)
+        whitelist.forEach(function (item) {
+            const existing = dataList.find(function (d) { return String(d.id) === String(item.id); });
+            if (!existing && item.id) {
+                dataList.push({
+                    id: item.id,
+                    title: item.value,
+                    price: item.price || 0,
+                    capacity: item.capacity || 0
+                });
+            } else if (existing && item.price !== undefined) {
+                existing.price = item.price || 0;
+                existing.capacity = item.capacity || 0;
+            }
+        });
     }
 
     function initBlockTagify(blockIndex) {
@@ -534,6 +642,9 @@
                     setTagifyWhitelist(t.acc, data.accommodations || []);
                     setTagifyWhitelist(t.boat, data.boats || []);
                     setTagifyWhitelist(t.guiding, data.guidings || []);
+                    updateComponentDataFromWhitelist(blockIndex, 'accommodation', t.acc);
+                    updateComponentDataFromWhitelist(blockIndex, 'boat', t.boat);
+                    updateComponentDataFromWhitelist(blockIndex, 'guiding', t.guiding);
                     updatePreview();
                 })
                 .catch(function () {
@@ -550,6 +661,22 @@
         wireCampChange(0);
     }
     wireDateFromTo(0);
+    
+    // Wire up number_of_persons for initial offer block
+    (function() {
+        const initialBlock = document.querySelector('.offer-block[data-offer-index="0"]');
+        if (initialBlock) {
+            const personsInput = initialBlock.querySelector('input[name*="[number_of_persons]"]');
+            if (personsInput) {
+                personsInput.addEventListener('input', function() {
+                    autoCalculateQuantities(0);
+                });
+                personsInput.addEventListener('change', function() {
+                    autoCalculateQuantities(0);
+                });
+            }
+        }
+    })();
 
     document.getElementById('add-offer-btn').addEventListener('click', function () {
         var template = document.getElementById('offer-block-template');
@@ -566,6 +693,16 @@
         clone.querySelectorAll('input, select, textarea').forEach(function (el) {
             el.addEventListener('input', updatePreview);
             el.addEventListener('change', updatePreview);
+            
+            // Add auto-calculation for number_of_persons
+            if (el.name && el.name.indexOf('[number_of_persons]') !== -1) {
+                el.addEventListener('input', function() {
+                    autoCalculateQuantities(index);
+                });
+                el.addEventListener('change', function() {
+                    autoCalculateQuantities(index);
+                });
+            }
         });
         clone.querySelector('.btn-remove-offer').addEventListener('click', function () {
             var block = this.closest('.offer-block');
@@ -587,6 +724,24 @@
             if (el.name && (el.name.indexOf('offers[') === 0 || el.name === 'recipient_type' || el.name === 'customer_id' || el.name === 'manual_name' || el.name === 'manual_email' || el.name === 'manual_phone' || el.name === 'locale' || el.name === 'free_text')) {
                 el.addEventListener('input', updatePreview);
                 el.addEventListener('change', updatePreview);
+                
+                // Add auto-calculation for number_of_persons
+                if (el.name && el.name.indexOf('[number_of_persons]') !== -1) {
+                    el.addEventListener('input', function() {
+                        const block = el.closest('.offer-block');
+                        if (block) {
+                            const blockIndex = block.getAttribute('data-offer-index');
+                            autoCalculateQuantities(blockIndex);
+                        }
+                    });
+                    el.addEventListener('change', function() {
+                        const block = el.closest('.offer-block');
+                        if (block) {
+                            const blockIndex = block.getAttribute('data-offer-index');
+                            autoCalculateQuantities(blockIndex);
+                        }
+                    });
+                }
             }
         });
 

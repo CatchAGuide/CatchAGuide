@@ -41,8 +41,21 @@ class WelcomeController extends Controller
         $latitude = $request->input('latitude');
         $longitude = $request->input('longitude');
 
+        // Validate that latitude and longitude are numeric and valid
+        if (!is_numeric($latitude) || !is_numeric($longitude)) {
+            return response()->json([]);
+        }
+
+        // Ensure values are within valid range
+        $latitude = (float) $latitude;
+        $longitude = (float) $longitude;
+        
+        if ($latitude < -90 || $latitude > 90 || $longitude < -180 || $longitude > 180) {
+            return response()->json([]);
+        }
+
         $nearestlistings = Guiding::select(['guidings.*'])
-            ->selectRaw("(6371 * acos(cos(radians($latitude)) * cos(radians(lat)) * cos(radians(lng) - radians($longitude)) + sin(radians($latitude)) * sin(radians(lat)))) AS distance")
+            ->selectRaw("(6371 * acos(cos(radians(?)) * cos(radians(lat)) * cos(radians(lng) - radians(?)) + sin(radians(?)) * sin(radians(lat)))) AS distance", [$latitude, $longitude, $latitude])
             ->orderBy('distance')
             ->limit(4)
             ->where('status',1)

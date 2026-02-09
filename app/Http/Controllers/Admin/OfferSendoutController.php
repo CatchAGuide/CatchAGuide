@@ -35,15 +35,43 @@ class OfferSendoutController extends Controller
 
         $accommodations = Accommodation::where('status', 'active')
             ->orderBy('title')
-            ->get(['id', 'title', 'slug']);
+            ->get(['id', 'title', 'slug', 'per_person_pricing', 'max_occupancy']);
 
         $boats = RentalBoat::where('status', 'active')
             ->orderBy('title')
-            ->get(['id', 'title', 'slug']);
+            ->get(['id', 'title', 'slug', 'prices', 'max_persons']);
 
         $guidings = Guiding::where('status', 1)
             ->orderBy('title')
-            ->get(['id', 'title', 'slug']);
+            ->get(['id', 'title', 'slug', 'price', 'prices', 'price_type', 'max_guests']);
+
+        // Prepare component data with prices and capacities for JavaScript
+        $accommodationsData = $accommodations->map(function ($acc) {
+            return [
+                'id' => $acc->id,
+                'title' => $acc->title,
+                'price' => $this->getAccommodationBasePrice($acc),
+                'capacity' => $acc->max_occupancy ?? 0,
+            ];
+        });
+
+        $boatsData = $boats->map(function ($boat) {
+            return [
+                'id' => $boat->id,
+                'title' => $boat->title,
+                'price' => $this->getRentalBoatBasePrice($boat),
+                'capacity' => $boat->max_persons ?? 0,
+            ];
+        });
+
+        $guidingsData = $guidings->map(function ($guiding) {
+            return [
+                'id' => $guiding->id,
+                'title' => $guiding->title,
+                'price' => $this->getGuidingBasePrice($guiding),
+                'capacity' => $guiding->max_guests ?? 0,
+            ];
+        });
 
         return view('admin.pages.offer-sendout.index', [
             'customers' => $customers,
@@ -51,6 +79,9 @@ class OfferSendoutController extends Controller
             'accommodations' => $accommodations,
             'boats' => $boats,
             'guidings' => $guidings,
+            'accommodationsData' => $accommodationsData,
+            'boatsData' => $boatsData,
+            'guidingsData' => $guidingsData,
         ]);
     }
 
@@ -268,14 +299,20 @@ class OfferSendoutController extends Controller
             'offers.*.accommodation_prices.*.id' => ['nullable'],
             'offers.*.accommodation_prices.*.title' => ['nullable', 'string'],
             'offers.*.accommodation_prices.*.price' => ['nullable', 'numeric'],
+            'offers.*.accommodation_prices.*.qty' => ['nullable', 'numeric'],
+            'offers.*.accommodation_prices.*.days' => ['nullable', 'numeric'],
             'offers.*.boat_prices' => ['nullable', 'array'],
             'offers.*.boat_prices.*.id' => ['nullable'],
             'offers.*.boat_prices.*.title' => ['nullable', 'string'],
             'offers.*.boat_prices.*.price' => ['nullable', 'numeric'],
+            'offers.*.boat_prices.*.qty' => ['nullable', 'numeric'],
+            'offers.*.boat_prices.*.days' => ['nullable', 'numeric'],
             'offers.*.guiding_prices' => ['nullable', 'array'],
             'offers.*.guiding_prices.*.id' => ['nullable'],
             'offers.*.guiding_prices.*.title' => ['nullable', 'string'],
             'offers.*.guiding_prices.*.price' => ['nullable', 'numeric'],
+            'offers.*.guiding_prices.*.qty' => ['nullable', 'numeric'],
+            'offers.*.guiding_prices.*.days' => ['nullable', 'numeric'],
         ];
         $validated = $request->validate($rules);
 
@@ -399,20 +436,59 @@ class OfferSendoutController extends Controller
 
         $accommodation_items = $accommodations->map(function ($acc) use ($accPrices) {
             $p = $accPrices->get((string) $acc->id);
-            return ['model' => $acc, 'price' => $p ? (float) ($p['price'] ?? 0) : 0, 'title' => $p['title'] ?? $acc->title];
+            $unitPrice = $p ? (float) ($p['price'] ?? 0) : 0;
+            $qty = $p && isset($p['qty']) ? (float) $p['qty'] : 1;
+            $days = $p && isset($p['days']) ? (float) $p['days'] : 1;
+            $qty = $qty > 0 ? $qty : 1;
+            $days = $days > 0 ? $days : 1;
+            $total = $unitPrice * $qty * $days;
+            return [
+                'model' => $acc,
+                'price' => $unitPrice,
+                'qty' => $qty,
+                'days' => $days,
+                'total' => $total,
+                'title' => $p['title'] ?? $acc->title,
+            ];
         })->values()->all();
         $boat_items = $boats->map(function ($boat) use ($boatPrices) {
             $p = $boatPrices->get((string) $boat->id);
-            return ['model' => $boat, 'price' => $p ? (float) ($p['price'] ?? 0) : 0, 'title' => $p['title'] ?? $boat->title];
+            $unitPrice = $p ? (float) ($p['price'] ?? 0) : 0;
+            $qty = $p && isset($p['qty']) ? (float) $p['qty'] : 1;
+            $days = $p && isset($p['days']) ? (float) $p['days'] : 1;
+            $qty = $qty > 0 ? $qty : 1;
+            $days = $days > 0 ? $days : 1;
+            $total = $unitPrice * $qty * $days;
+            return [
+                'model' => $boat,
+                'price' => $unitPrice,
+                'qty' => $qty,
+                'days' => $days,
+                'total' => $total,
+                'title' => $p['title'] ?? $boat->title,
+            ];
         })->values()->all();
         $guiding_items = $guidings->map(function ($g) use ($guidingPrices) {
             $p = $guidingPrices->get((string) $g->id);
-            return ['model' => $g, 'price' => $p ? (float) ($p['price'] ?? 0) : 0, 'title' => $p['title'] ?? $g->title];
+            $unitPrice = $p ? (float) ($p['price'] ?? 0) : 0;
+            $qty = $p && isset($p['qty']) ? (float) $p['qty'] : 1;
+            $days = $p && isset($p['days']) ? (float) $p['days'] : 1;
+            $qty = $qty > 0 ? $qty : 1;
+            $days = $days > 0 ? $days : 1;
+            $total = $unitPrice * $qty * $days;
+            return [
+                'model' => $g,
+                'price' => $unitPrice,
+                'qty' => $qty,
+                'days' => $days,
+                'total' => $total,
+                'title' => $p['title'] ?? $g->title,
+            ];
         })->values()->all();
 
-        $componentTotal = collect($accommodation_items)->pluck('price')->sum()
-            + collect($boat_items)->pluck('price')->sum()
-            + collect($guiding_items)->pluck('price')->sum();
+        $componentTotal = collect($accommodation_items)->pluck('total')->sum()
+            + collect($boat_items)->pluck('total')->sum()
+            + collect($guiding_items)->pluck('total')->sum();
 
         $dateFrom = $input['date_from'] ?? '';
         $dateTo = $input['date_to'] ?? '';
@@ -518,6 +594,107 @@ class OfferSendoutController extends Controller
     }
 
     /**
+     * Get base price from accommodation per_person_pricing.
+     */
+    private function getAccommodationBasePrice(Accommodation $accommodation): float
+    {
+        $perPersonPricing = $accommodation->per_person_pricing;
+        
+        if (is_string($perPersonPricing)) {
+            $perPersonPricing = json_decode($perPersonPricing, true);
+        }
+        
+        if (is_array($perPersonPricing) && !empty($perPersonPricing)) {
+            $prices = [];
+            foreach ($perPersonPricing as $tier) {
+                if (!is_array($tier)) {
+                    continue;
+                }
+                if (isset($tier['price_per_night']) && $tier['price_per_night'] > 0) {
+                    $prices[] = (float) $tier['price_per_night'];
+                }
+                if (isset($tier['price_per_week']) && $tier['price_per_week'] > 0) {
+                    $prices[] = (float) $tier['price_per_week'];
+                }
+            }
+            if (!empty($prices)) {
+                return min($prices);
+            }
+        }
+        
+        return 0;
+    }
+
+    /**
+     * Get base price from rental boat prices.
+     */
+    private function getRentalBoatBasePrice(RentalBoat $boat): float
+    {
+        $prices = $boat->prices;
+        
+        if (is_string($prices)) {
+            $prices = json_decode($prices, true);
+        }
+        
+        if (is_array($prices) && !empty($prices)) {
+            $priceValues = [];
+            // Handle indexed array format [0 => ['amount' => ...]]
+            if (isset($prices[0]) && is_array($prices[0])) {
+                foreach ($prices as $price) {
+                    if (isset($price['amount']) && $price['amount'] > 0) {
+                        $priceValues[] = (float) $price['amount'];
+                    }
+                }
+            } 
+            // Handle associative array format ['per_day' => amount, ...]
+            else {
+                foreach ($prices as $key => $value) {
+                    if (is_array($value) && isset($value['amount'])) {
+                        if ($value['amount'] > 0) {
+                            $priceValues[] = (float) $value['amount'];
+                        }
+                    } elseif (is_numeric($value) && $value > 0) {
+                        $priceValues[] = (float) $value;
+                    }
+                }
+            }
+            if (!empty($priceValues)) {
+                return min($priceValues);
+            }
+        }
+        
+        return 0;
+    }
+
+    /**
+     * Get base price from guiding.
+     */
+    private function getGuidingBasePrice(Guiding $guiding): float
+    {
+        // If price_type is per_person, get lowest price from prices array
+        if ($guiding->price_type === 'per_person') {
+            $prices = $guiding->prices;
+            if (is_string($prices)) {
+                $prices = json_decode($prices, true);
+            }
+            if (is_array($prices) && !empty($prices)) {
+                $priceValues = [];
+                foreach ($prices as $price) {
+                    if (isset($price['amount']) && $price['amount'] > 0) {
+                        $priceValues[] = (float) $price['amount'];
+                    }
+                }
+                if (!empty($priceValues)) {
+                    return min($priceValues);
+                }
+            }
+        }
+        
+        // Otherwise use direct price field
+        return (float) ($guiding->price ?? 0);
+    }
+
+    /**
      * Return accommodations, boats, and guidings: camp-connected first (with connected: true), then all others (connected: false), sorted by title.
      */
     public function campOptions(Camp $camp)
@@ -536,18 +713,46 @@ class OfferSendoutController extends Controller
                 ->pluck('guidings.id')
                 ->all();
 
-            $allAcc = Accommodation::where('status', 'active')->orderBy('title')->get(['id', 'title']);
-            $allBoats = RentalBoat::where('status', 'active')->orderBy('title')->get(['id', 'title']);
-            $allGuidings = Guiding::where('status', 1)->orderBy('title')->get(['id', 'title']);
+        $allAcc = Accommodation::where('status', 'active')->orderBy('title')->get(['id', 'title', 'per_person_pricing', 'max_occupancy']);
+        $allBoats = RentalBoat::where('status', 'active')->orderBy('title')->get(['id', 'title', 'prices', 'max_persons']);
+        $allGuidings = Guiding::where('status', 1)->orderBy('title')->get(['id', 'title', 'price', 'prices', 'price_type', 'max_guests']);
 
             $accommodations = $this->mergeConnectedFirst($allAcc, $connectedAccIds, 'title');
             $boats = $this->mergeConnectedFirst($allBoats, $connectedBoatIds, 'title');
             $guidings = $this->mergeConnectedFirst($allGuidings, $connectedGuidingIds, 'title');
 
+            // Add price and capacity data
+            $accommodationsWithData = array_map(function ($item) use ($allAcc) {
+                $acc = $allAcc->firstWhere('id', $item['id']);
+                if ($acc) {
+                    $item['price'] = $this->getAccommodationBasePrice($acc);
+                    $item['capacity'] = $acc->max_occupancy ?? 0;
+                }
+                return $item;
+            }, $accommodations);
+
+            $boatsWithData = array_map(function ($item) use ($allBoats) {
+                $boat = $allBoats->firstWhere('id', $item['id']);
+                if ($boat) {
+                    $item['price'] = $this->getRentalBoatBasePrice($boat);
+                    $item['capacity'] = $boat->max_persons ?? 0;
+                }
+                return $item;
+            }, $boats);
+
+            $guidingsWithData = array_map(function ($item) use ($allGuidings) {
+                $guiding = $allGuidings->firstWhere('id', $item['id']);
+                if ($guiding) {
+                    $item['price'] = $this->getGuidingBasePrice($guiding);
+                    $item['capacity'] = $guiding->max_guests ?? 0;
+                }
+                return $item;
+            }, $guidings);
+
             return response()->json([
-                'accommodations' => $accommodations,
-                'boats' => $boats,
-                'guidings' => $guidings,
+                'accommodations' => $accommodationsWithData,
+                'boats' => $boatsWithData,
+                'guidings' => $guidingsWithData,
             ]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('OfferSendoutController::campOptions failed', [

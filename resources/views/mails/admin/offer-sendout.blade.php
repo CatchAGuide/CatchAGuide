@@ -91,50 +91,78 @@
                                                                 $campUrl = (!empty($offer['camp']) && !empty($offer['camp']->slug)) ? route('vacations.show', $offer['camp']->slug) : route('welcome');
                                                                 $accThumb = !empty($acc->thumbnail_path) ? (strpos($acc->thumbnail_path, 'http') === 0 ? $acc->thumbnail_path : asset(ltrim($acc->thumbnail_path, '/'))) : null;
                                                             @endphp
-                                                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; margin-bottom: 6px;">
-                                                                <tr>
-                                                                    @if($accThumb)
-                                                                    <td style="width: 100px; vertical-align: top; padding: 0; border-radius: 6px 0 0 6px; overflow: hidden;">
-                                                                        <img src="{{ $accThumb }}" alt="{{ $item['title'] ?? $acc->title ?? '' }}" width="100" height="90" style="width: 100px; height: 90px; object-fit: cover; display: block;" />
-                                                                    </td>
-                                                                    @endif
-                                                                    <td style="padding: 8px 10px; vertical-align: top;">
-                                                                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-                                                                            <tr>
-                                                                                <td style="vertical-align: top;">
-                                                                                    <div style="font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 1px;">{{ $item['title'] ?? $acc->title ?? '' }}</div>
-                                                                                    <div style="font-size: 11px; color: #64748b; margin-bottom: 4px;">{{ translate($acc->accommodationType?->name ?? 'Apartment / Holiday Home') }}</div>
-                                                                                    <div style="margin-bottom: 3px;">
-                                                                                        @if(!empty($acc->living_area_sqm))<span style="display: inline-block; font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px; margin-right: 3px;">📐 {{ $acc->living_area_sqm }} m²</span>@endif
-                                                                                    </div>
-                                                                                    @php
-                                                                                        $bedSummary = null;
-                                                                                        if (!empty($acc->room_configurations) && is_array($acc->room_configurations)) {
-                                                                                            $parts = [];
-                                                                                            foreach ($acc->room_configurations as $rc) {
-                                                                                                $val = is_array($rc) ? ($rc['value'] ?? $rc['name'] ?? null) : $rc;
-                                                                                                if ($val) $parts[] = $val;
+                                                            <div style="position: relative; margin-bottom: 6px;">
+                                                                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: #fff; border: 1px solid #e5e7eb; border-radius: 6px;">
+                                                                    <tr>
+                                                                        @if($accThumb)
+                                                                        <td style="width: 100px; vertical-align: top; padding: 0; border-radius: 6px 0 0 6px; overflow: hidden;">
+                                                                            <img src="{{ $accThumb }}" alt="{{ $item['title'] ?? $acc->title ?? '' }}" width="100" height="90" style="width: 100px; height: 90px; object-fit: cover; display: block;" />
+                                                                        </td>
+                                                                        @endif
+                                                                        <td style="padding: 8px 10px; vertical-align: top;">
+                                                                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                                                                                <tr>
+                                                                                    <td style="vertical-align: top;">
+                                                                                        <div style="font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 1px;">{{ $item['title'] ?? $acc->title ?? '' }}</div>
+                                                                                        <div style="font-size: 11px; color: #64748b; margin-bottom: 4px;">{{ translate($acc->accommodationType?->name ?? 'Apartment / Holiday Home') }}</div>
+                                                                                        <div style="margin-bottom: 3px;">
+                                                                                            @if(!empty($acc->living_area_sqm))<span style="display: inline-block; font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px; margin-right: 3px;">📐 {{ $acc->living_area_sqm }} m²</span>@endif
+                                                                                        </div>
+                                                                                        @php
+                                                                                            $bedSummary = null;
+                                                                                            if (!empty($acc->room_configurations) && is_array($acc->room_configurations)) {
+                                                                                                $parts = [];
+                                                                                                foreach ($acc->room_configurations as $rc) {
+                                                                                                    $val = is_array($rc) ? ($rc['value'] ?? $rc['name'] ?? null) : $rc;
+                                                                                                    if ($val) $parts[] = $val;
+                                                                                                }
+                                                                                                $bedSummary = !empty($parts) ? implode(', ', $parts) : null;
                                                                                             }
-                                                                                            $bedSummary = !empty($parts) ? implode(', ', $parts) : null;
-                                                                                        }
+                                                                                        @endphp
+                                                                                        @if($bedSummary)<div style="font-size: 11px; color: #334155; margin-bottom: 3px;">🛏️ {{ __('accommodations.bedrooms') }}: {{ translate($bedSummary) }}</div>@endif
+                                                                                        <div style="margin-bottom: 4px;">
+                                                                                            @if(!empty($acc->distance_to_water_m))<span style="display: inline-block; font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px; margin-right: 3px;">💧 Water: {{ is_numeric($acc->distance_to_water_m) ? $acc->distance_to_water_m . 'm' : translate($acc->distance_to_water_m) }}</span>@endif
+                                                                                            @if(!empty($acc->distance_to_boat_berth_m))<span style="display: inline-block; font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px; margin-right: 3px;">🚤 {{ is_numeric($acc->distance_to_boat_berth_m) ? $acc->distance_to_boat_berth_m . 'm' : translate($acc->distance_to_boat_berth_m) }}</span>@endif
+                                                                                            @if(!empty($acc->distance_to_parking_m))<span style="display: inline-block; font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px; margin-right: 3px;">🚗 Parking: {{ is_numeric($acc->distance_to_parking_m) ? $acc->distance_to_parking_m . 'm' : translate($acc->distance_to_parking_m) }}</span>@endif
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    @php
+                                                                                        $unitPrice = (float)($item['price'] ?? 0);
+                                                                                        $qty = (int)($item['qty'] ?? 1);
+                                                                                        $days = (int)($item['days'] ?? 1);
+                                                                                        $qty = $qty > 0 ? $qty : 1;
+                                                                                        $days = $days > 0 ? $days : 1;
+                                                                                        $lineTotal = isset($item['total']) ? (float)$item['total'] : ($unitPrice * $qty * $days);
                                                                                     @endphp
-                                                                                    @if($bedSummary)<div style="font-size: 11px; color: #334155; margin-bottom: 3px;">🛏️ {{ __('accommodations.bedrooms') }}: {{ translate($bedSummary) }}</div>@endif
-                                                                                    <div style="margin-bottom: 4px;">
-                                                                                        @if(!empty($acc->distance_to_water_m))<span style="display: inline-block; font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px; margin-right: 3px;">💧 Water: {{ is_numeric($acc->distance_to_water_m) ? $acc->distance_to_water_m . 'm' : translate($acc->distance_to_water_m) }}</span>@endif
-                                                                                        @if(!empty($acc->distance_to_boat_berth_m))<span style="display: inline-block; font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px; margin-right: 3px;">🚤 {{ is_numeric($acc->distance_to_boat_berth_m) ? $acc->distance_to_boat_berth_m . 'm' : translate($acc->distance_to_boat_berth_m) }}</span>@endif
-                                                                                        @if(!empty($acc->distance_to_parking_m))<span style="display: inline-block; font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px; margin-right: 3px;">🚗 Parking: {{ is_numeric($acc->distance_to_parking_m) ? $acc->distance_to_parking_m . 'm' : translate($acc->distance_to_parking_m) }}</span>@endif
-                                                                                    </div>
-                                                                                </td>
-                                                                                <td style="vertical-align: top; text-align: right; white-space: nowrap; padding-left: 10px;">
-                                                                                    <div style="font-size: 9px; color: #64748b;">Per Day</div>
-                                                                                    <div style="font-size: 14px; font-weight: 700; color: #1e293b;">€{{ number_format((float)($item['price'] ?? 0), 2) }}</div>
-                                                                                    <a href="{{ $campUrl }}" target="_blank" style="display: block; margin-top: 4px; font-size: 11px; color: #2563eb; font-weight: 600; text-decoration: none;">{{ __('Show More') }} ▼</a>
-                                                                                </td>
-                                                                            </tr>
-                                                                        </table>
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
+                                                                                    <td style="vertical-align: top; text-align: right; white-space: nowrap; padding-left: 10px;">
+                                                                                        <div style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 2px;">
+                                                                                            €{{ number_format($lineTotal, 2) }}
+                                                                                        </div>
+                                                                                        <div style="font-size: 10px; color: #6b7280; margin-bottom: 6px;">
+                                                                                            (€{{ number_format($unitPrice, 2) }} {{ __('per day') }})
+                                                                                        </div>
+                                                                                        <a href="{{ $campUrl }}" target="_blank" style="display: inline-block; margin-top: 2px; font-size: 11px; color: #2563eb; font-weight: 600; text-decoration: none;">{{ __('Show More') }}</a>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                                @if($qty > 1 || $days > 1)
+                                                                <div style="position: absolute; bottom: -1px; right: -1px; display: inline-block;">
+                                                                    <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse: separate;">
+                                                                        <tr>
+                                                                            <td style="background: #e8604c; color: #ffffff; font-size: 10px; font-weight: 600; padding: 5px 8px; border-radius: 12px 0 0 0; white-space: nowrap;">
+                                                                                Qty: {{ $qty }}
+                                                                            </td>
+                                                                            <td style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #ffffff; font-size: 10px; font-weight: 600; padding: 5px 8px; border-radius: 0 0 0 0; white-space: nowrap;">
+                                                                                {{ $days }} {{ __('Days') }}
+                                                                            </td>
+                                                                        </tr>
+                                                                    </table>
+                                                                </div>
+                                                                @endif
+                                                            </div>
                                                             @endforeach
                                                         </td>
                                                     </tr>
@@ -165,7 +193,7 @@
                                                                                     <div style="margin-bottom: 4px;">@if(!empty($acc->living_area_sqm))<span style="font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px; margin-right: 3px;">📐 {{ $acc->living_area_sqm }} m²</span>@endif @if(!empty($acc->distance_to_water_m))<span style="font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px; margin-right: 3px;">💧 Water: {{ $acc->distance_to_water_m }}m</span>@endif @if(!empty($acc->distance_to_boat_berth_m))<span style="font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px; margin-right: 3px;">🚤 {{ $acc->distance_to_boat_berth_m }}m</span>@endif @if(!empty($acc->distance_to_parking_m))<span style="font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px;">🚗 Parking: {{ $acc->distance_to_parking_m }}m</span>@endif</div>
                                                                                 </td>
                                                                                 <td style="vertical-align: top; text-align: right; white-space: nowrap; padding-left: 10px;">
-                                                                                    <a href="{{ $campUrl }}" target="_blank" style="font-size: 11px; color: #2563eb; font-weight: 600; text-decoration: none;">{{ __('Show More') }} ▼</a>
+                                                                                    <a href="{{ $campUrl }}" target="_blank" style="font-size: 11px; color: #2563eb; font-weight: 600; text-decoration: none;">{{ __('Show More') }}</a>
                                                                                 </td>
                                                                             </tr>
                                                                         </table>
@@ -190,32 +218,60 @@
                                                                 $boatInclusives = $boat ? (is_array($boat->inclusions) ? $boat->inclusions : []) : [];
                                                                 $boatThumb = $boat && !empty($boat->thumbnail_path) ? (strpos($boat->thumbnail_path, 'http') === 0 ? $boat->thumbnail_path : asset(ltrim($boat->thumbnail_path, '/'))) : null;
                                                             @endphp
-                                                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; margin-bottom: 6px;">
-                                                                <tr>
-                                                                    @if($boatThumb)
-                                                                    <td style="width: 100px; vertical-align: top; padding: 0; border-radius: 6px 0 0 6px; overflow: hidden;">
-                                                                        <img src="{{ $boatThumb }}" alt="{{ $item['title'] ?? $boat->title ?? '' }}" width="100" height="90" style="width: 100px; height: 90px; object-fit: cover; display: block;" />
-                                                                    </td>
-                                                                    @endif
-                                                                    <td style="padding: 8px 10px; vertical-align: top;">
-                                                                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-                                                                            <tr>
-                                                                                <td style="vertical-align: top;">
-                                                                                    <div style="font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 1px;">{{ $item['title'] ?? $boat->title ?? '' }}</div>
-                                                                                    @if($boat->boatType?->name)<div style="font-size: 11px; color: #64748b; margin-bottom: 4px;">{{ translate($boat->boatType->name) }}</div>@endif
-                                                                                    @if(count($boatSpecs) > 0)<div style="margin-bottom: 4px;">@foreach(array_slice($boatSpecs, 0, 3) as $spec)@php $spec = is_array($spec) ? $spec : ['name' => '', 'label' => '', 'value' => $spec]; $specLabel = $spec['name'] ?? $spec['label'] ?? ''; @endphp<span style="display: inline-block; font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px; margin-right: 3px;">{{ translate($specLabel) }}: {{ translate($spec['value'] ?? '') }}</span>@endforeach</div>@endif
-                                                                                    @if(count($boatInclusives) > 0)<div style="font-size: 9px; color: #64748b; font-weight: 600; margin-bottom: 3px; text-transform: uppercase;">{{ __('Included in the price') }}</div><div style="margin-bottom: 4px;">@foreach(array_slice($boatInclusives, 0, 3) as $inc)<span style="display: inline-block; font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px; margin-right: 3px;">✓ {{ translate(is_array($inc) ? ($inc['name'] ?? $inc['value'] ?? '') : $inc) }}</span>@endforeach</div>@endif
-                                                                                </td>
-                                                                                <td style="vertical-align: top; text-align: right; white-space: nowrap; padding-left: 10px;">
-                                                                                    <div style="font-size: 9px; color: #64748b;">{{ __('per day') }}</div>
-                                                                                    <div style="font-size: 14px; font-weight: 700; color: #1e293b;">€{{ number_format((float)($item['price'] ?? 0), 2) }}</div>
-                                                                                    <a href="{{ $boatCampUrl }}" target="_blank" style="display: block; margin-top: 4px; font-size: 11px; color: #2563eb; font-weight: 600; text-decoration: none;">{{ __('Show More') }} ▼</a>
-                                                                                </td>
-                                                                            </tr>
-                                                                        </table>
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
+                                                            <div style="position: relative; margin-bottom: 6px;">
+                                                                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: #fff; border: 1px solid #e5e7eb; border-radius: 6px;">
+                                                                    <tr>
+                                                                        @if($boatThumb)
+                                                                        <td style="width: 100px; vertical-align: top; padding: 0; border-radius: 6px 0 0 6px; overflow: hidden;">
+                                                                            <img src="{{ $boatThumb }}" alt="{{ $item['title'] ?? $boat->title ?? '' }}" width="100" height="90" style="width: 100px; height: 90px; object-fit: cover; display: block;" />
+                                                                        </td>
+                                                                        @endif
+                                                                        <td style="padding: 8px 10px; vertical-align: top;">
+                                                                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                                                                                <tr>
+                                                                                    <td style="vertical-align: top;">
+                                                                                        <div style="font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 1px;">{{ $item['title'] ?? $boat->title ?? '' }}</div>
+                                                                                        @if($boat->boatType?->name)<div style="font-size: 11px; color: #64748b; margin-bottom: 4px;">{{ translate($boat->boatType->name) }}</div>@endif
+                                                                                        @if(count($boatSpecs) > 0)<div style="margin-bottom: 4px;">@foreach(array_slice($boatSpecs, 0, 3) as $spec)@php $spec = is_array($spec) ? $spec : ['name' => '', 'label' => '', 'value' => $spec]; $specLabel = $spec['name'] ?? $spec['label'] ?? ''; @endphp<span style="display: inline-block; font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px; margin-right: 3px;">{{ translate($specLabel) }}: {{ translate($spec['value'] ?? '') }}</span>@endforeach</div>@endif
+                                                                                        @if(count($boatInclusives) > 0)<div style="font-size: 9px; color: #64748b; font-weight: 600; margin-bottom: 3px; text-transform: uppercase;">{{ __('Included in the price') }}</div><div style="margin-bottom: 4px;">@foreach(array_slice($boatInclusives, 0, 3) as $inc)<span style="display: inline-block; font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px; margin-right: 3px;">✓ {{ translate(is_array($inc) ? ($inc['name'] ?? $inc['value'] ?? '') : $inc) }}</span>@endforeach</div>@endif
+                                                                                    </td>
+                                                                                    @php
+                                                                                        $unitPrice = (float)($item['price'] ?? 0);
+                                                                                        $qty = (int)($item['qty'] ?? 1);
+                                                                                        $days = (int)($item['days'] ?? 1);
+                                                                                        $qty = $qty > 0 ? $qty : 1;
+                                                                                        $days = $days > 0 ? $days : 1;
+                                                                                        $lineTotal = isset($item['total']) ? (float)$item['total'] : ($unitPrice * $qty * $days);
+                                                                                    @endphp
+                                                                                    <td style="vertical-align: top; text-align: right; white-space: nowrap; padding-left: 10px;">
+                                                                                        <div style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 2px;">
+                                                                                            €{{ number_format($lineTotal, 2) }}
+                                                                                        </div>
+                                                                                        <div style="font-size: 10px; color: #6b7280; margin-bottom: 6px;">
+                                                                                            (€{{ number_format($unitPrice, 2) }} {{ __('per day') }})
+                                                                                        </div>
+                                                                                        <a href="{{ $boatCampUrl }}" target="_blank" style="display: inline-block; margin-top: 2px; font-size: 11px; color: #2563eb; font-weight: 600; text-decoration: none;">{{ __('Show More') }}</a>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                                @if($qty > 1 || $days > 1)
+                                                                <div style="position: absolute; bottom: -1px; right: -1px; display: inline-block;">
+                                                                    <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse: separate;">
+                                                                        <tr>
+                                                                            <td style="background: #e8604c; color: #ffffff; font-size: 10px; font-weight: 600; padding: 5px 8px; border-radius: 12px 0 0 0; white-space: nowrap;">
+                                                                                Qty: {{ $qty }}
+                                                                            </td>
+                                                                            <td style="background: #2563eb; color: #ffffff; font-size: 10px; font-weight: 600; padding: 5px 8px; border-radius: 0 0 0 0; white-space: nowrap;">
+                                                                                {{ $days }} {{ __('Days') }}
+                                                                            </td>
+                                                                        </tr>
+                                                                    </table>
+                                                                </div>
+                                                                @endif
+                                                            </div>
                                                             @endforeach
                                                         </td>
                                                     </tr>
@@ -249,7 +305,7 @@
                                                                                     @if(count($boatInclusives) > 0)<div style="font-size: 9px; color: #64748b; font-weight: 600; margin-bottom: 3px; text-transform: uppercase;">{{ __('Included in the price') }}</div><div>@foreach(array_slice($boatInclusives, 0, 3) as $inc)<span style="display: inline-block; font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px; margin-right: 3px;">✓ {{ translate(is_array($inc) ? ($inc['name'] ?? $inc['value'] ?? '') : $inc) }}</span>@endforeach</div>@endif
                                                                                 </td>
                                                                                 <td style="vertical-align: top; text-align: right; white-space: nowrap; padding-left: 10px;">
-                                                                                    <a href="{{ $boatCampUrl }}" target="_blank" style="font-size: 11px; color: #2563eb; font-weight: 600; text-decoration: none;">{{ __('Show More') }} ▼</a>
+                                                                                    <a href="{{ $boatCampUrl }}" target="_blank" style="font-size: 11px; color: #2563eb; font-weight: 600; text-decoration: none;">{{ __('Show More') }}</a>
                                                                                 </td>
                                                                             </tr>
                                                                         </table>
@@ -274,35 +330,63 @@
                                                                 $gType = $g->fishing_from ?? $g->type ?? ($g->fishing_type ?? 'Shore');
                                                                 $gThumb = $g && !empty($g->thumbnail_path) ? (strpos($g->thumbnail_path, 'http') === 0 ? $g->thumbnail_path : asset(ltrim($g->thumbnail_path, '/'))) : null;
                                                             @endphp
-                                                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; margin-bottom: 6px;">
-                                                                <tr>
-                                                                    @if($gThumb)
-                                                                    <td style="width: 100px; vertical-align: top; padding: 0; border-radius: 6px 0 0 6px; overflow: hidden;">
-                                                                        <img src="{{ $gThumb }}" alt="{{ $item['title'] ?? $g->title ?? '' }}" width="100" height="90" style="width: 100px; height: 90px; object-fit: cover; display: block;" />
-                                                                    </td>
-                                                                    @endif
-                                                                    <td style="padding: 8px 10px; vertical-align: top;">
-                                                                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-                                                                            <tr>
-                                                                                <td style="vertical-align: top;">
-                                                                                    <div style="font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 1px;">{{ $item['title'] ?? $g->title ?? '' }}</div>
-                                                                                    @if(!empty($g->description))<div style="font-size: 11px; color: #64748b; margin-bottom: 4px; line-height: 1.35;">{{ Str::limit(strip_tags($g->description), 70) }}</div>@endif
-                                                                                    <div style="margin-bottom: 4px;">
-                                                                                        @if($gDuration)<span style="display: inline-block; font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px; margin-right: 3px;">🕐 {{ is_numeric($gDuration) ? $gDuration . ' h' : $gDuration }}</span>@endif
-                                                                                        @if(!empty($g->max_guests) || !empty($g->max_persons))<span style="display: inline-block; font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px; margin-right: 3px;">👥 {{ $g->max_guests ?? $g->max_persons ?? '' }} Pers</span>@endif
-                                                                                        <span style="display: inline-block; font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px;">🚤 {{ translate($gType) }}</span>
-                                                                                    </div>
-                                                                                </td>
-                                                                                <td style="vertical-align: top; text-align: right; white-space: nowrap; padding-left: 10px;">
-                                                                                    <div style="font-size: 9px; color: #64748b;">{{ $g && $g->price_type ? translate(str_replace('_', ' ', $g->price_type)) : 'per tour' }}</div>
-                                                                                    <div style="font-size: 14px; font-weight: 700; color: #1e293b;">€{{ number_format((float)($item['price'] ?? $g->price ?? 0), 2) }}</div>
-                                                                                    <a href="{{ $guidingUrl }}" target="_blank" style="display: block; margin-top: 4px; font-size: 11px; color: #2563eb; font-weight: 600; text-decoration: none;">{{ __('Show More') }} ▼</a>
-                                                                                </td>
-                                                                            </tr>
-                                                                        </table>
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
+                                                            <div style="position: relative; margin-bottom: 6px;">
+                                                                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: #fff; border: 1px solid #e5e7eb; border-radius: 6px;">
+                                                                    <tr>
+                                                                        @if($gThumb)
+                                                                        <td style="width: 100px; vertical-align: top; padding: 0; border-radius: 6px 0 0 6px; overflow: hidden;">
+                                                                            <img src="{{ $gThumb }}" alt="{{ $item['title'] ?? $g->title ?? '' }}" width="100" height="90" style="width: 100px; height: 90px; object-fit: cover; display: block;" />
+                                                                        </td>
+                                                                        @endif
+                                                                        <td style="padding: 8px 10px; vertical-align: top;">
+                                                                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                                                                                <tr>
+                                                                                    <td style="vertical-align: top;">
+                                                                                        <div style="font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 1px;">{{ $item['title'] ?? $g->title ?? '' }}</div>
+                                                                                        @if(!empty($g->description))<div style="font-size: 11px; color: #64748b; margin-bottom: 4px; line-height: 1.35;">{{ Str::limit(strip_tags($g->description), 70) }}</div>@endif
+                                                                                        <div style="margin-bottom: 4px;">
+                                                                                            @if($gDuration)<span style="display: inline-block; font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px; margin-right: 3px;">🕐 {{ is_numeric($gDuration) ? $gDuration . ' h' : $gDuration }}</span>@endif
+                                                                                            @if(!empty($g->max_guests) || !empty($g->max_persons))<span style="display: inline-block; font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px; margin-right: 3px;">👥 {{ $g->max_guests ?? $g->max_persons ?? '' }} Pers</span>@endif
+                                                                                            <span style="display: inline-block; font-size: 10px; color: #64748b; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 6px;">🚤 {{ translate($gType) }}</span>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    @php
+                                                                                        $basePrice = (float)($item['price'] ?? ($g->price ?? 0));
+                                                                                        $qty = (int)($item['qty'] ?? 1);
+                                                                                        $days = (int)($item['days'] ?? 1);
+                                                                                        $qty = $qty > 0 ? $qty : 1;
+                                                                                        $days = $days > 0 ? $days : 1;
+                                                                                        $lineTotal = isset($item['total']) ? (float)$item['total'] : ($basePrice * $qty * $days);
+                                                                                    @endphp
+                                                                                    <td style="vertical-align: top; text-align: right; white-space: nowrap; padding-left: 10px;">
+                                                                                        <div style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 2px;">
+                                                                                            €{{ number_format($lineTotal, 2) }}
+                                                                                        </div>
+                                                                                        <div style="font-size: 10px; color: #6b7280; margin-bottom: 6px;">
+                                                                                            (€{{ number_format($basePrice, 2) }} {{ $g && $g->price_type ? translate(str_replace('_', ' ', $g->price_type)) : 'per tour' }})
+                                                                                        </div>
+                                                                                        <a href="{{ $guidingUrl }}" target="_blank" style="display: inline-block; margin-top: 2px; font-size: 11px; color: #2563eb; font-weight: 600; text-decoration: none;">{{ __('Show More') }}</a>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                                @if($qty > 1 || $days > 1)
+                                                                <div style="position: absolute; bottom: -1px; right: -1px; display: inline-block;">
+                                                                    <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse: separate;">
+                                                                        <tr>
+                                                                            <td style="background: #e8604c; color: #ffffff; font-size: 10px; font-weight: 600; padding: 5px 8px; border-radius: 12px 0 0 0; white-space: nowrap;">
+                                                                                Qty: {{ $qty }}
+                                                                            </td>
+                                                                            <td style="background: #2563eb; color: #ffffff; font-size: 10px; font-weight: 600; padding: 5px 8px; border-radius: 0 0 0 0; white-space: nowrap;">
+                                                                                {{ $days }} {{ __('Days') }}
+                                                                            </td>
+                                                                        </tr>
+                                                                    </table>
+                                                                </div>
+                                                                @endif
+                                                            </div>
                                                             @endforeach
                                                         </td>
                                                     </tr>
@@ -342,7 +426,7 @@
                                                                                 <td style="vertical-align: top; text-align: right; white-space: nowrap; padding-left: 10px;">
                                                                                     <div style="font-size: 9px; color: #64748b;">{{ $guiding->price_type ? translate(str_replace('_', ' ', $guiding->price_type)) : 'per tour' }}</div>
                                                                                     <div style="font-size: 14px; font-weight: 700; color: #1e293b;">€{{ number_format((float)$gPrice, 2) }}</div>
-                                                                                    <a href="{{ $guidingUrl }}" target="_blank" style="display: block; margin-top: 4px; font-size: 11px; color: #2563eb; font-weight: 600; text-decoration: none;">{{ __('Show More') }} ▼</a>
+                                                                                    <a href="{{ $guidingUrl }}" target="_blank" style="display: block; margin-top: 4px; font-size: 11px; color: #2563eb; font-weight: 600; text-decoration: none;">{{ __('Show More') }}</a>
                                                                                 </td>
                                                                             </tr>
                                                                         </table>
