@@ -2438,21 +2438,26 @@ document.addEventListener("DOMContentLoaded", function() {
     }, 1500); // Wait a bit longer for calendar to be fully rendered
 });
 
-function initMap() {
-    //var location = { lat: 41.40338, lng: 2.17403 }; // Example coordinates
-    var location = { lat: {{ $guiding->lat }}, lng: {{ $guiding->lng }} }; // Example coordinates
-    var map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 10,
-        center: location,
-        mapTypeControl: false,
-        streetViewControl: false,
-        mapId: '8f348c2f6c51f6f0'
-    });
+// Use centralized GoogleMapsManager
+const MapsManager = window.GoogleMapsManager;
 
-    // Create an AdvancedMarkerElement with the required Map ID
-    const marker = new google.maps.marker.AdvancedMarkerElement({
-        map,
-        position: location,
+async function initMap() {
+    const location = { lat: {{ $guiding->lat }}, lng: {{ $guiding->lng }} };
+    
+    MapsManager.waitForGoogleMaps(async function() {
+        const map = await MapsManager.initMap('map', {
+            zoom: 10,
+            center: location,
+            mapTypeControl: false,
+            streetViewControl: false,
+            mapId: "{{ config('services.google_maps.map_id', 'DEMO_MAP_ID') }}"
+        });
+
+        // Create marker using centralized manager
+        const marker = await MapsManager.createMarker({
+            map: map,
+            position: location
+        });
     });
 }
 

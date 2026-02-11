@@ -37,6 +37,11 @@ return [
         'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta/models'),
     ],
 
+    'google_maps' => [
+        'api_key' => env('GOOGLE_MAPS_API_KEY'),
+        'map_id' => env('GOOGLE_MAPS_MAP_ID', 'DEMO_MAP_ID'),
+    ],
+
     'translation' => [
         'driver' => env('TRANSLATION_SERVICE', 'gemini'), // Options: 'gemini' or 'google'
     ],

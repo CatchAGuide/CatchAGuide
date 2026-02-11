@@ -34,11 +34,11 @@
             const grayPin{{$guiding->id}} = new PinElement({
                 background: '#3C4043', // dark gray for strong contrast
                 borderColor: '#111827', // near-black border
-                glyph: '•',
+                glyphText: '•', // Use glyphText instead of deprecated glyph
                 glyphColor: '#ffffff',
                 scale: 1.35,
             });
-            markerOptions{{$guiding->id}}.content = grayPin{{$guiding->id}}.element;
+            markerOptions{{$guiding->id}}.content = grayPin{{$guiding->id}}; // Use PinElement directly instead of .element
             markerOptions{{$guiding->id}}.zIndex = 100;
             markerOptions{{$guiding->id}}.collisionBehavior = google.maps.CollisionBehavior.REQUIRED;
         }
@@ -93,7 +93,7 @@
 
         infowindows.push(infowindow{{$guiding->id}});
 
-        marker{{$guiding->id}}.addListener("click", () => {
+        marker{{$guiding->id}}.addListener("gmp-click", () => {
             infowindows.forEach((infowindow) => {
                 infowindow.close();
             });

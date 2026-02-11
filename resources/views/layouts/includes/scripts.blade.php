@@ -39,7 +39,8 @@
 <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous" async></script>
 <script src="/js/app.js"></script>
 
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&libraries=places,geocoding,marker"></script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&libraries=places,geocoding,marker&loading=async"></script>
+@include('layouts.includes.maps-utils')
 @stack('js_push')
 
 <script>
@@ -140,8 +141,28 @@
     selectTarget.trigger('change');
 </script>
 <script>
-    // Initialize all search inputs with Google Places Autocomplete
+    // Helper: run a callback once the Google Maps JS API is ready
+    function runWhenGoogleMapsReady(callback, maxAttempts = 50, interval = 200) {
+        let attempts = 0;
+        const timer = setInterval(function () {
+            if (window.google && google.maps) {
+                clearInterval(timer);
+                callback();
+            } else if (++attempts >= maxAttempts) {
+                clearInterval(timer);
+                console.warn('Google Maps JS API not available after waiting – skipping callback.');
+            }
+        }, interval);
+    }
+
+    // Initialize all search inputs with Google Places Autocomplete using centralized manager
     function initializeGooglePlaces() {
+        const MapsManager = window.GoogleMapsManager;
+        if (!MapsManager) {
+            console.warn('GoogleMapsManager not available – skipping autocomplete init.');
+            return;
+        }
+
         const searchInputs = [
             {
                 input: 'searchPlaceMobile',
@@ -186,51 +207,35 @@
         ];
 
         searchInputs.forEach(config => {
-            const inputElement = document.getElementById(config.input);
-            if (inputElement) {
-                const autocomplete = new google.maps.places.Autocomplete(inputElement);
-                autocomplete.addListener('place_changed', function() {
-                    const place = autocomplete.getPlace();
-                    if (!place.geometry) {
-                        console.warn("Place details not found for input: " + config.input);
-                        return;
-                    }
+            MapsManager.initAutocomplete(config.input, function(place) {
+                // Extract location data using centralized method
+                const locationData = MapsManager.extractLocationData(place);
 
-                    document.getElementById(config.lat).value = place.geometry.location.lat();
-                    document.getElementById(config.lng).value = place.geometry.location.lng();
+                // Write to hidden fields only when they exist so we never throw
+                const latInput = document.getElementById(config.lat);
+                const lngInput = document.getElementById(config.lng);
+                const cityInput = document.getElementById(config.city);
+                const countryInput = document.getElementById(config.country);
+                const regionInput = document.getElementById(config.region);
 
-                    // Extract city, region and country from address components
-                    const addressComponents = place.address_components;
-                    let city = '', country = '', region = '';
-                    
-                    for (const component of addressComponents) {
-                        const types = component.types;
-                        if (types.includes('locality') || types.includes('sublocality') || types.includes('postal_town') || types.includes('"natural_feature"')) {
-                            city = component.long_name;
-                        }
-                        if (types.includes('country')) {
-                            country = component.long_name;
-                        }
-                        if (types.includes('administrative_area_level_1')) {
-                            region = component.long_name;
-                        }
-                    }
-
-                    console.log(place);
-                    console.log(city);
-                    console.log(country);
-                    console.log(region);
-
-                    document.getElementById(config.city).value = city;
-                    document.getElementById(config.country).value = country;
-                    document.getElementById(config.region).value = region;
-                });
-            }
+                if (latInput) latInput.value = locationData.lat;
+                if (lngInput) lngInput.value = locationData.lng;
+                if (cityInput) cityInput.value = locationData.city || '';
+                if (countryInput) countryInput.value = locationData.country || '';
+                if (regionInput) regionInput.value = locationData.region || '';
+            });
         });
     }
 
-    // Initialize on page load
-    window.addEventListener('load', initializeGooglePlaces);
+    // Initialize on page load (but only once Google Maps is actually ready)
+    window.addEventListener('load', function () {
+        const MapsManager = window.GoogleMapsManager;
+        if (MapsManager) {
+            MapsManager.waitForGoogleMaps(initializeGooglePlaces);
+        } else {
+            runWhenGoogleMapsReady(initializeGooglePlaces);
+        }
+    });
 
     // Also initialize when any modal containing a search input is shown
     document.addEventListener('DOMContentLoaded', function() {
@@ -238,7 +243,14 @@
         modals.forEach(modalId => {
             const modal = document.getElementById(modalId);
             if (modal) {
-                modal.addEventListener('shown.bs.modal', initializeGooglePlaces);
+                modal.addEventListener('shown.bs.modal', function () {
+                    const MapsManager = window.GoogleMapsManager;
+                    if (MapsManager) {
+                        MapsManager.waitForGoogleMaps(initializeGooglePlaces);
+                    } else {
+                        runWhenGoogleMapsReady(initializeGooglePlaces);
+                    }
+                });
             }
         });
     });

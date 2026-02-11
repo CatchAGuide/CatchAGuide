@@ -1013,25 +1013,31 @@ function initDescriptionToggles() {
     });
 }
 
-function initMap() {
+// Use centralized GoogleMapsManager
+const MapsManager = window.GoogleMapsManager;
+
+async function initMap() {
     @php
         // Try to get coordinates from camp data (support multiple possible field names)
         $lat = $camp['latitude'] ?? $camp['lat'] ?? 41.40338;
         $lng = $camp['longitude'] ?? $camp['lng'] ?? 2.17403;
     @endphp
-    var location = { lat: {{ $lat }}, lng: {{ $lng }} };
-    var map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 10,
-        center: location,
-        mapTypeControl: false,
-        streetViewControl: false,
-        mapId: '8f348c2f6c51f6f0'
-    });
+    const location = { lat: {{ $lat }}, lng: {{ $lng }} };
+    
+    MapsManager.waitForGoogleMaps(async function() {
+        const map = await MapsManager.initMap('map', {
+            zoom: 10,
+            center: location,
+            mapTypeControl: false,
+            streetViewControl: false,
+            mapId: "{{ config('services.google_maps.map_id', 'DEMO_MAP_ID') }}"
+        });
 
-    // Create an AdvancedMarkerElement with the required Map ID
-    const marker = new google.maps.marker.AdvancedMarkerElement({
-        map,
-        position: location,
+        // Create marker using centralized manager
+        const marker = await MapsManager.createMarker({
+            map: map,
+            position: location
+        });
     });
 }
 </script>

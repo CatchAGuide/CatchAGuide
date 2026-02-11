@@ -474,19 +474,23 @@
 
 </script>
 
-<script type="module">
+<script>
+    // Use centralized GoogleMapsManager
+    const MapsManager = window.GoogleMapsManager;
+    
+    function initialize() {
+        MapsManager.waitForGoogleMaps(function() {
+            MapsManager.initAutocomplete('searchPlace', function(place) {
+                const locationData = MapsManager.extractLocationData(place);
+                const latInput = document.getElementById('placeLat');
+                const lngInput = document.getElementById('placeLng');
+                if (latInput) latInput.value = locationData.lat;
+                if (lngInput) lngInput.value = locationData.lng;
+            });
+        });
+    }
 
-function initialize() {
-    var input = document.getElementById('searchPlace');
-    var autocomplete = new google.maps.places.Autocomplete(input);
-    google.maps.event.addListener(autocomplete, 'place_changed', function () {
-        var place = autocomplete.getPlace();
-        document.getElementById('placeLat').value = place.geometry.location.lat();
-        document.getElementById('placeLng').value = place.geometry.location.lng();
-    });
-}
-
-window.addEventListener('load', initialize);
+    window.addEventListener('load', initialize);
 
 window.addEventListener('load', function() {
     var placeLatitude = '{{ request()->get('placeLat') }}';

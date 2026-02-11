@@ -58,7 +58,7 @@
 
     infowindows.push(infowindow{{$vacation->id}});
 
-    marker{{$vacation->id}}.addListener("click", () => {
+    marker{{$vacation->id}}.addListener("gmp-click", () => {
         infowindows.forEach((infowindow) => {
             infowindow.close();
         });

@@ -742,36 +742,35 @@
 
 @section('js_after')
 
-<script type="module">
-    import { MarkerClusterer } from "https://cdn.skypack.dev/@googlemaps/markerclusterer@2.3.1";
-         initializeMap();
-    
-    async function initializeMap() {
-    
+<script>
+    // Use centralized GoogleMapsManager
+    const MapsManager = window.GoogleMapsManager;
+    let map;
+    const markers = [];
+    const infowindows = [];
+    const uniqueCoordinates = [];
+    let isDuplicateCoordinate;
+    let markerCluster;
+
+    // Initialize map
+    MapsManager.waitForGoogleMaps(async function() {
         @php
             $lat = isset($vacations[0]) ? $vacations[0]->latitude : 51.165691;
             $lng = isset($vacations[0]) ? $vacations[0]->longitude : 10.451526;
         @endphp
-        const position = { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }} , lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} };
-        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
-        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
-    
-        const map = new Map(document.getElementById("map"), {
+        const position = { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }}, lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} };
+        
+        // Initialize map using centralized manager
+        map = await MapsManager.initMap("map", {
             zoom: 5,
             center: position,
-            mapId: "{{env('GOOGLE_MAPS_MAP_ID')}}",
+            mapId: "{{ config('services.google_maps.map_id', 'DEMO_MAP_ID') }}",
             mapTypeControl: false,
-            streetViewControl: false,
+            streetViewControl: false
         });
-    
-        const marker = new AdvancedMarkerElement({
-            map: map,
-        });
-    
-        const markers = [];
-        const infowindows = [];
-        const uniqueCoordinates = [];
-        let isDuplicateCoordinate;  
+
+        // Create placeholder marker
+        await MapsManager.createMarker({ map: map });
         
         @php
             $grayIds = collect($vacations->items())->pluck('id')->toArray();
@@ -785,21 +784,28 @@
           return (Math.random() - 0.5) * 0.0080;
         }
     
-        const markerCluster = new MarkerClusterer({ markers, map });
-        google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
-            map.setZoom(map.getZoom() + 2);
-            map.setCenter(cluster.getCenter());
-        });
+        // Create marker cluster using centralized manager
+        if (markers.length > 0) {
+            markerCluster = MapsManager.createMarkerClusterer({ markers, map });
+            if (markerCluster) {
+                google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
+                    map.setZoom(map.getZoom() + 2);
+                    map.setCenter(cluster.getCenter());
+                });
+            }
+        }
+    });
     
-    }
-    
+    // Initialize Places Autocomplete using centralized manager
     function initialize() {
-        var input = document.getElementById('searchPlace');
-        var autocomplete = new google.maps.places.Autocomplete(input);
-        google.maps.event.addListener(autocomplete, 'place_changed', function () {
-            var place = autocomplete.getPlace();
-            document.getElementById('placeLat').value = place.geometry.location.lat();
-            document.getElementById('placeLng').value = place.geometry.location.lng();
+        MapsManager.waitForGoogleMaps(function() {
+            MapsManager.initAutocomplete('searchPlace', function(place) {
+                const locationData = MapsManager.extractLocationData(place);
+                const latInput = document.getElementById('placeLat');
+                const lngInput = document.getElementById('placeLng');
+                if (latInput) latInput.value = locationData.lat;
+                if (lngInput) lngInput.value = locationData.lng;
+            });
         });
     }
     

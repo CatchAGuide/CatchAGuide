@@ -122,10 +122,11 @@
             @endphp
 
             @php
-                $activeFilters = collect(request()->except(['price_min', 'price_max', 'isMobile']))
-                                ->filter(function($value) {
-                                    return !is_null($value) && $value !== '';
-                                });
+                // Collect all non-empty request filters (excluding internal/mobile helper param)
+                $activeFilters = collect(request()->except(['ismobile']))
+                    ->filter(function ($value) {
+                        return !is_null($value) && $value !== '';
+                    });
             @endphp
 
             <!-- Mobile Search Summary -->
@@ -136,15 +137,48 @@
                         @if($activeFilters->isNotEmpty())
                             <span>
                                 {{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }} · 
-                                {{ request()->num_guests ?? '0' }} guests
+                                @if(request()->has('num_guests') && request()->num_guests > 0)
+                                    {{ request()->num_guests }} guests
+                                @endif
                                 @if(request()->has('target_fish'))
                                     · {{ count((array)request()->target_fish) }} fish
                                 @endif
                                 @php
-                                    $additionalFilters = $activeFilters->except(['place', 'placeLat', 'placeLng', 'city', 'country', 'region', 'num_guests', 'target_fish[]',  'price_min', 'price_max', 'ismobile'])->count();
+                                    // Keys that are already shown above or are not real filters
+                                    $ignoredKeys = [
+                                        'place', 'placeLat', 'placeLng', 'placelat', 'placelng',
+                                        'city', 'country', 'region',
+                                        'num_guests', 'target_fish',
+                                        'ismobile', 'page',
+                                    ];
+
+                                    // Human‑readable labels for known filters
+                                    $filterLabels = [
+                                        'radius'         => translate('Radius'),
+                                        'methods'        => translate('Methods'),
+                                        'water'          => translate('Water Types'),
+                                        'duration_types' => translate('Duration'),
+                                        'num_persons'    => translate('Number of People'),
+                                        'price_min'      => translate('Min Price'),
+                                        'price_max'      => translate('Max Price'),
+                                    ];
+
+                                    // Determine which extra filters are active
+                                    $additionalFilterKeys = $activeFilters->except($ignoredKeys)->keys();
+
+                                    $additionalFilterNames = $additionalFilterKeys
+                                        ->map(function ($key) use ($filterLabels) {
+                                            return $filterLabels[$key] ?? ucfirst(str_replace('_', ' ', $key));
+                                        })
+                                        ->unique()
+                                        ->values();
+
+                                    $additionalFiltersText = $additionalFilterNames->implode(', ');
+                                    // Limit length and add ellipsis if too long
+                                    $additionalFiltersText = \Illuminate\Support\Str::limit($additionalFiltersText, 30, '...');
                                 @endphp
-                                @if($additionalFilters > 0)
-                                    · {{ $additionalFilters }} more filter{{ $additionalFilters > 1 ? 's' : '' }}
+                                @if($additionalFilterNames->isNotEmpty())
+                                    · {{ $additionalFiltersText }}
                                 @endif
                             </span>
                         @else

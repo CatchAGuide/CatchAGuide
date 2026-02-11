@@ -1176,44 +1176,45 @@ $(document).ready(function() {
 </script>
 
 
-<script type="module">
-    import { MarkerClusterer } from "https://cdn.skypack.dev/@googlemaps/markerclusterer@2.3.1";
-     initializeMap();
-
-     async function initializeMap() {
-
-    @php
-        $lat = isset($guidings[0]) ? $guidings[0]->lat : 51.165691;
-        $lng = isset($guidings[0]) ? $guidings[0]->lng : 10.451526;
-    @endphp
-    const position = { 
-        lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }},
-        lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} 
-    };
-    const { Map, InfoWindow } = await google.maps.importLibrary("maps");
-    const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
-
-    const map = new Map(document.getElementById("map"), {
-        zoom: 5,
-        center: position,
-        mapId: "{{env('GOOGLE_MAPS_MAP_ID')}}",
-        mapTypeControl: false,
-        streetViewControl: false,
-    });
-
-    const marker = new AdvancedMarkerElement({
-        map: map,
-        position: position,
-    });
-
+<script>
+    // Use centralized GoogleMapsManager
+    const MapsManager = window.GoogleMapsManager;
+    let map;
     const markers = [];
     const infowindows = [];
     const uniqueCoordinates = [];
-    let isDuplicateCoordinate;  
+    let isDuplicateCoordinate;
+    let markerCluster;
     // Bounds for primary markers
     const redBounds = new google.maps.LatLngBounds();
     let redMarkerCount = 0;
     const redCoordinates = new Set();
+
+    // Initialize map
+    MapsManager.waitForGoogleMaps(async function() {
+        @php
+            $lat = isset($guidings[0]) ? $guidings[0]->lat : 51.165691;
+            $lng = isset($guidings[0]) ? $guidings[0]->lng : 10.451526;
+        @endphp
+        const position = { 
+            lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }},
+            lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} 
+        };
+        
+        // Initialize map using centralized manager
+        map = await MapsManager.initMap("map", {
+            zoom: 5,
+            center: position,
+            mapId: "{{ config('services.google_maps.map_id', 'DEMO_MAP_ID') }}",
+            mapTypeControl: false,
+            streetViewControl: false
+        });
+
+        // Create placeholder marker
+        await MapsManager.createMarker({
+            map: map,
+            position: position
+        });
 
     @if($allGuidings->isEmpty())
         @include('pages.guidings.partials.maps',[
@@ -1238,33 +1239,40 @@ $(document).ready(function() {
         }
     }
 
-    function getRandomOffset() {
-      // Generate a random value between -0.00005 and 0.00005 (adjust the range as needed)
-      return (Math.random() - 0.5) * 0.0080;
+        function getRandomOffset() {
+          // Generate a random value between -0.00005 and 0.00005 (adjust the range as needed)
+          return (Math.random() - 0.5) * 0.0080;
+        }
+       
+        // Create marker cluster using centralized manager
+        if (markers.length > 0) {
+            markerCluster = MapsManager.createMarkerClusterer({ markers, map });
+            if (markerCluster) {
+                // Add click event listeners to individual markers inside the cluster
+                google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
+                    // You can control the zoom level here
+                    // For example, zoom in by 2 levels when clicking on a cluster
+                    map.setZoom(map.getZoom() + 2);
+                    map.setCenter(cluster.getCenter());
+                });
+            }
+        }
+    });
+
+    // Initialize Places Autocomplete using centralized manager
+    function initialize() {
+        MapsManager.waitForGoogleMaps(function() {
+            MapsManager.initAutocomplete('searchPlace', function(place) {
+                const locationData = MapsManager.extractLocationData(place);
+                const latInput = document.getElementById('placeLat');
+                const lngInput = document.getElementById('placeLng');
+                if (latInput) latInput.value = locationData.lat;
+                if (lngInput) lngInput.value = locationData.lng;
+            });
+        });
     }
-   
-    const markerCluster = new MarkerClusterer({ markers, map });
-    // Add click event listeners to individual markers inside the cluster
-    google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
-        // You can control the zoom level here
-        // For example, zoom in by 2 levels when clicking on a cluster
-        map.setZoom(map.getZoom() + 2);
-        map.setCenter(cluster.getCenter());
-    });
 
-}
-
-function initialize() {
-    var input = document.getElementById('searchPlace');
-    var autocomplete = new google.maps.places.Autocomplete(input);
-    google.maps.event.addListener(autocomplete, 'place_changed', function () {
-        var place = autocomplete.getPlace();
-        document.getElementById('placeLat').value = place.geometry.location.lat();
-        document.getElementById('placeLng').value = place.geometry.location.lng();
-    });
-}
-
-window.addEventListener('load', initialize);
+    window.addEventListener('load', initialize);
 
 window.addEventListener('load', function() {
     var placeLatitude = '{{ request()->get('placeLat') }}';
