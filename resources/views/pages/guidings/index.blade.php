@@ -726,7 +726,7 @@
     </section>
     <!--Tours List End-->
 
-    <div class="modal show" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+    <div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl" style="max-width: 100%; width: 96%; height:100%;">
             <div class="modal-content" style="height:90%;">
                 <div class="modal-header">
@@ -840,37 +840,53 @@
     });
 </script>
 
-<script type="module">
-    import { MarkerClusterer } from "https://cdn.skypack.dev/@googlemaps/markerclusterer@2.3.1";
+<script>
+    // Use centralized GoogleMapsManager
+    const MapsManager = window.GoogleMapsManager;
     let map; // Make map variable accessible in wider scope
     let markerCluster; // Make markerCluster accessible in wider scope
     let isDuplicateCoordinate;
     const markers = [];
     const infowindows = [];
     const uniqueCoordinates = [];
-    initializeMap();
+    let mapInitialized = false;
+
+    // Initialize map when modal is shown
+    document.addEventListener('DOMContentLoaded', function() {
+        const mapModal = document.getElementById('mapModal');
+        if (mapModal) {
+            mapModal.addEventListener('shown.bs.modal', function () {
+                if (!mapInitialized) {
+                    MapsManager.waitForGoogleMaps(function() {
+                        initializeMap();
+                    });
+                } else if (map) {
+                    // If map already exists, trigger resize to fix dimensions
+                    MapsManager.resizeMap(map);
+                }
+            });
+        }
+    });
 
     async function initializeMap() {
-    
         @php
             $lat = isset($guidings[0]) ? $guidings[0]->lat : 51.165691;
             $lng = isset($guidings[0]) ? $guidings[0]->lng : 10.451526;
         @endphp
-        const position =  { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }} , lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} }; 
-        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
-        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
+        const position = { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }}, lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} }; 
+        
+        const { InfoWindow } = await MapsManager.loadLibrary("maps");
+        const { AdvancedMarkerElement, PinElement } = await MapsManager.loadLibrary("marker");
 
         // Initialize map only if it hasn't been initialized yet
         if (!map) {
-            const mapOptions = {
+            map = await MapsManager.initMap("map", {
                 zoom: 5,
                 center: position,
-                mapId: "{{env('GOOGLE_MAPS_MAP_ID')}}",
+                mapId: "{{ config('services.google_maps.map_id', 'DEMO_MAP_ID') }}",
                 streetViewControl: false,
                 clickableIcons: false
-            };
-            
-            map = new Map(document.getElementById("map"), mapOptions);
+            });
         }
 
         // Bounds and marker counter for primary (non-gray) markers
@@ -913,11 +929,21 @@
             return (Math.random() - 0.5) * 0.0080;
         }
 
-        markerCluster = new MarkerClusterer({ markers, map });
-        google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
-            map.setZoom(map.getZoom() + 2);
-            map.setCenter(cluster.getCenter());
-        });
+        // Create marker cluster using centralized manager
+        if (markers.length > 0) {
+            markerCluster = MapsManager.createMarkerClusterer({ markers, map });
+            if (markerCluster) {
+                google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
+                    map.setZoom(map.getZoom() + 2);
+                    map.setCenter(cluster.getCenter());
+                });
+            }
+        }
+        
+        mapInitialized = true;
+        
+        // Trigger resize after a short delay to ensure modal is fully rendered
+        MapsManager.resizeMap(map);
     }
 
     window.updateMapWithGuidings = function(guidings) {
@@ -926,7 +952,11 @@
         
         // Clear marker cluster
         if (markerCluster) {
-            markerCluster.clearMarkers();
+            try {
+                markerCluster.clearMarkers();
+            } catch (error) {
+                console.warn('Error clearing marker cluster:', error);
+            }
         }
 
         // Clear arrays but keep the map instance
@@ -988,7 +1018,7 @@
 
                 infowindows.push(infowindow);
 
-                marker.addListener("click", () => {
+                marker.addListener("gmp-click", () => {
                     infowindows.forEach((iw) => {
                         iw.close();
                     });
@@ -999,7 +1029,18 @@
 
         // Update marker cluster with new markers
         if (markerCluster) {
-            markerCluster.addMarkers(markers);
+            try {
+                markerCluster.addMarkers(markers);
+            } catch (error) {
+                console.warn('Error adding markers to cluster:', error);
+                // If clustering fails, recreate it
+                if (markers.length > 0 && map) {
+                    markerCluster = MapsManager.createMarkerClusterer({ markers, map });
+                }
+            }
+        } else if (markers.length > 0 && map) {
+            // Create cluster if it doesn't exist
+            markerCluster = MapsManager.createMarkerClusterer({ markers, map });
         }
     };
 

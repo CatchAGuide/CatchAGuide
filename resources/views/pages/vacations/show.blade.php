@@ -1132,34 +1132,35 @@
 @section('js_after')
 <script>
 
-function initMap() {
-    var location = { 
+// Use centralized GoogleMapsManager
+const MapsManager = window.GoogleMapsManager;
+
+async function initMap() {
+    const location = { 
         lat: {{ $vacation->latitude ?? 41.40338 }}, 
         lng: {{ $vacation->longitude ?? 2.17403 }} 
     };
-    var map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 10,
-        center: location,
-        mapTypeControl: false,
-        streetViewControl: false,
-        mapId: '8f348c2f6c51f6f0'
-    });
+    
+    MapsManager.waitForGoogleMaps(async function() {
+        const map = await MapsManager.initMap('map', {
+            zoom: 10,
+            center: location,
+            mapTypeControl: false,
+            streetViewControl: false,
+            mapId: "{{ config('services.google_maps.map_id', 'DEMO_MAP_ID') }}"
+        });
 
-    // Create an AdvancedMarkerElement with the required Map ID
-    const marker = new google.maps.marker.AdvancedMarkerElement({
-        map,
-        position: location,
+        // Create marker using centralized manager
+        const marker = await MapsManager.createMarker({
+            map: map,
+            position: location
+        });
     });
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-    // Load Google Maps API dynamically with marker library
-    if (typeof google === 'undefined') {
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&libraries=marker&callback=initMap`;
-        script.async = true;
-        script.defer = true;
-        document.head.appendChild(script);
+    // Use centralized manager - no need to load script dynamically
+    initMap();
     } else {
         // If Google Maps API is already loaded, just call initMap
         initMap();

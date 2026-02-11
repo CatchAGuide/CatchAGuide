@@ -590,54 +590,35 @@ transform: translate3d(0,0,0); width: 100%;">
     </style>
 
     <script>
-        
-        
-        initMap();
- 
-            // Initialize and add the map
-            async function initMap() {
-                // The location of Uluru
-                const position = { lat: {{$guiding->lat}}, lng: {{$guiding->lng}} };
-                // Request needed libraries.
-                //@ts-ignore
-                const { Map } = await google.maps.importLibrary("maps");
-                const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+        // Use centralized GoogleMapsManager
+        const MapsManager = window.GoogleMapsManager;
+        let map;
 
-                // The map, centered at Uluru
-                map = new Map(document.getElementById("map"), {
-                    zoom: 10,
-                    center: position,
-                    mapId: "DEMO_MAP_ID",
-                    mapTypeControl: false,
-                    streetViewControl: false,
-                });
+        // Wait for Google Maps API and initialize map
+        MapsManager.waitForGoogleMaps(async function() {
+            const position = { lat: {{$guiding->lat}}, lng: {{$guiding->lng}} };
+            
+            // Initialize map using centralized manager (use env mapId if available)
+            map = await MapsManager.initMap("map", {
+                zoom: 10,
+                center: position,
+                mapId: "{{ config('services.google_maps.map_id', 'DEMO_MAP_ID') }}",
+                mapTypeControl: false,
+                streetViewControl: false
+            });
 
-                // The marker, positioned at Uluru
-                const marker = new AdvancedMarkerElement({
-                    map: map,
-                    position: position,
-                });
-            }
+            // Create marker using centralized manager
+            const marker = await MapsManager.createMarker({
+                map: map,
+                position: position
+            });
+            
+            // Add Event on Marker using gmp-click
+            marker.addListener("gmp-click", () => {
+                $('#guidingModal{{$guiding->id}}').modal('show');
+            });
+        });
 
-            function initMap_original() {
-                // The location of guiding
-                const location = {lat: {{$guiding->lat}}, lng: {{$guiding->lng}}};
-                // The map, centered at location
-                const map = new google.maps.Map(document.getElementById("map"), {
-                    zoom: 10,
-                    center: location,
-                    mapId: '8f348c2f6c51f6f0'
-                });
-                // The marker, positioned at Uluru
-                const marker = new google.maps.marker.AdvancedMarkerElement({
-                    position: location,
-                    map: map,
-                });
-                // Add Even on Marker
-                marker.addListener("click", () => {
-                    $('#guidingModal{{$guiding->id}}').modal('show');
-                })
-            }
 
             function toggleHighlight(markerView) {
                 if (markerView.content.classList.contains("highlight")) {

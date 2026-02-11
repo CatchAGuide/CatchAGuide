@@ -557,10 +557,27 @@ class Guiding extends Model
             'ids' => []
         ];
         
+        // Detect if this is a country-level search (city equals country)
+        // This happens when Google Maps returns a country without a city component
+        $isCountryOnlySearch = false;
+        if ($locationParts['city'] && $locationParts['country']) {
+            // Check if city equals country (indicating country-level search)
+            if (strtolower(trim($locationParts['city'])) === strtolower(trim($locationParts['country']))) {
+                $isCountryOnlySearch = true;
+            }
+            // Also check translated versions
+            if (isset($locationParts['city_en']) && isset($locationParts['country_en'])) {
+                if (strtolower(trim($locationParts['city_en'])) === strtolower(trim($locationParts['country_en']))) {
+                    $isCountryOnlySearch = true;
+                }
+            }
+        }
+        
         // Try direct database match based on standardized names
         $query = self::select('id')
-            ->where(function($query) use ($locationParts) {                // City conditions
-                if ($locationParts['city']) {
+            ->where(function($query) use ($locationParts, $isCountryOnlySearch) {
+                // City conditions - skip if this is a country-only search
+                if ($locationParts['city'] && !$isCountryOnlySearch) {
                     $query->where(function($q) use ($locationParts) {
                         $q->where('city', $locationParts['city']);
                         if (isset($locationParts['city_en'])) {
