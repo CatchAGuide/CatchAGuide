@@ -203,6 +203,8 @@ return [
     'offer_sendout_closing_message' => 'Unser Team von Angel-Experten steht bereit, um Ihre Fragen zu beantworten und Ihnen bei der Buchung zu helfen. Wir setzen uns dafür ein, Ihr Angelabenteuer reibungslos und unvergesslich zu gestalten.',
     'offer_sendout_closing_secondary' => 'Buchen Sie mit Vertrauen - wir bieten flexible Stornierungsbedingungen und engagierten Support während Ihrer gesamten Reise.',
     'offer_sendout_subject' => 'Ihr persönliches Angebot – :name',
+    'offer_sendout_reply_subject' => 'Re: Ihr CatchAGuide Angebot',
+    'offer_sendout_reply_button' => 'E-Mail an uns senden',
 
     'offer_followup_title' => 'Einfach mal Hallo sagen',
     'offer_followup_subject' => 'Kurzes Hallo – der Angelplan, den wir für Sie zusammengestellt haben :name',

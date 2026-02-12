@@ -74,6 +74,14 @@
                                 </div>
                             </div>
 
+                            {{-- Introduction text --}}
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Introduction text</label>
+                                <textarea name="introduction_text" id="introduction_text" class="form-control" rows="5" placeholder="{{ __('emails.offer_sendout_intro') }} {{ __('emails.offer_sendout_intro_secondary') }}"></textarea>
+                                <small class="text-muted">Leave empty to use default translation.</small>
+                            </div>
+
+
                             <div id="offer-blocks-container">
                                 {{-- Offer 1 --}}
                                 <div class="offer-block card border mb-3" data-offer-index="0">
@@ -392,6 +400,7 @@
             manual_email: form.querySelector('[name="manual_email"]')?.value || '',
             manual_phone: form.querySelector('[name="manual_phone"]')?.value || '',
             locale: form.querySelector('[name="locale"]')?.value || 'en',
+            introduction_text: form.querySelector('[name="introduction_text"]')?.value || '',
             free_text: form.querySelector('[name="free_text"]')?.value || '',
             offers: []
         };
@@ -721,7 +730,7 @@
 
     if (form) {
         form.querySelectorAll('input, select, textarea').forEach(function (el) {
-            if (el.name && (el.name.indexOf('offers[') === 0 || el.name === 'recipient_type' || el.name === 'customer_id' || el.name === 'manual_name' || el.name === 'manual_email' || el.name === 'manual_phone' || el.name === 'locale' || el.name === 'free_text')) {
+            if (el.name && (el.name.indexOf('offers[') === 0 || el.name === 'recipient_type' || el.name === 'customer_id' || el.name === 'manual_name' || el.name === 'manual_email' || el.name === 'manual_phone' || el.name === 'locale' || el.name === 'introduction_text' || el.name === 'free_text')) {
                 el.addEventListener('input', updatePreview);
                 el.addEventListener('change', updatePreview);
                 

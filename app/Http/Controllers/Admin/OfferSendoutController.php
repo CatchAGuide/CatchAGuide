@@ -283,6 +283,7 @@ class OfferSendoutController extends Controller
             'number_of_persons' => ['nullable', 'string', 'max:50'],
             'price' => ['nullable', 'string', 'max:100'],
             'additional_info' => ['nullable', 'string'],
+            'introduction_text' => ['nullable', 'string'],
             'free_text' => ['nullable', 'string'],
             'locale' => ['nullable', 'string', Rule::in(['en', 'de'])],
             'offers' => ['nullable', 'array'],
@@ -346,12 +347,34 @@ class OfferSendoutController extends Controller
 
         $subject = __('emails.offer_sendout_subject', ['name' => config('app.name')]);
 
+        $messageId = null;
         try {
+            $mailable = new OfferSendoutMail($payload);
+            $messageId = $mailable->messageId;
+            
+            \Log::info('Sending offer email', [
+                'to' => $recipientEmail,
+                'cc' => $adminEmail,
+                'locale' => $locale,
+                'message_id' => $messageId,
+            ]);
+            
             Mail::to($recipientEmail)
                 ->locale($locale)
                 ->cc($adminEmail)
-                ->send(new OfferSendoutMail($payload));
+                ->send($mailable);
+            
+            \Log::info('Offer email sent successfully', [
+                'to' => $recipientEmail,
+                'message_id' => $messageId,
+            ]);
         } catch (\Throwable $e) {
+            \Log::error('Failed to send offer email', [
+                'to' => $recipientEmail,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to send email: ' . $e->getMessage(),
@@ -368,6 +391,7 @@ class OfferSendoutController extends Controller
             'additional_info' => json_encode([
                 'recipient_name' => $recipientName,
                 'cc' => $adminEmail,
+                'message_id' => $messageId,
             ]),
         ]);
 
@@ -410,6 +434,7 @@ class OfferSendoutController extends Controller
 
         return [
             'recipient_name' => $recipientName,
+            'introduction_text' => $validated['introduction_text'] ?? '',
             'free_text' => $validated['free_text'] ?? '',
             'offers' => $offers,
         ];
@@ -588,6 +613,7 @@ class OfferSendoutController extends Controller
 
         return [
             'recipient_name' => $customerName ?: 'Customer',
+            'introduction_text' => $input['introduction_text'] ?? '',
             'free_text' => $input['free_text'] ?? '',
             'offers' => $offers,
         ];

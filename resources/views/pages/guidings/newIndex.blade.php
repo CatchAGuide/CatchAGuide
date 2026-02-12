@@ -1555,7 +1555,7 @@
                             </p>
                         </div>
                         <div class="comment-content">
-                            <p class="description">{{ $review->comment }}</p>
+                            <p class="description">{{ translate($review->comment) }}</p>
                             <small class="see-more text-orange">{{ __('guidings.See_More') }}</small>
                             <small class="show-less text-orange">{{ __('guidings.Show_Less') }}</small>
                         </div>

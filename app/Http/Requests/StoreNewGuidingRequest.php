@@ -61,6 +61,24 @@ class StoreNewGuidingRequest extends FormRequest
             }
         }
 
+        // If it's an update/edit, make all fields optional (deactivate validation for editing)
+        if ($this->input('is_update') == 1) {
+            foreach ($rules as $field => $rule) {
+                if (is_string($rule)) {
+                    if (strpos($rule, 'required_if') !== false) {
+                        $rules[$field] = str_replace('required_if', 'nullable', $rule);
+                    } else {
+                        $rules[$field] = str_replace('required', 'nullable', $rule);
+                    }
+                } elseif (is_array($rule)) {
+                    $rules[$field] = array_filter($rule, function($item) {
+                        return $item !== 'required';
+                    });
+                    array_unshift($rules[$field], 'nullable');
+                }
+            }
+        }
+
         return $rules;
     }
 

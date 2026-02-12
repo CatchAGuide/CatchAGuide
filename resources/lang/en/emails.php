@@ -207,6 +207,8 @@ return [
     'offer_sendout_closing_message' => 'Our team of fishing experts is ready to answer any questions and help you finalize your booking. We\'re committed to making your fishing adventure seamless and memorable.',
     'offer_sendout_closing_secondary' => 'Book with confidence - we offer flexible cancellation policies and dedicated support throughout your journey.',
     'offer_sendout_subject' => 'Your personalized offer – :name',
+    'offer_sendout_reply_subject' => 'Re: Your CatchAGuide Offer',
+    'offer_sendout_reply_button' => 'Send Email to Us',
 
     'offer_followup_title' => 'Just saying hi',
     'offer_followup_subject' => 'Quick hello – that fishing plan we put together :name',
