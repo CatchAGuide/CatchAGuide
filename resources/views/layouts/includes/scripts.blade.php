@@ -155,76 +155,63 @@
         }, interval);
     }
 
-    // Initialize all search inputs with Google Places Autocomplete using centralized manager
+    // Config for mobile search modal (searchPlace) – initialized only when modal is shown so dropdown works on mobile
+    const searchModalPlaceConfig = {
+        input: 'searchPlace',
+        lat: 'LocationLat',
+        lng: 'LocationLng',
+        city: 'LocationCity',
+        country: 'LocationCountry',
+        region: 'LocationRegion'
+    };
+
+    // Inputs that are visible on load (not inside a hidden modal) – init on page load
+    const searchInputsOnLoad = [
+        { input: 'searchPlaceMobile', lat: 'LocationLatMobile', lng: 'LocationLngMobile', city: 'LocationCityMobile', country: 'LocationCountryMobile', region: 'LocationRegionMobile' },
+        { input: 'searchPlaceDesktop', lat: 'LocationLatDesktop', lng: 'LocationLngDesktop', city: 'LocationCityDesktop', country: 'LocationCountryDesktop', region: 'LocationRegionDesktop' },
+        { input: 'searchPlaceHeaderDesktop', lat: 'LocationLatHeaderDesktop', lng: 'LocationLngHeaderDesktop', city: 'LocationCityHeaderDesktop', country: 'LocationCountryHeaderDesktop', region: 'LocationRegionHeaderDesktop' },
+        { input: 'searchPlaceShortDesktop', lat: 'LocationLatShortDesktop', lng: 'LocationLngShortDesktop', city: 'LocationCityShortDesktop', country: 'LocationCountryShortDesktop', region: 'LocationRegionShortDesktop' }
+    ];
+
+    function initAutocompleteForConfig(MapsManager, config, callback) {
+        if (!callback) {
+            callback = function(place) {
+                const locationData = MapsManager.extractLocationData(place);
+                const latInput = document.getElementById(config.lat);
+                const lngInput = document.getElementById(config.lng);
+                const cityInput = document.getElementById(config.city);
+                const countryInput = document.getElementById(config.country);
+                const regionInput = document.getElementById(config.region);
+                if (latInput) latInput.value = locationData.lat;
+                if (lngInput) lngInput.value = locationData.lng;
+                if (cityInput) cityInput.value = locationData.city || '';
+                if (countryInput) countryInput.value = locationData.country || '';
+                if (regionInput) regionInput.value = locationData.region || '';
+            };
+        }
+        MapsManager.initAutocomplete(config.input, callback);
+    }
+
+    // Initialize search inputs that are visible on page load (excludes searchPlace in modal)
     function initializeGooglePlaces() {
         const MapsManager = window.GoogleMapsManager;
         if (!MapsManager) {
             console.warn('GoogleMapsManager not available – skipping autocomplete init.');
             return;
         }
-
-        const searchInputs = [
-            {
-                input: 'searchPlaceMobile',
-                lat: 'LocationLatMobile',
-                lng: 'LocationLngMobile',
-                city: 'LocationCityMobile',
-                country: 'LocationCountryMobile',
-                region: 'LocationRegionMobile'
-            },
-            {
-                input: 'searchPlaceDesktop',
-                lat: 'LocationLatDesktop',
-                lng: 'LocationLngDesktop',
-                city: 'LocationCityDesktop',
-                country: 'LocationCountryDesktop',
-                region: 'LocationRegionDesktop'
-            },
-            {
-                input: 'searchPlaceHeaderDesktop',
-                lat: 'LocationLatHeaderDesktop',
-                lng: 'LocationLngHeaderDesktop',
-                city: 'LocationCityHeaderDesktop',
-                country: 'LocationCountryHeaderDesktop',
-                region: 'LocationRegionHeaderDesktop'
-            },
-            {
-                input: 'searchPlaceShortDesktop',
-                lat: 'LocationLatShortDesktop',
-                lng: 'LocationLngShortDesktop',
-                city: 'LocationCityShortDesktop',
-                country: 'LocationCountryShortDesktop',
-                region: 'LocationRegionShortDesktop'
-            },
-            {
-                input: 'searchPlace',
-                lat: 'LocationLat',
-                lng: 'LocationLng',
-                city: 'LocationCity',
-                country: 'LocationCountry',
-                region: 'LocationRegion'
-            }
-        ];
-
-        searchInputs.forEach(config => {
-            MapsManager.initAutocomplete(config.input, function(place) {
-                // Extract location data using centralized method
-                const locationData = MapsManager.extractLocationData(place);
-
-                // Write to hidden fields only when they exist so we never throw
-                const latInput = document.getElementById(config.lat);
-                const lngInput = document.getElementById(config.lng);
-                const cityInput = document.getElementById(config.city);
-                const countryInput = document.getElementById(config.country);
-                const regionInput = document.getElementById(config.region);
-
-                if (latInput) latInput.value = locationData.lat;
-                if (lngInput) lngInput.value = locationData.lng;
-                if (cityInput) cityInput.value = locationData.city || '';
-                if (countryInput) countryInput.value = locationData.country || '';
-                if (regionInput) regionInput.value = locationData.region || '';
-            });
+        searchInputsOnLoad.forEach(function(config) {
+            initAutocompleteForConfig(MapsManager, config);
         });
+    }
+
+    // Initialize only the mobile search modal Location input (so suggestions show on mobile when modal is visible)
+    var searchPlaceModalAutocompleteInited = false;
+    function initializeSearchModalPlaces() {
+        if (searchPlaceModalAutocompleteInited) return;
+        const MapsManager = window.GoogleMapsManager;
+        if (!MapsManager || !document.getElementById(searchModalPlaceConfig.input)) return;
+        searchPlaceModalAutocompleteInited = true;
+        initAutocompleteForConfig(MapsManager, searchModalPlaceConfig);
     }
 
     // Initialize on page load (but only once Google Maps is actually ready)
@@ -237,10 +224,21 @@
         }
     });
 
-    // Also initialize when any modal containing a search input is shown
+    // When mobile search modal is shown, init Places Autocomplete for searchPlace so suggestions appear (fix for mobile)
     document.addEventListener('DOMContentLoaded', function() {
-        const modals = ['searchModal', 'mobileMenuModal'];
-        modals.forEach(modalId => {
+        const searchModal = document.getElementById('searchModal');
+        if (searchModal) {
+            searchModal.addEventListener('shown.bs.modal', function () {
+                const MapsManager = window.GoogleMapsManager;
+                if (MapsManager) {
+                    MapsManager.waitForGoogleMaps(initializeSearchModalPlaces);
+                } else {
+                    runWhenGoogleMapsReady(initializeSearchModalPlaces);
+                }
+            });
+        }
+        // Other modals: re-run full init in case they contain other search inputs
+        ['mobileMenuModal'].forEach(function(modalId) {
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.addEventListener('shown.bs.modal', function () {

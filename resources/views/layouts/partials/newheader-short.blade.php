@@ -1004,6 +1004,11 @@ input[type=number] {
 .tooltip .tooltip-arrow::before {
     border-bottom-color: #dc3545;
 }
+
+/* Ensure Google Places autocomplete dropdown appears above the search modal on mobile */
+.pac-container {
+    z-index: 1060 !important;
+}
 </style>
 
 <!-- Search Modal for Mobile -->

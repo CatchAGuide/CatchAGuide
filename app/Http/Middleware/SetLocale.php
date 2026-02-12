@@ -15,10 +15,12 @@ class SetLocale
 
       if (env('APP_ENV') == 'production') {
         $domain = $request->getHost();
-      
-        if ($domain === 'catchaguide.com') {
+        // Normalize so both www.catchaguide.de and catchaguide.de get correct locale
+        $normalizedDomain = str_replace('www.', '', $domain);
+
+        if ($normalizedDomain === 'catchaguide.com') {
           \App::setLocale('en');
-        } elseif ($domain === 'catchaguide.de') {
+        } elseif ($normalizedDomain === 'catchaguide.de') {
           \App::setLocale('de');
         }
       }
