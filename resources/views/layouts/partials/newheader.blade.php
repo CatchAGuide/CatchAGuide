@@ -160,16 +160,21 @@
                                 </div>
                             </div>
                             <div class="col-md-4 column-input my-2">
-                                <div class="d-flex align-items-center small myselect2">
+                                <div class="d-flex align-items-center small target-fish-select-wrap">
                                     <i class="fa fa-fish fa-fw text-muted position-absolute ps-1"></i>
-                                    <select class="form-control form-select border-0" name="target_fish[]" style="width:100%">
-                                        <option value="">Select fish...</option>
+                                    <select class="selectpicker target-fish-picker" name="target_fish[]" style="width:100%" multiple
+                                        data-size="10"
+                                        data-live-search="true"
+                                        data-actions-box="true"
+                                        data-dropup-auto="false"
+                                        data-none-selected-text="@lang('homepage.searchbar-targetfish')..."
+                                        data-width="100%"
+                                        data-style="bg-white border-0">
                                         @php
-                                            // Assuming targets()::getAllTargets() returns an array or collection of targets
                                             $targets = collect(targets()::getAllTargets())->sortBy('name');
                                         @endphp
                                         @foreach($targets as $target)
-                                            <option value="{{ $target['id'] }}" 
+                                            <option value="{{ $target['id'] }}"
                                                 {{ in_array($target['id'], (array) request()->target_fish) ? 'selected' : '' }}>
                                                 {{ $target['name'] }}
                                             </option>
@@ -252,14 +257,17 @@
                             </div>
                             <div class="search-input" style="width: 300px;">
                                 <i class="fa fa-fish input-icon"></i>
-                                <select class="form-select" name="target_fish[]" id="target_fish_search">
-                                    <option value="">@lang('homepage.searchbar-targetfish')...</option>
+                                <select class="selectpicker target-fish-picker" name="target_fish[]" id="target_fish_search" multiple
+                                    data-size="10"
+                                    data-live-search="true"
+                                    data-actions-box="true"
+                                    data-none-selected-text="@lang('homepage.searchbar-targetfish')..."
+                                    data-width="100%">
                                     @php
-                                        // Assuming targets()::getAllTargets() returns an array or collection of targets
                                         $targets = collect(targets()::getAllTargets())->sortBy('name');
                                     @endphp
                                     @foreach($targets as $target)
-                                        <option value="{{ $target['id'] }}" 
+                                        <option value="{{ $target['id'] }}"
                                             {{ in_array($target['id'], (array) request()->target_fish) ? 'selected' : '' }}>
                                             {{ $target['name'] }}
                                         </option>
@@ -302,7 +310,8 @@
     #mobileherofilter .column-input i{
         color:#E8604C !important;
     }
-    #mobileherofilter .column-input input,select{
+    #mobileherofilter .column-input input,
+    #mobileherofilter .column-input select{
        padding-left:30px !important;
     }
     #mobileherofilter .form-control:focus {
@@ -333,6 +342,38 @@
     #mobileherofilter .myselect2 button.select2-selection__choice__remove{
         border: 0 !important;
         color: #fff !important;
+    }
+    /* Target fish multi-select with checkboxes – same look on mobile */
+    #mobileherofilter .target-fish-select-wrap .dropdown-toggle {
+        border-top: none !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-bottom: 1px solid #a7a7a7 !important;
+        padding: 2px 0px 2px 30px !important;
+        background-color: white;
+    }
+    #mobileherofilter .target-fish-select-wrap i.fa-fish {
+        z-index: 2;
+        pointer-events: none;
+    }
+    #mobileherofilter .target-fish-select-wrap .bootstrap-select {
+        width: 100% !important;
+    }
+    #mobileherofilter .target-fish-select-wrap .bootstrap-select .dropdown-menu {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        left: 0 !important;
+        right: auto !important;
+        margin: 0 !important;
+        z-index: 1065 !important;
+    }
+    #mobileherofilter .target-fish-select-wrap .bootstrap-select .bs-actionsbox .btn-group {
+        display: flex;
+        width: 100%;
+    }
+    #mobileherofilter .target-fish-select-wrap .bootstrap-select .bs-actionsbox .btn-group .btn {
+        flex: 1;
     }
     #mobileherofilter .new-filter-btn{
         background-color:#E8604C;
@@ -386,6 +427,17 @@
     pointer-events: none;
 }
 
+.short-header .search-input {
+    flex: 1;
+    min-width: 0;
+}
+.short-header .search-input[style*="width: 200px"] {
+    flex: 0 0 200px;
+}
+.short-header .search-input[style*="width: 300px"] {
+    flex: 0 0 300px;
+}
+
 .short-header .form-control,
 .short-header .form-select {
     height: 48px;
@@ -393,6 +445,71 @@
     border: 1px solid #E85B40;
     border-radius: 4px;
     width: 100%;
+}
+
+/* Target fish bootstrap-select: match search bar template (height, red border, icon space) */
+.short-header .search-input .bootstrap-select.target-fish-picker,
+.short-header .search-input .bootstrap-select:has(select.target-fish-picker) {
+    width: 100% !important;
+    flex: 1;
+    min-width: 0;
+}
+.short-header .search-input .bootstrap-select.target-fish-picker.form-control,
+.short-header .search-input .bootstrap-select.target-fish-picker.form-select,
+.short-header .search-input .bootstrap-select:has(select.target-fish-picker).form-control,
+.short-header .search-input .bootstrap-select:has(select.target-fish-picker).form-select {
+    border: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+.short-header .search-input .bootstrap-select.target-fish-picker .dropdown-toggle,
+.short-header .search-input .bootstrap-select:has(select.target-fish-picker) .dropdown-toggle {
+    height: 48px !important;
+    min-height: 48px !important;
+    padding-left: 40px !important;
+    padding-right: 40px !important;
+    border: 1px solid #E85B40 !important;
+    border-radius: 4px !important;
+    width: 100% !important;
+    line-height: 1.2 !important;
+    background-color: #fff !important;
+    color: #333 !important;
+    display: flex !important;
+    align-items: center !important;
+}
+.short-header .search-input .bootstrap-select.target-fish-picker .dropdown-toggle::after,
+.short-header .search-input .bootstrap-select:has(select.target-fish-picker) .dropdown-toggle::after {
+    display: none !important;
+}
+.short-header .search-input .bootstrap-select.target-fish-picker .dropdown-toggle .filter-option,
+.short-header .search-input .bootstrap-select:has(select.target-fish-picker) .dropdown-toggle .filter-option {
+    display: flex;
+    align-items: center;
+    min-height: 46px;
+    line-height: 1.2 !important;
+    border: 0 !important;
+    padding: 0 !important;
+}
+.short-header .search-input .bootstrap-select.target-fish-picker .dropdown-toggle .bs-caret,
+.short-header .search-input .bootstrap-select:has(select.target-fish-picker) .dropdown-toggle .bs-caret {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.short-header .search-input .bootstrap-select.target-fish-picker .dropdown-toggle:focus,
+.short-header .search-input .bootstrap-select:has(select.target-fish-picker) .dropdown-toggle:focus {
+    box-shadow: none !important;
+    border-color: #E85B40 !important;
+    outline: none !important;
+}
+.short-header .search-input .bootstrap-select.target-fish-picker .dropdown-menu,
+.short-header .search-input .bootstrap-select:has(select.target-fish-picker) .dropdown-menu {
+    background: #fff !important;
+    border: 1px solid #ced4da !important;
+    box-shadow: 0 8px 20px rgba(25, 30, 45, 0.12) !important;
 }
 
 .short-header .form-control:focus,
@@ -485,6 +602,76 @@ input[type=number] {
     }
     form#mobile-search .btn-primary{
         background-color: #313041;
+    }
+    #searchModal .target-fish-modal-wrap i {
+        left: 15px;
+        color: #E8604C;
+        z-index: 3;
+        pointer-events: none;
+    }
+    #searchModal .target-fish-modal-wrap .bootstrap-select {
+        width: 100% !important;
+    }
+    #searchModal .target-fish-modal-wrap .bootstrap-select > .dropdown-toggle {
+        width: 100% !important;
+        height: calc(1.5em + 0.75rem + 2px) !important;
+        border: 1px solid #aeb8c3 !important;
+        border-radius: 0.25rem !important;
+        background: #f7f9fc !important;
+        padding-left: 42px !important;
+        padding-right: 36px !important;
+        color: #313041 !important;
+        box-shadow: none !important;
+    }
+    #searchModal .target-fish-modal-wrap .bootstrap-select > .dropdown-toggle:focus,
+    #searchModal .target-fish-modal-wrap .bootstrap-select.show > .dropdown-toggle {
+        border-color: #E8604C !important;
+        box-shadow: 0 0 0 0.15rem rgba(232, 96, 76, 0.15) !important;
+    }
+    #searchModal .target-fish-modal-wrap .bootstrap-select > .dropdown-toggle::after {
+        display: none !important;
+    }
+    #searchModal .target-fish-modal-wrap .bootstrap-select > .dropdown-toggle .filter-option {
+        display: flex;
+        align-items: center;
+    }
+    #searchModal .target-fish-modal-wrap .bootstrap-select > .dropdown-toggle .filter-option-inner-inner {
+        color: #313041;
+    }
+    #searchModal .target-fish-modal-wrap .bootstrap-select > .dropdown-toggle .bs-caret {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    #searchModal .target-fish-modal-wrap .bootstrap-select .dropdown-menu {
+        width: 100% !important;
+        min-width: 100% !important;
+        background: #ffffff !important;
+        border: 1px solid #cfd6df !important;
+        box-shadow: 0 8px 20px rgba(25, 30, 45, 0.12) !important;
+    }
+    #searchModal .target-fish-modal-wrap .bootstrap-select .bs-searchbox {
+        background: #f5f7fa;
+        padding: 8px;
+    }
+    #searchModal .target-fish-modal-wrap .bootstrap-select .bs-searchbox .form-control {
+        border: 1px solid #aeb8c3 !important;
+        background: #fff !important;
+        color: #313041 !important;
+    }
+    #searchModal .target-fish-modal-wrap .bootstrap-select .bs-searchbox .form-control::placeholder {
+        color: #8a93a0;
+    }
+    #searchModal .target-fish-modal-wrap .bootstrap-select .bs-actionsbox .btn-group {
+        display: flex;
+        width: 100%;
+    }
+    #searchModal .target-fish-modal-wrap .bootstrap-select .bs-actionsbox .btn-group .btn {
+        flex: 1;
+        background: #f5f7fa;
+        color: #313041;
+        border-color: #d3d9e1;
     }
 }
 @media (max-width: 768px) {
@@ -1043,17 +1230,20 @@ input[type=number] {
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Target Fish</label>
-                            <div class="position-relative">
+                            <label class="form-label">@lang('homepage.searchbar-targetfish')</label>
+                            <div class="position-relative target-fish-modal-wrap">
                                 <i class="fas fa-fish position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
-                                <select class="form-select ps-5" name="target_fish[]">
-                                    <option value="">Select fish...</option>
+                                <select class="selectpicker target-fish-picker target-fish-modal-picker" name="target_fish[]" multiple
+                                    data-size="10"
+                                    data-live-search="true"
+                                    data-actions-box="true"
+                                    data-none-selected-text="@lang('homepage.searchbar-targetfish')..."
+                                    data-width="100%">
                                     @php
-                                        // Assuming targets()::getAllTargets() returns an array or collection of targets
                                         $targets = collect(targets()::getAllTargets())->sortBy('name');
                                     @endphp
                                     @foreach($targets as $target)
-                                        <option value="{{ $target['id'] }}" 
+                                        <option value="{{ $target['id'] }}"
                                             {{ in_array($target['id'], (array) request()->target_fish) ? 'selected' : '' }}>
                                             {{ $target['name'] }}
                                         </option>
@@ -1231,6 +1421,12 @@ document.addEventListener('DOMContentLoaded', function() {
         searchTrigger.addEventListener('click', function() {
             headerSearchModal.show();
         });
+        // Refresh target fish picker when modal opens (keeps dropdown/checkboxes correct on mobile)
+        searchModal.addEventListener('shown.bs.modal', function() {
+            if (typeof $ !== 'undefined' && $.fn.selectpicker) {
+                $('.target-fish-picker').selectpicker('refresh');
+            }
+        });
     }
 
     // Initialize bootstrap-select
@@ -1238,6 +1434,8 @@ document.addEventListener('DOMContentLoaded', function() {
         style: 'btn-link',
         size: 4
     });
+    // Target fish multi-select with checkboxes (desktop + mobile) – data-style/data-size on element override as needed
+    $('.target-fish-picker').selectpicker('refresh');
 
     // Add onchange handlers to all country selects
     const countrySelects = {

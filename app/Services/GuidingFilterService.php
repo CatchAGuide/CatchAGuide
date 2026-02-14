@@ -418,28 +418,27 @@ class GuidingFilterService
             return [];
         }
 
-        // For multiple target fish selections, use AND logic (intersection)
-        // Show only guidings that have ALL selected target fish
-        $resultIds = null;
-        
+        // Normalize to array (request can sometimes send single value)
+        $targetIds = is_array($targetIds) ? $targetIds : [$targetIds];
+
+        // For multiple target fish selections, use OR logic (union)
+        // Show guidings that have ANY of the selected target fish
+        $allIds = [];
+
         foreach ($targetIds as $targetId) {
-            if (isset($this->filterData['targets'][$targetId])) {
-                $currentIds = $this->filterData['targets'][$targetId];
-                
-                if ($resultIds === null) {
-                    // First iteration - set the initial result
-                    $resultIds = $currentIds;
-                } else {
-                    // Subsequent iterations - intersect with previous results
-                    $resultIds = array_intersect($resultIds, $currentIds);
-                }
-            } else {
-                // If any target fish has no guidings, result should be empty
-                return [];
+            $key = $targetId;
+            if (!isset($this->filterData['targets'][$key])) {
+                $key = (string) $targetId;
+            }
+            if (!isset($this->filterData['targets'][$key])) {
+                $key = (int) $targetId;
+            }
+            if (isset($this->filterData['targets'][$key])) {
+                $allIds = array_merge($allIds, $this->filterData['targets'][$key]);
             }
         }
-        
-        return $resultIds ?? [];
+
+        return array_values(array_unique($allIds));
     }
 
     private function getGuidingIdsForMethods($methodIds)
