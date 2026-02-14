@@ -282,18 +282,394 @@
     }
 }
 
-// Vacation Category Page - Card Styling
+// Vacation Category Page - Card Styling (desktop: image left, content middle, price right; mobile: stacked)
 #vacations-category {
-    // Vacation Card Gallery Styling
-    .vacation-card__gallery {
+    .vacation-list-card {
+        margin-bottom: 16px;
+        position: relative;
+
+        &.guiding-list-item {
+            margin-bottom: 16px !important;
+        }
+    }
+
+    .vacation-list-card__inner {
+        display: flex;
+        flex-direction: column;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(15, 23, 42, 0.06);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+
+        @media (min-width: 768px) {
+            flex-direction: row;
+            align-items: stretch;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        }
+    }
+
+    .vacation-list-card__media {
+        flex-shrink: 0;
+        width: 100%;
+        min-height: 200px;
+
+        @media (min-width: 768px) {
+            width: 38%;
+            height: 220px;
+            min-height: 220px;
+            max-height: 220px;
+            border-radius: 12px 0 0 12px;
+            overflow: hidden;
+        }
+    }
+
+    .vacation-list-card__body {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        padding: 14px 12px;
+        min-width: 0;
+        width: 100%;
+
+        @media (min-width: 768px) {
+            flex-direction: row;
+            padding: 14px 16px;
+            width: 62%;
+            min-height: 220px;
+            max-height: 220px;
+        }
+    }
+
+    .vacation-list-card__link {
+        color: inherit;
+        text-decoration: none;
+        display: block;
+        flex: 1;
+        min-width: 0;
+        width: 100%;
+
+        &:hover {
+            color: inherit;
+        }
+
+        @media (min-width: 768px) {
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+            padding-right: 12px;
+        }
+    }
+
+    .vacation-list-card__img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        min-height: 200px;
+        object-fit: cover;
+        cursor: pointer;
+
+        @media (min-width: 768px) {
+            min-height: 0;
+        }
+    }
+
+    .vacation-list-card__title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin: 0 0 4px 0;
+        line-height: 1.28;
+        color: #1e293b;
+
+        @media (min-width: 768px) {
+            font-size: 1.25rem;
+            margin-bottom: 6px;
+        }
+    }
+
+    .vacation-list-card__location {
+        font-size: 0.85rem;
+        color: #64748b;
+        margin: 0 0 8px 0;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        @media (min-width: 768px) {
+            font-size: 0.875rem;
+            margin-bottom: 10px;
+        }
+    }
+
+    .vacation-list-card__tags {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap !important;
+        gap: 6px;
+        margin-bottom: 10px;
+        align-items: center;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+        max-width: 100%;
+
+        /* Hide scrollbar but keep functionality */
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+        
+        &::-webkit-scrollbar {
+            display: none; /* Chrome, Safari */
+        }
+
+        @media (min-width: 768px) {
+            gap: 6px;
+            margin-bottom: 8px;
+            overflow-x: auto;
+        }
+    }
+
+    .vacation-list-card__tags .vacation-see-more-btn {
+        flex-shrink: 0;
+    }
+
+    .vacation-list-card__tags.vacation-target-fish-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap !important;
+        align-items: center;
+    }
+
+    .vacation-list-card__tag {
+        display: inline-flex;
+        align-items: center;
+        flex-shrink: 0;
+        padding: 4px 10px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        border-radius: 8px;
+        background: #e2e8f0;
+        color: #334155;
+        white-space: nowrap;
+
+        @media (min-width: 768px) {
+            padding: 4px 8px;
+            font-size: 0.7rem;
+            border-radius: 6px;
+        }
+    }
+
+    .vacation-list-card__features {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 8px;
+
+        @media (min-width: 768px) {
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+    }
+
+    .vacation-list-card__feature {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border-radius: 8px;
+        white-space: nowrap;
+
+        @media (min-width: 768px) {
+            padding: 5px 10px;
+            font-size: 0.75rem;
+        }
+
+        i {
+            font-size: 0.85rem;
+        }
+
+        &--boat {
+            background: #dbeafe;
+            color: #1e40af;
+
+            i {
+                color: #1e40af;
+            }
+        }
+
+        &--guide {
+            background: #dcfce7;
+            color: #166534;
+
+            i {
+                color: #166534;
+            }
+        }
+    }
+
+    .vacation-list-card__amenities {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+
+        @media (min-width: 768px) {
+            gap: 3px;
+        }
+
+        .fa-check {
+            color: #10b981;
+            margin-right: 6px;
+            font-size: 0.7rem;
+        }
+    }
+
+    .vacation-list-card__amenity {
+        display: flex;
+        align-items: center;
+        font-size: 0.75rem;
+        color: #475569;
+
+        @media (min-width: 768px) {
+            font-size: 0.75rem;
+        }
+    }
+
+    .vacation-list-card__footer {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: auto;
+        padding-top: 10px;
+        border-top: 1px solid #e2e8f0;
+        flex-wrap: nowrap;
+        flex-shrink: 0;
+        width: 100%;
+
+        @media (min-width: 768px) {
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+            padding-top: 0;
+            padding-left: 12px;
+            border-top: none;
+            border-left: 1px solid #e2e8f0;
+            width: auto;
+            min-width: 180px;
+            margin-top: 0;
+            gap: 10px;
+        }
+    }
+
+    .vacation-list-card__price-block {
+        display: flex;
+        flex-direction: column;
+        margin-right: auto;
+
+        @media (min-width: 768px) {
+            margin-right: 0;
+            text-align: right;
+            width: 100%;
+        }
+    }
+
+    .vacation-list-card__price-label {
+        font-size: 0.65rem;
+        font-weight: 500;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+
+        @media (min-width: 768px) {
+            font-size: 0.7rem;
+        }
+    }
+
+    .vacation-list-card__price {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #1e293b;
+
+        @media (min-width: 768px) {
+            font-size: 1.1rem;
+        }
+    }
+
+    .vacation-list-card__btn-book {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 14px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #fff;
+        background: #E8604C;
+        border-radius: 8px;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: background 0.2s;
+
+        @media (min-width: 768px) {
+            padding: 10px 0;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+
+        &:hover {
+            background: #d04a3a;
+            color: #fff;
+        }
+    }
+
+    .vacation-list-card__btn-info {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        color: #64748b;
+        text-decoration: none;
+        flex-shrink: 0;
+        transition: background 0.2s, color 0.2s;
+
+        @media (min-width: 768px) {
+            width: 100%;
+            height: 36px;
+            border-radius: 8px;
+        }
+
+        &:hover {
+            background: #cbd5e1;
+            color: #334155;
+        }
+
+        i {
+            font-size: 0.8rem;
+        }
+    }
+
+    // Vacation Card Gallery (inside new card) - fixed height on desktop for balanced card
+    .vacation-list-card .vacation-card__gallery {
         position: relative;
         width: 100%;
         height: 100%;
-        min-height: 300px;
+        min-height: 200px;
         overflow: hidden;
-        border-radius: 8px;
-        border: 1px solid rgba(15, 23, 42, 0.08);
         background: #f1f5f9;
+
+        @media (min-width: 768px) {
+            min-height: 0;
+            height: 100%;
+            max-height: 220px;
+            border-radius: 12px 0 0 12px;
+        }
 
         img {
             position: absolute;
@@ -310,129 +686,8 @@
     }
 
     .guiding-list-item {
-        margin-bottom: 12px !important;
+        margin-bottom: 16px !important;
         position: relative;
-
-        .row {
-            align-items: stretch;
-            padding: 6px 8px !important;
-
-            @media (max-width: 768px) {
-                align-items: flex-start;
-                padding: 4px 6px !important;
-            }
-        }
-
-        .border {
-            border-radius: 8px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .vacation-card__gallery {
-            height: 100%;
-            min-height: 200px;
-
-            @media (min-width: 768px) {
-                min-height: 220px;
-            }
-        }
-
-        .guiding-item-desc {
-            padding: 6px 8px !important;
-
-            @media (min-width: 768px) {
-                padding: 8px 10px !important;
-            }
-        }
-
-        [class*="col-"] {
-            padding-left: 4px;
-            padding-right: 4px;
-
-            @media (min-width: 768px) {
-                padding-left: 6px;
-                padding-right: 6px;
-            }
-        }
-    }
-
-    .guiding-item-desc {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-
-        .guidings-item {
-            gap: 4px;
-        }
-
-        .guidings-item-title {
-            margin-bottom: 2px;
-
-            h5 {
-                margin-bottom: 1px;
-                font-size: 1rem;
-                line-height: 1.2;
-            }
-
-            span {
-                font-size: 0.8rem;
-                line-height: 1.3;
-            }
-        }
-
-        .inclusions-price {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 10px;
-            margin-top: 6px;
-
-            @media (max-width: 768px) {
-                flex-direction: column;
-                gap: 8px;
-            }
-        }
-
-        .guidings-inclusions-container {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .guiding-item-price {
-            text-align: right;
-            min-width: fit-content;
-            padding-left: 10px;
-
-            h5 {
-                margin: 0;
-                white-space: nowrap;
-                font-size: clamp(14px, 2vw, 18px);
-            }
-
-            span {
-                display: inline-block;
-                padding: 4px 8px;
-            }
-
-            @media (max-width: 768px) {
-                width: 100%;
-                text-align: left;
-                padding-left: 0;
-
-                h5 {
-                    font-size: 16px;
-                }
-            }
-        }
-
-        @media (max-width: 768px) {
-            margin-top: 6px;
-
-            .guidings-item-title h5 {
-                font-size: 0.95rem;
-            }
-        }
     }
 
     // Vacation Gallery Navigation
@@ -455,6 +710,12 @@
         transition: all 0.2s ease;
         box-shadow: 0 6px 14px -8px rgba(15, 23, 42, 0.4);
         z-index: 10;
+
+        @media (min-width: 768px) {
+            width: 28px;
+            height: 28px;
+            font-size: 14px;
+        }
 
         &:hover {
             background: #ffffff;
@@ -482,6 +743,14 @@
         color: #64748b;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         z-index: 10;
+
+        @media (min-width: 768px) {
+            bottom: 6px;
+            right: 6px;
+            padding: 3px 6px;
+            font-size: 10px;
+            border-radius: 10px;
+        }
     }
 
     // Vacation Info Section Styling
@@ -533,12 +802,27 @@
         flex: 1;
         min-width: 0;
         width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
 
         @media (max-width: 768px) {
             width: 100%;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .vacation-list-card__inner {
+            border-radius: 18px;
+        }
+
+        .vacation-list-card .vacation-card__gallery {
+            border-radius: 18px 18px 0 0;
+        }
+
+        .vacation-list-card__btn-book {
+            border-radius: 12px;
+        }
+
+        .vacation-list-card__btn-info {
+            border-radius: 12px;
         }
     }
 

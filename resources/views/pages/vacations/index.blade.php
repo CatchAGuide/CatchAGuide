@@ -366,153 +366,109 @@
                     </div>
                     <div class="col-sm-12 col-lg-9 country-listing-item">
                         @foreach($vacations as $vacation)
-                        <div class="row m-0 mb-2 guiding-list-item">
-                            <div class="tours-list__right col-md-12">
-                                <div class="row p-2 border shadow-sm bg-white rounded">
-                                    <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-0">
-                                        @php
-                                            $gallery_images = get_galleries_image_link($vacation, 1);
-                                            $gallery_images_full = array_map(function($img) {
-                                                return asset($img);
-                                            }, $gallery_images);
-                                            $gallery_count = count($gallery_images);
-                                        @endphp
-                                        <div class="vacation-card__gallery" data-vacation-gallery="{{ $vacation->id }}" data-gallery-images='@json($gallery_images_full)'>
-                                            @if($gallery_count > 0)
-                                                <img 
-                                                    src="{{ asset($gallery_images[0]) }}" 
-                                                    alt="{{ translate($vacation->title) }}"
-                                                    data-vacation-gallery-image
-                                                    data-vacation-open-modal
-                                                    style="cursor: pointer;"
-                                                />
-                                                @if($gallery_count > 1)
-                                                    <button
-                                                        type="button"
-                                                        aria-label="{{ __('Previous image') }}"
-                                                        class="vacation-gallery__nav-btn vacation-gallery__nav-btn--prev"
-                                                        data-vacation-prev-image
-                                                    >
-                                                        ‹
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        aria-label="{{ __('Next image') }}"
-                                                        class="vacation-gallery__nav-btn vacation-gallery__nav-btn--next"
-                                                        data-vacation-next-image
-                                                    >
-                                                        ›
-                                                    </button>
-                                                    <div class="vacation-gallery__counter" data-vacation-image-counter>1/{{ $gallery_count }}</div>
-                                                @endif
-                                            @else
-                                                <img 
-                                                    src="{{ asset('images/placeholder_guide.jpg') }}" 
-                                                    alt="{{ translate($vacation->title) }}"
-                                                />
+                        @php
+                            $gallery_images = get_galleries_image_link($vacation, 0);
+                            $gallery_images_full = array_map(function($img) {
+                                return asset($img);
+                            }, $gallery_images);
+                            $gallery_count = count($gallery_images);
+                            $target_fish_raw = $vacation->target_fish ?? [];
+                            $target_fish = is_array($target_fish_raw) ? $target_fish_raw : (is_string($target_fish_raw) ? array_filter(explode(',', $target_fish_raw)) : []);
+                            $target_fish_count = count($target_fish);
+                            $has_boat = count($vacation->rentalBoats ?? []) > 0;
+                            $has_guide = count($vacation->guidings ?? []) > 0;
+                        @endphp
+                        <div class="vacation-list-card guiding-list-item">
+                            <div class="vacation-list-card__inner border shadow-sm bg-white rounded overflow-hidden">
+                                {{-- Image on top (mobile) / left (desktop) --}}
+                                <div class="vacation-list-card__media">
+                                    <div class="vacation-card__gallery" data-vacation-gallery="{{ $vacation->id }}" data-gallery-images='@json($gallery_images_full)'>
+                                        @if($gallery_count > 0)
+                                            <img
+                                                src="{{ asset($gallery_images[0]) }}"
+                                                alt="{{ translate($vacation->title) }}"
+                                                data-vacation-gallery-image
+                                                data-vacation-open-modal
+                                                class="vacation-list-card__img"
+                                            />
+                                            @if($gallery_count > 1)
+                                                <button type="button" aria-label="{{ __('Previous image') }}" class="vacation-gallery__nav-btn vacation-gallery__nav-btn--prev" data-vacation-prev-image>‹</button>
+                                                <button type="button" aria-label="{{ __('Next image') }}" class="vacation-gallery__nav-btn vacation-gallery__nav-btn--next" data-vacation-next-image>›</button>
+                                                <div class="vacation-gallery__counter" data-vacation-image-counter>1/{{ $gallery_count }}</div>
                                             @endif
-                                        </div>
-                                        
-                                        <!-- Vacation Gallery Modal -->
-                                        <div class="vacation-gallery-modal" data-vacation-modal="{{ $vacation->id }}">
-                                            <div class="vacation-gallery-modal__content">
-                                                <button class="vacation-gallery-modal__close">&times;</button>
-                                                <button class="vacation-gallery-modal__prev">&#10094;</button>
-                                                <button class="vacation-gallery-modal__next">&#10095;</button>
-                                                <img class="vacation-gallery-modal__image" src="" alt="{{ translate($vacation->title) }}">
-                                                <div class="vacation-gallery-modal__counter">
-                                                    <span class="vacation-gallery-modal__current">1</span> / <span class="vacation-gallery-modal__total">{{ $gallery_count }}</span>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @else
+                                            <img src="{{ asset('images/placeholder_guide.jpg') }}" alt="{{ translate($vacation->title) }}" class="vacation-list-card__img" />
+                                        @endif
                                     </div>
-                                    <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 p-md-3 mt-md-1">
-                                    <a href="{{ route('vacations.show', [$vacation->slug]) }}" 
-                                       onclick="event.preventDefault(); 
-                                                document.getElementById('store-destination-{{ $vacation->id }}').submit();">
-                                        <div class="guidings-item">
-                                            <div class="guidings-item-title">
-                                                @if(!$agent->ismobile())
-                                                <h5 class="fw-bolder text-truncate">{{translate($vacation->title)}}</h5>
-                                                @endif
-                                                @if($agent->ismobile())
-                                                    <h5 class="fw-bolder text-truncate">{{ \Str::limit(translate($vacation->title), 65) }}</h5>
-                                                @endif
-                                                <span class=""><i class="fas fa-map-marker-alt me-2"></i>{{ $vacation->location }} </span>                                      
-                                            </div>
-                                            <div class="inclusions-price">
-                                                <div class="guidings-inclusions-container">
-                                                </div>
-                                                <div class="guiding-item-price">
-                                                    <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{two($vacation->getLowestPrice())}}€ per day</span></h5>
-                                                </div>
-                                            </div>
+                                </div>
+                                <div class="vacation-list-card__body">
+                                    <a href="{{ route('vacations.show', [$vacation->slug]) }}" class="vacation-list-card__link" onclick="event.preventDefault(); document.getElementById('store-destination-{{ $vacation->id }}').submit();">
+                                        <h3 class="vacation-list-card__title">{{ \Str::limit(translate($vacation->title), 65) }}</h3>
+                                        <p class="vacation-list-card__location"><i class="fas fa-map-marker-alt me-2"></i>{{ $vacation->location }}</p>
+                                        {{-- Target fish tags (oval, light gray) - ALL visible on one scrollable line --}}
+                                        <div class="vacation-list-card__tags vacation-target-fish-container">
+                                            @foreach($target_fish as $index => $fish)
+                                                <span class="vacation-list-card__tag">{{ is_array($fish) ? ($fish['name'] ?? '') : (string) $fish }}</span>
+                                            @endforeach
                                         </div>
-                                        <div class="vacations-item-row">
-                                            <div class="vacations-item-row-top">
-                                            </div>
-                                            <div class="vacations-info-section">
-                                                <div class="vacations-info-item"> 
-                                                    <span class="fw-bold">{{translate('Target Fish')}}:</span>
-                                                    <div class="vacation-target-fish-container">
-                                                        <div class="vacation-target-fish-row">
-                                                            @php
-                                                                $target_fish = explode(",",$vacation->target_fish);
-                                                                $target_fish_count = count($target_fish);
-                                                            @endphp
-                                                            @foreach($target_fish as $index => $targetFish)
-                                                                <span class="vacation-target-fish-pill @if($index >= 3) vacation-item-hidden @endif">{{ $targetFish }}</span>
-                                                            @endforeach
-                                                            @if($target_fish_count > 3)
-                                                                <button type="button" class="vacation-see-more-btn" data-target="target-fish-{{ $vacation->id }}" data-expanded="false">
-                                                                    <span class="see-more-text">...</span>
-                                                                    <span class="see-less-text" style="display: none;">...</span>
-                                                                </button>
-                                                            @endif
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="vacations-info-item"> 
-                                                    <span class="fw-bold">{{translate('Boat Available')}}:</span>
-                                                    @if(count($vacation->rentalBoats) > 0)
-                                                        <i class="fa fa-check text-success ms-1"></i>
-                                                    @else
-                                                        <i class="fa fa-times text-danger ms-1"></i>
-                                                    @endif
-                                                </div>
-                                                <div class="vacations-info-item vacations-amenities-wrapper"> 
-                                                    <span class="fw-bold">{{translate('Camp Amenities')}}:</span>
-                                                    <div class="vacations-amenities-container">
-                                                        <div class="vacations-amenities-list">
-                                                            @php
-                                                                $facilities_count = count($vacation->facilities);
-                                                            @endphp
-                                                            @foreach($vacation->facilities as $index => $facility)
-                                                            <div class="vacation-amenity-item @if($index >= 3) vacation-item-hidden @endif">
-                                                                <i class="fa fa-check text-success"></i>
-                                                                <span>{{ $facility['name'] }}</span>
-                                                            </div>
-                                                            @endforeach
-                                                            @if($facilities_count > 3)
-                                                                <button type="button" class="vacation-see-more-btn vacation-amenity-ellipsis" data-target="amenities-{{ $vacation->id }}" data-expanded="false">
-                                                                    <span class="see-more-text">...</span>
-                                                                    <span class="see-less-text" style="display: none;">...</span>
-                                                                </button>
-                                                            @endif
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>  
+                                        {{-- Boat / Guide feature boxes --}}
+                                        <div class="vacation-list-card__features">
+                                            <span class="vacation-list-card__feature vacation-list-card__feature--boat">
+                                                @if($has_boat)
+                                                    <i class="fas fa-ship" aria-hidden="true"></i>
+                                                    <span>@lang('vacations.modern_boat')</span>
+                                                @else
+                                                    <i class="fas fa-home" aria-hidden="true"></i>
+                                                    <span>@lang('vacations.cozy_house')</span>
+                                                @endif
+                                            </span>
+                                            <span class="vacation-list-card__feature vacation-list-card__feature--guide">
+                                                @if($has_guide)
+                                                    <i class="fas fa-fish" aria-hidden="true"></i>
+                                                    <span>@lang('vacations.pro_guide')</span>
+                                                @else
+                                                    <i class="fas fa-star" aria-hidden="true"></i>
+                                                    <span>@lang('vacations.top_fishing')</span>
+                                                @endif
+                                            </span>
+                                        </div>
+                                        {{-- Camp amenities (included features) --}}
+                                        <div class="vacations-amenities-container">
+                                        <ul class="vacation-list-card__amenities">
+                                            @php $facilities_display = $vacation->facilities ?? collect(); $facilities_count = is_countable($facilities_display) ? count($facilities_display) : 0; @endphp
+                                            @foreach($facilities_display->take(3) as $index => $facility)
+                                                <li class="vacation-list-card__amenity">
+                                                    <i class="fa fa-check text-success" aria-hidden="true"></i>
+                                                    <span>{{ is_object($facility) ? ($facility->name ?? '') : ($facility['name'] ?? '') }}</span>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                        </div>
                                     </a>
-                                    <form id="store-destination-{{ $vacation->id }}" 
-                                          action="{{ route('vacations.show', [$vacation->slug]) }}" 
-                                          method="GET" style="display: none;">
-                                        @php
-                                            session(['vacation_destination_id' => $row_data->id]);
-                                        @endphp
+                                    {{-- Footer: price + Book Now + info --}}
+                                    <div class="vacation-list-card__footer">
+                                        <div class="vacation-list-card__price-block">
+                                            <span class="vacation-list-card__price-label">@lang('vacations.per_day_label')</span>
+                                            <span class="vacation-list-card__price">€{{ two($vacation->getLowestPrice()) }}</span>
+                                        </div>
+                                        <a href="{{ route('vacations.show', [$vacation->slug]) }}" class="vacation-list-card__btn-book" onclick="event.preventDefault(); document.getElementById('store-destination-{{ $vacation->id }}').submit();">@lang('vacations.book_now')</a>
+                                        <a href="{{ route('vacations.show', [$vacation->slug]) }}" class="vacation-list-card__btn-info" onclick="event.preventDefault(); document.getElementById('store-destination-{{ $vacation->id }}').submit();" aria-label="@lang('vacations.details')"><i class="fas fa-info"></i></a>
+                                    </div>
+                                    <form id="store-destination-{{ $vacation->id }}" action="{{ route('vacations.show', [$vacation->slug]) }}" method="GET" style="display: none;">
+                                        @php session(['vacation_destination_id' => $row_data->id]); @endphp
                                     </form>
                                 </div>
+                            </div>
+                            {{-- Gallery modal --}}
+                            <div class="vacation-gallery-modal" data-vacation-modal="{{ $vacation->id }}">
+                                <div class="vacation-gallery-modal__content">
+                                    <button class="vacation-gallery-modal__close">&times;</button>
+                                    <button class="vacation-gallery-modal__prev">&#10094;</button>
+                                    <button class="vacation-gallery-modal__next">&#10095;</button>
+                                    <img class="vacation-gallery-modal__image" src="" alt="{{ translate($vacation->title) }}">
+                                    <div class="vacation-gallery-modal__counter">
+                                        <span class="vacation-gallery-modal__current">1</span> / <span class="vacation-gallery-modal__total">{{ $gallery_count }}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -186,7 +186,7 @@ class VacationsController extends Controller
         }
 
         // $query = Vacation::where('status', 1)->where('country', $country);
-        $query = Camp::with('rentalBoats')->where('status', 'active')->where('country', $country);
+        $query = Camp::with(['rentalBoats', 'facilities', 'guidings'])->where('status', 'active')->where('country', $country);
 
         // Build title based on filters
         if($request->has('page')){

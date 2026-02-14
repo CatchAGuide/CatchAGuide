@@ -104,4 +104,12 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'send_inquiry_notice' => 'Anfrage senden - verbindliche Bestätigung innerhalb von 48 Stunden.',
     'send_inquiry' => 'Anfrage senden',
     'special_offers' => 'Sonderangebote',
+
+    // Card feature labels (list view)
+    'modern_boat' => 'Modernes Boot',
+    'cozy_house' => 'Gemütliches Haus',
+    'pro_guide' => 'Pro Guide',
+    'top_fishing' => 'Top Angeln',
+    'book_now' => 'Jetzt buchen',
+    'per_day_label' => 'PRO TAG',
 ];  
