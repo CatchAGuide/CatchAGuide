@@ -592,9 +592,7 @@ class GuidingsController extends Controller
     {
         try {
             $guidingIds = $request->input('guiding_ids', []);
-            
-            \Log::info('generateCards called with IDs:', $guidingIds);
-            
+
             if (empty($guidingIds)) {
                 return response()->json([
                     'success' => false,
@@ -604,18 +602,7 @@ class GuidingsController extends Controller
             
             // Get guidings by IDs - first check if they exist at all
             $allGuidings = Guiding::whereIn('id', $guidingIds)->get();
-            \Log::info('Found guidings (any status):', $allGuidings->pluck('id', 'status')->toArray());
-            
-            // Show actual status values for debugging
-            $statusInfo = $allGuidings->map(function($g) {
-                return [
-                    'id' => $g->id,
-                    'status' => $g->status,
-                    'title' => $g->title
-                ];
-            })->toArray();
-            \Log::info('Guiding status details:', $statusInfo);
-            
+
             // Get guidings by IDs - try different status values
             // First try status = 1 (published)
             $guidings = Guiding::whereIn('id', $guidingIds)
@@ -645,31 +632,7 @@ class GuidingsController extends Controller
                     ->with(['user', 'guidingTargets', 'guidingMethods', 'guidingWaters'])
                     ->get();
             }
-            
-            \Log::info('Found active guidings:', $guidings->pluck('id')->toArray());
-            
-            // Debug: Log image data for first guiding
-            if ($guidings->count() > 0) {
-                $firstGuiding = $guidings->first();
-                $galleryImages = $firstGuiding->cached_gallery_images ?? json_decode($firstGuiding->gallery_images);
-                $firstImage = null;
-                if (!empty($galleryImages) && is_array($galleryImages) && count($galleryImages) > 0) {
-                    $firstImage = $galleryImages[0];
-                }
-                
-                \Log::info('First guiding image debug:', [
-                    'id' => $firstGuiding->id,
-                    'title' => $firstGuiding->title,
-                    'cached_gallery_images' => $firstGuiding->cached_gallery_images,
-                    'gallery_images' => $firstGuiding->gallery_images,
-                    'decoded_gallery_images' => $galleryImages,
-                    'first_image_raw' => $firstImage,
-                    'first_image_with_asset' => $firstImage ? asset($firstImage) : null,
-                    'cached_gallery_images_type' => gettype($firstGuiding->cached_gallery_images),
-                    'gallery_images_type' => gettype($firstGuiding->gallery_images)
-                ]);
-            }
-            
+
             // Generate card HTML using a compact version for camp form
             $cardsHtml = view('components.guiding-card-compact', [
                 'guidings' => $guidings
@@ -850,16 +813,10 @@ class GuidingsController extends Controller
                 $totalImageCount = max($totalImageCount, count(array_filter($imageListFromRequest)));
             }
 
-            Log::debug('guidingsStore image validation', [
-                'guiding_id' => $guiding->id ?? null,
-                'is_update' => $isUpdate,
-                'is_draft' => $isDraft,
-                'gallery_images_count' => count($galleryImages),
-                'image_list_count' => is_array($imageListFromRequest) ? count(array_filter($imageListFromRequest)) : null,
-                'total_image_count' => $totalImageCount
-            ]);
+            $isAdminSubmit = str_contains($request->input('target_redirect', ''), 'admin');
 
-            if (!$isDraft && $totalImageCount < 5) {
+            // Require 5 images only for non-draft, non-admin submissions (profile create/update)
+            if (!$isDraft && !$isAdminSubmit && $totalImageCount < 5) {
                 throw new \Exception('Please upload at least 5 images');
             }
 
@@ -1724,25 +1681,13 @@ class GuidingsController extends Controller
 
     public function edit_newguiding(Guiding $guiding)
     {
-        \Log::info('DEBUG: edit_newguiding method called', ['guiding_id' => $guiding->id]);
-        
-        // Ensure the user has permission to edit this guiding
         if ($guiding->user_id !== auth()->id()) {
-            \Log::info('DEBUG: User not authorized', ['user_id' => auth()->id(), 'guiding_user_id' => $guiding->user_id]);
             abort(403, 'Unauthorized action.');
         }
 
-        // Load necessary relationships
         $guiding->load([
             'guidingTargets', 'guidingWaters', 'guidingMethods', 
             'fishingTypes', 'fishingFrom'
-        ]);
-        
-        \Log::info('DEBUG: edit_newguiding - Raw data from database', [
-            'guiding_id' => $guiding->id,
-            'raw_desc_departure_time' => $guiding->desc_departure_time,
-            'raw_weekday_availability' => $guiding->weekday_availability,
-            'raw_weekdays' => $guiding->weekdays
         ]);
 
         // Prepare data for the form
@@ -1810,16 +1755,6 @@ class GuidingsController extends Controller
             'weekday_availability' => $guiding->weekday_availability,
             'weekdays' => json_decode($guiding->weekdays, true),
         ];
-
-        \Log::info('DEBUG: edit_newguiding - form data for frontend', [
-            'desc_departure_time' => $formData['desc_departure_time'],
-            'weekday_availability' => $formData['weekday_availability'],
-            'weekdays' => $formData['weekdays'],
-            'raw_desc_departure_time_from_db' => $guiding->desc_departure_time,
-            'raw_weekday_availability_from_db' => $guiding->weekday_availability,
-            'raw_weekdays_from_db' => $guiding->weekdays
-        ]);
-
 
         $locale = Config::get('app.locale');
         $nameField = $locale == 'en' ? 'name_en' : 'name';
@@ -2013,11 +1948,6 @@ class GuidingsController extends Controller
 
                 if (!$guiding) {
                     $guiding = new Guiding(['user_id' => auth()->id()]);
-                } else {
-                    Log::info('SaveDraftSync: Found existing draft guiding', [
-                        'guiding_id' => $guiding->id,
-                        'status' => $guiding->status
-                    ]);
                 }
             }
 

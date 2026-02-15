@@ -14,6 +14,12 @@
     window.region = window.region || null;
     window.country = window.country || null;
     window.postal_code = window.postal_code || null;
+    function isAdminEdit() {
+        const el = document.getElementById('is_admin_guiding_form');
+        const isUpdateEl = document.getElementById('is_update');
+        return el && el.value === '1' && isUpdateEl && isUpdateEl.value === '1';
+    }
+    window.isAdminEdit = isAdminEdit;
     window.errorMapping = window.errorMapping || {
         title: { field: 'Title', step: 1 },
         title_image: { field: 'Galery Image', step: 1 },
@@ -122,7 +128,7 @@
 
     $(document).on('click', '[id^="saveDraftBtn"]', async function(e) {
         e.preventDefault();
-        
+        if (isAdminEdit()) return;
         // Always redirect after saving draft
         await saveDraft(true);
     });
@@ -402,8 +408,6 @@
                 $('#is_update').val(1);
             }
 
-            console.log('Draft saved successfully');
-            
             if (shouldRedirect) {
                 // Redirect to my guidings page
                 window.location.href = '{{ route("profile.myguidings") }}';
@@ -681,7 +685,6 @@
                     // Show min guests container if per_person is selected
                     if (priceType === 'per_person') {
                         document.getElementById('min_guests_container').style.display = 'block';
-                        console.log('per_person');
                         
                         // Handle min_guests setting
                         const hasMinGuests = {!! isset($formData['min_guests']) && $formData['min_guests'] > 0 ? 'true' : 'false' !!};
@@ -1211,7 +1214,6 @@
             };
 
             // Process cropped images
-            console.log("All cropped images:", croppedImages);
 
             Promise.all(
                 croppedImages.map((image, index) => {
@@ -1221,7 +1223,6 @@
                         // Try to use the original filename if available
                         if (image.filename) {
                             fileName = image.filename;
-                            console.log(`Using original filename: ${fileName}`);
                         } else {
                             // Create a unique filename with timestamp and index
                             const timestamp = new Date().getTime();
@@ -1238,11 +1239,9 @@
                                     extension = 'webp';
                                 }
                             } catch (e) {
-                                console.log("Could not extract MIME type, using default extension");
                             }
                             
                             fileName = `image_${timestamp}_${index}.${extension}`;
-                            console.log(`Generated fallback filename: ${fileName}`);
                         }
                         
                         return compressImage(image.dataUrl, maxWidth, quality).then((compressedBlob) => {
@@ -1365,6 +1364,10 @@
         let isValid = true;
         let errors = [];
 
+        // Skip all step validation on admin edit (validate only on final Save)
+        if (isAdminEdit()) {
+            return true;
+        }
         // Check if it's a draft submission
         const isDraft = document.querySelector('input[name="is_draft"]');
         if (isDraft && isDraft.value === '1') {
@@ -1444,7 +1447,6 @@
             case 4:
                 // Populate form data when step 4 is shown (departure time checkboxes)
                 if (typeof populateEditFormData === 'function') {
-                    console.log('Calling populateEditFormData from step 4 validation');
                     populateEditFormData();
                 }
                 
@@ -1532,7 +1534,6 @@
             case 7:
                 // Populate form data when step 7 is shown (weekday availability)
                 if (typeof populateEditFormData === 'function') {
-                    console.log('Calling populateEditFormData from step 7 validation');
                     populateEditFormData();
                 }
                 
@@ -1582,15 +1583,15 @@
             return;
         }
 
-        // Only validate when moving forward
-        if (stepNumber > currentStep && !validateStep(currentStep)) {
+        // Only validate when moving forward (skip validation on admin edit - validate only on final save)
+        if (stepNumber > currentStep && !isAdminEdit() && !validateStep(currentStep)) {
             console.error('Validation failed for current step');
             hideLoadingScreen();
             return;
         }
 
-        // Call AJAX to save progress when moving forward and wait for completion
-        if (stepNumber > currentStep) {
+        // Call AJAX to save progress when moving forward (skip auto-save on admin edit - save only on final step button)
+        if (stepNumber > currentStep && !isAdminEdit()) {
             try {                
                 // Update loading screen message to indicate saving
                 const loadingScreen = document.getElementById('loadingScreen');
@@ -1651,9 +1652,9 @@
         // Update button visibility
         const isUpdate = document.getElementById('is_update').value === '1';
         const isDraft = document.getElementById('is_draft').value === '1';
-        
-        // Show save draft button on all steps except the last one (since last step has submit)
-        $(`#saveDraftBtn${stepNumber}`).toggle(currentStep < totalSteps);
+        const showSaveDraft = currentStep < totalSteps && !isAdminEdit();
+        // Show save draft button on all steps except the last one; hide on admin edit (save only on final step)
+        $(`#saveDraftBtn${stepNumber}`).toggle(showSaveDraft);
         
         $(`#submitBtn${stepNumber}`).toggle((isUpdate && !isDraft) || currentStep === totalSteps);
         $(`#prevBtn${stepNumber}`).toggle(currentStep > 1);
@@ -1674,9 +1675,9 @@
         // Use setTimeout to allow the loading screen to render before validation
         setTimeout(async () => {
             try {
-                if (validateStep(currentStep)) {
+                if (validateStep(currentStep) || isAdminEdit()) {
                     const nextStep = currentStep + 1;
-                    await showStep(nextStep); // Save will happen in showStep before proceeding
+                    await showStep(nextStep); // Save will happen in showStep before proceeding (skipped on admin edit)
                 } else {
                     // Hide loading if validation fails
                     hideLoadingScreen();
@@ -1711,69 +1712,46 @@
         // Check if we're in edit mode
         const isUpdate = document.getElementById('is_update');
         if (!isUpdate || isUpdate.value !== '1') {
-            console.log('Not in edit mode, skipping populateEditFormData');
             return;
         }
-        
-        console.log('populateEditFormData called');
-        
+
         // Set departure time checkboxes
         const timeOfDayData = {!! json_encode($formData['desc_departure_time'] ?? []) !!};
-        console.log('timeOfDayData:', timeOfDayData);
         if (timeOfDayData && timeOfDayData.length > 0) {
             timeOfDayData.forEach(timeOfDay => {
-                console.log('Setting departure time:', timeOfDay);
                 const checkbox = document.querySelector(`input[name="desc_departure_time[]"][value="${timeOfDay}"]`);
                 if (checkbox) {
                     checkbox.checked = true;
                     checkbox.dispatchEvent(new Event('change'));
-                    console.log('Set departure time checkbox:', timeOfDay);
-                } else {
-                    console.log('Departure time checkbox not found for:', timeOfDay);
                 }
             });
-        } else {
-            console.log('No departure time data to set');
         }
 
         // Set weekday availability
         const weekdayAvailabilityData = '{{ $formData['weekday_availability'] ?? '' }}';
-        console.log('weekdayAvailabilityData:', weekdayAvailabilityData);
         if (weekdayAvailabilityData) {
             const weekdayRadio = document.querySelector(`input[name="weekday_availability"][value="${weekdayAvailabilityData}"]`);
-            console.log('weekdayRadio found:', weekdayRadio);
             if (weekdayRadio) {
                 weekdayRadio.checked = true;
                 weekdayRadio.dispatchEvent(new Event('change'));
-                console.log('Set weekday availability radio:', weekdayAvailabilityData);
-                
-                // Show weekday selection if certain_days is selected
+
                 if (weekdayAvailabilityData === 'certain_days') {
                     const weekdaySelection = document.getElementById('weekday_selection');
                     if (weekdaySelection) {
                         weekdaySelection.style.display = 'block';
                     }
-                    
-                    // Set specific weekdays if available
+
                     const weekdaysData = {!! json_encode($formData['weekdays'] ?? []) !!};
-                    console.log('weekdaysData:', weekdaysData);
                     if (weekdaysData && weekdaysData.length > 0) {
                         weekdaysData.forEach(weekday => {
                             const checkbox = document.querySelector(`input[name="weekdays[]"][value="${weekday}"]`);
                             if (checkbox) {
                                 checkbox.checked = true;
-                                console.log('Set weekday checkbox:', weekday);
-                            } else {
-                                console.log('Weekday checkbox not found for:', weekday);
                             }
                         });
                     }
                 }
-            } else {
-                console.log('Weekday availability radio not found for:', weekdayAvailabilityData);
             }
-        } else {
-            console.log('No weekday availability data to set');
         }
     }
 
@@ -1917,7 +1895,7 @@
                     
                     setTimeout(async () => {
                         try {
-                            if (targetStep > currentStepNumber && !validateStep(currentStepNumber)) {
+                            if (targetStep > currentStepNumber && !isAdminEdit() && !validateStep(currentStepNumber)) {
                                 hideLoadingScreen();
                                 return;
                             }
@@ -1955,7 +1933,6 @@
         return new Promise((resolve, reject) => {
             // Prevent duplicate calls within 2 seconds
             if (saveStepProgressLock) {
-                console.log('Save in progress, skipping duplicate call');
                 resolve(); // Resolve immediately for duplicate calls
                 return;
             }

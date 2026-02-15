@@ -90,8 +90,6 @@ class SaveGuidingDraftJob implements ShouldQueue
 
             DB::commit();
 
-            Log::info('Draft saved successfully for guiding ID: ' . $guiding->id);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error saving draft: ' . $e->getMessage());
@@ -195,7 +193,6 @@ class SaveGuidingDraftJob implements ShouldQueue
     private function handleSeasonalBlocking(Guiding $guiding): void
     {
         if (!isset($this->guidingData['seasonal_trip'])) {
-            Log::info('SaveGuidingDraftJob: No seasonal_trip data, skipping calendar schedule generation');
             return;
         }
 

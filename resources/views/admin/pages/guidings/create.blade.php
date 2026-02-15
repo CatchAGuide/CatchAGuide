@@ -104,7 +104,7 @@
       </div>
 
       <div class="container shadow-lg p-4 my-5">
-        @include('pages.guidings.multi-step-form')
+        @include('pages.guidings.multi-step-form', ['is_admin_guiding_form' => true])
         {{-- @livewire('admin-edit-guiding',['guiding' => $guiding]) --}}
       </div>
     </div>
