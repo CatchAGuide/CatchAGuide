@@ -141,30 +141,47 @@ class DestinationCountryController extends Controller
         
         // Filter by current destination context using location data from filters field
         // The filters field contains the exact location names as stored in guidings table
-        $rawFilters = $row_data->filters;
-        $filterData = is_array($rawFilters)
-            ? $rawFilters
-            : (is_string($rawFilters) ? (json_decode($rawFilters, true) ?? []) : []);
+        $filterData = $this->decodeDestinationFilters($row_data->filters);
+
+        $countryFilterValues = $this->buildDestinationFilterValues(
+            $filterData['country'] ?? null,
+            $country_row->name,
+            $country_row->translations->pluck('title')->all()
+        );
+        $regionFilterValues = $region_row
+            ? $this->buildDestinationFilterValues(
+                $filterData['region'] ?? null,
+                $region_row->name,
+                $region_row->translations->pluck('title')->all()
+            )
+            : [];
+        $cityFilterValues = $city_row
+            ? $this->buildDestinationFilterValues(
+                $filterData['city'] ?? null,
+                $city_row->name,
+                $city_row->translations->pluck('title')->all()
+            )
+            : [];
         
-        if ($city_row && !empty($filterData['city'])) {
-            $filteredQuery->where('city', $filterData['city']);
-            
-            if (!empty($filterData['country'])) {
-                $filteredQuery->where('country', $filterData['country']);
+        if ($city_row && !empty($cityFilterValues)) {
+            $filteredQuery->whereIn('city', $cityFilterValues);
+
+            if (!empty($countryFilterValues)) {
+                $filteredQuery->whereIn('country', $countryFilterValues);
             }
-            
-            if ($region_row && !empty($filterData['region'])) {
-                $filteredQuery->where('region', $filterData['region']);
+
+            if ($region_row && !empty($regionFilterValues)) {
+                $filteredQuery->whereIn('region', $regionFilterValues);
             }
-        } elseif ($region_row && !empty($filterData['region'])) {
-            $filteredQuery->where('region', $filterData['region']);
-            
-            if (!empty($filterData['country'])) {
-                $filteredQuery->where('country', $filterData['country']);
+        } elseif ($region_row && !empty($regionFilterValues)) {
+            $filteredQuery->whereIn('region', $regionFilterValues);
+
+            if (!empty($countryFilterValues)) {
+                $filteredQuery->whereIn('country', $countryFilterValues);
             }
         } else {
-            if (!empty($filterData['country'])) {
-                $filteredQuery->where('country', $filterData['country']);
+            if (!empty($countryFilterValues)) {
+                $filteredQuery->whereIn('country', $countryFilterValues);
             }
         }
 
@@ -294,7 +311,9 @@ class DestinationCountryController extends Controller
         $country = $filterData['country'] ?? null;
         $region = $filterData['region'] ?? null;
 
-        if(!empty($placeLat) && !empty($placeLng)){
+        // On destination pages, only run geo radius logic when radius is explicitly requested.
+        // Otherwise, keep strict destination matching to avoid nearby cross-country leakage.
+        if($radius !== null && !empty($placeLat) && !empty($placeLng)){
             $title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
             $filter_title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ', ';
             $guidingFilter = Guiding::locationFilter($city, $country, $region, $radius, $placeLat, $placeLng);
@@ -569,6 +588,49 @@ class DestinationCountryController extends Controller
         $coordinates = $geocoder->getCoordinatesForAddress($address);
 
         return $coordinates;
+    }
+
+    /**
+     * Decode destination filters and handle legacy/double-encoded JSON payloads.
+     */
+    private function decodeDestinationFilters($rawFilters): array
+    {
+        if (is_array($rawFilters)) {
+            return $rawFilters;
+        }
+
+        if (!is_string($rawFilters) || trim($rawFilters) === '') {
+            return [];
+        }
+
+        $decoded = json_decode($rawFilters, true);
+        if (is_array($decoded)) {
+            return $decoded;
+        }
+
+        if (is_string($decoded)) {
+            $decodedAgain = json_decode($decoded, true);
+            if (is_array($decodedAgain)) {
+                return $decodedAgain;
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * Build non-empty unique values for destination field matching.
+     */
+    private function buildDestinationFilterValues($primary, $fallback, array $translations = []): array
+    {
+        $values = array_merge([$primary, $fallback], $translations);
+        $values = array_map(function ($value) {
+            return is_string($value) ? trim($value) : $value;
+        }, $values);
+
+        return array_values(array_unique(array_filter($values, function ($value) {
+            return is_string($value) && $value !== '';
+        })));
     }
     
 
