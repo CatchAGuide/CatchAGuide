@@ -3,6 +3,96 @@
 @section('title', 'Alle Buchungen')
 
 @section('content')
+    <style>
+        #booking-datatable .col-id {
+            min-width: 80px;
+            width: 80px;
+        }
+
+        #booking-datatable .col-customer {
+            min-width: 220px;
+            width: 220px;
+        }
+
+        #booking-datatable .col-action {
+            min-width: 420px;
+            width: 420px;
+        }
+
+        /* Disable parent wrapper scrolling so controls don't move */
+        .booking-table-responsive {
+            overflow: visible !important;
+        }
+
+        #booking-datatable td.sticky-col {
+            position: sticky;
+            background: #fff;
+            z-index: 2;
+        }
+
+        /* Keep header cells non-sticky to avoid DataTables alignment issues */
+        #booking-datatable th.sticky-col {
+            position: static;
+            z-index: auto;
+        }
+
+        #booking-datatable td.sticky-left-id {
+            left: 0;
+        }
+
+        #booking-datatable td.sticky-left-customer {
+            left: 80px;
+        }
+
+        #booking-datatable td.sticky-right-action {
+            right: 0;
+        }
+
+        #booking-datatable tr.bg-warning td.sticky-col {
+            background: #fff3cd;
+        }
+
+        /* Keep horizontal scrolling scoped to table body only */
+        #booking-datatable_wrapper .dataTables_scroll {
+            overflow: visible !important;
+        }
+
+        #booking-datatable_wrapper .dataTables_scrollBody {
+            overflow-x: scroll !important;
+            overflow-y: auto !important;
+            margin-bottom: 10px;
+            scrollbar-width: auto;
+            scrollbar-color: #6c757d #dfe3e8;
+        }
+
+        /* More visible horizontal/vertical scrollbars (WebKit browsers) */
+        #booking-datatable_wrapper .dataTables_scrollBody::-webkit-scrollbar {
+            height: 14px;
+            width: 14px;
+        }
+
+        #booking-datatable_wrapper .dataTables_scrollBody::-webkit-scrollbar-track {
+            background: #dfe3e8;
+            border-radius: 10px;
+            border: 1px solid #c5ccd3;
+        }
+
+        #booking-datatable_wrapper .dataTables_scrollBody::-webkit-scrollbar-thumb {
+            background: #6c757d;
+            border-radius: 10px;
+            border: 2px solid #dfe3e8;
+        }
+
+        #booking-datatable_wrapper .dataTables_scrollBody::-webkit-scrollbar-thumb:hover {
+            background: #495057;
+        }
+
+        /* Ensure controls stay fixed and not inside horizontal scroll */
+        #booking-datatable_wrapper .dataTables_info,
+        #booking-datatable_wrapper .dataTables_paginate {
+            white-space: nowrap;
+        }
+    </style>
     <div class="side-app">
 
         <!-- CONTAINER -->
@@ -25,12 +115,12 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-body">
-                            <div class="table-responsive">
+                            <div class="table-responsive booking-table-responsive">
                                 <table class="table table-bordered text-nowrap border-bottom" id="booking-datatable">
                                     <thead>
                                     <tr>
-                                        <th class="wd-20p border-bottom-0">ID</th>
-                                        <th class="wd-20p border-bottom-0">Customer</th>
+                                        <th class="wd-20p border-bottom-0 col-id sticky-col sticky-left-id">ID</th>
+                                        <th class="wd-20p border-bottom-0 col-customer sticky-col sticky-left-customer">Customer</th>
                                         <th class="wd-15p border-bottom-0">Phone #</th>
                                         <th class="wd-15p border-bottom-0">Price</th>
                                         <th class="wd-15p border-bottom-0">Guide Share</th>
@@ -40,17 +130,24 @@
                                         <th class="wd-15p border-bottom-0">Status</th>
                                         <th class="wd-15p border-bottom-0">Guide</th>
                                         <th class="wd-15p border-bottom-0">Guiding</th>
-                                        <th class="wd-15p border-bottom-0">Action</th>
+                                        <th class="wd-15p border-bottom-0 col-action sticky-col sticky-right-action">Action</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($bookings as $booking)
+                                            @php
+                                                $bookingDateTime = $booking->getFormattedBookingDate('d.m.Y H:i');
+                                                $canSendGuideInvoice = $booking->status === 'accepted'
+                                                    && $booking->isBookingOver()
+                                                    && optional($booking->guiding)->user
+                                                    && optional($booking->guiding->user)->email;
+                                            @endphp
                                             {{-- @php
                                                 $price = $booking->guiding->price_type == 'per_boat' ? $booking->price * $booking->count_of_users : $booking->price;
                                             @endphp --}}
                                             <tr class="{{ $booking->is_guest ? 'bg-warning' : '' }}">
-                                                <td>{{ $booking->id }}</td>
-                                                <td>
+                                                <td class="col-id sticky-col sticky-left-id">{{ $booking->id }}</td>
+                                                <td class="col-customer sticky-col sticky-left-customer">
                                                     @if ($booking->user)
                                                         {{ $booking->user->firstname ?? 'Guest' }} {{ $booking->user->lastname ?? '' }}
                                                     @endif
@@ -77,6 +174,14 @@
 
                                                         <span class="text-info">by {{ $booking->employee->name }}</span>
                                                     @endif
+                                                    @if($booking->status === 'accepted' && $booking->isBookingOver())
+                                                        <br>
+                                                        @if($booking->is_guide_billed)
+                                                            <span class="badge bg-success">Billed</span>
+                                                        @else
+                                                            <span class="badge bg-warning text-dark">To be billed</span>
+                                                        @endif
+                                                    @endif
                                                 </td>
                                                 <td>
                                                     @if($booking->guiding && $booking->guiding->user)
@@ -96,15 +201,15 @@
                                                         <span class="text-muted">N/A</span>
                                                     @endif
                                                 </td>
-                                                <td>
+                                                <td class="col-action sticky-col sticky-right-action">
                                                     @if($booking->status == 'pending')
                                                         <a href="{{ route('booking.accept', $booking->token) }}" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
                                                         <a href="{{ route('booking.reject', $booking->token) }}" class="btn btn-sm btn-danger"><i class="fa fa-times-circle"></i></a>
                                                     @endif
 
-                                                    <a href="javascript:void(0)" class="btn btn-sm btn-secondary" onclick="showEditBookingModal({{ $booking->id }})"><i class="fa fa-pen"></i></a>
-                                                    <a href="javascript:deleteResource('{{ route('admin.bookings.destroy', $booking, false) }}')" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></a>
-                                                    <a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="showEmailPreview({{ $booking->id }})"><i class="fa fa-envelope"></i></a>
+                                                    <a href="javascript:void(0)" class="btn btn-sm btn-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit booking" onclick="showEditBookingModal({{ $booking->id }})"><i class="fa fa-pen"></i></a>
+                                                    <a href="javascript:deleteResource('{{ route('admin.bookings.destroy', $booking, false) }}')" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete booking"><i class="fa fa-trash"></i></a>
+                                                    <a href="javascript:void(0)" class="btn btn-sm btn-info" data-bs-toggle="tooltip" data-bs-placement="top" title="Preview emails" onclick="showEmailPreview({{ $booking->id }})"><i class="fa fa-envelope"></i></a>
                                                     <button class="btn btn-sm btn-warning" onclick="showResendModal(
                                                         {{ $booking->id }}, 
                                                         {{ json_encode($booking->user ? ($booking->user->firstname . ' ' . $booking->user->lastname) : ($booking->firstname . ' ' . $booking->lastname)) }}, 
@@ -112,8 +217,32 @@
                                                         {{ json_encode($booking->guiding && $booking->guiding->user ? ($booking->guiding->user->firstname . ' ' . $booking->guiding->user->lastname) : 'N/A') }}, 
                                                         {{ json_encode($booking->guiding && $booking->guiding->user ? $booking->guiding->user->email : '') }}
                                                     )"
-                                                        <i class="fa fa-paper-plane"></i> Resend Emails
+                                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Resend booking request emails">
+                                                        <i class="fa fa-paper-plane"></i>
                                                     </button>
+                                                    @if($canSendGuideInvoice)
+                                                        <button class="btn btn-sm btn-primary" onclick="showInvoiceConfirmModal(
+                                                            {{ $booking->id }},
+                                                            {{ json_encode($booking->guiding->user->full_name ?? 'N/A') }},
+                                                            {{ json_encode($booking->guiding->user->email ?? 'N/A') }},
+                                                            {{ json_encode($bookingDateTime ?: 'N/A') }},
+                                                            {{ json_encode(two($booking->price) . ' €') }},
+                                                            {{ json_encode(two($booking->price - $booking->cag_percent) . ' €') }},
+                                                            {{ json_encode(two($booking->cag_percent) . ' €') }}
+                                                        )"
+                                                            data-bs-toggle="tooltip" data-bs-placement="top" title="Send guide invoice email">
+                                                            <i class="fa fa-receipt"></i>
+                                                        </button>
+                                                        @if($booking->is_guide_billed)
+                                                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="Unmark as billed" onclick="updateGuideBillingStatus({{ $booking->id }}, false)">
+                                                                <i class="fa fa-undo"></i>
+                                                            </button>
+                                                        @else
+                                                            <button class="btn btn-sm btn-success" data-bs-toggle="tooltip" data-bs-placement="top" title="Mark as billed" onclick="updateGuideBillingStatus({{ $booking->id }}, true)">
+                                                                <i class="fa fa-check-circle"></i>
+                                                            </button>
+                                                        @endif
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -389,6 +518,76 @@
         </div>
     </div>
 
+    <!-- Send Guide Invoice Confirmation Modal -->
+    <div class="modal fade" id="sendGuideInvoiceModal" tabindex="-1" role="dialog" aria-labelledby="sendGuideInvoiceModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sendGuideInvoiceModalLabel">
+                        <i class="fa fa-envelope"></i> Send Guide Invoice
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-12 col-lg-5">
+                            <div class="alert alert-info">
+                                <i class="fa fa-info-circle"></i>
+                                <strong>Confirmation Required</strong>
+                                <p class="mb-0">You are about to send an invoice email to the guide for this completed booking.</p>
+                            </div>
+
+                            <div class="card border-primary mb-3">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0"><i class="fa fa-receipt"></i> Booking Summary</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-1"><strong>Booking ID:</strong> <span id="invoice-booking-id">-</span></p>
+                                    <p class="mb-1"><strong>Guide:</strong> <span id="invoice-guide-name">-</span></p>
+                                    <p class="mb-1"><strong>Guide Email:</strong> <span id="invoice-guide-email">-</span></p>
+                                    <p class="mb-1"><strong>Tour Date/Time:</strong> <span id="invoice-tour-datetime">-</span></p>
+                                    <hr>
+                                    <p class="mb-1"><strong>Total Price:</strong> <span id="invoice-total-price">-</span></p>
+                                    <p class="mb-1"><strong>Guide Share:</strong> <span id="invoice-guide-share">-</span></p>
+                                    <p class="mb-0"><strong>CaG Share:</strong> <span id="invoice-cag-share">-</span></p>
+                                </div>
+                            </div>
+
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" id="confirmGuideInvoiceSend" required>
+                                <label class="form-check-label" for="confirmGuideInvoiceSend">
+                                    I confirm that I want to send this invoice email
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-7">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <iframe id="guide-invoice-preview-iframe" style="width: 100%; height: 520px; border: 1px solid #dee2e6; border-radius: 6px;"></iframe>
+                                    <div id="guide-invoice-preview-loading" class="text-muted mt-2">
+                                        Loading invoice email preview...
+                                    </div>
+                                    <div id="guide-invoice-preview-not-available" class="alert alert-warning mt-2 d-none mb-0">
+                                        Invoice email preview is not available.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fa fa-times"></i> Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary" id="confirmGuideInvoiceSendBtn" onclick="confirmGuideInvoiceSend()" disabled>
+                        <i class="fa fa-envelope"></i> Send Invoice Email
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Edit Booking Modal -->
     <div class="modal fade" id="editBookingModal" tabindex="-1" role="dialog" aria-labelledby="editBookingModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -429,6 +628,14 @@
 
     <script>
         let currentBookingId = null;
+        let currentInvoiceBookingId = null;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
 
         function showResendModal(bookingId, guestName, guestEmail, guideName, guideEmail) {
             currentBookingId = bookingId;
@@ -452,6 +659,10 @@
         // Enable/disable send button based on checkbox
         document.getElementById('confirmSend').addEventListener('change', function() {
             document.getElementById('confirmSendBtn').disabled = !this.checked;
+        });
+
+        document.getElementById('confirmGuideInvoiceSend').addEventListener('change', function() {
+            document.getElementById('confirmGuideInvoiceSendBtn').disabled = !this.checked;
         });
 
         function confirmSendEmails() {
@@ -702,6 +913,139 @@
             })
             .catch(error => {
                 alert('Error updating booking.');
+            });
+        }
+
+        function showInvoiceConfirmModal(bookingId, guideName, guideEmail, tourDateTime, totalPrice, guideShare, cagShare) {
+            currentInvoiceBookingId = bookingId;
+
+            document.getElementById('invoice-booking-id').textContent = bookingId;
+            document.getElementById('invoice-guide-name').textContent = guideName || 'N/A';
+            document.getElementById('invoice-guide-email').textContent = guideEmail || 'N/A';
+            document.getElementById('invoice-tour-datetime').textContent = tourDateTime || 'N/A';
+            document.getElementById('invoice-total-price').textContent = totalPrice || 'N/A';
+            document.getElementById('invoice-guide-share').textContent = guideShare || 'N/A';
+            document.getElementById('invoice-cag-share').textContent = cagShare || 'N/A';
+
+            document.getElementById('confirmGuideInvoiceSend').checked = false;
+            document.getElementById('confirmGuideInvoiceSendBtn').disabled = true;
+
+            const previewIframe = document.getElementById('guide-invoice-preview-iframe');
+            const previewLoading = document.getElementById('guide-invoice-preview-loading');
+            const previewNotAvailable = document.getElementById('guide-invoice-preview-not-available');
+
+            previewIframe.srcdoc = '';
+            previewLoading.classList.remove('d-none');
+            previewNotAvailable.classList.add('d-none');
+
+            fetch(`/admin/bookings/${bookingId}/guide-invoice-preview`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.html) {
+                        previewIframe.srcdoc = data.html;
+                        previewNotAvailable.classList.add('d-none');
+                    } else {
+                        previewIframe.srcdoc = '';
+                        previewNotAvailable.classList.remove('d-none');
+                    }
+                })
+                .catch(() => {
+                    previewIframe.srcdoc = '';
+                    previewNotAvailable.classList.remove('d-none');
+                })
+                .finally(() => {
+                    previewLoading.classList.add('d-none');
+                });
+
+            const modal = new bootstrap.Modal(document.getElementById('sendGuideInvoiceModal'));
+            modal.show();
+        }
+
+        function confirmGuideInvoiceSend() {
+            if (!currentInvoiceBookingId) {
+                alert('Invalid booking selected.');
+                return;
+            }
+
+            if (!document.getElementById('confirmGuideInvoiceSend').checked) {
+                alert('Please confirm by checking the checkbox.');
+                return;
+            }
+
+            const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+            if (!csrfTokenElement) {
+                alert('CSRF token not found.');
+                return;
+            }
+
+            const confirmBtn = document.getElementById('confirmGuideInvoiceSendBtn');
+            const originalText = confirmBtn.innerHTML;
+            confirmBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Sending...';
+            confirmBtn.disabled = true;
+
+            fetch(`/admin/bookings/${currentInvoiceBookingId}/send-guide-invoice`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfTokenElement.getAttribute('content'),
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ ' + data.message);
+                    bootstrap.Modal.getInstance(document.getElementById('sendGuideInvoiceModal')).hide();
+                    location.reload();
+                } else {
+                    alert('❌ ' + (data.message || 'Failed to send invoice email.'));
+                }
+            })
+            .catch(error => {
+                console.error('Error sending guide invoice:', error);
+                alert('❌ Failed to send invoice email.');
+            })
+            .finally(() => {
+                confirmBtn.innerHTML = originalText;
+                confirmBtn.disabled = false;
+            });
+        }
+
+        function updateGuideBillingStatus(bookingId, isGuideBilled) {
+            const actionText = isGuideBilled ? 'mark this booking as billed' : 'unmark this booking as billed';
+            if (!confirm(`Are you sure you want to ${actionText}?`)) {
+                return;
+            }
+
+            const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+            if (!csrfTokenElement) {
+                alert('CSRF token not found.');
+                return;
+            }
+
+            fetch(`/admin/bookings/${bookingId}/update-guide-billing-status`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfTokenElement.getAttribute('content'),
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    is_guide_billed: isGuideBilled ? 1 : 0
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ ' + data.message);
+                    location.reload();
+                } else {
+                    alert('❌ ' + (data.message || 'Failed to update billing status.'));
+                }
+            })
+            .catch(error => {
+                console.error('Error updating guide billing status:', error);
+                alert('❌ Failed to update billing status.');
             });
         }
     </script>

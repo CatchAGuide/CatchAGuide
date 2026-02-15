@@ -11,13 +11,14 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\Guest\GuestBookingRequestMail;
 use App\Mail\Guide\GuideBookingRequestMail;
+use App\Mail\Guide\GuideInvoiceMail;
 use App\Events\BookingStatusChanged;
 
 class BookingsController extends Controller
 {
     public function index()
     {
-        $booking = Booking::with('employee', 'guiding.user')->orderBy('created_at', 'DESC')->get();
+        $booking = Booking::with('employee', 'guiding.user', 'blocked_event', 'calendar_schedule')->orderBy('created_at', 'DESC')->get();
         
         return view('admin.pages.bookings.index', [
             'bookings' => $booking
@@ -196,7 +197,142 @@ class BookingsController extends Controller
             ], 500);
         }
     }
-    
+
+    public function sendGuideInvoice(Booking $booking)
+    {
+        try {
+            if ($booking->status !== 'accepted') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invoice can only be sent for accepted bookings.'
+                ], 422);
+            }
+
+            if (!$booking->isBookingOver()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invoice can only be sent after the booked guiding date has passed.'
+                ], 422);
+            }
+
+            if (!$booking->guiding || !$booking->guiding->user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No guide is associated with this booking.'
+                ], 400);
+            }
+
+            $guide = $booking->guiding->user;
+            $guideEmail = $guide->email;
+
+            if (!$guideEmail) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No guide email address found for this booking.'
+                ], 400);
+            }
+
+            $emailLogExists = CheckEmailLog(
+                'guide_booking_invoice',
+                'booking_' . $booking->id,
+                $guideEmail
+            );
+
+            if ($emailLogExists) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invoice email was already sent in the last 24 hours for this booking.'
+                ], 409);
+            }
+
+            Mail::to($guideEmail)
+                ->locale($guide->language ?? app()->getLocale())
+                ->send(new GuideInvoiceMail($booking));
+
+            $booking->guide_invoice_sent_at = now();
+            $booking->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Invoice email sent successfully to ' . $guideEmail . '.'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error sending guide invoice email: ' . $e->getMessage(), [
+                'booking_id' => $booking->id ?? null
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error sending invoice email: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updateGuideBillingStatus(Request $request, Booking $booking)
+    {
+        $data = $request->validate([
+            'is_guide_billed' => 'required|boolean',
+        ]);
+
+        if ($booking->status !== 'accepted' || !$booking->isBookingOver()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Billing status can only be updated for completed accepted bookings.'
+            ], 422);
+        }
+
+        $booking->is_guide_billed = (bool) $data['is_guide_billed'];
+        $booking->guide_billed_at = $booking->is_guide_billed ? now() : null;
+        $booking->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => $booking->is_guide_billed
+                ? 'Booking marked as billed.'
+                : 'Booking marked as not billed.',
+            'is_guide_billed' => (bool) $booking->is_guide_billed,
+        ]);
+    }
+
+    public function guideInvoicePreview(Booking $booking)
+    {
+        try {
+            if (!$booking->guiding || !$booking->guiding->user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Guide information is not available for this booking.'
+                ], 422);
+            }
+
+            $user = $booking->user ?? (object) [
+                'firstname' => $booking->firstname,
+                'lastname' => $booking->lastname
+            ];
+            $guide = $booking->guiding->user;
+            $guiding = $booking->guiding;
+
+            $guideInvoiceEmail = view('mails.guide.guide_invoice', compact(
+                'booking',
+                'user',
+                'guide',
+                'guiding'
+            ))->render();
+
+            return response()->json([
+                'success' => true,
+                'html' => $guideInvoiceEmail
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error rendering guide invoice preview: ' . $e->getMessage(), [
+                'booking_id' => $booking->id ?? null,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to render invoice preview.'
+            ], 500);
+        }
+    }
 
 
     public function emailPreview(Booking $booking)

@@ -83,6 +83,23 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100 bg-dark text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fa fa-file-invoice fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-0">Billing Queue</h6>
+                            <h2 class="mb-0">{{ $toBeBilledCount }}</h2>
+                            <small>{{ $completedApprovedCount }} completed approved bookings</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Guide Analytics Summary -->
@@ -241,7 +258,7 @@
         <div class="col-12 col-xl-6">
             <div class="card h-100">
                 <div class="card-header">
-                    <h5 class="card-title mb-0">Recent Bookings</h5>
+                    <h5 class="card-title mb-0">Completed Approved Bookings</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -251,8 +268,10 @@
                                     <th>ID</th>
                                     <th>Customer</th>
                                     <th>Tour</th>
+                                    <th>Date</th>
                                     <th>Price</th>
                                     <th>Status</th>
+                                    <th>Billing</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -261,16 +280,24 @@
                                         <td>#{{ $booking['id'] }}</td>
                                         <td>{{ $booking['customer'] }}</td>
                                         <td>{{ $booking['tour'] }}</td>
+                                        <td>{{ $booking['date'] }}</td>
                                         <td>${{ number_format($booking['price'], 2) }}</td>
                                         <td>
                                             <span class="badge bg-{{ $booking['status_color'] }}">
                                                 {{ ucfirst($booking['status']) }}
                                             </span>
                                         </td>
+                                        <td>
+                                            @if($booking['is_guide_billed'])
+                                                <span class="badge bg-success">Billed</span>
+                                            @else
+                                                <span class="badge bg-warning text-dark">To be billed</span>
+                                            @endif
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="text-center">No recent bookings</td>
+                                        <td colspan="7" class="text-center">No completed approved bookings</td>
                                     </tr>
                                 @endforelse
                             </tbody>

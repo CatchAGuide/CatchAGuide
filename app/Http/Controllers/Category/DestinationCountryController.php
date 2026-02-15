@@ -141,7 +141,10 @@ class DestinationCountryController extends Controller
         
         // Filter by current destination context using location data from filters field
         // The filters field contains the exact location names as stored in guidings table
-        $filterData = json_decode($row_data->filters, true);
+        $rawFilters = $row_data->filters;
+        $filterData = is_array($rawFilters)
+            ? $rawFilters
+            : (is_string($rawFilters) ? (json_decode($rawFilters, true) ?? []) : []);
         
         if ($city_row && !empty($filterData['city'])) {
             $filteredQuery->where('city', $filterData['city']);

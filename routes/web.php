@@ -384,7 +384,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::resource('bookings', BookingsController::class);
         Route::get('/bookings/{booking}/email-preview', [BookingsController::class, 'emailPreview'])->name('bookings.email-preview');
+        Route::get('/bookings/{booking}/guide-invoice-preview', [BookingsController::class, 'guideInvoicePreview'])->name('bookings.guide-invoice-preview');
         Route::post('/bookings/{booking}/send-booking-request-emails', [BookingsController::class, 'sendBookingRequestEmails'])->name('bookings.send-booking-request-emails');
+        Route::post('/bookings/{booking}/send-guide-invoice', [BookingsController::class, 'sendGuideInvoice'])->name('bookings.send-guide-invoice');
+        Route::post('/bookings/{booking}/update-guide-billing-status', [BookingsController::class, 'updateGuideBillingStatus'])->name('bookings.update-guide-billing-status');
         Route::prefix('payments')->name('payments.')->group(function () {
             Route::get('/', [AdminPaymentsController::class, 'index'])->name('index');
             Route::get('/showoutpayments/{id}', [AdminPaymentsController::class, 'showoutpayments'])->name('showoutpayments');

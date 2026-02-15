@@ -57,12 +57,21 @@ class AdminController extends Controller
             })
             ->count();
 
-        // Recent Bookings with guest support
-        $recentBookings = Booking::with(['user', 'guiding'])
+        // Completed + approved bookings (accepted and tour date already passed)
+        $completedApprovedBookings = Booking::with(['user', 'guiding', 'blocked_event', 'calendar_schedule'])
+            ->where('status', 'accepted')
             ->orderBy('id', 'desc')
-            ->take(5)
             ->get()
+            ->filter(function ($booking) {
+                return $booking->isBookingOver();
+            });
 
+        $completedApprovedCount = $completedApprovedBookings->count();
+        $toBeBilledCount = $completedApprovedBookings->where('is_guide_billed', false)->count();
+
+        // Dashboard bookings table now only shows completed + approved bookings
+        $recentBookings = $completedApprovedBookings
+            ->take(10)
             ->map(function($booking) {
                 return [
                     'id' => $booking->id,
@@ -71,8 +80,10 @@ class AdminController extends Controller
                         $booking->user?->full_name,
                     'tour' => $booking->guiding?->title,
                     'price' => $booking->price + ($booking->total_extra_price ?? 0),
+                    'date' => $booking->getFormattedBookingDate('d.m.Y H:i'),
                     'status' => $booking->status,
-                    'status_color' => $this->getStatusColor($booking->status)
+                    'status_color' => $this->getStatusColor($booking->status),
+                    'is_guide_billed' => (bool) $booking->is_guide_billed,
                 ];
             });
 
@@ -115,6 +126,8 @@ class AdminController extends Controller
             'totalGuides',
             'guidesWithActiveTours',
             'guidesWithoutActiveOrDraftGuidings',
+            'completedApprovedCount',
+            'toBeBilledCount',
             'recentBookings',
             'upcomingTours',
             'revenueData',
