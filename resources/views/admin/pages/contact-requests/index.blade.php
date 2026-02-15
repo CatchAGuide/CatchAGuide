@@ -3,113 +3,208 @@
 @section('title', 'Contact Requests')
 
 @section('content')
-    <div class="side-app">
-
-        <!-- CONTAINER -->
-        <div class="main-container container-fluid">
-
-            <!-- PAGE-HEADER -->
-            <div class="page-header">
-                <h1 class="page-title">Contact Requests</h1>
-                <div>
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="#">System</a></li>
-                        <li class="breadcrumb-item"><a href="#">Admin</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Contact Requests</li>
-                    </ol>
-                </div>
+<div class="side-app">
+    <div class="main-container container-fluid">
+        <div class="page-header">
+            <h1 class="page-title">Contact Requests</h1>
+            <div>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="#">System</a></li>
+                    <li class="breadcrumb-item"><a href="#">Admin</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Contact Requests</li>
+                </ol>
             </div>
-            <!-- PAGE-HEADER END -->
-            
-            <!-- Row -->
-            <div class="row row-sm">
-                <div class="col-lg-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Contact Requests</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped text-nowrap border-bottom">
-                                    <thead>
+        </div>
+
+        @if($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <div class="row row-sm">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Contact Requests</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped text-nowrap border-bottom" id="contact-requests-datatable">
+                                <thead>
+                                    <tr>
+                                        <th width="5%" class="border-bottom-0">ID</th>
+                                        <th width="20%" class="border-bottom-0">Name</th>
+                                        <th width="20%" class="border-bottom-0">Email</th>
+                                        <th width="15%" class="border-bottom-0">Phone</th>
+                                        <th width="15%" class="border-bottom-0">Source Type</th>
+                                        <th width="15%" class="border-bottom-0">Created At</th>
+                                        <th width="10%" class="border-bottom-0">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($contactRequests as $request)
                                         <tr>
-                                            <th width="5%" class="border-bottom-0">ID</th>
-                                            <th width="20%" class="border-bottom-0">Name</th>
-                                            <th width="20%" class="border-bottom-0">Email</th>
-                                            <th width="15%" class="border-bottom-0">Phone</th>
-                                            <th width="15%" class="border-bottom-0">Source Type</th>
-                                            <th width="15%" class="border-bottom-0">Created At</th>
-                                            <th width="10%" class="border-bottom-0">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse($contactRequests as $request)
-                                            <tr>
-                                                <td>{{ $request->id }}</td>
-                                                <td>{{ $request->name }}</td>
-                                                <td>{{ $request->email }}</td>
-                                                <td>{{ $request->phone }}</td>
-                                                <td>{{ $request->source_type }}</td>
-                                                <td>{{ $request->created_at->format('F j, Y g:i A') }}</td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-info toggle-btn" type="button" data-bs-toggle="collapse" 
-                                                            data-bs-target="#description-{{ $request->id }}" aria-expanded="false" 
-                                                            aria-controls="description-{{ $request->id }}">
-                                                        <i class="fa fa-eye"></i>
+                                            <td>{{ $request->id }}</td>
+                                            <td>{{ $request->name ?: '-' }}</td>
+                                            <td>{{ $request->email ?: '-' }}</td>
+                                            <td>{{ $request->phone ?: '-' }}</td>
+                                            <td>{{ $request->source_type ?: '-' }}</td>
+                                            <td data-order="{{ optional($request->created_at)->timestamp }}">
+                                                {{ optional($request->created_at)->format('F j, Y g:i A') }}
+                                            </td>
+                                            <td>
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-sm btn-info js-view-message"
+                                                    data-message="{{ e($request->description) }}"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#messageModal"
+                                                >
+                                                    <i class="fa fa-eye"></i>
+                                                </button>
+
+                                                @if(!empty($request->email))
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-sm btn-primary js-reply-btn"
+                                                        data-id="{{ $request->id }}"
+                                                        data-name="{{ e($request->name ?? '') }}"
+                                                        data-email="{{ e($request->email) }}"
+                                                        data-subject="{{ e('Re: Your contact request') }}"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#replyModal"
+                                                    >
+                                                        <i class="fa fa-reply"></i>
                                                     </button>
-                                                </td>
-                                            </tr>
-                                            <tr class="collapse" id="description-{{ $request->id }}">
-                                                <td colspan="7">
-                                                    <div class="p-3 bg-light">
-                                                        <h5>Message:</h5>
-                                                        <p style="white-space: normal; word-break: break-word;">{{ $request->description }}</p>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="7" class="text-center">No contact requests found</td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                                @if(method_exists($contactRequests, 'links'))
-                                    {{ $contactRequests->links() }}
-                                @endif
-                            </div>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td></td><td></td><td></td><td></td><td></td><td></td>
+                                            <td class="text-center text-muted">No contact requests found</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- End Row -->
         </div>
-        <!-- CONTAINER CLOSED -->
-
     </div>
+</div>
+
+<div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="messageModalLabel">Contact Message</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="messageModalContent" style="white-space: pre-wrap; word-break: break-word;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <form method="POST" action="{{ route('admin.contact-requests.reply') }}" id="replyForm">
+                @csrf
+                <input type="hidden" name="contact_submission_id" id="reply_contact_submission_id" value="{{ old('contact_submission_id') }}">
+                <input type="hidden" name="recipient_display" id="reply_recipient_hidden" value="{{ old('recipient_display') }}">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="replyModalLabel">Reply to Contact Request</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Recipient</label>
+                        <input type="text" class="form-control" id="reply_recipient_display" value="{{ old('recipient_display') }}" readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="reply_subject" class="form-label">Subject</label>
+                        <input type="text" class="form-control" id="reply_subject" name="subject" value="{{ old('subject', 'Re: Your contact request') }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="reply_body" class="form-label">Message</label>
+                        <textarea class="form-control" id="reply_body" name="body" rows="12" required>{{ old('body') }}</textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Send Email</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
 
-@section('scripts')
+@section('js_after')
 <script>
-    $(document).ready(function() {
-        // Initialize Bootstrap collapse functionality
-        $('.toggle-btn').on('click', function() {
-            const target = $(this).data('bs-target');
-            
-            // Check if the target is currently shown or hidden
-            const isCollapsed = $(target).hasClass('show');
-            
-            // Toggle the icon based on the current state
-            const icon = $(this).find('i');
-            if (isCollapsed) {
-                icon.removeClass('fa-eye-slash').addClass('fa-eye');
-            } else {
-                icon.removeClass('fa-eye').addClass('fa-eye-slash');
-            }
-            
-            // Let Bootstrap handle the collapse toggle
-            // No need to call collapse('toggle') manually
+    $(function () {
+        var $table = $('#contact-requests-datatable');
+        if ($table.length && $.fn.DataTable) {
+            $table.DataTable({
+                order: [[5, 'desc']],
+                pageLength: 25,
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.13.7/i18n/de-DE.json"
+                },
+                columnDefs: [
+                    { orderable: false, targets: 6 }
+                ]
+            });
+        }
+
+        if (typeof CKEDITOR !== 'undefined' && !CKEDITOR.instances.reply_body) {
+            CKEDITOR.replace('reply_body', {
+                height: 260
+            });
+        }
+
+        $('.js-view-message').on('click', function () {
+            const message = $(this).data('message') || 'No message provided.';
+            $('#messageModalContent').text(message);
         });
+
+        $('.js-reply-btn').on('click', function () {
+            const id = $(this).data('id');
+            const name = $(this).data('name') || '';
+            const email = $(this).data('email') || '';
+            const subject = $(this).data('subject') || 'Re: Your contact request';
+            const recipient = name ? `${name} <${email}>` : email;
+
+            $('#reply_contact_submission_id').val(id);
+            $('#reply_recipient_display').val(recipient);
+            $('#reply_recipient_hidden').val(recipient);
+            $('#reply_subject').val(subject);
+        });
+
+        $('#replyForm').on('submit', function () {
+            if (CKEDITOR.instances.reply_body) {
+                CKEDITOR.instances.reply_body.updateElement();
+            }
+        });
+
+        @if($errors->any() && old('contact_submission_id'))
+            const previousReplyModal = new bootstrap.Modal(document.getElementById('replyModal'));
+            previousReplyModal.show();
+        @endif
     });
 </script>
 @endsection
