@@ -549,13 +549,13 @@
                         </label>
                     </div>
                     <div id="duration_details" class="mt-3" style="display: none;">
-                        <div id="hours_input" class="input-group mt-2">
+                        <div id="hours_input" class="input-group mt-2" style="display: none;">
                             <span class="input-group-text">{{ __('newguidings.number_of_hours') }}:</span>
-                            <input type="number" id="duration_hours" name="duration_hours" class="form-control" value="{{ $formData['duration_hours'] ?? '' }}" min="1" max="24">
+                            <input type="number" id="duration_hours" name="duration_hours" class="form-control" value="{{ $formData['duration_hours'] ?? '' }}" data-min="1" data-max="24">
                         </div>
-                        <div id="days_input" class="input-group mt-2">
+                        <div id="days_input" class="input-group mt-2" style="display: none;">
                             <span class="input-group-text">{{ __('newguidings.number_of_days') }}:</span>
-                            <input type="number" id="duration_days" name="duration_days" class="form-control" value="{{ $formData['duration_days'] ?? '' }}" min="2">
+                            <input type="number" id="duration_days" name="duration_days" class="form-control" value="{{ $formData['duration_days'] ?? '' }}" data-min="2">
                         </div>
                     </div>
                 </div>

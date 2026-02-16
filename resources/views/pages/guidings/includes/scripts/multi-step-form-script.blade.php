@@ -1125,6 +1125,101 @@
         $(this).closest('.extra-row').remove();
     });
 
+    // Function to check if an element is hidden
+    function isElementHidden(element) {
+        if (!element) return true;
+        
+        const computedStyle = window.getComputedStyle(element);
+        const parentContainer = element.closest('#duration_details, #hours_input, #days_input, .step');
+        
+        return (
+            element.offsetParent === null || 
+            computedStyle.display === 'none' ||
+            computedStyle.visibility === 'hidden' ||
+            (parentContainer && window.getComputedStyle(parentContainer).display === 'none') ||
+            element.closest('[style*="display: none"]') !== null ||
+            element.closest('[style*="display:none"]') !== null ||
+            (parentContainer && parentContainer.classList.contains('step') && !parentContainer.classList.contains('active'))
+        );
+    }
+
+    // Function to remove validation constraints from hidden fields
+    function removeValidationFromHiddenFields(form) {
+        if (!form) return;
+        
+        // Find all input fields with min/max attributes
+        const inputs = form.querySelectorAll('input[type="number"][min], input[type="number"][max], input[type="number"][required]');
+        
+        inputs.forEach(input => {
+            if (isElementHidden(input)) {
+                // Remove validation attributes from hidden fields
+                input.removeAttribute('min');
+                input.removeAttribute('max');
+                input.removeAttribute('required');
+            }
+        });
+    }
+
+    // Function to initialize validation attributes based on field visibility
+    function initializeFieldValidation() {
+        const form = document.getElementById('newGuidingForm');
+        if (!form) return;
+        
+        // Remove validation from all hidden fields on page load
+        removeValidationFromHiddenFields(form);
+        
+        // Prevent HTML5 validation errors for hidden fields
+        form.addEventListener('invalid', function(e) {
+            const input = e.target;
+            if (isElementHidden(input)) {
+                // Remove validation attributes to prevent the error
+                input.removeAttribute('min');
+                input.removeAttribute('max');
+                input.removeAttribute('required');
+                // Prevent the default validation message
+                e.preventDefault();
+                // Clear any custom validity
+                input.setCustomValidity('');
+            }
+        }, true); // Use capture phase to catch early
+        
+        // Also handle on individual inputs
+        form.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('invalid', function(e) {
+                if (isElementHidden(this)) {
+                    this.removeAttribute('min');
+                    this.removeAttribute('max');
+                    this.removeAttribute('required');
+                    this.setCustomValidity('');
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }, true);
+        });
+        
+        // Set up observer to watch for visibility changes
+        const observer = new MutationObserver(() => {
+            removeValidationFromHiddenFields(form);
+        });
+        
+        // Observe changes to style attributes and class changes
+        const durationDetails = document.getElementById('duration_details');
+        if (durationDetails) {
+            observer.observe(durationDetails, {
+                attributes: true,
+                attributeFilter: ['style', 'class']
+            });
+        }
+        
+        // Observe all steps for visibility changes
+        document.querySelectorAll('.step').forEach(step => {
+            observer.observe(step, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+        });
+    }
+
     // Modify the handleSubmit function
     function handleSubmit(event) {
         event.preventDefault();
@@ -1135,6 +1230,9 @@
         if (event.submitter && event.submitter.closest('.image-controls')) {
             return;
         }
+        
+        // Remove validation constraints from hidden fields before submission
+        removeValidationFromHiddenFields(form);
         
         // Show loading screen
         showLoadingScreen();
@@ -1636,6 +1734,11 @@
         
         // Update current step
         currentStep = stepNumber;
+        
+        // Remove validation from hidden fields after step change
+        setTimeout(() => {
+            removeValidationFromHiddenFields(document.getElementById('newGuidingForm'));
+        }, 50);
 
         // Populate form data when step 4 (departure time) or step 7 (weekday availability) is shown
         if (stepNumber === 4 || stepNumber === 7) {
@@ -1757,6 +1860,9 @@
 
     // Then, in your DOMContentLoaded event listener, replace the existing Tagify initializations with:
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialize field validation to remove constraints from hidden fields
+        initializeFieldValidation();
+        
         showStep(currentStep);
         initializeImageManager();
         
@@ -1852,16 +1958,58 @@
             const durationDetails = $('#duration_details');
             const hoursInput = $('#hours_input');
             const daysInput = $('#days_input');
+            const durationHoursField = document.getElementById('duration_hours');
+            const durationDaysField = document.getElementById('duration_days');
 
             durationDetails.show(); // Show the duration details section
 
             if (selectedDuration === 'multi_day') {
                 daysInput.show(); // Show days input for multi-day
                 hoursInput.hide(); // Hide hours input
+                
+                // Remove validation constraints from hidden hours field
+                if (durationHoursField) {
+                    durationHoursField.removeAttribute('min');
+                    durationHoursField.removeAttribute('max');
+                    durationHoursField.removeAttribute('required');
+                    durationHoursField.value = ''; // Clear value when hidden
+                }
+                
+                // Restore validation constraints for visible days field
+                if (durationDaysField && !isElementHidden(durationDaysField)) {
+                    const dataMin = durationDaysField.getAttribute('data-min');
+                    if (dataMin) {
+                        durationDaysField.setAttribute('min', dataMin);
+                    }
+                }
             } else {
                 hoursInput.show(); // Show hours input for half/full day
                 daysInput.hide(); // Hide days input
+                
+                // Restore validation constraints for visible hours field
+                if (durationHoursField && !isElementHidden(durationHoursField)) {
+                    const dataMin = durationHoursField.getAttribute('data-min');
+                    const dataMax = durationHoursField.getAttribute('data-max');
+                    if (dataMin) {
+                        durationHoursField.setAttribute('min', dataMin);
+                    }
+                    if (dataMax) {
+                        durationHoursField.setAttribute('max', dataMax);
+                    }
+                }
+                
+                // Remove validation constraints from hidden days field
+                if (durationDaysField) {
+                    durationDaysField.removeAttribute('min');
+                    durationDaysField.removeAttribute('required');
+                    durationDaysField.value = ''; // Clear value when hidden
+                }
             }
+            
+            // Re-check all hidden fields after visibility change
+            setTimeout(() => {
+                removeValidationFromHiddenFields(document.getElementById('newGuidingForm'));
+            }, 100);
         });
         
         const imageUploadInput = document.getElementById('title_image');
@@ -1922,7 +2070,18 @@
     });
 
     // Update the form's submit event listener
-    document.getElementById('newGuidingForm').addEventListener('submit', handleSubmit);
+    const form = document.getElementById('newGuidingForm');
+    if (form) {
+        // Remove validation from hidden fields BEFORE browser validation runs
+        // This must happen in capture phase, before any other handlers
+        form.addEventListener('submit', function(e) {
+            // Remove validation from hidden fields FIRST, synchronously
+            removeValidationFromHiddenFields(form);
+        }, true); // Capture phase runs first
+        
+        // Then handle the actual submission (this will preventDefault)
+        form.addEventListener('submit', handleSubmit);
+    }
 
     // Add these variables at the top of your script
     let saveStepProgressTimeout = null;
