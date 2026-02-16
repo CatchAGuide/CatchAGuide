@@ -196,6 +196,87 @@
             transform: scale(1.05);
         }
         
+        /* Hide week numbers to ensure 7 days display */
+        .litepicker .week-number,
+        .litepicker .container__days .week-number,
+        .litepicker .container__days > .week-number,
+        #lite-datepicker .week-number,
+        #lite-datepicker .litepicker .week-number,
+        #guidings-page #lite-datepicker .litepicker .week-number,
+        #guidings-page #lite-datepicker .litepicker .container__days .week-number,
+        #guidings-page #lite-datepicker .litepicker .container__months .week-number,
+        #guidings-page #lite-datepicker .litepicker .month-item-weekdays-row .week-number {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            visibility: hidden !important;
+            flex: 0 0 0 !important;
+            grid-column: span 0 !important;
+            position: absolute !important;
+            left: -9999px !important;
+            opacity: 0 !important;
+        }
+        
+        /* BASE LAYOUT - All 7 days using CSS Grid (works for both mobile and desktop) */
+        #lite-datepicker .litepicker .container__days,
+        #lite-datepicker .litepicker .month-item-weekdays-row {
+            display: grid !important;
+            grid-template-columns: repeat(7, 1fr) !important;
+            width: 100% !important;
+            gap: 1px !important;
+        }
+        
+        /* Ensure all children fit within grid cells */
+        #lite-datepicker .litepicker .container__days > *,
+        #lite-datepicker .litepicker .month-item-weekdays-row > * {
+            width: 100% !important;
+            min-width: 0 !important;
+            box-sizing: border-box !important;
+        }
+        
+        /* Mobile: single column view (up to 767px) */
+        @media (max-width: 767px) {
+            #lite-datepicker .litepicker .container__months:not(.columns-2) .month-item .container__days,
+            #lite-datepicker .litepicker .container__months:not(.columns-2) .month-item .month-item-weekdays-row {
+                display: grid !important;
+                grid-template-columns: repeat(7, 1fr) !important;
+                width: 100% !important;
+                gap: 2px !important;
+            }
+            
+            #lite-datepicker .litepicker .container__months:not(.columns-2) .month-item .container__days .day-item,
+            #lite-datepicker .litepicker .container__months:not(.columns-2) .month-item .month-item-weekdays-row > div {
+                min-height: 40px !important;
+                font-size: 0.85rem !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+        }
+        
+        /* Desktop: two column view (768px and up) */
+        @media (min-width: 768px) {
+            #guidings-page #lite-datepicker .litepicker .container__months.columns-2 .month-item {
+                width: calc(50% - 5px) !important;
+            }
+            
+            #guidings-page #lite-datepicker .litepicker .container__months.columns-2 .month-item .container__days,
+            #guidings-page #lite-datepicker .litepicker .container__months.columns-2 .month-item .month-item-weekdays-row {
+                display: grid !important;
+                grid-template-columns: repeat(7, 1fr) !important;
+                width: 100% !important;
+                gap: 1px !important;
+            }
+            
+            #guidings-page #lite-datepicker .litepicker .container__months.columns-2 .month-item .container__days > *,
+            #guidings-page #lite-datepicker .litepicker .container__months.columns-2 .month-item .month-item-weekdays-row > * {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                box-sizing: border-box !important;
+            }
+        }
+        
         /* Calendar availability indicators */
         .litepicker .day-item {
             transition: all 0.2s ease !important;
@@ -2285,6 +2366,8 @@ document.addEventListener("DOMContentLoaded", function() {
         startDate: null, // Explicitly set to null to prevent default date selection
         lockDays: lockDays, // Use the dynamically calculated blocked days
         lang: '{{app()->getLocale()}}',
+        firstDay: 1, // Start week on Monday (0 = Sunday, 1 = Monday)
+        showWeekNumbers: false, // Disable week numbers to show all 7 days
         lockDaysFormat: 'YYYY-MM-DD',
         disallowLockDaysInRange: true,
         setup: (picker) => {
