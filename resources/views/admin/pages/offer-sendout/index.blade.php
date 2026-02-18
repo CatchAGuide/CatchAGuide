@@ -273,9 +273,9 @@
     };
 
     const fullOptions = {
-        accommodations: @json($accommodations->map(fn($a) => ['id' => $a->id, 'value' => $a->title, 'connected' => false])),
-        boats: @json($boats->map(fn($b) => ['id' => $b->id, 'value' => $b->title, 'connected' => false])),
-        guidings: @json($guidings->map(fn($g) => ['id' => $g->id, 'value' => $g->title, 'connected' => false]))
+        accommodations: @json($fullOptionsAccommodations),
+        boats: @json($fullOptionsBoats),
+        guidings: @json($fullOptionsGuidings)
     };
 
     let previewDebounce = null;
@@ -502,6 +502,20 @@
         toast.show();
     }
 
+    function buildTagifyDropdownItem(item) {
+        var isConnected = item.connected === true;
+        var cls = 'tagify__dropdown__item' + (isConnected ? ' tagify__dropdown__item--connected' : '');
+        var safeValue = (item.value || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        var idHtml = item.id
+            ? '<span class="tfi-id">' + item.id + '</span><span class="tfi-sep">|</span>'
+            : '';
+        var nameHtml = '<span class="tfi-name"><strong>' + (item.value || '') + '</strong></span>';
+        var campHtml = item.camp_name
+            ? '<span class="tfi-sep">|</span><span class="tfi-camp">' + item.camp_name + '</span>'
+            : '';
+        return '<div class="' + cls + '" data-value="' + safeValue + '">' + idHtml + nameHtml + campHtml + '</div>';
+    }
+
     function initTagify(inputEl, hiddenEl, whitelist, blockIndex, type) {
         if (!inputEl || typeof Tagify === 'undefined') return null;
         var t = new Tagify(inputEl, {
@@ -514,12 +528,10 @@
                 closeOnSelect: false,
                 highlightFirst: true,
                 mapValueTo: 'value',
-                searchKeys: ['value'],
-                dropdownItemTemplate: function (item) {
-                    var cls = (item.connected === true) ? ' tagify__dropdown__item--connected' : '';
-                    var idPrefix = item.id ? '<span style="color: #64748b; margin-right: 6px; font-weight: 500;">#' + item.id + '</span>' : '';
-                    return '<div class="tagify__dropdown__item' + cls + '" data-value="' + (item.value || '').replace(/"/g, '&quot;') + '">' + idPrefix + (item.value || '') + '</div>';
-                }
+                searchKeys: ['value', 'id', 'camp_name'],
+            },
+            templates: {
+                dropdownItem: buildTagifyDropdownItem
             },
             duplicates: false,
             tagTemplate: function (tagData) {
@@ -543,10 +555,17 @@
         return t;
     }
 
-    function setTagifyWhitelist(tagify, items) {
+    function setTagifyWhitelist(tagify, items, fallbackOptions) {
         if (!tagify) return;
         var list = (items || []).map(function (i) {
-            return { id: i.id, value: i.value, connected: i.connected === true, price: i.price || 0, capacity: i.capacity || 0 };
+            var campName = i.camp_name || '';
+            // For unconnected items, fall back to the fullOptions camp_name
+            // so items that belong to OTHER camps still show their camp name.
+            if (!campName && fallbackOptions) {
+                var fb = fallbackOptions.find(function (o) { return String(o.id) === String(i.id); });
+                if (fb) campName = fb.camp_name || '';
+            }
+            return { id: i.id, value: i.value, connected: i.connected === true, price: i.price || 0, capacity: i.capacity || 0, camp_name: campName };
         });
         tagify.settings.whitelist = list;
         if (typeof tagify.removeAllTags === 'function') tagify.removeAllTags();
@@ -648,9 +667,9 @@
             fetch(campOptionsUrl.replace('__CAMP__', campId), { headers: { 'Accept': 'application/json' } })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
-                    setTagifyWhitelist(t.acc, data.accommodations || []);
-                    setTagifyWhitelist(t.boat, data.boats || []);
-                    setTagifyWhitelist(t.guiding, data.guidings || []);
+                    setTagifyWhitelist(t.acc, data.accommodations || [], fullOptions.accommodations);
+                    setTagifyWhitelist(t.boat, data.boats || [], fullOptions.boats);
+                    setTagifyWhitelist(t.guiding, data.guidings || [], fullOptions.guidings);
                     updateComponentDataFromWhitelist(blockIndex, 'accommodation', t.acc);
                     updateComponentDataFromWhitelist(blockIndex, 'boat', t.boat);
                     updateComponentDataFromWhitelist(blockIndex, 'guiding', t.guiding);

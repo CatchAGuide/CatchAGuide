@@ -73,15 +73,74 @@ class OfferSendoutController extends Controller
             ];
         });
 
+        // Build camp-name lookups using existing Eloquent relationships on Camp.
+        // One Camp query + 3 eager-load queries; no raw SQL needed.
+        $accommodationIds = $accommodations->pluck('id')->all();
+        $boatIds          = $boats->pluck('id')->all();
+        $guidingIds       = $guidings->pluck('id')->all();
+
+        $campsWithComponents = Camp::where('status', 'active')
+            ->with([
+                'accommodations' => fn ($q) => $q->select('accommodations.id')->whereIn('accommodations.id', $accommodationIds),
+                'rentalBoats'    => fn ($q) => $q->select('rental_boats.id')->whereIn('rental_boats.id', $boatIds),
+                'guidings'       => fn ($q) => $q->select('guidings.id')->whereIn('guidings.id', $guidingIds),
+            ])
+            ->get(['id', 'title']);
+
+        $accMap     = [];
+        $boatMap    = [];
+        $guidingMap = [];
+
+        foreach ($campsWithComponents as $camp) {
+            foreach ($camp->accommodations as $acc) {
+                $accMap[$acc->id][] = $camp->title;
+            }
+            foreach ($camp->rentalBoats as $boat) {
+                $boatMap[$boat->id][] = $camp->title;
+            }
+            foreach ($camp->guidings as $guiding) {
+                $guidingMap[$guiding->id][] = $camp->title;
+            }
+        }
+
+        $accCampNames     = collect($accMap)->map(fn ($t) => implode(', ', $t));
+        $boatCampNames    = collect($boatMap)->map(fn ($t) => implode(', ', $t));
+        $guidingCampNames = collect($guidingMap)->map(fn ($t) => implode(', ', $t));
+
+        // Pre-build whitelist arrays so @json() in the view receives simple variables.
+        $fullOptionsAccommodations = $accommodations->map(fn ($a) => [
+            'id'        => $a->id,
+            'value'     => $a->title,
+            'connected' => false,
+            'camp_name' => $accCampNames->get($a->id, ''),
+        ])->values()->all();
+
+        $fullOptionsBoats = $boats->map(fn ($b) => [
+            'id'        => $b->id,
+            'value'     => $b->title,
+            'connected' => false,
+            'camp_name' => $boatCampNames->get($b->id, ''),
+        ])->values()->all();
+
+        $fullOptionsGuidings = $guidings->map(fn ($g) => [
+            'id'        => $g->id,
+            'value'     => $g->title,
+            'connected' => false,
+            'camp_name' => $guidingCampNames->get($g->id, ''),
+        ])->values()->all();
+
         return view('admin.pages.offer-sendout.index', [
-            'customers' => $customers,
-            'camps' => $camps,
-            'accommodations' => $accommodations,
-            'boats' => $boats,
-            'guidings' => $guidings,
-            'accommodationsData' => $accommodationsData,
-            'boatsData' => $boatsData,
-            'guidingsData' => $guidingsData,
+            'customers'              => $customers,
+            'camps'                  => $camps,
+            'accommodations'         => $accommodations,
+            'boats'                  => $boats,
+            'guidings'               => $guidings,
+            'accommodationsData'     => $accommodationsData,
+            'boatsData'              => $boatsData,
+            'guidingsData'           => $guidingsData,
+            'fullOptionsAccommodations' => $fullOptionsAccommodations,
+            'fullOptionsBoats'          => $fullOptionsBoats,
+            'fullOptionsGuidings'       => $fullOptionsGuidings,
         ]);
     }
 
@@ -743,9 +802,10 @@ class OfferSendoutController extends Controller
         $allBoats = RentalBoat::where('status', 'active')->orderBy('title')->get(['id', 'title', 'prices', 'max_persons']);
         $allGuidings = Guiding::where('status', 1)->orderBy('title')->get(['id', 'title', 'price', 'prices', 'price_type', 'max_guests']);
 
-            $accommodations = $this->mergeConnectedFirst($allAcc, $connectedAccIds, 'title');
-            $boats = $this->mergeConnectedFirst($allBoats, $connectedBoatIds, 'title');
-            $guidings = $this->mergeConnectedFirst($allGuidings, $connectedGuidingIds, 'title');
+            $campTitle = $camp->title;
+            $accommodations = $this->mergeConnectedFirst($allAcc, $connectedAccIds, 'title', $campTitle);
+            $boats = $this->mergeConnectedFirst($allBoats, $connectedBoatIds, 'title', $campTitle);
+            $guidings = $this->mergeConnectedFirst($allGuidings, $connectedGuidingIds, 'title', $campTitle);
 
             // Add price and capacity data
             $accommodationsWithData = array_map(function ($item) use ($allAcc) {
@@ -797,15 +857,22 @@ class OfferSendoutController extends Controller
      * @param \Illuminate\Support\Collection $items
      * @param int[] $connectedIds
      * @param string $titleKey
-     * @return array<int, array{id: int, value: string, connected: bool}>
+     * @param string $campName  Name of the selected camp (shown on connected items)
+     * @return array<int, array{id: int, value: string, connected: bool, camp_name: string}>
      */
-    private function mergeConnectedFirst($items, array $connectedIds, string $titleKey = 'title'): array
+    private function mergeConnectedFirst($items, array $connectedIds, string $titleKey = 'title', string $campName = ''): array
     {
         $connected = [];
         $others = [];
         foreach ($items as $item) {
-            $entry = ['id' => $item->id, 'value' => $item->{$titleKey}, 'connected' => in_array($item->id, $connectedIds, true)];
-            if ($entry['connected']) {
+            $isConnected = in_array($item->id, $connectedIds, true);
+            $entry = [
+                'id'        => $item->id,
+                'value'     => $item->{$titleKey},
+                'connected' => $isConnected,
+                'camp_name' => $isConnected ? $campName : '',
+            ];
+            if ($isConnected) {
                 $connected[] = $entry;
             } else {
                 $others[] = $entry;
