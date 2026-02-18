@@ -503,3 +503,310 @@
     color: #334155;
     box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
 }
+
+// ─── Mobile Card Redesign (max-width: 767px) ──────────────────────────────────
+@media (max-width: 767px) {
+
+    // Outer row: tighten the gutter
+    .guiding-list-item {
+        padding-left: 6px !important;
+        padding-right: 6px !important;
+        margin-bottom: 16px !important;
+    }
+
+    // Card wrapper: edge-to-edge image, clean rounded card
+    .guiding-card-wrapper {
+        padding: 0 !important;
+        border: none !important;
+        border-radius: 16px !important;
+        overflow: hidden !important;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.11) !important;
+
+        // Image column: flush to top, no margin
+        > .col-12:first-child {
+            margin-top: 0 !important;
+            padding: 0 !important;
+
+            .gc-carousel {
+                border-radius: 0 !important;
+
+                .carousel-inner,
+                .carousel-item,
+                img {
+                    border-radius: 0 !important;
+                }
+
+                img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    aspect-ratio: 4/3;
+                    display: block;
+                }
+
+                // Carousel nav arrows - styled as white circles
+                .carousel-control-prev,
+                .carousel-control-next {
+                    width: 36px;
+                    height: 36px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    background: rgba(255, 255, 255, 0.92);
+                    border-radius: 50%;
+                    opacity: 1;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    &.carousel-control-prev { left: 10px; }
+                    &.carousel-control-next { right: 10px; }
+                }
+
+                .carousel-control-prev-icon,
+                .carousel-control-next-icon {
+                    width: 14px;
+                    height: 14px;
+                    filter: invert(1) sepia(1) saturate(0) brightness(0); // dark arrow
+                }
+            }
+        }
+
+        // Content column: body padding
+        > .guiding-item-desc {
+            padding: 14px 14px 12px !important;
+        }
+    }
+
+    // ── Rating badge overlay (top-left on image) ────────────────────────────
+    .gc-mob-rating-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 5;
+        background: rgba(0, 0, 0, 0.72);
+        color: #fff;
+        border-radius: 20px;
+        padding: 4px 10px;
+        align-items: center;
+        gap: 4px;
+        font-size: 13px;
+        font-weight: 600;
+        pointer-events: none;
+
+        svg {
+            width: 13px;
+            height: 13px;
+            color: #ffce00;
+            fill: #ffce00;
+            flex-shrink: 0;
+        }
+
+        .gc-mob-rating-count {
+            font-size: 11px;
+            font-weight: 400;
+            opacity: 0.85;
+        }
+    }
+
+    // ── Image counter overlay (bottom-right on image) ───────────────────────
+    .gc-mob-img-counter {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        z-index: 10;
+        background: rgba(0, 0, 0, 0.52);
+        color: #fff;
+        border-radius: 10px;
+        padding: 2px 8px;
+        font-size: 11px;
+        font-weight: 500;
+        align-items: center;
+        pointer-events: none;
+    }
+
+    // ── Title & Location ────────────────────────────────────────────────────
+    .guiding-card-wrapper .guidings-item {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 4px !important;
+        align-items: flex-start !important;
+
+        .guidings-item-title {
+            width: 100% !important;
+
+            h5 {
+                font-size: 16px !important;
+                font-weight: 700 !important;
+                color: #1e293b !important;
+                margin-bottom: 2px !important;
+                white-space: normal !important;
+                overflow: visible !important;
+                text-overflow: unset !important;
+            }
+
+            span.truncate {
+                font-size: 13px !important;
+                color: #64748b !important;
+
+                i.fas.fa-map-marker-alt {
+                    color: #E85B40;
+                    font-size: 12px;
+                }
+            }
+        }
+
+        // Hide rating row inside guidings-item on mobile (shown as overlay)
+        .ave-reviews-row,
+        .no-reviews {
+            display: none !important;
+        }
+    }
+
+    // ── Fish tag pills (mobile only) ────────────────────────────────────────
+    .gc-mob-fish-tags {
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 2px;
+    }
+
+    .gc-mob-fish-tag {
+        display: inline-block;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 3px 10px;
+        font-size: 12px;
+        color: #475569;
+        font-weight: 500;
+    }
+
+    // ── Info icon grid ───────────────────────────────────────────────────────
+    .guiding-card-wrapper .guidings-item-icon {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px 12px !important;
+        margin-top: 2px !important;
+
+        .guidings-icon-container {
+            width: 100% !important;
+            font-size: 13px !important;
+            color: #334155 !important;
+            align-items: center !important;
+            gap: 6px !important;
+
+            img {
+                width: 18px !important;
+                height: 18px !important;
+                flex-shrink: 0;
+            }
+
+            .tours-list__content__trait__text {
+                display: -webkit-box !important;
+                -webkit-line-clamp: 1 !important;
+                -webkit-box-orient: vertical !important;
+                overflow: hidden !important;
+            }
+        }
+    }
+
+    // ── Inclusions (green circle check treatment) ────────────────────────────
+    .guiding-card-wrapper .guidings-included {
+        strong {
+            font-size: 13px;
+            color: #1e293b;
+        }
+
+        .inclusions-list {
+            flex-direction: column !important;
+            gap: 5px !important;
+            margin-top: 6px;
+
+            .inclusion-item {
+                width: 100% !important;
+                font-size: 13px !important;
+                color: #334155 !important;
+                align-items: center !important;
+                gap: 7px !important;
+
+                i.fa.fa-check {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 18px;
+                    height: 18px;
+                    border-radius: 50%;
+                    background-color: #16a34a;
+                    color: #fff;
+                    font-size: 9px;
+                    flex-shrink: 0;
+                }
+            }
+        }
+    }
+
+    // ── Hide the inline price section on mobile (replaced by gc-mob-footer) ──
+    .guiding-card-wrapper .inclusions-price {
+        .guiding-item-price {
+            display: none !important;
+        }
+    }
+
+    // ── Mobile CTA footer: price + Book Now button ───────────────────────────
+    .gc-mob-footer {
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #f1f5f9;
+        gap: 8px;
+    }
+
+    .gc-mob-price {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.2;
+    }
+
+    .gc-mob-price-from {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: #94a3b8;
+        font-weight: 600;
+    }
+
+    .gc-mob-price-amount {
+        font-size: 19px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .gc-mob-book-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #E85B40;
+        color: #fff !important;
+        text-decoration: none !important;
+        border-radius: 24px;
+        padding: 10px 22px;
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+        transition: background-color 0.2s ease, box-shadow 0.2s ease;
+        flex-shrink: 0;
+
+        &:hover,
+        &:focus {
+            background: #d44a30;
+            color: #fff !important;
+            box-shadow: 0 4px 12px rgba(232, 91, 64, 0.35);
+        }
+    }
+
+    // ── Hide desktop-only elements on mobile ────────────────────────────────
+    .guiding-card-wrapper .guiding-item-desc > a .inclusions-price .guidings-inclusions-container {
+        // Keep inclusions visible on mobile
+    }
+}

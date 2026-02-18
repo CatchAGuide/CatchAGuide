@@ -1,14 +1,20 @@
 @foreach($guidings as $guiding)
-<div class="row m-0 mb-2 guiding-list-item">
+<div class="row m-0 mb-3 guiding-list-item">
     <div class="col-md-12">
-        <div class="row p-2 border shadow-sm bg-white rounded">
+        <div class="row p-2 border shadow-sm bg-white rounded guiding-card-wrapper">
             <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-0">
-                <div id="carouselExampleControls-{{$guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
+                @php
+                    $galleryImages = $guiding->cached_gallery_images ?? json_decode($guiding->gallery_images);
+                    $averageRating = $guiding->cached_average_rating ?? $guiding->user->average_rating();
+                    $reviewCount   = $guiding->cached_review_count ?? $guiding->user->reviews->count();
+                    $guidingTargets = $guiding->cached_target_fish_names ?? $guiding->getTargetFishNames($targetsMap ?? null);
+                    $targetNames    = collect($guidingTargets)->pluck('name')->toArray();
+                    $inclussions    = $guiding->cached_inclusion_names ?? $guiding->getInclusionNames();
+                    $totalImages    = count($galleryImages);
+                @endphp
+                <div id="carouselExampleControls-{{$guiding->id}}" class="carousel slide gc-carousel" data-bs-ride="carousel" data-bs-interval="false">
                     <div class="carousel-inner">
-                        @php
-                            $galleryImages = $guiding->cached_gallery_images ?? json_decode($guiding->gallery_images);
-                        @endphp
-                        @if(count($galleryImages))
+                        @if($totalImages)
                             @foreach($galleryImages as $index => $gallery_image_link)
                                 <div class="carousel-item @if($index == 0) active @endif">
                                     <img class="d-block lazy" 
@@ -24,7 +30,7 @@
                         @endif
                     </div>
 
-                    @if(count($galleryImages) > 1)
+                    @if($totalImages > 1)
                         <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls-{{$guiding->id}}" data-bs-slide="prev">
                             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                             <span class="visually-hidden">Previous</span>
@@ -33,6 +39,26 @@
                             <span class="carousel-control-next-icon" aria-hidden="true"></span>
                             <span class="visually-hidden">Next</span>
                         </button>
+                    @endif
+
+                    {{-- Mobile-only: Rating badge overlay --}}
+                    @if($averageRating)
+                    <div class="gc-mob-rating-badge d-flex d-md-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                        <span>{{ number_format($averageRating, 1) }}</span>
+                        <span class="gc-mob-rating-count">({{ $reviewCount }})</span>
+                    </div>
+                    @endif
+
+                    {{-- Mobile-only: Image counter --}}
+                    @if($totalImages > 1)
+                    <div class="gc-mob-img-counter d-flex d-md-none"
+                         data-counter-for="carouselExampleControls-{{$guiding->id}}"
+                         data-total="{{ $totalImages }}">
+                        1/{{ $totalImages }}
+                    </div>
                     @endif
                 </div>
         
@@ -44,23 +70,27 @@
                             <h5 class="fw-bolder text-truncate">{{ Str::limit($guiding->title, 70) }}</h5>
                             <span class="truncate"><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }}</span>                                      
                         </div>
-                        @php
-                            $averageRating = $guiding->cached_average_rating ?? $guiding->user->average_rating();
-                            $reviewCount = $guiding->cached_review_count ?? $guiding->user->reviews->count();
-                        @endphp
                         @if ($averageRating)
                             <div class="ave-reviews-row">
                                 <div class="ratings-score">
-                                <span class="rating-value">{{number_format($averageRating, 1)}}</span>
-                            </div>
-                                <span class="mb-1">
-                                    ({{$reviewCount}} reviews)
-                                </span>
+                                    <span class="rating-value">{{ number_format($averageRating, 1) }}</span>
+                                </div>
+                                <span class="mb-1">({{ $reviewCount }} reviews)</span>
                             </div>
                         @else
                             <div class="no-reviews"><span>@lang('guidings.no_reviews')</span></div>
                         @endif
                     </div>
+
+                    {{-- Mobile-only: Fish type tags as pill badges --}}
+                    @if(!empty($targetNames))
+                    <div class="gc-mob-fish-tags d-flex d-md-none">
+                        @foreach(array_slice($targetNames, 0, 4) as $fishName)
+                            <span class="gc-mob-fish-tag">{{ $fishName }}</span>
+                        @endforeach
+                    </div>
+                    @endif
+
                     <div class="guidings-item-icon">
                         <div class="guidings-icon-container"> 
                             <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
@@ -71,18 +101,13 @@
                         <div class="guidings-icon-container"> 
                             <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" />
                             <div class="">
-                            {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
+                                Max {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
                             </div>
                         </div>
                         <div class="guidings-icon-container"> 
                             <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
                             <div class="">
-                                <div class="tours-list__content__trait__text" >
-                                    @php
-                                    $guidingTargets = $guiding->cached_target_fish_names ?? $guiding->getTargetFishNames($targetsMap ?? null);
-                                    $targetNames = collect($guidingTargets)->pluck('name')->toArray();
-                                    @endphp
-                                    
+                                <div class="tours-list__content__trait__text">
                                     @if(!empty($targetNames))
                                         {{ implode(', ', $targetNames) }}
                                     @endif
@@ -92,7 +117,7 @@
                         <div class="guidings-icon-container">
                             <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
                             <div class="">
-                                <div class="tours-list__content__trait__text" >
+                                <div class="tours-list__content__trait__text">
                                     {{ $guiding->cached_boat_type_name ?? ($guiding->is_boat ? ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')) }}
                                 </div>
                             </div>
@@ -100,23 +125,18 @@
                     </div>
                     <div class="inclusions-price">
                         <div class="guidings-inclusions-container">
-                            @php
-                                $inclussions = $guiding->cached_inclusion_names ?? $guiding->getInclusionNames();
-                            @endphp
                             @if(!empty($inclussions))
                             <div class="guidings-included">
                                 <strong>@lang('guidings.Whats_Included')</strong>
                                 <div class="inclusions-list">
                                     @php
-                                        $maxToShow = 3; // Maximum number of inclusions to display
+                                        $maxToShow = 3;
                                     @endphp
-
                                     @foreach ($inclussions as $index => $inclussion)
                                         @if ($index < $maxToShow)
                                             <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclussion['name'] }}</span>
                                         @endif
                                     @endforeach
-
                                     @if (count($inclussions) > $maxToShow)
                                         <span class="inclusion-item">+{{ count($inclussions) - $maxToShow }} more</span>
                                     @endif
@@ -131,6 +151,17 @@
                         </div>
                     </div>    
                 </a>
+
+                {{-- Mobile-only: CTA footer (price + Book Now button) --}}
+                <div class="gc-mob-footer d-flex d-md-none">
+                    <div class="gc-mob-price">
+                        <span class="gc-mob-price-from">@lang('message.from')</span>
+                        <span class="gc-mob-price-amount">€{{ $guiding->getLowestPrice() }} p.P.</span>
+                    </div>
+                    <a href="{{ route('guidings.show', [$guiding->id, $guiding->slug]) }}" class="gc-mob-book-btn">
+                        @lang('vacations.book_now')
+                    </a>
+                </div>
             </div>
         </div>
     </div>

@@ -1237,6 +1237,23 @@ document.addEventListener("DOMContentLoaded", function() {
 window.initLazyLoading = initLazyLoading;
 </script>
 
+<script>
+// Mobile carousel counter: update "1/N" badge on slide change
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-counter-for]').forEach(function (counter) {
+        var carouselId = counter.getAttribute('data-counter-for');
+        var total      = parseInt(counter.getAttribute('data-total'), 10);
+        var carousel   = document.getElementById(carouselId);
+
+        if (!carousel) return;
+
+        carousel.addEventListener('slide.bs.carousel', function (e) {
+            counter.textContent = (e.to + 1) + '/' + total;
+        });
+    });
+});
+</script>
+
 @endsection
 
 @stack('guidingListingScripts')
