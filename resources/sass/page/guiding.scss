@@ -206,6 +206,145 @@
   justify-content: center;
   border: none !important;
 }
+
+// ── Mobile Sort / Filter / Map Bar ────────────────────────────────────────────
+.mobile-selection-sfm {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding-top: 6px;
+    padding-bottom: 2px;
+}
+
+.sfm-bar {
+    display: flex;
+    align-items: stretch;
+    background: #313041;
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 4px 16px -4px rgba(49, 48, 65, .35);
+    // overflow must stay visible so Bootstrap dropdowns/offcanvas are not clipped
+
+    &__item {
+        flex: 1;
+        display: flex;
+        position: static; // avoid stacking context that traps Bootstrap overlays
+
+        // Replicate border-radius on edge buttons instead of overflow:hidden
+        &:first-child .sfm-bar__btn {
+            border-radius: 14px 0 0 14px;
+        }
+        &:last-child .sfm-bar__btn {
+            border-radius: 0 14px 14px 0;
+        }
+    }
+
+    &__divider {
+        width: 1px;
+        background: rgba(255, 255, 255, .12);
+        flex-shrink: 0;
+        margin: 6px 0;
+    }
+
+    &__btn {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        width: 100%;
+        padding: 9px 6px;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #ffffff;
+        text-decoration: none !important;
+        cursor: pointer;
+        transition: background-color 0.18s ease;
+        position: relative;
+
+        &::after {
+            display: none !important;
+        }
+
+        &:hover,
+        &:focus {
+            background: rgba(255, 255, 255, .08);
+            color: #ffffff;
+            text-decoration: none !important;
+        }
+    }
+
+    &__icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: rgba(255, 255, 255, .80);
+
+        svg {
+            width: 14px;
+            height: 14px;
+        }
+    }
+
+    &__label {
+        font-size: 11px;
+        font-weight: 700;
+        color: inherit;
+        white-space: nowrap;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    &__badge {
+        display: none;
+        min-width: 16px;
+        height: 16px;
+        padding: 0 4px;
+        background: #E85B40;
+        color: #fff;
+        border-radius: 8px;
+        font-size: 9px;
+        font-weight: 700;
+        line-height: 16px;
+        text-align: center;
+        flex-shrink: 0;
+
+        &:not(:empty) {
+            display: block;
+        }
+    }
+
+    &__dropdown {
+        border: 1px solid rgba(15, 23, 42, .1);
+        border-radius: 12px;
+        box-shadow: 0 8px 24px -4px rgba(15, 23, 42, .15);
+        padding: 6px;
+        margin-top: 6px !important;
+
+        .dropdown-item {
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #334155;
+            padding: 8px 12px;
+            transition: background-color 0.15s ease;
+
+            &:hover,
+            &:focus {
+                background: rgba(15, 23, 42, .05);
+                color: #0f172a;
+            }
+
+            &.active,
+            &:active {
+                background: rgba(232, 91, 64, .1);
+                color: #E85B40;
+            }
+        }
+    }
+}
 .guiding-list-item .carousel.slide{
   .carousel-item{
     position: relative;

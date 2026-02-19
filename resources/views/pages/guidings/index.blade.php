@@ -514,25 +514,72 @@
     <section class="tours-list">
         <div class="container">
             <div class="row">
-                <!-- Mobile Sorting -->
-                <div class="col-12 col-sm-4 col-md-12 d-flex mb-3 d-block d-sm-none mobile-selection-sfm">
-                    <div class="d-grid gap-2 w-100">
-                        <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-                            <div class="btn-group border rounded-start cag-btn-inverted" role="group" style=" width:30%;">
-                                <button type="button" class="btn dropdown-toggle text-white" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-arrow-down-arrow-up me-1"></i>@lang('message.sortby')</button>
-                                <ul class="dropdown-menu">
+                <!-- Mobile Sort / Filter / Map Bar -->
+                <div class="col-12 d-block d-sm-none mb-3 mobile-selection-sfm">
+                    <div class="sfm-bar">
+
+                        {{-- Sort --}}
+                        <div class="sfm-bar__item">
+                            <div class="dropdown w-100">
+                                <button type="button"
+                                        class="sfm-bar__btn dropdown-toggle w-100"
+                                        data-bs-toggle="dropdown"
+                                        data-bs-auto-close="true"
+                                        aria-expanded="false">
+                                    <span class="sfm-bar__icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zM7 15a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z"/>
+                                        </svg>
+                                    </span>
+                                    <span class="sfm-bar__label">@lang('message.sortby')</span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-start sfm-bar__dropdown">
                                     <li><a class="dropdown-item mobile-sort-option" href="javascript:void(0)" data-sort="newest">@lang('message.newest')</a></li>
                                     <li><a class="dropdown-item mobile-sort-option" href="javascript:void(0)" data-sort="price-asc">@lang('message.lowprice')</a></li>
                                     <li><a class="dropdown-item mobile-sort-option" href="javascript:void(0)" data-sort="short-duration">@lang('message.shortduration')</a></li>
                                     <li><a class="dropdown-item mobile-sort-option" href="javascript:void(0)" data-sort="long-duration">@lang('message.longduration')</a></li>
                                 </ul>
                             </div>
-                            <a class="btn border-start cag-btn-inverted" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottomSearch" aria-controls="offcanvasBottomSearch" href="javascript:void(0)" style="border-left: 1px solid #ccc!important; z-index: 2; width:30%;">
-                                <i class="fa fa-filter me-1"></i>@lang('message.filter')
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="active-filter-counter"></span>
-                            </a>
-                            <a class="btn border cag-btn-inverted" id="openMapModal" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)" style=" border-left: 2px solid #ccc!important; width:40%;"><i class="fa fa-map-marker-alt me-2"></i>@lang('destination.show_on_map')</a>
                         </div>
+
+                        <div class="sfm-bar__divider"></div>
+
+                        {{-- Filter --}}
+                        <div class="sfm-bar__item">
+                            <button type="button"
+                                    class="sfm-bar__btn"
+                                    id="sfmFilterBtn"
+                                    data-bs-toggle="offcanvas"
+                                    data-bs-target="#offcanvasBottomSearch"
+                                    aria-controls="offcanvasBottomSearch">
+                                <span class="sfm-bar__icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L13 10.414V17a1 1 0 01-1.447.894l-4-2A1 1 0 017 15v-4.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd"/>
+                                    </svg>
+                                </span>
+                                <span class="sfm-bar__label">@lang('message.filter')</span>
+                                <span class="sfm-bar__badge" id="active-filter-counter"></span>
+                            </button>
+                        </div>
+
+                        <div class="sfm-bar__divider"></div>
+
+                        {{-- Map --}}
+                        <div class="sfm-bar__item">
+                            <a class="sfm-bar__btn sfm-bar__btn--map"
+                               id="openMapModal"
+                               data-bs-target="#mapModal"
+                               data-bs-toggle="modal"
+                               href="javascript:void(0)">
+                                <span class="sfm-bar__icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                                    </svg>
+                                </span>
+                                <span class="sfm-bar__label">@lang('destination.show_on_map')</span>
+                            </a>
+                        </div>
+
                     </div>
                 </div>
 
@@ -822,6 +869,16 @@
             $('#num-guests, #num-guestsOffCanvass').val('{{ request()->get('num_guests') }}');
         @endif
     }
+
+    // Prevent the filter button click from bubbling to document and re-closing the offcanvas
+    (function () {
+        var filterBtn = document.getElementById('sfmFilterBtn');
+        if (filterBtn) {
+            filterBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+            });
+        }
+    })();
 
     // Handle mobile sorting
     document.querySelectorAll('.mobile-sort-option').forEach(option => {
