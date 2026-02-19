@@ -42,6 +42,120 @@
         .similar-guides-section {
             margin-bottom: 2rem; /* Adjust as needed */
         }
+
+        /* Enhanced guiding tile cards (same guide + similar guidings) */
+        .tour-details-two .guiding-tile {
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            transition: box-shadow 0.25s ease, transform 0.25s ease;
+            border: 1px solid rgba(0,0,0,0.06);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .tour-details-two .guiding-tile:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+        .tour-details-two .guiding-tile__img-wrap {
+            position: relative;
+            aspect-ratio: 4/3;
+            overflow: hidden;
+            background: #e9ecef;
+        }
+        .tour-details-two .guiding-tile__img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.35s ease;
+        }
+        .tour-details-two .guiding-tile:hover .guiding-tile__img-wrap img {
+            transform: scale(1.03);
+        }
+        .tour-details-two .guiding-tile__rating {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(0,0,0,0.65);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .tour-details-two .guiding-tile__rating svg {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
+        .tour-details-two .guiding-tile__body {
+            padding: 14px 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .tour-details-two .guiding-tile__title {
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1.35;
+            margin-bottom: 6px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .tour-details-two .guiding-tile__title a {
+            color: #262e35;
+            text-decoration: none;
+        }
+        .tour-details-two .guiding-tile__title a:hover {
+            color: #E85B40;
+        }
+        .tour-details-two .guiding-tile__location {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .tour-details-two .guiding-tile__meta {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-bottom: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .tour-details-two .guiding-tile__meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .tour-details-two .guiding-tile__price {
+            margin-top: auto;
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: #262e35;
+        }
+        .tour-details-two .guiding-tile__price .from {
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        /* Carousel: tile fills owl item height */
+        .tour-details-two .popular-tours__carousel .owl-item {
+            display: flex;
+        }
+        .tour-details-two .popular-tours__carousel .owl-item .guiding-tile {
+            width: 100%;
+        }
       
         @media screen and (max-width: 767px) {
             .price-details{
@@ -400,7 +514,26 @@
                 display: none !important;
             }
             .tours-list__inner.mobile-view {
-                display: block !important;
+                display: flex !important;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                gap: 12px;
+                padding: 0 0 12px;
+                scrollbar-width: none;
+                margin-left: -12px;
+                margin-right: -12px;
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+            .tours-list__inner.mobile-view::-webkit-scrollbar {
+                display: none;
+            }
+            .tours-list__inner.mobile-view .guiding-tile,
+            .tours-list__inner.mobile-view .popular-tours__single {
+                flex: 0 0 78%;
+                scroll-snap-align: start;
+                margin: 0;
             }
             .desktop-view {
                 display: none !important;
@@ -409,9 +542,8 @@
                 display: block !important;
             }
             
-            /* Mobile carousel styling */
+            /* Mobile carousel styling – enhanced tiles use .guiding-tile; legacy fallback */
             .popular-tours__single {
-                margin: 0 5px;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.1);
                 border-radius: 8px;
                 overflow: hidden;
@@ -431,6 +563,14 @@
             
             .popular-tours__content {
                 padding: 15px;
+            }
+            
+            .tour-details-two .guiding-tile__body {
+                padding: 12px 14px;
+            }
+            
+            .tour-details-two .guiding-tile__title {
+                font-size: 0.95rem;
             }
             
             .crop-text-2 {
@@ -1668,12 +1808,12 @@
                                     <div class="row p-2 border shadow-sm bg-white rounded">
                                         <!-- Existing desktop layout -->
                                         <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-0">
-                                            <div id="carouselExampleControls-{{$other_guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
-                                                <div class="carousel-inner">
+                                            <div id="carouselExampleControls-{{$other_guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false" style="aspect-ratio: 4/3; overflow: hidden;">
+                                                <div class="carousel-inner h-100">
                                                     @if(count(get_galleries_image_link($other_guiding)))
                                                         @foreach(get_galleries_image_link($other_guiding) as $index => $gallery_image_link)
-                                                            <div class="carousel-item @if($index == 0) active @endif">
-                                                                <img class="d-block" src="{{$gallery_image_link}}">
+                                                            <div class="carousel-item @if($index == 0) active @endif h-100">
+                                                                <img class="d-block w-100 h-100" src="{{$gallery_image_link}}" alt="{{ $other_guiding->title }}" style="object-fit: cover;">
                                                             </div>
                                                         @endforeach
                                                     @endif
@@ -1725,13 +1865,11 @@
                                                         <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
                                                         <div class="">
                                                             <div class="tours-list__content__trait__text" >
-
                                                                 @php
-                                                                $guidingTargets = collect($guiding->cached_target_fish_names ?? $guiding->getTargetFishNames($targetsMap ?? null))->pluck('name')->toArray();
+                                                                $otherGuidingTargets = collect($other_guiding->cached_target_fish_names ?? $other_guiding->getTargetFishNames($targetsMap ?? null))->pluck('name')->toArray();
                                                                 @endphp
-                                                                
-                                                                @if(!empty($guidingTargets))
-                                                                    {{ implode(', ', $guidingTargets) }}
+                                                                @if(!empty($otherGuidingTargets))
+                                                                    {{ implode(', ', $otherGuidingTargets) }}
                                                                 @endif
                                                             </div>
                                                         </div>
@@ -1752,18 +1890,16 @@
                                                                 <strong>@lang('guidings.Whats_Included')</strong>
                                                                 <div class="inclusions-list">
                                                                     @php
-                                                                        $inclussions = $guiding->getInclusionNames();
-                                                                        $maxToShow = 3; // Maximum number of inclusions to display
+                                                                        $otherInclusions = $other_guiding->getInclusionNames();
+                                                                        $maxToShow = 3;
                                                                     @endphp
-
-                                                                    @foreach ($inclussions as $index => $inclussion)
-                                                                        @if ($index < $maxToShow && is_array($inclussion) && isset($inclussion['name']))
+                                                                    @foreach ($otherInclusions as $incIndex => $inclussion)
+                                                                        @if ($incIndex < $maxToShow && is_array($inclussion) && isset($inclussion['name']))
                                                                             <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclussion['name'] }}</span>
                                                                         @endif
                                                                     @endforeach
-
-                                                                    @if (count($inclussions) > $maxToShow)
-                                                                        <span class="inclusion-item">+{{ count($inclussions) - $maxToShow }} more</span>
+                                                                    @if (count($otherInclusions) > $maxToShow)
+                                                                        <span class="inclusion-item">+{{ count($otherInclusions) - $maxToShow }} more</span>
                                                                     @endif
                                                                 </div>
                                                             </div>
@@ -1783,29 +1919,39 @@
                             @endforeach
                         </div>
                         
-                        <!-- Mobile view (carousel layout) -->
-                        <div class="tours-list__inner mobile-view owl-carousel">
+                        <!-- Mobile view (scroll layout) – enhanced tiles -->
+                        <div class="tours-list__inner mobile-view">
                             @foreach($same_guiding as $other_guiding)
-                                <div class="popular-tours__single">
-                                    <a class="popular-tours__img" href="{{ route('guidings.show',[$other_guiding->id,$other_guiding->slug]) }}" title="Guide aufmachen">
-                                        <div class="popular-tours__img__wrapper">
-                                            @if($other_guiding->thumbnail_path)
-                                                <img src="{{ asset($other_guiding->thumbnail_path) }}" alt="{{ $other_guiding->title }}"/>
-                                            @endif
-                                        </div>
-                                    </a>
-                                    <div class="popular-tours__content">
-                                        <h5 class="crop-text-2 card-title h6">
-                                            <a href="{{ route('guidings.show', [$other_guiding->id, $other_guiding->slug]) }}">
-                                                {{ $other_guiding->title ? translate(Str::limit($other_guiding->title, 50)) : translate($other_guiding->title) }}
-                                            </a>
-                                        </h5>    
-                                        <small class="crop-text-1 small-text text-muted">{{ $other_guiding->location }}</small>
-                                        <p class="fw-bold text-muted">
-                                            <span>@lang('message.from') {{ $other_guiding->getLowestPrice() }}€</span>
-                                        </p>
+                                @php
+                                    $tile_img = $other_guiding->thumbnail_path ? asset($other_guiding->thumbnail_path) : null;
+                                    if (!$tile_img && count(get_galleries_image_link($other_guiding)) > 0) {
+                                        $tile_img = get_galleries_image_link($other_guiding)[0];
+                                    }
+                                    $tile_rating = $other_guiding->user ? $other_guiding->user->average_rating() : null;
+                                    $tile_reviews = $other_guiding->user && $other_guiding->user->reviews ? $other_guiding->user->reviews->count() : 0;
+                                @endphp
+                                <a href="{{ route('guidings.show', [$other_guiding->id, $other_guiding->slug]) }}" class="guiding-tile text-decoration-none">
+                                    <div class="guiding-tile__img-wrap">
+                                        @if($tile_img)
+                                            <img src="{{ $tile_img }}" alt="{{ $other_guiding->title }}" loading="lazy">
+                                        @endif
+                                        @if($tile_rating)
+                                            <span class="guiding-tile__rating">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                                {{ number_format($tile_rating, 1) }}@if($tile_reviews) ({{ $tile_reviews }})@endif
+                                            </span>
+                                        @endif
                                     </div>
-                                </div>
+                                    <div class="guiding-tile__body">
+                                        <h3 class="guiding-tile__title">{{ $other_guiding->title ? translate(Str::limit($other_guiding->title, 55)) : translate($other_guiding->title) }}</h3>
+                                        <div class="guiding-tile__location"><i class="fas fa-map-marker-alt"></i> {{ $other_guiding->location }}</div>
+                                        <div class="guiding-tile__meta">
+                                            <span>{{ $other_guiding->duration }} @if($other_guiding->duration_type == 'multi_day') {{ __('guidings.days') }} @else {{ __('guidings.hours') }} @endif</span>
+                                            <span>{{ $other_guiding->max_guests }} @if($other_guiding->max_guests != 1) {{ __('guidings.persons') }} @else {{ __('guidings.person') }} @endif</span>
+                                        </div>
+                                        <div class="guiding-tile__price"><span class="from">@lang('message.from')</span> {{ $other_guiding->getLowestPrice() }}€</div>
+                                    </div>
+                                </a>
                             @endforeach
                         </div>
 
@@ -1813,11 +1959,6 @@
                             <button id="showMoreBtn" class="btn btn-orange mt-3 text-center">{{ __('guidings.See_More') }}</button>
                         </div>
                         
-                        <div class="text-center mobile-view">
-                            <a href="{{ route('guidings.index', ['guide_id' => $guiding->user->id]) }}" class="btn btn-outline-secondary mt-3">
-                                {{ __('guidings.View_all_from') }} {{ $guiding->user->firstname }}
-                            </a>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1827,40 +1968,46 @@
     @if ($other_guidings->count() > 0)
     <section class="tour-details-two mb-5 p-0">
         <div class="container">
-
             <div class="tour-details-two__related-tours {{$agent->ismobile() ? 'text-center' : ''}}">
                 <h3 class="tour-details-two__title">@lang('guidings.Match_Guiding')</h3>
                 <div class="popular-tours__carousel owl-theme owl-carousel">
                     @foreach($other_guidings as $other_guiding)
-                
-                        <div class="popular-tours__single">
-                            <a class="popular-tours__img" href="{{ route('guidings.show',[$other_guiding->id,$other_guiding->slug]) }}" title="Guide aufmachen">
-                                <div class="popular-tours__img__wrapper">
-                                    @if($other_guiding->thumbnail_path)
-                                        <img src="{{ asset($other_guiding->thumbnail_path) }}" alt="{{ $other_guiding->title }}"/>
-                                    @endif
-                                </div>
-                            </a>
-
-                            <div class="popular-tours__content">
-                                <h5 class="crop-text-2 card-title h6">
-                                    <a href="{{ route('guidings.show', [$other_guiding->id, $other_guiding->slug]) }}">
-                                        {{ $other_guiding->title ? translate(Str::limit($other_guiding->title, 50)) : translate($other_guiding->title) }}
-                                    </a>
-                                </h5>    
-                                <small class="crop-text-1 small-text text-muted">{{ $other_guiding->location }}</small>
-                                <p class="fw-bold text-muted">
-                                    <span>@lang('message.from') {{ $other_guiding->getLowestPrice() }}€</span>
-                                </p>
+                        @php
+                            $tile_img = $other_guiding->thumbnail_path ? asset($other_guiding->thumbnail_path) : null;
+                            if (!$tile_img && count(get_galleries_image_link($other_guiding)) > 0) {
+                                $tile_img = get_galleries_image_link($other_guiding)[0];
+                            }
+                            $tile_rating = $other_guiding->user ? $other_guiding->user->average_rating() : null;
+                            $tile_reviews = $other_guiding->user && $other_guiding->user->reviews ? $other_guiding->user->reviews->count() : 0;
+                        @endphp
+                        <a href="{{ route('guidings.show', [$other_guiding->id, $other_guiding->slug]) }}" class="guiding-tile text-decoration-none">
+                            <div class="guiding-tile__img-wrap">
+                                @if($tile_img)
+                                    <img src="{{ $tile_img }}" alt="{{ $other_guiding->title }}" loading="lazy">
+                                @endif
+                                @if($tile_rating)
+                                    <span class="guiding-tile__rating">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                        {{ number_format($tile_rating, 1) }}@if($tile_reviews) ({{ $tile_reviews }})@endif
+                                    </span>
+                                @endif
                             </div>
-                        </div>
+                            <div class="guiding-tile__body">
+                                <h3 class="guiding-tile__title">{{ $other_guiding->title ? translate(Str::limit($other_guiding->title, 55)) : translate($other_guiding->title) }}</h3>
+                                <div class="guiding-tile__location"><i class="fas fa-map-marker-alt"></i> {{ $other_guiding->location }}</div>
+                                <div class="guiding-tile__meta">
+                                    <span>{{ $other_guiding->duration }} @if($other_guiding->duration_type == 'multi_day') {{ __('guidings.days') }} @else {{ __('guidings.hours') }} @endif</span>
+                                    <span>{{ $other_guiding->max_guests }} @if($other_guiding->max_guests != 1) {{ __('guidings.persons') }} @else {{ __('guidings.person') }} @endif</span>
+                                </div>
+                                <div class="guiding-tile__price"><span class="from">@lang('message.from')</span> {{ $other_guiding->getLowestPrice() }}€</div>
+                            </div>
+                        </a>
                     @endforeach
                 </div>
                 <div class="text-center my-3">
                     <a href="/guidings" class="btn btn-outline-secondary">{{ __('guidings.View_all_guidings') }}</a>
                 </div>
             </div>
-            
         </div>
     </section>
     @endif
@@ -2162,49 +2309,8 @@ $(document).ready(function(){
         });
     }
     
-    // Initialize carousels for mobile view
-    initMobileCarousels();
-    
-    // Re-initialize on window resize
-    $(window).on('resize', function() {
-        initMobileCarousels();
-    });
 });
 
-function initMobileCarousels() {
-    if (window.innerWidth < 768) {
-        // Initialize the same_guiding carousel for mobile
-        if (!$('.tours-list__inner.mobile-view').hasClass('owl-loaded')) {
-            $('.tours-list__inner.mobile-view').owlCarousel({
-                items: 1.2,
-                loop: false,
-                margin: 10,
-                nav: true,
-                dots: true,
-                navText: [
-                    '<i class="fas fa-chevron-left"></i>',
-                    '<i class="fas fa-chevron-right"></i>'
-                ],
-                responsive: {
-                    0: {
-                        items: 1.2
-                    },
-                    480: {
-                        items: 1.5
-                    },
-                    576: {
-                        items: 2
-                    }
-                }
-            });
-        }
-    } else {
-        // Destroy carousel on desktop if it was initialized
-        if ($('.tours-list__inner.mobile-view').hasClass('owl-loaded')) {
-            $('.tours-list__inner.mobile-view').trigger('destroy.owl.carousel');
-        }
-    }
-}
 
 const moreText = document.querySelector(".js-trigger-more-text");
 let expanded = false;
