@@ -9,22 +9,30 @@
                     $reviewCount   = $guiding->cached_review_count ?? $guiding->user->reviews->count();
                     $guidingTargets = $guiding->cached_target_fish_names ?? $guiding->getTargetFishNames($targetsMap ?? null);
                     $targetNames    = collect($guidingTargets)->pluck('name')->toArray();
+                    $guidingWaters  = $guiding->getWaterNames();
+                    $waterNames     = collect($guidingWaters)->pluck('name')->toArray();
                     $inclussions    = $guiding->cached_inclusion_names ?? $guiding->getInclusionNames();
                     $totalImages    = count($galleryImages);
                 @endphp
-                <div id="carouselExampleControls-{{$guiding->id}}" class="carousel slide gc-carousel" data-bs-ride="carousel" data-bs-interval="false">
+                <div id="carouselExampleControls-{{$guiding->id}}"
+                     class="carousel slide gc-carousel"
+                     data-bs-ride="carousel"
+                     data-bs-interval="false"
+                     data-guiding-gallery="{{ $guiding->id }}"
+                     data-gallery-images='@json((array)$galleryImages)'>
                     <div class="carousel-inner">
                         @if($totalImages)
                             @foreach($galleryImages as $index => $gallery_image_link)
                                 <div class="carousel-item @if($index == 0) active @endif">
-                                    <img class="d-block lazy" 
+                                    <img class="d-block lazy"
                                          data-src="{{ $gallery_image_link }}"
                                          src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
                                          alt="{{ $guiding->title }}"
                                          loading="lazy"
                                          width="800"
                                          height="600"
-                                         style="aspect-ratio: 4/3; object-fit: cover;">
+                                         data-guiding-open-modal
+                                         style="aspect-ratio: 4/3; object-fit: cover; cursor: pointer;">
                                 </div>
                             @endforeach
                         @endif
@@ -61,7 +69,20 @@
                     </div>
                     @endif
                 </div>
-        
+
+                {{-- Gallery lightbox modal --}}
+                <div class="guiding-gallery-modal" data-guiding-modal="{{ $guiding->id }}">
+                    <div class="guiding-gallery-modal__content">
+                        <button class="guiding-gallery-modal__close">&times;</button>
+                        <button class="guiding-gallery-modal__prev">&#10094;</button>
+                        <button class="guiding-gallery-modal__next">&#10095;</button>
+                        <img class="guiding-gallery-modal__image" src="" alt="{{ $guiding->title }}">
+                        <div class="guiding-gallery-modal__counter">
+                            <span class="guiding-gallery-modal__current">1</span> / <span class="guiding-gallery-modal__total">{{ $totalImages }}</span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
             <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 px-md-3 pt-md-2">
                 <a href="{{ route('guidings.show', [$guiding->id, $guiding->slug])}}">
@@ -105,11 +126,11 @@
                             </div>
                         </div>
                         <div class="guidings-icon-container"> 
-                            <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
+                            <img src="{{asset('assets/images/icons/pelagic.png')}}" height="20" width="20" alt="" />
                             <div class="">
                                 <div class="tours-list__content__trait__text">
-                                    @if(!empty($targetNames))
-                                        {{ implode(', ', $targetNames) }}
+                                    @if(!empty($waterNames))
+                                        {{ implode(', ', $waterNames) }}
                                     @endif
                                 </div>
                             </div>
@@ -130,7 +151,7 @@
                                 <strong>@lang('guidings.Whats_Included')</strong>
                                 <div class="inclusions-list">
                                     @php
-                                        $maxToShow = 3;
+                                        $maxToShow = 2;
                                     @endphp
                                     @foreach ($inclussions as $index => $inclussion)
                                         @if ($index < $maxToShow)
@@ -158,9 +179,20 @@
                         <span class="gc-mob-price-from">@lang('message.from')</span>
                         <span class="gc-mob-price-amount">€{{ $guiding->getLowestPrice() }} p.P.</span>
                     </div>
-                    <a href="{{ route('guidings.show', [$guiding->id, $guiding->slug]) }}" class="gc-mob-book-btn">
-                        @lang('vacations.book_now')
-                    </a>
+                    <div class="gc-mob-cta">
+                        <a href="{{ route('guidings.show', [$guiding->id, $guiding->slug]) }}"
+                           class="gc-mob-info-btn"
+                           title="@lang('guidings.more_info')">
+                            <i class="fas fa-info"></i>
+                        </a>
+                        <form method="POST" action="{{ route('checkout') }}" style="margin:0;">
+                            @csrf
+                            <input type="hidden" name="guiding_id" value="{{ $guiding->id }}">
+                            <input type="hidden" name="person" value="1">
+                            <input type="hidden" name="selected_date" value="">
+                            <button type="submit" class="gc-mob-book-btn">@lang('vacations.book_now')</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

@@ -614,7 +614,7 @@
         position: absolute;
         bottom: 8px;
         right: 8px;
-        z-index: 10;
+        z-index: 2;
         background: rgba(0, 0, 0, 0.52);
         color: #fff;
         border-radius: 10px;
@@ -665,9 +665,16 @@
 
     // ── Fish tag pills (mobile only) ────────────────────────────────────────
     .gc-mob-fish-tags {
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         gap: 6px;
         margin-top: 2px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; // Firefox
+
+        &::-webkit-scrollbar {
+            display: none; // Chrome/Safari
+        }
     }
 
     .gc-mob-fish-tag {
@@ -679,6 +686,7 @@
         font-size: 12px;
         color: #475569;
         font-weight: 500;
+        white-space: nowrap;
     }
 
     // ── Info icon grid ───────────────────────────────────────────────────────
@@ -762,6 +770,34 @@
         gap: 8px;
     }
 
+    .gc-mob-cta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    .gc-mob-info-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        font-size: 13px;
+        text-decoration: none !important;
+        flex-shrink: 0;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+            background: #e2e8f0;
+            color: #334155;
+        }
+    }
+
     .gc-mob-price {
         display: flex;
         flex-direction: column;
@@ -789,6 +825,8 @@
         background: #E85B40;
         color: #fff !important;
         text-decoration: none !important;
+        border: none;
+        outline: none;
         border-radius: 24px;
         padding: 10px 22px;
         font-size: 14px;
@@ -796,6 +834,7 @@
         white-space: nowrap;
         transition: background-color 0.2s ease, box-shadow 0.2s ease;
         flex-shrink: 0;
+        cursor: pointer;
 
         &:hover,
         &:focus {
@@ -809,4 +848,117 @@
     .guiding-card-wrapper .guiding-item-desc > a .inclusions-price .guidings-inclusions-container {
         // Keep inclusions visible on mobile
     }
+}
+
+// ─── Guiding Gallery Lightbox Modal ──────────────────────────────────────────
+.guiding-gallery-modal {
+    display: none;
+    position: fixed !important;
+    z-index: 99999 !important;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.95);
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+
+    &.show {
+        display: flex;
+        animation: ggFadeIn 0.2s ease;
+    }
+
+    &__content {
+        position: relative;
+        width: 90%;
+        max-width: 1200px;
+        height: 90vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: ggZoomIn 0.2s ease;
+    }
+
+    &__image {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 90vh;
+        object-fit: contain;
+        border-radius: 8px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    &__close {
+        position: absolute;
+        top: -50px;
+        right: 0;
+        font-size: 40px;
+        font-weight: 300;
+        color: #fff;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s ease;
+        z-index: 10000;
+
+        &:hover { transform: scale(1.1); }
+    }
+
+    &__prev,
+    &__next {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: #fff;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        z-index: 10000;
+
+        &:hover { background: rgba(255, 255, 255, 0.2); }
+    }
+
+    &__prev { left: 20px; }
+    &__next { right: 20px; }
+
+    &__counter {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #64748b;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+}
+
+@keyframes ggFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes ggZoomIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
 }

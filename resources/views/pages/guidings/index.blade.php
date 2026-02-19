@@ -1256,4 +1256,74 @@ document.addEventListener('DOMContentLoaded', function () {
 
 @endsection
 
+@push('guidingListingScripts')
+<script>
+// ── Guiding Gallery Lightbox ──────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-guiding-gallery]').forEach(function (carousel) {
+        const guidingId = carousel.getAttribute('data-guiding-gallery');
+        const images    = JSON.parse(carousel.getAttribute('data-gallery-images') || '[]');
+        const modal     = document.querySelector('[data-guiding-modal="' + guidingId + '"]');
+
+        if (!modal || images.length === 0) return;
+
+        const modalImage   = modal.querySelector('.guiding-gallery-modal__image');
+        const modalPrev    = modal.querySelector('.guiding-gallery-modal__prev');
+        const modalNext    = modal.querySelector('.guiding-gallery-modal__next');
+        const modalClose   = modal.querySelector('.guiding-gallery-modal__close');
+        const modalCurrent = modal.querySelector('.guiding-gallery-modal__current');
+
+        let currentIndex = 0;
+
+        function showImage(index) {
+            if (index < 0) index = images.length - 1;
+            if (index >= images.length) index = 0;
+            currentIndex = index;
+            if (modalImage)   modalImage.src = images[currentIndex];
+            if (modalCurrent) modalCurrent.textContent = currentIndex + 1;
+        }
+
+        function openModal(index) {
+            showImage(index);
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        // Sync with Bootstrap carousel slide index
+        carousel.addEventListener('slide.bs.carousel', function (e) {
+            currentIndex = e.to;
+        });
+
+        // Click any image in the carousel to open modal
+        carousel.querySelectorAll('[data-guiding-open-modal]').forEach(function (img, idx) {
+            img.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                openModal(idx);
+            });
+        });
+
+        if (modalClose) modalClose.addEventListener('click', closeModal);
+        if (modalPrev)  modalPrev.addEventListener('click', function () { showImage(currentIndex - 1); });
+        if (modalNext)  modalNext.addEventListener('click', function () { showImage(currentIndex + 1); });
+
+        // Close on backdrop click
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) closeModal();
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
+        });
+    });
+});
+</script>
+@endpush
+
 @stack('guidingListingScripts')
