@@ -29,28 +29,15 @@
 <!-- webschuppen styles -->
 <link rel="stylesheet" href="{{ asset('css/app.css') }}" />
 
-<link rel="stylesheet" type="text/css"
-      href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css"/>
-
+<link rel="stylesheet" href="{{ asset('assets/vendors/toastr/toastr.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/vendors/litepicker/css/litepicker.css') }}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" integrity="sha256-16PDMvytZTH9heHu9KBPjzrFTaoner60bnABykjNiM0=" crossorigin="anonymous">
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.css" integrity="sha512-3pIirOrwegjM6erE5gPSwkUzO+3cTjpnV9lexlNZqvupR64iZBnOOTiiLPb9M36zpMScbmUNIcHUqKD47M719g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<!-- with v4.1.0 Krajee SVG theme is used as default (and must be loaded as below) - include any of the other theme JS files as mentioned below (and change the theme property of the plugin) -->
-
-<!-- optionally if you need translation for your language then include locale file as mentioned below (replace LANG.js with your own locale file) -->
-<link href="https://cdn.jsdelivr.net/gh/kartik-v/bootstrap-star-rating@4.1.2/css/star-rating.min.css" media="all" rel="stylesheet" type="text/css" />
-
-<!-- with v4.1.0 Krajee SVG theme is used as default (and must be loaded as below) - include any of the other theme CSS files as mentioned below (and change the theme property of the plugin) -->
-<link href="https://cdn.jsdelivr.net/gh/kartik-v/bootstrap-star-rating@4.1.2/themes/krajee-svg/theme.css" media="all" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.6.6/css/flag-icons.min.css"/>
-<link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" />
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
+<link href="{{ asset('assets/vendors/bootstrap-star-rating/css/star-rating.min.css') }}" media="all" rel="stylesheet" type="text/css" />
+<link href="{{ asset('assets/vendors/bootstrap-star-rating/themes/krajee-svg/theme.css') }}" media="all" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="{{ asset('assets/vendors/flag-icons/css/flag-icons.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/vendors/tagify/tagify.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/vendors/fontawesome/css/all.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/vendors/cropperjs/cropper.min.css') }}">
 
 <style>
     .pagination .page-item .page-link {

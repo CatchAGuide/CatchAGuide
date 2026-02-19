@@ -547,8 +547,8 @@
 @endpush
 
 @push('guidingListingScripts')
-<script src="https://cdn.jsdelivr.net/npm/nouislider@14.6.3/distribute/nouislider.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ asset('assets/vendors/nouislider/nouislider.min.js') }}"></script>
+<script src="{{ asset('assets/vendors/chartjs/chart.umd.min.js') }}"></script>
 
 <script>
     // Pass the price histogram data to JavaScript

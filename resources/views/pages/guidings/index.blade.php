@@ -773,14 +773,35 @@
     </section>
     <!--Tours List End-->
 
-    <div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl" style="max-width: 100%; width: 96%; height:100%;">
-            <div class="modal-content" style="height:90%;">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="mapModalLabel">Map</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal fade map-modal" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+        <div class="modal-dialog map-modal__dialog">
+            <div class="modal-content map-modal__content">
+
+                {{-- Floating header bar over the map --}}
+                <div class="map-modal__header">
+                    <div class="map-modal__header-left">
+                        <span class="map-modal__pin-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                            </svg>
+                        </span>
+                        <div>
+                            <h6 class="map-modal__title" id="mapModalLabel">@lang('destination.show_on_map')</h6>
+                            @if(count($allGuidings) > 0)
+                            <span class="map-modal__subtitle">{{ count($allGuidings) }} {{ count($allGuidings) == 1 ? translate('result') : translate('results') }}</span>
+                            @endif
+                        </div>
+                    </div>
+                    <button type="button" class="map-modal__close" data-bs-dismiss="modal" aria-label="Close">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
                 </div>
-                <div id="map" class="modal-body"></div>
+
+                {{-- Map fills the rest --}}
+                <div id="map" class="map-modal__map"></div>
+
             </div>
         </div>
     </div>

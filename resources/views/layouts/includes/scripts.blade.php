@@ -22,22 +22,17 @@
 <script src="{{ asset('assets/vendors/vegas/vegas.min.js') }}"></script>
 <script src="{{ asset('assets/vendors/jquery-ui/jquery-ui.js') }}"></script>
 <script src="{{ asset('assets/vendors/timepicker/timePicker.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="{{ asset('assets/vendors/litepicker/litepicker.js') }}"></script>
+<script src="{{ asset('assets/vendors/moment/moment.min.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/locales-all.min.js"></script>
-
-<script src="https://cdn.jsdelivr.net/gh/kartik-v/bootstrap-star-rating@4.1.2/js/star-rating.min.js" type="text/javascript"></script>
-
-<script src="https://cdn.jsdelivr.net/gh/kartik-v/bootstrap-star-rating@4.1.2/themes/krajee-svg/theme.js"></script>
-
-<script src="https://cdn.jsdelivr.net/gh/kartik-v/bootstrap-star-rating@4.1.2/js/locales/LANG.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-{{-- <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> --}}
+<script src="{{ asset('assets/vendors/bootstrap-star-rating/js/star-rating.min.js') }}" type="text/javascript"></script>
+<script src="{{ asset('assets/vendors/bootstrap-star-rating/themes/krajee-svg/theme.js') }}"></script>
+<script src="{{ asset('assets/vendors/toastr/toastr.min.js') }}"></script>
 <script src="{{ asset('assets/js/select2.min.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous" async></script>
+<script src="{{ asset('assets/vendors/tagify/tagify.min.js') }}"></script>
+<script src="{{ asset('assets/vendors/cropperjs/cropper.min.js') }}"></script>
+<script src="{{ asset('assets/vendors/masonry/masonry.pkgd.min.js') }}" async></script>
 <script src="/js/app.js"></script>
 
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&libraries=places,geocoding,marker&loading=async"></script>
