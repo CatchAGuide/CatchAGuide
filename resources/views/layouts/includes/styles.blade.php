@@ -34,7 +34,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" integrity="sha256-16PDMvytZTH9heHu9KBPjzrFTaoner60bnABykjNiM0=" crossorigin="anonymous">
 <link href="{{ asset('assets/vendors/bootstrap-star-rating/css/star-rating.min.css') }}" media="all" rel="stylesheet" type="text/css" />
 <link href="{{ asset('assets/vendors/bootstrap-star-rating/themes/krajee-svg/theme.css') }}" media="all" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="{{ asset('assets/vendors/flag-icons/css/flag-icons.min.css') }}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.6.6/css/flag-icons.min.css" crossorigin="anonymous" />
 <link rel="stylesheet" href="{{ asset('assets/vendors/tagify/tagify.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/vendors/fontawesome/css/all.min.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/vendors/cropperjs/cropper.min.css') }}">
