@@ -69,8 +69,8 @@ class CategoryController extends Controller
         // Clean up request parameters before processing
         $cleanedRequest = $this->cleanRequestParameters($request);
         
-        // Eager load relationships to avoid N+1 problem
-        $baseQuery = Guiding::with(['target_fish', 'methods', 'water_types', 'boatType'])
+        // Eager load relationships to avoid N+1 problem (user.reviews for guiding-card partial)
+        $baseQuery = Guiding::with(['target_fish', 'methods', 'water_types', 'boatType', 'user.reviews'])
             ->select(['*', DB::raw('(
                 WITH price_per_person AS (
                     SELECT 
@@ -566,6 +566,7 @@ class CategoryController extends Controller
             // 'priceHistogramData' => $priceHistogramData,
             'maxPrice' => $overallMaxPrice,
             'overallMaxPrice' => $overallMaxPrice,
+            'targetsMap' => collect(),
         ]);
     }
 

@@ -1,20 +1,30 @@
+{{-- Guiding listing cards (mobile-updated). Used on guidings index and destination pages. --}}
 @foreach($guidings as $guiding)
+@php
+    $targetsMap = $targetsMap ?? null;
+    $fromDestination = $fromDestination ?? false;
+    $destinationId = $destinationId ?? null;
+    $showParams = [$guiding->id, $guiding->slug];
+    if ($fromDestination && $destinationId !== null) {
+        $showParams = array_merge($showParams, ['from_destination' => true, 'destination_id' => $destinationId]);
+    }
+    $showUrl = route('guidings.show', $showParams);
+
+    $galleryImages = $guiding->cached_gallery_images ?? json_decode($guiding->gallery_images);
+    $averageRating = $guiding->cached_average_rating ?? $guiding->user->average_rating();
+    $reviewCount   = $guiding->cached_review_count ?? $guiding->user->reviews->count();
+    $guidingTargets = $guiding->cached_target_fish_names ?? $guiding->getTargetFishNames($targetsMap);
+    $targetNames    = collect($guidingTargets)->pluck('name')->toArray();
+    $guidingWaters  = $guiding->getWaterNames();
+    $waterNames     = collect($guidingWaters)->pluck('name')->toArray();
+    $inclussions    = $guiding->cached_inclusion_names ?? $guiding->getInclusionNames();
+    $totalImages    = count($galleryImages);
+@endphp
 <div class="row m-0 mb-3 guiding-list-item">
     <div class="col-md-12">
         <div class="row p-2 border shadow-sm bg-white rounded guiding-card-wrapper">
             <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-0">
-                @php
-                    $galleryImages = $guiding->cached_gallery_images ?? json_decode($guiding->gallery_images);
-                    $averageRating = $guiding->cached_average_rating ?? $guiding->user->average_rating();
-                    $reviewCount   = $guiding->cached_review_count ?? $guiding->user->reviews->count();
-                    $guidingTargets = $guiding->cached_target_fish_names ?? $guiding->getTargetFishNames($targetsMap ?? null);
-                    $targetNames    = collect($guidingTargets)->pluck('name')->toArray();
-                    $guidingWaters  = $guiding->getWaterNames();
-                    $waterNames     = collect($guidingWaters)->pluck('name')->toArray();
-                    $inclussions    = $guiding->cached_inclusion_names ?? $guiding->getInclusionNames();
-                    $totalImages    = count($galleryImages);
-                @endphp
-                <div id="carouselExampleControls-{{$guiding->id}}"
+                <div id="carouselExampleControls-{{ $guiding->id }}"
                      class="carousel slide gc-carousel"
                      data-bs-ride="carousel"
                      data-bs-interval="false"
@@ -24,9 +34,8 @@
                         @if($totalImages)
                             @foreach($galleryImages as $index => $gallery_image_link)
                                 <div class="carousel-item @if($index == 0) active @endif">
-                                    <img class="d-block lazy"
-                                         data-src="{{ $gallery_image_link }}"
-                                         src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                                    <img class="d-block"
+                                         src="{{ (strpos($gallery_image_link, 'http') === 0) ? $gallery_image_link : asset($gallery_image_link) }}"
                                          alt="{{ $guiding->title }}"
                                          loading="lazy"
                                          width="800"
@@ -85,11 +94,11 @@
 
             </div>
             <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 px-md-3 pt-md-2">
-                <a href="{{ route('guidings.show', [$guiding->id, $guiding->slug])}}">
+                <a href="{{ $showUrl }}">
                     <div class="guidings-item">
                         <div class="guidings-item-title">
                             <h5 class="fw-bolder text-truncate">{{ Str::limit($guiding->title, 70) }}</h5>
-                            <span class="truncate"><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }}</span>                                      
+                            <span class="truncate"><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }}</span>
                         </div>
                         @if ($averageRating)
                             <div class="ave-reviews-row">
@@ -113,19 +122,19 @@
                     @endif
 
                     <div class="guidings-item-icon">
-                        <div class="guidings-icon-container"> 
+                        <div class="guidings-icon-container">
                             <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
                             <div class="">
                                 {{$guiding->duration}} {{ $guiding->duration_type == 'multi_day' ? __('guidings.days') : __('guidings.hours') }}
                             </div>
                         </div>
-                        <div class="guidings-icon-container"> 
+                        <div class="guidings-icon-container">
                             <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" />
                             <div class="">
                                 Max {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
                             </div>
                         </div>
-                        <div class="guidings-icon-container"> 
+                        <div class="guidings-icon-container">
                             <img src="{{asset('assets/images/icons/pelagic.png')}}" height="20" width="20" alt="" />
                             <div class="">
                                 <div class="tours-list__content__trait__text">
@@ -170,7 +179,7 @@
                             <div class="d-none d-flex flex-column mt-4">
                             </div>
                         </div>
-                    </div>    
+                    </div>
                 </a>
 
                 {{-- Mobile-only: CTA footer (price + Book Now button) --}}
@@ -180,7 +189,7 @@
                         <span class="gc-mob-price-amount">€{{ $guiding->getLowestPrice() }} p.P.</span>
                     </div>
                     <div class="gc-mob-cta">
-                        <a href="{{ route('guidings.show', [$guiding->id, $guiding->slug]) }}"
+                        <a href="{{ $showUrl }}"
                            class="gc-mob-info-btn"
                            title="@lang('guidings.more_info')">
                             <i class="fas fa-info"></i>
