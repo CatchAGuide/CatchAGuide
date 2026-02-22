@@ -577,14 +577,16 @@
                         @include('pages.guidings.includes.filters', ['formAction' => route('guidings.index')])
                     </div>
                     <div class="col-sm-12 col-lg-9 country-listing-item">
-                        <div id="guidings-list">
-                        @include('pages.guidings.partials.guiding-card', [
-                            'guidings'         => $guidings,
-                            'targetsMap'       => $targetsMap ?? null,
-                            'fromDestination'  => true,
-                            'destinationId'    => $row_data->id,
-                        ])
-                        {!! $guides->links('vendor.pagination.default') !!}
+                        <div class="tours-list__right">
+                            <div class="tours-list__inner" id="guidings-list">
+                                @include('pages.guidings.partials.guiding-card', [
+                                    'guidings'         => $guidings,
+                                    'targetsMap'       => $targetsMap ?? null,
+                                    'fromDestination'  => true,
+                                    'destinationId'    => $row_data->id,
+                                ])
+                                {!! $guides->links('vendor.pagination.default') !!}
+                            </div>
                         </div>
                     </div>
                 </div>

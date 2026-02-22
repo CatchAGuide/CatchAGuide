@@ -507,6 +507,15 @@
 // ─── Mobile Card Redesign (max-width: 767px) ──────────────────────────────────
 @media (max-width: 767px) {
 
+    // Destination & category pages: match guidings list spacing (same as /guidings)
+    .country-listing-item .tours-list__right,
+    .country-listing-item .tours-list__inner {
+        padding-left: 0;
+        padding-right: 0;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
     // Outer row: tighten the gutter
     .guiding-list-item {
         padding-left: 6px !important;

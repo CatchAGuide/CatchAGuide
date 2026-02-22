@@ -545,7 +545,6 @@
     </div>
 </section>
 
-
 <section class="trending my-5 py-1">
     <div class="container my-4">
         <div class="section-title my-0">

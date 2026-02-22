@@ -4,6 +4,13 @@
         display: block;
         border-bottom: 1px solid #ebe6de;
         padding: 24px 0 11px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+        &::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Edge */
+        }
         &.guiding{
             padding: 16px 0 11px;
             margin-bottom: 16px;
@@ -11,6 +18,13 @@
         &.destination{
             padding: 0 0 11px;
             margin-bottom: 16px;
+        }
+        .page-header__bottom-inner,
+        .thm-breadcrumb{
+            white-space: nowrap;
+        }
+        .thm-breadcrumb li{
+            word-break: normal;
         }
     }
 }

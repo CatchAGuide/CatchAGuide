@@ -221,7 +221,10 @@
 <!-- /.preloader -->
 <div class="page-wrapper">
   
-    @include('layouts.partials.newheader-short', ['isVacation' => request()->is('vacations*')])
+    @include('layouts.partials.newheader-short', [
+        'isVacation' => request()->is('vacations*'),
+        'currentVacationCountry' => isset($vacation) ? ($vacation->country ?? null) : null,
+    ])
 
     @yield('content')
 

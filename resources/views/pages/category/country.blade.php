@@ -664,14 +664,16 @@
                             @include('pages.guidings.includes.filters', ['formAction' => request()->url()])
                         </div>
                         <div class="col-sm-12 col-lg-9 country-listing-item">
-                            <div id="guidings-list">
-                            @include('pages.guidings.partials.guiding-card', [
-                                'guidings'         => $guidings,
-                                'targetsMap'       => $targetsMap ?? null,
-                                'fromDestination'  => true,
-                                'destinationId'    => $row_data->id,
-                            ])
-                            {!! $guidings->links('vendor.pagination.default') !!}
+                            <div class="tours-list__right">
+                                <div class="tours-list__inner" id="guidings-list">
+                                    @include('pages.guidings.partials.guiding-card', [
+                                        'guidings'         => $guidings,
+                                        'targetsMap'       => $targetsMap ?? null,
+                                        'fromDestination'  => true,
+                                        'destinationId'    => $row_data->id,
+                                    ])
+                                    {!! $guidings->links('vendor.pagination.default') !!}
+                                </div>
                             </div>
                         </div>
                     </div>

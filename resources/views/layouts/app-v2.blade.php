@@ -223,7 +223,10 @@
 <!-- /.preloader -->
 <div class="page-wrapper">
 
-    @include('layouts.partials.newheader', ['isVacation' => request()->is('vacations*')])
+    @include('layouts.partials.newheader', [
+        'isVacation' => request()->is('vacations*'),
+        'currentVacationCountry' => isset($row_data) ? ($row_data->name ?? null) : null,
+    ])
 
     @yield('content')
 

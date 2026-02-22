@@ -141,7 +141,10 @@
 <!-- /.preloader -->
 <div class="page-wrapper">
   
-    @include('layouts.partials.newheader-short', ['isVacation' => request()->is('vacations*')])
+    @include('layouts.partials.newheader-short', [
+        'isVacation' => request()->is('vacations*'),
+        'currentVacationCountry' => isset($campData) && is_array($campData) ? ($campData['country'] ?? null) : null,
+    ])
 
     @yield('content')
 

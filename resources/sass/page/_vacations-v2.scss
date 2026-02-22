@@ -75,6 +75,10 @@ body {
     position: relative;
     z-index: 20;
 
+    @media (min-width: 768px) {
+        padding-top: 0; // floating search already provides top clearance on desktop
+    }
+
     &__inner {
         max-width: 1100px;
         display: flex;
