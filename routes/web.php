@@ -370,6 +370,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('guidings/{guiding}/details', [AdminGuidingsController::class, 'details'])->name('guidings.details');
         Route::post('guidings/{guiding}/details-field', [AdminGuidingsController::class, 'updateDetailsField'])->name('guidings.details-field');
         Route::post('guidings/{guiding}/translate', [AdminGuidingsController::class, 'translate'])->name('guidings.translate');
+        Route::post('guidings/{guiding}/language', [AdminGuidingsController::class, 'updateLanguage'])->name('guidings.update-language');
         Route::resource('guidings', AdminGuidingsController::class);
         Route::get('guidings/changeguidingstatus/{id}', [AdminGuidingsController::class, 'changeguidingstatus'])->name('changeGuidingStatus');
         

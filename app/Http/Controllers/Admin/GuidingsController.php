@@ -47,6 +47,11 @@ class GuidingsController extends Controller
         'recommendations',
         'other_information',
     ];
+    
+    /**
+     * Allowed source/target language codes for guidings (must match translation service).
+     */
+    private const ALLOWED_LANGUAGES = ['de', 'en', 'es', 'fr', 'it'];
 
     /**
      * Display a listing of the resource.
@@ -451,6 +456,35 @@ class GuidingsController extends Controller
         $guiding->save();
         return back()->with('success', 'Der Status wurde erfolgreich geändert');
     }
+
+    /**
+     * Update the source language of a guiding (main content language).
+     * Used so the translation command knows the correct source when translating.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Guiding  $guiding
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+     */
+    public function updateLanguage(Request $request, Guiding $guiding)
+    {
+        $validated = $request->validate([
+            'language' => ['required', 'string', 'size:2', Rule::in(self::ALLOWED_LANGUAGES)],
+        ]);
+
+        $guiding->language = $validated['language'];
+        $guiding->save();
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('admin.guiding_source_language_set', ['lang' => strtoupper($validated['language'])]),
+                'language' => $guiding->language,
+            ]);
+        }
+
+        return back()->with('success', __('admin.guiding_source_language_set', ['lang' => strtoupper($validated['language'])]));
+    }
+
     /**
      * Trigger translation for a guiding into the given languages (or missing only).
      * POST admin/guidings/{guiding}/translate?languages=en,de or no query to translate all missing (default targets: en, de).

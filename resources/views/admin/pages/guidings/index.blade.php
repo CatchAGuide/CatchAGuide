@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Alle Guidings')
+@section('title', __('admin.guidings.page_title'))
 
 @section('css_after')
 <style>
@@ -23,7 +23,7 @@
                 <h1 class="page-title">@yield('title')</h1>
                 <div>
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="#">Verwaltung</a></li>
+                        <li class="breadcrumb-item"><a href="#">{{ __('admin.guidings.breadcrumb_management') }}</a></li>
                         <li class="breadcrumb-item active" aria-current="page">@yield('title')</li>
                     </ol>
                 </div>
@@ -35,17 +35,17 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-header">
-                            <a href="{{ route('admin.guidings.create') }}" class="btn btn-primary"><i class="fa fa-plus"></i> Guiding</a>
+                            <a href="{{ route('admin.guidings.create') }}" class="btn btn-primary"><i class="fa fa-plus"></i> {{ __('admin.guidings.add_guiding') }}</a>
                         </div>
                         <div class="card-body table-responsive">
                             <table id="guiding-datatable" class="table">
                                 <thead>
                                     <tr>
-                                        <th class="wd-15p border-bottom-0">ID</th>
-                                        <th class="wd-15p border-bottom-0">Name des Guidings</th>
-                                        <th class="wd-10p border-bottom-0">Guide Name</th>
-                                        <th class="wd-12p border-bottom-0" title="* = main language">Languages</th>
-                                        <th class="wd-25p border-bottom-0">Aktionen</th>
+                                        <th class="wd-15p border-bottom-0">{{ __('admin.guidings.th_id') }}</th>
+                                        <th class="wd-15p border-bottom-0">{{ __('admin.guidings.th_name') }}</th>
+                                        <th class="wd-10p border-bottom-0">{{ __('admin.guidings.th_guide') }}</th>
+                                        <th class="wd-12p border-bottom-0" title="{{ __('admin.guidings.th_languages_hint') }}">{{ __('admin.guidings.th_languages') }}</th>
+                                        <th class="wd-25p border-bottom-0">{{ __('admin.guidings.th_actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -82,20 +82,21 @@
                                             @if(empty($availableLangs))
                                                 <span class="text-muted">—</span>
                                             @endif
+                                            <button type="button" class="btn btn-sm btn-outline-secondary ms-1 btn-guiding-language" title="{{ __('admin.guidings.btn_set_source_language') }}" data-guiding-id="{{ $guiding->id }}" data-guiding-title="{{ e($guiding->title) }}" data-current-lang="{{ $mainLang }}"><i class="fa fa-globe"></i></button>
                                         </td>
                                         <td class="text-center">
                                             <div class="btn-group">
                                                 @if($guiding->status == 1)
-                                                    <a href="{{ route('admin.changeGuidingStatus', $guiding->id) }}" title="Guiding deaktivieren" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></a>
+                                                    <a href="{{ route('admin.changeGuidingStatus', $guiding->id) }}" title="{{ __('admin.guidings.deactivate') }}" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></a>
                                                 @else
-                                                    <a href="{{ route('admin.changeGuidingStatus', $guiding->id) }}" title="Guiding aktivieren" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
+                                                    <a href="{{ route('admin.changeGuidingStatus', $guiding->id) }}" title="{{ __('admin.guidings.activate') }}" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
                                                 @endif
                                                 <a href="{{ route('admin.guidings.edit', $guiding) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pen"></i></a>
-                                                <button type="button" class="btn btn-sm btn-primary btn-guiding-details" title="Textdetails anzeigen" data-guiding-id="{{ $guiding->id }}" data-guiding-title="{{ e($guiding->title) }}" data-guiding-location="{{ e($guiding->location ?? '') }}" data-guiding-guide-name="{{ e($guiding->user->full_name ?? '') }}"><i class="fa fa-search"></i></button>
-                                                <a href="{{ route('admin.guidings.show', $guiding) }}" class="btn btn-sm btn-outline-primary" title="Seite öffnen"><i class="fa fa-external-link-alt"></i></a>
+                                                <button type="button" class="btn btn-sm btn-primary btn-guiding-details" title="{{ __('admin.guidings.btn_show_details') }}" data-guiding-id="{{ $guiding->id }}" data-guiding-title="{{ e($guiding->title) }}" data-guiding-location="{{ e($guiding->location ?? '') }}" data-guiding-guide-name="{{ e($guiding->user->full_name ?? '') }}"><i class="fa fa-search"></i></button>
+                                                <a href="{{ route('admin.guidings.show', $guiding) }}" class="btn btn-sm btn-outline-primary" title="{{ __('admin.guidings.btn_open_page') }}"><i class="fa fa-external-link-alt"></i></a>
                                                 @if(!empty($missingLangs))
-                                                    <button type="button" class="btn btn-sm btn-info btn-guiding-translate" title="Fehlende Übersetzung erstellen ({{ strtoupper(implode(', ', $missingLangs)) }})" data-translate-url="{{ route('admin.guidings.translate', $guiding) }}" data-missing="{{ implode(',', $missingLangs) }}">
-                                                        <i class="fa fa-language"></i> <span class="btn-translate-label">Übersetzen</span>
+                                                    <button type="button" class="btn btn-sm btn-info btn-guiding-translate" title="{{ __('admin.guidings.btn_translate_missing', ['langs' => strtoupper(implode(', ', $missingLangs))]) }}" data-translate-url="{{ route('admin.guidings.translate', $guiding) }}" data-missing="{{ implode(',', $missingLangs) }}">
+                                                        <i class="fa fa-language"></i> <span class="btn-translate-label">{{ __('admin.guidings.btn_translate') }}</span>
                                                     </button>
                                                 @endif
                                             </div>
@@ -156,9 +157,9 @@
                                         <td class="text-center">
                                             <div class="btn-group">
                                                 @if($guiding->status == 1)
-                                                    <a href="{{ route('admin.changeGuidingStatus', $guiding->id) }}" title="Guiding deaktivieren" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></a>
+                                                    <a href="{{ route('admin.changeGuidingStatus', $guiding->id) }}" title="{{ __('admin.guidings.deactivate') }}" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></a>
                                                 @else
-                                                    <a href="{{ route('admin.changeGuidingStatus', $guiding->id) }}" title="Guiding aktivieren" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
+                                                    <a href="{{ route('admin.changeGuidingStatus', $guiding->id) }}" title="{{ __('admin.guidings.activate') }}" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
                                                 @endif
                                                 <a href="{{ route('admin.guidings.edit', $guiding) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pen"></i></a>
                                                 <a href="{{ route('admin.guidings.show', $guiding) }}" class="btn btn-sm btn-primary"><i class="fa fa-search"></i></a>
@@ -185,21 +186,21 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="guidingDetailsModalLabel">
-                        <i class="fa fa-search me-2"></i> Guiding – Textdetails
+                        <i class="fa fa-search me-2"></i> {{ __('admin.guidings.modal_details_title') }}
                     </h5>
                     <div class="d-flex align-items-center gap-2">
-                        <label class="mb-0 small text-muted">Sprache:</label>
+                        <label class="mb-0 small text-muted">{{ __('admin.guidings.modal_language') }}</label>
                         <select id="guidingDetailsLangSwitch" class="form-select form-select-sm" style="width: auto;">
                             <option value="">—</option>
                         </select>
-                        <a id="guidingDetailsShowLink" href="#" class="btn btn-sm btn-outline-primary" target="_blank" title="Seite öffnen"><i class="fa fa-external-link-alt"></i></a>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+                        <a id="guidingDetailsShowLink" href="#" class="btn btn-sm btn-outline-primary" target="_blank" title="{{ __('admin.guidings.btn_open_page') }}"><i class="fa fa-external-link-alt"></i></a>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('admin.guidings.modal_close') }}"></button>
                     </div>
                 </div>
                 <div class="modal-body">
                     <div id="guidingDetailsLoading" class="text-center py-5">
-                        <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Laden…</span></div>
-                        <p class="mt-2 text-muted mb-0">Lade Details…</p>
+                        <div class="spinner-border text-primary" role="status"><span class="visually-hidden">{{ __('admin.guidings.modal_loading') }}</span></div>
+                        <p class="mt-2 text-muted mb-0">{{ __('admin.guidings.modal_loading_text') }}</p>
                     </div>
                     <div id="guidingDetailsContent" class="d-none">
                         <div id="guidingDetailsSections"></div>
@@ -209,11 +210,52 @@
             </div>
         </div>
     </div>
+
+    <!-- Set guiding source language modal -->
+    <div class="modal fade" id="guidingLanguageModal" tabindex="-1" aria-labelledby="guidingLanguageModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="guidingLanguageModalLabel"><i class="fa fa-globe me-2"></i> {{ __('admin.guidings.modal_source_language_title') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('admin.guidings.modal_close') }}"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3">{!! __('admin.guidings.modal_source_language_paragraph') !!}</p>
+                    <input type="hidden" id="guidingLanguageGuidingId" value="">
+                    <div class="mb-0">
+                        <label for="guidingLanguageSelect" class="form-label">{{ __('admin.guidings.modal_source_language_label') }}</label>
+                        <select id="guidingLanguageSelect" class="form-select">
+                            <option value="de">{{ __('admin.guidings.lang_de') }}</option>
+                            <option value="en">{{ __('admin.guidings.lang_en') }}</option>
+                            <option value="es">{{ __('admin.guidings.lang_es') }}</option>
+                            <option value="fr">{{ __('admin.guidings.lang_fr') }}</option>
+                            <option value="it">{{ __('admin.guidings.lang_it') }}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.guidings.modal_cancel') }}</button>
+                    <button type="button" class="btn btn-primary" id="guidingLanguageSaveBtn"><i class="fa fa-check me-1"></i> {{ __('admin.guidings.modal_save') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 
 @section('js_after')
 @php
+    $adminGuidingsJs = [
+        'source_language_prefix' => __('admin.guidings.js_source_language_prefix'),
+        'guiding_prefix' => __('admin.guidings.js_guiding_prefix'),
+        'guide_prefix' => __('admin.guidings.js_guide_prefix'),
+        'save_failed' => __('admin.guidings.js_save_failed'),
+        'translation_failed' => __('admin.guidings.js_translation_failed'),
+        'translation_request_failed' => __('admin.guidings.js_translation_request_failed'),
+        'details_load_failed' => __('admin.guidings.js_details_load_failed'),
+        'btn_edit' => __('admin.guidings.btn_edit'),
+        'modal_save' => __('admin.guidings.modal_save'),
+    ];
     $guidingDetailsLabels = [
         'labels' => [
             'title' => __('newguidings.title'),
@@ -241,21 +283,65 @@
         ],
         'noTextDetails' => __('newguidings.no_text_details_for_language'),
         'steps' => [
-            ['step' => 1, 'title' => 'Step 1', 'fields' => ['title']],
-            ['step' => 2, 'title' => 'Step 2', 'fields' => ['additional_information']],
-            ['step' => 4, 'title' => 'Step 4', 'fields' => ['description', 'desc_course_of_action', 'desc_starting_time', 'desc_meeting_point', 'desc_tour_unique']],
-            ['step' => 5, 'title' => 'Step 5', 'fields' => ['other_information', 'requirements', 'recommendations']],
+            ['step' => 1, 'title' => __('admin.guidings.step', ['num' => 1]), 'fields' => ['title']],
+            ['step' => 2, 'title' => __('admin.guidings.step', ['num' => 2]), 'fields' => ['additional_information']],
+            ['step' => 4, 'title' => __('admin.guidings.step', ['num' => 4]), 'fields' => ['description', 'desc_course_of_action', 'desc_starting_time', 'desc_meeting_point', 'desc_tour_unique']],
+            ['step' => 5, 'title' => __('admin.guidings.step', ['num' => 5]), 'fields' => ['other_information', 'requirements', 'recommendations']],
         ],
     ];
 @endphp
 <script>
     window.guidingDetailsTranslations = @json($guidingDetailsLabels);
+    window.adminGuidingsJs = @json($adminGuidingsJs);
 </script>
 <script>
     $(function() {
         $('#guiding-datatable').DataTable({
             order: [[0, 'desc']]
         });
+
+        var guidingLanguageModalEl = document.getElementById('guidingLanguageModal');
+        if (guidingLanguageModalEl) {
+            var guidingLanguageModal = new bootstrap.Modal(guidingLanguageModalEl);
+            $(document).on('click', '.btn-guiding-language', function() {
+                var id = $(this).data('guiding-id');
+                var title = $(this).data('guiding-title');
+                var currentLang = $(this).data('current-lang') || 'de';
+                var t = window.adminGuidingsJs || {};
+                $('#guidingLanguageModalLabel').text((t.source_language_prefix || 'Source language:') + ' ' + (title || (t.guiding_prefix || 'Guiding #') + id));
+                $('#guidingLanguageGuidingId').val(id);
+                $('#guidingLanguageSelect').val(currentLang);
+                guidingLanguageModal.show();
+            });
+            $('#guidingLanguageSaveBtn').on('click', function() {
+                var id = $('#guidingLanguageGuidingId').val();
+                var language = $('#guidingLanguageSelect').val();
+                if (!id || !language) return;
+                var $btn = $(this);
+                $btn.prop('disabled', true);
+                $.ajax({
+                    url: '{{ url("admin/guidings") }}/' + id + '/language',
+                    method: 'POST',
+                    data: { language: language, _token: '{{ csrf_token() }}' },
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                    .done(function(res) {
+                        if (res && res.success) {
+                            guidingLanguageModal.hide();
+                            window.location.reload();
+                        } else {
+                            var t = window.adminGuidingsJs || {};
+                            alert(res && res.message ? res.message : (t.save_failed || 'Save failed.'));
+                        }
+                    })
+                    .fail(function(xhr) {
+                        var t = window.adminGuidingsJs || {};
+                        var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : (xhr.responseJSON && xhr.responseJSON.errors && xhr.responseJSON.errors.language ? xhr.responseJSON.errors.language[0] : (t.save_failed || 'Save failed.'));
+                        alert(msg);
+                    })
+                    .always(function() { $btn.prop('disabled', false); });
+            });
+        }
 
         $(document).on('click', '.btn-guiding-translate', function() {
             var $btn = $(this);
@@ -275,12 +361,14 @@
                     if (res && res.success !== false) {
                         window.location.reload();
                     } else {
-                        alert(res && res.message ? res.message : 'Translation completed with some failures.');
+                        var t = window.adminGuidingsJs || {};
+                        alert(res && res.message ? res.message : (t.translation_failed || 'Translation completed with some failures.'));
                         window.location.reload();
                     }
                 })
                 .fail(function(xhr) {
-                    var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Translation request failed.';
+                    var t = window.adminGuidingsJs || {};
+                    var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : (t.translation_request_failed || 'Translation request failed.');
                     alert(msg);
                     $btn.prop('disabled', false);
                     $label.text(origLabel);
@@ -302,7 +390,8 @@
                 var title = $(this).data('guiding-title') || ('Guiding #' + id);
                 var location = $(this).data('guiding-location') || '';
                 var guideName = $(this).data('guiding-guide-name') || '';
-                var modalTitle = 'Guidings ' + id + ' - ' + title + (location ? ' | ' + location : '') + (guideName ? ' | Guide: ' + guideName : '');
+                var t = window.adminGuidingsJs || {};
+                var modalTitle = (t.guiding_prefix || 'Guiding #') + id + ' - ' + title + (location ? ' | ' + location : '') + (guideName ? ' | ' + (t.guide_prefix || 'Guide:') + ' ' + guideName : '');
                 $('#guidingDetailsModalLabel').text(modalTitle);
                 $('#guidingDetailsShowLink').attr('href', showBaseUrl + '/' + id);
                 $('#guidingDetailsContent').addClass('d-none');
@@ -315,7 +404,7 @@
                     .done(function(res) {
                         if (res && res.error) {
                             $('#guidingDetailsLoading').addClass('d-none');
-                            $('#guidingDetailsError').text(res.message || res.error || 'Details konnten nicht geladen werden.').removeClass('d-none');
+                            $('#guidingDetailsError').text(res.message || res.error || (t.details_load_failed || 'Could not load details.')).removeClass('d-none');
                             return;
                         }
                         currentDetails = res;
@@ -337,7 +426,8 @@
                     })
                     .fail(function(xhr) {
                         $('#guidingDetailsLoading').addClass('d-none');
-                        var errMsg = 'Details konnten nicht geladen werden.';
+                        var t = window.adminGuidingsJs || {};
+                        var errMsg = t.details_load_failed || 'Could not load details.';
                         try {
                             if (xhr.responseJSON && (xhr.responseJSON.message || xhr.responseJSON.error)) {
                                 errMsg = xhr.responseJSON.message || xhr.responseJSON.error;
@@ -367,12 +457,14 @@
                     { step: 5, title: 'Step 5', fields: ['other_information', 'requirements', 'recommendations'] }
                 ];
                 var html = '';
+                var editTitle = (window.adminGuidingsJs && window.adminGuidingsJs.btn_edit) || 'Edit';
+                var saveTitle = (window.adminGuidingsJs && window.adminGuidingsJs.modal_save) || 'Save';
 
                 function renderInput(key, val) {
                     var meta = fieldMeta[key] || { type: 'text', rows: 3 };
                     var label = labels[key] || key;
                     var strVal = (val === undefined || val === null) ? '' : (typeof val === 'object' ? JSON.stringify(val, null, 2) : String(val));
-                    var editBtn = '<button type="button" class="btn btn-sm btn-outline-secondary btn-detail-edit ms-1" title="Bearbeiten" data-field="' + escapeAttr(key) + '"><i class="fa fa-pen"></i></button><button type="button" class="btn btn-sm btn-success btn-detail-save d-none ms-1" title="Speichern" data-field="' + escapeAttr(key) + '"><i class="fa fa-check"></i></button>';
+                    var editBtn = '<button type="button" class="btn btn-sm btn-outline-secondary btn-detail-edit ms-1" title="' + escapeAttr(editTitle) + '" data-field="' + escapeAttr(key) + '"><i class="fa fa-pen"></i></button><button type="button" class="btn btn-sm btn-success btn-detail-save d-none ms-1" title="' + escapeAttr(saveTitle) + '" data-field="' + escapeAttr(key) + '"><i class="fa fa-check"></i></button>';
                     var labelRow = '<div class="d-flex align-items-center flex-wrap gap-1 mb-1"><label class="form-label small text-muted mb-0">' + escapeHtml(label) + '</label>' + editBtn + '</div>';
                     var wrapStart = '<div class="mb-3 guiding-detail-field-row" data-field="' + escapeAttr(key) + '">' + labelRow;
                     var wrapEnd = '</div>';
@@ -409,7 +501,7 @@
                             itemValue = String(item);
                         }
                         var rows = itemValue.length > 120 ? 4 : 2;
-                        var editBtn = '<button type="button" class="btn btn-sm btn-outline-secondary btn-detail-edit ms-1" title="Bearbeiten" data-field="' + escapeAttr(key) + '" data-list-index="' + idx + '" data-list-id="' + escapeAttr(itemId) + '"><i class="fa fa-pen"></i></button><button type="button" class="btn btn-sm btn-success btn-detail-save d-none ms-1" title="Speichern" data-field="' + escapeAttr(key) + '" data-list-index="' + idx + '" data-list-id="' + escapeAttr(itemId) + '"><i class="fa fa-check"></i></button>';
+                        var editBtn = '<button type="button" class="btn btn-sm btn-outline-secondary btn-detail-edit ms-1" title="' + escapeAttr(editTitle) + '" data-field="' + escapeAttr(key) + '" data-list-index="' + idx + '" data-list-id="' + escapeAttr(itemId) + '"><i class="fa fa-pen"></i></button><button type="button" class="btn btn-sm btn-success btn-detail-save d-none ms-1" title="' + escapeAttr(saveTitle) + '" data-field="' + escapeAttr(key) + '" data-list-index="' + idx + '" data-list-id="' + escapeAttr(itemId) + '"><i class="fa fa-check"></i></button>';
                         html += '<div class="mb-3 guiding-detail-field-row" data-field="' + escapeAttr(key) + '" data-list-index="' + idx + '" data-list-id="' + escapeAttr(itemId) + '"><div class="d-flex align-items-center flex-wrap gap-1 mb-1"><label class="form-label small text-muted mb-0">' + escapeHtml(itemLabel) + '</label>' + editBtn + '</div><textarea class="form-control form-control-sm guiding-detail-value guiding-detail-input" readonly rows="' + rows + '" style="resize:vertical">' + escapeHtml(itemValue) + '</textarea></div>';
                     });
                     html += '</div>';
@@ -489,7 +581,8 @@
                         renderGuidingDetailsContent(lang);
                     })
                     .fail(function(xhr) {
-                        var msg = (xhr.responseJSON && xhr.responseJSON.error) ? xhr.responseJSON.error : 'Speichern fehlgeschlagen.';
+                        var t = window.adminGuidingsJs || {};
+                        var msg = (xhr.responseJSON && xhr.responseJSON.error) ? xhr.responseJSON.error : (t.save_failed || 'Save failed.');
                         alert(msg);
                     })
                     .always(function() { $btn.prop('disabled', false); });
