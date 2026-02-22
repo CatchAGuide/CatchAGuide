@@ -50,6 +50,7 @@ return [
     'course_of_action_placeholder' => 'Erzähle deinen Gästen, was sie von deiner Angeltour erwarten können. Wie sieht eine typische Angeltour aus?',
     'starting_time' => 'Startzeit',
     'starting_time_placeholder' => 'Lass deine Gäste wissen, wann die Angeltour typischerweise beginnt.',
+    'departure_times' => 'Abfahrtszeiten',
     'meeting_point' => 'Treffpunkt',
     'meeting_point_placeholder' => 'Gib deinen Gästen Informationen, wo sie dich nach der Buchung treffen werden.',
     'tour_highlights' => 'Tour-Highlights',
@@ -102,6 +103,7 @@ return [
     // Additional text
     'extra_input_placeholder' => 'Füge einen Kommentar oder zusätzliche Informationen für deine Gäste hinzu.',
     'error_message' => 'Bitte fülle alle erforderlichen Felder aus.',
+    'no_text_details_for_language' => 'Keine Textdetails für diese Sprache.',
 
     // Tooltips
     'tooltip_upload_image' => 'Wähle einen Titel, der deine Tour am besten beschreibt. Füge zum Beispiel den Standort, die Zielfische, den Gewässernamen usw. ein. Beispiel: "Angeltour in Amsterdam auf Barsch & Zander".',

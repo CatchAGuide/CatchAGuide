@@ -166,7 +166,7 @@
                                 </div>
                             </div>
                             @if(!empty($camp['description']['camp_description']))
-                            <div class="description-item-toggle">
+                            <div class="description-item-toggle camp-desc-mobile-wrap">
                                 <h3 class="font-semibold text-gray-700">{{ __('vacations.camp') }}</h3>
                                 <p class="description-text description-text-wrapper">
                                     <span class="description-loading">
@@ -174,10 +174,14 @@
                                         <span>{{ __('vacations.loading') }}</span>
                                     </span>
                                 </p>
+                                <button type="button" class="camp-desc-see-more btn btn-link p-0 mt-2 text-orange text-decoration-none d-none" aria-expanded="false">
+                                    <span class="camp-desc-more-label">@lang('vacations.see_more')</span>
+                                    <span class="camp-desc-less-label d-none">@lang('vacations.see_less')</span>
+                                </button>
                             </div>
                             @endif
                             @if(!empty($camp['description']['camp_area']))
-                            <div class="description-item-toggle">
+                            <div class="description-item-toggle camp-desc-mobile-wrap">
                                 <h3 class="font-semibold text-gray-700">{{ __('vacations.area') }}</h3>
                                 <p class="description-text description-text-wrapper">
                                     <span class="description-loading">
@@ -185,10 +189,14 @@
                                         <span>{{ __('vacations.loading') }}</span>
                                     </span>
                                 </p>
+                                <button type="button" class="camp-desc-see-more btn btn-link p-0 mt-2 text-orange text-decoration-none d-none" aria-expanded="false">
+                                    <span class="camp-desc-more-label">@lang('vacations.see_more')</span>
+                                    <span class="camp-desc-less-label d-none">@lang('vacations.see_less')</span>
+                                </button>
                             </div>
                             @endif
                             @if(!empty($camp['description']['camp_area_fishing']))
-                            <div class="description-item-toggle">
+                            <div class="description-item-toggle camp-desc-mobile-wrap">
                                 <h3 class="font-semibold text-gray-700">{{ __('vacations.fishing') }}</h3>
                                 <p class="description-text description-text-wrapper">
                                     <span class="description-loading">
@@ -196,6 +204,10 @@
                                         <span>{{ __('vacations.loading') }}</span>
                                     </span>
                                 </p>
+                                <button type="button" class="camp-desc-see-more btn btn-link p-0 mt-2 text-orange text-decoration-none d-none" aria-expanded="false">
+                                    <span class="camp-desc-more-label">@lang('vacations.see_more')</span>
+                                    <span class="camp-desc-less-label d-none">@lang('vacations.see_less')</span>
+                                </button>
                             </div>
                             @endif
                         </div>
@@ -879,137 +891,77 @@ document.addEventListener('DOMContentLoaded', function () {
     initDescriptionToggles();
 });
 
-// Description expand/collapse functionality
+// Description expand/collapse functionality (mobile only: 5 lines + visible See more/See less)
 function initDescriptionToggles() {
-    const descriptionItems = document.querySelectorAll('.description-item-toggle');
-    
-    // Store original text content before processing
+    const descriptionItems = document.querySelectorAll('.description-item-toggle.camp-desc-mobile-wrap');
     const originalTexts = {
         'camp_description': @json(translate($camp['description']['camp_description'] ?? '')),
         'camp_area': @json(translate($camp['description']['camp_area'] ?? '')),
         'camp_area_fishing': @json(translate($camp['description']['camp_area_fishing'] ?? ''))
     };
-    
+
     descriptionItems.forEach((item, index) => {
         const textElement = item.querySelector('.description-text-wrapper');
+        const seeMoreBtn = item.querySelector('.camp-desc-see-more');
+        const moreLabel = seeMoreBtn ? seeMoreBtn.querySelector('.camp-desc-more-label') : null;
+        const lessLabel = seeMoreBtn ? seeMoreBtn.querySelector('.camp-desc-less-label') : null;
         if (!textElement) return;
-        
-        // Get the correct original text based on position
+
         let originalText = '';
-        if (index === 0 && originalTexts.camp_description) {
-            originalText = originalTexts.camp_description;
-        } else if (index === 1 && originalTexts.camp_area) {
-            originalText = originalTexts.camp_area;
-        } else if (index === 2 && originalTexts.camp_area_fishing) {
-            originalText = originalTexts.camp_area_fishing;
-        }
-        
-        if (!originalText) {
-            // Hide loading if no text available
-            const loadingElement = textElement.querySelector('.description-loading');
-            if (loadingElement) {
-                loadingElement.remove();
-            }
-            return;
-        }
-        
-        // Remove loading indicator
+        if (index === 0 && originalTexts.camp_description) originalText = originalTexts.camp_description;
+        else if (index === 1 && originalTexts.camp_area) originalText = originalTexts.camp_area;
+        else if (index === 2 && originalTexts.camp_area_fishing) originalText = originalTexts.camp_area_fishing;
+
         const loadingElement = textElement.querySelector('.description-loading');
-        if (loadingElement) {
-            loadingElement.remove();
-        }
-        
-        // Set the original text
+        if (loadingElement) loadingElement.remove();
+        if (!originalText) return;
+
         textElement.innerHTML = originalText;
-        
-        // Add truncated class initially
-        textElement.classList.add('description-text--truncated');
-        
-        // Use setTimeout to ensure layout is calculated
-        setTimeout(() => {
-            // Check if truncation is needed by comparing full height to ~3 lines
+
+        function applyMobileTruncation() {
+            const isMobile = window.innerWidth < 768;
+            if (!isMobile) {
+                item.classList.remove('collapsed');
+                if (seeMoreBtn) {
+                    seeMoreBtn.classList.remove('camp-desc-visible');
+                    seeMoreBtn.classList.add('d-none');
+                    if (moreLabel) moreLabel.classList.remove('d-none');
+                    if (lessLabel) lessLabel.classList.add('d-none');
+                }
+                return;
+            }
             const lineHeight = parseFloat(window.getComputedStyle(textElement).lineHeight) || 24;
-            const maxHeight = lineHeight * 3; // 3 lines
-            
-            // Temporarily remove truncation to measure full height
-            textElement.classList.remove('description-text--truncated');
+            const maxLines = 5;
+            const maxHeight = lineHeight * maxLines;
             const fullHeight = textElement.scrollHeight;
             const needsTruncation = fullHeight > maxHeight;
-            
-            if (needsTruncation) {
-                let isExpanded = false;
-                
-                // Calculate truncation point manually (no CSS line-clamp)
-                const words = originalText.split(/\s+/);
-                const tempDiv = document.createElement('div');
-                tempDiv.style.cssText = window.getComputedStyle(textElement).cssText;
-                tempDiv.style.position = 'absolute';
-                tempDiv.style.visibility = 'hidden';
-                tempDiv.style.width = textElement.offsetWidth + 'px';
-                tempDiv.style.height = 'auto';
-                tempDiv.style.lineHeight = window.getComputedStyle(textElement).lineHeight;
-                tempDiv.style.fontSize = window.getComputedStyle(textElement).fontSize;
-                tempDiv.style.fontFamily = window.getComputedStyle(textElement).fontFamily;
-                document.body.appendChild(tempDiv);
-                
-                // Find optimal truncation point for ~3 lines
-                let bestFit = words.length;
-                
-                // Binary search for best fit
-                let low = 20;
-                let high = words.length;
-                
-                while (low <= high) {
-                    const mid = Math.floor((low + high) / 2);
-                    tempDiv.innerHTML = words.slice(0, mid).join(' ') + ' <span style="color: #E85B40; cursor: pointer;">...</span>';
-                    const height = tempDiv.scrollHeight;
-                    
-                    if (height <= maxHeight) {
-                        bestFit = mid;
-                        low = mid + 1;
-                    } else {
-                        high = mid - 1;
-                    }
-                }
-                
-                // Ensure we don't exceed word count
-                if (bestFit >= words.length) {
-                    bestFit = words.length - 1;
-                }
-                
-                document.body.removeChild(tempDiv);
-                
-                // Function to update content
-                const updateContent = (expanded) => {
-                    if (expanded) {
-                        // Show full text with "Show less" icon at the end
-                        textElement.innerHTML = originalText + ' <span class="description-ellipsis-clickable"><i class="fas fa-chevron-up"></i></span>';
-                        textElement.classList.remove('description-text--truncated');
-                    } else {
-                        // Show truncated with clickable "..." at the end
-                        const visibleText = words.slice(0, bestFit).join(' ');
-                        textElement.innerHTML = visibleText + ' <span class="description-ellipsis-clickable">...</span>';
-                        textElement.classList.remove('description-text--truncated');
-                    }
-                };
-                
-                // Set initial truncated state
-                updateContent(false);
-                
-                // Add click handler to ellipsis
-                textElement.addEventListener('click', function(e) {
-                    if (e.target.classList.contains('description-ellipsis-clickable')) {
-                        e.preventDefault();
-                        isExpanded = !isExpanded;
-                        updateContent(isExpanded);
-                    }
-                });
+
+            if (needsTruncation && seeMoreBtn) {
+                item.classList.add('collapsed');
+                seeMoreBtn.classList.add('camp-desc-visible');
+                seeMoreBtn.classList.remove('d-none');
+                moreLabel.classList.remove('d-none');
+                lessLabel.classList.add('d-none');
+                seeMoreBtn.setAttribute('aria-expanded', 'false');
             } else {
-                // Text doesn't need truncation - set it directly
-                textElement.innerHTML = originalText;
-                textElement.classList.remove('description-text--truncated');
+                item.classList.remove('collapsed');
+                if (seeMoreBtn) seeMoreBtn.classList.remove('camp-desc-visible');
             }
-        }, 100);
+        }
+
+        if (seeMoreBtn) {
+            seeMoreBtn.addEventListener('click', function() {
+                if (window.innerWidth >= 768) return;
+                const expanded = item.classList.toggle('collapsed');
+                const isExpanded = !item.classList.contains('collapsed');
+                seeMoreBtn.setAttribute('aria-expanded', isExpanded);
+                if (moreLabel) moreLabel.classList.toggle('d-none', isExpanded);
+                if (lessLabel) lessLabel.classList.toggle('d-none', !isExpanded);
+            });
+        }
+
+        setTimeout(applyMobileTruncation, 50);
+        window.addEventListener('resize', applyMobileTruncation);
     });
 }
 

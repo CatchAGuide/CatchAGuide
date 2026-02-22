@@ -29,7 +29,16 @@
                 </button>
                 <div class="navbar navbar-collapse responsive-navbar p-0">
                     <div class="collapse navbar-collapse" id="navbarSupportedContent-4">
-                        <div class="d-flex order-lg-2">
+                        <div class="d-flex order-lg-2 align-items-center gap-2">
+                            <form action="{{ route('language.switch') }}" method="POST" class="d-flex align-items-center admin-language-form">
+                                @csrf
+                                <span class="fi fi-{{ array_search(app()->getLocale(), config('app.locales')) }} me-1" style="font-size: 1rem;" title="{{ __('Language') }}"></span>
+                                <select name="language" class="form-select form-select-sm border-0 bg-transparent px-2 py-1 fs-14" style="width: auto; max-width: 5rem;" onchange="if(this.value !== '{{ app()->getLocale() }}') this.form.submit();" title="{{ __('Language') }}">
+                                    @foreach (config('app.locales') as $key => $locale)
+                                        <option value="{{ $locale }}" {{ app()->getLocale() == $locale ? 'selected' : '' }}>{{ strtoupper($locale) }}</option>
+                                    @endforeach
+                                </select>
+                            </form>
                             <div class="dropdown d-flex profile-1">
                                 <a href="#" data-bs-toggle="dropdown" class="nav-link leading-none d-flex">
 

@@ -16,11 +16,37 @@ use App\Models\GuidingBoatDescription;
 use App\Models\GuidingAdditionalInformation;
 use App\Models\GuidingRequirements;
 use App\Models\GuidingRecommendations;
+use App\Models\Language;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class GuidingsController extends Controller
 {
+    /**
+     * Allowed scalar fields for details modal (stored on guidings table or Language.json_data).
+     */
+    private const DETAILS_SCALAR_FIELDS = [
+        'title',
+        'description',
+        'additional_information',
+        'desc_course_of_action',
+        'desc_meeting_point',
+        'desc_starting_time',
+        'desc_tour_unique',
+    ];
+
+    /**
+     * List fields stored as JSON (guidings table keyed by id; Language.json_data as array).
+     */
+    private const DETAILS_LIST_FIELDS = [
+        'requirements',
+        'recommendations',
+        'other_information',
+    ];
+
     /**
      * Display a listing of the resource.
      *
@@ -227,6 +253,190 @@ class GuidingsController extends Controller
        $guiding->update($data);
 
        return redirect()->route('admin.guidings.index');
+    }
+
+    /**
+     * Return guiding text details for the modal: main language from guidings table,
+     * other languages from languages.json_data (type = guidings, source_id = guiding.id).
+     */
+    public function details(Guiding $guiding)
+    {
+        $mainLanguage = $guiding->language ?? 'de';
+        $main = $this->buildGuidingTextPayload($guiding);
+
+        $translations = [];
+        $languageRecords = Language::where('source_id', (string) $guiding->id)
+            ->where('type', 'guidings')
+            ->get();
+
+        foreach ($languageRecords as $record) {
+            $jsonData = $record->json_data;
+            if (! is_array($jsonData)) {
+                $jsonData = is_string($jsonData) ? json_decode($jsonData, true) : [];
+            }
+            $translations[$record->language] = array_merge($main, is_array($jsonData) ? $jsonData : []);
+        }
+
+        return response()->json([
+            'main_language' => $mainLanguage,
+            'main' => $main,
+            'translations' => $translations,
+            'available_languages' => array_values(array_unique(array_merge([$mainLanguage], array_keys($translations)))),
+        ]);
+    }
+
+    /**
+     * Update a single field from the details modal (main table or translation).
+     * Does not touch any other columns/keys.
+     */
+    public function updateDetailsField(Request $request, Guiding $guiding)
+    {
+        $mainLanguage = $guiding->language ?? 'de';
+        $language = $request->input('language');
+        $field = $request->input('field');
+        $value = $request->input('value');
+        $listIndex = $request->input('list_index'); // 0-based index for list items (translations)
+        $listId = $request->input('list_id');       // id key for list items (main language, guidings table)
+
+        $scalarFields = self::DETAILS_SCALAR_FIELDS;
+        $listFields = self::DETAILS_LIST_FIELDS;
+
+        $isListField = in_array($field, $listFields, true);
+        $isScalarField = in_array($field, $scalarFields, true);
+
+        $rules = [
+            'language' => ['required', 'string', 'size:2'],
+            'field'    => ['required', 'string', Rule::in(array_merge($scalarFields, $listFields))],
+            'value'    => ['nullable', 'string'],
+        ];
+        if ($isListField) {
+            $rules['list_index'] = ['nullable', 'integer', 'min:0'];
+            $rules['list_id']    = ['nullable', 'string'];
+        }
+        $validated = $request->validate($rules);
+
+        $language = $validated['language'];
+        $field = $validated['field'];
+        $value = $validated['value'] ?? '';
+
+        if ($language === $mainLanguage) {
+            // Save to guidings table only (single column / single list entry)
+            if ($isScalarField) {
+                if (! in_array($field, $scalarFields, true)) {
+                    return response()->json(['error' => 'Invalid field'], 422);
+                }
+                $guiding->{$field} = $value;
+                $guiding->save();
+            } else {
+                // List field on main table: raw attribute is JSON keyed by id (from DB to avoid accessor)
+                $raw = DB::table('guidings')->where('id', $guiding->id)->value($field);
+                $decoded = is_string($raw) ? json_decode($raw, true) : $raw;
+                if (! is_array($decoded)) {
+                    $decoded = [];
+                }
+                $listId = $request->input('list_id');
+                if ($listId !== null && $listId !== '') {
+                    if (isset($decoded[$listId])) {
+                        $entry = $decoded[$listId];
+                        if (is_array($entry)) {
+                            $decoded[$listId]['value'] = $value;
+                        } else {
+                            $decoded[$listId] = $value;
+                        }
+                    }
+                    $guiding->setAttribute($field, $decoded);
+                    $guiding->save();
+                } else {
+                    return response()->json(['error' => 'list_id required for list field on main language'], 422);
+                }
+            }
+        } else {
+            // Save to Language table (json_data) – only update the one key/index
+            $record = Language::where('source_id', (string) $guiding->id)
+                ->where('type', 'guidings')
+                ->where('language', $language)
+                ->first();
+
+            $jsonData = $record ? (is_array($record->json_data) ? $record->json_data : json_decode($record->json_data, true)) : [];
+            if (! is_array($jsonData)) {
+                $jsonData = [];
+            }
+
+            if ($isScalarField) {
+                $jsonData[$field] = $value;
+                $payload = $jsonData;
+            } else {
+                $listIndex = $listIndex !== null ? (int) $listIndex : null;
+                if ($listIndex === null) {
+                    return response()->json(['error' => 'list_index required for list field in translation'], 422);
+                }
+                $arr = isset($jsonData[$field]) && is_array($jsonData[$field]) ? $jsonData[$field] : [];
+                $arr = array_values($arr);
+                if (isset($arr[$listIndex])) {
+                    $item = $arr[$listIndex];
+                    if (is_array($item)) {
+                        $item['value'] = $value;
+                        $arr[$listIndex] = $item;
+                    } else {
+                        $arr[$listIndex] = $value;
+                    }
+                }
+                $jsonData[$field] = $arr;
+                $payload = $jsonData;
+            }
+
+            Language::updateOrCreate(
+                [
+                    'source_id' => (string) $guiding->id,
+                    'type'      => 'guidings',
+                    'language'  => $language,
+                ],
+                [
+                    'title'     => $payload['title'] ?? ($record ? $record->title : $guiding->title),
+                    'json_data' => $payload,
+                ]
+            );
+
+            $cacheKey = 'guiding_translation_' . $guiding->id . '_' . $language;
+            Cache::forget($cacheKey);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Build text fields from the guiding (main language) for modal display.
+     */
+    private function buildGuidingTextPayload(Guiding $guiding): array
+    {
+        $inclusions = $guiding->inclusions;
+        $inclusions = is_string($inclusions) ? json_decode($inclusions, true) : $inclusions;
+        $requirements = $guiding->requirements;
+        $requirements = is_string($requirements) ? json_decode($requirements, true) : $requirements;
+        $recommendations = $guiding->recommendations;
+        $recommendations = is_string($recommendations) ? json_decode($recommendations, true) : $recommendations;
+        $otherInformation = $guiding->other_information;
+        $otherInformation = is_string($otherInformation) ? json_decode($otherInformation, true) : $otherInformation;
+        $pricingExtra = $guiding->pricing_extra;
+        $pricingExtra = is_string($pricingExtra) ? json_decode($pricingExtra, true) : $pricingExtra;
+
+        // Only text-based fields from multi-step-form (no location/city/region/country, no departure_times).
+        return array_filter([
+            'title' => $guiding->title,
+            'description' => $guiding->description,
+            'additional_information' => $guiding->additional_information,
+            'desc_course_of_action' => $guiding->desc_course_of_action,
+            'desc_meeting_point' => $guiding->desc_meeting_point,
+            'desc_starting_time' => $guiding->desc_starting_time,
+            'desc_tour_unique' => $guiding->desc_tour_unique,
+            'inclusions' => $inclusions,
+            'requirements' => $requirements,
+            'recommendations' => $recommendations,
+            'other_information' => $otherInformation,
+            'pricing_extra' => $pricingExtra,
+        ], function ($v) {
+            return $v !== null && $v !== '';
+        });
     }
 
     public function changeGuidingStatus($id)

@@ -841,6 +841,29 @@ body {
                 }
             }
         }
+
+        // Mobile only: truncate description to 5 lines with visible See more/See less
+        @media (max-width: 767.98px) {
+            .camp-desc-mobile-wrap.collapsed .description-text-wrapper {
+                display: -webkit-box;
+                -webkit-line-clamp: 5;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+            .camp-desc-see-more.camp-desc-visible {
+                display: inline-block !important;
+            }
+        }
+        @media (min-width: 768px) {
+            .camp-desc-mobile-wrap.collapsed .description-text-wrapper {
+                display: block;
+                -webkit-line-clamp: unset;
+                overflow: visible;
+            }
+            .camp-desc-see-more {
+                display: none !important;
+            }
+        }
     }
 
     &__list {

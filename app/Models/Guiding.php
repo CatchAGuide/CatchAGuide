@@ -28,6 +28,7 @@ use App\Models\GuidingBoatType;
 use App\Models\GuidingBoatDescription;
 use App\Models\GuidingBoatExtras;
 use App\Models\BoatExtras;
+use App\Models\Language;
 
 /**
  * @property string|null $target_fish
@@ -237,8 +238,15 @@ class Guiding extends Model
         return $this->hasMany(GuidingExtras::class,'guiding_id','id');
     }
 
-
-
+    /**
+     * Translation records from languages table (type = guidings, source_id = guiding.id).
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function languageTranslations(): HasMany
+    {
+        return $this->hasMany(Language::class, 'source_id', 'id')->where('type', 'guidings');
+    }
 
     /**
      * @return HasMany

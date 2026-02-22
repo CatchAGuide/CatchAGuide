@@ -50,6 +50,7 @@ return [
     'course_of_action_placeholder' => 'Tell your guests what they can expect from your fishing tour. How does a typical fishing tour look like?',
     'starting_time' => 'Starting time',
     'starting_time_placeholder' => 'Let your guests know when you typically begin with the fishing tour.',
+    'departure_times' => 'Departure times',
     'meeting_point' => 'Meeting point',
     'meeting_point_placeholder' => 'Give your guests information about where they will meet you after booking your fishing tour.',
     'tour_highlights' => 'Tour highlights',
@@ -102,6 +103,7 @@ return [
     // Additional text
     'extra_input_placeholder' => 'Add a comment or additional information for your guests.',
     'error_message' => 'Please fill in all required fields.',
+    'no_text_details_for_language' => 'No text details for this language.',
 
     // Tooltips
     'tooltip_upload_image' => 'Choose a title which describes your tour best. Include for example the location, the target fish, the water name, etc. Example: "Fishing tour in Amsterdam for Perch & Zander".',
