@@ -367,8 +367,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/destroy/{faq}', [AdminFAQController::class,'destroy'])->name('destroy');
         });
 
-        Route::get('guidings/{guiding}/details', [AdminGuidingsController::class, 'details'])->name('admin.guidings.details');
-        Route::post('guidings/{guiding}/details-field', [AdminGuidingsController::class, 'updateDetailsField'])->name('admin.guidings.details-field');
+        Route::get('guidings/{guiding}/details', [AdminGuidingsController::class, 'details'])->name('guidings.details');
+        Route::post('guidings/{guiding}/details-field', [AdminGuidingsController::class, 'updateDetailsField'])->name('guidings.details-field');
+        Route::post('guidings/{guiding}/translate', [AdminGuidingsController::class, 'translate'])->name('guidings.translate');
         Route::resource('guidings', AdminGuidingsController::class);
         Route::get('guidings/changeguidingstatus/{id}', [AdminGuidingsController::class, 'changeguidingstatus'])->name('changeGuidingStatus');
         

@@ -421,6 +421,31 @@ class GuidingTranslationService
     }
 
     /**
+     * Get target languages for which this guiding has no translation (same defaults as GuidingTranslationCommand).
+     *
+     * @param array $targetLanguages e.g. ['en', 'de']
+     * @return array Language codes that are missing for this guiding
+     */
+    public function getMissingLanguages(Guiding $guiding, array $targetLanguages = ['en', 'de']): array
+    {
+        $missing = [];
+        foreach ($targetLanguages as $lang) {
+            if (!$this->hasTranslation($guiding, $lang)) {
+                $missing[] = $lang;
+            }
+        }
+        return $missing;
+    }
+
+    /**
+     * Default target languages used by the translation command and UI (EN, DE).
+     */
+    public static function defaultTargetLanguages(): array
+    {
+        return ['en', 'de'];
+    }
+
+    /**
      * Batch translate fields using Google Translate
      */
     private function batchTranslateWithGoogle(array $fields, string $toLanguage, string $fromLanguage = 'de'): array

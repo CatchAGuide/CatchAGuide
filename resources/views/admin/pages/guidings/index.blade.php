@@ -49,12 +49,17 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    @php
+                                        $translationService = app(\App\Services\Translation\GuidingTranslationService::class);
+                                        $translationTargetLangs = \App\Services\Translation\GuidingTranslationService::defaultTargetLanguages();
+                                    @endphp
                                     @foreach($guidings as $guiding)
                                     @php
                                         $mainLang = $guiding->language ?? 'de';
                                         $translationLangs = $guiding->languageTranslations->pluck('language')->toArray();
                                         $availableLangs = array_unique(array_merge([$mainLang], $translationLangs));
                                         sort($availableLangs);
+                                        $missingLangs = $translationService->getMissingLanguages($guiding, $translationTargetLangs);
                                     @endphp
                                     <tr>
                                         <td>{{$guiding -> id}}</td>
@@ -88,6 +93,11 @@
                                                 <a href="{{ route('admin.guidings.edit', $guiding) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pen"></i></a>
                                                 <button type="button" class="btn btn-sm btn-primary btn-guiding-details" title="Textdetails anzeigen" data-guiding-id="{{ $guiding->id }}" data-guiding-title="{{ e($guiding->title) }}" data-guiding-location="{{ e($guiding->location ?? '') }}" data-guiding-guide-name="{{ e($guiding->user->full_name ?? '') }}"><i class="fa fa-search"></i></button>
                                                 <a href="{{ route('admin.guidings.show', $guiding) }}" class="btn btn-sm btn-outline-primary" title="Seite öffnen"><i class="fa fa-external-link-alt"></i></a>
+                                                @if(!empty($missingLangs))
+                                                    <button type="button" class="btn btn-sm btn-info btn-guiding-translate" title="Fehlende Übersetzung erstellen ({{ strtoupper(implode(', ', $missingLangs)) }})" data-translate-url="{{ route('admin.guidings.translate', $guiding) }}" data-missing="{{ implode(',', $missingLangs) }}">
+                                                        <i class="fa fa-language"></i> <span class="btn-translate-label">Übersetzen</span>
+                                                    </button>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>
@@ -245,6 +255,36 @@
     $(function() {
         $('#guiding-datatable').DataTable({
             order: [[0, 'desc']]
+        });
+
+        $(document).on('click', '.btn-guiding-translate', function() {
+            var $btn = $(this);
+            var url = $btn.data('translate-url');
+            if (!url) return;
+            $btn.prop('disabled', true);
+            var $label = $btn.find('.btn-translate-label');
+            var origLabel = $label.text();
+            $label.text('…');
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: { _token: '{{ csrf_token() }}' },
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                .done(function(res) {
+                    if (res && res.success !== false) {
+                        window.location.reload();
+                    } else {
+                        alert(res && res.message ? res.message : 'Translation completed with some failures.');
+                        window.location.reload();
+                    }
+                })
+                .fail(function(xhr) {
+                    var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Translation request failed.';
+                    alert(msg);
+                    $btn.prop('disabled', false);
+                    $label.text(origLabel);
+                });
         });
 
         var guidingDetailsModal = document.getElementById('guidingDetailsModal');

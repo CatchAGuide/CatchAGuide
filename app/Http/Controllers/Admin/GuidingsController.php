@@ -17,6 +17,7 @@ use App\Models\GuidingAdditionalInformation;
 use App\Models\GuidingRequirements;
 use App\Models\GuidingRecommendations;
 use App\Models\Language;
+use App\Services\Translation\GuidingTranslationService;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -450,6 +451,63 @@ class GuidingsController extends Controller
         $guiding->save();
         return back()->with('success', 'Der Status wurde erfolgreich geändert');
     }
+    /**
+     * Trigger translation for a guiding into the given languages (or missing only).
+     * POST admin/guidings/{guiding}/translate?languages=en,de or no query to translate all missing (default targets: en, de).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Guiding  $guiding
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function translate(Request $request, Guiding $guiding)
+    {
+        $service = app(GuidingTranslationService::class);
+        $targetLanguages = GuidingTranslationService::defaultTargetLanguages();
+
+        if ($request->filled('languages')) {
+            $requested = is_array($request->languages) ? $request->languages : explode(',', $request->languages);
+            $targetLanguages = array_values(array_unique(array_map('trim', $requested)));
+        }
+
+        $missing = $service->getMissingLanguages($guiding, $targetLanguages);
+        if (empty($missing)) {
+            return response()->json([
+                'success' => true,
+                'message' => __('No missing translations for this guiding.'),
+                'translated' => [],
+            ]);
+        }
+
+        $guiding->load(['user', 'guidingTargets', 'guidingMethods', 'guidingWaters']);
+        $translated = [];
+        $failed = [];
+
+        foreach ($missing as $lang) {
+            try {
+                if ($service->translateGuiding($guiding, $lang)) {
+                    $translated[] = $lang;
+                } else {
+                    $failed[] = $lang;
+                }
+            } catch (\Exception $e) {
+                $failed[] = $lang;
+            }
+        }
+
+        if (!empty($translated)) {
+            $service->markContentUpdated($guiding);
+        }
+
+        return response()->json([
+            'success' => empty($failed),
+            'message' => empty($failed)
+                ? __('Translations created for :langs.', ['langs' => strtoupper(implode(', ', $translated))])
+                : __('Translated :ok; failed: :fail.', ['ok' => implode(', ', $translated), 'fail' => implode(', ', $failed)]),
+            'translated' => $translated,
+            'failed' => $failed,
+        ]);
+    }
+
     /**
      * Remove the specified resource from storage.
      *
