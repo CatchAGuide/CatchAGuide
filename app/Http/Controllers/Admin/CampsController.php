@@ -146,11 +146,14 @@ class CampsController extends Controller
     {
         $formData = $this->dataProcessor->prepareEditFormData($camp);
         $cachedFormData = $this->cacheService->getFormData();
-        
+        // Pre-selected guidings for the AJAX select (so we show title even if guiding is inactive)
+        $selectedGuidings = $camp->guidings;
+
         return view('admin.pages.camps.edit', array_merge([
             'camp' => $camp,
             'formData' => $formData,
             'targetRedirect' => route('admin.camps.index'),
+            'selectedGuidings' => $selectedGuidings,
         ], $cachedFormData));
     }
 

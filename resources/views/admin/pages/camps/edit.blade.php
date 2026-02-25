@@ -28,6 +28,7 @@
                         'accommodations' => $accommodations ?? [],
                         'rentalBoats' => $rentalBoats ?? [],
                         'guidings' => $guidings ?? [],
+                        'selectedGuidings' => $selectedGuidings ?? collect(),
                         'specialOffers' => $specialOffers ?? [],
                         'campFacilities' => $campFacilities ?? [],
                         'targetFish' => $targetFish ?? [],

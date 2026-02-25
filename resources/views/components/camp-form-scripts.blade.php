@@ -480,25 +480,58 @@ function initializeSelect2() {
             if (guidingsEl.hasClass('select2-hidden-accessible')) {
                 guidingsEl.select2('destroy');
             }
-            
-            guidingsEl.select2({
-                placeholder: '{{ __("camps.select_options") }}',
-                allowClear: true,
-                width: '100%',
-                templateResult: function(data) {
-                    if (!data.id) {
-                        return data.text;
+
+            const guidingsAjaxUrl = guidingsEl.data('ajax-url');
+            if (guidingsAjaxUrl) {
+                // AJAX mode: search loads guidings on demand (no 300+ options in DOM)
+                guidingsEl.select2({
+                    placeholder: '{{ __("camps.select_options") }}',
+                    allowClear: true,
+                    width: '100%',
+                    minimumInputLength: 0,
+                    ajax: {
+                        url: guidingsAjaxUrl,
+                        dataType: 'json',
+                        delay: 200,
+                        data: function(params) {
+                            return {
+                                q: params.term || '',
+                                page: params.page || 1
+                            };
+                        },
+                        processResults: function(data) {
+                            return {
+                                results: data.results,
+                                pagination: data.pagination
+                            };
+                        },
+                        cache: true
+                    },
+                    templateResult: function(data) {
+                        if (!data.id) return data.text;
+                        return $('<span>' + (data.text || '(' + data.id + ') | -') + '</span>');
+                    },
+                    templateSelection: function(data) {
+                        if (!data.id) return data.text;
+                        return $('<span>' + (data.text || '(' + data.id + ') | -') + '</span>');
                     }
-                    return $('<span>(' + data.id + ') | ' + data.text + '</span>');
-                },
-                templateSelection: function(data) {
-                    if (!data.id) {
-                        return data.text;
+                });
+            } else {
+                guidingsEl.select2({
+                    placeholder: '{{ __("camps.select_options") }}',
+                    allowClear: true,
+                    width: '100%',
+                    templateResult: function(data) {
+                        if (!data.id) return data.text;
+                        return $('<span>(' + data.id + ') | ' + data.text + '</span>');
+                    },
+                    templateSelection: function(data) {
+                        if (!data.id) return data.text;
+                        return $('<span>(' + data.id + ') | ' + data.text + '</span>');
                     }
-                    return $('<span>(' + data.id + ') | ' + data.text + '</span>');
-                }
-            });
-            
+                });
+            }
+
             // Add change event listener for guidings to show cards
             guidingsEl.on('change', function() {
                 updateSelectedGuidingsCards();

@@ -54,7 +54,7 @@ class CampCacheService
             'campFacilities' => CampFacility::where('is_active', true)->orderBy('name')->get(),
             'accommodations' => Accommodation::where('status', 'active')->orderBy('title')->get(),
             'rentalBoats' => RentalBoat::where('status', 'active')->orderBy('title')->get(),
-            'guidings' => Guiding::where('status', 'active')->orderBy('title')->get(),
+            'guidings' => Guiding::where('status', 1)->orderBy('title')->get(),
             'specialOffers' => SpecialOffer::where('status', 'active')->orderBy('title')->get(),
             'targetFish' => Target::orderBy('name')->get(),
         ];

@@ -427,14 +427,13 @@
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="{{ __('camps.tooltip_guidings') }}"></i>
                     </label>
-                    <select class="form-control" name="guidings[]" id="guidings" multiple>
-                        @foreach($guidings ?? [] as $guiding)
-                            <option value="{{ $guiding->id }}" 
-                                {{ (isset($formData['guidings']) && in_array($guiding->id, $formData['guidings'])) ? 'selected' : '' }}>
-                                {{ $guiding->title }}
-                            </option>
+                    <select class="form-control" name="guidings[]" id="guidings" multiple
+                            data-ajax-url="{{ route('admin.guidings.search') }}">
+                        @foreach($selectedGuidings ?? [] as $guiding)
+                            <option value="{{ $guiding->id }}" selected>({{ $guiding->id }}) | {{ $guiding->title ?: '-' }}</option>
                         @endforeach
                     </select>
+                    <p class="form-text text-muted small mt-1">{{ __('camps.guidings_search_hint') }}</p>
                 </div>
 
                 <!-- Selected Guidings Cards Display -->

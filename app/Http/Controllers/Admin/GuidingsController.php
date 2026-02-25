@@ -552,4 +552,48 @@ class GuidingsController extends Controller
     {
         //
     }
+
+    /**
+     * Search guidings for Select2 AJAX (e.g. camp form).
+     * Returns active guidings (status=1) matching search by ID or title; paginated.
+     *
+     * @param  \Illuminate\Http\Request  $request  expects 'q' (search term), optional 'page'
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function searchForSelect(Request $request)
+    {
+        $perPage = 30;
+        $q = $request->input('q', '');
+        $page = (int) $request->input('page', 1);
+
+        $query = Guiding::where('status', 1)
+            ->orderBy('title')
+            ->select('id', 'title');
+
+        if (trim($q) !== '') {
+            $term = trim($q);
+            if (is_numeric($term)) {
+                $query->where('id', (int) $term);
+            } else {
+                $query->where('title', 'like', '%' . $term . '%');
+            }
+        }
+
+        $paginator = $query->paginate($perPage, ['*'], 'page', $page);
+
+        $results = $paginator->getCollection()->map(function ($guiding) {
+            $title = $guiding->title ?: '-';
+            return [
+                'id' => (string) $guiding->id,
+                'text' => '(' . $guiding->id . ') | ' . $title,
+            ];
+        })->values()->all();
+
+        return response()->json([
+            'results' => $results,
+            'pagination' => [
+                'more' => $paginator->hasMorePages(),
+            ],
+        ]);
+    }
 }

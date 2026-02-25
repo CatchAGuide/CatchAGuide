@@ -51,7 +51,7 @@ class SpecialOfferCacheService
             return [
                 'accommodations' => Accommodation::where('status', 'active')->orderBy('title')->get(),
                 'rentalBoats' => RentalBoat::where('status', 'active')->orderBy('title')->get(),
-                'guidings' => Guiding::where('status', 'active')->orderBy('title')->get(),
+                'guidings' => Guiding::where('status', 1)->orderBy('title')->get(),
             ];
         });
     }

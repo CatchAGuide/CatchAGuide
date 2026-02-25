@@ -136,6 +136,54 @@ class Camp extends Model
         return !empty($prices) ? (float) min($prices) : 0.0;
     }
 
+    /**
+     * Get the lowest price per day from Accommodation OR Special offer only.
+     * Excludes Boat and Guiding prices. Returns null when no valid price exists (do not show price in that case).
+     *
+     * @return float|null
+     */
+    public function getLowestAccommodationOrOfferPrice(): ?float
+    {
+        $prices = [];
+
+        // Accommodations only - per_person_pricing (price_per_night, price_per_week)
+        $accommodations = $this->accommodations()->where('status', 'active')->get();
+        foreach ($accommodations as $accommodation) {
+            $perPersonPricing = $accommodation->per_person_pricing;
+            if (is_string($perPersonPricing)) {
+                $perPersonPricing = json_decode($perPersonPricing, true);
+            }
+            if (is_array($perPersonPricing) && !empty($perPersonPricing)) {
+                foreach ($perPersonPricing as $tier) {
+                    if (!is_array($tier)) {
+                        continue;
+                    }
+                    if (isset($tier['price_per_night']) && $tier['price_per_night'] > 0) {
+                        $prices[] = (float) $tier['price_per_night'];
+                    }
+                    if (isset($tier['price_per_week']) && $tier['price_per_week'] > 0) {
+                        $prices[] = (float) $tier['price_per_week'] / 7;
+                    }
+                }
+            }
+        }
+
+        // Special offers only
+        $specialOffers = $this->specialOffers()->get();
+        foreach ($specialOffers as $offer) {
+            $low = $offer->getLowestPrice();
+            if ($low > 0) {
+                $prices[] = (float) $low;
+            }
+        }
+
+        if (empty($prices)) {
+            return null;
+        }
+
+        return (float) min($prices);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

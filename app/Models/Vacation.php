@@ -529,6 +529,53 @@ class Vacation extends Model
     }
 
     /**
+     * Get the lowest price per day from Accommodation OR Package (special offer) only.
+     * Excludes Boat and Guiding prices. Returns null when no valid price exists (do not show price in that case).
+     *
+     * @return float|null
+     */
+    public function getLowestAccommodationOrOfferPrice(): ?float
+    {
+        $lowestPackagePrice = $this->packages->map(function ($package) {
+            $dynamicFields = is_string($package->dynamic_fields) ? json_decode($package->dynamic_fields, true) : $package->dynamic_fields;
+            if (!isset($dynamicFields['prices']) || empty($dynamicFields['prices'])) {
+                return PHP_FLOAT_MAX;
+            }
+            $pricesPerPerson = collect($dynamicFields['prices'])->map(function ($price, $index) {
+                $personCount = $index + 1;
+                return round((float)$price / $personCount);
+            });
+            return $pricesPerPerson->min();
+        })->filter(function ($price) {
+            return $price !== PHP_FLOAT_MAX;
+        })->min();
+
+        $lowestAccommodationPrice = $this->accommodations->map(function ($accommodation) {
+            $dynamicFields = is_string($accommodation->dynamic_fields) ? json_decode($accommodation->dynamic_fields, true) : $accommodation->dynamic_fields;
+            if (!isset($dynamicFields['prices']) || empty($dynamicFields['prices'])) {
+                return PHP_FLOAT_MAX;
+            }
+            $pricesPerPerson = collect($dynamicFields['prices'])->map(function ($price, $index) {
+                $personCount = $index + 1;
+                return round((float)$price / $personCount);
+            });
+            return $pricesPerPerson->min();
+        })->filter(function ($price) {
+            return $price !== PHP_FLOAT_MAX;
+        })->min();
+
+        $lowestPrice = $lowestPackagePrice !== null && $lowestAccommodationPrice !== null
+            ? min($lowestPackagePrice, $lowestAccommodationPrice)
+            : ($lowestPackagePrice ?? $lowestAccommodationPrice);
+
+        if ($lowestPrice === null || $lowestPrice <= 0) {
+            return null;
+        }
+
+        return round((float)$lowestPrice);
+    }
+
+    /**
      * Get the total capacity across all accommodations
      *
      * @return int

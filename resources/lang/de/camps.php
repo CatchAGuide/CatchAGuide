@@ -83,6 +83,7 @@ return [
     'guidings' => 'Guidings',
     'selected_guidings' => 'Ausgewählte Guidings',
     'tooltip_guidings' => 'Wählen Sie verfügbare Guidings aus',
+    'guidings_search_hint' => 'Suche nach ID oder Titel. Alle aktiven Guidings werden bei Bedarf geladen.',
 
     // Step 8 - Special Offers
     'special_offers_title' => 'Sonderangebote',

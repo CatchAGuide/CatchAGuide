@@ -445,12 +445,15 @@
                                         </ul>
                                         </div>
                                     </a>
-                                    {{-- Footer: price + Book Now + info --}}
+                                    {{-- Footer: price + Book Now + info (price = lowest of Accommodation OR Package only; hide if null) --}}
                                     <div class="vacation-list-card__footer">
+                                        @php $displayPrice = $vacation->getLowestAccommodationOrOfferPrice(); @endphp
+                                        @if($displayPrice !== null)
                                         <div class="vacation-list-card__price-block">
                                             <span class="vacation-list-card__price-label">@lang('vacations.per_day_label')</span>
-                                            <span class="vacation-list-card__price">€{{ two($vacation->getLowestPrice()) }}</span>
+                                            <span class="vacation-list-card__price">€{{ two($displayPrice) }}</span>
                                         </div>
+                                        @endif
                                         <a href="{{ route('vacations.show', [$vacation->slug]) }}" class="vacation-list-card__btn-book" onclick="event.preventDefault(); document.getElementById('store-destination-{{ $vacation->id }}').submit();">@lang('vacations.book_now')</a>
                                         <a href="{{ route('vacations.show', [$vacation->slug]) }}" class="vacation-list-card__btn-info" onclick="event.preventDefault(); document.getElementById('store-destination-{{ $vacation->id }}').submit();" aria-label="@lang('vacations.details')"><i class="fas fa-info"></i></a>
                                     </div>

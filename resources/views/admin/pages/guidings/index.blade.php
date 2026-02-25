@@ -95,7 +95,7 @@
                                                 <button type="button" class="btn btn-sm btn-primary btn-guiding-details" title="{{ __('admin.guidings.btn_show_details') }}" data-guiding-id="{{ $guiding->id }}" data-guiding-title="{{ e($guiding->title) }}" data-guiding-location="{{ e($guiding->location ?? '') }}" data-guiding-guide-name="{{ e($guiding->user->full_name ?? '') }}"><i class="fa fa-search"></i></button>
                                                 <a href="{{ route('admin.guidings.show', $guiding) }}" class="btn btn-sm btn-outline-primary" title="{{ __('admin.guidings.btn_open_page') }}"><i class="fa fa-external-link-alt"></i></a>
                                                 @if(!empty($missingLangs))
-                                                    <button type="button" class="btn btn-sm btn-info btn-guiding-translate" title="{{ __('admin.guidings.btn_translate_missing', ['langs' => strtoupper(implode(', ', $missingLangs))]) }}" data-translate-url="{{ route('admin.guidings.translate', $guiding) }}" data-missing="{{ implode(',', $missingLangs) }}">
+                                                    <button type="button" class="btn btn-sm btn-info btn-guiding-translate" title="{{ __('admin.guidings.btn_translate_missing', ['langs' => strtoupper(implode(', ', $missingLangs))]) }}" data-translate-url="{{ route('admin.guidings.translate', $guiding) }}" data-missing="{{ implode(',', $missingLangs) }}" data-guiding-title="{{ e($guiding->title) }}">
                                                         <i class="fa fa-language"></i> <span class="btn-translate-label">{{ __('admin.guidings.btn_translate') }}</span>
                                                     </button>
                                                 @endif
@@ -240,6 +240,25 @@
             </div>
         </div>
     </div>
+
+    <!-- Confirm translation modal -->
+    <div class="modal fade" id="guidingTranslateConfirmModal" tabindex="-1" aria-labelledby="guidingTranslateConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="guidingTranslateConfirmModalLabel"><i class="fa fa-language me-2"></i> {{ __('admin.guidings.modal_translate_confirm_title') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('admin.guidings.modal_close') }}"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0" id="guidingTranslateConfirmMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.guidings.modal_cancel') }}</button>
+                    <button type="button" class="btn btn-info" id="guidingTranslateConfirmBtn"><i class="fa fa-language me-1"></i> {{ __('admin.guidings.btn_translate') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 
@@ -252,6 +271,12 @@
         'save_failed' => __('admin.guidings.js_save_failed'),
         'translation_failed' => __('admin.guidings.js_translation_failed'),
         'translation_request_failed' => __('admin.guidings.js_translation_request_failed'),
+        'translation_rate_limited' => __('admin.guidings.js_translation_rate_limited'),
+        'translation_retry_after' => __('admin.guidings.js_translation_retry_after'),
+        'translation_seconds' => __('admin.guidings.js_translation_seconds'),
+        'translation_minutes' => __('admin.guidings.js_translation_minutes'),
+        'modal_translate_confirm_title' => __('admin.guidings.modal_translate_confirm_title'),
+        'modal_translate_confirm_message' => __('admin.guidings.modal_translate_confirm_message'),
         'details_load_failed' => __('admin.guidings.js_details_load_failed'),
         'btn_edit' => __('admin.guidings.btn_edit'),
         'modal_save' => __('admin.guidings.modal_save'),
@@ -343,37 +368,72 @@
             });
         }
 
-        $(document).on('click', '.btn-guiding-translate', function() {
-            var $btn = $(this);
-            var url = $btn.data('translate-url');
-            if (!url) return;
-            $btn.prop('disabled', true);
-            var $label = $btn.find('.btn-translate-label');
-            var origLabel = $label.text();
-            $label.text('…');
-            $.ajax({
-                url: url,
-                method: 'POST',
-                data: { _token: '{{ csrf_token() }}' },
-                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
-            })
-                .done(function(res) {
-                    if (res && res.success !== false) {
-                        window.location.reload();
-                    } else {
-                        var t = window.adminGuidingsJs || {};
-                        alert(res && res.message ? res.message : (t.translation_failed || 'Translation completed with some failures.'));
-                        window.location.reload();
-                    }
+        var guidingTranslateConfirmModalEl = document.getElementById('guidingTranslateConfirmModal');
+        if (guidingTranslateConfirmModalEl) {
+            var guidingTranslateConfirmModal = new bootstrap.Modal(guidingTranslateConfirmModalEl);
+            var pendingTranslateUrl = null;
+            var pendingTranslateBtn = null;
+
+            $(document).on('click', '.btn-guiding-translate', function() {
+                var $btn = $(this);
+                var url = $btn.data('translate-url');
+                if (!url) return;
+                var missing = ($btn.data('missing') || '').split(',').filter(Boolean);
+                var title = $btn.data('guiding-title') || ('#' + $btn.closest('tr').find('td:first').text());
+                var langsDisplay = missing.length ? missing.map(function(l) { return l.toUpperCase(); }).join(', ') : '';
+                var t = window.adminGuidingsJs || {};
+                var msgTemplate = t.modal_translate_confirm_message || 'Create missing translations for this guiding? Target languages: %s.';
+                $('#guidingTranslateConfirmModalLabel').text((t.modal_translate_confirm_title || 'Confirm translation') + ' – ' + (title || ''));
+                $('#guidingTranslateConfirmMessage').text(msgTemplate.replace('%s', langsDisplay));
+                pendingTranslateUrl = url;
+                pendingTranslateBtn = $btn;
+                guidingTranslateConfirmModal.show();
+            });
+
+            $('#guidingTranslateConfirmBtn').on('click', function() {
+                if (!pendingTranslateUrl || !pendingTranslateBtn) return;
+                var $btn = pendingTranslateBtn;
+                var url = pendingTranslateUrl;
+                pendingTranslateUrl = null;
+                pendingTranslateBtn = null;
+                guidingTranslateConfirmModal.hide();
+                $btn.prop('disabled', true);
+                var $label = $btn.find('.btn-translate-label');
+                var origLabel = $label.text();
+                $label.text('…');
+                $.ajax({
+                    url: url,
+                    method: 'POST',
+                    data: { _token: '{{ csrf_token() }}' },
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
                 })
-                .fail(function(xhr) {
-                    var t = window.adminGuidingsJs || {};
-                    var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : (t.translation_request_failed || 'Translation request failed.');
-                    alert(msg);
-                    $btn.prop('disabled', false);
-                    $label.text(origLabel);
-                });
-        });
+                    .done(function(res) {
+                        if (res && res.success !== false) {
+                            window.location.reload();
+                        } else {
+                            var t = window.adminGuidingsJs || {};
+                            alert(res && res.message ? res.message : (t.translation_failed || 'Translation completed with some failures.'));
+                            window.location.reload();
+                        }
+                    })
+                    .fail(function(xhr) {
+                        var t = window.adminGuidingsJs || {};
+                        var msg = t.translation_request_failed || 'Translation request failed.';
+                        if (xhr.status === 429) {
+                            msg = (xhr.responseJSON && xhr.responseJSON.error) ? xhr.responseJSON.error : (t.translation_rate_limited || 'Too many translation requests. Please try again later.');
+                            if (xhr.responseJSON && xhr.responseJSON.retry_after) {
+                                var sec = xhr.responseJSON.retry_after;
+                                msg += ' ' + (t.translation_retry_after || 'You can try again in about') + ' ' + (sec <= 60 ? (sec + ' ' + (t.translation_seconds || 'seconds')) : (Math.ceil(sec / 60) + ' ' + (t.translation_minutes || 'minutes'))) + '.';
+                            }
+                        } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        }
+                        alert(msg);
+                        $btn.prop('disabled', false);
+                        $label.text(origLabel);
+                    });
+            });
+        }
 
         var guidingDetailsModal = document.getElementById('guidingDetailsModal');
         if (guidingDetailsModal) {
