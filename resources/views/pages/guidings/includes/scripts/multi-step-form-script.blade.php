@@ -3,6 +3,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@latest/dist/browser-image-compression.js"></script>
+{{-- HEIC/HEIF to JPEG converter for broader mobile support --}}
+<script src="https://unpkg.com/heic2any@0.0.4/dist/heic2any.min.js"></script>
 <script src="{{ asset('assets/js/ImageManager.js') }}"></script>
 
 <script>
@@ -14,6 +16,8 @@
     window.region = window.region || null;
     window.country = window.country || null;
     window.postal_code = window.postal_code || null;
+    // Track if we've already uploaded images as part of a draft save
+    window.hasUploadedImagesInDraft = window.hasUploadedImagesInDraft || false;
     function isAdminEdit() {
         const el = document.getElementById('is_admin_guiding_form');
         const isUpdateEl = document.getElementById('is_update');
@@ -45,8 +49,24 @@
     };
     
     function initAutocomplete() {
+        const locationInput = document.getElementById('location');
+        if (!locationInput) {
+            return;
+        }
+
+        // Gracefully handle cases where Google Maps / Places is not loaded
+        if (
+            typeof window.google === 'undefined' ||
+            !google.maps ||
+            !google.maps.places ||
+            !google.maps.places.Autocomplete
+        ) {
+            console.warn('Google Places Autocomplete is not available on this page.');
+            return;
+        }
+
         autocomplete = new google.maps.places.Autocomplete(
-            document.getElementById('location'),
+            locationInput,
             {
                 types: ['(regions)']
             }
@@ -406,6 +426,8 @@
             if (data.guiding_id) {
                 $('#guiding_id').val(data.guiding_id);
                 $('#is_update').val(1);
+                // Mark that we have already sent images at least once for this draft
+                window.hasUploadedImagesInDraft = true;
             }
 
             if (shouldRedirect) {
@@ -816,6 +838,18 @@
     $('input[type="radio"]').change(function() {
         $(this).closest('.btn-group-toggle').find('label').removeClass('active');
         $(this).next('label').addClass('active');
+    });
+
+    // Time-of-day (Startzeit) checkbox button functionality
+    $('.time-of-day-checkbox').change(function() {
+        var $label = $('label[for="' + this.id + '"]');
+        $label.toggleClass('active', this.checked);
+    });
+
+    // Initialize time-of-day buttons on load (for edit mode / pre-checked values)
+    $('.time-of-day-checkbox').each(function() {
+        var $label = $('label[for="' + this.id + '"]');
+        $label.toggleClass('active', this.checked);
     });
 
     // Checkbox with additional fields functionality
@@ -2070,7 +2104,7 @@
     });
 
     // Update the form's submit event listener
-    const form = document.getElementById('newGuidingForm');
+    var form = document.getElementById('newGuidingForm');
     if (form) {
         // Remove validation from hidden fields BEFORE browser validation runs
         // This must happen in capture phase, before any other handlers
@@ -2084,8 +2118,9 @@
     }
 
     // Add these variables at the top of your script
-    let saveStepProgressTimeout = null;
-    let saveStepProgressLock = false;
+    // Use var instead of let so duplicate script inclusions don't throw
+    var saveStepProgressTimeout = null;
+    var saveStepProgressLock = false;
 
     function saveStepProgress(stepNumber) {
         // Return a Promise to allow waiting for completion
@@ -2106,7 +2141,6 @@
             const form = document.getElementById('newGuidingForm');
             const formData = new FormData(form);
 
-
             formData.append('current_step', stepNumber);
             formData.append('is_draft', 1);
 
@@ -2116,22 +2150,27 @@
             if (guidingId) formData.append('guiding_id', guidingId);
             if (isUpdate) formData.append('is_update', isUpdate);
 
-            // --- FIX: Append cropped images as files ---
-            if (window.imageManagerLoaded && typeof imageManagerLoaded.getCroppedImages === 'function') {
+            // Only include image binaries on the very first step-1 draft save.
+            // This avoids repeatedly sending large image payloads on every step change.
+            const shouldIncludeImages = stepNumber === 1 && !window.hasUploadedImagesInDraft;
+
+            if (!shouldIncludeImages) {
+                // Ensure we don't send original large files when not needed
+                formData.delete('title_image[]');
+            } else if (window.imageManagerLoaded && typeof imageManagerLoaded.getCroppedImages === 'function') {
                 const croppedImages = imageManagerLoaded.getCroppedImages();
                 if (croppedImages.length > 0) {
-                    // Remove any existing title_image[] from FormData
+                    // Replace any original title_image[] with compressed, cropped versions
                     formData.delete('title_image[]');
                     croppedImages.forEach((imgObj, idx) => {
-                        // Convert dataURL to Blob
                         const blob = dataURLtoBlob(imgObj.dataUrl);
-                        // Use the original filename if available, otherwise fallback
                         const filename = imgObj.filename || `cropped_${idx}.png`;
                         formData.append('title_image[]', blob, filename);
                     });
+                    // After one successful step save with images, mark as uploaded
+                    window.hasUploadedImagesInDraft = true;
                 }
             }
-            // --- END FIX ---
 
             // Use synchronous saving for step progression to avoid status timing issues
             fetch(window.saveDraftSyncUrl, {

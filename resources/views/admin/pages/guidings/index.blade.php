@@ -9,6 +9,209 @@
     @media (min-width: 1200px) {
         #guidingDetailsModal .modal-xxl { max-width: 95vw; width: 95vw; }
     }
+
+    /* Admin guidings list – visual polish */
+    #guiding-datatable {
+        border-collapse: separate;
+        border-spacing: 0 6px;
+    }
+
+    #guiding-datatable thead th {
+        border-bottom-width: 1px !important;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #6b7280;
+        background-color: #f9fafb;
+        white-space: nowrap;
+    }
+
+    #guiding-datatable tbody tr {
+        background-color: #ffffff;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    #guiding-datatable tbody tr:hover {
+        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+    }
+
+    /* Guide avatar + name */
+    .guiding-guide-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        white-space: nowrap;
+    }
+
+    .guiding-guide-avatar,
+    .guiding-guide-avatar-placeholder {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .guiding-guide-avatar {
+        object-fit: cover;
+        border: 2px solid #e5e7eb;
+        background-color: #f3f4f6;
+    }
+
+    .guiding-guide-avatar-placeholder {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: #ffffff;
+        background: radial-gradient(circle at 30% 30%, #60a5fa, #2563eb);
+        border: 2px solid #e5e7eb;
+        text-transform: uppercase;
+    }
+
+    .guiding-guide-name {
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: #111827;
+    }
+
+    .guiding-guide-name small {
+        display: block;
+        font-size: 0.75rem;
+        color: #6b7280;
+    }
+
+    /* Tour images thumbnail column */
+    .guiding-images-scroll {
+        max-width: 220px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .guiding-images-row {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding-bottom: 0.15rem;
+    }
+
+    .guiding-thumb-img {
+        width: 46px;
+        height: 46px;
+        border-radius: 0.55rem;
+        object-fit: cover;
+        border: 1px solid rgba(148, 163, 184, 0.5);
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+        background-color: #f3f4f6;
+        flex-shrink: 0;
+    }
+
+    .guiding-thumb-img-more {
+        position: relative;
+    }
+
+    .guiding-thumb-img-more-badge {
+        position: absolute;
+        right: 4px;
+        bottom: 4px;
+        padding: 0 6px;
+        border-radius: 999px;
+        background-color: rgba(15, 23, 42, 0.8);
+        color: #f9fafb;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+
+    .guiding-images-empty {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        white-space: nowrap;
+    }
+
+    /* Language badges */
+    .guiding-lang-badge {
+        padding: 0.15rem 0.55rem;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        border: 1px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.2rem;
+    }
+
+    .guiding-lang-badge-main {
+        background-color: #eef2ff;
+        color: #4338ca;
+        border-color: #c7d2fe;
+    }
+
+    .guiding-lang-badge-alt {
+        background-color: #f3f4f6;
+        color: #4b5563;
+        border-color: #e5e7eb;
+    }
+
+    /* Stronger glow for translate button to highlight action */
+    .btn-guiding-translate {
+        position: relative;
+        color: #ffffff;
+        background-image: linear-gradient(135deg, #0ea5e9, #2563eb);
+        border-color: #0ea5e9;
+        box-shadow:
+            0 0 0 0 rgba(56, 189, 248, 0.85),
+            0 6px 14px rgba(37, 99, 235, 0.35);
+        animation: guiding-translate-glow 1.4s ease-in-out infinite;
+    }
+
+    .btn-guiding-translate:hover,
+    .btn-guiding-translate:focus {
+        animation-play-state: paused;
+        box-shadow:
+            0 0 0 8px rgba(56, 189, 248, 0.45),
+            0 8px 18px rgba(37, 99, 235, 0.45);
+        transform: translateY(-1px);
+    }
+
+    @keyframes guiding-translate-glow {
+        0% {
+            box-shadow:
+                0 0 0 0 rgba(56, 189, 248, 0.9),
+                0 5px 12px rgba(37, 99, 235, 0.4);
+            transform: translateY(0);
+        }
+        60% {
+            box-shadow:
+                0 0 0 12px rgba(56, 189, 248, 0),
+                0 7px 16px rgba(37, 99, 235, 0.35);
+            transform: translateY(-1px);
+        }
+        100% {
+            box-shadow:
+                0 0 0 0 rgba(56, 189, 248, 0),
+                0 5px 12px rgba(37, 99, 235, 0.3);
+            transform: translateY(0);
+        }
+    }
+
+    .guiding-lang-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 999px;
+        background-color: currentColor;
+        opacity: 0.65;
+    }
+
+    .guiding-lang-code {
+        letter-spacing: 0.06em;
+    }
+
+    .guiding-lang-label {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        opacity: 0.8;
+    }
+
 </style>
 @endsection
 
@@ -35,15 +238,69 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-header">
-                            <a href="{{ route('admin.guidings.create') }}" class="btn btn-primary"><i class="fa fa-plus"></i> {{ __('admin.guidings.add_guiding') }}</a>
+                            <div class="d-flex justify-content-between align-items-center w-100 flex-wrap gap-2">
+                                <a href="{{ route('admin.guidings.create') }}" class="btn btn-primary">
+                                    <i class="fa fa-plus"></i> {{ __('admin.guidings.add_guiding') }}
+                                </a>
+                                @isset($guidingStats)
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <div class="p-2 px-3 rounded border bg-light">
+                                            <div class="small text-muted mb-1">{{ __('Total tours') }}</div>
+                                            <div class="fw-bold">{{ $guidingStats['total_tours'] }}</div>
+                                        </div>
+                                        <div class="p-2 px-3 rounded border bg-light">
+                                            <div class="small text-muted mb-1">{{ __('Active / Draft') }}</div>
+                                            <div class="fw-bold">
+                                                {{ $guidingStats['active_tours'] }} /
+                                                {{ $guidingStats['draft_tours'] }}
+                                            </div>
+                                        </div>
+                                        <div class="p-2 px-3 rounded border bg-light">
+                                            <div class="small text-muted mb-1">{{ __('Tours with bookings') }}</div>
+                                            <div class="fw-bold">
+                                                {{ $guidingStats['tours_with_bookings'] }}
+                                                @if($guidingStats['booked_active_tours_ratio'] !== null)
+                                                    <span class="small text-muted">
+                                                        ({{ $guidingStats['booked_active_tours_ratio'] }}%)
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="p-2 px-3 rounded border bg-light">
+                                            <div class="small text-muted mb-1">{{ __('Bookings (A / R / P)') }}</div>
+                                            <div class="fw-bold">
+                                                {{ $guidingStats['accepted_bookings'] }}
+                                                /
+                                                {{ $guidingStats['rejected_bookings'] }}
+                                                /
+                                                {{ $guidingStats['pending_bookings'] }}
+                                            </div>
+                                        </div>
+                                        <div class="p-2 px-3 rounded border bg-light">
+                                            <div class="small text-muted mb-1">{{ __('Success / Cancel rate') }}</div>
+                                            <div class="fw-bold">
+                                                {{ $guidingStats['booking_success_rate'] ?? '–' }}%
+                                                /
+                                                {{ $guidingStats['cancellation_rate'] ?? '–' }}%
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endisset
+                            </div>
                         </div>
                         <div class="card-body table-responsive">
-                            <table id="guiding-datatable" class="table">
+                            <table id="guiding-datatable" class="table align-middle mb-0">
                                 <thead>
                                     <tr>
                                         <th class="wd-15p border-bottom-0">{{ __('admin.guidings.th_id') }}</th>
                                         <th class="wd-15p border-bottom-0">{{ __('admin.guidings.th_name') }}</th>
                                         <th class="wd-10p border-bottom-0">{{ __('admin.guidings.th_guide') }}</th>
+                                        <th class="wd-15p border-bottom-0">
+                                            @php
+                                                $imagesHeader = __('admin.guidings.th_images');
+                                            @endphp
+                                            {{ $imagesHeader === 'admin.guidings.th_images' ? 'Images' : $imagesHeader }}
+                                        </th>
                                         <th class="wd-12p border-bottom-0" title="{{ __('admin.guidings.th_languages_hint') }}">{{ __('admin.guidings.th_languages') }}</th>
                                         <th class="wd-25p border-bottom-0">{{ __('admin.guidings.th_actions') }}</th>
                                     </tr>
@@ -60,6 +317,42 @@
                                         $availableLangs = array_unique(array_merge([$mainLang], $translationLangs));
                                         sort($availableLangs);
                                         $missingLangs = $translationService->getMissingLanguages($guiding, $translationTargetLangs);
+
+                                        // Build small gallery for admin list
+                                        $thumbPath = $guiding->thumbnail_path ?? null;
+                                        $galleryRaw = $guiding->gallery_images ?? '[]';
+                                        $galleryArray = is_array($galleryRaw) ? $galleryRaw : (function ($value) {
+                                            try {
+                                                return decode_if_json($value, true) ?: [];
+                                            } catch (\Throwable $e) {
+                                                return [];
+                                            }
+                                        })($galleryRaw);
+
+                                        $allImages = [];
+                                        if ($thumbPath && file_exists(public_path($thumbPath))) {
+                                            $allImages[] = asset($thumbPath);
+                                        }
+                                        if (!empty($galleryArray) && is_array($galleryArray)) {
+                                            foreach ($galleryArray as $img) {
+                                                if (!empty($img) && $img !== $thumbPath && file_exists(public_path($img))) {
+                                                    $allImages[] = asset($img);
+                                                }
+                                            }
+                                        }
+                                        $allImages = array_values(array_unique($allImages));
+                                        $displayImages = array_slice($allImages, 0, 3);
+                                        $extraCount = max(count($allImages) - count($displayImages), 0);
+
+                                        $fullName = $guiding->user->full_name ?? '';
+                                        $nameParts = preg_split('/\s+/', trim($fullName));
+                                        $initials = '';
+                                        if (!empty($nameParts)) {
+                                            $initials .= mb_substr($nameParts[0], 0, 1);
+                                            if (count($nameParts) > 1) {
+                                                $initials .= mb_substr(end($nameParts), 0, 1);
+                                            }
+                                        }
                                     @endphp
                                     <tr>
                                         <td>{{$guiding -> id}}</td>
@@ -71,13 +364,83 @@
        
                                         </td>
                                         <td>
-                                            <a href="{{route('admin.guides.edit', $guiding->user->id)}}">
-                                                {{$guiding -> user->full_name }}
+                                            <a href="{{route('admin.guides.edit', $guiding->user->id)}}" class="text-decoration-none">
+                                                <div class="guiding-guide-cell">
+                                                    @if(!empty($guiding->user->profil_image ?? null))
+                                                        <img
+                                                            src="{{ asset('uploads/profile_images/' . $guiding->user->profil_image) }}"
+                                                            alt="{{ $guiding->user->full_name }}"
+                                                            class="guiding-guide-avatar"
+                                                        >
+                                                    @else
+                                                        <span class="guiding-guide-avatar-placeholder">
+                                                            {{ $initials ?: 'G' }}
+                                                        </span>
+                                                    @endif
+                                                    <span class="guiding-guide-name">
+                                                        {{ $guiding->user->full_name }}
+                                                        @if($guiding->user->information->city ?? null)
+                                                            <small>{{ $guiding->user->information->city }}</small>
+                                                        @endif
+                                                    </span>
+                                                </div>
                                             </a>
                                         </td>
                                         <td>
+                                            @if(!empty($displayImages))
+                                                <div
+                                                    class="guiding-images-scroll guiding-images-trigger"
+                                                    data-guiding-id="{{ $guiding->id }}"
+                                                    data-guiding-title="{{ e($guiding->title) }}"
+                                                    data-guiding-location="{{ e($guiding->location ?? '') }}"
+                                                    data-images='@json($allImages)'
+                                                >
+                                                    <div class="guiding-images-row">
+                                                        @foreach($displayImages as $idx => $img)
+                                                            @php
+                                                                $isLast = $idx === count($displayImages) - 1;
+                                                            @endphp
+                                                            <div class="{{ $isLast && $extraCount > 0 ? 'guiding-thumb-img-more' : '' }}">
+                                                                <img src="{{ $img }}" alt="Guiding image {{ $idx + 1 }}" class="guiding-thumb-img">
+                                                                @if($isLast && $extraCount > 0)
+                                                                    <span class="guiding-thumb-img-more-badge">+{{ $extraCount }}</span>
+                                                                @endif
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <span class="guiding-images-empty">{{ __('admin.guidings.no_images') ?? 'No images' }}</span>
+                                            @endif
+                                        </td>
+                                        <td>
                                             @foreach($availableLangs as $langCode)
-                                                <span class="badge me-1 {{ $langCode === $mainLang ? 'bg-primary' : 'bg-secondary' }}">{{ strtoupper($langCode) }}{{ $langCode === $mainLang ? ' *' : '' }}</span>
+                                                @php
+                                                    $isMain = $langCode === $mainLang;
+                                                    $tooltip = $isMain
+                                                        ? (__('admin.guidings.lang_source_tooltip') !== 'admin.guidings.lang_source_tooltip'
+                                                            ? __('admin.guidings.lang_source_tooltip')
+                                                            : 'Source language')
+                                                        : (__('admin.guidings.lang_translated_tooltip') !== 'admin.guidings.lang_translated_tooltip'
+                                                            ? __('admin.guidings.lang_translated_tooltip')
+                                                            : 'Translated version');
+                                                @endphp
+                                                <span
+                                                    class="badge guiding-lang-badge me-1 {{ $isMain ? 'guiding-lang-badge-main' : 'guiding-lang-badge-alt' }}"
+                                                    title="{{ $tooltip }}"
+                                                >
+                                                    <span class="guiding-lang-dot"></span>
+                                                    <span class="guiding-lang-code">{{ strtoupper($langCode) }}</span>
+                                                    @if($isMain)
+                                                        @php
+                                                            $mainLabel = __('admin.guidings.lang_label_main');
+                                                            if ($mainLabel === 'admin.guidings.lang_label_main') {
+                                                                $mainLabel = 'SRC';
+                                                            }
+                                                        @endphp
+                                                        <span class="guiding-lang-label ms-1">{{ $mainLabel }}</span>
+                                                    @endif
+                                                </span>
                                             @endforeach
                                             @if(empty($availableLangs))
                                                 <span class="text-muted">—</span>
@@ -95,8 +458,15 @@
                                                 <button type="button" class="btn btn-sm btn-primary btn-guiding-details" title="{{ __('admin.guidings.btn_show_details') }}" data-guiding-id="{{ $guiding->id }}" data-guiding-title="{{ e($guiding->title) }}" data-guiding-location="{{ e($guiding->location ?? '') }}" data-guiding-guide-name="{{ e($guiding->user->full_name ?? '') }}"><i class="fa fa-search"></i></button>
                                                 <a href="{{ route('admin.guidings.show', $guiding) }}" class="btn btn-sm btn-outline-primary" title="{{ __('admin.guidings.btn_open_page') }}"><i class="fa fa-external-link-alt"></i></a>
                                                 @if(!empty($missingLangs))
-                                                    <button type="button" class="btn btn-sm btn-info btn-guiding-translate" title="{{ __('admin.guidings.btn_translate_missing', ['langs' => strtoupper(implode(', ', $missingLangs))]) }}" data-translate-url="{{ route('admin.guidings.translate', $guiding) }}" data-missing="{{ implode(',', $missingLangs) }}" data-guiding-title="{{ e($guiding->title) }}">
-                                                        <i class="fa fa-language"></i> <span class="btn-translate-label">{{ __('admin.guidings.btn_translate') }}</span>
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-sm btn-info btn-guiding-translate"
+                                                        title="{{ __('admin.guidings.btn_translate_missing', ['langs' => strtoupper(implode(', ', $missingLangs))]) }}"
+                                                        data-translate-url="{{ route('admin.guidings.translate', $guiding) }}"
+                                                        data-missing="{{ implode(',', $missingLangs) }}"
+                                                        data-guiding-title="{{ e($guiding->title) }}"
+                                                    >
+                                                        <i class="fa fa-language"></i>
                                                     </button>
                                                 @endif
                                             </div>
@@ -178,6 +548,29 @@
         </div>
         <!-- CONTAINER CLOSED -->
 
+    </div>
+
+    <!-- Guiding images modal -->
+    <div class="modal fade" id="guidingImagesModal" tabindex="-1" aria-labelledby="guidingImagesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="guidingImagesModalLabel">
+                        <i class="fa fa-images me-2"></i> {{ __('admin.guidings.images_modal_title') ?? 'Guiding images' }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('admin.guidings.modal_close') }}"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="guidingImagesMain" class="text-center mb-3">
+                        <img id="guidingImagesMainImg" src="" alt="" class="img-fluid rounded shadow-sm d-none">
+                        <div id="guidingImagesEmpty" class="text-muted py-4">
+                            {{ __('admin.guidings.no_images') ?? 'No images available for this guiding.' }}
+                        </div>
+                    </div>
+                    <div id="guidingImagesThumbs" class="d-flex flex-wrap gap-2 justify-content-center"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Guiding text details modal -->
@@ -368,6 +761,73 @@
             });
         }
 
+        // Images modal
+        var guidingImagesModalEl = document.getElementById('guidingImagesModal');
+        if (guidingImagesModalEl) {
+            var guidingImagesModal = new bootstrap.Modal(guidingImagesModalEl);
+
+            $(document).on('click', '.guiding-images-trigger', function() {
+                var $el = $(this);
+                var raw = $el.attr('data-images') || '[]';
+                var images = [];
+                try {
+                    images = JSON.parse(raw);
+                } catch (e) {
+                    images = [];
+                }
+                if (!Array.isArray(images)) {
+                    images = [];
+                }
+
+                var title = $el.data('guiding-title') || '';
+                var location = $el.data('guiding-location') || '';
+                var id = $el.data('guiding-id') || '';
+                var headerTitle = title || ('Guiding #' + id);
+                if (location) {
+                    headerTitle += ' – ' + location;
+                }
+                $('#guidingImagesModalLabel').text(headerTitle);
+
+                var $mainImg = $('#guidingImagesMainImg');
+                var $empty = $('#guidingImagesEmpty');
+                var $thumbs = $('#guidingImagesThumbs').empty();
+
+                if (!images.length) {
+                    $mainImg.addClass('d-none').attr('src', '');
+                    $empty.removeClass('d-none');
+                } else {
+                    $empty.addClass('d-none');
+                    $mainImg.removeClass('d-none').attr('src', images[0]);
+
+                    images.forEach(function(src, idx) {
+                        if (!src) return;
+                        var thumb = $('<img>', {
+                            src: src,
+                            alt: 'Image ' + (idx + 1),
+                            class: 'img-thumbnail guiding-images-thumb',
+                            css: {
+                                width: '72px',
+                                height: '72px',
+                                objectFit: 'cover',
+                                cursor: 'pointer'
+                            },
+                            'data-src': src
+                        });
+                        $thumbs.append(thumb);
+                    });
+                }
+
+                guidingImagesModal.show();
+            });
+
+            $(document).on('click', '.guiding-images-thumb', function() {
+                var src = $(this).attr('data-src');
+                if (src) {
+                    $('#guidingImagesMainImg').attr('src', src);
+                }
+            });
+        }
+
         var guidingTranslateConfirmModalEl = document.getElementById('guidingTranslateConfirmModal');
         if (guidingTranslateConfirmModalEl) {
             var guidingTranslateConfirmModal = new bootstrap.Modal(guidingTranslateConfirmModalEl);
@@ -398,9 +858,6 @@
                 pendingTranslateBtn = null;
                 guidingTranslateConfirmModal.hide();
                 $btn.prop('disabled', true);
-                var $label = $btn.find('.btn-translate-label');
-                var origLabel = $label.text();
-                $label.text('…');
                 $.ajax({
                     url: url,
                     method: 'POST',
@@ -430,7 +887,6 @@
                         }
                         alert(msg);
                         $btn.prop('disabled', false);
-                        $label.text(origLabel);
                     });
             });
         }

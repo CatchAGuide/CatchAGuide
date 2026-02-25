@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateGuidingRequest;
 use App\Models\Guiding;
+use App\Models\Booking;
 use App\Models\Method;
 use App\Models\Target;
 use App\Models\Water;
@@ -60,9 +61,43 @@ class GuidingsController extends Controller
      */
     public function index()
     {
+        $guidings = Guiding::with([
+                'user.information',
+                'languageTranslations',
+            ])
+            ->withCount(['bookings', 'ratings'])
+            ->get();
 
-        $guidings = Guiding::all();
-        return view('admin.pages.guidings.index',compact('guidings'));
+        $totalTours = $guidings->count();
+        $activeTours = $guidings->where('status', 1)->count();
+        $draftTours = $guidings->where('status', 2)->count();
+        $inactiveTours = $guidings->where('status', 0)->count();
+        $toursWithBookings = $guidings->where('bookings_count', '>', 0)->count();
+
+        $totalBookings = Booking::count();
+        $acceptedBookings = Booking::where('status', 'accepted')->count();
+        $rejectedBookings = Booking::where('status', 'rejected')->count();
+        $pendingBookings = Booking::where('status', 'pending')->count();
+
+        $decisionCount = $acceptedBookings + $rejectedBookings;
+
+        $guidingStats = [
+            'total_tours' => $totalTours,
+            'active_tours' => $activeTours,
+            'draft_tours' => $draftTours,
+            'inactive_tours' => $inactiveTours,
+            'tours_with_bookings' => $toursWithBookings,
+            'total_bookings' => $totalBookings,
+            'accepted_bookings' => $acceptedBookings,
+            'rejected_bookings' => $rejectedBookings,
+            'pending_bookings' => $pendingBookings,
+            'booking_success_rate' => $decisionCount > 0 ? round(($acceptedBookings / $decisionCount) * 100, 1) : null,
+            'cancellation_rate' => $decisionCount > 0 ? round(($rejectedBookings / $decisionCount) * 100, 1) : null,
+            'average_bookings_per_tour' => $totalTours > 0 ? round($totalBookings / $totalTours, 2) : null,
+            'booked_active_tours_ratio' => $activeTours > 0 ? round(($toursWithBookings / $activeTours) * 100, 1) : null,
+        ];
+
+        return view('admin.pages.guidings.index', compact('guidings', 'guidingStats'));
     }
 
     /**

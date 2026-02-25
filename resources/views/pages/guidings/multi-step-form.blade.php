@@ -67,7 +67,7 @@
                 <div class="card mb-4">
                     <div class="card-body">
                         <div class="file-upload-wrapper">
-                            <input id="title_image" name="title_image[]" type="file" multiple />
+                            <input id="title_image" name="title_image[]" type="file" multiple accept="image/*" />
                             <input id="cropped_image" name="cropped_image[]" type="file" multiple hidden/>
                             <label for="title_image" class="file-upload-btn">{{ __('newguidings.choose_files') }}</label>
                         </div>
@@ -341,23 +341,26 @@
                         <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
                            title="{{ __('newguidings.tooltip_starting_time') }}"></i>
                     </label>
-                    <div class="d-flex flex-wrap mb-2">
-                        <div class="form-check form-check-inline me-3">
-                            <input class="form-check-input time-of-day-checkbox" type="checkbox" name="desc_departure_time[]" value="morning" id="morning_checkbox">
-                            <label class="form-check-label" for="morning_checkbox">{{ __('newguidings.morning') }}</label>
-                        </div>
-                        <div class="form-check form-check-inline me-3">
-                            <input class="form-check-input time-of-day-checkbox" type="checkbox" name="desc_departure_time[]" value="noon" id="noon_checkbox">
-                            <label class="form-check-label" for="noon_checkbox">{{ __('newguidings.noon') }}</label>
-                        </div>
-                        <div class="form-check form-check-inline me-3">
-                            <input class="form-check-input time-of-day-checkbox" type="checkbox" name="desc_departure_time[]" value="evening" id="evening_checkbox">
-                            <label class="form-check-label" for="evening_checkbox">{{ __('newguidings.evening') }}</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input time-of-day-checkbox" type="checkbox" name="desc_departure_time[]" value="night" id="night_checkbox">
-                            <label class="form-check-label" for="night_checkbox">{{ __('newguidings.night') }}</label>
-                        </div>
+                    <div class="d-flex flex-nowrap btn-group-toggle mb-2">
+                        <input class="time-of-day-checkbox" type="checkbox" name="desc_departure_time[]" value="morning" id="morning_checkbox">
+                        <label for="morning_checkbox" class="btn btn-outline-primary mx-1 flex-fill btn-checkbox">
+                            {{ __('newguidings.morning') }}
+                        </label>
+
+                        <input class="time-of-day-checkbox" type="checkbox" name="desc_departure_time[]" value="noon" id="noon_checkbox">
+                        <label for="noon_checkbox" class="btn btn-outline-primary mx-1 flex-fill btn-checkbox">
+                            {{ __('newguidings.noon') }}
+                        </label>
+
+                        <input class="time-of-day-checkbox" type="checkbox" name="desc_departure_time[]" value="evening" id="evening_checkbox">
+                        <label for="evening_checkbox" class="btn btn-outline-primary mx-1 flex-fill btn-checkbox">
+                            {{ __('newguidings.evening') }}
+                        </label>
+
+                        <input class="time-of-day-checkbox" type="checkbox" name="desc_departure_time[]" value="night" id="night_checkbox">
+                        <label for="night_checkbox" class="btn btn-outline-primary mx-1 flex-fill btn-checkbox">
+                            {{ __('newguidings.night') }}
+                        </label>
                     </div>
                     <textarea class="form-control" id="desc_starting_time" name="desc_starting_time" rows="3" placeholder="{{ __('newguidings.starting_time_placeholder') }}">{{ $formData['desc_starting_time'] ?? '' }}</textarea>
                 </div>
