@@ -494,8 +494,8 @@ class Checkout extends Component
         $dateDifference = Carbon::parse($this->selectedDate)->diffInDays(Carbon::now());
 
         if ($dateDifference > 3) {
-            // If the selected date is more than 3 days from now, add 72 hours to the expiration time
-            $expiresAt = Carbon::now()->addHours(72);
+            // If the selected date is more than 3 days from now, extend to 48 hours total response time
+            $expiresAt = Carbon::now()->addHours(48);
         }
 
         $booking = Booking::create([

@@ -137,7 +137,7 @@
                             @foreach($countries as $country)
                                 <option value="{{ $country }}"
                                     {{ ($currentVacationCountry ?? request()->country) == $country ? 'selected' : '' }}>
-                                    {{ $country }}
+                                    {{ translate($country) }}
                                 </option>
                             @endforeach
                         </select>
@@ -224,7 +224,7 @@
                                     <option value="">{{translate('Select Country')}}</option>
                                     @foreach($countries as $country)
                                         <option value="{{ $country }}" {{ ($currentVacationCountry ?? request()->country) == $country ? 'selected' : '' }}>
-                                            {{ $country }}
+                                            {{ translate($country) }}
                                         </option>
                                     @endforeach
                                 </select>

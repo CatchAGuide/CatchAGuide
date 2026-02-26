@@ -32,7 +32,7 @@ class SendGuideReminders12Hours extends Command
     public function handle()
     {
         // Find bookings that will expire in 12 hours
-        // Assuming expires_at is set to 72 hours after creation
+        // expires_at is typically 24–48 hours after creation depending on lead time
         $bookingsToRemind = Booking::whereNotNull('expires_at')
             ->where('status', 'pending') // Adjust status as needed for your application
             ->where('expires_at', '>', Carbon::now())

@@ -14,11 +14,75 @@
             <p style="font-size: 14px;">@lang('emails.dear') {{$guide->firstname}},</p>
             <p style="font-size: 14px;">@lang('emails.guide_reminder_to_respond_12hrs_text_1')</p>
 
+            {{-- Booking summary (mirrors booking request email) --}}
+            <div class="order-details" style="border: 1px solid rgb(132, 132, 132); padding: 10px; border-radius: 12px; margin-top: 20px;">
+                <div class="booking-details">
+                    <p style="font-size: 14px;">
+                        <strong>@lang('emails.guest_name'): </strong>
+                        {{ optional($booking->user)->firstname ?? __('emails.guest_name') }}
+                    </p>
+                    <p style="font-size: 14px;">
+                        <strong>@lang('emails.tour'): </strong>
+                        @if(isset($booking->guiding))
+                            <a href="{{ route('guidings.show', [$booking->guiding->id, $booking->guiding->slug]) }}" target="_blank" style="text-decoration: none; font-weight: bold;">
+                                {{ $booking->guiding->title }}
+                            </a>
+                        @endif
+                    </p>
+                    @if(isset($booking->guiding))
+                        <p style="font-size: 14px;">
+                            <strong>@lang('emails.location'): </strong> {{ $booking->guiding->location }}
+                        </p>
+                    @endif
+                    <p style="font-size: 14px;">
+                        <strong>@lang('emails.number_of_guests'): </strong> {{ $booking->count_of_users }}
+                    </p>
+                    <p style="font-size: 14px;">
+                        <strong>@lang('emails.date'): </strong> {{ date('d F Y', strtotime($booking->book_date)) }}
+                    </p>
+                    <p style="font-size: 14px;">
+                        <strong>@lang('emails.extras'): </strong>
+                    </p>
+                    <ul style="padding-left: 18px; margin-top: 0;">
+                        @php
+                            $extras = $booking->extras ? @unserialize($booking->extras) : [];
+                        @endphp
+                        @if(is_array($extras) && count($extras))
+                            @foreach($extras as $extra)
+                                <li style="font-size: 14px;">
+                                    {{ $extra['extra_name'] ?? '' }}@if(!empty($extra['extra_quantity'])): ({{ $extra['extra_quantity'] }})@endif
+                                </li>
+                            @endforeach
+                        @else
+                            <li style="font-size: 14px;">@lang('emails.no_extras')</li>
+                        @endif
+                    </ul>
+                    <p style="font-size: 14px;">
+                        <strong>@lang('emails.price'): </strong> {{ number_format($booking->price, 2, ',', '.') }} €
+                    </p>
+                </div>
+            </div>
+
             <div style="margin-top: 2rem;">
                 <p style="font-size: 14px;">@lang('emails.guide_reminder_to_respond_12hrs_text_2')</p>
                 <div style="text-align: center; margin-top: 2rem;">
-                    <a style="background-color: #e8604c; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px; display: inline-block;" href="{{route('profile.bookings', ['id' => $booking->id])}}" target="_blank">@lang('emails.view_bookings')</a>
-                    <a style="background-color: #313041; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px; display: inline-block; margin-right: 10px;" href="{{route('additional.contact')}}" target="_blank">@lang('emails.contact_us')</a>
+                    @if($booking->status === 'pending')
+                        <a class="btn-theme" style="background-color: #e8604c; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px; display: inline-block; margin-right: 10px;" href="{{route('booking.accept', [$booking->token])}}" target="_blank">
+                            @lang('emails.accept')
+                        </a>
+                        <a class="btn-theme" style="background-color: #fff; padding: 10px 20px; color: #e8604c !important; border: 1px solid #e8604c; text-decoration: none; margin-top: 30px; display: inline-block;" href="{{route('booking.reject', [$booking->token])}}" target="_blank">
+                            @lang('emails.reject')
+                        </a>
+                    @endif
+
+                    <div style="margin-top: 1.5rem;">
+                        <a style="background-color: #e8604c; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 10px; display: inline-block; margin-right: 10px;" href="{{route('profile.bookings', ['id' => $booking->id])}}" target="_blank">
+                            @lang('emails.view_bookings')
+                        </a>
+                        <a style="background-color: #313041; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 10px; display: inline-block; margin-right: 10px;" href="{{route('additional.contact')}}" target="_blank">
+                            @lang('emails.contact_us')
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

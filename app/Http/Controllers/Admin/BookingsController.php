@@ -475,15 +475,13 @@ class BookingsController extends Controller
             \Log::error('Error rendering guide expired booking email template: ' . $e->getMessage());
         }
         
-        // Render guide reminder email if applicable
-        if ($booking->status === 'pending') {
-            try {
-                $guideReminderEmail = view('mails.guide.guide_reminder', compact(
-                    'user', 'guide', 'guiding', 'booking'
-                ))->render();
-            } catch (\Exception $e) {
-                \Log::error('Error rendering guide reminder email template: ' . $e->getMessage());
-            }
+        // Render guide 24h reminder email (always available for preview)
+        try {
+            $guideReminderEmail = view('mails.guide.guide_reminder', compact(
+                'user', 'guide', 'guiding', 'booking'
+            ))->render();
+        } catch (\Exception $e) {
+            \Log::error('Error rendering guide reminder email template: ' . $e->getMessage());
         }
         
         // Render guide upcoming tour email if applicable
@@ -499,22 +497,22 @@ class BookingsController extends Controller
 
             try {
                 $guideUpcomingTourEmail = view('mails.guide.guide_upcoming_tour')
-                ->with([
-                    'guide' => $guiding,
-                    'booking' => $booking,
-                ])->render();
+                    ->with([
+                        'guide' => $guiding,
+                        'booking' => $booking,
+                    ])->render();
             } catch (\Exception $e) {
-                dd($e->getMessage());
                 \Log::error('Error rendering guide upcoming tour email template: ' . $e->getMessage());
             }
+        }
 
-            try {
-                $guideReminder12hrsEmail = view('mails.guide.guide_reminder_12hrs', compact(
-                    'user', 'guide', 'guiding', 'booking'
-                ))->render();
-            } catch (\Exception $e) {
-                \Log::error('Error rendering guide 12hrs reminder email template: ' . $e->getMessage());
-            }
+        // Render guide 12hrs reminder email (always available for preview)
+        try {
+            $guideReminder12hrsEmail = view('mails.guide.guide_reminder_12hrs', compact(
+                'user', 'guide', 'guiding', 'booking'
+            ))->render();
+        } catch (\Exception $e) {
+            \Log::error('Error rendering guide 12hrs reminder email template: ' . $e->getMessage());
         }
         
         // Render guide review confirmation email

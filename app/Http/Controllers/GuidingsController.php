@@ -42,6 +42,8 @@ class GuidingsController extends Controller
 {
     use GuidingFilterOptimization;
     
+    protected GuidingTranslationService $guidingTranslationService;
+    
     /**
      * Guiding Status Values:
      * 0 = Disabled (manually disabled by user via profile page)
@@ -56,9 +58,10 @@ class GuidingsController extends Controller
      * - Manual disable/enable toggles between 0 and 1
      */
 
-    public function __construct()
+    public function __construct(GuidingTranslationService $guidingTranslationService)
     {
         $this->initializeOptimizationServices();
+        $this->guidingTranslationService = $guidingTranslationService;
     }
 
     public function index(Request $request)
@@ -95,6 +98,9 @@ class GuidingsController extends Controller
         $guidings = Guiding::where('status', 1)
             ->orderBy('created_at', 'desc')
             ->paginate(20);
+        
+        // Apply stored translations for current locale so listing titles use manual translations
+        $this->applyGuidingTranslations($guidings->getCollection());
         
         $guidings->appends($request->except('page'));
         
@@ -213,6 +219,10 @@ class GuidingsController extends Controller
 
             $this->preComputeGuidingData($allGuidings, $targetsMap, $methodsMap, $watersMap, $inclussionsMap);
             $this->preComputeGuidingData($guidings->items(), $targetsMap, $methodsMap, $watersMap, $inclussionsMap);
+
+            // Apply stored translations for the current locale so listing titles use manual translations
+            $this->applyGuidingTranslations($allGuidings);
+            $this->applyGuidingTranslations($guidings->items());
         } else {
             // Ensure $guidings is always defined
             if (!isset($guidings)) {
@@ -448,6 +458,10 @@ class GuidingsController extends Controller
 
                 $this->preComputeGuidingData($allGuidings, $targetsMap, $methodsMap, $watersMap, $inclussionsMap);
                 $this->preComputeGuidingData($guidings->getCollection(), $targetsMap, $methodsMap, $watersMap, $inclussionsMap);
+
+                // Apply stored translations for the current locale so listing titles use manual translations
+                $this->applyGuidingTranslations($allGuidings);
+                $this->applyGuidingTranslations($guidings->getCollection());
             }
         }
 
@@ -634,6 +648,9 @@ class GuidingsController extends Controller
             }
 
             // Generate card HTML using a compact version for camp form
+            // Apply translations so the cards reflect manual translations for the active locale
+            $this->applyGuidingTranslations($guidings);
+
             $cardsHtml = view('components.guiding-card-compact', [
                 'guidings' => $guidings
             ])->render();
@@ -1213,6 +1230,43 @@ class GuidingsController extends Controller
             $guiding->cached_boat_type_name = $guiding->is_boat ? 
                 ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : 
                 __('guidings.shore');
+        }
+    }
+
+    /**
+     * Apply stored translations from Language table to a collection/array of guidings
+     * for the current locale. When translations exist, they are attached to the
+     * model's $translated property so accessors like $guiding->title use them.
+     *
+     * @param iterable|\Illuminate\Support\Collection $guidings
+     */
+    private function applyGuidingTranslations($guidings): void
+    {
+        if (empty($guidings)) {
+            return;
+        }
+
+        $locale = app()->getLocale() ?: config('app.locale');
+
+        if (!$locale) {
+            return;
+        }
+
+        foreach ($guidings as $guiding) {
+            if (!$guiding instanceof Guiding) {
+                continue;
+            }
+
+            // Skip if guiding content is already in the target language
+            if ($guiding->language === $locale) {
+                continue;
+            }
+
+            $translated = $this->guidingTranslationService->getTranslatedGuiding($guiding, $locale);
+
+            if ($translated) {
+                $guiding->translated = $translated;
+            }
         }
     }
 

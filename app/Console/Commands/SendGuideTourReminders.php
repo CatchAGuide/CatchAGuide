@@ -54,10 +54,12 @@ class SendGuideTourReminders extends Command
             $type = 'guide_reminder';
             $target = 'booking_' . $booking->id;
             
-            // Send the reminder email
+            // Send the reminder email (one per guide/booking within 24h window)
             app()->setLocale($language);
-            
-            if (!CheckEmailLog('guide_reminder', 'booking_' . $booking->id, $booking->user->email)) {
+
+            // Use the guide's email address for duplicate check so that
+            // the CheckEmailLog helper matches what is stored by LogSentEmail
+            if (!CheckEmailLog('guide_reminder', 'booking_' . $booking->id, $guide->email)) {
                 Mail::send('mails.guide.guide_reminder', [
                     'guide' => $guide,
                     'booking' => $booking,
