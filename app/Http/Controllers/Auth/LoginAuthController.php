@@ -48,16 +48,19 @@ class LoginAuthController extends Controller
     /**
      * @return JsonResponse|RedirectResponse
      */
-    public function logout()
+    public function logout(Request $request)
     {
         Auth::guard('employees')->logout();
         Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-        if (request()->ajax()) {
+        if ($request->ajax() || $request->wantsJson()) {
             return response()->json(['success' => true]);
         }
 
-        return redirect()->route('login');
+        // Stay on current page: redirect back so the page just refreshes with session cleared
+        return redirect()->back();
     }
 
 

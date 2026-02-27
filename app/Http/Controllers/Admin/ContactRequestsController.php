@@ -49,4 +49,25 @@ class ContactRequestsController extends Controller
             ->route('admin.contact-requests.index')
             ->with('success', 'Reply sent successfully to ' . e($contactSubmission->email) . '.');
     }
+
+    public function updateStatus(Request $request, ContactSubmission $contactSubmission)
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'string', 'in:open,in_process,done'],
+        ]);
+
+        $contactSubmission->update(['status' => $validated['status']]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'status' => $contactSubmission->status,
+                'status_label' => \App\Models\ContactSubmission::statusOptions()[$contactSubmission->status] ?? $contactSubmission->status,
+            ]);
+        }
+
+        return redirect()
+            ->route('admin.contact-requests.index')
+            ->with('success', 'Status updated.');
+    }
 }

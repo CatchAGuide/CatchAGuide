@@ -74,6 +74,7 @@
 
         autocomplete.addListener('place_changed', function () {
             const place = autocomplete.getPlace();
+            if (!place.geometry || !place.address_components) return;
             place.address_components.forEach(component => {
                 const types = component.types;
 
@@ -95,6 +96,21 @@
                 }
             });
         });
+    }
+
+    // Load Google Maps API with Places library when not already loaded (required for Create Guiding location autocomplete)
+    function loadGoogleMapsAPIForGuiding() {
+        if (typeof window.google !== 'undefined' && window.google.maps && window.google.maps.places) {
+            initAutocomplete();
+            return;
+        }
+        if (window.__guidingMapsScriptLoading) return;
+        window.__guidingMapsScriptLoading = true;
+        var script = document.createElement('script');
+        script.src = 'https://maps.googleapis.com/maps/api/js?key={{ env("GOOGLE_MAPS_API_KEY") }}&libraries=places&callback=initAutocomplete';
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
     }
 
     function handleImageUpload(event) {
@@ -1984,7 +2000,7 @@
             $textarea.toggle(this.checked);
         });
 
-        initAutocomplete();
+        loadGoogleMapsAPIForGuiding();
 
         // Duration selection logic
         $('input[name="duration"]').change(function() {

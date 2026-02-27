@@ -494,6 +494,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('email-logs', [EmailLogsController::class, 'index'])->name('email-logs.index');
         Route::get('contact-requests', [ContactRequestsController::class, 'index'])->name('contact-requests.index');
         Route::post('contact-requests/reply', [ContactRequestsController::class, 'sendReply'])->name('contact-requests.reply');
+        Route::patch('contact-requests/{contactSubmission}/status', [ContactRequestsController::class, 'updateStatus'])->name('contact-requests.update-status');
 
         Route::prefix('offer-sendout')->name('offer-sendout.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\OfferSendoutController::class, 'customCampOffers'])->name('index');

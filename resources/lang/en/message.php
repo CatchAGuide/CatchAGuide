@@ -34,6 +34,11 @@ return [
     'about-us' => 'About Us',
     'contact' => 'Contact',
     'contact-request' => 'Contact Request',
+    'contact_request_status' => [
+        'open' => 'Open',
+        'in_process' => 'In Process',
+        'done' => 'Done',
+    ],
 
     'legal' => 'Legal',
     'imprint' => 'Imprint',

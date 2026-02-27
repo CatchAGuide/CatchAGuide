@@ -36,6 +36,11 @@ return [
     'about-us' => 'Über Uns',
     'contact' => 'Kontakt',
     'contact-request' => 'Kontaktanfrage',
+    'contact_request_status' => [
+        'open' => 'Offen',
+        'in_process' => 'In Bearbeitung',
+        'done' => 'Erledigt',
+    ],
 
     'legal' => 'Rechtliches',
     'imprint' => 'Impressum',
