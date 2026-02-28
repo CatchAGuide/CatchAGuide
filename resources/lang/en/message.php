@@ -292,4 +292,15 @@ Important note: If you provide personal contact details such as your email addre
     //booking reject
     'booking-reject-additional-comment' => 'Additional Comment',
 
+    // Rejection form – how to (foolproof guide)
+    'reject-form-how-to-title' => 'How to complete this form',
+    'reject-form-step-1' => 'Select 1 to 5 alternative dates',
+    'reject-form-step-1-hint' => 'Tap the green dates in the calendar below. Your choices appear above the calendar. Tap × on a date to remove it.',
+    'reject-form-step-2' => 'Write a short message to your guest',
+    'reject-form-step-2-hint' => 'Type at least 50 characters explaining why you must decline. The submit button will unlock when both steps are done.',
+    'reject-form-step-3' => 'Submit',
+    'reject-form-step-3-hint' => 'Click the button below when both steps above are done.',
+    'reject-form-step-done' => 'Done',
+    'reject-form-step-pending' => 'Next',
+
 ];

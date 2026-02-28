@@ -287,4 +287,15 @@ Wichtiger Hinweis: Solltest du persönliche Kontaktdaten wie z.B. deine E-Mail-A
     //booking reject
     'booking-reject-additional-comment' => 'Zusätzliche Kommentare',
 
+    // Rejection form – how to (foolproof guide)
+    'reject-form-how-to-title' => 'So füllst du das Formular aus',
+    'reject-form-step-1' => '1 bis 5 alternative Termine wählen',
+    'reject-form-step-1-hint' => 'Tippe auf die grünen Termine im Kalender. Deine Auswahl erscheint über dem Kalender. Tippe auf ×, um einen Termin zu entfernen.',
+    'reject-form-step-2' => 'Kurze Nachricht an deinen Gast schreiben',
+    'reject-form-step-2-hint' => 'Schreibe mindestens 50 Zeichen mit dem Grund für die Absage. Der Button wird freigegeben, wenn beide Schritte erledigt sind.',
+    'reject-form-step-3' => 'Absenden',
+    'reject-form-step-3-hint' => 'Klicke auf den Button unten, wenn beide Schritte erledigt sind.',
+    'reject-form-step-done' => 'Erledigt',
+    'reject-form-step-pending' => 'Weiter',
+
 ];

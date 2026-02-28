@@ -9,9 +9,20 @@
     <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
 
     <style>
-        html,body {
-            font-family: 'Raleway', sans-serif;
+        :root {
+            --reject-card-radius: 12px;
+            --reject-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04);
+            --reject-section-gap: 2rem;
+            --reject-input-radius: 10px;
+            --reject-info-bg: rgba(var(--thm-primary-rgb, 23, 162, 184), 0.06);
+            --reject-info-border: rgba(var(--thm-primary-rgb, 23, 162, 184), 0.25);
         }
+
+        html, body {
+            font-family: 'Raleway', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
         .thankyou-page ._header {
             background: var(--thm-primary);
             padding: 100px 30px;
@@ -32,270 +43,425 @@
         }
         .thankyou-page ._body {
             margin: -70px 0 30px;
+            padding: 0 15px;
         }
         .thankyou-page ._body ._box {
-            margin: auto;
-            padding: 40px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 0 35px rgba(10, 10, 10, 0.12);
+            margin: 0 auto;
+            max-width: 720px;
+            padding: clamp(24px, 5vw, 48px);
+            background: #fff;
+            border-radius: var(--reject-card-radius);
+            box-shadow: var(--reject-card-shadow);
+            border: 1px solid rgba(0, 0, 0, 0.06);
         }
         .thankyou-page ._body ._box h2 {
             font-size: 32px;
             font-weight: 600;
             color: var(--thm-primary);
         }
-        
-        /* Improved layout styles */
+        .thankyou-page ._body ._box h4 {
+            font-size: clamp(1.15rem, 2.5vw, 1.35rem);
+            font-weight: 600;
+            color: #1a1a1a;
+            letter-spacing: -0.02em;
+            line-height: 1.35;
+        }
+
+        /* Section layout */
         .section-title {
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: 600;
             color: var(--thm-primary);
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid rgba(var(--thm-primary-rgb), 0.1);
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
         }
-        
+
         .form-group {
-            margin-bottom: 2rem;
+            margin-bottom: var(--reject-section-gap);
+            padding-bottom: var(--reject-section-gap);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
         }
-        
+        .form-group:last-of-type {
+            border-bottom: 0;
+            padding-bottom: 0;
+        }
+
         .form-control {
-            border-radius: 6px;
-            border: 1px solid #e0e0e0;
-            padding: 12px;
-            transition: all 0.2s ease;
+            border-radius: var(--reject-input-radius);
+            border: 1px solid #e5e7eb;
+            padding: 14px 16px;
+            font-size: 1rem;
+            line-height: 1.5;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            width: 100%;
         }
-        
+        .form-control::placeholder {
+            color: #9ca3af;
+        }
         .form-control:focus {
+            outline: none;
             border-color: var(--thm-primary);
-            box-shadow: 0 0 0 0.2rem rgba(var(--thm-primary-rgb), 0.1);
+            box-shadow: 0 0 0 3px rgba(var(--thm-primary-rgb), 0.12);
         }
-        
+
+        .char-counter-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
         .char-counter {
-            font-size: 0.85rem;
-            color: #777;
-            margin-top: 0.5rem;
-            text-align: right;
+            font-size: 0.8125rem;
+            color: #6b7280;
         }
-        
         .char-counter.invalid {
-            color: #dc3545;
+            color: #dc2626;
         }
-        
+
         .thm-btn {
-            padding: 10px 24px;
-            font-weight: 500;
-            border-radius: 6px;
-            transition: all 0.3s ease;
+            padding: 14px 32px;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: var(--reject-input-radius);
+            transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+            min-width: 180px;
         }
-        
+        .thm-btn:not(:disabled):hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(var(--thm-primary-rgb), 0.25);
+        }
         .thm-btn:disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
+            transform: none;
         }
-        
+
         .validation-message {
-            color: #dc3545;
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
+            color: #dc2626;
+            font-size: 0.8125rem;
+            margin-top: 0.25rem;
             display: none;
         }
-        
         .validation-message.show {
             display: block;
         }
-        
-        /* Notification styles */
+
+        /* Notifications */
         .notification {
-            padding: 12px 15px;
-            border-radius: 6px;
-            margin: 15px 0;
+            padding: 14px 18px;
+            border-radius: var(--reject-input-radius);
+            margin: 0 0 1.25rem;
             display: none;
             animation: fadeIn 0.3s ease;
         }
-        
         .notification.show {
             display: block;
         }
-        
         .notification-warning {
-            background-color: #fff3cd;
-            border: 1px solid #ffeeba;
-            color: #856404;
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            color: #92400e;
         }
-        
         .notification-success {
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
         }
-        
         .notification-error {
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
         }
-        
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
+            from { opacity: 0; transform: translateY(-8px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
-        /* Calendar styles */
-        #lite-datepicker {
-            margin-bottom: 20px;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            margin: 0 auto;
+
+        /* Info boxes */
+        .info-box {
+            background: var(--reject-info-bg);
+            border-left: 4px solid var(--thm-primary);
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.25rem;
+            border-radius: 0 var(--reject-input-radius) var(--reject-input-radius) 0;
+            font-size: 0.9375rem;
+            line-height: 1.55;
+            color: #374151;
         }
-        
+        .info-box p {
+            margin: 0;
+        }
+
+        /* Calendar */
+        #lite-datepicker {
+            margin: 0 auto 1.25rem;
+            border-radius: var(--reject-input-radius);
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        }
+
         .litepicker {
             font-family: 'Raleway', sans-serif;
-            font-size: 0.95rem;
+            font-size: 0.9375rem;
             margin: 0 auto;
         }
-        
-        .litepicker-container {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-        }
-        
+
         .litepicker .container__days .day-item {
             border-radius: 50%;
-            transition: all 0.2s ease;
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
         }
-        
-        .litepicker .container__days .day-item:hover {
-            background-color: white;
+        .litepicker .container__days .day-item:hover:not(.is-locked) {
+            background-color: rgba(var(--thm-primary-rgb), 0.1);
             color: var(--thm-primary);
-            border: 1px solid rgba(var(--thm-primary-rgb), 0.3);
         }
-        
+        .litepicker .container__days .day-item:active:not(.is-locked) {
+            transform: scale(0.95);
+        }
         .litepicker .container__days .day-item.is-locked {
             text-decoration: line-through;
-            background-color: #f8f8f8;
+            background-color: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
         }
-        
         .litepicker .container__days .day-item.is-today {
             color: var(--thm-primary);
-            font-weight: bold;
+            font-weight: 600;
         }
-        
         .litepicker .container__days .day-item.is-in-range,
         .litepicker .container__days .day-item.is-start-date,
         .litepicker .container__days .day-item.is-end-date {
             background-color: var(--thm-primary);
             color: white;
         }
-        
+        .litepicker .container__days .day-item.is-selected {
+            background-color: #059669;
+            color: white;
+            font-weight: 600;
+        }
+        .litepicker .container__days .day-item.is-start-date:not(.is-selected),
+        .litepicker .container__days .day-item:hover:not(.is-selected):not(.is-locked) {
+            background-color: rgba(var(--thm-primary-rgb), 0.12);
+            color: #111;
+        }
+
         .calendar-container {
-            margin-bottom: 30px;
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            background: #fafafa;
+            border-radius: var(--reject-input-radius);
+            padding: clamp(16px, 3vw, 24px);
             text-align: center;
+            border: 1px solid rgba(0, 0, 0, 0.06);
         }
-        
-        .calendar-title {
-            margin-bottom: 15px;
-            font-weight: 600;
-            color: var(--thm-primary);
-            font-size: 1.1rem;
-        }
-        
-        /* Selected dates styles */
+
         .selected-dates-container {
-            margin-top: 20px;
+            margin-bottom: 1rem;
             text-align: center;
         }
-        
-        .selected-dates-title {
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #333;
-        }
-        
         .selected-dates-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 0.5rem;
             justify-content: center;
-            margin-bottom: 15px;
+            min-height: 2rem;
         }
-        
         .date-tag {
             display: inline-flex;
             align-items: center;
-            background-color: rgba(var(--thm-primary-rgb), 0.1);
-            border-radius: 20px;
+            background: rgba(var(--thm-primary-rgb), 0.1);
+            border-radius: 9999px;
             padding: 6px 12px;
-            font-size: 14px;
+            font-size: 0.875rem;
             color: var(--thm-primary);
             border: 1px solid rgba(var(--thm-primary-rgb), 0.2);
+            transition: background 0.2s ease;
         }
-        
         .date-tag .date-text {
-            margin-right: 8px;
+            margin-right: 6px;
         }
-        
         .date-tag .remove-date {
-            margin-left: 8px;
+            margin-left: 4px;
             cursor: pointer;
-            font-size: 14px;
-            width: 18px;
-            height: 18px;
-            display: flex;
+            font-size: 1rem;
+            width: 20px;
+            height: 20px;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            background-color: rgba(var(--thm-primary-rgb), 0.1);
-            transition: all 0.2s ease;
+            background: rgba(var(--thm-primary-rgb), 0.15);
+            transition: background 0.2s ease;
+            line-height: 1;
         }
-        
         .date-tag .remove-date:hover {
-            background-color: rgba(var(--thm-primary-rgb), 0.3);
+            background: rgba(var(--thm-primary-rgb), 0.3);
         }
-        
-        /* Hidden input to store selected dates */
         #selected-dates-input {
             display: none;
         }
-        
-        .info-box {
-            background-color: #f8f9fa;
-            border-left: 4px solid #17a2b8;
-            padding: 15px;
-            margin-bottom: 20px;
+
+        /* Foolproof how-to guide */
+        .reject-form-guide {
+            background: linear-gradient(135deg, rgba(var(--thm-primary-rgb, 23, 162, 184), 0.08) 0%, rgba(var(--thm-primary-rgb, 23, 162, 184), 0.03) 100%);
+            border: 1px solid rgba(var(--thm-primary-rgb), 0.2);
+            border-radius: var(--reject-input-radius);
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem;
         }
-        
-        .litepicker .container__days .day-item.is-selected {
-            background-color: #28a745;
-            color: white;
-            font-weight: bold;
-            position: relative;
+        .reject-form-guide__title {
+            font-size: 0.9375rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0 0 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
-        
-        .litepicker .container__days .day-item.is-selected::after {
+        .reject-form-guide__title::before {
+            content: '';
+            width: 4px;
+            height: 1.1em;
+            background: var(--thm-primary);
+            border-radius: 2px;
+        }
+        .reject-form-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            padding: 0.6rem 0;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+        .reject-form-step:last-child {
+            margin-bottom: 0;
+        }
+        .reject-form-step__num {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(var(--thm-primary-rgb), 0.2);
+            color: var(--thm-primary);
+            font-weight: 700;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .reject-form-step--done .reject-form-step__num {
+            background: #059669;
+            color: #fff;
+        }
+        .reject-form-step--done .reject-form-step__num::after {
             content: '✓';
-            position: absolute;
-            top: -5px;
-            right: -2px;
-            font-size: 10px;
-            color: white;
         }
-        
-        /* Add styles for the currently being selected date (like May 9 in the image) */
-        .litepicker .container__days .day-item.is-start-date:not(.is-selected),
-        .litepicker .container__days .day-item:hover:not(.is-selected):not(.is-locked) {
-            background-color: #f0f0f0; /* Light gray highlight for the date being selected */
-            color: #212529;
-            border: 1px solid #e0e0e0;
+        .reject-form-step--done .reject-form-step__num {
+            font-size: 0;
         }
-        
+        .reject-form-step__body {
+            flex: 1;
+            min-width: 0;
+        }
+        .reject-form-step__label {
+            font-weight: 600;
+            font-size: 0.9375rem;
+            color: #374151;
+            margin: 0 0 0.25rem;
+        }
+        .reject-form-step--done .reject-form-step__label {
+            color: #059669;
+        }
+        .reject-form-step__hint {
+            font-size: 0.8125rem;
+            color: #6b7280;
+            line-height: 1.45;
+            margin: 0;
+        }
+        .reject-form-step--current .reject-form-step__hint {
+            color: #374151;
+        }
+        .reject-form-inline-hint {
+            font-size: 0.8125rem;
+            color: #6b7280;
+            margin: -0.5rem 0 0.75rem;
+            padding-left: 0.25rem;
+        }
+        .reject-form-inline-hint strong {
+            color: #374151;
+        }
+
+        /* Mobile-first responsive */
+        @media (max-width: 575.98px) {
+            .thankyou-page ._body {
+                margin-top: 1rem;
+                padding: 0 12px;
+            }
+            .thankyou-page ._body ._box {
+                padding: 20px 16px;
+            }
+            .reject-form-guide {
+                padding: 1rem 1.25rem;
+            }
+            .reject-form-step__num {
+                width: 26px;
+                height: 26px;
+                font-size: 0.8125rem;
+            }
+            .reject-form-step__label {
+                font-size: 0.875rem;
+            }
+            .reject-form-step__hint {
+                font-size: 0.75rem;
+            }
+            .form-group {
+                margin-bottom: 1.5rem;
+                padding-bottom: 1.5rem;
+            }
+            .info-box {
+                padding: 12px 14px;
+                font-size: 0.875rem;
+            }
+            .calendar-container {
+                padding: 12px;
+            }
+            .thm-btn {
+                width: 100%;
+                min-width: 0;
+            }
+            .date-tag {
+                font-size: 0.8125rem;
+                padding: 5px 10px;
+            }
+        }
+
+        @media (min-width: 576px) and (max-width: 767.98px) {
+            .thankyou-page ._body ._box {
+                padding: 28px 24px;
+            }
+        }
+
+        /* Litepicker responsive (touch-friendly cells on mobile) */
+        @media (max-width: 767.98px) {
+            .litepicker {
+                max-width: 100%;
+                font-size: 0.875rem;
+            }
+            .litepicker .container__days .day-item {
+                min-height: 40px;
+                min-width: 40px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .litepicker .container__months {
+                width: 100%;
+            }
+            .litepicker .container__months .month-item {
+                width: 100%;
+            }
+        }
     </style>
     <!------ Include the above in your HEAD tag ---------->
 
@@ -310,16 +476,43 @@
                     <div id="notification" class="notification notification-warning">
                         <span id="notification-message"></span>
                     </div>
+
+                    <!-- Foolproof how-to guide -->
+                    <div class="reject-form-guide" id="reject-form-guide">
+                        <h5 class="reject-form-guide__title">@lang('message.reject-form-how-to-title')</h5>
+                        <div class="reject-form-step reject-form-step--current" id="guide-step-1" data-step="dates">
+                            <span class="reject-form-step__num">1</span>
+                            <div class="reject-form-step__body">
+                                <p class="reject-form-step__label">@lang('message.reject-form-step-1')</p>
+                                <p class="reject-form-step__hint">@lang('message.reject-form-step-1-hint')</p>
+                            </div>
+                        </div>
+                        <div class="reject-form-step" id="guide-step-2" data-step="message">
+                            <span class="reject-form-step__num">2</span>
+                            <div class="reject-form-step__body">
+                                <p class="reject-form-step__label">@lang('message.reject-form-step-2')</p>
+                                <p class="reject-form-step__hint">@lang('message.reject-form-step-2-hint')</p>
+                            </div>
+                        </div>
+                        <div class="reject-form-step" id="guide-step-3" data-step="submit">
+                            <span class="reject-form-step__num">3</span>
+                            <div class="reject-form-step__body">
+                                <p class="reject-form-step__label">@lang('message.reject-form-step-3')</p>
+                                <p class="reject-form-step__hint">@lang('message.reject-form-step-3-hint')</p>
+                            </div>
+                        </div>
+                    </div>
                     
                     <form id="rejection-form" action="{{route('booking.rejection',$booking)}}" method="POST">
                         @csrf
                         
                         <!-- Calendar section -->
-                        <div class="form-group">
+                        <div class="form-group" id="form-group-dates">
                             <p class="section-title">@lang('guidings.available_dates')</p>
                             <div class="info-box mb-4">
                                 <p class="mb-0">@lang('message.booking-reject-message-available-dates')</p>
                             </div>
+                            <p class="reject-form-inline-hint" id="inline-hint-dates"><strong>@lang('message.reject-form-step-pending'):</strong> @lang('message.reject-form-step-1-hint')</p>
 
                             <div class="calendar-container">    
                                 <!-- Selected dates container -->
@@ -338,21 +531,24 @@
                             </div>
                         </div>
                         
-                        <div class="form-group">
+                        <div class="form-group" id="form-group-message">
                             <p class="section-title">@lang('message.booking-reject-additional-comment')</p>
                             
                             <div class="info-box mb-4">
                                 <p class="mb-0">@lang('message.booking-reject-message')</p>
                             </div>
+                            <p class="reject-form-inline-hint" id="inline-hint-message"><strong>@lang('message.reject-form-step-pending'):</strong> @lang('message.reject-form-step-2-hint')</p>
                             <textarea class="form-control" name="reason" id="rejection-reason" rows="4" placeholder="@lang('guidings.Rejection_Reason_Placeholder')"></textarea>
-                            <div class="char-counter" id="char-counter">
+                            <div class="char-counter-wrap">
                                 <div id="reason-validation-message" class="validation-message">
-                                    @lang('guidings.Min_Characters_Message') 
-                                </div>0/50 @lang('guidings.Characters')</div>
+                                    @lang('guidings.Min_Characters_Message')
+                                </div>
+                                <span class="char-counter" id="char-counter">0/50 @lang('guidings.Characters')</span>
+                            </div>
                         </div>
                         
-                        <div class="text-center">
-                            <button type="submit" id="submit-btn" class="thm-btn py-2 my-2" disabled>@lang('message.booking-submit')</button>
+                        <div class="text-center pt-2 mt-2">
+                            <button type="submit" id="submit-btn" class="thm-btn py-3 px-4" disabled>@lang('message.booking-submit')</button>
                         </div>
                     </form>
                 </div>
@@ -543,6 +739,33 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
+    // Update foolproof guide steps and inline hints
+    function updateGuideSteps() {
+        const reasonTextarea = document.getElementById('rejection-reason');
+        const hasDates = selectedDates.length > 0;
+        const hasMessage = reasonTextarea && reasonTextarea.value.length >= 50;
+        const step1 = document.getElementById('guide-step-1');
+        const step2 = document.getElementById('guide-step-2');
+        const step3 = document.getElementById('guide-step-3');
+        const hintDates = document.getElementById('inline-hint-dates');
+        const hintMessage = document.getElementById('inline-hint-message');
+
+        [step1, step2, step3].forEach(el => {
+            if (!el) return;
+            el.classList.remove('reject-form-step--done', 'reject-form-step--current');
+        });
+
+        step1.classList.add(hasDates ? 'reject-form-step--done' : 'reject-form-step--current');
+        if (step2) {
+            if (hasDates && !hasMessage) step2.classList.add('reject-form-step--current');
+            if (hasMessage) step2.classList.add('reject-form-step--done');
+        }
+        if (step3 && hasDates && hasMessage) step3.classList.add('reject-form-step--current');
+
+        if (hintDates) hintDates.style.display = hasDates ? 'none' : '';
+        if (hintMessage) hintMessage.style.display = hasMessage ? 'none' : '';
+    }
+
     // Function to validate the form
     function validateForm() {
         const submitBtn = document.getElementById('submit-btn');
@@ -568,6 +791,8 @@ document.addEventListener("DOMContentLoaded", function() {
         
         // Enable/disable submit button
         if (submitBtn) submitBtn.disabled = !(hasSelectedDates && hasEnoughChars);
+
+        updateGuideSteps();
     }
 
     // Character counter for textarea

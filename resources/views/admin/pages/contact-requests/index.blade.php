@@ -2,6 +2,22 @@
 
 @section('title', 'Contact Requests')
 
+@section('custom_style')
+<style>
+    /* Contact request status row colors */
+    #contact-requests-datatable tbody tr.contact-request-status-open { background-color: rgba(13, 110, 253, 0.06); }
+    #contact-requests-datatable tbody tr.contact-request-status-in_process { background-color: rgba(255, 193, 7, 0.15); }
+    #contact-requests-datatable tbody tr.contact-request-status-done { background-color: rgba(25, 135, 84, 0.08); }
+    /* Status dropdown button - single button colored by status */
+    .js-status-dropdown-btn.btn-status-open { background-color: #0d6efd; border-color: #0d6efd; color: #fff; }
+    .js-status-dropdown-btn.btn-status-open:hover { background-color: #0b5ed7; border-color: #0a58ca; color: #fff; }
+    .js-status-dropdown-btn.btn-status-in_process { background-color: #ffc107; border-color: #ffc107; color: #000; }
+    .js-status-dropdown-btn.btn-status-in_process:hover { background-color: #e0a800; border-color: #d39e00; color: #000; }
+    .js-status-dropdown-btn.btn-status-done { background-color: #198754; border-color: #198754; color: #fff; }
+    .js-status-dropdown-btn.btn-status-done:hover { background-color: #157347; border-color: #146c43; color: #fff; }
+</style>
+@endsection
+
 @section('content')
 <div class="side-app">
     <div class="main-container container-fluid">
@@ -43,12 +59,14 @@
                                         <th width="15%" class="border-bottom-0">Phone</th>
                                         <th width="15%" class="border-bottom-0">Source Type</th>
                                         <th width="15%" class="border-bottom-0">Created At</th>
+                                        <th width="12%" class="border-bottom-0">Status</th>
                                         <th width="10%" class="border-bottom-0">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse($contactRequests as $request)
-                                        <tr>
+                                        @php $rowStatus = $request->status ?? 'open'; @endphp
+                                        <tr class="contact-request-row contact-request-status-{{ $rowStatus }}" data-status="{{ $rowStatus }}">
                                             <td>{{ $request->id }}</td>
                                             <td>{{ $request->name ?: '-' }}</td>
                                             <td>{{ $request->email ?: '-' }}</td>
@@ -56,6 +74,21 @@
                                             <td>{{ $request->source_type ?: '-' }}</td>
                                             <td data-order="{{ optional($request->created_at)->timestamp }}">
                                                 {{ optional($request->created_at)->format('F j, Y g:i A') }}
+                                            </td>
+                                            <td>
+                                                <div class="dropdown">
+                                                    <button type="button" class="btn btn-sm dropdown-toggle js-status-dropdown-btn btn-status-{{ $rowStatus }}" data-bs-toggle="dropdown" data-id="{{ $request->id }}" data-url="{{ route('admin.contact-requests.update-status', $request) }}" data-status="{{ $rowStatus }}" data-options='@json(\App\Models\ContactSubmission::statusOptions())' aria-expanded="false">
+                                                        <span class="js-status-btn-text">{{ \App\Models\ContactSubmission::statusOptions()[$rowStatus] ?? $rowStatus }}</span>
+                                                        <i class="fa fa-caret-down ms-1"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu dropdown-menu-end">
+                                                        @foreach(\App\Models\ContactSubmission::statusOptions() as $value => $label)
+                                                            <li>
+                                                                <a class="dropdown-item js-status-option {{ $rowStatus === $value ? 'active' : '' }}" href="#" data-status="{{ $value }}">{{ $label }}</a>
+                                                            </li>
+                                                        @endforeach
+                                                    </ul>
+                                                </div>
                                             </td>
                                             <td>
                                                 <button
@@ -86,7 +119,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td></td><td></td><td></td><td></td><td></td><td></td>
+                                            <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
                                             <td class="text-center text-muted">No contact requests found</td>
                                         </tr>
                                     @endforelse
@@ -166,7 +199,7 @@
                     url: "//cdn.datatables.net/plug-ins/1.13.7/i18n/de-DE.json"
                 },
                 columnDefs: [
-                    { orderable: false, targets: 6 }
+                    { orderable: false, targets: 7 }
                 ]
             });
         }
@@ -182,7 +215,43 @@
             $('#messageModalContent').text(message);
         });
 
-        $('.js-reply-btn').on('click', function () {
+        $(document).on('click', '.js-status-option', function (e) {
+                e.preventDefault();
+                var newStatus = $(this).data('status');
+                var $dropdown = $(this).closest('.dropdown');
+                var $btn = $dropdown.find('.js-status-dropdown-btn');
+                var currentStatus = $btn.data('status');
+                if (newStatus === currentStatus) {
+                    var d = bootstrap.Dropdown.getOrCreateInstance($btn[0]); if (d) d.hide();
+                    return;
+                }
+                var url = $btn.data('url');
+                var options = $btn.data('options');
+                var $row = $btn.closest('tr');
+                $.ajax({
+                    url: url,
+                    method: 'PATCH',
+                    data: { status: newStatus, _token: '{{ csrf_token() }}' },
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                    success: function (res) {
+                        var status = res.status || newStatus;
+                        var label = (res.status_label) ? res.status_label : (options && options[status]) ? options[status] : status;
+                        $btn.removeClass('btn-status-open btn-status-in_process btn-status-done').addClass('btn-status-' + status).data('status', status);
+                        $btn.find('.js-status-btn-text').text(label);
+                        $row.removeClass('contact-request-status-open contact-request-status-in_process contact-request-status-done').addClass('contact-request-status-' + status).attr('data-status', status);
+                        $dropdown.find('.dropdown-item').removeClass('active').filter('[data-status="' + status + '"]').addClass('active');
+                        $row.addClass('table-success');
+                        setTimeout(function () { $row.removeClass('table-success'); }, 600);
+                        var dd = bootstrap.Dropdown.getOrCreateInstance($btn[0]); if (dd) dd.hide();
+                    },
+                    error: function (xhr) {
+                        var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Failed to update status.';
+                        alert(msg);
+                    }
+                });
+            });
+
+            $('.js-reply-btn').on('click', function () {
             const id = $(this).data('id');
             const name = $(this).data('name') || '';
             const email = $(this).data('email') || '';
