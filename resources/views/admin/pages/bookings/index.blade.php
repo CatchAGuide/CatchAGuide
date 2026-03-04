@@ -3,96 +3,6 @@
 @section('title', 'Alle Buchungen')
 
 @section('content')
-    <style>
-        #booking-datatable .col-id {
-            min-width: 80px;
-            width: 80px;
-        }
-
-        #booking-datatable .col-customer {
-            min-width: 220px;
-            width: 220px;
-        }
-
-        #booking-datatable .col-action {
-            min-width: 420px;
-            width: 420px;
-        }
-
-        /* Disable parent wrapper scrolling so controls don't move */
-        .booking-table-responsive {
-            overflow: visible !important;
-        }
-
-        #booking-datatable td.sticky-col {
-            position: sticky;
-            background: #fff;
-            z-index: 2;
-        }
-
-        /* Keep header cells non-sticky to avoid DataTables alignment issues */
-        #booking-datatable th.sticky-col {
-            position: static;
-            z-index: auto;
-        }
-
-        #booking-datatable td.sticky-left-id {
-            left: 0;
-        }
-
-        #booking-datatable td.sticky-left-customer {
-            left: 80px;
-        }
-
-        #booking-datatable td.sticky-right-action {
-            right: 0;
-        }
-
-        #booking-datatable tr.bg-warning td.sticky-col {
-            background: #fff3cd;
-        }
-
-        /* Keep horizontal scrolling scoped to table body only */
-        #booking-datatable_wrapper .dataTables_scroll {
-            overflow: visible !important;
-        }
-
-        #booking-datatable_wrapper .dataTables_scrollBody {
-            overflow-x: scroll !important;
-            overflow-y: auto !important;
-            margin-bottom: 10px;
-            scrollbar-width: auto;
-            scrollbar-color: #6c757d #dfe3e8;
-        }
-
-        /* More visible horizontal/vertical scrollbars (WebKit browsers) */
-        #booking-datatable_wrapper .dataTables_scrollBody::-webkit-scrollbar {
-            height: 14px;
-            width: 14px;
-        }
-
-        #booking-datatable_wrapper .dataTables_scrollBody::-webkit-scrollbar-track {
-            background: #dfe3e8;
-            border-radius: 10px;
-            border: 1px solid #c5ccd3;
-        }
-
-        #booking-datatable_wrapper .dataTables_scrollBody::-webkit-scrollbar-thumb {
-            background: #6c757d;
-            border-radius: 10px;
-            border: 2px solid #dfe3e8;
-        }
-
-        #booking-datatable_wrapper .dataTables_scrollBody::-webkit-scrollbar-thumb:hover {
-            background: #495057;
-        }
-
-        /* Ensure controls stay fixed and not inside horizontal scroll */
-        #booking-datatable_wrapper .dataTables_info,
-        #booking-datatable_wrapper .dataTables_paginate {
-            white-space: nowrap;
-        }
-    </style>
     <div class="side-app">
 
         <!-- CONTAINER -->
@@ -113,27 +23,22 @@
             <!-- Row -->
             <div class="row row-sm">
                 <div class="col-lg-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="table-responsive booking-table-responsive">
-                                <table class="table table-bordered text-nowrap border-bottom" id="booking-datatable">
-                                    <thead>
-                                    <tr>
-                                        <th class="wd-20p border-bottom-0 col-id sticky-col sticky-left-id">ID</th>
-                                        <th class="wd-20p border-bottom-0 col-customer sticky-col sticky-left-customer">Customer</th>
-                                        <th class="wd-15p border-bottom-0">Phone #</th>
-                                        <th class="wd-15p border-bottom-0">Price</th>
-                                        <th class="wd-15p border-bottom-0">Guide Share</th>
-                                        <th class="wd-15p border-bottom-0">CaG Share</th>
-                                        <th class="wd-15p border-bottom-0">Booking Date</th>
-                                        <th class="wd-15p border-bottom-0">Transaction</th>
-                                        <th class="wd-15p border-bottom-0">Status</th>
-                                        <th class="wd-15p border-bottom-0">Guide</th>
-                                        <th class="wd-15p border-bottom-0">Guiding</th>
-                                        <th class="wd-15p border-bottom-0 col-action sticky-col sticky-right-action">Action</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="table-responsive booking-table-responsive booking-table__wrapper booking-table">
+                                    <table class="table table-bordered text-nowrap border-bottom" id="booking-datatable">
+                                        <thead>
+                                        <tr>
+                                            <th class="wd-20p border-bottom-0 col-id">ID</th>
+                                            <th class="wd-20p border-bottom-0 col-customer">Customer</th>
+                                            <th class="wd-15p border-bottom-0">Date / Checkout</th>
+                                            <th class="wd-15p border-bottom-0">Price / Shares</th>
+                                            <th class="wd-15p border-bottom-0">Status</th>
+                                            <th class="wd-20p border-bottom-0">Guide / Tour</th>
+                                            <th class="wd-10p border-bottom-0 col-action">Actions</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
                                         @foreach($bookings as $booking)
                                             @php
                                                 $bookingDateTime = $booking->getFormattedBookingDate('d.m.Y H:i');
@@ -145,104 +50,210 @@
                                             {{-- @php
                                                 $price = $booking->guiding->price_type == 'per_boat' ? $booking->price * $booking->count_of_users : $booking->price;
                                             @endphp --}}
-                                            <tr class="{{ $booking->is_guest ? 'bg-warning' : '' }}">
-                                                <td class="col-id sticky-col sticky-left-id">{{ $booking->id }}</td>
-                                                <td class="col-customer sticky-col sticky-left-customer">
-                                                    @if ($booking->user)
-                                                        {{ $booking->user->firstname ?? 'Guest' }} {{ $booking->user->lastname ?? '' }}
+                                            @php
+                                                $rowClass = $booking->is_guest
+                                                    ? 'booking-table__row booking-table__row--guest'
+                                                    : 'booking-table__row booking-table__row--registered';
+                                            @endphp
+                                            <tr class="{{ $rowClass }}">
+                                                <td class="col-id booking-table__cell booking-table__cell--id">
+                                                    <div class="booking-table__id">
+                                                        <span class="booking-table__id-number">{{ $booking->id }}</span>
+                                                        <span class="booking-table__checkout-badge {{ $booking->is_guest ? 'booking-table__checkout-badge--guest' : 'booking-table__checkout-badge--member' }}">
+                                                            {{ $booking->is_guest ? 'Guest' : 'Account' }}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td class="col-customer booking-table__cell booking-table__cell--customer">
+                                                    <div class="booking-table__customer-name">
+                                                        @if ($booking->user)
+                                                            {{ $booking->user->firstname ?? 'Guest' }} {{ $booking->user->lastname ?? '' }}
+                                                        @else
+                                                            Guest
+                                                        @endif
+                                                    </div>
+                                                    <div class="booking-table__customer-meta">
+                                                        {{ $booking->email ?? ($booking->user->email ?? '—') }}
+                                                    </div>
+                                                    @if($booking->phone)
+                                                        <div class="booking-table__customer-meta">
+                                                            {{ $booking->phone }}
+                                                        </div>
                                                     @endif
                                                 </td>
-                                                <td>{{ $booking->phone }}</td>
-                                                <td>{{ two($booking->price) }} €</td>
-                                                <td>{{ two($booking->price - $booking->cag_percent) }} €</td>
-                                                <td>{{ two($booking->cag_percent) }} €</td>
-                                                <td>
-                                                    {{ \Carbon\Carbon::parse($booking->book_date)->format('d.m.Y') }}
+                                                <td class="booking-table__cell booking-table__cell--date">
+                                                    <div class="booking-table__checkout">
+                                                        <div class="booking-table__checkout-date">
+                                                            <i class="fa fa-calendar-alt me-1"></i>
+                                                            {{ \Carbon\Carbon::parse($booking->book_date)->format('d.m.Y') }}
+                                                        </div>
+                                                    </div>
                                                 </td>
-                                                <td>{{ $booking->transaction_id }}</td>
-                                                <td>
-                                                    <span class="@if($booking->status == 'rejected' || $booking->status == 'cancelled') text-danger @elseif($booking->status == 'accepted') text-success @else {{ !$booking->is_guest ? "text-warning" : "" }} glow @endif">
+                                                <td class="booking-table__cell booking-table__cell--money">
+                                                    <div class="booking-table__money-row">
+                                                        <div class="booking-table__money-line">
+                                                            <span class="booking-table__money-label">Total</span>
+                                                            <span class="booking-table__money-value">{{ two($booking->price) }} €</span>
+                                                        </div>
+                                                        <div class="booking-table__money-line">
+                                                            <span class="booking-table__money-label">Guide</span>
+                                                            <span class="booking-table__money-value">{{ two($booking->price - $booking->cag_percent) }} €</span>
+                                                        </div>
+                                                        <div class="booking-table__money-line">
+                                                            <span class="booking-table__money-label">CaG</span>
+                                                            <span class="booking-table__money-value">{{ two($booking->cag_percent) }} €</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="booking-table__cell booking-table__cell--status">
+                                                    @php
+                                                        $status = strtolower($booking->status);
+                                                        $statusClass = match ($status) {
+                                                            'accepted' => 'booking-table__status-pill--accepted',
+                                                            'rejected', 'cancelled' => 'booking-table__status-pill--danger',
+                                                            default => 'booking-table__status-pill--pending',
+                                                        };
+                                                    @endphp
+                                                    <span class="booking-table__status-pill {{ $statusClass }}">
+                                                        <i class="fa
+                                                            @switch($status)
+                                                                @case('accepted') fa-check-circle @break
+                                                                @case('rejected') fa-times-circle @break
+                                                                @case('cancelled') fa-times-circle @break
+                                                                @default fa-hourglass-half
+                                                            @endswitch
+                                                        me-1"></i>
                                                         {{ strtoupper($booking->status) }}
-                                                        @if($booking->is_guest)
-                                                            <br>
-                                                            <small class="text-muted">Guest Checkout</small>
-                                                        @endif
                                                     </span>
-                                                    @if($booking->last_employee_id)
-
-                                                        <br>
-
-                                                        <span class="text-info">by {{ $booking->employee->name }}</span>
-                                                    @endif
-                                                    @if($booking->status === 'accepted' && $booking->isBookingOver())
-                                                        <br>
-                                                        @if($booking->is_guide_billed)
-                                                            <span class="badge bg-success">Billed</span>
-                                                        @else
-                                                            <span class="badge bg-warning text-dark">To be billed</span>
+                                                    <div class="booking-table__status-meta">
+                                                        @if($booking->last_employee_id)
+                                                            <span>by {{ $booking->employee->name }}</span>
                                                         @endif
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    @if($booking->guiding && $booking->guiding->user)
-                                                        <a href="{{route('admin.guides.edit', $booking->guiding->user->id)}}">
-                                                            {{ $booking->guiding->user->full_name }}
-                                                        </a>
-                                                    @else
-                                                        <span class="text-muted">N/A</span>
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    @if($booking->guiding)
-                                                        <a href="{{route('admin.guidings.edit', $booking->guiding->id)}}">
-                                                            {{$booking->guiding->title}}
-                                                        </a>
-                                                    @else
-                                                        <span class="text-muted">N/A</span>
-                                                    @endif
-                                                </td>
-                                                <td class="col-action sticky-col sticky-right-action">
-                                                    @if($booking->status == 'pending')
-                                                        <a href="{{ route('booking.accept', $booking->token) }}" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
-                                                        <a href="{{ route('booking.reject', $booking->token) }}" class="btn btn-sm btn-danger"><i class="fa fa-times-circle"></i></a>
-                                                    @endif
-
-                                                    <a href="javascript:void(0)" class="btn btn-sm btn-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit booking" onclick="showEditBookingModal({{ $booking->id }})"><i class="fa fa-pen"></i></a>
-                                                    <a href="javascript:deleteResource('{{ route('admin.bookings.destroy', $booking, false) }}')" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete booking"><i class="fa fa-trash"></i></a>
-                                                    <a href="javascript:void(0)" class="btn btn-sm btn-info" data-bs-toggle="tooltip" data-bs-placement="top" title="Preview emails" onclick="showEmailPreview({{ $booking->id }})"><i class="fa fa-envelope"></i></a>
-                                                    <button class="btn btn-sm btn-warning" onclick="showResendModal(
-                                                        {{ $booking->id }}, 
-                                                        {{ json_encode($booking->user ? ($booking->user->firstname . ' ' . $booking->user->lastname) : ($booking->firstname . ' ' . $booking->lastname)) }}, 
-                                                        {{ json_encode($booking->email ?: ($booking->user ? $booking->user->email : '')) }}, 
-                                                        {{ json_encode($booking->guiding && $booking->guiding->user ? ($booking->guiding->user->firstname . ' ' . $booking->guiding->user->lastname) : 'N/A') }}, 
-                                                        {{ json_encode($booking->guiding && $booking->guiding->user ? $booking->guiding->user->email : '') }}
-                                                    )"
-                                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Resend booking request emails">
-                                                        <i class="fa fa-paper-plane"></i>
-                                                    </button>
-                                                    @if($canSendGuideInvoice)
-                                                        <button class="btn btn-sm btn-primary" onclick="showInvoiceConfirmModal(
-                                                            {{ $booking->id }},
-                                                            {{ json_encode($booking->guiding->user->full_name ?? 'N/A') }},
-                                                            {{ json_encode($booking->guiding->user->email ?? 'N/A') }},
-                                                            {{ json_encode($bookingDateTime ?: 'N/A') }},
-                                                            {{ json_encode(two($booking->price) . ' €') }},
-                                                            {{ json_encode(two($booking->price - $booking->cag_percent) . ' €') }},
-                                                            {{ json_encode(two($booking->cag_percent) . ' €') }}
-                                                        )"
-                                                            data-bs-toggle="tooltip" data-bs-placement="top" title="Send guide invoice email">
-                                                            <i class="fa fa-receipt"></i>
-                                                        </button>
-                                                        @if($booking->is_guide_billed)
-                                                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="Unmark as billed" onclick="updateGuideBillingStatus({{ $booking->id }}, false)">
-                                                                <i class="fa fa-undo"></i>
-                                                            </button>
-                                                        @else
-                                                            <button class="btn btn-sm btn-success" data-bs-toggle="tooltip" data-bs-placement="top" title="Mark as billed" onclick="updateGuideBillingStatus({{ $booking->id }}, true)">
-                                                                <i class="fa fa-check-circle"></i>
-                                                            </button>
+                                                        @if($booking->status === 'accepted' && $booking->isBookingOver())
+                                                            @if($booking->is_guide_billed)
+                                                                <span>Billed to guide</span>
+                                                            @else
+                                                                <span>To be billed</span>
+                                                            @endif
                                                         @endif
-                                                    @endif
+                                                    </div>
+                                                </td>
+                                                <td class="booking-table__cell booking-table__cell--guide-tour">
+                                                    <div class="booking-table__guide-tour">
+                                                        <div class="booking-table__guide-tour-line">
+                                                            <span class="booking-table__guide-tour-label">
+                                                                <i class="fa fa-user-tie me-1"></i>
+                                                            </span>
+                                                            <span class="booking-table__guide-tour-value">
+                                                                @if($booking->guiding && $booking->guiding->user)
+                                                                    <a href="{{route('admin.guides.edit', $booking->guiding->user->id)}}">
+                                                                        {{ $booking->guiding->user->full_name }}
+                                                                    </a>
+                                                                @else
+                                                                    <span class="text-muted">N/A</span>
+                                                                @endif
+                                                            </span>
+                                                        </div>
+                                                        <div class="booking-table__guide-tour-line">
+                                                            <span class="booking-table__guide-tour-label booking-table__guide-tour-label--muted">
+                                                                <i class="fa fa-map-marked-alt me-1"></i>
+                                                            </span>
+                                                            <span class="booking-table__guide-tour-value">
+                                                                @if($booking->guiding)
+                                                                    <a href="{{route('admin.guidings.edit', $booking->guiding->id)}}">
+                                                                        {{$booking->guiding->title}}
+                                                                    </a>
+                                                                @else
+                                                                    <span class="text-muted">N/A</span>
+                                                                @endif
+                                                            </span>
+                                                        </div>
+                                                        <div class="booking-table__guide-tour-line">
+                                                            <span class="booking-table__guide-tour-label booking-table__guide-tour-label--muted">
+                                                                <i class="fa fa-map-pin me-1"></i>
+                                                            </span>
+                                                            <span class="booking-table__guide-tour-value booking-table__guide-tour-value--location">
+                                                                @if($booking->guiding && $booking->guiding->location)
+                                                                    {{ $booking->guiding->location }}
+                                                                @else
+                                                                    <span class="text-muted">N/A</span>
+                                                                @endif
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="col-action">
+                                                    <div class="booking-table__actions">
+                                                        {{-- Primary inline actions --}}
+                                                        <div class="booking-table__actions-inline">
+                                                            @if($booking->status == 'pending')
+                                                                <a href="{{ route('booking.accept', $booking->token) }}" class="btn btn-success btn-compact-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="Accept booking">
+                                                                    <i class="fa fa-check"></i>
+                                                                </a>
+                                                                <a href="{{ route('booking.reject', $booking->token) }}" class="btn btn-danger btn-compact-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="Cancel / reject booking">
+                                                                    <i class="fa fa-times-circle"></i>
+                                                                </a>
+                                                            @endif
+                                                            <a href="javascript:void(0)" class="btn btn-secondary btn-compact-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit booking" onclick="showEditBookingModal({{ $booking->id }})">
+                                                                <i class="fa fa-pen"></i>
+                                                            </a>
+                                                            <a href="javascript:deleteResource('{{ route('admin.bookings.destroy', $booking, false) }}')" class="btn btn-danger btn-compact-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete booking">
+                                                                <i class="fa fa-trash"></i>
+                                                            </a>
+                                                        </div>
+
+                                                        {{-- More actions in a compact bubble menu --}}
+                                                        <div class="dropdown booking-table__more">
+                                                            <button class="btn btn-light btn-compact-icon booking-table__more-toggle" type="button" id="booking-more-{{ $booking->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                <i class="fa fa-ellipsis-h"></i>
+                                                            </button>
+                                                            <ul class="dropdown-menu dropdown-menu-end booking-table__more-menu" aria-labelledby="booking-more-{{ $booking->id }}">
+                                                                <li>
+                                                                    <button class="dropdown-item" type="button" onclick="showEmailPreview({{ $booking->id }})">
+                                                                        <i class="fa fa-envelope me-2"></i> Preview emails
+                                                                    </button>
+                                                                </li>
+                                                                <li>
+                                                                    <button class="dropdown-item" type="button" onclick="showResendModal(
+                                                                        {{ $booking->id }},
+                                                                        {{ json_encode($booking->user ? ($booking->user->firstname . ' ' . $booking->user->lastname) : ($booking->firstname . ' ' . $booking->lastname)) }},
+                                                                        {{ json_encode($booking->email ?: ($booking->user ? $booking->user->email : '')) }},
+                                                                        {{ json_encode($booking->guiding && $booking->guiding->user ? ($booking->guiding->user->firstname . ' ' . $booking->guiding->user->lastname) : 'N/A') }},
+                                                                        {{ json_encode($booking->guiding && $booking->guiding->user ? $booking->guiding->user->email : '') }}
+                                                                    )">
+                                                                        <i class="fa fa-paper-plane me-2"></i> Resend booking emails
+                                                                    </button>
+                                                                </li>
+                                                                @if($canSendGuideInvoice)
+                                                                    <li><hr class="dropdown-divider"></li>
+                                                                    <li>
+                                                                        <button class="dropdown-item" type="button" onclick="showInvoiceConfirmModal(
+                                                                            {{ $booking->id }},
+                                                                            {{ json_encode($booking->guiding->user->full_name ?? 'N/A') }},
+                                                                            {{ json_encode($booking->guiding->user->email ?? 'N/A') }},
+                                                                            {{ json_encode($bookingDateTime ?: 'N/A') }},
+                                                                            {{ json_encode(two($booking->price) . ' €') }},
+                                                                            {{ json_encode(two($booking->price - $booking->cag_percent) . ' €') }},
+                                                                            {{ json_encode(two($booking->cag_percent) . ' €') }}
+                                                                        )">
+                                                                            <i class="fa fa-receipt me-2"></i> Send guide invoice
+                                                                        </button>
+                                                                    </li>
+                                                                    <li>
+                                                                        @if($booking->is_guide_billed)
+                                                                            <button class="dropdown-item" type="button" onclick="updateGuideBillingStatus({{ $booking->id }}, false)">
+                                                                                <i class="fa fa-undo me-2"></i> Unmark as billed
+                                                                            </button>
+                                                                        @else
+                                                                            <button class="dropdown-item" type="button" onclick="updateGuideBillingStatus({{ $booking->id }}, true)">
+                                                                                <i class="fa fa-check-circle me-2"></i> Mark as billed
+                                                                            </button>
+                                                                        @endif
+                                                                    </li>
+                                                                @endif
+                                                            </ul>
+                                                        </div>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @endforeach

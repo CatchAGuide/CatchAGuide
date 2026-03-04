@@ -21,6 +21,23 @@ return [
 
     'guiding_source_language_set' => 'Source language set to :lang.',
 
+    // Admin auth (login) screen
+    'auth' => [
+        'badge' => 'Admin console',
+        'welcome_back' => 'Welcome back',
+        'subtitle' => 'Sign in to manage bookings, guides, and content.',
+        'email_label' => 'E-mail address',
+        'email_placeholder' => 'e.g. admin@catchaguide.com',
+        'password_label' => 'Password',
+        'password_placeholder' => 'Your secure password',
+        'remember_me' => 'Remain signed in',
+        'login_button' => 'Sign in',
+        'session_note_label' => 'Note:',
+        'session_note_text' => 'For security reasons, the session will be automatically terminated after a period of inactivity.',
+        'active_admins_today' => 'Active admins today',
+        'trend_positive' => '+18%',
+    ],
+
     // Admin guidings index page
     'guidings' => [
         'page_title' => 'All Guidings',

@@ -1,0 +1,452 @@
+@use "sass:color";
+
+// Booking table – compact, readable, dark-theme aware
+
+.booking-table {
+  &__wrapper {
+    // keep DataTables scroll container behaviour
+    &.booking-table-responsive {
+      overflow: visible !important;
+    }
+  }
+
+  // Sticky columns (ID, customer, actions)
+  #booking-datatable {
+    .col-id {
+      min-width: 80px;
+      width: 80px;
+    }
+
+    .col-customer {
+      min-width: 220px;
+      width: 220px;
+    }
+
+    .col-action {
+      min-width: 150px;
+      width: 150px;
+      text-align: right;
+    }
+
+    td.sticky-col {
+      position: sticky;
+      z-index: 2;
+    }
+
+    th.sticky-col {
+      position: static;
+      z-index: auto;
+    }
+
+    td.sticky-left-id {
+      left: 0;
+    }
+
+    td.sticky-left-customer {
+      left: 80px;
+    }
+
+    td.sticky-right-action {
+      right: 0;
+    }
+
+    // Guest vs member highlighting for sticky cells is handled via
+    // the dedicated modifier classes below to avoid relying on
+    // Bootstrap utility backgrounds.
+  }
+
+  // Horizontal scroll only on table body – behavior is now styled globally
+  // in admin/layout.scss for all DataTables instances.
+
+  // ---- Cell layouts --------------------------------------------------------
+
+  &__cell {
+    &--id {
+      .booking-table__id {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.18rem;
+      }
+
+      .booking-table__id-number {
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        opacity: 0.9;
+      }
+
+      .booking-table__checkout-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.05rem 0.45rem;
+        border-radius: 999px;
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 500;
+        border: 1px solid rgba(148, 163, 184, 0.6);
+      }
+
+      .booking-table__checkout-badge--guest {
+        background: rgba(250, 204, 21, 0.16);
+        border-color: rgba(234, 179, 8, 0.8);
+        color: #92400e;
+      }
+
+      .booking-table__checkout-badge--member {
+        background: rgba(59, 130, 246, 0.14);
+        border-color: rgba(59, 130, 246, 0.8);
+        color: #1d4ed8;
+      }
+    }
+
+    &--date {
+      .booking-table__checkout {
+        display: flex;
+        flex-direction: column;
+        gap: 0.12rem;
+        font-size: 0.8rem;
+      }
+
+      .booking-table__checkout-date {
+        color: #6b7280;
+
+        i {
+          color: #9ca3af;
+        }
+      }
+
+      .booking-table__checkout-type {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin-top: 0.05rem;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-weight: 500;
+        border-radius: 999px;
+        padding: 0.08rem 0.55rem;
+
+        i {
+          font-size: 0.8em;
+        }
+      }
+    }
+
+    &--customer {
+      .booking-table__customer-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      .booking-table__customer-meta {
+        margin-top: 0.1rem;
+        font-size: 0.75rem;
+        opacity: 0.8;
+      }
+    }
+
+    &--money {
+      .booking-table__money-row {
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+      }
+
+      .booking-table__money-line {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+      }
+
+      .booking-table__money-label {
+        opacity: 0.7;
+      }
+
+      .booking-table__money-value {
+        font-weight: 500;
+      }
+    }
+
+    &--status {
+      .booking-table__status-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.15rem 0.55rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+      }
+
+      .booking-table__status-meta {
+        margin-top: 0.25rem;
+        font-size: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+      }
+
+      .booking-table__status-meta span {
+        opacity: 0.8;
+      }
+    }
+
+    &--guide-tour {
+      max-width: 260px;
+      width: 260px;
+      white-space: normal;
+
+      .booking-table__guide-tour {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        font-size: 0.8rem;
+      }
+
+      .booking-table__guide-tour-line {
+        display: flex;
+        align-items: baseline;
+        gap: 0.25rem;
+      }
+
+      .booking-table__guide-tour-label {
+        flex-shrink: 0;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #4b5563;
+
+        &--muted {
+          color: #9ca3af;
+        }
+      }
+
+      .booking-table__guide-tour-value {
+        min-width: 0;
+
+        a {
+          font-weight: 500;
+          text-decoration: none;
+          word-break: break-word;
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+
+        .text-muted {
+          font-size: 0.8rem;
+        }
+
+        &--location {
+          color: #4b5563;
+          font-size: 0.78rem;
+        }
+      }
+    }
+  }
+
+  // Mobile: limit Guide / Tour column width, stack as
+  // - Guide Name
+  // - Tour | Location
+  // with horizontal scroll inside the cell (no visible scrollbar).
+  @media (max-width: 767.98px) {
+    #booking-datatable {
+      th:nth-child(6),
+      td.booking-table__cell--guide-tour {
+        max-width: 220px;
+        width: 220px;
+      }
+    }
+
+    &__cell {
+      &--guide-tour {
+        .booking-table__guide-tour {
+          display: block;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          padding-bottom: 0.1rem;
+          scrollbar-width: none; // Firefox – hide scrollbar
+
+          &::-webkit-scrollbar {
+            display: none; // WebKit – hide scrollbar
+          }
+        }
+
+        // First line: guide name on its own line
+        .booking-table__guide-tour-line:nth-child(1) {
+          display: flex;
+          margin-bottom: 0.05rem;
+        }
+
+        // Second + third lines inline on one row: "Tour | Location"
+        .booking-table__guide-tour-line:nth-child(2),
+        .booking-table__guide-tour-line:nth-child(3) {
+          display: inline-flex;
+          align-items: baseline;
+        }
+
+        .booking-table__guide-tour-line:nth-child(3)::before {
+          margin: 0 0.25rem;
+          color: #9ca3af;
+        }
+
+        .booking-table__guide-tour-value {
+          a {
+            word-break: normal;
+            white-space: nowrap;
+          }
+        }
+
+        .booking-table__guide-tour-value--location {
+          white-space: nowrap;
+        }
+      }
+    }
+  }
+
+  // Status color variants (match existing semantics but less harsh)
+  &__status-pill--accepted {
+    background: rgba(22, 163, 74, 0.12);
+    color: #14532d;
+  }
+
+  &__status-pill--pending {
+    background: rgba(234, 179, 8, 0.14);
+    color: #854d0e;
+  }
+
+  &__status-pill--danger {
+    background: rgba(220, 38, 38, 0.12);
+    color: #991b1b;
+  }
+
+  // ---- Action buttons ------------------------------------------------------
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.25rem;
+  }
+
+  &__actions-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.18rem;
+  }
+
+  &__actions-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.7;
+    margin-right: 0.25rem;
+  }
+
+  .btn-compact-icon {
+    padding: 0.16rem 0.32rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: none;
+    background: #ffffff;
+    border: 1px solid rgba(148, 163, 184, 0.6);
+    color: #4b5563;
+
+    i {
+      font-size: 0.8rem;
+    }
+  }
+
+  .btn-compact-icon.btn-success {
+    background: rgba(22, 163, 74, 0.12);
+    border-color: rgba(22, 163, 74, 0.7);
+    color: #14532d;
+  }
+
+  .btn-compact-icon.btn-danger {
+    background: rgba(220, 38, 38, 0.12);
+    border-color: rgba(220, 38, 38, 0.75);
+    color: #7f1d1d;
+  }
+
+  .btn-compact-icon.btn-warning {
+    background: rgba(245, 158, 11, 0.16);
+    border-color: rgba(245, 158, 11, 0.8);
+    color: #78350f;
+  }
+
+  .btn-compact-icon.btn-info {
+    background: rgba(59, 130, 246, 0.14);
+    border-color: rgba(59, 130, 246, 0.8);
+    color: #1d4ed8;
+  }
+
+  .btn-compact-icon.btn-primary {
+    background: rgba(79, 70, 229, 0.16);
+    border-color: rgba(79, 70, 229, 0.8);
+    color: #312e81;
+  }
+
+  .btn-compact-icon.btn-secondary,
+  .btn-compact-icon.btn-outline-secondary {
+    background: rgba(148, 163, 184, 0.16);
+    border-color: rgba(148, 163, 184, 0.8);
+    color: #374151;
+  }
+
+  &__more {
+    .booking-table__more-toggle {
+      background: #ffffff;
+      border-color: rgba(148, 163, 184, 0.7);
+      color: #4b5563;
+    }
+
+    .booking-table__more-menu {
+      min-width: 220px;
+      border-radius: 12px;
+      border-color: rgba(148, 163, 184, 0.35);
+      box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.18);
+    }
+
+    .booking-table__more-menu .dropdown-item i {
+      width: 16px;
+      text-align: center;
+      color: #6b7280;
+    }
+  }
+
+  .btn-compact-icon.btn-outline-light {
+    border-color: rgba(148, 163, 184, 0.6);
+    color: #e5e7eb;
+    background: rgba(15, 23, 42, 0.6);
+
+    &:hover {
+      background: rgba(15, 23, 42, 0.9);
+    }
+  }
+
+  // Row variants -------------------------------------------------------------
+
+  // Guests: soft warm tint and subtle left border
+  &__row--guest {
+    background: rgba(250, 204, 21, 0.04);
+  }
+
+  // Registered / non-guest bookings: cool, very light tint
+  &__row--registered {
+    background: rgba(59, 130, 246, 0.02);
+  }
+
+}
+

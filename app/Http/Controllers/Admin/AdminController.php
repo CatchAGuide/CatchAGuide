@@ -23,18 +23,74 @@ class AdminController extends Controller
      */
     public function index()
     {
+        $now = now();
+
+        // Exclude internal/test accounts from all booking-based statistics
+        $testUserIds = [2, 3];
+        $testUserEmails = User::whereIn('id', $testUserIds)
+            ->pluck('email')
+            ->filter()
+            ->toArray();
+
+        $filterTestBookings = function ($query) use ($testUserIds, $testUserEmails) {
+            $query->whereNotIn('user_id', $testUserIds);
+
+            if (!empty($testUserEmails)) {
+                $query->whereNotIn('email', $testUserEmails);
+            }
+
+            return $query;
+        };
+
         // Total Bookings including guest bookings
-        $totalBookings = Booking::count();
-        $guestBookings = Booking::where('is_guest', true)->count();
+        $totalBookings = $filterTestBookings(Booking::query())->count();
+        $guestBookings = $filterTestBookings(Booking::where('is_guest', true))->count();
         
-        // Monthly statistics
-        $thisMonth = now()->startOfMonth();
-        $monthlyBookings = Booking::whereMonth('created_at', $thisMonth)->count();
-        $monthlyRevenue = Booking::whereMonth('created_at', $thisMonth)
-            ->get()
-            ->sum(function($booking) {
-                return $booking->price + ($booking->total_extra_price ?? 0);
-            });
+        // Monthly statistics - bookings created this month (by status)
+        $monthlyBookingsQuery = $filterTestBookings(
+            Booking::whereYear('created_at', $now->year)
+                ->whereMonth('created_at', $now->month)
+        );
+
+        $monthlyBookingsTotal = (clone $monthlyBookingsQuery)->count();
+        $monthlyBookingsAccepted = (clone $monthlyBookingsQuery)->where('status', 'accepted')->count();
+        $monthlyBookingsCancelled = (clone $monthlyBookingsQuery)->where('status', 'cancelled')->count();
+        $monthlyBookingsPending = (clone $monthlyBookingsQuery)->where('status', 'pending')->count();
+
+        // Last month statistics - bookings created last month (by status)
+        $startOfThisMonth = $now->copy()->startOfMonth();
+        $startOfLastMonth = $now->copy()->subMonthNoOverflow()->startOfMonth();
+
+        $lastMonthBookingsQuery = $filterTestBookings(
+            Booking::whereYear('created_at', $startOfLastMonth->year)
+                ->whereMonth('created_at', $startOfLastMonth->month)
+        );
+
+        $lastMonthBookingsTotal = (clone $lastMonthBookingsQuery)->count();
+        $lastMonthBookingsAccepted = (clone $lastMonthBookingsQuery)->where('status', 'accepted')->count();
+        $lastMonthBookingsCancelled = (clone $lastMonthBookingsQuery)->where('status', 'cancelled')->count();
+        $lastMonthBookingsPending = (clone $lastMonthBookingsQuery)->where('status', 'pending')->count();
+
+        // This year statistics - bookings created this year (by status)
+        $thisYearBookingsQuery = $filterTestBookings(
+            Booking::whereYear('created_at', $now->year)
+        );
+
+        $thisYearBookingsTotal = (clone $thisYearBookingsQuery)->count();
+        $thisYearBookingsAccepted = (clone $thisYearBookingsQuery)->where('status', 'accepted')->count();
+        $thisYearBookingsCancelled = (clone $thisYearBookingsQuery)->where('status', 'cancelled')->count();
+        $thisYearBookingsPending = (clone $thisYearBookingsQuery)->where('status', 'pending')->count();
+
+        // Last year statistics - bookings created last year (by status)
+        $lastYear = $now->copy()->subYear()->year;
+        $lastYearBookingsQuery = $filterTestBookings(
+            Booking::whereYear('created_at', $lastYear)
+        );
+
+        $lastYearBookingsTotal = (clone $lastYearBookingsQuery)->count();
+        $lastYearBookingsAccepted = (clone $lastYearBookingsQuery)->where('status', 'accepted')->count();
+        $lastYearBookingsCancelled = (clone $lastYearBookingsQuery)->where('status', 'cancelled')->count();
+        $lastYearBookingsPending = (clone $lastYearBookingsQuery)->where('status', 'pending')->count();
         
         // Customer statistics
         $registeredUsers = User::where('is_guide', false)->orWhereNull('is_guide')->count();
@@ -58,9 +114,11 @@ class AdminController extends Controller
             ->count();
 
         // Completed + approved bookings (accepted and tour date already passed)
-        $completedApprovedBookings = Booking::with(['user', 'guiding', 'blocked_event', 'calendar_schedule'])
-            ->where('status', 'accepted')
-            ->orderBy('id', 'desc')
+        $completedApprovedBookings = $filterTestBookings(
+                Booking::with(['user', 'guiding', 'blocked_event', 'calendar_schedule'])
+                    ->where('status', 'accepted')
+                    ->orderBy('id', 'desc')
+            )
             ->get()
             ->filter(function ($booking) {
                 return $booking->isBookingOver();
@@ -68,6 +126,55 @@ class AdminController extends Controller
 
         $completedApprovedCount = $completedApprovedBookings->count();
         $toBeBilledCount = $completedApprovedBookings->where('is_guide_billed', false)->count();
+
+        // Monthly revenue based on completed + approved bookings whose booking date is in the current month
+        $monthlyRevenueBookings = $completedApprovedBookings->filter(function ($booking) use ($now) {
+            $date = $booking->getBookingDate();
+            return $date && $date->year === $now->year && $date->month === $now->month;
+        });
+
+        $monthlyRevenue = $monthlyRevenueBookings->sum(function ($booking) {
+            return $booking->price + ($booking->total_extra_price ?? 0);
+        });
+
+        $monthlyRevenueUnbilledCount = $monthlyRevenueBookings->where('is_guide_billed', false)->count();
+
+        // Helper to get completed + approved bookings for a given date range (based on booking date)
+        $completedBookingsForRange = function ($from, $to) use ($completedApprovedBookings) {
+            return $completedApprovedBookings->filter(function ($booking) use ($from, $to) {
+                $date = $booking->getBookingDate();
+                return $date && $date->gte($from) && $date->lte($to);
+            });
+        };
+
+        // Date ranges for additional revenue KPIs
+        $endOfLastMonth = $startOfThisMonth->copy()->subDay();
+
+        $startOfThisYear = $now->copy()->startOfYear();
+        $endOfThisYear = $now->copy()->endOfYear();
+        $startOfLastYear = $now->copy()->subYear()->startOfYear();
+        $endOfLastYear = $now->copy()->subYear()->endOfYear();
+
+        // Last month revenue + booking stats
+        $lastMonthCompletedBookings = $completedBookingsForRange($startOfLastMonth, $endOfLastMonth);
+        $lastMonthRevenue = $lastMonthCompletedBookings->sum(function ($booking) {
+            return $booking->price + ($booking->total_extra_price ?? 0);
+        });
+        $lastMonthRevenueUnbilledCount = $lastMonthCompletedBookings->where('is_guide_billed', false)->count();
+
+        // This year revenue + booking stats
+        $thisYearCompletedBookings = $completedBookingsForRange($startOfThisYear, $endOfThisYear);
+        $thisYearRevenue = $thisYearCompletedBookings->sum(function ($booking) {
+            return $booking->price + ($booking->total_extra_price ?? 0);
+        });
+        $thisYearRevenueUnbilledCount = $thisYearCompletedBookings->where('is_guide_billed', false)->count();
+
+        // Last year revenue + booking stats
+        $lastYearCompletedBookings = $completedBookingsForRange($startOfLastYear, $endOfLastYear);
+        $lastYearRevenue = $lastYearCompletedBookings->sum(function ($booking) {
+            return $booking->price + ($booking->total_extra_price ?? 0);
+        });
+        $lastYearRevenueUnbilledCount = $lastYearCompletedBookings->where('is_guide_billed', false)->count();
 
         // Dashboard bookings table now only shows completed + approved bookings
         $recentBookings = $completedApprovedBookings
@@ -102,23 +209,38 @@ class AdminController extends Controller
             });
 
         // Revenue Chart Data - Last 6 months
-        $revenueData = $this->getRevenueChartData();
+        $revenueData = $this->getRevenueChartData($completedApprovedBookings);
 
         // Popular Tours Data
         $popularToursData = $this->getPopularToursData();
 
         // New statistics
-        $bookingsByType = $this->getBookingsByType();
-        $topDestinations = $this->getTopDestinations();
-        $customerRetentionData = $this->getCustomerRetentionData();
-        $seasonalTrends = $this->getSeasonalTrends();
+        $bookingsByType = $this->getBookingsByType($completedApprovedBookings);
+        $topDestinations = $this->getTopDestinations($testUserEmails);
+        $customerRetentionData = $this->getCustomerRetentionData($testUserIds, $testUserEmails);
+        $seasonalTrends = $this->getSeasonalTrends($completedApprovedBookings);
         $vacationStats = $this->getVacationStats();
 
         return view('admin.pages.index', compact(
             'totalBookings',
             'guestBookings',
             'monthlyRevenue',
-            'monthlyBookings',
+            'monthlyBookingsTotal',
+            'monthlyBookingsAccepted',
+            'monthlyBookingsCancelled',
+            'monthlyBookingsPending',
+            'lastMonthBookingsTotal',
+            'lastMonthBookingsAccepted',
+            'lastMonthBookingsCancelled',
+            'lastMonthBookingsPending',
+            'thisYearBookingsTotal',
+            'thisYearBookingsAccepted',
+            'thisYearBookingsCancelled',
+            'thisYearBookingsPending',
+            'lastYearBookingsTotal',
+            'lastYearBookingsAccepted',
+            'lastYearBookingsCancelled',
+            'lastYearBookingsPending',
             'totalCustomers',
             'registeredUsers',
             'guestUsers',
@@ -128,6 +250,13 @@ class AdminController extends Controller
             'guidesWithoutActiveOrDraftGuidings',
             'completedApprovedCount',
             'toBeBilledCount',
+            'monthlyRevenueUnbilledCount',
+            'lastMonthRevenue',
+            'lastMonthRevenueUnbilledCount',
+            'thisYearRevenue',
+            'thisYearRevenueUnbilledCount',
+            'lastYearRevenue',
+            'lastYearRevenueUnbilledCount',
             'recentBookings',
             'upcomingTours',
             'revenueData',
@@ -150,7 +279,7 @@ class AdminController extends Controller
         };
     }
 
-    private function getRevenueChartData()
+    private function getRevenueChartData($completedApprovedBookings)
     {
         $labels = [];
         $data = [];
@@ -158,14 +287,16 @@ class AdminController extends Controller
         for ($i = 5; $i >= 0; $i--) {
             $month = now()->subMonths($i);
             $labels[] = $month->format('M Y');
-            
-            $monthlyRevenue = Booking::whereYear('created_at', $month->year)
-                ->whereMonth('created_at', $month->month)
-                ->get()
-                ->sum(function($booking) {
+
+            $monthlyRevenue = $completedApprovedBookings
+                ->filter(function ($booking) use ($month) {
+                    $date = $booking->getBookingDate();
+                    return $date && $date->year === $month->year && $date->month === $month->month;
+                })
+                ->sum(function ($booking) {
                     return $booking->price + ($booking->total_extra_price ?? 0);
                 });
-                
+
             $data[] = $monthlyRevenue;
 
         }
@@ -189,11 +320,11 @@ class AdminController extends Controller
         ];
     }
 
-    private function getBookingsByType()
+    private function getBookingsByType($completedApprovedBookings)
     {
         // Regular tour bookings vs vacation bookings
-        $regularBookings = Booking::where('is_guest', false)->count();
-        $guestBookings = Booking::where('is_guest', true)->count();
+        $regularBookings = $completedApprovedBookings->where('is_guest', false)->count();
+        $guestBookings = $completedApprovedBookings->where('is_guest', true)->count();
         $vacationBookings = VacationBooking::count();
         
         return [
@@ -202,7 +333,7 @@ class AdminController extends Controller
         ];
     }
 
-    private function getTopDestinations()
+    private function getTopDestinations(array $testUserEmails)
     {
         // Tour destinations with explicit table names
         $tourDestinations = Guiding::select(
@@ -212,6 +343,10 @@ class AdminController extends Controller
             )
             ->join('bookings', 'guidings.id', '=', 'bookings.guiding_id')
             ->where('guidings.status', 1)
+            ->where('bookings.status', 'accepted')
+            ->when(!empty($testUserEmails), function ($query) use ($testUserEmails) {
+                $query->whereNotIn('bookings.email', $testUserEmails);
+            })
             ->groupBy('guidings.city', 'guidings.country')
             ->orderByDesc('booking_count')
             ->take(5)
@@ -236,7 +371,7 @@ class AdminController extends Controller
         ];
     }
 
-    private function getCustomerRetentionData()
+    private function getCustomerRetentionData(array $testUserIds, array $testUserEmails)
     {
         // Calculate total customers (excluding guides)
         $totalCustomers = User::where('is_guide', false)->orWhereNull('is_guide')->count();
@@ -244,10 +379,14 @@ class AdminController extends Controller
         // Calculate repeat customers using a subquery
         $repeatCustomers = User::where('is_guide', false)
             ->orWhereNull('is_guide')
-            ->whereExists(function ($query) {
+            ->whereExists(function ($query) use ($testUserIds, $testUserEmails) {
                 $query->selectRaw('1')
                       ->from('bookings')
                       ->whereColumn('users.id', 'bookings.user_id')
+                      ->whereNotIn('bookings.user_id', $testUserIds)
+                      ->when(!empty($testUserEmails), function ($q) use ($testUserEmails) {
+                          $q->whereNotIn('bookings.email', $testUserEmails);
+                      })
                       ->groupBy('bookings.user_id')
                       ->havingRaw('COUNT(*) > 1');
             })
@@ -259,14 +398,18 @@ class AdminController extends Controller
         ];
     }
 
-    private function getSeasonalTrends()
+    private function getSeasonalTrends($completedApprovedBookings)
     {
         $trends = [];
         $currentYear = now()->year;
 
         for ($month = 1; $month <= 12; $month++) {
-            $tourBookings = Booking::whereYear('created_at', $currentYear)
-                ->whereMonth('created_at', $month)
+            // Only count completed + approved tour bookings (accepted and booking date has passed)
+            $tourBookings = $completedApprovedBookings
+                ->filter(function ($booking) use ($currentYear, $month) {
+                    $date = $booking->getBookingDate();
+                    return $date && $date->year === $currentYear && $date->month === $month;
+                })
                 ->count();
             
             $vacationBookings = VacationBooking::whereYear('created_at', $currentYear)

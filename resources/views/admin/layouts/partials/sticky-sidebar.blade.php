@@ -4,10 +4,7 @@
     <div class="app-sidebar">
         <div class="side-header">
             <a class="header-brand1" href="{{ route('welcome') }}">
-                <img src="{{ asset('assets/images/logo.png') }}" class="header-brand-img desktop-logo" alt="logo">
-                <img src="{{ asset('assets/images/logo.png') }}" class="header-brand-img toggle-logo" alt="logo">
-                <img src="{{ asset('assets/images/logo.png') }}" class="header-brand-img light-logo" alt="logo">
-                <img src="{{ asset('assets/images/logo.png') }}" class="header-brand-img light-logo1" alt="logo">
+                <img src="{{ asset('assets/images/logo/CatchAGuide_Logo_PNG.png') }}" class="header-brand-img desktop-logo" alt="{{ config('app.name') }}">
             </a>
             <!-- LOGO -->
         </div>
@@ -19,10 +16,25 @@
                 </li>
 
                 <li class="sub-category">
-                    <h3>Administration</h3>
+                    <h3>Operations</h3>
                 </li>
                 <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.customers.index') }}"><i class="side-menu__icon fe fe-users"></i><span class="side-menu__label">Customers</span></a>
+                </li>
+                <li class="slide {{ request()->routeIs('admin.bookings.*') || request()->routeIs('admin.vacations.bookings') ? 'is-expanded' : '' }}">
+                    <a class="side-menu__item {{ request()->routeIs('admin.bookings.*') || request()->routeIs('admin.vacations.bookings') ? 'active' : '' }}" data-bs-toggle="slide" href="#">
+                        <i class="side-menu__icon fe fe-dollar-sign"></i>
+                        <span class="side-menu__label">Bookings</span>
+                        <i class="angle fe fe-chevron-right"></i>
+                    </a>
+                    <ul class="slide-menu">
+                        <li><a href="{{ route('admin.bookings.index') }}" class="slide-item  {{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}"> Guidings</a></li>
+                        <li><a href="{{ route('admin.vacations.bookings') }}" class="slide-item  {{ request()->routeIs('admin.vacations.bookings') ? 'active' : '' }} text-secondary"> Vacations</a></li>
+                    </ul>
+                </li>
+
+                <li class="sub-category">
+                    <h3>Inventory</h3>
                 </li>
                 <li class="slide {{ request()->routeIs('admin.guides.*') || request()->routeIs('admin.guide-requests.*') || request()->routeIs('admin.guide-analytics.*') ? 'is-expanded' : '' }}">
                     <a class="side-menu__item {{ request()->routeIs('admin.guides.*') || request()->routeIs('admin.guide-requests.*') || request()->routeIs('admin.guide-analytics.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#"><i class="side-menu__icon fe fe-anchor"></i><span class="side-menu__label">Guides & Tours</span><i class="angle fe fe-chevron-right"></i></a>
@@ -40,13 +52,6 @@
                     <a class="side-menu__item {{ request()->routeIs('admin.special-offers.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.special-offers.index') }}"><i class="side-menu__icon fas fa-gift"></i><span class="side-menu__label">Special Offers</span></a>
                     <a class="side-menu__item {{ request()->routeIs('admin.camps.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.camps.index') }}"><i class="side-menu__icon fas fa-campground"></i><span class="side-menu__label">Camps</span></a>
                     <a class="side-menu__item {{ request()->routeIs('admin.holidays.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.vacations.index') }}"><i class="side-menu__icon fe fe-book-open"></i><span class="side-menu__label">Vacations (Old)</span></a>
-                    
-                    <a class="side-menu__item {{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#"><i class="side-menu__icon fe fe-dollar-sign"></i><span class="side-menu__label">Bookings</span><i class="angle fe fe-chevron-right"></i></a>
-                    <ul class="slide-menu">
-                        <li><a href="{{ route('admin.bookings.index') }}" class="slide-item  {{ request()->routeIs('admin.vacations.index') ? 'active' : '' }}"> Guidings</a></li>
-                        <li><a href="{{ route('admin.vacations.bookings') }}" class="slide-item  {{ request()->routeIs('admin.vacations.bookings') ? 'active' : '' }} text-secondary"> Vacations</a></li>
-                    </ul>
-                    {{-- <a class="side-menu__item {{ request()->routeIs('admin.payments.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.payments.index') }}"><i class="side-menu__icon fe fe-credit-card"></i><span class="side-menu__label">Zahlungen</span></a> --}}
                 </li>
 
                 <li class="sub-category">
@@ -67,6 +72,16 @@
 
                 <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.employees.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.employees.index') }}"><i class="side-menu__icon fe fe-users"></i><span class="side-menu__label">Employees</span></a>
+                </li>
+
+                <li class="slide">
+                    <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
+                        <i class="side-menu__icon fe fe-bell"></i>
+                        <span class="side-menu__label">Notifications</span>
+                        @if(($adminNotificationCount ?? 0) > 0)
+                            <span class="side-menu__counter">{{ $adminNotificationCount > 9 ? '9+' : $adminNotificationCount }}</span>
+                        @endif
+                    </a>
                 </li>
 
                 <li class="slide {{ request()->routeIs('admin.settings.*') ? 'is-expanded' : '' }}">

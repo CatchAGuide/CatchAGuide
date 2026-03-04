@@ -18,3 +18,6 @@
 
 <!-- COLOR SKIN CSS -->
 <link id="theme" rel="stylesheet" type="text/css" media="all" href="{{ asset('assets/admin/colors/color1.css') }}" />
+
+<!-- Custom admin authentication styles (compiled from SCSS) -->
+<link rel="stylesheet" href="{{ asset('css/admin-auth.css') }}">

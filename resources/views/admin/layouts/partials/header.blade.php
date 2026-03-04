@@ -4,12 +4,63 @@
         <div class="d-flex">
             <a aria-label="Hide Sidebar" class="app-sidebar__toggle" data-bs-toggle="sidebar" href="#"></a>
             <!-- sidebar-toggle-->
-            <a class="logo-horizontal " href="{{ route('welcome') }}">
-                <img src="{{ asset('assets/images/logo.png') }}" class="header-brand-img desktop-logo" alt="logo">
-                <img src="{{ asset('assets/images/logo.png') }}" class="header-brand-img light-logo1" alt="logo">
+            <a class="logo-horizontal admin-header-logo" href="{{ route('welcome') }}">
+                <img src="{{ asset('assets/images/logo/CatchAGuide_Logo_PNG.png') }}" class="header-brand-img desktop-logo" alt="{{ config('app.name') }}">
+                <img src="{{ asset('assets/images/logo/CatchAGuide_Logo_PNG.png') }}" class="header-brand-img light-logo1" alt="{{ config('app.name') }}">
             </a>
 
-            <div class="d-flex order-lg-2 ms-auto header-right-icons">
+            <nav class="admin-breadcrumb ms-3 d-none d-md-flex align-items-center" aria-label="Breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('admin.administration') }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ $adminBreadcrumbTitle ?? 'Dashboard' }}</li>
+                </ol>
+            </nav>
+
+            <div class="d-flex order-lg-2 ms-auto header-right-icons align-items-center">
+                <!-- Bell always visible (including mobile) – not inside burger dropdown -->
+                <div class="dropdown notification-dropdown admin-header-bell me-2">
+                    <a href="#" class="nav-link icon" data-bs-toggle="dropdown" aria-label="Notifications">
+                        <i class="fe fe-bell"></i>
+                        @if(($adminNotificationCount ?? 0) > 0)
+                            <span class="notification-badge">
+                                {{ $adminNotificationCount > 9 ? '9+' : $adminNotificationCount }}
+                            </span>
+                        @endif
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow p-0">
+                        <div class="px-3 py-2 border-bottom d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="notification-pill"></span>
+                                <span class="fw-semibold small">{{ __('Notifications') }}</span>
+                            </div>
+                            <span class="badge bg-secondary-subtle text-white-50 rounded-pill small">
+                                {{ $adminNotificationCount ?? 0 }}
+                            </span>
+                        </div>
+                        <div class="list-group list-group-flush" style="max-height: 320px; overflow-y: auto;">
+                            @forelse(($adminNotifications ?? []) as $notification)
+                                <a href="{{ $notification->link ?? '#' }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-start">
+                                    <div class="me-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge badge-soft badge-soft--{{ $notification->level ?? 'info' }} text-uppercase">{{ $notification->type }}</span>
+                                        </div>
+                                        <div class="fw-semibold small mt-1">{{ $notification->title }}</div>
+                                        @if($notification->body)
+                                            <small class="text-muted d-block">{{ \Illuminate\Support\Str::limit($notification->body, 80) }}</small>
+                                        @endif
+                                    </div>
+                                    <small class="text-muted text-nowrap ms-2">
+                                        {{ $notification->created_at?->diffForHumans() }}
+                                    </small>
+                                </a>
+                            @empty
+                                <div class="list-group-item text-muted small">
+                                    {{ __('No new notifications') }}
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
                 <div class="dropdown d-lg-none d-md-block d-none">
                     <a href="#" class="nav-link icon" data-bs-toggle="dropdown">
                         <i class="fe fe-search"></i>
@@ -23,8 +74,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- SEARCH -->
-                <button class="navbar-toggler navresponsive-toggler d-md-none ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent-4" aria-controls="navbarSupportedContent-4" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler navresponsive-toggler d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent-4" aria-controls="navbarSupportedContent-4" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon fe fe-more-vertical"></span>
                 </button>
                 <div class="navbar navbar-collapse responsive-navbar p-0">
@@ -40,14 +90,13 @@
                                 </select>
                             </form>
                             <div class="dropdown d-flex profile-1">
-                                <a href="#" data-bs-toggle="dropdown" class="nav-link leading-none d-flex">
-
-                                    <h4 class="text-dark mb-0 fs-16 fw-semibold"><i class="fe fe-user"></i> {{ Auth::guard('employees')->user()->name }}</h4>
+                                <a href="#" data-bs-toggle="dropdown" class="nav-link leading-none d-flex admin-header-user">
+                                    <span class="admin-header-user-name"><i class="fe fe-user me-1"></i>{{ Auth::guard('employees')->user()->name }}</span>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                                     <div class="drop-heading">
                                         <div class="text-center">
-                                            <h5 class="text-dark mb-0 fs-14 fw-semibold">{{ Auth::guard('employees')->user()->name }}</h5>
+                                            <h5 class="admin-dropdown-heading mb-0 fs-14 fw-semibold">{{ Auth::guard('employees')->user()->name }}</h5>
                                             <small class="text-muted">Administrator</small>
                                         </div>
                                     </div>

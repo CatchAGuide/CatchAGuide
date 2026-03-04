@@ -3,7 +3,7 @@
 @section('title', 'Dashboard')
 
 @section('content')
-<div class="container-fluid px-4">
+<div class="container-fluid px-4 pt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0">Dashboard</h1>
         <nav aria-label="breadcrumb">
@@ -26,23 +26,6 @@
                             <h6 class="mb-0">Total Bookings</h6>
                             <h2 class="mb-0">{{ $totalBookings }}</h2>
                             <small>{{ $guestBookings }} from guests</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card h-100 bg-success text-white">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="fa fa-dollar-sign fa-2x"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="mb-0">Monthly Revenue</h6>
-                            <h2 class="mb-0">${{ number_format($monthlyRevenue) }}</h2>
-                            <small>{{ $monthlyBookings }} bookings this month</small>
                         </div>
                     </div>
                 </div>
@@ -95,6 +78,162 @@
                             <h6 class="mb-0">Billing Queue</h6>
                             <h2 class="mb-0">{{ $toBeBilledCount }}</h2>
                             <small>{{ $completedApprovedCount }} completed approved bookings</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Cards -->
+    <div class="row g-4 mb-4">
+        <!-- This Month Revenue -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100 border-0 shadow-sm bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fa fa-dollar-sign fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-0 text-uppercase small">Revenue - This Month</h6>
+                            <h2 class="mb-1 fw-semibold">${{ number_format($monthlyRevenue, 2) }}</h2>
+
+                            <div class="small mb-1">
+                                <span class="me-1">
+                                    <i class="fa fa-calendar-check-o me-1"></i>
+                                    {{ $monthlyBookingsTotal }} bookings this month
+                                </span>
+                            </div>
+                            <div class="small d-flex flex-wrap gap-1 mb-1">
+                                <span class="badge bg-light text-success" data-bs-toggle="tooltip" data-bs-placement="top" title="Accepted bookings for this month">
+                                    <i class="fa fa-check-circle me-1"></i>{{ $monthlyBookingsAccepted }}
+                                </span>
+                                <span class="badge bg-light text-warning" data-bs-toggle="tooltip" data-bs-placement="top" title="Pending bookings for this month">
+                                    <i class="fa fa-clock-o me-1"></i>{{ $monthlyBookingsPending }}
+                                </span>
+                                <span class="badge bg-light text-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Cancelled bookings for this month">
+                                    <i class="fa fa-times-circle me-1"></i>{{ $monthlyBookingsCancelled }}
+                                </span>
+                            </div>
+                            <div class="small">
+                                <i class="fa fa-file-invoice-dollar me-1"></i>
+                                {{ $monthlyRevenueUnbilledCount }} completed bookings not yet billed
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Last Month Revenue -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100 border-0 shadow-sm bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fa fa-calendar-o fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-1 text-uppercase small">Revenue - Last Month</h6>
+                            <h3 class="mb-1 fw-semibold">${{ number_format($lastMonthRevenue, 2) }}</h3>
+                            <div class="small mb-1">
+                                <span class="me-1">
+                                    <i class="fa fa-calendar-check-o me-1"></i>
+                                    {{ $lastMonthBookingsTotal }} bookings last month
+                                </span>
+                            </div>
+                            <div class="small d-flex flex-wrap gap-1 mb-1">
+                                <span class="badge bg-light text-success" data-bs-toggle="tooltip" data-bs-placement="top" title="Accepted bookings for last month">
+                                    <i class="fa fa-check-circle me-1"></i>{{ $lastMonthBookingsAccepted }}
+                                </span>
+                                <span class="badge bg-light text-warning" data-bs-toggle="tooltip" data-bs-placement="top" title="Pending bookings for last month">
+                                    <i class="fa fa-clock-o me-1"></i>{{ $lastMonthBookingsPending }}
+                                </span>
+                                <span class="badge bg-light text-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Cancelled bookings for last month">
+                                    <i class="fa fa-times-circle me-1"></i>{{ $lastMonthBookingsCancelled }}
+                                </span>
+                            </div>
+                            <div class="small">
+                                <i class="fa fa-file-invoice-dollar me-1"></i>
+                                {{ $lastMonthRevenueUnbilledCount }} completed bookings not yet billed
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- This Year Revenue -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100 border-0 shadow-sm bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fa fa-calendar-check-o fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-1 text-uppercase small">Revenue - This Year</h6>
+                            <h3 class="mb-1 fw-semibold">${{ number_format($thisYearRevenue, 2) }}</h3>
+                            <div class="small mb-1">
+                                <span class="me-1">
+                                    <i class="fa fa-calendar-check-o me-1"></i>
+                                    {{ $thisYearBookingsTotal }} bookings this year
+                                </span>
+                            </div>
+                            <div class="small d-flex flex-wrap gap-1 mb-1">
+                                <span class="badge bg-light text-success" data-bs-toggle="tooltip" data-bs-placement="top" title="Accepted bookings for this year">
+                                    <i class="fa fa-check-circle me-1"></i>{{ $thisYearBookingsAccepted }}
+                                </span>
+                                <span class="badge bg-light text-warning" data-bs-toggle="tooltip" data-bs-placement="top" title="Pending bookings for this year">
+                                    <i class="fa fa-clock-o me-1"></i>{{ $thisYearBookingsPending }}
+                                </span>
+                                <span class="badge bg-light text-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Cancelled bookings for this year">
+                                    <i class="fa fa-times-circle me-1"></i>{{ $thisYearBookingsCancelled }}
+                                </span>
+                            </div>
+                            <div class="small">
+                                <i class="fa fa-file-invoice-dollar me-1"></i>
+                                {{ $thisYearRevenueUnbilledCount }} completed bookings not yet billed
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Last Year Revenue -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100 border-0 shadow-sm bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fa fa-history fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-1 text-uppercase small">Revenue - Last Year</h6>
+                            <h3 class="mb-1 fw-semibold">${{ number_format($lastYearRevenue, 2) }}</h3>
+                            <div class="small mb-1">
+                                <span class="me-1">
+                                    <i class="fa fa-calendar-check-o me-1"></i>
+                                    {{ $lastYearBookingsTotal }} bookings last year
+                                </span>
+                            </div>
+                            <div class="small d-flex flex-wrap gap-1 mb-1">
+                                <span class="badge bg-light text-success" data-bs-toggle="tooltip" data-bs-placement="top" title="Accepted bookings for last year">
+                                    <i class="fa fa-check-circle me-1"></i>{{ $lastYearBookingsAccepted }}
+                                </span>
+                                <span class="badge bg-light text-warning" data-bs-toggle="tooltip" data-bs-placement="top" title="Pending bookings for last year">
+                                    <i class="fa fa-clock-o me-1"></i>{{ $lastYearBookingsPending }}
+                                </span>
+                                <span class="badge bg-light text-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Cancelled bookings for last year">
+                                    <i class="fa fa-times-circle me-1"></i>{{ $lastYearBookingsCancelled }}
+                                </span>
+                            </div>
+                            <div class="small">
+                                <i class="fa fa-file-invoice-dollar me-1"></i>
+                                {{ $lastYearRevenueUnbilledCount }} completed bookings not yet billed
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -350,6 +489,14 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // Enable Bootstrap tooltips
+        if (window.bootstrap) {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+
         // Revenue Chart
         const revenueData = {!! json_encode($revenueData) !!};
         const popularToursData = {!! json_encode($popularToursData) !!};

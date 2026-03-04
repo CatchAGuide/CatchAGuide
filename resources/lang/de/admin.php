@@ -21,6 +21,23 @@ return [
 
     'guiding_source_language_set' => 'Quellsprache auf :lang gesetzt.',
 
+    // Admin-Login-Seite
+    'auth' => [
+        'badge' => 'Admin Konsole',
+        'welcome_back' => 'Willkommen zurück',
+        'subtitle' => 'Melde dich an, um Buchungen, Guides und Inhalte zu verwalten.',
+        'email_label' => 'E-Mail Adresse',
+        'email_placeholder' => 'z.B. admin@catchaguide.com',
+        'password_label' => 'Passwort',
+        'password_placeholder' => 'Dein sicheres Passwort',
+        'remember_me' => 'Angemeldet bleiben',
+        'login_button' => 'Anmelden',
+        'session_note_label' => 'Hinweis:',
+        'session_note_text' => 'Aus Sicherheitsgründen wird die Sitzung nach längerer Inaktivität automatisch beendet.',
+        'active_admins_today' => 'Aktive Admins heute',
+        'trend_positive' => '+18%',
+    ],
+
     // Admin-Guidings-Index-Seite
     'guidings' => [
         'page_title' => 'Alle Guidings',

@@ -1,0 +1,624 @@
+// Admin main layout theme – light, soft and elegant
+// Palette is intentionally low-contrast compared to pure white,
+// but still keeps good readability.
+
+$admin-shell-bg: #edf2f7; // overall background
+$admin-shell-bg-muted: #e5e7eb; // subtle gradient stop
+$admin-shell-surface: #ffffff; // cards / surfaces
+$admin-shell-border-subtle: rgba(148, 163, 184, 0.35);
+$admin-shell-border-strong: rgba(148, 163, 184, 0.6);
+$admin-shell-text: #111827;
+$admin-shell-text-muted: #6b7280;
+$admin-shell-primary: #6366f1;
+$admin-shell-accent: #f97316;
+// Softened gradient stops for active pills / buttons – keeps things lively
+// but better aligned with the calm admin palette.
+$admin-shell-gradient-soft: #a5b4fc;
+$admin-shell-gradient-strong: #4f46e5;
+
+.admin-shell {
+  background:
+    radial-gradient(circle at top left, rgba(251, 191, 36, 0.14), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.18), transparent 55%),
+    linear-gradient(145deg, $admin-shell-bg, $admin-shell-bg-muted 40%, #f9fafb);
+  color: $admin-shell-text;
+}
+
+.admin-shell .page {
+  background: transparent;
+}
+
+.admin-shell .app-header.header {
+  border-bottom: 1px solid $admin-shell-border-subtle;
+  background: linear-gradient(to right, #ffffff, #f9fafb);
+  backdrop-filter: blur(10px);
+  box-shadow:
+    0 6px 18px rgba(15, 23, 42, 0.08);
+}
+
+// Header logo: consistent size and alignment (no white box)
+.admin-shell .app-header .logo-horizontal.admin-header-logo {
+  display: flex;
+  align-items: center;
+  padding: 0 0.5rem;
+  margin-left: 0.25rem;
+}
+
+.admin-shell .app-header .logo-horizontal img {
+  max-height: 32px;
+  width: auto;
+  object-fit: contain;
+}
+
+// User name and nav items in header – always light (never black)
+.admin-shell .app-header .header-right-icons .nav-link,
+.admin-shell .app-header .header-right-icons .fe,
+.admin-shell .app-header .header-right-icons .admin-header-user-name {
+  color: $admin-shell-text;
+}
+
+.admin-shell .app-header .header-right-icons .admin-header-user-name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.admin-shell .app-header .header-right-icons .nav-link:hover,
+.admin-shell .app-header .header-right-icons .admin-header-user:hover .admin-header-user-name {
+  color: #f9fafb;
+  opacity: 0.95;
+}
+
+// Dropdown content can stay dark text (light background)
+.admin-shell .drop-heading .admin-dropdown-heading {
+  color: #1f2937;
+}
+
+// Breadcrumbs in header – visible on dark bar
+.admin-shell .admin-breadcrumb .breadcrumb {
+  background: transparent;
+  padding: 0;
+}
+
+.admin-shell .app-header .admin-breadcrumb .breadcrumb-item,
+.admin-shell .app-header .admin-breadcrumb .breadcrumb-item a {
+  color: $admin-shell-text-muted;
+}
+
+.admin-shell .app-header .admin-breadcrumb .breadcrumb-item a:hover {
+  color: $admin-shell-text;
+}
+
+.admin-shell .app-header .admin-breadcrumb .breadcrumb-item.active {
+  color: $admin-shell-text;
+}
+
+.admin-shell .header-right-icons .form-select {
+  color: $admin-shell-text-muted;
+  background-color: transparent;
+}
+
+.admin-shell .header-right-icons .form-select option {
+  color: #020617;
+}
+
+.admin-shell .notification-dropdown .nav-link {
+  position: relative;
+}
+
+.admin-shell .notification-badge {
+  position: absolute;
+  top: -0.2rem;
+  right: -0.3rem;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(120deg, #f97316, #ef4444);
+  color: #f9fafb;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.9);
+}
+
+.admin-shell .notification-dropdown .dropdown-menu {
+  min-width: 320px;
+  background: $admin-shell-surface;
+  border-radius: 14px;
+  border: 1px solid $admin-shell-border-subtle;
+  box-shadow:
+    0 22px 60px rgba(15, 23, 42, 0.96),
+    0 0 0 1px rgba(15, 23, 42, 0.9);
+}
+
+.admin-shell .notification-dropdown .dropdown-item {
+  color: $admin-shell-text;
+  font-size: 0.82rem;
+}
+
+.admin-shell .notification-dropdown .dropdown-item small {
+  color: $admin-shell-text-muted;
+}
+
+.admin-shell .notification-pill {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #22c55e;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  animation: admin-shell-pulse 1.5s infinite;
+}
+
+.admin-shell .app-sidebar {
+  background: linear-gradient(to bottom, #f9fafb, #edf2f7);
+  border-right: 1px solid $admin-shell-border-subtle;
+  box-shadow:
+    0 12px 30px rgba(15, 23, 42, 0.1);
+}
+
+// Sidebar header: dark background, logo centered and visible (no white box)
+.admin-shell .side-header {
+  border-bottom: 1px solid $admin-shell-border-subtle;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(to bottom, #f9fafb, #edf2f7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.35rem;
+}
+
+.admin-shell .main-sidemenu {
+  padding-top: 0.1rem;
+}
+
+.admin-shell .side-header .header-brand1 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid $admin-shell-border-subtle;
+}
+
+.admin-shell .side-header .header-brand1 img {
+  max-height: 40px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.admin-shell .side-menu {
+  padding-top: 0.75rem;
+}
+
+.admin-shell .side-menu__item {
+  color: $admin-shell-text-muted;
+  border-radius: 999px;
+  margin: 0.12rem 0.6rem;
+  padding-inline: 0.85rem;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.admin-shell .side-menu__item .side-menu__icon {
+  color: $admin-shell-text-muted;
+}
+
+// Hover: keep text and icon light (no blue) for readability
+.admin-shell .side-menu__item:hover {
+  background: rgba(99, 102, 241, 0.08);
+  color: $admin-shell-text;
+  transform: translateX(2px);
+}
+
+.admin-shell .side-menu__item:hover .side-menu__icon {
+  color: #4b5563;
+}
+
+.admin-shell .side-menu__item.active:hover,
+.admin-shell .side-menu__item.active:focus {
+  color: #f9fafb;
+}
+
+.admin-shell .side-menu__item.active:hover .side-menu__icon,
+.admin-shell .side-menu__item.active:focus .side-menu__icon {
+  color: #f9fafb;
+}
+
+.admin-shell .side-menu__item.active {
+  background: linear-gradient(135deg, $admin-shell-gradient-soft, $admin-shell-gradient-strong);
+  color: #ffffff;
+  box-shadow:
+    0 10px 26px rgba(15, 23, 42, 0.4),
+    0 0 0 1px rgba(248, 250, 252, 0.7);
+}
+
+.admin-shell .side-menu__item.active .side-menu__icon {
+  color: #f9fafb;
+}
+
+.admin-shell .sub-category h3 {
+  color: $admin-shell-text-muted;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  padding-inline: 1.2rem;
+  margin-top: 0.75rem;
+}
+
+// Submenu items: light text, no blue hover
+.admin-shell .app-sidebar .slide-menu .slide-item {
+  color: $admin-shell-text-muted;
+}
+
+.admin-shell .app-sidebar .slide-menu .slide-item:hover,
+.admin-shell .app-sidebar .slide-menu .slide-item.active {
+  color: #f9fafb;
+  background: rgba(248, 250, 252, 0.06);
+}
+
+.admin-shell .main-content.app-content {
+  background:
+    radial-gradient(circle at top right, rgba(129, 140, 248, 0.18), transparent 60%),
+    radial-gradient(circle at bottom left, rgba(251, 191, 36, 0.12), transparent 60%);
+}
+
+// Breadcrumbs and page title in main content – visible on dark background
+.admin-shell .main-content .page-title {
+  color: $admin-shell-text;
+}
+
+.admin-shell .main-content .breadcrumb {
+  background: transparent;
+}
+
+.admin-shell .main-content .breadcrumb-item,
+.admin-shell .main-content .breadcrumb-item a {
+  color: $admin-shell-text-muted;
+}
+
+.admin-shell .main-content .breadcrumb-item a:hover {
+  color: $admin-shell-text;
+}
+
+.admin-shell .main-content .breadcrumb-item.active {
+  color: $admin-shell-text;
+}
+
+.admin-shell .card {
+  background: $admin-shell-surface;
+  border-radius: 18px;
+  border: 1px solid $admin-shell-border-subtle;
+  box-shadow:
+    0 14px 40px rgba(15, 23, 42, 0.08);
+  color: $admin-shell-text;
+}
+
+.admin-shell .card-header,
+.admin-shell .card-footer {
+  border-color: $admin-shell-border-subtle;
+}
+
+// ----- DataTables & tables (admin-wide) -----
+.admin-shell .table {
+  color: $admin-shell-text;
+}
+
+.admin-shell .table thead th {
+  color: $admin-shell-text-muted;
+  border-bottom-color: $admin-shell-border-subtle;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.85rem 0.75rem;
+  background: #f9fafb;
+}
+
+.admin-shell .table tbody tr {
+  border-bottom-color: $admin-shell-border-subtle;
+  transition: background 0.15s ease;
+}
+
+.admin-shell .table tbody tr:nth-child(even) {
+  background: #f9fafb;
+}
+
+.admin-shell .table tbody tr:hover {
+  background: rgba(191, 219, 254, 0.55);
+}
+
+.admin-shell .main-content .table tbody tr:hover td,
+.admin-shell .main-content .table tbody tr:hover td a:not(.btn) {
+  color: $admin-shell-text;
+}
+
+.admin-shell .table td {
+  padding: 0.75rem;
+  vertical-align: middle;
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.admin-shell .table tbody tr:hover td a.btn {
+  color: inherit;
+}
+
+// DataTables wrapper: length, filter, info
+.admin-shell .dataTables_wrapper {
+  color: $admin-shell-text;
+}
+
+// Unified DataTables horizontal scrollbars (all grids)
+.admin-shell .dataTables_scrollBody {
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  margin-bottom: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.9) rgba(249, 250, 251, 1);
+}
+
+.admin-shell .dataTables_scrollBody::-webkit-scrollbar {
+  height: 8px;
+}
+
+.admin-shell .dataTables_scrollBody::-webkit-scrollbar-track {
+  background: #f9fafb;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.25);
+}
+
+.admin-shell .dataTables_scrollBody::-webkit-scrollbar-thumb {
+  background: linear-gradient(120deg, #9ca3af, #6b7280);
+  border-radius: 999px;
+}
+
+.admin-shell .dataTables_scrollBody::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(120deg, #6b7280, #4b5563);
+}
+
+.admin-shell .dataTables_length label,
+.admin-shell .dataTables_filter label {
+  color: $admin-shell-text-muted;
+  font-size: 0.875rem;
+}
+
+.admin-shell .dataTables_length select {
+  background: #ffffff;
+  border: 1px solid $admin-shell-border-subtle;
+  border-radius: 8px;
+  color: $admin-shell-text;
+  padding: 0.35rem 1.75rem;
+}
+
+.admin-shell .dataTables_filter input {
+  background: #ffffff;
+  border: 1px solid $admin-shell-border-subtle;
+  border-radius: 8px;
+  color: $admin-shell-text;
+  padding: 0.4rem 0.75rem;
+}
+
+.admin-shell .dataTables_filter input::placeholder {
+  color: $admin-shell-text-muted;
+}
+
+.admin-shell .dataTables_filter input:focus {
+  border-color: rgba(99, 102, 241, 0.6);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.admin-shell .dataTables_wrapper .dataTables_info {
+  color: $admin-shell-text-muted;
+  font-size: 0.8125rem;
+  padding-top: 0.75rem;
+}
+
+// DataTables pagination – styled for dark theme
+.admin-shell .dataTables_paginate {
+  padding-top: 0.75rem;
+}
+
+.admin-shell .dataTables_wrapper .dataTables_paginate .paginate_button {
+  margin: 0 0.15rem;
+  padding: 0.4rem 0.65rem;
+  min-width: 2rem;
+  border-radius: 8px;
+  border: 1px solid $admin-shell-border-subtle;
+  background: #ffffff;
+  color: $admin-shell-text;
+  font-size: 0.8125rem;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.admin-shell .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  border-color: rgba(99, 102, 241, 0.5);
+  background: rgba(129, 140, 248, 0.15);
+  color: #111827;
+}
+
+.admin-shell .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+  border-color: $admin-shell-gradient-strong;
+  background: linear-gradient(135deg, $admin-shell-gradient-soft, $admin-shell-gradient-strong);
+  color: #f9fafb;
+}
+
+.admin-shell .dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
+.admin-shell .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
+  opacity: 0.65;
+  cursor: not-allowed;
+  background: #f3f4f6;
+  border-color: $admin-shell-border-subtle;
+  color: $admin-shell-text-muted;
+}
+
+.admin-shell .dataTables_wrapper .row:first-child {
+  margin-bottom: 0.75rem;
+}
+
+// Bootstrap-style pagination (when DataTables uses page-item / page-link)
+.admin-shell .dataTables_paginate .pagination .page-item .page-link {
+  background: #ffffff;
+  border-color: $admin-shell-border-subtle;
+  color: $admin-shell-text;
+  border-radius: 8px;
+  margin: 0 0.15rem;
+}
+
+.admin-shell .dataTables_paginate .pagination .page-item.active .page-link {
+  background: linear-gradient(135deg, $admin-shell-gradient-soft, $admin-shell-gradient-strong);
+  border-color: $admin-shell-gradient-strong;
+  color: #f9fafb;
+}
+
+.admin-shell .dataTables_paginate .pagination .page-item.disabled .page-link {
+  opacity: 0.65;
+  background: #f3f4f6;
+  color: $admin-shell-text-muted;
+}
+
+// ----- Pagination: mobile – single compact row, horizontal scroll (does not engulf page) -----
+@media (max-width: 767.98px) {
+  .admin-shell .dataTables_wrapper .row:last-child {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .admin-shell .dataTables_wrapper .dataTables_info {
+    text-align: center;
+    order: 1;
+    padding-top: 0.5rem;
+  }
+
+  .admin-shell .dataTables_wrapper .dataTables_paginate {
+    order: 2;
+    width: 100%;
+    padding-top: 0.5rem;
+    padding-bottom: 0.25rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-shell .dataTables_wrapper .dataTables_paginate {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .admin-shell .dataTables_wrapper .dataTables_paginate span,
+  .admin-shell .dataTables_wrapper .dataTables_paginate .pagination {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0 0.25rem;
+    min-width: min-content;
+  }
+
+  .admin-shell .dataTables_wrapper .dataTables_paginate .paginate_button {
+    margin: 0;
+    padding: 0.35rem 0.45rem;
+    min-width: 1.75rem;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .admin-shell .dataTables_wrapper .dataTables_paginate .pagination .page-item {
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  .admin-shell .dataTables_wrapper .dataTables_paginate .pagination .page-item .page-link {
+    padding: 0.35rem 0.45rem;
+    min-width: 1.75rem;
+    font-size: 0.75rem;
+    text-align: center;
+  }
+}
+
+.admin-shell .badge-soft {
+  background: rgba(37, 99, 235, 0.16);
+  color: #bfdbfe;
+  border-radius: 999px;
+}
+
+.admin-shell .badge-soft--warning {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fed7aa;
+}
+
+.admin-shell .badge-soft--danger {
+  background: rgba(220, 38, 38, 0.18);
+  color: #fecaca;
+}
+
+.admin-shell .side-menu__counter {
+  margin-left: auto;
+  font-size: 0.72rem;
+  padding: 0.05rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(220, 38, 38, 0.2);
+  color: #fecaca;
+}
+
+// ---------------------------------------------------------------------------
+// Bookings table – dedicated styling (sticky columns, guest vs member rows,
+// compact money/status pills, etc.). Kept in a separate partial so it
+// doesn't leak into other admin tables.
+// ---------------------------------------------------------------------------
+@import "./bookings-table";
+
+@keyframes admin-shell-pulse {
+  0% {
+    transform: scale(0.9);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 7px rgba(34, 197, 94, 0);
+  }
+  100% {
+    transform: scale(0.9);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+}
+
+// Mobile: burger open menu – dark panel so text is visible (not white on white)
+@media (max-width: 991.98px) {
+  .admin-shell .app-sidebar {
+    box-shadow:
+      0 28px 60px rgba(15, 23, 42, 0.98),
+      0 0 0 1px rgba(15, 23, 42, 0.9);
+  }
+
+  .admin-shell .responsive-navbar .navbar-collapse.collapse.show {
+    background: rgba(15, 23, 42, 0.98);
+    border: 1px solid $admin-shell-border-subtle;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    padding: 0.75rem 1rem;
+    margin-top: 0.25rem;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+  }
+
+  .admin-shell .responsive-navbar .navbar-collapse .admin-header-user-name,
+  .admin-shell .responsive-navbar .navbar-collapse .nav-link {
+    color: $admin-shell-text;
+  }
+
+  .admin-shell .responsive-navbar .navbar-collapse .form-select {
+    color: $admin-shell-text;
+    background-color: rgba(30, 41, 59, 0.8);
+    border-radius: 8px;
+  }
+
+  .admin-shell .responsive-navbar .navbar-collapse .form-select option {
+    color: #0f172a;
+    background: #f8fafc;
+  }
+}
+

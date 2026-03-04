@@ -37,6 +37,9 @@
 <!-- webschuppen styles -->
 <link rel="stylesheet" href="{{ asset('css/app.css') }}" />
 
+<!-- Custom admin layout theme -->
+<link rel="stylesheet" href="{{ asset('css/admin-layout.css') }}" />
+
 <style type="text/css">
 
 #cke_notifications_area_introduction, 
