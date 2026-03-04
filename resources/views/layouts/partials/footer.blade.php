@@ -72,6 +72,7 @@
                                 <li><a href="{{route('guidings.index')}}">@lang('message.Guiding')</a></li>
                                 <li><a href="{{route('profile.settings')}}">@lang('message.myaccount')</a></li>
                                 <li><a id="contact-footer" href="{{route('additional.contact')}}">@lang('message.contact')</a></li>
+                                <li><a href="{{ route('additional.for_agents') }}">For AI agents &amp; developers</a></li>
                             </ul>
                         </div>
                     </div>

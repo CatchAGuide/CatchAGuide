@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\CatalogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,4 +45,14 @@ Route::prefix('checkout')->group(function () {
     Route::post('/submit-booking', [\App\Http\Controllers\Api\ModernCheckoutApiController::class, 'submitBooking']);
     Route::get('/available-dates/{guidingId}', [\App\Http\Controllers\Api\ModernCheckoutApiController::class, 'getAvailableDates']);
 });
+
+// Public catalog endpoints for AI agents and developers
+Route::prefix('catalog')
+    ->middleware('throttle:60,1') // basic rate limit: 60 requests per minute per IP
+    ->group(function () {
+        Route::get('/trips', [CatalogController::class, 'trips']);
+        Route::get('/guidings', [CatalogController::class, 'guidings']);
+        Route::get('/vacations', [CatalogController::class, 'vacations']);
+    });
+
 

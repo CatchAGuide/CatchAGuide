@@ -52,10 +52,11 @@ class AdminController extends Controller
                 ->whereMonth('created_at', $now->month)
         );
 
-        $monthlyBookingsTotal = (clone $monthlyBookingsQuery)->count();
         $monthlyBookingsAccepted = (clone $monthlyBookingsQuery)->where('status', 'accepted')->count();
-        $monthlyBookingsCancelled = (clone $monthlyBookingsQuery)->where('status', 'cancelled')->count();
+        // Treat cancelled + rejected as one "cancelled" bucket
+        $monthlyBookingsCancelled = (clone $monthlyBookingsQuery)->whereIn('status', ['cancelled', 'rejected'])->count();
         $monthlyBookingsPending = (clone $monthlyBookingsQuery)->where('status', 'pending')->count();
+        $monthlyBookingsTotal = $monthlyBookingsAccepted + $monthlyBookingsCancelled + $monthlyBookingsPending;
 
         // Last month statistics - bookings created last month (by status)
         $startOfThisMonth = $now->copy()->startOfMonth();
@@ -66,20 +67,20 @@ class AdminController extends Controller
                 ->whereMonth('created_at', $startOfLastMonth->month)
         );
 
-        $lastMonthBookingsTotal = (clone $lastMonthBookingsQuery)->count();
         $lastMonthBookingsAccepted = (clone $lastMonthBookingsQuery)->where('status', 'accepted')->count();
-        $lastMonthBookingsCancelled = (clone $lastMonthBookingsQuery)->where('status', 'cancelled')->count();
+        $lastMonthBookingsCancelled = (clone $lastMonthBookingsQuery)->whereIn('status', ['cancelled', 'rejected'])->count();
         $lastMonthBookingsPending = (clone $lastMonthBookingsQuery)->where('status', 'pending')->count();
+        $lastMonthBookingsTotal = $lastMonthBookingsAccepted + $lastMonthBookingsCancelled + $lastMonthBookingsPending;
 
         // This year statistics - bookings created this year (by status)
         $thisYearBookingsQuery = $filterTestBookings(
             Booking::whereYear('created_at', $now->year)
         );
 
-        $thisYearBookingsTotal = (clone $thisYearBookingsQuery)->count();
         $thisYearBookingsAccepted = (clone $thisYearBookingsQuery)->where('status', 'accepted')->count();
-        $thisYearBookingsCancelled = (clone $thisYearBookingsQuery)->where('status', 'cancelled')->count();
+        $thisYearBookingsCancelled = (clone $thisYearBookingsQuery)->whereIn('status', ['cancelled', 'rejected'])->count();
         $thisYearBookingsPending = (clone $thisYearBookingsQuery)->where('status', 'pending')->count();
+        $thisYearBookingsTotal = $thisYearBookingsAccepted + $thisYearBookingsCancelled + $thisYearBookingsPending;
 
         // Last year statistics - bookings created last year (by status)
         $lastYear = $now->copy()->subYear()->year;
@@ -87,10 +88,10 @@ class AdminController extends Controller
             Booking::whereYear('created_at', $lastYear)
         );
 
-        $lastYearBookingsTotal = (clone $lastYearBookingsQuery)->count();
         $lastYearBookingsAccepted = (clone $lastYearBookingsQuery)->where('status', 'accepted')->count();
-        $lastYearBookingsCancelled = (clone $lastYearBookingsQuery)->where('status', 'cancelled')->count();
+        $lastYearBookingsCancelled = (clone $lastYearBookingsQuery)->whereIn('status', ['cancelled', 'rejected'])->count();
         $lastYearBookingsPending = (clone $lastYearBookingsQuery)->where('status', 'pending')->count();
+        $lastYearBookingsTotal = $lastYearBookingsAccepted + $lastYearBookingsCancelled + $lastYearBookingsPending;
         
         // Customer statistics
         $registeredUsers = User::where('is_guide', false)->orWhereNull('is_guide')->count();

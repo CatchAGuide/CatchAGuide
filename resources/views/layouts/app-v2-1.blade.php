@@ -23,6 +23,7 @@
     
     <!-- Canonical URL to prevent duplicate content -->
     <link rel="canonical" href="{{ request()->url() }}" />
+    <link rel="alternate" type="application/json" href="{{ url('/api/catalog/trips') }}" />
     @include('components.seo.hreflang')
     
     @yield('meta_robots')

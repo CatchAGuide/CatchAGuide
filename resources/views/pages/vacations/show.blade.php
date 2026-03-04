@@ -13,6 +13,42 @@
     @endif
 @endsection
 
+@section('meta_robots')
+    @php
+        $mainImage = null;
+        if (isset($vacation->gallery) && is_array($vacation->gallery) && !empty($vacation->gallery[0])) {
+            $mainImage = asset($vacation->gallery[0]);
+        }
+
+        $jsonLd = [
+            '@context' => 'https://schema.org',
+            '@type' => 'TouristTrip',
+            'name' => $translatedVacation->title ?? $vacation->title,
+            'description' => $translatedVacation->description
+                ?? $vacation->basic_fishing_description
+                ?? $vacation->surroundings_description
+                ?? $vacation->accommodation_description,
+            'url' => url()->current(),
+            'image' => $mainImage,
+            'touristType' => 'Fishing vacation',
+            'areaServed' => array_filter([
+                $translatedVacation->city ?? $vacation->city,
+                $translatedVacation->region ?? $vacation->region,
+                $translatedVacation->country ?? $vacation->country,
+            ]),
+            'offers' => [
+                '@type' => 'Offer',
+                'priceCurrency' => 'EUR',
+                'price' => $vacation->price_from ?? null,
+                'availability' => 'https://schema.org/InStock'
+            ],
+        ];
+    @endphp
+    <script type="application/ld+json">
+        {!! json_encode($jsonLd, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}
+    </script>
+@endsection
+
 @section('css_after')
     <style>
         .carousel .carousel-control-next, .carousel .carousel-control-prev {

@@ -24,6 +24,8 @@
     @yield('meta_robots')
     <meta name="keywords" content="online catch guide" >
     <meta name="robots" content="INDEX,FOLLOW" >
+    <link rel="alternate" type="application/json" href="{{ url('/api/catalog/trips') }}" />
+
     @if(count($attributes))
         @foreach($attributes as $attribute)
             @if($attribute->meta_type == 'title')

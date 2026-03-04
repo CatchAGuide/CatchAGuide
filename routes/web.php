@@ -271,6 +271,7 @@ Route::post('searchrequest/store', [GuidingsController::class, 'bookingRequestSt
 Route::name('additional.')->group(function () {
     Route::view('/contact', 'pages.additional.contact')->name('contact');
     Route::view('/about-us', 'pages.additional.about-us')->name('about_us');
+    Route::view('/for-agents', 'pages.additional.for-agents')->name('for_agents');
 });
 
 Route::get('destination', [DestinationCountryController::class, 'index'])->name('destination')->middleware('ddos:search');
@@ -316,12 +317,12 @@ Route::get('robots.txt', function () {
     if ($normalizedHost === 'catchaguide.com') {
         // Point Google and other crawlers to the main EN sitemap
         $content = "User-agent: *\n";
-        $content .= "Disallow: \n";
+        $content .= "Disallow: /api/catalog/\n";
         $content .= "Sitemap: https://www.catchaguide.com/sitemap.xml\n";
     } else {
         // Default to the DE domain sitemap
         $content = "User-agent: *\n";
-        $content .= "Disallow: \n";
+        $content .= "Disallow: /api/catalog/\n";
         $content .= "Sitemap: https://www.catchaguide.de/sitemap.xml\n";
     }
 

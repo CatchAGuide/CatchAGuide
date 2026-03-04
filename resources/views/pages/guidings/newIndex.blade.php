@@ -11,6 +11,34 @@
     @endif
 @endsection
 
+@section('meta_robots')
+    @php
+        $jsonLd = [
+            '@context' => 'https://schema.org',
+            '@type' => 'TouristTrip',
+            'name' => $guiding->title,
+            'description' => $guiding->desc_tour_unique ?? $guiding->desc_course_of_action ?? $guiding->description,
+            'url' => url()->current(),
+            'image' => $guiding->thumbnail_path ? asset($guiding->thumbnail_path) : null,
+            'touristType' => 'Fishing trip',
+            'areaServed' => array_filter([
+                $guiding->city,
+                $guiding->region,
+                $guiding->country,
+            ]),
+            'offers' => [
+                '@type' => 'Offer',
+                'priceCurrency' => 'EUR',
+                'price' => $guiding->getLowestPrice() ?? null,
+                'availability' => 'https://schema.org/InStock'
+            ],
+        ];
+    @endphp
+    <script type="application/ld+json">
+        {!! json_encode($jsonLd, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}
+    </script>
+@endsection
+
 @section('css_after')
     <style>
         .carousel .carousel-control-next, .carousel .carousel-control-prev {
