@@ -27,6 +27,32 @@
     @include('components.seo.hreflang')
     
     @yield('meta_robots')
+
+    @php
+        $orgJsonLd = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Organization',
+            'name' => config('app.name', 'Catch a Guide'),
+            'url' => url('/'),
+            'logo' => asset('assets/images/logo/CatchAGuide2_Logo_PNG.png'),
+            'sameAs' => [
+                'https://www.facebook.com/CatchAGuide',
+                'https://www.instagram.com/catchaguide_official/',
+            ],
+            'contactPoint' => [
+                [
+                    '@type' => 'ContactPoint',
+                    'contactType' => 'customer support',
+                    'email' => 'info.catchaguide@gmail.com',
+                    'telephone' => '+49 ' . env('CONTACT_NUM'),
+                    'availableLanguage' => ['en', 'de'],
+                ],
+            ],
+        ];
+    @endphp
+    <script type="application/ld+json">
+        {!! json_encode($orgJsonLd, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}
+    </script>
     
     @if(count($attributes))
         @foreach($attributes as $attribute)

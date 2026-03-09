@@ -3,11 +3,83 @@
 @section('title', __('guidings.rating_title'))
 
 @section('content')
-    <div class="container py-4">
+    <div class="container py-4 rating-page-container">
         <div class="rating-wrapper shadow-lg">
             <div class="rating-header">
-                <h3>{{ __('guidings.rating_title') }} {{ $booking->guiding->user->firstname }}</h3>
+                <h3>
+                    {{ __('guidings.rating_title') }}
+                    <span class="guide-name-highlight">{{ $booking->guiding->user->firstname }}</span>
+                </h3>
                 <p class="text-muted">{{ __('guidings.rating_subtitle') }}</p>
+            </div>
+
+            <!-- Booking summary -->
+            <div class="booking-summary">
+                <h5 class="booking-summary-title">
+                    {{ __('guidings.rating_booking_summary_title') }}
+                </h5>
+                <div class="booking-summary-grid">
+                    <div class="booking-summary-item">
+                        <div class="booking-summary-label-row">
+                            <div class="booking-summary-icon-circle">
+                                <i class="fas fa-fish"></i>
+                            </div>
+                            <div class="booking-summary-label">
+                                {{ __('guidings.rating_booking_title') }}
+                            </div>
+                        </div>
+                        <div class="booking-summary-value">
+                            {{ $booking->guiding->title ?? '–' }}
+                        </div>
+                    </div>
+                    <div class="booking-summary-item">
+                        <div class="booking-summary-label-row">
+                            <div class="booking-summary-icon-circle">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="booking-summary-label">
+                                {{ __('guidings.rating_booking_location') }}
+                            </div>
+                        </div>
+                        <div class="booking-summary-value">
+                            {{ $booking->guiding->location ?? '–' }}
+                        </div>
+                    </div>
+                    <div class="booking-summary-item">
+                        <div class="booking-summary-label-row">
+                            <div class="booking-summary-icon-circle">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div class="booking-summary-label">
+                                {{ __('guidings.rating_booking_date') }}
+                            </div>
+                        </div>
+                        <div class="booking-summary-value">
+                            @php
+                                $tripDate = null;
+                                if ($booking->calendar_schedule) {
+                                    $tripDate = \Carbon\Carbon::parse($booking->calendar_schedule->date)->format('D, M j, Y');
+                                } elseif ($booking->blocked_event) {
+                                    $tripDate = \Carbon\Carbon::parse($booking->blocked_event->from)->format('D, M j, Y');
+                                }
+                            @endphp
+                            {{ $tripDate ?? '–' }}
+                        </div>
+                    </div>
+                    <div class="booking-summary-item">
+                        <div class="booking-summary-label-row">
+                            <div class="booking-summary-icon-circle">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="booking-summary-label">
+                                {{ __('guidings.rating_booking_guests') }}
+                            </div>
+                        </div>
+                        <div class="booking-summary-value">
+                            {{ $booking->count_of_users ?? 1 }}
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <form action="{{ route('ratings.store', ['token' => $booking->token]) }}" method="POST" class="rating-form">
@@ -115,19 +187,30 @@
 
 @section('css_after')
     <style>
+        .rating-page-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: calc(100vh - 120px);
+        }
+
         .rating-wrapper {
-            max-width: 1000px;
+            width: 100%;
+            max-width: 640px;
             margin: 0 auto;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-            padding: 2rem;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+            padding: 2.25rem 1.75rem 2.5rem;
         }
 
         .rating-header {
             margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #e5e7eb;
+            text-align: center;
+        }
+
+        .guide-name-highlight {
+            color: #f97362;
         }
 
         .rating-header h3 {
@@ -170,15 +253,86 @@
             margin-bottom: 2rem;
         }
 
-        .rating-boxes {
+        .booking-summary {
+            padding: 1.25rem 1.1rem 1.35rem;
+            background: #f9fafb;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 2rem;
+        }
+
+        .booking-summary-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 0.75rem;
+        }
+
+        .booking-summary-grid {
             display: grid;
-            gap: 1.5rem;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem 1.5rem;
+        }
+
+        .booking-summary-item {
+            min-width: 0;
+            padding: 0.4rem 0.35rem;
+            border-radius: 10px;
+            transition: background-color 0.15s ease-in-out, transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .booking-summary-item:hover {
+            background-color: #f3f4ff;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .booking-summary-label-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .booking-summary-icon-circle {
+            width: 28px;
+            height: 28px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(249, 115, 98, 0.09);
+            color: #f97362;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .booking-summary-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #9ca3af;
+            margin-bottom: 0.15rem;
+        }
+
+        .booking-summary-value {
+            font-size: 0.9rem;
+            color: #111827;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .rating-boxes {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
         }
 
         .rating-box {
-            background: #f9fafb;
-            padding: 1.25rem;
-            border-radius: 8px;
+            background: #ffffff;
+            padding: 1.1rem 1rem 1.25rem;
+            border-radius: 16px;
             border: 1px solid #e5e7eb;
         }
 
@@ -195,8 +349,9 @@
         }
 
         .rating-score {
-            color: #6b7280;
-            font-size: 0.875rem;
+            color: #f97362;
+            font-weight: 600;
+            font-size: 0.95rem;
         }
 
         .form-actions {
@@ -204,18 +359,23 @@
             border-top: 1px solid #e5e7eb;
         }
 
-        .btn-primary {
-            background: #2563eb;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
+        .btn-orange {
+            width: 100%;
+            background: linear-gradient(90deg, #f97362 0%, #fb923c 100%);
+            color: #ffffff;
+            padding: 0.9rem 1.5rem;
+            border-radius: 999px;
             border: none;
-            font-weight: 500;
-            transition: background-color 0.15s ease-in-out;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out, opacity 0.15s ease-in-out;
         }
 
-        .btn-primary:hover {
-            background: #1d4ed8;
+        .btn-orange:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(249, 115, 98, 0.45);
         }
 
         /* Rating stars customization */
@@ -228,23 +388,58 @@
         }
 
         /* Mobile Responsive */
-        @media (min-width: 768px) {
-            .rating-boxes {
-                grid-template-columns: repeat(3, 1fr);
+        @media (max-width: 767px) {
+            .rating-page-container {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
+
+            .rating-wrapper {
+                padding: 1.75rem 1.25rem 2rem;
+                border-radius: 20px;
+            }
+
+            .booking-summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                column-gap: 0.75rem;
+                row-gap: 0.6rem;
+            }
+
+            .booking-summary-item {
+                padding: 0.3rem 0.25rem;
+            }
+
+            .booking-summary-label {
+                font-size: 0.7rem;
+            }
+
+            .booking-summary-value {
+                font-size: 0.85rem;
             }
         }
 
-        @media (max-width: 767px) {
-            .rating-wrapper {
-                padding: 1.5rem;
+        @media (min-width: 992px) {
+            .rating-page-container {
+                min-height: calc(100vh - 160px);
             }
 
+            .rating-wrapper {
+                max-width: 980px;
+            }
+
+            .ratings-container {
+                margin-bottom: 2.25rem;
+            }
+        }
+
+        @media (min-width: 768px) {
             .rating-boxes {
-                grid-template-columns: 1fr;
+                flex-direction: row;
+                align-items: stretch;
             }
 
             .rating-box {
-                padding: 1rem;
+                flex: 1 1 0;
             }
         }
 

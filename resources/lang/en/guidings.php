@@ -75,6 +75,12 @@ return [
     'rating_thank_you' => 'Thank you for your rating!',
     'rating_close' => 'Close',
 
+    'rating_booking_summary_title' => 'Booking summary',
+    'rating_booking_title' => 'Trip title',
+    'rating_booking_location' => 'Location',
+    'rating_booking_date' => 'Trip date',
+    'rating_booking_guests' => 'Guests',
+
     'Real_experiences' => 'Real reviews from real guests',
     'Real_experiences_description' => 'Overall ratings and reviews can only be submitted by guests who have booked this fishing tour through Catch A Guide and participated in the tour',
     'How_are_overall_ratings_calculated' => 'How are overall ratings calculated?',
