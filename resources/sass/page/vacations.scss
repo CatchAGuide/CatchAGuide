@@ -316,10 +316,11 @@
         min-height: 200px;
 
         @media (min-width: 768px) {
-            width: 38%;
-            height: 220px;
-            min-height: 220px;
-            max-height: 220px;
+            width: 36%;
+            flex-shrink: 0;
+            min-height: 260px;
+            height: auto;
+            align-self: stretch;
             border-radius: 12px 0 0 12px;
             overflow: hidden;
         }
@@ -335,10 +336,9 @@
 
         @media (min-width: 768px) {
             flex-direction: row;
-            padding: 14px 16px;
-            width: 62%;
-            min-height: 220px;
-            max-height: 220px;
+            padding: 0;
+            width: 64%;
+            min-height: 260px;
         }
     }
 
@@ -358,7 +358,7 @@
             flex: 1;
             min-height: 0;
             overflow: hidden;
-            padding-right: 12px;
+            padding: 14px 16px;
         }
     }
 
@@ -554,15 +554,15 @@
         @media (min-width: 768px) {
             flex-direction: column;
             align-items: flex-end;
-            justify-content: center;
-            padding-top: 0;
-            padding-left: 12px;
+            justify-content: flex-start;
+            padding: 14px 14px 14px 12px;
             border-top: none;
-            border-left: 1px solid #e2e8f0;
+            border-left: none;
             width: auto;
-            min-width: 180px;
+            min-width: 190px;
+            max-width: 220px;
             margin-top: 0;
-            gap: 10px;
+            gap: 7px;
         }
     }
 
@@ -615,9 +615,11 @@
         transition: background 0.2s;
 
         @media (min-width: 768px) {
-            padding: 10px 0;
-            font-size: 0.9rem;
+            padding: 11px 0;
+            font-size: 0.92rem;
             width: 100%;
+            border-radius: 8px;
+            letter-spacing: 0.01em;
         }
 
         &:hover {
@@ -640,9 +642,7 @@
         transition: background 0.2s, color 0.2s;
 
         @media (min-width: 768px) {
-            width: 100%;
-            height: 36px;
-            border-radius: 8px;
+            display: none;
         }
 
         &:hover {
@@ -667,7 +667,6 @@
         @media (min-width: 768px) {
             min-height: 0;
             height: 100%;
-            max-height: 220px;
             border-radius: 12px 0 0 12px;
         }
 
@@ -965,6 +964,232 @@
         align-items: center;
         justify-content: flex-start;
         margin-left: 0;
+    }
+
+    // Image badge - desktop only
+    .vacation-list-card__badge {
+        display: none;
+
+        @media (min-width: 768px) {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 5px 11px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            z-index: 5;
+            white-space: nowrap;
+
+            i {
+                font-size: 0.65rem;
+            }
+        }
+
+        &--top {
+            background: rgba(255, 255, 255, 0.95);
+            color: #d97706;
+            border: 1px solid rgba(217, 119, 6, 0.25);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+        }
+
+        &--limited {
+            background: #E8604C;
+            color: #fff;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+        }
+    }
+
+    // Price "from" label - desktop only
+    .vacation-list-card__price-from-label {
+        font-size: 0.7rem;
+        color: #94a3b8;
+        font-weight: 400;
+        line-height: 1.1;
+        text-align: right;
+    }
+
+    // Trust badges container - desktop only
+    .vacation-list-card__trust {
+        display: none;
+
+        @media (min-width: 768px) {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            width: 100%;
+        }
+    }
+
+    .vacation-list-card__trust-item {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 5px;
+        font-size: 0.72rem;
+        color: #16a34a;
+        font-weight: 500;
+
+        i {
+            font-size: 0.72rem;
+            flex-shrink: 0;
+        }
+    }
+
+    // View Details link - desktop only
+    .vacation-list-card__btn-details {
+        display: none;
+
+        @media (min-width: 768px) {
+            display: inline-flex;
+            align-items: center;
+            justify-content: flex-end;
+            width: 100%;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: #475569;
+            text-decoration: none;
+            padding: 3px 0;
+            transition: color 0.2s;
+            text-align: right;
+
+            &:hover {
+                color: #E8604C;
+                text-decoration: none;
+            }
+        }
+    }
+
+    // No booking fees / best price guarantee - desktop only
+    .vacation-list-card__no-fees {
+        display: none;
+
+        @media (min-width: 768px) {
+            display: block;
+            font-size: 0.62rem;
+            color: #94a3b8;
+            text-align: right;
+            width: 100%;
+            line-height: 1.35;
+            margin-top: 2px;
+        }
+    }
+
+    // ── Desktop-only info trait rows (Target Fish, Method) ──
+    .vacation-card-trait {
+        display: none;
+
+        @media (min-width: 768px) {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.8rem;
+            color: #475569;
+            margin-bottom: 3px;
+
+            img {
+                flex-shrink: 0;
+                opacity: 0.65;
+            }
+        }
+    }
+
+    .vacation-card-trait__text {
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+        flex-wrap: wrap;
+        line-height: 1.3;
+    }
+
+    .vacation-card-trait__label {
+        font-weight: 600;
+        color: #334155;
+        white-space: nowrap;
+    }
+
+    // ── Desktop-only Duration + Capacity stats row ──
+    .vacation-card-stats {
+        display: none;
+
+        @media (min-width: 768px) {
+            display: flex;
+            gap: 24px;
+            margin: 8px 0 6px;
+            padding: 8px 0;
+            border-top: 1px solid #f1f5f9;
+            border-bottom: 1px solid #f1f5f9;
+        }
+    }
+
+    .vacation-card-stat {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .vacation-card-stat__label {
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+    }
+
+    .vacation-card-stat__value {
+        font-size: 0.84rem;
+        font-weight: 600;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+
+        i {
+            color: #64748b;
+            font-size: 0.78rem;
+        }
+    }
+
+    // ── Desktop-only Included items row ──
+    .vacation-card-included {
+        display: none;
+
+        @media (min-width: 768px) {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            font-size: 0.76rem;
+            color: #475569;
+            margin-top: 4px;
+        }
+    }
+
+    .vacation-card-included__label {
+        font-weight: 600;
+        color: #334155;
+        flex-shrink: 0;
+    }
+
+    .vacation-card-included__item {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+
+        i {
+            font-size: 0.65rem;
+            color: #10b981;
+        }
+    }
+
+    .vacation-card-included__more {
+        font-weight: 600;
+        color: #E8604C;
     }
 }
 

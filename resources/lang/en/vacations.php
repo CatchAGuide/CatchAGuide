@@ -113,4 +113,24 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'top_fishing' => 'Top fishing',
     'book_now' => 'Book Now',
     'per_day_label' => 'PER DAY',
+
+    // Listing card desktop info rows
+    'method' => 'Method',
+    'duration_label' => 'DURATION',
+    'capacity_label' => 'CAPACITY',
+    'included_label' => 'Included',
+    'more' => 'more',
+    'hours' => 'hours',
+    'hour' => 'hour',
+    'night' => 'night',
+    'person' => 'person',
+
+    // Listing card desktop design elements
+    'from_label' => 'from',
+    'free_cancellation' => 'Free Cancellation',
+    'verified_operator' => 'Verified Operator',
+    'no_booking_fees' => 'No booking fees · Best price guarantee',
+    'view_details' => 'View Details',
+    'top_rated_badge' => 'TOP RATED',
+    'limited_avail_badge' => 'LIMITED AVAILABILITY',
 ];

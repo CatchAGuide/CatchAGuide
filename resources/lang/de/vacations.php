@@ -112,4 +112,24 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'top_fishing' => 'Top Angeln',
     'book_now' => 'Jetzt buchen',
     'per_day_label' => 'PRO TAG',
-];  
+
+    // Listing card desktop info rows
+    'method' => 'Methode',
+    'duration_label' => 'DAUER',
+    'capacity_label' => 'KAPAZITÄT',
+    'included_label' => 'Inklusive',
+    'more' => 'mehr',
+    'hours' => 'Stunden',
+    'hour' => 'Stunde',
+    'night' => 'Nacht',
+    'person' => 'Person',
+
+    // Listing card desktop design elements
+    'from_label' => 'ab',
+    'free_cancellation' => 'Kostenlose Stornierung',
+    'verified_operator' => 'Verifizierter Anbieter',
+    'no_booking_fees' => 'Keine Buchungsgebühren · Bestpreisgarantie',
+    'view_details' => 'Details ansehen',
+    'top_rated_badge' => 'TOP BEWERTET',
+    'limited_avail_badge' => 'BEGRENZT VERFÜGBAR',
+];

@@ -377,12 +377,56 @@
                             $target_fish_count = count($target_fish);
                             $has_boat = count($vacation->rentalBoats ?? []) > 0;
                             $has_guide = count($vacation->guidings ?? []) > 0;
+
+                            // Desktop-only: facilities (for Included row)
+                            $facilities_display = $vacation->facilities ?? collect();
+
+                            // Desktop-only: method names from linked guidings
+                            $desktop_methods = $vacation->guidings
+                                ->flatMap(fn($g) => $g->guidingMethods ?? collect())
+                                ->pluck('name')->unique()->filter()->take(3)->values()->toArray();
+
+                            // Desktop-only: duration + capacity
+                            // Prefer accommodation data (min stay / max occupancy), fallback to guiding
+                            $firstAccommodation = $vacation->accommodations->first();
+                            $firstGuiding       = $vacation->guidings->first();
+
+                            $desktop_duration_value = null;
+                            $desktop_duration_unit  = null;
+                            if ($firstAccommodation && $firstAccommodation->minimum_stay_nights) {
+                                $desktop_duration_value = $firstAccommodation->minimum_stay_nights;
+                                $desktop_duration_unit  = (int)$firstAccommodation->minimum_stay_nights == 1
+                                    ? __('vacations.night') : __('vacations.nights');
+                            } elseif ($firstGuiding && $firstGuiding->duration) {
+                                $desktop_duration_value = $firstGuiding->duration;
+                                $desktop_duration_unit  = (int)$firstGuiding->duration == 1
+                                    ? __('vacations.hour') : __('vacations.hours');
+                            }
+
+                            $desktop_capacity = null;
+                            if ($firstAccommodation && $firstAccommodation->max_occupancy) {
+                                $desktop_capacity = $firstAccommodation->max_occupancy;
+                            } elseif ($firstGuiding && $firstGuiding->max_guests) {
+                                $desktop_capacity = $firstGuiding->max_guests;
+                            }
                         @endphp
                         <div class="vacation-list-card guiding-list-item">
                             <div class="vacation-list-card__inner border shadow-sm bg-white rounded overflow-hidden">
                                 {{-- Image on top (mobile) / left (desktop) --}}
                                 <div class="vacation-list-card__media">
                                     <div class="vacation-card__gallery" data-vacation-gallery="{{ $vacation->id }}" data-gallery-images='@json($gallery_images_full)'>
+                                        {{-- Image badge - desktop only --}}
+                                        @if($has_guide)
+                                            <span class="vacation-list-card__badge vacation-list-card__badge--top">
+                                                <i class="fas fa-star" aria-hidden="true"></i>
+                                                @lang('vacations.top_rated_badge')
+                                            </span>
+                                        @elseif($has_boat)
+                                            <span class="vacation-list-card__badge vacation-list-card__badge--limited">
+                                                <i class="fas fa-bolt" aria-hidden="true"></i>
+                                                @lang('vacations.limited_avail_badge')
+                                            </span>
+                                        @endif
                                         @if($gallery_count > 0)
                                             <img
                                                 src="{{ asset($gallery_images[0]) }}"
@@ -405,14 +449,63 @@
                                     <a href="{{ route('vacations.show', [$vacation->slug]) }}" class="vacation-list-card__link" onclick="event.preventDefault(); document.getElementById('store-destination-{{ $vacation->id }}').submit();">
                                         <h3 class="vacation-list-card__title">{{ \Str::limit(translate($vacation->title), 65) }}</h3>
                                         <p class="vacation-list-card__location"><i class="fas fa-map-marker-alt me-2"></i>{{ $vacation->location }}</p>
-                                        {{-- Target fish tags (oval, light gray) - ALL visible on one scrollable line --}}
-                                        <div class="vacation-list-card__tags vacation-target-fish-container">
+
+                                        {{-- ── DESKTOP-ONLY INFO ROWS ── --}}
+                                        {{-- Target Fish row --}}
+                                        @if(!empty($target_fish))
+                                        <div class="vacation-card-trait d-none d-md-flex">
+                                            <img src="{{ asset('assets/images/icons/fish.png') }}" height="16" width="16" alt="" />
+                                            <div class="vacation-card-trait__text">
+                                                <span class="vacation-card-trait__label">@lang('vacations.target_fish'):</span>
+                                                {{ implode(', ', array_map(fn($f) => is_array($f) ? ($f['name'] ?? '') : (string)$f, $target_fish)) }}
+                                            </div>
+                                        </div>
+                                        @endif
+
+                                        {{-- Method row --}}
+                                        @if(!empty($desktop_methods))
+                                        <div class="vacation-card-trait d-none d-md-flex">
+                                            <img src="{{ asset('assets/images/icons/fishing.png') }}" height="16" width="16" alt="" />
+                                            <div class="vacation-card-trait__text">
+                                                <span class="vacation-card-trait__label">@lang('vacations.method'):</span>
+                                                {{ implode(', ', $desktop_methods) }}
+                                            </div>
+                                        </div>
+                                        @endif
+
+                                        {{-- Duration + Capacity stat row --}}
+                                        @if($desktop_duration_value || $desktop_capacity)
+                                        <div class="vacation-card-stats d-none d-md-flex">
+                                            @if($desktop_duration_value)
+                                            <div class="vacation-card-stat">
+                                                <span class="vacation-card-stat__label">@lang('vacations.duration_label')</span>
+                                                <span class="vacation-card-stat__value">
+                                                    <i class="far fa-clock" aria-hidden="true"></i>
+                                                    {{ $desktop_duration_value }} {{ $desktop_duration_unit }}
+                                                </span>
+                                            </div>
+                                            @endif
+                                            @if($desktop_capacity)
+                                            <div class="vacation-card-stat">
+                                                <span class="vacation-card-stat__label">@lang('vacations.capacity_label')</span>
+                                                <span class="vacation-card-stat__value">
+                                                    <i class="fas fa-user-friends" aria-hidden="true"></i>
+                                                    Max {{ $desktop_capacity }} {{ (int)$desktop_capacity == 1 ? __('vacations.person') : __('vacations.persons') }}
+                                                </span>
+                                            </div>
+                                            @endif
+                                        </div>
+                                        @endif
+
+                                        {{-- ── MOBILE-ONLY ELEMENTS (hidden on desktop) ── --}}
+                                        {{-- Target fish tags (pill style) --}}
+                                        <div class="vacation-list-card__tags vacation-target-fish-container d-md-none">
                                             @foreach($target_fish as $index => $fish)
                                                 <span class="vacation-list-card__tag">{{ is_array($fish) ? ($fish['name'] ?? '') : (string) $fish }}</span>
                                             @endforeach
                                         </div>
-                                        {{-- Boat / Guide feature boxes --}}
-                                        <div class="vacation-list-card__features">
+                                        {{-- Boat / Guide feature badges --}}
+                                        <div class="vacation-list-card__features d-md-none">
                                             <span class="vacation-list-card__feature vacation-list-card__feature--boat">
                                                 @if($has_boat)
                                                     <i class="fas fa-ship" aria-hidden="true"></i>
@@ -432,30 +525,63 @@
                                                 @endif
                                             </span>
                                         </div>
-                                        {{-- Camp amenities (included features) --}}
-                                        <div class="vacations-amenities-container">
-                                        <ul class="vacation-list-card__amenities">
-                                            @php $facilities_display = $vacation->facilities ?? collect(); $facilities_count = is_countable($facilities_display) ? count($facilities_display) : 0; @endphp
-                                            @foreach($facilities_display->take(3) as $index => $facility)
-                                                <li class="vacation-list-card__amenity">
-                                                    <i class="fa fa-check text-success" aria-hidden="true"></i>
-                                                    <span>{{ is_object($facility) ? ($facility->name ?? '') : ($facility['name'] ?? '') }}</span>
-                                                </li>
-                                            @endforeach
-                                        </ul>
+                                        {{-- Camp amenities list (mobile) --}}
+                                        <div class="vacations-amenities-container d-md-none">
+                                            <ul class="vacation-list-card__amenities">
+                                                @foreach($facilities_display->take(3) as $index => $facility)
+                                                    <li class="vacation-list-card__amenity">
+                                                        <i class="fa fa-check text-success" aria-hidden="true"></i>
+                                                        <span>{{ is_object($facility) ? ($facility->name ?? '') : ($facility['name'] ?? '') }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
                                         </div>
+
+                                        {{-- Included items (desktop inline row) --}}
+                                        @if($facilities_display->count() > 0)
+                                        <div class="vacation-card-included d-none d-md-flex">
+                                            <span class="vacation-card-included__label">@lang('vacations.included_label'):</span>
+                                            @foreach($facilities_display->take(3) as $facility)
+                                                <span class="vacation-card-included__item">
+                                                    <i class="fa fa-check" aria-hidden="true"></i>
+                                                    {{ is_object($facility) ? ($facility->name ?? '') : ($facility['name'] ?? '') }}
+                                                </span>
+                                            @endforeach
+                                            @if($facilities_display->count() > 3)
+                                                <span class="vacation-card-included__more">+{{ $facilities_display->count() - 3 }} @lang('vacations.more')</span>
+                                            @endif
+                                        </div>
+                                        @endif
                                     </a>
                                     {{-- Footer: price + Book Now + info (price = lowest of Accommodation OR Package only; hide if null) --}}
                                     <div class="vacation-list-card__footer">
                                         @php $displayPrice = $vacation->getLowestAccommodationOrOfferPrice(); @endphp
                                         @if($displayPrice !== null)
                                         <div class="vacation-list-card__price-block">
-                                            <span class="vacation-list-card__price-label">@lang('vacations.per_day_label')</span>
+                                            {{-- "from" label - desktop only --}}
+                                            <span class="vacation-list-card__price-from-label d-none d-md-inline">@lang('vacations.from_label')</span>
                                             <span class="vacation-list-card__price">€{{ two($displayPrice) }}</span>
+                                            <span class="vacation-list-card__price-label">@lang('vacations.per_day_label')</span>
                                         </div>
                                         @endif
-                                        <a href="{{ route('vacations.show', [$vacation->slug]) }}" class="vacation-list-card__btn-book" onclick="event.preventDefault(); document.getElementById('store-destination-{{ $vacation->id }}').submit();">@lang('vacations.book_now')</a>
-                                        <a href="{{ route('vacations.show', [$vacation->slug]) }}" class="vacation-list-card__btn-info" onclick="event.preventDefault(); document.getElementById('store-destination-{{ $vacation->id }}').submit();" aria-label="@lang('vacations.details')"><i class="fas fa-info"></i></a>
+                                        {{-- Trust badges - desktop only --}}
+                                        <div class="vacation-list-card__trust d-none d-md-flex">
+                                            <span class="vacation-list-card__trust-item">
+                                                <i class="fas fa-check-circle" aria-hidden="true"></i>
+                                                @lang('vacations.free_cancellation')
+                                            </span>
+                                            <span class="vacation-list-card__trust-item">
+                                                <i class="fas fa-check-circle" aria-hidden="true"></i>
+                                                @lang('vacations.verified_operator')
+                                            </span>
+                                        </div>
+                                        <a href="{{ route('vacations.show', [$vacation->slug]) }}" class="vacation-list-card__btn-book" onclick="event.preventDefault(); document.getElementById('store-destination-{{ $vacation->id }}').submit();">@lang('vacations.book_now') &rarr;</a>
+                                        {{-- View Details link - desktop only --}}
+                                        <a href="{{ route('vacations.show', [$vacation->slug]) }}" class="vacation-list-card__btn-details d-none d-md-inline-flex" onclick="event.preventDefault(); document.getElementById('store-destination-{{ $vacation->id }}').submit();">@lang('vacations.view_details') &rarr;</a>
+                                        {{-- Mobile-only info button --}}
+                                        <a href="{{ route('vacations.show', [$vacation->slug]) }}" class="vacation-list-card__btn-info d-md-none" onclick="event.preventDefault(); document.getElementById('store-destination-{{ $vacation->id }}').submit();" aria-label="@lang('vacations.details')"><i class="fas fa-info"></i></a>
+                                        {{-- No booking fees - desktop only --}}
+                                        <div class="vacation-list-card__no-fees d-none d-md-block">@lang('vacations.no_booking_fees')</div>
                                     </div>
                                     <form id="store-destination-{{ $vacation->id }}" action="{{ route('vacations.show', [$vacation->slug]) }}" method="GET" style="display: none;">
                                         @php session(['vacation_destination_id' => $row_data->id]); @endphp
