@@ -442,24 +442,90 @@
             }
         }
 
-        /* Litepicker responsive (touch-friendly cells on mobile) */
+        /*
+         * Mobile-only overrides for litepicker.
+         * On desktop the global checkout.scss styles work fine — we only
+         * need to fix the alignment / oblong cells on narrow viewports
+         * where the 1px borders cause cells to overflow the 7-column grid.
+         */
         @media (max-width: 767.98px) {
-            .litepicker {
-                max-width: 100%;
+            .thankyou-page .calendar-container .litepicker {
+                max-width: 100% !important;
                 font-size: 0.875rem;
             }
-            .litepicker .container__days .day-item {
-                min-height: 40px;
-                min-width: 40px;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
+            .thankyou-page .calendar-container .litepicker .container__main {
+                width: 100% !important;
+                box-sizing: border-box !important;
             }
-            .litepicker .container__months {
-                width: 100%;
+            .thankyou-page .calendar-container .litepicker .container__months {
+                width: 100% !important;
+                box-sizing: border-box !important;
             }
-            .litepicker .container__months .month-item {
-                width: 100%;
+            .thankyou-page .calendar-container .litepicker .container__months .month-item {
+                width: 100% !important;
+                box-sizing: border-box !important;
+                padding: 5px 0 !important;
+            }
+            .thankyou-page .calendar-container .litepicker .container__months .month-item-weekdays-row {
+                display: flex !important;
+                width: 100% !important;
+            }
+            .thankyou-page .calendar-container .litepicker .container__months .month-item-weekdays-row > div {
+                flex: 1 !important;
+                width: calc(100% / 7) !important;
+                text-align: center !important;
+                padding: 5px 0 !important;
+                border: none !important;
+                aspect-ratio: auto !important;
+                height: auto !important;
+                border-radius: 0 !important;
+                background: transparent !important;
+            }
+            .thankyou-page .calendar-container .litepicker .container__days {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            .thankyou-page .calendar-container .litepicker .container__days > div,
+            .thankyou-page .calendar-container .litepicker .container__days > a,
+            .thankyou-page .calendar-container .litepicker .container__days .day-item {
+                width: calc(100% / 7) !important;
+                max-width: none !important;
+                height: auto !important;
+                min-height: 0 !important;
+                min-width: 0 !important;
+                aspect-ratio: 1 / 1;
+                padding: 0 !important;
+                box-sizing: border-box !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                border-radius: 50% !important;
+                font-size: 0.85rem;
+                border: none !important;
+                margin: 0 !important;
+            }
+            .thankyou-page .calendar-container .litepicker .container__days .day-item:not(.is-locked):not(.is-start-date):not(.is-end-date):not(.is-selected) {
+                background-color: #d4edda !important;
+                border: none !important;
+                color: #155724 !important;
+            }
+            .thankyou-page .calendar-container .litepicker .container__days .day-item.is-locked {
+                background-color: #ffeaea !important;
+                border: none !important;
+                color: #b85450 !important;
+            }
+            .thankyou-page .calendar-container .litepicker .container__days .day-item.is-selected {
+                background-color: #059669 !important;
+                color: white !important;
+                border: none !important;
+                font-weight: 600;
+            }
+            .thankyou-page .calendar-container .litepicker .container__days .day-item.is-today {
+                color: var(--thm-primary) !important;
+                background-color: transparent !important;
+                font-weight: 600;
             }
         }
     </style>
@@ -971,60 +1037,8 @@ document.addEventListener("DOMContentLoaded", function() {
         // Call the function after a delay to ensure the calendar is rendered
         setTimeout(ensureNavigationArrows, 500);
         
-        // Add additional CSS to improve mobile display
-        const styleElement = document.createElement('style');
-        styleElement.textContent = `
-            @media (max-width: 767px) {
-                .litepicker {
-                    max-width: 100%;
-                    font-size: 0.9rem;
-                }
-                
-                .litepicker .container__days .day-item {
-                    height: 36px;
-                    width: 36px;
-                    line-height: 36px;
-                }
-                
-                .date-tag {
-                    font-size: 12px;
-                    padding: 4px 10px;
-                }
-                
-                .selected-dates-tags {
-                    flex-direction: column;
-                    align-items: center;
-                }
-                
-                .litepicker .container__months {
-                    width: 100%;
-                }
-                
-                .litepicker .container__months .month-item {
-                    width: 100%;
-                }
-                
-                .litepicker .container__months .month-item-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    padding: 10px 5px;
-                }
-                
-                .litepicker .container__months .month-item-header div {
-                    flex: 1;
-                    text-align: center;
-                }
-                
-                .litepicker .button-previous-month,
-                .litepicker .button-next-month {
-                    visibility: visible !important;
-                    opacity: 1 !important;
-                    display: block !important;
-                }
-            }
-        `;
-        document.head.appendChild(styleElement);
+        // Dynamically injected styles removed — all mobile calendar
+        // overrides are now in the <style> block above.
         
         // Add a mutation observer to detect DOM changes in the calendar
         const observer = new MutationObserver(() => {
