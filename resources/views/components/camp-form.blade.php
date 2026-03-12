@@ -73,7 +73,7 @@
                 <div class="card mb-4">
                     <div class="card-body">
                         <div class="file-upload-wrapper">
-                            <input id="title_image" name="title_image[]" type="file" multiple />
+                            <input id="title_image" name="title_image[]" type="file" multiple accept="image/*"/>
                             <input id="cropped_image" name="cropped_image[]" type="file" multiple hidden/>
                             <label for="title_image" class="file-upload-btn">{{ __('camps.choose_files') }}</label>
                         </div>

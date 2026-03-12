@@ -1,0 +1,531 @@
+// Trip Form Styles - Modern, Isolated Wizard
+// ==========================================
+//
+// Everything is scoped to the trip form container so it cannot
+// interfere with other backoffice styles.
+
+#trip-form,
+.trip-form,
+[data-trip-form] {
+    max-width: 100%;
+    margin: 0 auto;
+    background: #fff;
+
+    // Top step header / progress bar
+    .step-wrapper {
+        position: relative;
+        padding: 24px 28px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        margin-bottom: 32px;
+        overflow: hidden;
+
+        // Soft gradient wash in the background for a more
+        // premium look than a flat color.
+        &::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                90deg,
+                rgba(14, 165, 233, 0.14),
+                rgba(56, 189, 248, 0.16),
+                rgba(129, 140, 248, 0.16)
+            );
+            opacity: 1;
+            pointer-events: none;
+            z-index: 0;
+        }
+    }
+
+    .step-buttons {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+        position: relative;
+        z-index: 2; // above gradient + line
+    }
+
+    .step-button {
+        width: 48px;
+        height: 48px;
+        border-radius: 999px;
+        background: #ffffff;
+        border: 2px solid #d1d5db;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+    }
+
+    .step-button.active {
+        background: #0ea5e9;
+        color: #ffffff;
+        border-color: #0ea5e9;
+        box-shadow: 0 2px 6px rgba(14, 165, 233, 0.45);
+        transform: translateY(-1px);
+    }
+
+    .step-button.completed {
+        background: #22c55e;
+        border-color: #22c55e;
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(34, 197, 94, 0.45);
+    }
+
+    .step-button:hover:not(.active):not(.completed) {
+        background: #f9fafb;
+        border-color: #9ca3af;
+        color: #374151;
+        box-shadow: 0 2px 4px rgba(15, 23, 42, 0.16);
+        transform: translateY(-1px);
+    }
+
+    .step-line {
+        position: absolute;
+        top: 50%;
+        left: 6%;
+        right: 6%;
+        height: 3px;
+        border-radius: 999px;
+        background: linear-gradient(
+            90deg,
+            rgba(148, 163, 184, 0.6),
+            rgba(148, 163, 184, 0.25)
+        );
+        z-index: 1;
+    }
+
+    // Generic step body
+    .step {
+        display: none;
+        padding: 30px;
+        min-height: 480px;
+    }
+
+    .step.active {
+        display: block;
+    }
+
+    .step h5 {
+        color: #0f172a;
+        margin-bottom: 24px;
+        font-weight: 600;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 24px;
+    }
+
+    .form-label {
+        color: #111827;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+    }
+
+    .form-control {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        background: #ffffff;
+    }
+
+    .form-control:focus {
+        border-color: #0ea5e9;
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.18);
+        outline: none;
+    }
+
+    // Shared button layout (next/previous/save draft)
+    .button-group {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .left-buttons,
+    .right-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .row-button {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .btn {
+        padding: 11px 22px;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .btn-primary {
+        background: #0ea5e9;
+        color: #ffffff;
+        border: 1px solid #0ea5e9;
+
+        &:hover {
+            background: #0284c7;
+            border-color: #0284c7;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(2, 132, 199, 0.35);
+        }
+    }
+
+    .btn-secondary {
+        background: #6b7280;
+        color: #ffffff;
+
+        &:hover {
+            background: #4b5563;
+        }
+    }
+
+    .btn-info {
+        background: #0ea5e9;
+        color: #ffffff;
+
+        &:hover {
+            background: #0284c7;
+        }
+    }
+
+    // Radio/checkbox "button" groups (fishing style, skill level, etc.)
+    .btn-checkbox-container {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
+        position: relative;
+    }
+
+    .btn-checkbox-container input[type="checkbox"],
+    .btn-checkbox-container input[type="radio"] {
+        display: none;
+    }
+
+    .btn-checkbox {
+        padding: 12px 20px;
+        border: 2px solid #e5e7eb;
+        border-radius: 999px;
+        background: #ffffff;
+        color: #6b7280;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        margin-bottom: 4px;
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        min-width: 120px;
+        white-space: nowrap;
+    }
+
+    .btn-checkbox:hover {
+        border-color: #0ea5e9;
+        color: #0ea5e9;
+        box-shadow: 0 2px 6px rgba(148, 163, 184, 0.35);
+    }
+
+    .btn-checkbox.active,
+    .btn-checkbox-container input[type="checkbox"]:checked + .btn-checkbox,
+    .btn-checkbox-container input[type="radio"]:checked + .btn-checkbox {
+        background: #0ea5e9;
+        border-color: #0ea5e9;
+        color: #ffffff;
+        box-shadow: 0 2px 8px rgba(14, 165, 233, 0.4);
+    }
+
+    // Image manager — mirrored from camp form so the
+    // gallery experience looks identical between camps & trips.
+    .file-upload-wrapper {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .file-upload-wrapper input[type="file"] {
+        position: absolute;
+        left: -9999px;
+        opacity: 0;
+    }
+
+    .file-upload-btn {
+        display: inline-block;
+        padding: 15px 30px;
+        background: #667eea;
+        color: #ffffff;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        width: 100%;
+        border: 2px dashed #667eea;
+        font-weight: 500;
+    }
+
+    .file-upload-btn:hover {
+        background: #5a6fd8;
+        border-color: #5a6fd8;
+    }
+
+    .image-area {
+        margin-top: 15px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 15px;
+    }
+
+    #croppedImagesContainer {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 15px;
+        align-items: flex-start;
+    }
+
+    .image-card {
+        position: relative;
+        width: 180px;
+        height: 180px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-controls {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            gap: 4px;
+        }
+
+        .btn-delete,
+        .btn-set-primary {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.24);
+
+            &:hover {
+                transform: scale(1.08);
+            }
+        }
+
+        .btn-delete {
+            background: rgba(220, 53, 69, 0.9);
+            color: #ffffff;
+
+            &:hover {
+                background: rgba(220, 53, 69, 1);
+            }
+        }
+
+        .btn-set-primary {
+            background: rgba(40, 167, 69, 0.9);
+            color: #ffffff;
+
+            &:hover {
+                background: rgba(40, 167, 69, 1);
+            }
+        }
+
+        &.primary-image {
+            border: 3px solid #28a745;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+
+            .primary-badge {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(40, 167, 69, 0.95);
+                color: #ffffff;
+                padding: 6px;
+                text-align: center;
+                font-size: 12px;
+                font-weight: 600;
+                text-transform: uppercase;
+            }
+        }
+    }
+
+    .image-preview-wrapper {
+        width: 300px;
+        height: 200px;
+        margin: 10px;
+        position: relative;
+        overflow: hidden;
+        border: 2px solid #313041;
+        border-radius: 5px;
+        display: block;
+        flex-shrink: 0;
+
+        &.primary {
+            border-color: #3b82f6;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+
+            &::after {
+                content: "Title Image";
+                position: absolute;
+                top: 5px;
+                right: 5px;
+                background-color: #3b82f6;
+                color: #ffffff;
+                padding: 2px 5px;
+                border-radius: 3px;
+                font-size: 12px;
+                z-index: 10;
+            }
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    }
+
+    .image-controls {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 10px;
+        z-index: 10;
+    }
+
+    .image-control-btn {
+        background-color: #313041;
+        color: #ffffff;
+        border: none;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s ease;
+
+        &:hover {
+            background-color: #3b82f6;
+        }
+    }
+
+    .btn-remove {
+        background-color: #dc3545;
+
+        &:hover {
+            background-color: #c82333;
+        }
+    }
+
+    // Validation / error container within the trip form
+    .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+    }
+
+    .alert-danger {
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+    }
+
+    // Availability status select styling (ensure text is visible and padding is reasonable)
+    .availability-status-select {
+        padding: 4px 8px !important;
+        color: #212529;
+        background-color: #ffffff;
+        min-width: 120px;
+    }
+
+    // Small responsive tweaks to keep the header & gallery
+    // usable on tablets and phones.
+    @media (max-width: 768px) {
+        .step-wrapper {
+            padding: 18px 16px;
+        }
+
+        .step-buttons {
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .step-button {
+            width: 42px;
+            height: 42px;
+            font-size: 14px;
+        }
+
+        .button-group {
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .left-buttons,
+        .right-buttons {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .step {
+            padding: 22px 16px;
+        }
+
+        .image-card {
+            width: 150px;
+            height: 150px;
+        }
+    }
+}
+

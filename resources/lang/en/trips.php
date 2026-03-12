@@ -1,0 +1,152 @@
+<?php
+
+return [
+    // Step 1 — Images & Basics
+    'upload_images_title' => 'Images & Basics',
+    'upload_image'        => 'Upload Images',
+    'choose_files'        => 'Choose Files',
+    'location'            => 'Location',
+    'location_placeholder'=> 'Enter location...',
+    'title'               => 'Title',
+    'title_placeholder'   => 'Enter an attractive trip title...',
+    'next'                => 'Next',
+    'previous'            => 'Previous',
+    'submit_publish'      => 'Publish',
+    'leave_save_draft'    => 'Save as Draft',
+
+    // Step 2 — Fishing Details
+    'fishing_details_title' => 'Fishing Details',
+    'target_species'        => 'Target Species',
+    'target_species_help'   => 'List the fish species this trip targets.',
+    'fishing_methods'       => 'Fishing Methods',
+    'fishing_style'         => 'Fishing Style',
+    'fishing_style_active'  => 'Active',
+    'fishing_style_passive' => 'Passive',
+    'fishing_style_both'    => 'Both',
+    'water_types'           => 'Water Types',
+    'skill_level'           => 'Skill Level',
+
+    // Step 2 — General Details
+    'general_details_title'   => 'General Details',
+    'duration_nights'         => 'Nights',
+    'duration_days'           => 'Days',
+    'group_size_min'          => 'Group Size (Min)',
+    'group_size_max'          => 'Group Size (Max / Fixed)',
+    'trip_schedule'           => 'Trip Schedule',
+    'trip_schedule_day_label' => 'Day label',
+    'trip_schedule_description' => 'Description',
+    'meeting_point'           => 'Meeting Point / Check-in Info',
+    'best_season'             => 'Best Season',
+    'best_season_from'        => 'Best Season From',
+    'best_season_to'          => 'Best Season To',
+    'catering'                => 'Catering',
+    'best_arrival_options'    => 'Best Arrival Options',
+    'arrival_day'             => 'Arrival Day',
+
+    // Step 3 — Boat Information
+    'boat_information_title' => 'Boat Information',
+    'boat_type'              => 'Boat Type',
+    'boat_features'          => 'Included Boat Features',
+    'boat_information'       => 'Boat Information',
+
+    // Step 3 — Accommodation & Logistics
+    'accommodation_title'      => 'Accommodation & Logistics',
+    'accommodation_description'=> 'Accommodation Description',
+    'accommodation_type'       => 'Accommodation Type',
+    'room_types'               => 'Room Types Available',
+    'distance_to_water'        => 'Distance to Water',
+    'nearest_airport'          => 'Nearest Airport',
+
+    // Step 3 — Provider
+    'provider_title'           => 'Provider',
+    'provider_name'            => 'Provider Name',
+    'provider_photo'           => 'Provider Photo',
+    'provider_experience'      => 'Provider Experience',
+    'provider_certifications'  => 'Provider Certifications & Licences',
+    'boat_staff'               => 'Boat Staff',
+    'guide_languages'          => 'Guide Languages',
+
+    // Step 4 — Description & Itinerary
+    'description_title'        => 'Description & Itinerary',
+    'description'              => 'Full Description',
+    'trip_highlights'          => 'Trip Highlights',
+    'trip_highlights_items'    => 'Highlight Items',
+    'add_highlight'            => 'Add Highlight',
+    'highlight_accommodation'  => 'Accommodation (x nights)',
+    'highlight_fishing'        => 'Fishing Days (x days)',
+    'highlight_travel'         => 'Travel Days',
+
+    // Step 5 — Included & Excluded
+    'included_excluded_title'  => 'Included & Excluded',
+    'included'                 => 'Included',
+    'excluded'                 => 'Excluded',
+
+    // Step 6 — Additional Information
+    'additional_info_title'        => 'Additional Information',
+    'child_friendly'               => 'Child-friendly',
+    'accessible'                   => 'Accessible / Disability-friendly',
+    'smoking_allowed'              => 'Smoking Allowed',
+    'alcohol_allowed'              => 'Alcohol Allowed',
+    'catch_and_release'            => 'Catch & Release Policy',
+    'license_required'             => 'License / Permit Required',
+    'clothing_recommendations'     => 'Clothing Recommendations',
+    'experience_level_required'    => 'Experience Level Required',
+    'equipment_to_bring'           => 'Equipment to Bring',
+    'minimum_age'                  => 'Minimum Age',
+    'maximum_age'                  => 'Maximum Age',
+    'non_fishing_activities'       => 'Non-Fishing Activities',
+    'cuisine_food_style'           => 'Cuisine / Food Style',
+
+    // Step 7 — Pricing
+    'pricing_title'                => 'Pricing',
+    'cancellation_policy'          => 'Cancellation Policy',
+    'price_per_person'             => 'Price per Person (Double Occupancy)',
+    'price_single_room_addition'   => 'Single Room Addition Price',
+    'downpayment_policy'           => 'Downpayment Policy',
+
+    // Step 8 — Availability & Dates
+    'availability_title'           => 'Availability & Dates',
+    'availability_departure_date'  => 'Available Departure Date',
+    'availability_spots'           => 'Spots Available',
+    'availability_status'          => 'Status',
+    'availability_status_available'=> 'Available',
+    'availability_status_limited'  => 'Limited',
+    'availability_status_sold_out' => 'Sold Out',
+
+    // Common
+    'create'           => 'Create Trip',
+    'edit'             => 'Edit Trip',
+    'show'             => 'View Trip',
+    'back_to_list'     => 'Back to List',
+    'view'             => 'View',
+    'saving'           => 'Saving...',
+    'saved_successfully' => 'Saved successfully',
+    'save_failed'      => 'Save failed',
+    'select_options'   => 'Select options...',
+
+    // Validation
+    'title_required'       => 'Title is required',
+    'location_required'    => 'Location is required',
+    'min_images_required'  => 'At least one image is required',
+
+    // Catering options (Tagify presets)
+    'catering_breakfast_only' => 'Breakfast only',
+    'catering_half_board'     => 'Half board',
+    'catering_full_board'     => 'Full board',
+    'catering_not_included'   => 'Not included',
+
+    // Room rate options (Tagify presets)
+    'room_rate_single' => 'Single',
+    'room_rate_double' => 'Double',
+    'room_rate_twin'   => 'Twin',
+    'room_rate_shared' => 'Shared',
+    'room_rate_suite'  => 'Suite',
+
+    // Guide language options (Tagify presets)
+    'language_english'    => 'English',
+    'language_german'     => 'German',
+    'language_spanish'    => 'Spanish',
+    'language_french'     => 'French',
+    'language_portuguese' => 'Portuguese',
+];
+

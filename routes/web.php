@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\RentalBoatsController as AdminRentalBoatsControll
 use App\Http\Controllers\Admin\AccommodationsController as AdminAccommodationsController;
 use App\Http\Controllers\Admin\PaymentsController as AdminPaymentsController;
 use App\Http\Controllers\Admin\VacationsController as AdminVacationsController;
+use App\Http\Controllers\Admin\TripsController as AdminTripsController;
 use App\Http\Controllers\Admin\Category\AdminCategoryVacationCountryController;
 use App\Http\Controllers\Admin\Blog\ThreadsController as AdminThreadsController;
 use App\Http\Controllers\Admin\Blog\CategoriesController as AdminCategoriesController;
@@ -386,6 +387,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::resource('camps', \App\Http\Controllers\Admin\CampsController::class);
         Route::get('camps/change-status/{id}', [\App\Http\Controllers\Admin\CampsController::class, 'changeStatus'])->name('camps.change-status');
+
+        Route::resource('trips', AdminTripsController::class);
+        Route::get('trips/change-status/{id}', [AdminTripsController::class, 'changeStatus'])->name('trips.change-status');
 
         Route::resource('special-offers', \App\Http\Controllers\Admin\SpecialOffersController::class);
         Route::get('special-offers/change-status/{id}', [\App\Http\Controllers\Admin\SpecialOffersController::class, 'changeStatus'])->name('special-offers.change-status');
