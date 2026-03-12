@@ -42,6 +42,7 @@ use App\Http\Controllers\LanguageController;
 use \App\Http\Controllers\CampOfferController;
 use App\Http\Controllers\Blog\BlogController;
 use App\Http\Controllers\VacationsController;
+use App\Http\Controllers\TripOfferController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\GuideThreadController;
 use App\Http\Controllers\Blog\ThreadsController;
@@ -265,6 +266,10 @@ Route::post('/vacation-booking', [VacationBookingController::class, 'store'])
     ->middleware('web');
 Route::get('vacations/c/{country}', [VacationsController::class, 'category'])->name('vacations.category')->middleware('ddos:search');
 Route::get('vacations-v2/{campId}', [CampOfferController::class, 'show'])->name('vacations.v2');
+
+Route::get('trips/{slug}', [TripOfferController::class, 'show'])
+    ->name('trips.show')
+    ->middleware('ddos:search');
 
 Route::get('searchrequest', [GuidingsController::class, 'bookingrequest'])->name('guidings.request');
 Route::post('searchrequest/store', [GuidingsController::class, 'bookingRequestStore'])->name('store.request');
