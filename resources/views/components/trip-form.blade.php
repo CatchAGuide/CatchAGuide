@@ -256,8 +256,13 @@
                     @php
                         $bestSeasonFromRaw = $formData['best_season_from'] ?? '';
                         $bestSeasonToRaw   = $formData['best_season_to'] ?? '';
-                        $bestSeasonFrom    = $bestSeasonFromRaw ? substr($bestSeasonFromRaw, -2) : '';
-                        $bestSeasonTo      = $bestSeasonToRaw ? substr($bestSeasonToRaw, -2) : '';
+                        $normalizeMonth = function ($v) {
+                            if ($v === null || $v === '') return '';
+                            $num = (int) preg_replace('/\D/', '', (string) $v);
+                            return ($num >= 1 && $num <= 12) ? str_pad((string) $num, 2, '0', STR_PAD_LEFT) : '';
+                        };
+                        $bestSeasonFrom = $normalizeMonth($bestSeasonFromRaw);
+                        $bestSeasonTo   = $normalizeMonth($bestSeasonToRaw);
                         $monthsOptions     = [
                             '01' => 'January',
                             '02' => 'February',
@@ -597,7 +602,7 @@
                     <textarea class="form-control"
                               name="description"
                               id="trip_description_editor"
-                              rows="6">{{ $formData['description'] ?? '' }}</textarea>
+                              rows="6">{!! str_replace('</textarea>', '&lt;/textarea&gt;', $formData['description'] ?? '') !!}</textarea>
                 </div>
 
                 <div class="form-group">
@@ -766,6 +771,7 @@
                         'smoking_allowed' => __('trips.smoking_allowed'),
                         'alcohol_allowed' => __('trips.alcohol_allowed'),
                         'catch_and_release' => __('trips.catch_and_release'),
+                        'catch_success' => __('trips.catch_success_label'),
                         'license_required' => __('trips.license_required'),
                         'clothing_recommendations' => __('trips.clothing_recommendations'),
                         'experience_level_required' => __('trips.experience_level_required'),
@@ -850,6 +856,14 @@
                         </div>
                     </div>
                     <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label fw-bold fs-5">{{ __('trips.currency') }}</label>
+                            <input type="text" class="form-control" name="currency" value="{{ $formData['currency'] ?? 'EUR' }}" placeholder="EUR" maxlength="3">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
                         <div class="form-group">
                             <label class="form-label fw-bold fs-5">{{ __('trips.downpayment_policy') }}</label>
                             <textarea class="form-control" name="downpayment_policy" rows="2">{{ $formData['downpayment_policy'] ?? '' }}</textarea>

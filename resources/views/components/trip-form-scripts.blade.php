@@ -84,7 +84,7 @@
         setupTripFormSubmission();
         initializeAvailabilityTable();
         initializeScheduleRows();
-        initializeTripDescriptionEditor();
+        // CKEditor for description is initialized when user reaches step 4 (see goToTripStep) so it reads the textarea content correctly
         initializeTripHighlights();
 
         const imageUploadInput = document.getElementById('title_image');
@@ -158,6 +158,12 @@
                 }
             });
 
+            // Lazy-init CKEditor for description when step 4 is shown so it picks up the textarea content
+            if (step === 4 && !window.tripDescriptionEditorInitialized) {
+                initializeTripDescriptionEditor();
+                window.tripDescriptionEditorInitialized = true;
+            }
+
             window.currentStep = step;
         }
     }
@@ -172,6 +178,11 @@
             collectTripTagifyData(formData);
             collectTripScheduleData(formData);
             collectAvailabilityData(formData);
+            // Ensure best season selects are always in payload (they live in step 2, which may be hidden)
+            const bestSeasonFrom = document.querySelector('select[name="best_season_from"]');
+            const bestSeasonTo = document.querySelector('select[name="best_season_to"]');
+            if (bestSeasonFrom) formData.set('best_season_from', bestSeasonFrom.value || '');
+            if (bestSeasonTo) formData.set('best_season_to', bestSeasonTo.value || '');
 
             if (window.imageManagerLoaded && typeof window.imageManagerLoaded.getCroppedImages === 'function') {
                 const croppedImages = window.imageManagerLoaded.getCroppedImages();
@@ -404,14 +415,16 @@
         }
         formData.set('trip_highlights_items', JSON.stringify(highlightItems));
 
-        // Sync WYSIWYG content back to textarea before submit
+        // Sync WYSIWYG content into FormData (FormData is built before this runs, so we must set description explicitly)
         if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances.trip_description_editor) {
             CKEDITOR.instances.trip_description_editor.updateElement();
+            formData.set('description', CKEDITOR.instances.trip_description_editor.getData());
         }
     }
 
     function initializeTripDescriptionEditor() {
-        if (typeof CKEDITOR !== 'undefined' && document.getElementById('trip_description_editor')) {
+        var textarea = document.getElementById('trip_description_editor');
+        if (typeof CKEDITOR !== 'undefined' && textarea && !CKEDITOR.instances.trip_description_editor) {
             CKEDITOR.replace('trip_description_editor', {
                 height: 300,
                 removeButtons: 'Subscript,Superscript,Anchor,Styles,Specialchar',
@@ -497,10 +510,11 @@
     function collectTripScheduleData(formData) {
         const rows = [];
         $('#trip_schedule_container .schedule-row').each(function () {
+            const time = $(this).find('input[name="trip_schedule_time[]"]').val();
             const dayLabel = $(this).find('input[name="trip_schedule_day_label[]"]').val();
             const description = $(this).find('input[name="trip_schedule_description[]"]').val();
-            if (dayLabel || description) {
-                rows.push({day_label: dayLabel, description: description});
+            if (dayLabel || description || time) {
+                rows.push({ time: time || null, day_label: dayLabel, description: description });
             }
         });
         formData.set('trip_schedule', JSON.stringify(rows));
@@ -510,14 +524,17 @@
         const container = $('#trip_schedule_container');
         const existing = @json($formData['trip_schedule'] ?? []);
 
-        function addRow(dayLabel = '', description = '') {
+        function addRow(time = '', dayLabel = '', description = '') {
             const row = $(`
                 <div class="schedule-row mb-2">
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-2">
+                            <input type="text" class="form-control" name="trip_schedule_time[]" placeholder="{{ __('trips.trip_schedule_time') }}" value="${time}">
+                        </div>
+                        <div class="col-md-3">
                             <input type="text" class="form-control" name="trip_schedule_day_label[]" placeholder="{{ __('trips.trip_schedule_day_label') }}" value="${dayLabel}">
                         </div>
-                        <div class="col-md-7 mt-2 mt-md-0">
+                        <div class="col-md-6 mt-2 mt-md-0">
                             <input type="text" class="form-control" name="trip_schedule_description[]" placeholder="{{ __('trips.trip_schedule_description') }}" value="${description}">
                         </div>
                         <div class="col-md-1 mt-2 mt-md-0 d-flex align-items-center">
@@ -532,7 +549,7 @@
         }
 
         if (Array.isArray(existing) && existing.length) {
-            existing.forEach(r => addRow(r.day_label || '', r.description || ''));
+            existing.forEach(r => addRow(r.time || '', r.day_label || '', r.description || ''));
         } else {
             addRow();
         }

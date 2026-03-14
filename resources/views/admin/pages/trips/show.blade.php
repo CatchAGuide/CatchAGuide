@@ -97,7 +97,7 @@
                                 <div class="col-12">
                                     <h5>Descriptions</h5>
                                     <h6>Main Description</h6>
-                                    <p class="text-muted">{!! nl2br(e($trip->description)) ?: 'No description provided' !!}</p>
+                                    <div class="text-muted trip-description-content">{!! $trip->description ?: '<span class="text-muted">No description provided</span>' !!}</div>
                                 </div>
                             </div>
 

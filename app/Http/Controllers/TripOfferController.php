@@ -3,175 +3,53 @@
 namespace App\Http\Controllers;
 
 use App\Models\Trip;
-use Illuminate\Http\Request;
+use App\Services\Trip\TripCacheService;
+use App\Services\Trip\TripOfferViewMapper;
+use Illuminate\View\View;
 
 class TripOfferController extends Controller
 {
-    public function show(string $slug)
+    public function __construct(
+        private TripOfferViewMapper $mapper,
+        private TripCacheService $cache
+    ) {}
+
+    public function show(string $slug): View
     {
         $trip = Trip::with(['availabilityDates'])
             ->where('slug', $slug)
             ->where('status', 'active')
             ->firstOrFail();
 
-        $tripView = $this->mapTrip($trip);
+        $tripView = $this->cache->rememberTripOfferViewModel($slug, fn () => $this->mapper->map($trip));
+
         $gallery = $this->buildGallery($trip);
         $availabilityCards = $this->buildAvailabilityCards($trip);
 
+        $tripOfferData = [
+            'gallery' => $gallery['all'] ?? [],
+            'map' => $this->getMapDataForScript($tripView),
+        ];
+
         return view('pages.trips.show', [
-            'trip' => $trip,
             'tripView' => $tripView,
             'gallery' => $gallery,
             'availabilityCards' => $availabilityCards,
+            'tripOfferData' => $tripOfferData,
         ]);
     }
 
-    private function mapTrip(Trip $trip): array
+    private function getMapDataForScript(array $tripView): ?array
     {
-        $targetSpecies = collect($trip->getTargetSpeciesNames())->pluck('name')->filter()->values()->all();
-        $fishingMethods = collect($trip->getFishingMethodNames())->pluck('name')->filter()->values()->all();
-        $waterTypes = collect($trip->getWaterTypeNames())->pluck('name')->filter()->values()->all();
-
-        $description = (string) ($trip->description ?? '');
-        $descriptionShort = $description;
-        $descriptionRest = '';
-
-        if (mb_strlen($description) > 600) {
-            $descriptionShort = mb_substr($description, 0, 600);
-            $lastDotPos = mb_strrpos($descriptionShort, '.');
-
-            if ($lastDotPos !== false && $lastDotPos > 200) {
-                $descriptionShort = mb_substr($descriptionShort, 0, $lastDotPos + 1);
-            }
-
-            $descriptionRest = trim(mb_substr($description, mb_strlen($descriptionShort)));
+        $lat = $tripView['coordinates']['lat'] ?? null;
+        $lng = $tripView['coordinates']['lng'] ?? null;
+        if ($lat === null || $lng === null || ! is_numeric($lat) || ! is_numeric($lng)) {
+            return null;
         }
-
-        $rawHighlights = is_array($trip->trip_highlights) ? $trip->trip_highlights : [];
-        $highlightItems = [];
-
-        if (is_array($rawHighlights)) {
-            foreach ($rawHighlights['items'] ?? [] as $item) {
-                $text = is_array($item) ? ($item['text'] ?? '') : (string) $item;
-                $text = trim($text);
-                if ($text !== '') {
-                    $highlightItems[] = $text;
-                }
-            }
-
-            $structuredKeys = [
-                'accommodation_nights' => __('trips.highlight_accommodation'),
-                'fishing_days'         => __('trips.highlight_fishing'),
-                'travel_days'          => __('trips.highlight_travel'),
-            ];
-
-            foreach ($structuredKeys as $key => $template) {
-                if (!isset($rawHighlights[$key]) || !is_array($rawHighlights[$key])) {
-                    continue;
-                }
-
-                $config = $rawHighlights[$key];
-                $enabled = (bool) ($config['enabled'] ?? false);
-                $value   = $config['value'] ?? null;
-
-                if (! $enabled || $value === null || $value === '' || ! is_scalar($value)) {
-                    continue;
-                }
-
-                $label = str_replace('x', (string) $value, $template);
-                $highlightItems[] = $label;
-            }
-        }
-
-        if (empty($highlightItems) && ! empty($rawHighlights) && array_is_list($rawHighlights)) {
-            foreach ($rawHighlights as $item) {
-                $text = is_array($item) ? ($item['text'] ?? '') : (string) $item;
-                $text = trim($text);
-                if ($text !== '') {
-                    $highlightItems[] = $text;
-                }
-            }
-        }
-
-        $additionalInfoList = [];
-        if (is_array($trip->additional_info)) {
-            foreach ($trip->additional_info as $key => $config) {
-                if (!is_array($config)) {
-                    continue;
-                }
-
-                $enabled = (bool) ($config['enabled'] ?? false);
-                $details = $config['details'] ?? null;
-
-                if (! $enabled && ($details === null || $details === '')) {
-                    continue;
-                }
-
-                $labelKey = 'trips.' . $key;
-                $label = __($labelKey);
-                if ($label === $labelKey) {
-                    $label = ucwords(str_replace('_', ' ', $key));
-                }
-
-                $text = $label;
-                if ($details) {
-                    $text .= ': ' . $details;
-                }
-
-                $additionalInfoList[] = $text;
-            }
-        }
-
         return [
-            'id' => $trip->id,
-            'title' => $trip->title,
-            'location' => $trip->location,
-            'country' => $trip->country,
-            'city' => $trip->city,
-            'region' => $trip->region,
-            'coordinates' => [
-                'lat' => $trip->latitude,
-                'lng' => $trip->longitude,
-            ],
-            'duration' => [
-                'nights' => $trip->duration_nights,
-                'days' => $trip->duration_days,
-            ],
-            'group_size' => [
-                'min' => $trip->group_size_min,
-                'max' => $trip->group_size_max,
-            ],
-            'price' => [
-                'per_person' => $trip->price_per_person,
-                'single_room_addition' => $trip->price_single_room_addition,
-                'currency' => 'EUR',
-            ],
-            'skill_level' => $trip->skill_level,
-            'fishing_style' => $trip->fishing_style,
-            'best_season' => [
-                'from' => $trip->best_season_from,
-                'to' => $trip->best_season_to,
-            ],
-            'target_species' => $targetSpecies,
-            'fishing_methods' => $fishingMethods,
-            'water_types' => $waterTypes,
-            'trip_schedule' => is_array($trip->trip_schedule) ? $trip->trip_schedule : [],
-            'included' => is_array($trip->included) ? $trip->included : [],
-            'excluded' => is_array($trip->excluded) ? $trip->excluded : [],
-            'additional_info' => $additionalInfoList,
-            'cancellation_policy' => $trip->cancellation_policy,
-            'provider' => [
-                'name' => $trip->provider_name,
-                'photo' => $trip->provider_photo,
-                'experience' => $trip->provider_experience,
-                'certifications' => $trip->provider_certifications,
-            ],
-            'description' => [
-                'full' => $description,
-                'intro' => $descriptionShort,
-                'rest' => $descriptionRest,
-            ],
-            'trip_highlights' => $highlightItems,
+            'lat' => (float) $lat,
+            'lng' => (float) $lng,
+            'title' => $tripView['title'] ?? '',
         ];
     }
 
@@ -221,6 +99,7 @@ class TripOfferController extends Controller
     private function buildAvailabilityCards(Trip $trip): array
     {
         $dates = $trip->availabilityDates()
+            ->where('departure_date', '>=', now()->toDateString())
             ->orderBy('departure_date')
             ->get();
 

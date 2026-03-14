@@ -6,6 +6,7 @@ use App\Models\BoatExtras;
 use App\Models\Method;
 use App\Models\Target;
 use App\Models\Water;
+use App\Services\Trip\TripCacheService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Trip extends Model
 {
     use HasFactory;
+
+    protected static function booted(): void
+    {
+        static::saved(function (Trip $trip) {
+            app(TripCacheService::class)->clearTripOfferCacheBySlug($trip->slug);
+            if ($trip->wasChanged('slug')) {
+                $original = $trip->getOriginal('slug');
+                if ($original) {
+                    app(TripCacheService::class)->clearTripOfferCacheBySlug($original);
+                }
+            }
+        });
+    }
 
     protected $fillable = [
         'title',
@@ -65,6 +79,7 @@ class Trip extends Model
         'price_per_person',
         'price_single_room_addition',
         'downpayment_policy',
+        'currency',
         'status',
         'user_id',
     ];

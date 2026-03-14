@@ -11,6 +11,7 @@ class TripCacheService
     private const CACHE_TTL = 300;
     private const TRIPS_LIST_CACHE_KEY = 'trips_list';
     private const TRIP_CACHE_KEY = 'trip_';
+    private const TRIP_OFFER_VIEW_CACHE_KEY = 'trip_offer_view_';
     private const FORM_DATA_CACHE_KEY = 'trip_form_data';
 
     public function getTripsList(int $perPage = 15): LengthAwarePaginator
@@ -56,6 +57,18 @@ class TripCacheService
     public function clearTripCache(int $tripId): void
     {
         Cache::forget(self::TRIP_CACHE_KEY . $tripId);
+    }
+
+    /** Get or compute the public trip offer view payload (cached). */
+    public function rememberTripOfferViewModel(string $slug, callable $callback): array
+    {
+        return Cache::remember(self::TRIP_OFFER_VIEW_CACHE_KEY . $slug, self::CACHE_TTL, $callback);
+    }
+
+    /** Clear the public trip offer page view cache (call when a trip is updated). */
+    public function clearTripOfferCacheBySlug(string $slug): void
+    {
+        Cache::forget(self::TRIP_OFFER_VIEW_CACHE_KEY . $slug);
     }
 
     public function clearTripsListCache(): void

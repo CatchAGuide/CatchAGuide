@@ -339,6 +339,13 @@ return [
             'section'  => 'pricing',
             'required' => false,
         ],
+        'currency' => [
+            'label'    => 'Currency',
+            'type'     => 'text',
+            'step'     => 7,
+            'section'  => 'pricing',
+            'required' => false,
+        ],
 
         // Page 8 — Availability & Dates
         'availability' => [

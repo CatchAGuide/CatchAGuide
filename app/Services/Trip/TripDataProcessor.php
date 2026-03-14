@@ -33,8 +33,8 @@ class TripDataProcessor
             'group_size_max'              => $request->input('group_size_max') ?: null,
             'trip_schedule'               => $this->processTripSchedule($request),
             'meeting_point'               => $request->input('meeting_point') ?: null,
-            'best_season_from'            => $request->input('best_season_from') ?: null,
-            'best_season_to'              => $request->input('best_season_to') ?: null,
+            'best_season_from'            => $this->normalizeMonthOption($request->input('best_season_from')),
+            'best_season_to'              => $this->normalizeMonthOption($request->input('best_season_to')),
             'catering'                    => $this->processTagifyField($request->input('catering')),
             'best_arrival_options'        => $request->input('best_arrival_options') ?: null,
             'arrival_day'                 => $request->input('arrival_day') ?: null,
@@ -60,6 +60,7 @@ class TripDataProcessor
             'price_per_person'            => $request->input('price_per_person') ?: null,
             'price_single_room_addition'  => $request->input('price_single_room_addition') ?: null,
             'downpayment_policy'          => $request->input('downpayment_policy') ?: null,
+            'currency'                    => $request->input('currency') ?: 'EUR',
         ];
     }
 
@@ -94,8 +95,8 @@ class TripDataProcessor
             'group_size_max'               => $trip->group_size_max,
             'trip_schedule'                => $trip->trip_schedule ?? [],
             'meeting_point'                => $trip->meeting_point,
-            'best_season_from'             => $trip->best_season_from,
-            'best_season_to'               => $trip->best_season_to,
+            'best_season_from'             => $this->normalizeMonthOption($trip->best_season_from),
+            'best_season_to'               => $this->normalizeMonthOption($trip->best_season_to),
             'catering'                     => $trip->catering ?? [],
             'best_arrival_options'         => $trip->best_arrival_options,
             'arrival_day'                  => $trip->arrival_day,
@@ -122,6 +123,7 @@ class TripDataProcessor
             'price_per_person'             => $trip->price_per_person,
             'price_single_room_addition'   => $trip->price_single_room_addition,
             'downpayment_policy'           => $trip->downpayment_policy,
+            'currency'                     => $trip->currency ?? 'EUR',
             'availability_dates'           => $trip->availabilityDates()
                                                         ->orderBy('departure_date')
                                                         ->get()
@@ -176,6 +178,21 @@ class TripDataProcessor
      *
      * This matches the desired storage format for both DB-backed and free-form Tagify fields.
      */
+    /**
+     * Normalize best season month to 2-digit string (01-12) for consistent storage and form display.
+     */
+    private function normalizeMonthOption($value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+        $num = (int) preg_replace('/\D/', '', (string) $value);
+        if ($num < 1 || $num > 12) {
+            return null;
+        }
+        return str_pad((string) $num, 2, '0', STR_PAD_LEFT);
+    }
+
     private function processTagifyField($value): array
     {
         if (empty($value)) {
@@ -236,6 +253,7 @@ class TripDataProcessor
             }
 
             $normalized[] = [
+                'time'        => isset($row['time']) ? trim((string) $row['time']) : null,
                 'day_label'   => $row['day_label'] ?? '',
                 'description' => $row['description'] ?? '',
             ];
@@ -292,6 +310,7 @@ class TripDataProcessor
             'smoking_allowed',
             'alcohol_allowed',
             'catch_and_release',
+            'catch_success',
             'license_required',
             'clothing_recommendations',
             'experience_level_required',
