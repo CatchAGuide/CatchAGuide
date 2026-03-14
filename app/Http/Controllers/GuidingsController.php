@@ -264,6 +264,7 @@ class GuidingsController extends Controller
             } else {
                 $otherguidings = $this->getOtherGuidings();
             }
+            $this->applyGuidingTranslations($otherguidings);
         }
 
         // Get filter options for display
@@ -506,6 +507,7 @@ class GuidingsController extends Controller
             } else {
                 $otherguidings = $this->getOtherGuidings();
             }
+            $this->applyGuidingTranslations($otherguidings);
         }
 
         // Get filter options for display
@@ -773,6 +775,8 @@ class GuidingsController extends Controller
                 $guiding->translated = $translated;
             }
         }
+        $this->applyGuidingTranslations($sameGuidings);
+        $this->applyGuidingTranslations($otherGuidings);
 
         return view('pages.guidings.newIndex', [
             'guiding' => $guiding,
@@ -1235,8 +1239,9 @@ class GuidingsController extends Controller
 
     /**
      * Apply stored translations from Language table to a collection/array of guidings
-     * for the current locale. When translations exist, they are attached to the
-     * model's $translated property so accessors like $guiding->title use them.
+     * for the current locale. Uses one batch query for all guidings to avoid N+1.
+     * When translations exist, they are attached to the model's $translated property
+     * so accessors like $guiding->title use them.
      *
      * @param iterable|\Illuminate\Support\Collection $guidings
      */
@@ -1252,20 +1257,31 @@ class GuidingsController extends Controller
             return;
         }
 
+        $idsNeedingTranslation = [];
+        $guidingsById = [];
         foreach ($guidings as $guiding) {
             if (!$guiding instanceof Guiding) {
                 continue;
             }
-
-            // Skip if guiding content is already in the target language
             if ($guiding->language === $locale) {
                 continue;
             }
+            $idsNeedingTranslation[] = $guiding->id;
+            $guidingsById[$guiding->id] = $guiding;
+        }
 
-            $translated = $this->guidingTranslationService->getTranslatedGuiding($guiding, $locale);
+        if (empty($idsNeedingTranslation)) {
+            return;
+        }
 
-            if ($translated) {
-                $guiding->translated = $translated;
+        $translationMap = $this->guidingTranslationService->getTranslatedGuidingsBatch(
+            array_values(array_unique($idsNeedingTranslation)),
+            $locale
+        );
+
+        foreach ($translationMap as $id => $translated) {
+            if (isset($guidingsById[$id])) {
+                $guidingsById[$id]->translated = $translated;
             }
         }
     }
@@ -1702,6 +1718,9 @@ class GuidingsController extends Controller
         ->where('status', 1)
         ->limit(4)
         ->get();
+
+        $this->applyGuidingTranslations(collect([$guiding]));
+        $this->applyGuidingTranslations($otherGuidings);
 
         return view('pages.guidings.show', [
             'guiding' => $guiding,

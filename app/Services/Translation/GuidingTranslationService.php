@@ -337,6 +337,37 @@ class GuidingTranslationService
     }
 
     /**
+     * Load translations for multiple guidings in one query (from Language table only).
+     * Use this for lists to avoid N+1. Returns map: guiding_id => json_data array.
+     *
+     * @param array $guidingIds
+     * @param string $targetLanguage
+     * @return array<int, array>
+     */
+    public function getTranslatedGuidingsBatch(array $guidingIds, string $targetLanguage): array
+    {
+        if (empty($guidingIds)) {
+            return [];
+        }
+
+        $translations = Language::where('type', 'guidings')
+            ->whereIn('source_id', $guidingIds)
+            ->where('language', $targetLanguage)
+            ->get();
+
+        $map = [];
+        foreach ($translations as $row) {
+            $id = (int) $row->source_id;
+            $data = $row->json_data;
+            if ($data !== null) {
+                $map[$id] = is_array($data) ? $data : (array) json_decode($data, true);
+            }
+        }
+
+        return $map;
+    }
+
+    /**
      * Store relation translations
      */
     private function storeRelationTranslations(Guiding $guiding, string $targetLanguage, array $translatedRelations): void

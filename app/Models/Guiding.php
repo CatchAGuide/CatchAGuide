@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Traits\MethodTraits;
@@ -133,10 +134,34 @@ class Guiding extends Model
 
     public function __get($key)
     {
-        if ($this->translated && isset($this->translated[$key])) {
+        if ($this->translated !== null && isset($this->translated[$key])) {
             return $this->translated[$key];
         }
+        // When translationForCurrentLocale is eager-loaded, use its json_data for translated attributes
+        if ($this->relationLoaded('translationForCurrentLocale')) {
+            $translation = $this->getRelation('translationForCurrentLocale');
+            $sourceLanguage = $this->attributes['language'] ?? null;
+            if ($translation && $sourceLanguage !== app()->getLocale()) {
+                $data = $translation->json_data ?? null;
+                if (is_array($data) && array_key_exists($key, $data)) {
+                    return $data[$key];
+                }
+            }
+        }
         return parent::__get($key);
+    }
+
+    /**
+     * Translation for the current app locale (from Language table).
+     * Eager load with translationForCurrentLocale to get translated attributes without extra per-model queries.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function translationForCurrentLocale(): HasOne
+    {
+        return $this->hasOne(Language::class, 'source_id', 'id')
+            ->where('type', 'guidings')
+            ->where('language', app()->getLocale());
     }
 
     /**
