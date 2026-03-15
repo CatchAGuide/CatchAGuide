@@ -39,6 +39,12 @@ return [
         'in_process' => 'In Process',
         'done' => 'Done',
     ],
+    'contact_request_source' => [
+        'guiding' => 'Guiding',
+        'vacation' => 'Vacation',
+        'camp' => 'Camp',
+        'trip' => 'Trip',
+    ],
 
     'legal' => 'Legal',
     'imprint' => 'Imprint',

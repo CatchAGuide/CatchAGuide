@@ -41,6 +41,12 @@ return [
         'in_process' => 'In Bearbeitung',
         'done' => 'Erledigt',
     ],
+    'contact_request_source' => [
+        'guiding' => 'Guiding',
+        'vacation' => 'Urlaub',
+        'camp' => 'Camp',
+        'trip' => 'Trip',
+    ],
 
     'legal' => 'Rechtliches',
     'imprint' => 'Impressum',

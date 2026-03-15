@@ -130,7 +130,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><path d="M20 12c0-1.5-.5-2.5-1.5-3.5L20 6l-4 2.5c-.5-.5-1-1-1.5-1.5C13 5.5 12 5 10.5 5 7 5 4 8 4 12s3 7 6.5 7c1.5 0 2.5-.5 3.5-1.5l4 2.5-2.5-2.5c1-1 1.5-2 1.5-3.5z"/></svg>
                             </span>
                             <p class="trip-offer-page__feature-card-label">{{ __('trips.target_species') }}</p>
-                            <p class="trip-offer-page__feature-card-value">{{ implode(', ', array_slice($tripView['target_species'], 0, 3)) }}</p>
+                            <p class="trip-offer-page__feature-card-value trip-offer-page__feature-card-value--scrollable">{{ implode(', ', $tripView['target_species']) }}</p>
                         </div>
                     @endif
                 </div>
