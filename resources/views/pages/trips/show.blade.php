@@ -479,40 +479,55 @@
                             @php $prov = $tripView['provider'] ?? []; @endphp
                             @if(!empty($prov['has_content']))
                                 <div class="trip-offer-page__info-card-body trip-offer-page__info-card-body--guide">
-                                    <div class="trip-offer-page__guide-row">
-                                        @if($prov['photo'] ?? null)
-                                            <img src="{{ $prov['photo'] }}" alt="{{ $prov['name'] ?? '' }}" class="trip-offer-page__guide-avatar-img">
-                                        @else
-                                            <div class="trip-offer-page__guide-avatar-initials">
-                                                {{ strtoupper(mb_substr(($prov['name'] ?? '?'), 0, 2)) }}
+                                    <div class="trip-offer-page__guide-two-col">
+                                        <div class="trip-offer-page__guide-left">
+                                            <div class="trip-offer-page__guide-row">
+                                                @if(!empty($prov['photo']))
+                                                    <img src="{{ asset($prov['photo']) }}" alt="{{ $prov['name'] ?? '' }}" class="trip-offer-page__guide-avatar-img">
+                                                @else
+                                                    <div class="trip-offer-page__guide-avatar-initials">
+                                                        {{ strtoupper(mb_substr(($prov['name'] ?? '?'), 0, 2)) }}
+                                                    </div>
+                                                @endif
+                                                <div class="trip-offer-page__guide-meta">
+                                                    @if(!empty($prov['name']))
+                                                        <p class="trip-offer-page__info-card-name">{{ $prov['name'] }}</p>
+                                                    @endif
+                                                    @if(!empty($prov['experience']))
+                                                        <p class="trip-offer-page__info-card-desc">{{ $prov['experience'] }}</p>
+                                                    @endif
+                                                </div>
                                             </div>
+                                            @if(!empty($prov['certifications_list']))
+                                                <div class="trip-offer-page__info-card-tags">
+                                                    @foreach($prov['certifications_list'] as $cert)
+                                                        <span class="trip-offer-page__info-card-tag trip-offer-page__info-card-tag--light">{{ $cert }}</span>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        </div>
+                                        @if(!empty($prov['guide_languages']))
+                                            @php
+                                                $languagesWithFlags = getLanguagesWithFlags(implode(',', $prov['guide_languages']));
+                                            @endphp
+                                            @if(!empty($languagesWithFlags))
+                                                <div class="trip-offer-page__guide-languages-col">
+                                                    <p class="trip-offer-page__info-card-label trip-offer-page__info-card-label--inline">{{ strtoupper(__('trips.guide_languages')) }}</p>
+                                                    <div class="trip-offer-page__info-card-tags trip-offer-page__info-card-tags--languages trip-offer-page__info-card-tags--flags">
+                                                        @foreach($languagesWithFlags as $language)
+                                                            @if($language['has_flag'])
+                                                                <span class="trip-offer-page__language-flag" title="{{ $language['name'] }}">
+                                                                    <img src="{{ asset('flags/' . $language['flag_code'] . '.svg') }}" alt="{{ $language['name'] }}" width="24" height="24">
+                                                                </span>
+                                                            @else
+                                                                <span class="trip-offer-page__info-card-tag trip-offer-page__info-card-tag--lang">{{ $language['name'] }}</span>
+                                                            @endif
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endif
                                         @endif
-                                        <div class="trip-offer-page__guide-meta">
-                                            @if(!empty($prov['name']))
-                                                <p class="trip-offer-page__info-card-name">{{ $prov['name'] }}</p>
-                                            @endif
-                                            @if(!empty($prov['experience']))
-                                                <p class="trip-offer-page__info-card-desc">{{ $prov['experience'] }}</p>
-                                            @endif
-                                        </div>
                                     </div>
-                                    @if(!empty($prov['certifications_list']))
-                                        <div class="trip-offer-page__info-card-tags">
-                                            @foreach($prov['certifications_list'] as $cert)
-                                                <span class="trip-offer-page__info-card-tag trip-offer-page__info-card-tag--light">{{ $cert }}</span>
-                                            @endforeach
-                                        </div>
-                                    @endif
-                                    @if(!empty($prov['guide_languages']))
-                                        <div class="trip-offer-page__info-card-languages">
-                                            <p class="trip-offer-page__info-card-label trip-offer-page__info-card-label--inline">{{ strtoupper(__('trips.guide_languages')) }}</p>
-                                            <div class="trip-offer-page__info-card-tags trip-offer-page__info-card-tags--languages">
-                                                @foreach($prov['guide_languages'] as $lang)
-                                                    <span class="trip-offer-page__info-card-tag trip-offer-page__info-card-tag--lang"><i class="fas fa-language trip-offer-page__info-card-tag-icon" aria-hidden="true"></i>{{ $lang }}</span>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    @endif
                                 </div>
                             @else
                                 <p class="trip-offer-page__info-card-empty">{{ __('trips.provider_name') }}</p>

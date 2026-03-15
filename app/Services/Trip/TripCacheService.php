@@ -2,6 +2,7 @@
 
 namespace App\Services\Trip;
 
+use App\Models\AccommodationType;
 use App\Models\Trip;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
@@ -50,6 +51,7 @@ class TripCacheService
                 'includedPreset'            => $config['included_whitelist'] ?? [],
                 'excludedPreset'            => $config['excluded_whitelist'] ?? [],
                 'availabilityStatusOptions' => $config['availability_status_options'] ?? ['available', 'limited', 'sold_out'],
+                'accommodationTypes'        => AccommodationType::active()->ordered()->get(),
             ];
         });
     }

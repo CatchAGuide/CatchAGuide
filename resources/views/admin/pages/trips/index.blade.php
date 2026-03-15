@@ -133,9 +133,10 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a href="{{ route('admin.trips.show', $trip->id) }}"
+                                                <a href="{{ route('trips.show', $trip->slug) }}"
                                                    class="btn btn-sm btn-info"
-                                                   title="View">
+                                                   title="View product page"
+                                                   target="_blank" rel="noopener">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                                 <a href="{{ route('admin.trips.edit', $trip->id) }}"

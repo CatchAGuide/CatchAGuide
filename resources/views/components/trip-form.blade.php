@@ -435,20 +435,20 @@
                             <label class="form-label fw-bold fs-5">{{ __('trips.accommodation_type') }}</label>
                             @php
                                 $accType = $formData['accommodation_type'] ?? null;
-                                $accommodationTypes = __('accommodations.options.accommodation_types');
+                                $accTypesList = $accommodationTypes ?? collect();
                             @endphp
-                            @if(is_array($accommodationTypes) && count($accommodationTypes))
+                            @if($accTypesList->isNotEmpty())
                                 <div class="d-flex flex-wrap btn-group-toggle">
-                                    @foreach($accommodationTypes as $value => $label)
+                                    @foreach($accTypesList as $accommodationType)
                                         <div class="btn-checkbox-container me-2 mb-2">
                                             <input
                                                 class="form-check-input"
                                                 type="radio"
                                                 name="accommodation_type"
-                                                id="acc_{{ $value }}"
-                                                value="{{ $value }}"
-                                                {{ $accType === $value ? 'checked' : '' }}>
-                                            <label class="btn-checkbox" for="acc_{{ $value }}">{{ $label }}</label>
+                                                id="acc_type_{{ $accommodationType->id }}"
+                                                value="{{ $accommodationType->name }}"
+                                                {{ ($accType === $accommodationType->name || $accType == $accommodationType->id) ? 'checked' : '' }}>
+                                            <label class="btn-checkbox" for="acc_type_{{ $accommodationType->id }}">{{ $accommodationType->name }}</label>
                                         </div>
                                     @endforeach
                                 </div>

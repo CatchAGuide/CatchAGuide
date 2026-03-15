@@ -103,7 +103,7 @@ class TripOfferViewMapper
             'certifications_list'  => $providerCertifications,
             'guide_languages'      => $guideLanguagesList,
         ];
-        $provider['has_content'] = $this->hasAnyValue($provider, ['name', 'experience', 'certifications_list', 'guide_languages']);
+        $provider['has_content'] = $this->hasAnyValue($provider, ['name', 'photo', 'experience', 'certifications_list', 'guide_languages']);
 
         $boat = [
             'boat_type'        => $trip->boat_type ? (string) $trip->boat_type : null,
