@@ -82,24 +82,22 @@
             <main class="trip-offer-page__main">
                 {{-- Feature cards: part of "gallery" block, on left; floating card starts beside them on the right --}}
                 <div class="trip-offer-page__feature-cards">
-                    @if(!empty($tripView['target_species']))
+                    @if(!empty($tripView['duration']['days']) || !empty($tripView['duration']['nights']))
                         <div class="trip-offer-page__feature-card">
                             <span class="trip-offer-page__feature-card-icon" aria-hidden="true">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><path d="M20 12c0-1.5-.5-2.5-1.5-3.5L20 6l-4 2.5c-.5-.5-1-1-1.5-1.5C13 5.5 12 5 10.5 5 7 5 4 8 4 12s3 7 6.5 7c1.5 0 2.5-.5 3.5-1.5l4 2.5-2.5-2.5c1-1 1.5-2 1.5-3.5z"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>
                             </span>
-                            <p class="trip-offer-page__feature-card-label">{{ __('trips.target_species') }}</p>
-                            <p class="trip-offer-page__feature-card-value">{{ implode(', ', $tripView['target_species']) }}</p>
+                            <p class="trip-offer-page__feature-card-label">{{ __('trips.duration') }}</p>
+                            <p class="trip-offer-page__feature-card-value">
+                                @if($tripView['duration']['days'])
+                                    {{ $tripView['duration']['days'] }} {{ __('trips.duration_days') }}
+                                @else
+                                    {{ $tripView['duration']['nights'] }} {{ __('trips.duration_nights') }}
+                                @endif
+                            </p>
                         </div>
                     @endif
-                    @if(!empty($tripView['boat_type']))
-                        <div class="trip-offer-page__feature-card">
-                            <span class="trip-offer-page__feature-card-icon" aria-hidden="true">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><path d="M20 21c-1.39 0-2.78-.47-4-1.32-2.44 1.71-5.56 1.71-8 0C6.78 20.53 5.39 21 4 21H2v2h2c1.38 0 2.74-.35 4-.99 2.52 1.29 5.48 1.29 8 0 1.26.65 2.62.99 4 .99h2v-2h-2zM3.95 19H4c1.6 0 3.02-.83 4-2 .98 1.17 2.4 2 4 2h.05l1.89-6.68c.08-.26.06-.54-.06-.78-.12-.24-.32-.42-.57-.5L20 10.62V6c0-1.1-.9-2-2-2h-3V1H9v3H6c-1.1 0-2 .9-2 2v4.62l-1.29.42c-.25.08-.45.26-.57.5-.12.24-.14.52-.06.78L3.95 19zM6 6h12v3.97L12 12 6 9.97V6z"/></svg>
-                            </span>
-                            <p class="trip-offer-page__feature-card-label">{{ __('trips.boat_type') }}</p>
-                            <p class="trip-offer-page__feature-card-value">{{ $tripView['boat_type'] }}</p>
-                        </div>
-                    @endif
+                    
                     @if(!empty($tripView['group_size']['min']) || !empty($tripView['group_size']['max']))
                         <div class="trip-offer-page__feature-card">
                             <span class="trip-offer-page__feature-card-icon" aria-hidden="true">
@@ -108,22 +106,31 @@
                             <p class="trip-offer-page__feature-card-label">{{ __('trips.group_size') }}</p>
                             <p class="trip-offer-page__feature-card-value">
                                 @if($tripView['group_size']['min'] && $tripView['group_size']['max'])
-                                    {{ $tripView['group_size']['min'] }}–{{ $tripView['group_size']['max'] }} {{ __('trips.anglers') }}
+                                    {{ $tripView['group_size']['min'] }}–{{ $tripView['group_size']['max'] }} {{ __('trips.people') }}
                                 @elseif($tripView['group_size']['max'])
-                                    {{ __('trips.max') }} {{ $tripView['group_size']['max'] }} {{ __('trips.anglers') }}
+                                    {{ __('trips.max_people', ['count' => $tripView['group_size']['max']]) }}
                                 @else
-                                    {{ $tripView['group_size']['min'] ?? $tripView['group_size']['max'] }} {{ __('trips.anglers') }}
+                                    {{ $tripView['group_size']['min'] ?? $tripView['group_size']['max'] }} {{ __('trips.people') }}
                                 @endif
                             </p>
                         </div>
                     @endif
-                    @if(!empty($tripView['skill_level']))
+                    @if(!empty($tripView['fishing_style']) || !empty($tripView['fishing_style_formatted']))
                         <div class="trip-offer-page__feature-card">
                             <span class="trip-offer-page__feature-card-icon" aria-hidden="true">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6h-6z"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><path d="M4 18l2.5-3.5L4 11l2.5-3.5L4 4h16v4l-2.5 3.5L20 15l-2.5 3.5L20 22H4l2.5-3.5L4 15l2.5-3.5L4 8z"/></svg>
                             </span>
-                            <p class="trip-offer-page__feature-card-label">{{ __('trips.skill_level') }}</p>
-                            <p class="trip-offer-page__feature-card-value">{{ $tripView['skill_level_formatted'] ?? $tripView['skill_level'] }}</p>
+                            <p class="trip-offer-page__feature-card-label">{{ __('trips.fishing_type') }}</p>
+                            <p class="trip-offer-page__feature-card-value">{{ $tripView['fishing_style_formatted'] ?? $tripView['fishing_style'] }}</p>
+                        </div>
+                    @endif
+                    @if(!empty($tripView['target_species']))
+                        <div class="trip-offer-page__feature-card">
+                            <span class="trip-offer-page__feature-card-icon" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><path d="M20 12c0-1.5-.5-2.5-1.5-3.5L20 6l-4 2.5c-.5-.5-1-1-1.5-1.5C13 5.5 12 5 10.5 5 7 5 4 8 4 12s3 7 6.5 7c1.5 0 2.5-.5 3.5-1.5l4 2.5-2.5-2.5c1-1 1.5-2 1.5-3.5z"/></svg>
+                            </span>
+                            <p class="trip-offer-page__feature-card-label">{{ __('trips.target_species') }}</p>
+                            <p class="trip-offer-page__feature-card-value">{{ implode(', ', array_slice($tripView['target_species'], 0, 3)) }}</p>
                         </div>
                     @endif
                 </div>
@@ -227,49 +234,87 @@
                         </h2>
                     </div>
 
-                    <div class="trip-offer-page__availability-strip" data-trip-availability>
-                        @foreach($availabilityCards as $index => $card)
-                            @php
-                                $classes = ['trip-offer-page__availability-card'];
-                                if ($index === 0) {
-                                    $classes[] = 'trip-offer-page__availability-card--selected';
-                                } elseif ($card['is_limited']) {
-                                    $classes[] = 'trip-offer-page__availability-card--limited';
-                                }
-                            @endphp
-                            <div class="{{ implode(' ', $classes) }}">
-                                <span class="trip-offer-page__availability-month">
-                                    {{ $card['month'] }}
-                                </span>
-                                <span class="trip-offer-page__availability-day">
-                                    {{ $card['day'] }}
-                                </span>
-                                <span class="trip-offer-page__availability-weekday">
-                                    {{ $card['weekday'] }}
-                                </span>
-                                @if($card['is_limited'])
-                                    <span class="trip-offer-page__availability-badge">
-                                        {{ $card['spots_available'] }}
-                                    </span>
-                                @endif
-                            </div>
-                        @endforeach
-                    </div>
+                    @if(!empty($availabilityCards))
+                        <p class="trip-offer-page__availability-subtitle">
+                            {{ __('trips.availability_subtitle') }}
+                        </p>
 
-                    <p class="trip-offer-page__availability-note">
-                        <i class="fas fa-clock trip-offer-page__availability-note-icon" aria-hidden="true"></i>
-                        <span class="trip-offer-page__availability-note-text">
-                            @if(!empty($tripView['cancellation_policy']))
-                                {{ $tripView['cancellation_policy'] }}
-                            @else
-                                {{ __('trips.free_cancellation_note') }}
-                            @endif
-                            @if(!empty($tripView['downpayment_policy']))
-                                <span class="trip-offer-page__availability-note-sep"> · </span>
-                                {{ __('trips.deposit_label') }}: {{ $tripView['downpayment_policy'] }}
-                            @endif
-                        </span>
-                    </p>
+                        <ul class="trip-offer-page__availability-list" data-trip-availability>
+                            @foreach($availabilityCards as $card)
+                                @php
+                                    $status = $card['availability_status'] ?? 'available';
+                                    $isFullyBooked = $status === 'fully_booked';
+                                @endphp
+                                <li class="trip-offer-page__availability-trip-card trip-offer-page__availability-trip-card--{{ $status }}">
+                                    <div class="trip-offer-page__availability-trip-left">
+                                        <div class="trip-offer-page__availability-trip-icon" aria-hidden="true">
+                                            @if($isFullyBooked)
+                                                <i class="fas fa-times"></i>
+                                            @else
+                                                <i class="fas fa-calendar-alt"></i>
+                                            @endif
+                                        </div>
+                                        <div class="trip-offer-page__availability-trip-meta">
+                                            <p class="trip-offer-page__availability-trip-date">{{ $card['date_formatted'] ?? $card['day'] . '. ' . $card['month'] . ' ' . now()->year }}</p>
+                                            <p class="trip-offer-page__availability-trip-status">
+                                                <span class="trip-offer-page__availability-trip-dot trip-offer-page__avaidaily_schedule_titlelability-trip-dot--{{ $status }}" aria-hidden="true"></span>
+                                                {{ __('trips.availability_status_' . $status) }}
+                                            </p>
+                                            <p class="trip-offer-page__availability-trip-spots">
+                                                @if($isFullyBooked)
+                                                    {{ __('trips.waitlist_possible') }}
+                                                @elseif($status === 'almost_full')
+                                                    {{ $card['spots_available'] == 1 ? __('trips.only_x_spot', ['count' => 1]) : __('trips.only_x_spot_plural', ['count' => $card['spots_available']]) }}
+                                                @else
+                                                    {{ __('trips.spots_available_count', ['count' => $card['spots_available'] ?? '—']) }}
+                                                @endif
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="trip-offer-page__availability-trip-right">
+                                        <div class="trip-offer-page__availability-trip-price-block">
+                                            <p class="trip-offer-page__availability-trip-price-label">{{ __('trips.price_per_person_label') }}</p>
+                                            <p class="trip-offer-page__availability-trip-price">
+                                                @php
+                                                    $pricePerPerson = $tripView['price']['per_person'] ?? null;
+                                                    $currency = $tripView['price']['currency'] ?? 'EUR';
+                                                @endphp
+                                                @if($pricePerPerson !== null && $pricePerPerson !== '')
+                                                    {{ number_format((float) $pricePerPerson, 0, ',', '.') }}{!! in_array(strtoupper($currency), ['EUR']) ? '€' : ' ' . $currency !!}
+                                                @else
+                                                    —
+                                                @endif
+                                            </p>
+                                        </div>
+                                        @if($isFullyBooked)
+                                            <a href="#contact" class="trip-offer-page__availability-trip-btn trip-offer-page__availability-trip-btn--secondary">
+                                                {{ __('trips.inquire') }}
+                                            </a>
+                                        @else
+                                            <button type="button" class="trip-offer-page__availability-trip-btn trip-offer-page__availability-trip-btn--primary" data-reserve-date="{{ $card['departure_date'] ?? '' }}">
+                                                {{ __('trips.reserve_now') }}
+                                            </button>
+                                        @endif
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
+
+                        <p class="trip-offer-page__availability-note">
+                            <i class="fas fa-exclamation-triangle trip-offer-page__availability-note-icon" aria-hidden="true"></i>
+                            <span class="trip-offer-page__availability-note-text">
+                                @if(!empty($tripView['cancellation_policy']))
+                                    {{ $tripView['cancellation_policy'] }}
+                                @else
+                                    {{ __('trips.free_cancellation_note') }}
+                                @endif
+                                @if(!empty($tripView['downpayment_policy']))
+                                    <span class="trip-offer-page__availability-note-sep"> · </span>
+                                    {{ __('trips.deposit_label') }}: {{ $tripView['downpayment_policy'] }}
+                                @endif
+                            </span>
+                        </p>
+                    @endif
                 </section>
 
                 @if(!empty($tripView['trip_highlights']))
@@ -289,7 +334,7 @@
                     <section class="trip-offer-page__daily-schedule" id="itinerary">
                         <div class="trip-offer-page__daily-schedule-card">
                             <h2 class="trip-offer-page__section-title">
-                                {{ __('trips.daily_schedule_title') }}
+                                {{ __('trips.trip_schedule') }}
                             </h2>
 
                             <ul class="trip-offer-page__schedule-timeline">
@@ -601,14 +646,6 @@
                             </p>
                         </div>
                         <div class="trip-offer-page__pricing-grid-card">
-                            <p class="trip-offer-page__pricing-grid-label">{{ strtoupper(__('trips.group_discount')) }}</p>
-                            <p class="trip-offer-page__pricing-grid-value">—</p>
-                        </div>
-                        <div class="trip-offer-page__pricing-grid-card">
-                            <p class="trip-offer-page__pricing-grid-label">{{ strtoupper(__('trips.early_bird')) }}</p>
-                            <p class="trip-offer-page__pricing-grid-value">—</p>
-                        </div>
-                        <div class="trip-offer-page__pricing-grid-card">
                             <p class="trip-offer-page__pricing-grid-label">{{ strtoupper(__('trips.deposit_at_booking')) }}</p>
                             <p class="trip-offer-page__pricing-grid-value">
                                 {{ !empty($tripView['downpayment_policy']) ? $tripView['downpayment_policy'] : '—' }}
@@ -635,9 +672,6 @@
                             <span class="trip-offer-page__booking-label">
                                 {{ __('trips.price_per_person_short') }}
                             </span>
-                            <span class="trip-offer-page__booking-badge">
-                                {{ __('trips.instant_booking') }}
-                            </span>
                         </div>
                         <div class="trip-offer-page__booking-price">
                             @if($tripView['price']['per_person'])
@@ -655,30 +689,25 @@
                     <div class="trip-offer-page__booking-body">
                         <div class="trip-offer-page__booking-field-group">
                             <p class="trip-offer-page__booking-field-label">
-                                {{ __('trips.select_duration') }}
-                            </p>
-                            <div class="trip-offer-page__duration-pill-row">
-                                @if($tripView['duration']['days'])
-                                    <button type="button" class="trip-offer-page__duration-pill trip-offer-page__duration-pill--active">
-                                        {{ $tripView['duration']['days'] }} {{ __('trips.duration_days') }}
-                                    </button>
-                                @endif
-                                @if($tripView['duration']['nights'])
-                                    <button type="button" class="trip-offer-page__duration-pill">
-                                        {{ $tripView['duration']['nights'] }} {{ __('trips.duration_nights') }}
-                                    </button>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="trip-offer-page__booking-field-group">
-                            <p class="trip-offer-page__booking-field-label">
                                 {{ __('trips.select_date') }}
                             </p>
-                            <button type="button" class="trip-offer-page__booking-input trip-offer-page__booking-input--date">
-                                <span data-trip-selected-date>{{ __('trips.choose_date') }}</span>
-                                <i class="far fa-calendar"></i>
-                            </button>
+                            <select class="trip-offer-page__booking-select" name="departure_date" data-trip-selected-date aria-label="{{ __('trips.select_date') }}">
+                                <option value="">{{ __('trips.choose_date') }}</option>
+                                @if(!empty($availabilityCards))
+                                    @foreach($availabilityCards as $card)
+                                        @php
+                                            $status = $card['availability_status'] ?? 'available';
+                                            $label = $card['date_formatted'] ?? ($card['day'] ?? '') . '. ' . ($card['month'] ?? '') . ' ' . now()->year;
+                                            if ($status === 'fully_booked') {
+                                                $label .= ' — ' . __('trips.availability_status_fully_booked');
+                                            } elseif ($status === 'almost_full' && isset($card['spots_available'])) {
+                                                $label .= ' — ' . ($card['spots_available'] == 1 ? __('trips.only_x_spot', ['count' => 1]) : __('trips.only_x_spot_plural', ['count' => $card['spots_available']]));
+                                            }
+                                        @endphp
+                                        <option value="{{ $card['departure_date'] ?? '' }}" {{ $status === 'fully_booked' ? 'disabled' : '' }}>{{ $label }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
                         </div>
 
                         <div class="trip-offer-page__booking-field-group">
@@ -707,37 +736,6 @@
                         <p class="trip-offer-page__booking-footnote">
                             {{ __('trips.free_cancellation_note') }}
                         </p>
-
-                        @if(!empty($tripView['provider']['name']))
-                            <div class="trip-offer-page__guide">
-                                <div class="trip-offer-page__guide-meta">
-                                    @if($tripView['provider']['photo'])
-                                        <img
-                                            src="{{ $tripView['provider']['photo'] }}"
-                                            alt="{{ $tripView['provider']['name'] }}"
-                                            class="trip-offer-page__guide-avatar"
-                                        >
-                                    @else
-                                        <div class="trip-offer-page__guide-avatar trip-offer-page__guide-avatar--placeholder" aria-hidden="true">
-                                            {{ strtoupper(mb_substr($tripView['provider']['name'], 0, 1)) }}
-                                        </div>
-                                    @endif
-                                    <div class="trip-offer-page__guide-info">
-                                        <p class="trip-offer-page__guide-name">
-                                            {{ $tripView['provider']['name'] }}
-                                        </p>
-                                        @if($tripView['provider']['experience'])
-                                            <p class="trip-offer-page__guide-experience">
-                                                {{ $tripView['provider']['experience'] }}
-                                            </p>
-                                        @endif
-                                    </div>
-                                </div>
-                                <a href="#" class="trip-offer-page__guide-contact" role="button">
-                                    {{ __('trips.contact') }}
-                                </a>
-                            </div>
-                        @endif
                     </div>
                 </div>
 

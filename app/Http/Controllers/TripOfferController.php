@@ -105,16 +105,36 @@ class TripOfferController extends Controller
 
         return $dates->map(function ($availability) {
             $date = $availability->departure_date;
+            $spots = $availability->spots_available;
+            $availabilityStatus = $this->deriveAvailabilityStatus($spots);
 
             return [
                 'month' => $date ? $date->format('M') : null,
                 'day' => $date ? $date->format('d') : null,
                 'weekday' => $date ? $date->format('D') : null,
-                'spots_available' => $availability->spots_available,
+                'date_formatted' => $date ? $date->format('d. F Y') : null,
+                'departure_date' => $date?->toDateString(),
+                'spots_available' => $spots,
                 'status' => $availability->status,
-                'is_limited' => $availability->spots_available !== null && $availability->spots_available <= 3,
+                'availability_status' => $availabilityStatus,
+                'is_limited' => $spots !== null && $spots > 0 && $spots <= 3,
             ];
         })->toArray();
+    }
+
+    /**
+     * Derive availability status from spots_available (from admin panel).
+     * fully_booked: 0 spots; almost_full: 1-3 spots; available: 4+ or null.
+     */
+    private function deriveAvailabilityStatus(?int $spots): string
+    {
+        if ($spots === null || $spots > 3) {
+            return 'available';
+        }
+        if ($spots === 0) {
+            return 'fully_booked';
+        }
+        return 'almost_full';
     }
 
     private function normalizeImagePath(?string $path): ?string
