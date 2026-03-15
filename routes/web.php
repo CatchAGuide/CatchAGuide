@@ -467,6 +467,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/translation/create', [TranslationController::class,'create'])->name('translation.create');
         
+        Route::get('employees/trashed', [EmployeesController::class, 'trashed'])->name('employees.trashed');
+        Route::post('employees/trashed/{id}/restore', [EmployeesController::class, 'restore'])->name('employees.restore');
+        Route::post('employees/{employee}/reset-password', [EmployeesController::class, 'resetPassword'])->name('employees.reset-password');
         Route::resource('employees', EmployeesController::class);
 
         Route::prefix('blog')->name('blog.')->group(function () {
