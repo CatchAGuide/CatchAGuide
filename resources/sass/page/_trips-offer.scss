@@ -723,6 +723,12 @@ $trip-offer-gutter-x: 15px;
         color: #111827;
     }
 
+    &__availability-trip-return {
+        margin: 0 0 0.15rem;
+        font-size: 0.8rem;
+        color: #6b7280;
+    }
+
     &__availability-trip-status {
         margin: 0 0 0.15rem;
         font-size: 0.75rem;
@@ -1018,9 +1024,14 @@ $trip-offer-gutter-x: 15px;
         color: #6b7280;
     }
 
-    // Single card: Accommodation, Your Guide, Boat & Equipment stacked (between What's Included and Additional Information)
+    // Cards: Accommodation, Your Guide, Boat & Equipment (between What's Included and Additional Information)
     &__card-group {
         margin-top: 1.5rem;
+    }
+
+    &__card-group-list {
+        display: grid;
+        gap: 1rem;
     }
 
     &__card-group-single {

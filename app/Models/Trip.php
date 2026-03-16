@@ -91,6 +91,7 @@ class Trip extends Model
         'target_species'             => 'array',
         'fishing_methods'            => 'array',
         'water_types'                => 'array',
+        'skill_level'                => 'array',
         'trip_schedule'              => 'array',
         'catering'                   => 'array',
         'boat_features'              => 'array',

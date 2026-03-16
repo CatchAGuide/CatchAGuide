@@ -7,6 +7,7 @@ use App\Models\Method;
 use App\Models\Target;
 use App\Models\Trip;
 use App\Models\Water;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 /**
@@ -80,8 +81,29 @@ class TripOfferViewMapper
         $included = $this->normalizeIncludedExcluded($trip->included ?? []);
         $excluded = $this->normalizeExcluded($trip->excluded ?? []);
 
-        $skillLevelFormatted = $trip->skill_level ? $this->titleCase($trip->skill_level) : null;
+        $rawSkillLevel = $trip->skill_level;
+        if (is_array($rawSkillLevel)) {
+            $skillSlugs = collect($rawSkillLevel)
+                ->map(function ($item) {
+                    if (is_array($item)) {
+                        return $item['name'] ?? $item['value'] ?? null;
+                    }
+                    return $item !== null ? (string) $item : null;
+                })
+                ->filter()
+                ->values()
+                ->toArray();
+        } else {
+            $skillSlugs = $rawSkillLevel ? [(string) $rawSkillLevel] : [];
+        }
+
+        $skillLevelFormatted = !empty($skillSlugs)
+            ? implode(' / ', array_map([$this, 'titleCase'], $skillSlugs))
+            : null;
         $fishingStyleFormatted = $trip->fishing_style ? $this->titleCase($trip->fishing_style) : null;
+
+        $bestSeasonFromLabel = $this->formatMonthLabel($trip->best_season_from);
+        $bestSeasonToLabel = $this->formatMonthLabel($trip->best_season_to);
 
         $acc = [
             'name'                  => $trip->accommodation_type ? (string) $trip->accommodation_type : null,
@@ -137,7 +159,7 @@ class TripOfferViewMapper
                 'single_room_addition' => $trip->price_single_room_addition,
                 'currency'             => $trip->currency ?? 'EUR',
             ],
-            'skill_level'                => $trip->skill_level,
+            'skill_level'                => $skillSlugs,
             'skill_level_formatted'      => $skillLevelFormatted,
             'fishing_style'              => $trip->fishing_style,
             'fishing_style_formatted'     => $fishingStyleFormatted,
@@ -145,6 +167,10 @@ class TripOfferViewMapper
             'best_season'                 => [
                 'from' => $trip->best_season_from,
                 'to'   => $trip->best_season_to,
+            ],
+            'best_season_formatted'       => [
+                'from' => $bestSeasonFromLabel,
+                'to'   => $bestSeasonToLabel,
             ],
             'target_species'             => $targetSpecies,
             'fishing_methods'            => $fishingMethods,
@@ -337,6 +363,26 @@ class TripOfferViewMapper
     private function titleCase(string $value): string
     {
         return \Illuminate\Support\Str::title(str_replace('_', ' ', $value));
+    }
+
+    private function formatMonthLabel(?string $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        // Accept "01".."12", "1".."12" (from dropdown), or already-a-label values.
+        if (! is_numeric($value)) {
+            return (string) $value;
+        }
+
+        $month = (int) $value;
+        if ($month < 1 || $month > 12) {
+            return null;
+        }
+
+        // Uses current app locale (Carbon locale is set by Laravel).
+        return Carbon::createFromDate(null, $month, 1)->translatedFormat('F');
     }
 
     private function hasAnyValue(array $data, array $keys): bool

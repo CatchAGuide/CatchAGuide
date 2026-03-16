@@ -26,7 +26,7 @@ class TripDataProcessor
             'fishing_methods'             => $this->processTagifyField($request->input('fishing_methods')),
             'fishing_style'               => $request->input('fishing_style') ?: null,
             'water_types'                 => $this->processTagifyField($request->input('water_types')),
-            'skill_level'                 => $request->input('skill_level') ?: null,
+            'skill_level'                 => $this->processTagifyField($request->input('skill_level')),
             'duration_nights'             => $request->input('duration_nights') ?: null,
             'duration_days'               => $request->input('duration_days') ?: null,
             'group_size_min'              => $request->input('group_size_min') ?: null,
@@ -131,7 +131,6 @@ class TripDataProcessor
                                                             return [
                                                                 'departure_date'  => optional($date->departure_date)->format('Y-m-d'),
                                                                 'spots_available' => $date->spots_available,
-                                                                'status'          => $date->status,
                                                             ];
                                                         })
                                                         ->toArray(),
@@ -287,18 +286,6 @@ class TripDataProcessor
 
         return [
             'items' => $cleanItems,
-            'accommodation_nights' => [
-                'enabled' => (bool) $request->input('highlight_accommodation_enabled', false),
-                'value'   => $request->input('highlight_accommodation_nights') ?: null,
-            ],
-            'fishing_days' => [
-                'enabled' => (bool) $request->input('highlight_fishing_enabled', false),
-                'value'   => $request->input('highlight_fishing_days') ?: null,
-            ],
-            'travel_days' => [
-                'enabled' => (bool) $request->input('highlight_travel_enabled', false),
-                'value'   => $request->input('highlight_travel_days') ?: null,
-            ],
         ];
     }
 

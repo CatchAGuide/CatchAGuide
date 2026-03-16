@@ -9,6 +9,12 @@ use Illuminate\View\View;
 
 class TripOfferController extends Controller
 {
+    /**
+     * Spots below this number are considered "almost full".
+     * Example: 2 => 1 spot left is almost full; 0 is fully booked.
+     */
+    private int $almostFullThreshold = 2;
+
     public function __construct(
         private TripOfferViewMapper $mapper,
         private TripCacheService $cache
@@ -98,15 +104,22 @@ class TripOfferController extends Controller
 
     private function buildAvailabilityCards(Trip $trip): array
     {
+        $durationDays = $trip->duration_days ?? null;
+
         $dates = $trip->availabilityDates()
             ->where('departure_date', '>=', now()->toDateString())
             ->orderBy('departure_date')
             ->get();
 
-        return $dates->map(function ($availability) {
+        return $dates->map(function ($availability) use ($durationDays) {
             $date = $availability->departure_date;
             $spots = $availability->spots_available;
             $availabilityStatus = $this->deriveAvailabilityStatus($spots);
+
+            $returnDate = null;
+            if ($date && $durationDays && $durationDays > 0) {
+                $returnDate = $date->copy()->addDays((int) $durationDays);
+            }
 
             return [
                 'month' => $date ? $date->format('M') : null,
@@ -114,27 +127,27 @@ class TripOfferController extends Controller
                 'weekday' => $date ? $date->format('D') : null,
                 'date_formatted' => $date ? $date->format('d. F Y') : null,
                 'departure_date' => $date?->toDateString(),
+                'return_date_formatted' => $returnDate ? $returnDate->format('d. F Y') : null,
                 'spots_available' => $spots,
-                'status' => $availability->status,
                 'availability_status' => $availabilityStatus,
-                'is_limited' => $spots !== null && $spots > 0 && $spots <= 3,
+                'is_limited' => $spots !== null && $spots > 0 && $spots < $this->almostFullThreshold,
             ];
         })->toArray();
     }
 
     /**
      * Derive availability status from spots_available (from admin panel).
-     * fully_booked: 0 spots; almost_full: 1-3 spots; available: 4+ or null.
+     * fully_booked: 0 spots; almost_full: 1 spot; available: 2+ or null.
      */
     private function deriveAvailabilityStatus(?int $spots): string
     {
-        if ($spots === null || $spots > 3) {
-            return 'available';
-        }
         if ($spots === 0) {
             return 'fully_booked';
         }
-        return 'almost_full';
+        if ($spots !== null && $spots < $this->almostFullThreshold) {
+            return 'almost_full';
+        }
+        return 'available';
     }
 
     private function normalizeImagePath(?string $path): ?string

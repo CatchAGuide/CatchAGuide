@@ -186,25 +186,11 @@
 
                 <div class="form-group">
                     <label class="form-label fw-bold fs-5">{{ __('trips.skill_level') }}</label>
-                    @php $skill = $formData['skill_level'] ?? null; @endphp
-                    <div class="d-flex flex-wrap btn-group-toggle">
-                        <div class="btn-checkbox-container me-2">
-                            <input class="form-check-input" type="radio" name="skill_level" id="skill_beginner" value="beginner" {{ $skill === 'beginner' ? 'checked' : '' }}>
-                            <label class="btn-checkbox" for="skill_beginner">Beginner</label>
-                        </div>
-                        <div class="btn-checkbox-container me-2">
-                            <input class="form-check-input" type="radio" name="skill_level" id="skill_intermediate" value="intermediate" {{ $skill === 'intermediate' ? 'checked' : '' }}>
-                            <label class="btn-checkbox" for="skill_intermediate">Intermediate</label>
-                        </div>
-                        <div class="btn-checkbox-container me-2">
-                            <input class="form-check-input" type="radio" name="skill_level" id="skill_advanced" value="advanced" {{ $skill === 'advanced' ? 'checked' : '' }}>
-                            <label class="btn-checkbox" for="skill_advanced">Advanced</label>
-                        </div>
-                        <div class="btn-checkbox-container me-2">
-                            <input class="form-check-input" type="radio" name="skill_level" id="skill_all_levels" value="all_levels" {{ $skill === 'all_levels' ? 'checked' : '' }}>
-                            <label class="btn-checkbox" for="skill_all_levels">All levels</label>
-                        </div>
-                    </div>
+                    <input type="text"
+                           class="form-control"
+                           name="skill_level"
+                           id="skill_level"
+                           placeholder="{{ __('trips.skill_level') }}">
                 </div>
 
                 <hr>
@@ -615,54 +601,6 @@
                     </button>
                 </div>
 
-                <div class="row g-3 mt-2">
-                    <div class="col-md-4">
-                        <div class="btn-checkbox-container w-100">
-                            <input class="form-check-input d-none" type="checkbox" id="highlight_accommodation_enabled" name="highlight_accommodation_enabled" {{ ($formData['trip_highlights']['accommodation_nights']['enabled'] ?? false) ? 'checked' : '' }}>
-                            <label class="btn btn-outline-primary btn-checkbox w-100 d-flex justify-content-between align-items-center" for="highlight_accommodation_enabled">
-                                <span>{{ __('trips.highlight_accommodation') }}</span>
-                                <span class="ms-2"><i class="fas fa-bed"></i></span>
-                            </label>
-                        </div>
-                        <input type="number"
-                               class="form-control mt-2 highlight-input"
-                               name="highlight_accommodation_nights"
-                               value="{{ $formData['trip_highlights']['accommodation_nights']['value'] ?? '' }}"
-                               placeholder="Nights"
-                               @if(empty($formData['trip_highlights']['accommodation_nights']['enabled'])) style="display:none;" @endif>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="btn-checkbox-container w-100">
-                            <input class="form-check-input d-none" type="checkbox" id="highlight_fishing_enabled" name="highlight_fishing_enabled" {{ ($formData['trip_highlights']['fishing_days']['enabled'] ?? false) ? 'checked' : '' }}>
-                            <label class="btn btn-outline-primary btn-checkbox w-100 d-flex justify-content-between align-items-center" for="highlight_fishing_enabled">
-                                <span>{{ __('trips.highlight_fishing') }}</span>
-                                <span class="ms-2"><i class="fas fa-fish"></i></span>
-                            </label>
-                        </div>
-                        <input type="number"
-                               class="form-control mt-2 highlight-input"
-                               name="highlight_fishing_days"
-                               value="{{ $formData['trip_highlights']['fishing_days']['value'] ?? '' }}"
-                               placeholder="Days"
-                               @if(empty($formData['trip_highlights']['fishing_days']['enabled'])) style="display:none;" @endif>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="btn-checkbox-container w-100">
-                            <input class="form-check-input d-none" type="checkbox" id="highlight_travel_enabled" name="highlight_travel_enabled" {{ ($formData['trip_highlights']['travel_days']['enabled'] ?? false) ? 'checked' : '' }}>
-                            <label class="btn btn-outline-primary btn-checkbox w-100 d-flex justify-content-between align-items-center" for="highlight_travel_enabled">
-                                <span>{{ __('trips.highlight_travel') }}</span>
-                                <span class="ms-2"><i class="fas fa-route"></i></span>
-                            </label>
-                        </div>
-                        <input type="number"
-                               class="form-control mt-2 highlight-input"
-                               name="highlight_travel_days"
-                               value="{{ $formData['trip_highlights']['travel_days']['value'] ?? '' }}"
-                               placeholder="Days"
-                               @if(empty($formData['trip_highlights']['travel_days']['enabled'])) style="display:none;" @endif>
-                    </div>
-                </div>
-
                 <div class="button-group">
                     <div class="left-buttons">
                         <button type="button" class="btn btn-secondary" id="saveDraftBtn4">
@@ -903,7 +841,6 @@
                             <tr>
                                 <th>{{ __('trips.availability_departure_date') }}</th>
                                 <th>{{ __('trips.availability_spots') }}</th>
-                                <th>{{ __('trips.availability_status') }}</th>
                                 <th></th>
                             </tr>
                         </thead>

@@ -25,6 +25,10 @@ return [
     'fishing_style_both'    => 'Both',
     'water_types'           => 'Water Types',
     'skill_level'           => 'Skill Level',
+    'skill_level_beginner'      => 'Beginner',
+    'skill_level_intermediate'  => 'Intermediate',
+    'skill_level_advanced'      => 'Advanced',
+    'skill_level_all_levels'    => 'All levels',
 
     // Step 2 — General Details
     'general_details_title'   => 'General Details',
@@ -172,6 +176,8 @@ return [
     'waitlist_possible'            => 'Waitlist possible',
     'reserve_now'                  => 'Reserve now',
     'inquire'                      => 'Inquire',
+
+    'return_date_label'            => 'Return:',
 
     // Common
     'create'           => 'Create Trip',

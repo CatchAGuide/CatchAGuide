@@ -136,8 +136,29 @@
                                             <span class="text-muted">Not set</span>
                                         @endif
                                     </p>
+                                    @php
+                                        $rawSkill = $trip->skill_level;
+                                        if (is_array($rawSkill)) {
+                                            $skillSlugs = collect($rawSkill)
+                                                ->map(function ($item) {
+                                                    if (is_array($item)) {
+                                                        return $item['name'] ?? $item['value'] ?? null;
+                                                    }
+                                                    return $item !== null ? (string) $item : null;
+                                                })
+                                                ->filter()
+                                                ->values()
+                                                ->toArray();
+                                        } else {
+                                            $skillSlugs = $rawSkill ? [(string) $rawSkill] : [];
+                                        }
+                                    @endphp
                                     <p><strong>Skill Level:</strong>
-                                        {{ $trip->skill_level ? ucfirst(str_replace('_', ' ', $trip->skill_level)) : 'Not set' }}
+                                        @if(count($skillSlugs))
+                                            {{ implode(' / ', array_map(fn($s) => ucfirst(str_replace('_', ' ', $s)), $skillSlugs)) }}
+                                        @else
+                                            <span class="text-muted">Not set</span>
+                                        @endif
                                     </p>
                                 </div>
                                 <div class="col-md-6">

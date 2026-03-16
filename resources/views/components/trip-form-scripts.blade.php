@@ -311,6 +311,13 @@
             __('trips.language_portuguese'),
         ]) !!};
 
+        const skillLevelOptions = {!! json_encode([
+            ['value' => 'beginner',     'label' => __('trips.skill_level_beginner')],
+            ['value' => 'intermediate', 'label' => __('trips.skill_level_intermediate')],
+            ['value' => 'advanced',     'label' => __('trips.skill_level_advanced')],
+            ['value' => 'all_levels',   'label' => __('trips.skill_level_all_levels')],
+        ]) !!};
+
         // Pre-populate DB-backed fields on edit — resolve stored IDs to names via model methods
         @if(isset($formData['is_update']) && $formData['is_update'])
             const targetSpeciesData = {!! json_encode(collect($formData['target_species'] ?? [])->pluck('name')->filter()->values()->toArray()) !!};
@@ -328,6 +335,34 @@
                 waterTypesTagify.addTags(waterTypesData);
             }
             const boatFeaturesData = {!! json_encode(collect($formData['boat_features'] ?? [])->pluck('name')->filter()->values()->toArray()) !!};
+        @endif
+
+        const skillLevelTagify = init('input[name="skill_level"]', {
+            whitelist: skillLevelOptions,
+            maxTags: 10,
+            tagTextProp: 'label',
+            dropdown: {
+                enabled: 0,
+                closeOnSelect: true,
+                searchKeys: ['label'],
+            },
+        });
+
+        @if(isset($formData['is_update']) && $formData['is_update'])
+            @php
+                $skillLevelRaw = $formData['skill_level'] ?? [];
+                $skillLevelNames = collect(is_array($skillLevelRaw) ? $skillLevelRaw : [$skillLevelRaw])
+                    ->map(function ($item) {
+                        return is_array($item) ? ($item['name'] ?? $item['value'] ?? null) : $item;
+                    })
+                    ->filter()
+                    ->values()
+                    ->toArray();
+            @endphp
+            const skillLevelData = {!! json_encode($skillLevelNames) !!};
+            if (skillLevelTagify && Array.isArray(skillLevelData) && skillLevelData.length) {
+                skillLevelTagify.addTags(skillLevelData);
+            }
         @endif
 
         // Free-form / DB-backed Tagify fields
@@ -400,7 +435,7 @@
             }
         }
 
-        ['target_species', 'fishing_methods', 'water_types', 'catering', 'boat_features', 'room_types', 'guide_languages', 'included', 'excluded'].forEach(collect);
+        ['target_species', 'fishing_methods', 'water_types', 'catering', 'boat_features', 'room_types', 'guide_languages', 'included', 'excluded', 'skill_level'].forEach(collect);
 
         // Trip highlights bullet items (min 1, max length enforced in UI)
         const highlightItems = [];
@@ -468,23 +503,6 @@
             }
         });
 
-        function bindToggle(checkboxId, inputName) {
-            const checkbox = $('#' + checkboxId);
-            const input = $(`input[name="${inputName}"]`);
-            function update() {
-                if (checkbox.is(':checked')) {
-                    input.show();
-                } else {
-                    input.hide().val('');
-                }
-            }
-            checkbox.on('change', update);
-            update();
-        }
-
-        bindToggle('highlight_accommodation_enabled', 'highlight_accommodation_nights');
-        bindToggle('highlight_fishing_enabled', 'highlight_fishing_days');
-        bindToggle('highlight_travel_enabled', 'highlight_travel_days');
     }
 
     // Reuseable toggle binding for "button as checkbox + extra input" pattern (Additional Information)
@@ -565,28 +583,16 @@
 
     function initializeAvailabilityTable() {
         const tbody = $('#availabilityTable tbody');
-        const statusOptions = @json($availabilityStatusOptions ?? ['available','limited','sold_out']);
         const existing = @json($formData['availability_dates'] ?? []);
 
         const today = new Date();
         const todayStr = today.toISOString().substring(0, 10);
 
-        function renderStatusSelect(selected) {
-            let html = '<select class="form-select form-select-sm availability-status-select" name="availability_dates[][status]">';
-            statusOptions.forEach(function (opt) {
-                const label = opt.replace('_', ' ');
-                html += `<option value="${opt}" ${selected === opt ? 'selected' : ''}>${label.charAt(0).toUpperCase() + label.slice(1)}</option>`;
-            });
-            html += '</select>';
-            return html;
-        }
-
-        function addRow(date = '', spots = '', status = 'available') {
+        function addRow(date = '', spots = '') {
             const row = $(`
                 <tr>
                     <td><input type="date" class="form-control form-control-sm availability-date-input" name="availability_dates[][departure_date]" value="${date}"></td>
                     <td><input type="number" min="0" class="form-control form-control-sm" name="availability_dates[][spots_available]" value="${spots}"></td>
-                    <td>${renderStatusSelect(status)}</td>
                     <td class="text-end">
                         <button type="button" class="btn btn-sm btn-outline-danger remove-availability-row">
                             <i class="fas fa-trash"></i>
@@ -623,7 +629,7 @@
         if (Array.isArray(existing) && existing.length) {
             existing.forEach(function (row) {
                 const date = row.departure_date?.date ? row.departure_date.date.substring(0, 10) : (row.departure_date || '');
-                addRow(date, row.spots_available ?? 0, row.status || 'available');
+                addRow(date, row.spots_available ?? 0);
             });
         } else {
             addRow();
@@ -643,12 +649,10 @@
         $('#availabilityTable tbody tr').each(function () {
             const date = $(this).find('input[name="availability_dates[][departure_date]"]').val();
             const spots = $(this).find('input[name="availability_dates[][spots_available]"]').val();
-            const status = $(this).find('select[name="availability_dates[][status]"]').val();
             if (date) {
                 rows.push({
                     departure_date: date,
-                    spots_available: spots || 0,
-                    status: status || 'available'
+                    spots_available: spots || 0
                 });
             }
         });
