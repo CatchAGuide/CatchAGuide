@@ -60,6 +60,10 @@ return [
     'guide_booking_accepted_text_11' => 'Ort :',
     'guide_booking_accepted_text_12' => 'Datum :',
     
+    'guest_booking_accepted_text_7' => 'Guide Name :',
+    'guest_booking_accepted_text_8' => 'Guide Telefon :',
+    'guest_booking_accepted_text_9' => 'Guide Email :',
+
     'guide_booking_expired_title' => 'Buchungsanfrage abgelaufen – Keine Antwort erhalten',
     'guide_booking_expired_text_1' => 'Wir möchten Dich darüber informieren, dass die kürzliche Buchungsanfrage für eine Angeltour aufgrund einer fehlenden Antwort von Dir innerhalb des 48-Stunden-Zeitrahmens abgelaufen ist.',
     'guide_booking_expired_text_2' => 'Zur Erinnerung: Alle Buchungsanfragen auf unserer Plattform laufen nach 48 Stunden ab, wenn keine Antwort erfolgt, damit Gäste ihre Reisen ohne unnötige Verzögerungen weiter planen können. Wir empfehlen, auf neue Anfragen so schnell wie möglich zu antworten, um keine zukünftigen Möglichkeiten zu verpassen.',

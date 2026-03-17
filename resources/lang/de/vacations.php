@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'Page' => 'Seite',
+    'Guest' => 'Gast',
     'Coordinates' => 'Koordinaten',
     'Radius' => 'Radius',
     'Show_on_map' => 'Auf Karte anzeigen',
@@ -43,7 +45,8 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'nearest_airport' => 'Nächstgelegener Flughafen',
     'distance_water' => 'Entfernung zum Wasser',
     'distance_shoping' => 'Entfernung zum Einkaufen',
-    'pets_allowd' => 'Haustiere Erlaubt',
+    'pets_allowd' => 'Haustiere erlaubt',
+    'pets_allowed' => 'Haustiere erlaubt',
     'smoking_allowed' => 'Rauchen erlaubt',
     'disability_friendly' => 'Behindertengerecht',
     'accommodations' => 'Unterkunft',

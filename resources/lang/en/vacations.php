@@ -46,6 +46,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'distance_water' => 'Distance to the Water',
     'distance_shoping' => 'Shopping distance',
     'pets_allowed' => 'Pets Allowed',
+    'pets_allowd' => 'Pets Allowed',
     'smoking_allowed' => 'Smoking allowed',
     'disability_friendly' => 'Handicapped accessible',
     'accommodations' => 'Accommodations',
@@ -59,6 +60,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'contact_us_message' => 'Send us a quick request with your preferred dates. We’ll let you know shortly if your fishing holiday is available.',
     'contact_us_button' => 'Request Now',
     'book_vacations' => 'Book Vacation',
+    'facilities' => 'Facilities',
 
     // V2 Page Translations
     'make_inquiry' => 'Make Inquiry',

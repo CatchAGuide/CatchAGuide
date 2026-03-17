@@ -70,6 +70,8 @@ return [
     'find-your-guide' => 'Finden & Buchen mit Catch A Guide!',
     'catchYourFish' => 'Fange Deinen Lieblingsfisch',
     'refine-techniques' => 'Verfeinere Deine Angeltechniken',
+
+    'FindAGiude' => 'Finde deinen Angelguide',
     
     
     // filter
@@ -303,5 +305,16 @@ Wichtiger Hinweis: Solltest du persönliche Kontaktdaten wie z.B. deine E-Mail-A
     'reject-form-step-3-hint' => 'Klicke auf den Button unten, wenn beide Schritte erledigt sind.',
     'reject-form-step-done' => 'Erledigt',
     'reject-form-step-pending' => 'Weiter',
+
+    // Legacy keys (kept for translation sync)
+    'ideas' => 'Profil',
+    'bookBy' => 'Von mir gebucht',
+    'favorite' => 'Lieblingsguidings',
+    'mess' => 'Nachrichten',
+    'verify' => 'Als Guide verifizieren',
+    'myGiuding' => 'Meine Guidings',
+    'createGuides' => 'Guides erstellen',
+    'bookedWithMe' => 'Bei mir gebucht',
+    'diary' => 'Kalender',
 
 ];

@@ -11,13 +11,13 @@ By default, functional cookies are enabled to ensure that you can access and use
 'analytical-msg' => 'These cookies allow us to track analytics by counting visits and traffic sources so we can measure and improve the performance of our website. 
 They may be set by us or by third party providers to help us to know which pages are the most and least popular and see how visitors move around the website.',
 
-'functional' => 'Advertising Cookies',
-'functional-msg' => 'These cookies may be set through our site by our advertising partners. 
+'advertising' => 'Advertising Cookies',
+'advertising-msg' => 'These cookies may be set through our site by our advertising partners. 
 They may be used by those partners to build a profile of your interests and show you relevant advertisements on other websites.',
 
 'yes-btn' => 'Yes',
 'no-btn' => 'No',
-'few-btn' => 'Just a few',
+'few-btn' => 'Settings',
 'close-btn' => 'Close',
 'save-preference-btn' => 'Save Preferences',
 

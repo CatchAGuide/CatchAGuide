@@ -214,5 +214,7 @@ return [
     'language_spanish'    => 'Spanish',
     'language_french'     => 'French',
     'language_portuguese' => 'Portuguese',
+
+    'please_provide_your_details_for_booking_the_trip' => 'Please provide your details for booking the trip: :title',
 ];
 
