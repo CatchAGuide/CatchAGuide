@@ -262,7 +262,7 @@
                                                 </p>
                                             @endif
                                             <p class="trip-offer-page__availability-trip-status">
-                                                <span class="trip-offer-page__availability-trip-dot trip-offer-page__avaidaily_schedule_titlelability-trip-dot--{{ $status }}" aria-hidden="true"></span>
+                                                <span class="trip-offer-page__availability-trip-dot trip-offer-page__availability-trip-dot--{{ $status }}" aria-hidden="true"></span>
                                                 {{ __('trips.availability_status_' . $status) }}
                                             </p>
                                             <p class="trip-offer-page__availability-trip-spots">

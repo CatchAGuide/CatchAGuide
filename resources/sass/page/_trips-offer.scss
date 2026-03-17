@@ -1,13 +1,42 @@
 @import "../settings/variables";
+@import "../settings/colors";
 
 // Align with header/search bar: same horizontal padding and max-width as .container (Bootstrap)
 $trip-offer-container-max: 1140px;
 $trip-offer-gutter-x: 15px;
 
+$trip-offer-theme-dark: map-get($colors, "dark");
+$trip-offer-theme-accent: $primary-color; // global primary (orange)
+$trip-offer-theme-surface: map-get($colors, "light");
+$trip-offer-theme-bg: $body-bg;
+$trip-offer-theme-border: rgba($trip-offer-theme-dark, 0.12);
+$trip-offer-theme-muted: map-get($colors, "gray");
+
+// Typography tokens (keep consistent across cards/details)
+$trip-offer-font-family: inherit;
+$trip-offer-weight-regular: 400;
+$trip-offer-weight-medium: 500;
+$trip-offer-weight-semibold: 600;
+$trip-offer-weight-bold: 700;
+$trip-offer-weight-extrabold: 800;
+
+$trip-offer-text-xs: .65rem;   // tiny labels
+$trip-offer-text-sm: .875rem;  // secondary text
+$trip-offer-text-base: .95rem; // default body/value in cards
+$trip-offer-text-md: 1rem;     // strong value / small headings
+$trip-offer-text-lg: 1.25rem;  // card titles
+$trip-offer-text-xl: 1.4rem;   // section titles
+
+$trip-offer-lh-tight: 1.25;
+$trip-offer-lh-snug: 1.45;
+$trip-offer-lh-normal: 1.6;
+$trip-offer-lh-relaxed: 1.7;
+
 .trip-offer-page {
     padding-top: 0.8rem;
     padding-bottom: 4rem;
-    background: #f8fafc;
+    background: $trip-offer-theme-bg;
+    font-family: $trip-offer-font-family;
 
     &__top {
         max-width: $trip-offer-container-max;
@@ -21,8 +50,8 @@ $trip-offer-gutter-x: 15px;
 
     &__title {
         font-size: 2rem;
-        font-weight: 800;
-        color: #111827;
+        font-weight: $trip-offer-weight-extrabold;
+        color: $trip-offer-theme-dark;
         margin-bottom: .25rem;
     }
 
@@ -32,14 +61,14 @@ $trip-offer-gutter-x: 15px;
         align-items: center;
         gap: .5rem;
         font-size: .875rem;
-        color: #6b7280;
+        color: $trip-offer-theme-muted;
     }
 
     &__map-link {
         border: 0;
         background: transparent;
-        color: $primary-color;
-        font-weight: 600;
+        color: $trip-offer-theme-accent;
+        font-weight: $trip-offer-weight-semibold;
         display: inline-flex;
         align-items: center;
         gap: .25rem;
@@ -116,7 +145,7 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__glance-label {
-        font-size: .65rem;
+        font-size: $trip-offer-text-xs;
         text-transform: uppercase;
         letter-spacing: .08em;
         color: rgba(249, 250, 251, .8);
@@ -124,8 +153,8 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__glance-value {
-        font-size: .8rem;
-        font-weight: 600;
+        font-size: $trip-offer-text-sm;
+        font-weight: $trip-offer-weight-semibold;
         color: #fff;
     }
 
@@ -207,13 +236,14 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__feature-card {
-        background: #fff;
+        background: $trip-offer-theme-surface;
         border-radius: 12px;
         padding: 1rem 1.25rem;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
         display: flex;
         flex-direction: column;
         gap: 0.35rem;
+        border: 1px solid $trip-offer-theme-border;
     }
 
     &__feature-card-icon {
@@ -221,7 +251,7 @@ $trip-offer-gutter-x: 15px;
         align-items: center;
         justify-content: flex-start;
         margin-bottom: 0.25rem;
-        color: #e8604c;
+        color: $trip-offer-theme-accent;
 
         svg {
             width: 28px;
@@ -231,20 +261,20 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__feature-card-label {
-        font-size: 0.7rem;
+        font-size: $trip-offer-text-xs;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        color: #6b7280;
+        color: $trip-offer-theme-muted;
         margin: 0;
-        font-weight: 600;
+        font-weight: $trip-offer-weight-semibold;
     }
 
     &__feature-card-value {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #111827;
+        font-size: $trip-offer-text-base;
+        font-weight: $trip-offer-weight-bold;
+        color: $trip-offer-theme-dark;
         margin: 0;
-        line-height: 1.3;
+        line-height: $trip-offer-lh-tight;
 
         &--scrollable {
             white-space: nowrap;
@@ -288,24 +318,24 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__section-title {
-        font-size: 1.4rem;
-        font-weight: 800;
+        font-size: $trip-offer-text-xl;
+        font-weight: $trip-offer-weight-extrabold;
         margin-bottom: 1rem;
-        color: #111827;
+        color: $trip-offer-theme-dark;
     }
 
     &__about-card {
-        background: #fff;
+        background: $trip-offer-theme-surface;
         border-radius: 1rem;
         padding: 1.5rem 1.75rem;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-        border: 1px solid rgba(226, 232, 240, 0.8);
+        border: 1px solid $trip-offer-theme-border;
     }
 
     &__about-intro,
     &__about-rest {
-        font-size: 1rem;
-        line-height: 1.7;
+        font-size: $trip-offer-text-md;
+        line-height: $trip-offer-lh-relaxed;
         color: #4b5563;
     }
 
@@ -322,12 +352,16 @@ $trip-offer-gutter-x: 15px;
         margin-top: .5rem;
         padding: .35rem 1rem;
         border-radius: 999px;
-        border: 1px solid $primary-color;
-        background: #fff;
-        color: $primary-color;
-        font-size: .85rem;
-        font-weight: 600;
+        border: 1px solid rgba(49, 48, 65, 0.25);
+        background: $trip-offer-theme-surface;
+        color: $trip-offer-theme-dark;
+        font-size: $trip-offer-text-sm;
+        font-weight: $trip-offer-weight-semibold;
         cursor: pointer;
+
+        &:hover {
+            border-color: rgba(49, 48, 65, 0.45);
+        }
     }
 
     &__about-block {
@@ -335,11 +369,11 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__about-block-label {
-        font-size: .7rem;
-        font-weight: 700;
+        font-size: $trip-offer-text-xs;
+        font-weight: $trip-offer-weight-bold;
         text-transform: uppercase;
         letter-spacing: .1em;
-        color: #374151;
+        color: $trip-offer-theme-dark;
         margin: 0 0 .5rem 0;
     }
 
@@ -355,24 +389,24 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__tags--methods .trip-offer-page__tag--secondary {
-        background: #ffedd5;
-        color: #c2410c;
+        background: rgba(232, 91, 64, 0.12);
+        color: $trip-offer-theme-dark;
     }
 
     &__tag {
         padding: .35rem .9rem;
         border-radius: 999px;
-        background: #e0f2fe;
-        color: #075985;
-        font-size: .8rem;
-        font-weight: 600;
+        background: #eef0f4;
+        color: $trip-offer-theme-dark;
+        font-size: $trip-offer-text-sm;
+        font-weight: $trip-offer-weight-semibold;
         display: inline-flex;
         align-items: center;
         gap: .35rem;
 
         &--secondary {
-            background: #fef3c7;
-            color: #92400e;
+            background: rgba(232, 91, 64, 0.10);
+            color: $trip-offer-theme-dark;
         }
 
         &--muted {
@@ -408,7 +442,7 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__about-spec-label {
-        font-size: .65rem;
+        font-size: $trip-offer-text-xs;
         text-transform: uppercase;
         letter-spacing: .08em;
         color: #9ca3af;
@@ -416,9 +450,9 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__about-spec-value {
-        font-size: .9rem;
-        font-weight: 600;
-        color: #111827;
+        font-size: $trip-offer-text-base;
+        font-weight: $trip-offer-weight-semibold;
+        color: $trip-offer-theme-dark;
         margin: 0;
     }
 
@@ -475,10 +509,10 @@ $trip-offer-gutter-x: 15px;
     &__highlights-item {
         font-size: .95rem;
         line-height: 1.5;
-        color: #374151;
+        color: $trip-offer-theme-dark;
 
         &::marker {
-            color: #2563eb;
+            color: $trip-offer-theme-accent;
         }
     }
 
@@ -522,8 +556,8 @@ $trip-offer-gutter-x: 15px;
         width: 1.25rem;
         height: 1.25rem;
         border-radius: 50%;
-        border: 2px solid #93c5fd;
-        background: #1d4ed8;
+        border: 2px solid $trip-offer-theme-border;
+        background: $trip-offer-theme-surface;
         margin-top: .25rem;
         position: relative;
         z-index: 1;
@@ -534,7 +568,7 @@ $trip-offer-gutter-x: 15px;
             position: absolute;
             inset: 4px;
             border-radius: 50%;
-            background: #93c5fd;
+            background: $trip-offer-theme-accent;
         }
 
         &::after {
@@ -545,7 +579,7 @@ $trip-offer-gutter-x: 15px;
             transform: translateX(-50%);
             width: 2px;
             height: calc(100% + 1.5rem);
-            background: #e5e7eb;
+            background: rgba(49, 48, 65, 0.12);
             margin-top: .25rem;
         }
     }
@@ -566,17 +600,17 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__schedule-time {
-        color: #2563eb;
+        color: $trip-offer-theme-accent;
         font-weight: 600;
     }
 
     &__schedule-sep {
-        color: #374151;
+        color: $trip-offer-theme-muted;
         font-weight: 400;
     }
 
     &__schedule-title {
-        color: #111827;
+        color: $trip-offer-theme-dark;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: .03em;
@@ -614,7 +648,7 @@ $trip-offer-gutter-x: 15px;
         width: 2.1rem;
         height: 2.1rem;
         border-radius: 999px;
-        background: #f97316;
+        background: $trip-offer-theme-accent;
         color: #fff;
         font-size: .9rem;
         font-weight: 700;
@@ -640,14 +674,14 @@ $trip-offer-gutter-x: 15px;
     &__availability {
         margin-top: 2.5rem;
         padding-top: 1.75rem;
-        border-top: 1px solid #e5e7eb;
+        border-top: 1px solid $trip-offer-theme-border;
     }
 
     &__availability-subtitle {
         margin-top: 0.5rem;
         margin-bottom: 1.25rem;
-        font-size: 0.9375rem;
-        color: #6b7280;
+        font-size: $trip-offer-text-base;
+        color: $trip-offer-theme-muted;
         line-height: 1.5;
     }
 
@@ -667,9 +701,9 @@ $trip-offer-gutter-x: 15px;
         flex-wrap: wrap;
         gap: 1rem;
         padding: 1.25rem 1.5rem;
-        background: #f9fafb;
+        background: #f8fafb;
         border-radius: 0.75rem;
-        border: 1px solid #e5e7eb;
+        border: 1px solid $trip-offer-theme-border;
     }
 
     &__availability-trip-left {
@@ -691,7 +725,7 @@ $trip-offer-gutter-x: 15px;
         flex-shrink: 0;
 
         .fa-calendar-alt {
-            color: #0ea5e9;
+            color: $trip-offer-theme-accent;
         }
 
         .fa-times {
@@ -709,7 +743,7 @@ $trip-offer-gutter-x: 15px;
 
     &__availability-trip-card--available &__availability-trip-icon,
     &__availability-trip-card--almost_full &__availability-trip-icon {
-        background: #e0f2fe;
+        background: rgba(232, 91, 64, 0.10);
     }
 
     &__availability-trip-meta {
@@ -718,35 +752,35 @@ $trip-offer-gutter-x: 15px;
 
     &__availability-trip-date {
         margin: 0 0 0.25rem;
-        font-size: 1rem;
-        font-weight: 700;
-        color: #111827;
+        font-size: $trip-offer-text-md;
+        font-weight: $trip-offer-weight-bold;
+        color: $trip-offer-theme-dark;
     }
 
     &__availability-trip-return {
         margin: 0 0 0.15rem;
-        font-size: 0.8rem;
-        color: #6b7280;
+        font-size: $trip-offer-text-sm;
+        color: $trip-offer-theme-muted;
     }
 
     &__availability-trip-status {
         margin: 0 0 0.15rem;
-        font-size: 0.75rem;
-        font-weight: 600;
+        font-size: $trip-offer-text-sm;
+        font-weight: $trip-offer-weight-semibold;
         letter-spacing: 0.02em;
         text-transform: uppercase;
     }
 
     &__availability-trip-card--available &__availability-trip-status {
-        color: #059669;
+        color: $trip-offer-theme-dark;
     }
 
     &__availability-trip-card--almost_full &__availability-trip-status {
-        color: #d97706;
+        color: $trip-offer-theme-accent;
     }
 
     &__availability-trip-card--fully_booked &__availability-trip-status {
-        color: #dc2626;
+        color: #991b1b;
     }
 
     &__availability-trip-dot {
@@ -759,21 +793,21 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__availability-trip-dot--available {
-        background: #10b981;
+        background: $trip-offer-theme-dark;
     }
 
     &__availability-trip-dot--almost_full {
-        background: #f59e0b;
+        background: $trip-offer-theme-accent;
     }
 
     &__availability-trip-dot--fully_booked {
-        background: #ef4444;
+        background: #991b1b;
     }
 
     &__availability-trip-spots {
         margin: 0;
-        font-size: 0.8125rem;
-        color: #6b7280;
+        font-size: $trip-offer-text-sm;
+        color: $trip-offer-theme-muted;
     }
 
     &__availability-trip-right {
@@ -794,8 +828,8 @@ $trip-offer-gutter-x: 15px;
 
     &__availability-trip-price-label {
         margin: 0;
-        font-size: 0.6875rem;
-        font-weight: 600;
+        font-size: $trip-offer-text-xs;
+        font-weight: $trip-offer-weight-semibold;
         letter-spacing: 0.06em;
         text-transform: uppercase;
         color: #9ca3af;
@@ -803,16 +837,16 @@ $trip-offer-gutter-x: 15px;
 
     &__availability-trip-price {
         margin: 0;
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: #111827;
+        font-size: $trip-offer-text-lg;
+        font-weight: $trip-offer-weight-bold;
+        color: $trip-offer-theme-dark;
     }
 
     &__availability-trip-btn {
         padding: 0.5rem 1.25rem;
         border-radius: 0.5rem;
-        font-size: 0.875rem;
-        font-weight: 600;
+        font-size: $trip-offer-text-sm;
+        font-weight: $trip-offer-weight-semibold;
         cursor: pointer;
         border: none;
         text-decoration: none;
@@ -820,11 +854,11 @@ $trip-offer-gutter-x: 15px;
         transition: background-color 0.15s, color 0.15s;
 
         &--primary {
-            background: #2563eb;
+            background: $trip-offer-theme-accent;
             color: #fff;
 
             &:hover {
-                background: #1d4ed8;
+                background: darken($trip-offer-theme-accent, 6%);
                 color: #fff;
             }
         }
@@ -853,29 +887,29 @@ $trip-offer-gutter-x: 15px;
         width: 4.5rem;
         aspect-ratio: 4 / 5;
         border-radius: 1.1rem;
-        border: 1px solid #e5e7eb;
-        background: #fff;
+        border: 1px solid $trip-offer-theme-border;
+        background: $trip-offer-theme-surface;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         gap: .1rem;
-        font-size: .75rem;
+        font-size: $trip-offer-text-sm;
         color: #6b7280;
 
         &--selected {
-            background: #1d4ed8;
-            border-color: #1d4ed8;
-            color: #eff6ff;
+            background: rgba($trip-offer-theme-accent, 0.10);
+            border-color: rgba($trip-offer-theme-accent, 0.55);
+            color: $trip-offer-theme-dark;
         }
 
         &--limited {
-            border-color: #f59e0b;
+            border-color: rgba(232, 91, 64, 0.65);
         }
     }
 
     &__availability-month {
-        font-size: .6rem;
+        font-size: $trip-offer-text-xs;
         letter-spacing: .16em;
         text-transform: uppercase;
         opacity: .7;
@@ -887,7 +921,7 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__availability-weekday {
-        font-size: .6rem;
+        font-size: $trip-offer-text-xs;
         text-transform: uppercase;
         letter-spacing: .14em;
     }
@@ -897,15 +931,15 @@ $trip-offer-gutter-x: 15px;
         bottom: -.35rem;
         padding: .1rem .55rem;
         border-radius: 999px;
-        background: #fbbf24;
-        color: #1f2937;
-        font-size: .6rem;
-        font-weight: 700;
+        background: $trip-offer-theme-accent;
+        color: #fff;
+        font-size: $trip-offer-text-xs;
+        font-weight: $trip-offer-weight-bold;
     }
 
     &__availability-note {
         margin-top: 1rem;
-        font-size: .8rem;
+        font-size: $trip-offer-text-sm;
         color: #6b7280;
         display: flex;
         align-items: flex-start;
@@ -914,7 +948,7 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__availability-note-icon {
-        color: #f97316;
+        color: $trip-offer-theme-accent;
         font-size: 1rem;
         margin-top: .15rem;
         flex-shrink: 0;
@@ -935,18 +969,18 @@ $trip-offer-gutter-x: 15px;
 
     // Single card for What's Included? + NOT INCLUDED (design)
     &__included-excluded-card {
-        background: #f8fafc;
+        background: #f8fafb;
         border-radius: 1rem;
         padding: 1.5rem 1.75rem;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-        border: 1px solid rgba(226, 232, 240, 0.8);
+        border: 1px solid $trip-offer-theme-border;
     }
 
     &__included-title {
         margin-bottom: 1rem;
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: #111827;
+        font-size: $trip-offer-text-lg;
+        font-weight: $trip-offer-weight-bold;
+        color: $trip-offer-theme-dark;
     }
 
     &__included-list-wrap,
@@ -974,7 +1008,7 @@ $trip-offer-gutter-x: 15px;
         align-items: flex-start;
         gap: .5rem;
         margin-bottom: .5rem;
-        font-size: .9rem;
+        font-size: $trip-offer-text-base;
         color: #374151;
     }
 
@@ -988,13 +1022,13 @@ $trip-offer-gutter-x: 15px;
     &__included-excluded-divider {
         margin: 1.25rem 0;
         border: 0;
-        border-top: 1px solid #e5e7eb;
+        border-top: 1px solid $trip-offer-theme-border;
     }
 
     &__excluded-title {
         margin: 0 0 .75rem 0;
-        font-size: .75rem;
-        font-weight: 700;
+        font-size: $trip-offer-text-sm;
+        font-weight: $trip-offer-weight-bold;
         text-transform: uppercase;
         letter-spacing: .08em;
         color: #6b7280;
@@ -1014,13 +1048,13 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__excluded-label {
-        font-weight: 500;
-        color: #374151;
+        font-weight: $trip-offer-weight-medium;
+        color: $trip-offer-theme-dark;
     }
 
     &__excluded-subtext {
-        font-size: .8rem;
-        font-weight: 400;
+        font-size: $trip-offer-text-sm;
+        font-weight: $trip-offer-weight-regular;
         color: #6b7280;
     }
 
@@ -1035,17 +1069,17 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__card-group-single {
-        background: #fff;
+        background: $trip-offer-theme-surface;
         border-radius: 1rem;
         padding: 0;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-        border: 1px solid rgba(226, 232, 240, 0.8);
+        border: 1px solid $trip-offer-theme-border;
         overflow: hidden;
     }
 
     &__info-card-section {
         padding: 1.5rem 1.75rem;
-        border-bottom: 1px solid #e5e7eb;
+        border-bottom: 1px solid $trip-offer-theme-border;
 
         &--last {
             border-bottom: none;
@@ -1058,9 +1092,9 @@ $trip-offer-gutter-x: 15px;
 
     &__info-card-title {
         margin: 0 0 1rem 0;
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #111827;
+        font-size: $trip-offer-text-lg;
+        font-weight: $trip-offer-weight-bold;
+        color: $trip-offer-theme-dark;
     }
 
     &__info-card-body {
@@ -1123,16 +1157,16 @@ $trip-offer-gutter-x: 15px;
 
     &__info-card-name {
         margin: 0 0 .25rem 0;
-        font-size: 1rem;
-        font-weight: 700;
-        color: #111827;
+        font-size: $trip-offer-text-md;
+        font-weight: $trip-offer-weight-bold;
+        color: $trip-offer-theme-dark;
     }
 
     &__info-card-desc {
         margin: 0 0 .5rem 0;
-        font-size: .875rem;
+        font-size: $trip-offer-text-sm;
         color: #6b7280;
-        line-height: 1.45;
+        line-height: $trip-offer-lh-snug;
 
         &--mt {
             margin-top: .5rem;
@@ -1149,24 +1183,24 @@ $trip-offer-gutter-x: 15px;
     &__info-card-tag {
         padding: .35rem .75rem;
         border-radius: 6px;
-        background: #2563eb;
+        background: $trip-offer-theme-dark;
         color: #fff;
-        font-size: .75rem;
-        font-weight: 600;
+        font-size: $trip-offer-text-sm;
+        font-weight: $trip-offer-weight-semibold;
 
         &--light {
-            background: #dbeafe;
-            color: #1e40af;
+            background: #eef0f4;
+            color: $trip-offer-theme-dark;
         }
 
         &--meal {
-            background: #fef3c7;
-            color: #92400e;
+            background: rgba(232, 91, 64, 0.10);
+            color: $trip-offer-theme-dark;
         }
 
         &--lang {
-            background: #e0e7ff;
-            color: #3730a3;
+            background: #eef0f4;
+            color: $trip-offer-theme-dark;
         }
     }
 
@@ -1229,7 +1263,7 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__info-card-boat-staff-icon {
-        color: #2563eb;
+        color: $trip-offer-theme-accent;
         font-size: .9rem;
     }
 
@@ -1252,8 +1286,8 @@ $trip-offer-gutter-x: 15px;
 
     &__info-card-label {
         margin: 0 0 .15rem 0;
-        font-size: .65rem;
-        font-weight: 700;
+        font-size: $trip-offer-text-xs;
+        font-weight: $trip-offer-weight-bold;
         text-transform: uppercase;
         letter-spacing: .06em;
         color: #9ca3af;
@@ -1261,8 +1295,8 @@ $trip-offer-gutter-x: 15px;
 
     &__info-card-value {
         margin: 0;
-        font-size: .875rem;
-        font-weight: 600;
+        font-size: $trip-offer-text-sm;
+        font-weight: $trip-offer-weight-semibold;
         color: #111827;
     }
 
@@ -1270,9 +1304,9 @@ $trip-offer-gutter-x: 15px;
         margin-top: .75rem;
         padding: .6rem .75rem;
         border-radius: 6px;
-        background: #dbeafe;
-        color: #1e40af;
-        font-size: .8rem;
+        background: rgba(232, 91, 64, 0.10);
+        color: $trip-offer-theme-dark;
+        font-size: $trip-offer-text-sm;
         display: flex;
         align-items: flex-start;
         gap: .5rem;
@@ -1294,10 +1328,10 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__guide-avatar-initials {
-        background: #2563eb;
+        background: $trip-offer-theme-dark;
         color: #fff;
-        font-size: .9rem;
-        font-weight: 700;
+        font-size: $trip-offer-text-base;
+        font-weight: $trip-offer-weight-bold;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -1305,7 +1339,7 @@ $trip-offer-gutter-x: 15px;
 
     &__info-card-empty {
         margin: 0;
-        font-size: .875rem;
+        font-size: $trip-offer-text-sm;
         color: #9ca3af;
     }
 
@@ -1315,18 +1349,18 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__non-fishing-card {
-        background: #fff;
+        background: $trip-offer-theme-surface;
         border-radius: 1rem;
         padding: 1.5rem 1.75rem;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-        border: 1px solid rgba(226, 232, 240, 0.8);
+        border: 1px solid $trip-offer-theme-border;
     }
 
     &__non-fishing-title {
         margin-bottom: 1rem;
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: #111827;
+        font-size: $trip-offer-text-lg;
+        font-weight: $trip-offer-weight-bold;
+        color: $trip-offer-theme-dark;
     }
 
     &__non-fishing-tags {
@@ -1341,10 +1375,10 @@ $trip-offer-gutter-x: 15px;
         gap: .4rem;
         padding: .4rem .85rem;
         border-radius: 999px;
-        background: #e0f2fe;
-        color: #0c4a6e;
-        font-size: .875rem;
-        font-weight: 600;
+        background: #eef0f4;
+        color: $trip-offer-theme-dark;
+        font-size: $trip-offer-text-sm;
+        font-weight: $trip-offer-weight-semibold;
     }
 
     &__non-fishing-tag-icon {
@@ -1358,33 +1392,35 @@ $trip-offer-gutter-x: 15px;
     }
     &__pricing-details-title {
         margin-bottom: 1rem;
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: #111827;
+        font-size: $trip-offer-text-lg;
+        font-weight: $trip-offer-weight-bold;
+        color: $trip-offer-theme-dark;
     }
     &__pricing-main-card {
-        background: #2563eb;
+        background: $trip-offer-theme-surface;
         border-radius: 1rem;
         padding: 1.25rem 1.5rem;
         margin-bottom: 1rem;
+        border: 1px solid $trip-offer-theme-border;
+        border-left: 5px solid $trip-offer-theme-accent;
     }
     &__pricing-main-label {
-        font-size: .7rem;
-        font-weight: 600;
+        font-size: $trip-offer-text-xs;
+        font-weight: $trip-offer-weight-semibold;
         letter-spacing: .04em;
         text-transform: uppercase;
-        color: rgba(255, 255, 255, .85);
+        color: $trip-offer-theme-muted;
         margin: 0 0 .35rem 0;
     }
     &__pricing-main-amount {
         font-size: 2rem;
-        font-weight: 700;
-        color: #fff;
+        font-weight: $trip-offer-weight-bold;
+        color: $trip-offer-theme-dark;
         margin: 0 0 .25rem 0;
     }
     &__pricing-main-inclusions {
-        font-size: .875rem;
-        color: rgba(255, 255, 255, .9);
+        font-size: $trip-offer-text-sm;
+        color: #4b5563;
         margin: 0;
     }
     &__pricing-grid {
@@ -1394,38 +1430,38 @@ $trip-offer-gutter-x: 15px;
         margin-bottom: 1rem;
     }
     &__pricing-grid-card {
-        background: #fff;
+        background: $trip-offer-theme-surface;
         border-radius: 1rem;
         padding: 1rem 1.25rem;
         box-shadow: 0 2px 10px rgba(0, 0, 0, .06);
-        border: 1px solid rgba(226, 232, 240, 0.8);
+        border: 1px solid $trip-offer-theme-border;
     }
     &__pricing-grid-label {
-        font-size: .65rem;
-        font-weight: 600;
+        font-size: $trip-offer-text-xs;
+        font-weight: $trip-offer-weight-semibold;
         letter-spacing: .04em;
         text-transform: uppercase;
         color: #64748b;
         margin: 0 0 .35rem 0;
     }
     &__pricing-grid-value {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #111827;
+        font-size: $trip-offer-text-md;
+        font-weight: $trip-offer-weight-bold;
+        color: $trip-offer-theme-dark;
         margin: 0;
     }
     &__pricing-cancellation-card {
         display: flex;
         align-items: flex-start;
         gap: 1rem;
-        background: #e0f2fe;
+        background: #eef0f4;
         border-radius: 1rem;
         padding: 1.25rem 1.5rem;
-        border: 1px solid rgba(14, 165, 233, .2);
+        border: 1px solid $trip-offer-theme-border;
     }
     &__pricing-cancellation-icon {
         font-size: 1.5rem;
-        color: #0284c7;
+        color: $trip-offer-theme-accent;
         margin-top: .1rem;
         flex-shrink: 0;
     }
@@ -1433,15 +1469,15 @@ $trip-offer-gutter-x: 15px;
         flex: 1;
     }
     &__pricing-cancellation-title {
-        font-size: 1rem;
-        font-weight: 700;
-        color: #111827;
+        font-size: $trip-offer-text-md;
+        font-weight: $trip-offer-weight-bold;
+        color: $trip-offer-theme-dark;
         margin: 0 0 .35rem 0;
     }
     &__pricing-cancellation-text {
-        font-size: .875rem;
-        color: #374151;
-        line-height: 1.45;
+        font-size: $trip-offer-text-sm;
+        color: #4b5563;
+        line-height: $trip-offer-lh-snug;
         margin: 0;
     }
 
@@ -1451,18 +1487,18 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__additional-info-card {
-        background: #fff;
+        background: $trip-offer-theme-surface;
         border-radius: 1rem;
         padding: 1.5rem 1.75rem;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-        border: 1px solid rgba(226, 232, 240, 0.8);
+        border: 1px solid $trip-offer-theme-border;
     }
 
     &__additional-info-title {
         margin-bottom: 1.25rem;
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: #111827;
+        font-size: $trip-offer-text-lg;
+        font-weight: $trip-offer-weight-bold;
+        color: $trip-offer-theme-dark;
     }
 
     &__additional-info-grid {
@@ -1478,13 +1514,13 @@ $trip-offer-gutter-x: 15px;
     &__additional-info-item {
         padding: .75rem 1rem;
         border-radius: .5rem;
-        background: #f8fafc;
+        background: #f8fafb;
     }
 
     &__additional-info-label {
         margin: 0 0 .25rem 0;
-        font-size: .65rem;
-        font-weight: 700;
+        font-size: $trip-offer-text-xs;
+        font-weight: $trip-offer-weight-bold;
         text-transform: uppercase;
         letter-spacing: .08em;
         color: #9ca3af;
@@ -1492,14 +1528,14 @@ $trip-offer-gutter-x: 15px;
 
     &__additional-info-value {
         margin: 0;
-        font-size: .9rem;
-        font-weight: 600;
-        color: #111827;
+        font-size: $trip-offer-text-base;
+        font-weight: $trip-offer-weight-semibold;
+        color: $trip-offer-theme-dark;
 
         &--long {
-            font-weight: 400;
-            font-size: .9rem;
-            line-height: 1.6;
+            font-weight: $trip-offer-weight-regular;
+            font-size: $trip-offer-text-base;
+            line-height: $trip-offer-lh-normal;
             color: #4b5563;
         }
     }
@@ -1513,7 +1549,7 @@ $trip-offer-gutter-x: 15px;
 
     &__additional-info-full-item {
         padding-top: 1rem;
-        border-top: 1px solid #e5e7eb;
+        border-top: 1px solid $trip-offer-theme-border;
 
         .trip-offer-page__additional-info-label {
             margin-bottom: .35rem;
@@ -1528,10 +1564,10 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__details-title {
-        font-size: 1rem;
-        font-weight: 700;
+        font-size: $trip-offer-text-md;
+        font-weight: $trip-offer-weight-bold;
         margin-bottom: .75rem;
-        color: #111827;
+        color: $trip-offer-theme-dark;
     }
 
     &__details-list {
@@ -1545,7 +1581,7 @@ $trip-offer-gutter-x: 15px;
             display: flex;
             align-items: center;
             gap: .4rem;
-            font-size: .85rem;
+            font-size: $trip-offer-text-sm;
             color: #4b5563;
 
             i {
@@ -1557,16 +1593,16 @@ $trip-offer-gutter-x: 15px;
 
     &__details-text {
         margin: 0;
-        font-size: .9rem;
+        font-size: $trip-offer-text-base;
         color: #4b5563;
     }
 
     &__booking-card {
         border-radius: 1.5rem;
-        background: #fff;
+        background: $trip-offer-theme-surface;
         box-shadow: 0 15px 45px rgba(15, 23, 42, .16);
         padding: 1.5rem 1.75rem;
-        border: 1px solid rgba(148, 163, 184, .35);
+        border: 1px solid $trip-offer-theme-border;
     }
 
     &__booking-header {
@@ -1584,10 +1620,10 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__booking-label {
-        font-size: .7rem;
+        font-size: $trip-offer-text-xs;
         text-transform: uppercase;
         letter-spacing: .16em;
-        color: #374151;
+        color: $trip-offer-theme-muted;
     }
 
     &__booking-price {
@@ -1597,8 +1633,8 @@ $trip-offer-gutter-x: 15px;
 
     &__booking-amount {
         font-size: 1.75rem;
-        font-weight: 800;
-        color: #111827;
+        font-weight: $trip-offer-weight-extrabold;
+        color: $trip-offer-theme-dark;
         line-height: 1.1;
     }
 
@@ -1607,8 +1643,8 @@ $trip-offer-gutter-x: 15px;
         border-radius: 6px;
         background: #dcfce7;
         color: #166534;
-        font-size: .65rem;
-        font-weight: 700;
+        font-size: $trip-offer-text-xs;
+        font-weight: $trip-offer-weight-bold;
         text-transform: uppercase;
         letter-spacing: .08em;
     }
@@ -1626,9 +1662,9 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__booking-field-label {
-        font-size: .7rem;
-        font-weight: 600;
-        color: #374151;
+        font-size: $trip-offer-text-xs;
+        font-weight: $trip-offer-weight-semibold;
+        color: $trip-offer-theme-muted;
         text-transform: uppercase;
         letter-spacing: .12em;
         margin-bottom: 0;
@@ -1644,15 +1680,15 @@ $trip-offer-gutter-x: 15px;
         border-radius: 8px;
         border: 1px solid #e5e7eb;
         background: #fff;
-        font-size: .85rem;
-        font-weight: 600;
+        font-size: $trip-offer-text-sm;
+        font-weight: $trip-offer-weight-semibold;
         color: #374151;
         cursor: pointer;
 
         &--active {
-            border-color: $primary-color;
-            background: #fff;
-            color: $primary-color;
+            border-color: rgba(49, 48, 65, 0.35);
+            background: #f8fafb;
+            color: $trip-offer-theme-dark;
         }
     }
 
@@ -1662,7 +1698,7 @@ $trip-offer-gutter-x: 15px;
         border-radius: .9rem;
         border: 1px solid #e5e7eb;
         background: #f9fafb;
-        font-size: .9rem;
+        font-size: $trip-offer-text-base;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -1680,8 +1716,8 @@ $trip-offer-gutter-x: 15px;
         border-radius: .9rem;
         border: 1px solid #e5e7eb;
         background: #f9fafb;
-        font-size: .9rem;
-        color: #374151;
+        font-size: $trip-offer-text-base;
+        color: $trip-offer-theme-dark;
         cursor: pointer;
         appearance: auto;
 
@@ -1708,7 +1744,7 @@ $trip-offer-gutter-x: 15px;
         border-radius: 50%;
         border: none;
         font-size: 1.1rem;
-        font-weight: 700;
+        font-weight: $trip-offer-weight-bold;
         color: #fff;
         cursor: pointer;
         display: inline-flex;
@@ -1726,19 +1762,19 @@ $trip-offer-gutter-x: 15px;
         }
 
         &--plus {
-            background: $primary-color;
+            background: $trip-offer-theme-dark;
             color: #fff;
 
             &:hover {
-                background: darken($primary-color, 6%);
+                background: darken($trip-offer-theme-dark, 4%);
             }
         }
     }
 
     &__guest-label {
-        font-size: .9rem;
-        font-weight: 600;
-        color: #111827;
+        font-size: $trip-offer-text-base;
+        font-weight: $trip-offer-weight-semibold;
+        color: $trip-offer-theme-dark;
     }
 
     &__booking-cta {
@@ -1747,21 +1783,21 @@ $trip-offer-gutter-x: 15px;
         padding: .85rem 1rem;
         border-radius: .9rem;
         border: none;
-        background: $primary-color;
+        background: $trip-offer-theme-accent;
         color: #fff;
-        font-size: .95rem;
-        font-weight: 700;
+        font-size: $trip-offer-text-base;
+        font-weight: $trip-offer-weight-bold;
         cursor: pointer;
-        box-shadow: 0 4px 14px rgba(249, 99, 22, 0.35);
+        box-shadow: 0 6px 18px rgba($trip-offer-theme-accent, 0.28);
         transition: box-shadow 0.2s ease;
 
         &:hover {
-            box-shadow: 0 6px 18px rgba(249, 99, 22, 0.4);
+            box-shadow: 0 8px 24px rgba($trip-offer-theme-accent, 0.34);
         }
     }
 
     &__booking-footnote {
-        font-size: .75rem;
+        font-size: $trip-offer-text-sm;
         color: #9ca3af;
         text-align: center;
         margin: .4rem 0 0 0;
@@ -1821,9 +1857,9 @@ $trip-offer-gutter-x: 15px;
     }
 
     &__guide-contact {
-        font-size: .9rem;
-        font-weight: 600;
-        color: #c2410c;
+        font-size: $trip-offer-text-base;
+        font-weight: $trip-offer-weight-semibold;
+        color: $trip-offer-theme-accent;
         text-decoration: none;
         flex-shrink: 0;
         cursor: pointer;
@@ -1833,25 +1869,25 @@ $trip-offer-gutter-x: 15px;
 
         &:hover {
             text-decoration: underline;
-            color: #9a3412;
+            color: darken($trip-offer-theme-accent, 8%);
         }
     }
 
     // Small map below booking card (sidebar)
     &__map-wrap {
         margin-top: 1.25rem;
-        background: #fff;
+        background: $trip-offer-theme-surface;
         border-radius: 1rem;
         overflow: hidden;
         box-shadow: 0 4px 14px rgba(0, 0, 0, .06);
-        border: 1px solid rgba(226, 232, 240, 0.8);
+        border: 1px solid $trip-offer-theme-border;
     }
 
     &__map-label {
         margin: 0;
         padding: .75rem 1rem .5rem;
-        font-size: .7rem;
-        font-weight: 600;
+        font-size: $trip-offer-text-xs;
+        font-weight: $trip-offer-weight-semibold;
         letter-spacing: .04em;
         text-transform: uppercase;
         color: #64748b;

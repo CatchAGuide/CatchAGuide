@@ -708,7 +708,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="contactModalLabel">{{ __('contact.shareYourQuestion') }}</h5>
+                <h5 class="modal-title" id="contactModalLabel">{{ $contactModalTitle ?? __('contact.shareYourQuestion') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -732,8 +732,37 @@
                         </div>
                         <div class="form-group mb-3">
                             @include('includes.forms.phone-input', [
-                                'placeholder' => 'contact.phone'
+                                'placeholder' => 'contact.phone',
+                                'required' => true,
+                                'showLabel' => true,
+                                'labelText' => 'contact.phone'
                             ])
+                        </div>
+                        <div class="row g-3 mb-3 align-items-end">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    @php
+                                        $preferredDateMin = now()->toDateString();
+                                        $preferredDateMax = now()->copy()->addYears(2)->toDateString();
+                                    @endphp
+                                    <label for="preferred_date" class="form-label">{{ __('trips.select_date') }}</label>
+                                    <input
+                                        type="date"
+                                        class="form-control"
+                                        id="preferred_date"
+                                        name="preferred_date"
+                                        min="{{ $preferredDateMin }}"
+                                        max="{{ $preferredDateMax }}"
+                                        required
+                                    >
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="number_of_persons" class="form-label">{{ __('trips.guests_label') }}</label>
+                                    <input type="number" class="form-control" id="number_of_persons" name="number_of_persons" min="1" step="1" required>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group mb-3">
                             <textarea name="description" class="form-control" rows="4" placeholder="{{ __('contact.feedback') }}" required></textarea>

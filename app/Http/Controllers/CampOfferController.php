@@ -206,6 +206,7 @@ class CampOfferController extends Controller
             })->toArray();
         
         $showCategories = true;
+        $contactModalTitle = trim(__('contact.shareYourQuestion') . (!empty($campData['title']) ? ': ' . $campData['title'] : ''));
 
         return view('pages.vacations.v2', compact(
             'campData',
@@ -221,7 +222,8 @@ class CampOfferController extends Controller
             'topRightImages',
             'bottomStripImages',
             'remainingGalleryCount',
-            'galleryImages'
+            'galleryImages',
+            'contactModalTitle'
         ))->with('camp', $campData);
     }
     

@@ -9,6 +9,7 @@ use App\Models\Newsletter;
 use App\Mail\NewsletterMail;
 use App\Mail\CustomerContactMail;
 use App\Models\ContactSubmission;
+use App\Models\CampVacationBooking;
 use App\Mail\CustomerNewsletterMail;
 
 class ZoisController extends Controller
@@ -19,7 +20,10 @@ class ZoisController extends Controller
             'email' => 'required|email',
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'phone' => 'nullable|string|max:20',
+            'countryCode' => 'required|string|max:10',
+            'phone' => 'required|string|max:20',
+            'preferred_date' => 'required|date',
+            'number_of_persons' => 'required|integer|min:1|max:99',
             'g-recaptcha-response' => app()->environment('production') ? 'recaptcha' : '',
         ]);
 
@@ -27,7 +31,7 @@ class ZoisController extends Controller
         $sourceType = $request->input('source_type', null);
         $sourceId = $request->input('source_id', null);
         
-        // Add source information to the description if available
+        // Add source information to the description if available (emails)
         $description = $request->description;
         if ($sourceType && $sourceId) {
             $sourceInfo = "\n\nThis contact was submitted from: {$sourceType} ID: {$sourceId}";
@@ -35,17 +39,32 @@ class ZoisController extends Controller
         }
 
         // Save to database
-        ContactSubmission::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->countryCode . ' ' . $request->phone,
-            'description' => $request->description,
-            'source_type' => $sourceType,
-            'source_id' => $sourceId
-        ]);
+        if (in_array(strtolower((string) $sourceType), [CampVacationBooking::SOURCE_CAMP, CampVacationBooking::SOURCE_VACATION], true) && $sourceId) {
+            CampVacationBooking::create([
+                'source_type' => strtolower((string) $sourceType),
+                'source_id' => (int) $sourceId,
+                'preferred_date' => $request->input('preferred_date'),
+                'number_of_persons' => (int) $request->input('number_of_persons'),
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone_country_code' => $request->countryCode,
+                'phone' => $request->phone,
+                'message' => $request->description,
+                'status' => CampVacationBooking::STATUS_OPEN,
+            ]);
+        } else {
+            ContactSubmission::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->countryCode . ' ' . $request->phone,
+                'description' => $description,
+                'source_type' => $sourceType,
+                'source_id' => $sourceId
+            ]);
+        }
 
         Mail::send(new ContactMail($request->name, $request->email, $description, $request->phone, $request->countryCode));
-        Mail::send(new CustomerContactMail($request->name, $request->email, $request->description));
+        Mail::send(new CustomerContactMail($request->name, $request->email, $description));
         
         // If it's an AJAX request or from a modal, return JSON
         if ($request->ajax() || $request->has('source_type')) {

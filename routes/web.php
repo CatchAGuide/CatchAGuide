@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\GuidesController;
 use App\Http\Controllers\Admin\GuideAnalyticsController;
 use App\Http\Controllers\Admin\BookingsController;
+use App\Http\Controllers\Admin\CampVacationBookingsController;
 use App\Http\Controllers\Admin\CustomersController;
 use App\Http\Controllers\Admin\EmployeesController;
 use App\Http\Controllers\Admin\EmailLogsController;
@@ -405,6 +406,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/bookings/{booking}/send-booking-request-emails', [BookingsController::class, 'sendBookingRequestEmails'])->name('bookings.send-booking-request-emails');
         Route::post('/bookings/{booking}/send-guide-invoice', [BookingsController::class, 'sendGuideInvoice'])->name('bookings.send-guide-invoice');
         Route::post('/bookings/{booking}/update-guide-billing-status', [BookingsController::class, 'updateGuideBillingStatus'])->name('bookings.update-guide-billing-status');
+
+        Route::get('camp-vacation-bookings', [CampVacationBookingsController::class, 'index'])->name('camp-vacation-bookings.index');
+        Route::patch('camp-vacation-bookings/{campVacationBooking}/status', [CampVacationBookingsController::class, 'updateStatus'])->name('camp-vacation-bookings.update-status');
+        Route::post('camp-vacation-bookings/reply', [CampVacationBookingsController::class, 'sendReply'])->name('camp-vacation-bookings.reply');
+        Route::get('camp-vacation-bookings/{campVacationBooking}/email-history', [CampVacationBookingsController::class, 'emailHistory'])->name('camp-vacation-bookings.email-history');
         Route::prefix('payments')->name('payments.')->group(function () {
             Route::get('/', [AdminPaymentsController::class, 'index'])->name('index');
             Route::get('/showoutpayments/{id}', [AdminPaymentsController::class, 'showoutpayments'])->name('showoutpayments');
