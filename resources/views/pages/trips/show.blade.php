@@ -719,7 +719,11 @@
                                                 $label .= ' — ' . ($card['spots_available'] == 1 ? __('trips.only_x_spot', ['count' => 1]) : __('trips.only_x_spot_plural', ['count' => $card['spots_available']]));
                                             }
                                         @endphp
-                                        <option value="{{ $card['departure_date'] ?? '' }}" {{ $status === 'fully_booked' ? 'disabled' : '' }}>{{ $label }}</option>
+                                        <option value="{{ $card['departure_date'] ?? '' }}"
+                                            {{ ($status === 'fully_booked') ? 'disabled' : '' }}
+                                            {{ (!empty($selectedDate) && ($card['departure_date'] ?? '') === $selectedDate) ? 'selected' : '' }}>
+                                            {{ $label }}
+                                        </option>
                                     @endforeach
                                 @endif
                             </select>
@@ -772,6 +776,100 @@
                 <img id="galleryModalImage" src="" alt="{{ $tripView['title'] }}">
                 <div class="gallery-modal__counter">
                     <span id="galleryCurrentIndex">1</span> / <span id="galleryTotalCount">{{ count($galleryImages) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Modal (Trips) -->
+        <div class="modal fade" id="tripContactModal" tabindex="-1" aria-labelledby="tripContactModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="tripContactModalLabel">{{ $contactModalTitle ?? __('contact.shareYourQuestion') }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        {!! ReCaptcha::htmlScriptTagJsApi() !!}
+                        <div id="tripContactFormContainer">
+                            <form id="tripContactModalForm">
+                                @csrf
+                                <input type="hidden" name="source_type" value="trip">
+                                <input type="hidden" name="source_id" value="{{ $tripView['id'] ?? '' }}">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="{{ __('contact.yourName') }}" name="name" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <input type="email" class="form-control" placeholder="{{ __('contact.email') }}" name="email" required>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    @include('includes.forms.phone-input', [
+                                        'placeholder' => 'contact.phone',
+                                        'required' => true,
+                                        'showLabel' => true,
+                                        'labelText' => 'contact.phone'
+                                    ])
+                                </div>
+
+                                <div class="row g-3 mb-3 align-items-end">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            @php
+                                                $preferredDateMin = now()->toDateString();
+                                                $preferredDateMax = now()->copy()->addYears(2)->toDateString();
+                                            @endphp
+                                            <label for="trip_preferred_date" class="form-label">{{ __('trips.select_date') }}</label>
+                                            <input
+                                                type="date"
+                                                class="form-control"
+                                                id="trip_preferred_date"
+                                                name="preferred_date"
+                                                min="{{ $preferredDateMin }}"
+                                                max="{{ $preferredDateMax }}"
+                                                value="{{ $selectedDate ?? '' }}"
+                                                required
+                                            >
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="trip_number_of_persons" class="form-label">{{ __('trips.guests_label') }}</label>
+                                            <input type="number" class="form-control" id="trip_number_of_persons" name="number_of_persons" min="1" step="1" required>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <textarea name="description" class="form-control" rows="4" placeholder="{{ __('contact.feedback') }}" required></textarea>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center">
+                                    {!! htmlFormSnippet() !!}
+                                    <button type="button" id="tripContactSubmitBtn" class="btn btn-orange">{{ __('contact.btnSend') }}</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div id="tripContactLoadingOverlay" style="display: none;">
+                            <div class="d-flex justify-content-center align-items-center flex-column p-4">
+                                <div class="spinner-border text-orange mb-3" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="text-center">{{ __('contact.submitting') }}...</p>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-success mt-3" id="tripContactSuccessMessage" style="display: none;">
+                            {{ __('contact.successMessage') }}
+                        </div>
+                        <div class="alert alert-danger mt-3" id="tripContactError" style="display: none;"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -921,6 +1019,7 @@
                         ? (guestRoot.getAttribute('data-angler') || 'Angler')
                         : (guestRoot.getAttribute('data-anglers') || 'Anglers');
                     label.textContent = guests + ' ' + unit;
+                    page.dataset.tripGuests = String(guests);
                 }
 
                 if (minusBtn) {
@@ -941,6 +1040,140 @@
 
                 updateGuests();
             }
+
+            // Availability "Reserve now" -> sync floating card date select
+            (function() {
+                const dateSelect = page.querySelector('[data-trip-selected-date]');
+                if (!dateSelect) return;
+
+                const reserveButtons = page.querySelectorAll('[data-reserve-date]');
+                reserveButtons.forEach((btn) => {
+                    btn.addEventListener('click', function () {
+                        const date = btn.getAttribute('data-reserve-date') || '';
+                        if (!date) return;
+
+                        dateSelect.value = date;
+                        dateSelect.dispatchEvent(new Event('change', { bubbles: true }));
+
+                        const bookingCard = page.querySelector('.trip-offer-page__booking-card');
+                        if (bookingCard) {
+                            bookingCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    });
+                });
+            })();
+
+            // Floating card "Request now" -> open contact modal and prefill
+            (function() {
+                const cta = page.querySelector('.trip-offer-page__booking-cta');
+                const modalEl = document.getElementById('tripContactModal');
+                if (!cta || !modalEl || typeof bootstrap === 'undefined' || !bootstrap.Modal) return;
+
+                const preferredDateInput = document.getElementById('trip_preferred_date');
+                const personsInput = document.getElementById('trip_number_of_persons');
+                const descInput = modalEl.querySelector('textarea[name="description"]');
+
+                function getModalInstance(el) {
+                    // Supports Bootstrap 5 (getInstance / getOrCreateInstance) and older builds (constructor)
+                    const Modal = bootstrap.Modal;
+                    if (Modal.getInstance) {
+                        return Modal.getInstance(el) || (Modal.getOrCreateInstance ? Modal.getOrCreateInstance(el) : new Modal(el));
+                    }
+                    return new Modal(el);
+                }
+
+                function prefillContactForm() {
+                    const dateSelect = page.querySelector('[data-trip-selected-date]');
+                    const selectedDate = (dateSelect && dateSelect.value) ? dateSelect.value : '';
+                    const guests = parseInt(page.dataset.tripGuests || '2', 10) || 2;
+
+                    if (personsInput) personsInput.value = String(guests);
+                    if (preferredDateInput && selectedDate) preferredDateInput.value = selectedDate;
+                }
+
+                cta.addEventListener('click', function () {
+                    prefillContactForm();
+                    const modal = getModalInstance(modalEl);
+                    modal.show();
+                });
+
+                modalEl.addEventListener('shown.bs.modal', function () {
+                    prefillContactForm();
+                });
+            })();
+
+            // Trips contact modal submission (AJAX)
+            (function() {
+                const submitBtn = document.getElementById('tripContactSubmitBtn');
+                const contactForm = document.getElementById('tripContactModalForm');
+                if (!submitBtn || !contactForm) return;
+
+                const formContainer = document.getElementById('tripContactFormContainer');
+                const loadingOverlay = document.getElementById('tripContactLoadingOverlay');
+                const successMessage = document.getElementById('tripContactSuccessMessage');
+                const contactError = document.getElementById('tripContactError');
+
+                function setVisible(el, visible) {
+                    if (!el) return;
+                    el.style.display = visible ? 'block' : 'none';
+                }
+
+                async function handleSubmit() {
+                    setVisible(contactError, false);
+                    setVisible(successMessage, false);
+
+                    if (!contactForm.checkValidity()) {
+                        contactForm.reportValidity();
+                        return;
+                    }
+
+                    const formData = new FormData(contactForm);
+
+                    if (formContainer) formContainer.style.display = 'none';
+                    if (loadingOverlay) loadingOverlay.style.display = 'block';
+
+                    try {
+                        const tokenEl = contactForm.querySelector('input[name="_token"]');
+                        const res = await fetch(@json(route('sendcontactmail')), {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRF-TOKEN': tokenEl ? tokenEl.value : ''
+                            }
+                        });
+                        const data = await res.json();
+
+                        if (loadingOverlay) loadingOverlay.style.display = 'none';
+
+                        if (data && data.success) {
+                            contactForm.reset();
+                            setVisible(successMessage, true);
+
+                            setTimeout(() => {
+                                const modalEl = document.getElementById('tripContactModal');
+                                const modal = (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal)
+                                    ? (bootstrap.Modal.getInstance ? (bootstrap.Modal.getInstance(modalEl) || (bootstrap.Modal.getOrCreateInstance ? bootstrap.Modal.getOrCreateInstance(modalEl) : new bootstrap.Modal(modalEl))) : new bootstrap.Modal(modalEl))
+                                    : null;
+                                if (modal) modal.hide();
+                                setVisible(successMessage, false);
+                                if (formContainer) formContainer.style.display = 'block';
+                            }, 2000);
+                        } else {
+                            if (formContainer) formContainer.style.display = 'block';
+                            setVisible(contactError, true);
+                            contactError.innerHTML = (data && data.message) ? data.message : 'An error occurred. Please try again.';
+                        }
+                    } catch (e) {
+                        if (loadingOverlay) loadingOverlay.style.display = 'none';
+                        if (formContainer) formContainer.style.display = 'block';
+                        setVisible(contactError, true);
+                        contactError.innerHTML = e && e.message ? e.message : 'An error occurred. Please try again.';
+                    }
+                }
+
+                submitBtn.addEventListener('click', handleSubmit);
+            })();
 
             // Small map below booking card (Leaflet + OSM)
             var mapEl = document.getElementById('tripOfferMap');

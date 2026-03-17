@@ -411,6 +411,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('camp-vacation-bookings/{campVacationBooking}/status', [CampVacationBookingsController::class, 'updateStatus'])->name('camp-vacation-bookings.update-status');
         Route::post('camp-vacation-bookings/reply', [CampVacationBookingsController::class, 'sendReply'])->name('camp-vacation-bookings.reply');
         Route::get('camp-vacation-bookings/{campVacationBooking}/email-history', [CampVacationBookingsController::class, 'emailHistory'])->name('camp-vacation-bookings.email-history');
+
+        Route::get('trip-bookings', [\App\Http\Controllers\Admin\TripBookingsController::class, 'index'])->name('trip-bookings.index');
+        Route::patch('trip-bookings/{tripBooking}/status', [\App\Http\Controllers\Admin\TripBookingsController::class, 'updateStatus'])->name('trip-bookings.update-status');
+        Route::post('trip-bookings/reply', [\App\Http\Controllers\Admin\TripBookingsController::class, 'sendReply'])->name('trip-bookings.reply');
+        Route::get('trip-bookings/{tripBooking}/email-history', [\App\Http\Controllers\Admin\TripBookingsController::class, 'emailHistory'])->name('trip-bookings.email-history');
         Route::prefix('payments')->name('payments.')->group(function () {
             Route::get('/', [AdminPaymentsController::class, 'index'])->name('index');
             Route::get('/showoutpayments/{id}', [AdminPaymentsController::class, 'showoutpayments'])->name('showoutpayments');

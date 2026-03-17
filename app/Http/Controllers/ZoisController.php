@@ -10,6 +10,7 @@ use App\Mail\NewsletterMail;
 use App\Mail\CustomerContactMail;
 use App\Models\ContactSubmission;
 use App\Models\CampVacationBooking;
+use App\Models\TripBooking;
 use App\Mail\CustomerNewsletterMail;
 
 class ZoisController extends Controller
@@ -51,6 +52,19 @@ class ZoisController extends Controller
                 'phone' => $request->phone,
                 'message' => $request->description,
                 'status' => CampVacationBooking::STATUS_OPEN,
+            ]);
+        } elseif (strtolower((string) $sourceType) === TripBooking::SOURCE_TRIP && $sourceId) {
+            TripBooking::create([
+                'source_type' => TripBooking::SOURCE_TRIP,
+                'source_id' => (int) $sourceId,
+                'preferred_date' => $request->input('preferred_date'),
+                'number_of_persons' => (int) $request->input('number_of_persons'),
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone_country_code' => $request->countryCode,
+                'phone' => $request->phone,
+                'message' => $request->description,
+                'status' => TripBooking::STATUS_OPEN,
             ]);
         } else {
             ContactSubmission::create([

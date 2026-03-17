@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Trip;
 use App\Services\Trip\TripCacheService;
 use App\Services\Trip\TripOfferViewMapper;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 use Illuminate\View\View;
 
 class TripOfferController extends Controller
@@ -20,7 +22,7 @@ class TripOfferController extends Controller
         private TripCacheService $cache
     ) {}
 
-    public function show(string $slug): View
+    public function show(Request $request, string $slug): View
     {
         $trip = Trip::with(['availabilityDates'])
             ->where('slug', $slug)
@@ -31,6 +33,7 @@ class TripOfferController extends Controller
 
         $gallery = $this->buildGallery($trip);
         $availabilityCards = $this->buildAvailabilityCards($trip);
+        $selectedDate = $this->resolveSelectedDate($request, $availabilityCards);
 
         $tripOfferData = [
             'gallery' => $gallery['all'] ?? [],
@@ -42,7 +45,38 @@ class TripOfferController extends Controller
             'gallery' => $gallery,
             'availabilityCards' => $availabilityCards,
             'tripOfferData' => $tripOfferData,
+            'selectedDate' => $selectedDate,
+            'contactModalTitle' => "Please provide your details for booking the trip: " . $tripView['title'] ?? __('contact.shareYourQuestion'),
         ]);
+    }
+
+    private function resolveSelectedDate(Request $request, array $availabilityCards): ?string
+    {
+        $candidate = $request->query('departure_date');
+        if (!is_string($candidate) || $candidate === '') {
+            $candidate = Session::get('selected_date');
+        }
+
+        if (!is_string($candidate) || $candidate === '') {
+            return null;
+        }
+
+        // Only allow selecting future, non-fully-booked dates shown on the page.
+        $allowed = [];
+        foreach ($availabilityCards as $card) {
+            $date = $card['departure_date'] ?? null;
+            $status = $card['availability_status'] ?? null;
+            if (is_string($date) && $date !== '' && $status !== 'fully_booked') {
+                $allowed[$date] = true;
+            }
+        }
+
+        if (!isset($allowed[$candidate])) {
+            return null;
+        }
+
+        Session::put('selected_date', $candidate);
+        return $candidate;
     }
 
     private function getMapDataForScript(array $tripView): ?array
