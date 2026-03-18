@@ -38,6 +38,8 @@ class Booking extends Model
         'phone_country_code',
         'email',
         'last_employee_id',
+        'created_by_id',
+        'created_source',
         'expires_at',
         'is_guest',
         'created_at',
@@ -160,6 +162,11 @@ class Booking extends Model
 
     public function employee(): BelongsTo{
         return $this->belongsTo(Employee::class, 'last_employee_id');
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'created_by_id');
     }
 
     /**

@@ -12,6 +12,7 @@ use App\Events\BookingStatusChanged;
 use App\Jobs\SendCheckoutEmail;
 use App\Services\EventService;
 use App\Services\HelperService;
+use App\Services\BookingService;
 use Carbon\Carbon;
 
 class BookingController extends Controller
@@ -144,23 +145,6 @@ class BookingController extends Controller
         // Get the original booking
         $originalBooking = Booking::findOrFail($request->booking_id);
         $guiding = $originalBooking->guiding;
-        $user = $originalBooking->user;
-
-        // Create a blocked event for the new date
-        $eventService = new EventService();
-        $blockedEvent = $eventService->createBlockedEvent('00:00', $request->selectedDate, $guiding, 'tour_request', $user);
-
-        // Calculate the fee
-        $helperService = new HelperService();
-        $fee = $helperService->calculateRates($request->total_price);
-        
-        // Set expiration time based on date difference
-        $expiresAt = Carbon::now()->addHours(24); // Default expiration time (24 hours)
-        $dateDifference = Carbon::parse($request->selectedDate)->diffInDays(Carbon::now());
-        if ($dateDifference > 3) {
-            // If the selected date is more than 3 days from now, extend to 48 hours total response time
-            $expiresAt = Carbon::now()->addHours(48);
-        }
 
         // Process extras
         $extraData = null;
@@ -168,35 +152,20 @@ class BookingController extends Controller
             $extraData = $this->processExtras($request->extras, $guiding);
         }
 
-        // Create a new booking
-        $newBooking = Booking::create([
-            'user_id' => $originalBooking->user_id,
-            'is_guest' => $originalBooking->is_guest,
-            'guiding_id' => $guiding->id,
-            'blocked_event_id' => $blockedEvent->id,
-            'is_paid' => false,
-            'extras' => $extraData,
-            'total_extra_price' => $this->calculateTotalExtraPrice($extraData),
+        $bookingService = app(BookingService::class);
+
+        $bookingData = [
+            'selected_date' => $request->selectedDate,
+            'total_price' => $request->total_price,
             'count_of_users' => $request->count_of_users,
-            'price' => $request->total_price,
-            'cag_percent' => $fee,
-            'status' => 'pending',
-            'book_date' => $request->selectedDate,
-            'expires_at' => $expiresAt,
-            'phone' => $originalBooking->phone,
-            'email' => $originalBooking->email,
-            'token' => $this->generateBookingToken($blockedEvent->id),
-            'parent_id' => $originalBooking->id, // Link to the original booking
-        ]);
+            'extras_serialized' => $extraData,
+        ];
 
-        $updateSchedule = CalendarSchedule::find($blockedEvent->id);
-        $updateSchedule->booking_id = $newBooking->id;
-        $updateSchedule->save();
-
-        // Send notification emails
-        if (!app()->environment('local')) {
-            SendCheckoutEmail::dispatch($newBooking, $user, $guiding, $guiding->user);
-        }
+        $newBooking = $bookingService->rescheduleGuidingBooking(
+            $originalBooking,
+            $bookingData,
+            sendEmails: !app()->environment('local'),
+        );
 
         if ($newBooking) {
             // Return success response for AJAX
@@ -243,30 +212,4 @@ class BookingController extends Controller
         return !empty($extraData) ? serialize($extraData) : null;
     }
 
-    /**
-     * Calculate total extra price from serialized extras data
-     */
-    private function calculateTotalExtraPrice($serializedExtras)
-    {
-        if (!$serializedExtras) {
-            return 0;
-        }
-
-        $extras = unserialize($serializedExtras);
-        $total = 0;
-
-        foreach ($extras as $extra) {
-            $total += $extra['extra_total_price'];
-        }
-
-        return $total;
-    }
-
-    private function generateBookingToken($eventID) 
-    {
-        $timestamp = time();
-        $combinedString = $eventID . '-' . $timestamp;
-
-        return hash('sha256', $combinedString);
-    }
 }

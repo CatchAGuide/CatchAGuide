@@ -16,7 +16,6 @@ use Livewire\Component;
 
 use Carbon\Carbon;
 use App\Services\HelperService;
-use App\Models\GuidingExtras;
 use Illuminate\Support\Facades\Log;
 
 use App\Jobs\SendCheckoutEmail;
@@ -25,6 +24,7 @@ use App\Models\UserGuest;
 use App\Models\CalendarSchedule;
 use Illuminate\Support\Facades\Cache;
 use App\Services\DDoSProtectionService;
+use App\Services\BookingService;
 
 class Checkout extends Component
 {
@@ -483,50 +483,30 @@ class Checkout extends Component
             }
         } 
  
-        $blockedEvent = (new EventService())->createBlockedEvent($this->selectedTime, $this->selectedDate, $this->guiding, 'tour_request'); 
- 
-        $fee = (new HelperService())->calculateRates($this->guidingprice);
-        $partnerFee = (new HelperService())->convertAmountToString($fee);
+        $bookingService = app(BookingService::class);
 
-        $expiresAt = Carbon::now()->addHours(24); // Default expiration time (24 hours)
-
-        // Calculate the difference between the selected date and the current date
-        $dateDifference = Carbon::parse($this->selectedDate)->diffInDays(Carbon::now());
-
-        if ($dateDifference > 3) {
-            // If the selected date is more than 3 days from now, extend to 48 hours total response time
-            $expiresAt = Carbon::now()->addHours(48);
-        }
-
-        $booking = Booking::create([
-            'user_id' => $userId, // Use null for guests, actual user ID for registered users
-            'is_guest' => $isGuest,
-            'guiding_id' => $this->guiding->id,
-            'blocked_event_id' => $blockedEvent->id,
-            'is_paid' => false,
-            'extras' => $this->extraData,
+        $bookingData = [
+            'persons' => $this->persons,
+            'selected_date' => $this->selectedDate,
+            'selected_time' => $this->selectedTime,
+            'total_price' => $this->totalPrice,
             'total_extra_price' => $this->totalExtraPrice,
-            'count_of_users' => $this->persons,
-            'price' => $this->totalPrice,
-            'cag_percent' => $fee,
-            'status' => 'pending',
-            'book_date' => $this->selectedDate,
-            'expires_at' => $expiresAt,
-            'phone' => $this->userData['countryCode'] . ' ' . $this->userData['phone'],
+            'extras_serialized' => $this->extraData,
+            'phone_full' => $this->userData['countryCode'] . ' ' . $this->userData['phone'],
             'phone_country_code' => $this->userData['countryCode'],
-            'language' => $locale,
             'email' => $this->userData['email'],
-            'token' => $this->generateBookingToken($blockedEvent->id),
-        ]);
+            'language' => $locale,
+            'guiding_price_for_fee' => $this->guidingprice,
+        ];
 
-        $updateSchedule = CalendarSchedule::find($blockedEvent->id);
-        $updateSchedule->booking_id = $booking->id;
-        $updateSchedule->save();
+        $booking = $bookingService->createGuidingBooking(
+            $bookingData,
+            $this->guiding,
+            $user,
+            $isGuest,
+            sendEmails: !app()->environment('local'),
+        );
 
-        if (!app()->environment('local')) {
-            SendCheckoutEmail::dispatch($booking, $user, $this->guiding, $this->guiding->user);
-        }
-        
         // Checkout completed successfully
         
         sleep(5);

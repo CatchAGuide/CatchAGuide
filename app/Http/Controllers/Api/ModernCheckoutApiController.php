@@ -12,6 +12,7 @@ use App\Models\CalendarSchedule;
 use App\Services\EventService;
 use App\Services\HelperService;
 use App\Jobs\SendCheckoutEmail;
+use App\Services\BookingService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -215,57 +216,32 @@ class ModernCheckoutApiController extends Controller
             // Handle user creation/retrieval (similar to original checkout)
             $user = $this->handleUserCreation($currentUser, $request->form_data, $locale);
             $isGuest = $user instanceof UserGuest;
-            $userId = $user->id;
-
-            // Create blocked event
-            $blockedEvent = $this->createBlockedEvent($request->selected_date, $guiding);
-
-            // Calculate fees
-            $helperService = app(HelperService::class);
-            $fee = $helperService->calculateRates($priceData->data->guidingPrice);
-            $partnerFee = $helperService->convertAmountToString($fee);
-            
-            // Debug logging
-            Log::info('Fee calculation - guidingPrice: ' . $priceData->data->guidingPrice . ', fee: ' . $fee . ', partnerFee: ' . $partnerFee);
-
-            // Set expiration time
-            $expiresAt = $this->calculateExpirationTime($request->selected_date);
 
             // Prepare extra data
             $extraData = $this->prepareExtraData($request->selected_extras, $guiding, $request->persons);
 
-            // Create booking
-            $booking = Booking::create([
-                'user_id' => $userId,
-                'is_guest' => $isGuest,
-                'guiding_id' => $guiding->id,
-                'blocked_event_id' => $blockedEvent->id,
-                'is_paid' => false,
-                'extras' => $extraData,
+            $bookingService = app(BookingService::class);
+
+            $bookingData = [
+                'persons' => $request->persons,
+                'selected_date' => $request->selected_date,
+                'total_price' => $priceData->data->totalPrice,
                 'total_extra_price' => $priceData->data->totalExtraPrice,
-                'count_of_users' => $request->persons,
-                'price' => $priceData->data->totalPrice,
-                'cag_percent' => $fee,
-                'status' => 'pending',
-                'book_date' => $request->selected_date,
-                'expires_at' => $expiresAt,
-                'phone' => $request->form_data['country_code'] . ' ' . $request->form_data['phone'],
+                'extras_serialized' => $extraData,
+                'phone_full' => $request->form_data['country_code'] . ' ' . $request->form_data['phone'],
                 'phone_country_code' => $request->form_data['country_code'],
-                'language' => $locale,
                 'email' => $request->form_data['email'],
-                'token' => $this->generateBookingToken($blockedEvent->id),
-            ]);
-            
-            // Debug logging for booking creation
-            Log::info('Booking created - ID: ' . $booking->id . ', cag_percent: ' . $booking->cag_percent . ', price: ' . $booking->price);
+                'language' => $locale,
+                'guiding_price_for_fee' => $priceData->data->guidingPrice,
+            ];
 
-            // Update calendar schedule
-            $this->updateCalendarSchedule($blockedEvent->id, $booking->id);
-
-            // Send email (if not in local environment)
-            if (!app()->environment('local')) {
-                $this->sendBookingEmail($booking, $user, $guiding);
-            }
+            $booking = $bookingService->createGuidingBooking(
+                $bookingData,
+                $guiding,
+                $user,
+                $isGuest,
+                sendEmails: !app()->environment('local'),
+            );
 
             return response()->json([
                 'success' => true,
@@ -387,15 +363,6 @@ class ModernCheckoutApiController extends Controller
     }
 
     /**
-     * Create blocked event for the booking
-     */
-    private function createBlockedEvent($selectedDate, $guiding)
-    {
-        $eventService = app(EventService::class);
-        return $eventService->createBlockedEvent('00:00', $selectedDate, $guiding, 'tour_request');
-    }
-
-    /**
      * Calculate rates using HelperService
      */
     private function calculateRates($guidingPrice)
@@ -457,30 +424,6 @@ class ModernCheckoutApiController extends Controller
         }
 
         return !empty($extraData) ? serialize($extraData) : null;
-    }
-
-    /**
-     * Update calendar schedule with booking ID
-     */
-    private function updateCalendarSchedule($eventId, $bookingId)
-    {
-        $updateSchedule = CalendarSchedule::find($eventId);
-        if ($updateSchedule) {
-            $updateSchedule->booking_id = $bookingId;
-            $updateSchedule->save();
-        }
-    }
-
-    /**
-     * Send booking email
-     */
-    private function sendBookingEmail($booking, $user, $guiding)
-    {
-        try {
-            SendCheckoutEmail::dispatch($booking, $user, $guiding, $guiding->user);
-        } catch (\Exception $e) {
-            Log::error('Error sending booking email: ' . $e->getMessage());
-        }
     }
 
     /**

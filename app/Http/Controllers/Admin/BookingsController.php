@@ -3,36 +3,96 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreManualBookingRequest;
 use App\Models\Booking;
 use App\Models\EmailLog;
 use App\Models\BlockedEvent;
+use App\Models\Guiding;
+use App\Models\UserGuest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\Guest\GuestBookingRequestMail;
 use App\Mail\Guide\GuideBookingRequestMail;
 use App\Mail\Guide\GuideInvoiceMail;
 use App\Events\BookingStatusChanged;
+use App\Services\BookingService;
 
 class BookingsController extends Controller
 {
     public function index()
     {
-        $booking = Booking::with('employee', 'guiding.user', 'blocked_event', 'calendar_schedule')->orderBy('created_at', 'DESC')->get();
-        
+        $booking = Booking::with('employee', 'guiding.user', 'blocked_event', 'calendar_schedule')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
         return view('admin.pages.bookings.index', [
-            'bookings' => $booking
+            'bookings' => $booking,
         ]);
     }
 
     public function create()
     {
-        //
+        $guidings = Guiding::with('user')
+            ->orderBy('title')
+            ->get(['id', 'title', 'location', 'user_id']);
+
+        return view('admin.pages.bookings.create', [
+            'guidings' => $guidings,
+        ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreManualBookingRequest $request, BookingService $bookingService)
     {
-        //
+        $data = $request->validated();
+
+        $guiding = Guiding::with('user')->findOrFail($data['guiding_id']);
+
+        // For admin manual bookings we always create/use a guest user
+        $guestUser = UserGuest::firstOrCreate(
+            ['email' => $data['guest_email']],
+            [
+                'firstname' => $data['guest_name'],
+                'lastname' => '',
+                'phone' => $data['guest_phone'] ?? '',
+                'phone_country_code' => $data['guest_phone_country_code'] ?? '',
+                'language' => app()->getLocale(),
+            ]
+        );
+
+        $bookingData = [
+            'persons' => $data['number_of_guests'],
+            'selected_date' => $data['date'],
+            'selected_time' => $data['time'] ?? '00:00',
+            'total_price' => $data['price_override'] ?? (float) $guiding->price,
+            'total_extra_price' => 0,
+            'extras_serialized' => null,
+            'phone_full' => ($data['guest_phone_country_code'] ?? '') . ' ' . ($data['guest_phone'] ?? ''),
+            'phone_country_code' => $data['guest_phone_country_code'] ?? '',
+            'email' => $data['guest_email'],
+            'language' => app()->getLocale(),
+            'guiding_price_for_fee' => $data['price_override'] ?? (float) $guiding->price,
+            'status' => $data['status'] ?? 'pending',
+        ];
+
+        if (!empty($data['notes'])) {
+            $bookingData['additional_information'] = $data['notes'];
+        }
+
+        $booking = $bookingService->createGuidingBooking(
+            $bookingData,
+            $guiding,
+            $guestUser,
+            true,
+            sendEmails: (bool) ($data['send_emails'] ?? true),
+            createdById: auth('employees')->id(),
+            createdSource: 'admin'
+        );
+
+        return redirect()
+            ->route('admin.bookings.index')
+            ->with('success', 'Booking created successfully.');
     }
 
     public function show(Booking $booking)
@@ -558,6 +618,76 @@ class BookingsController extends Controller
             'guideReminder12hrsEmail' => $guideReminder12hrsEmail,
             'guideUpcomingTourEmail' => $guideUpcomingTourEmail,
             'guideReviewConfirmationEmail' => $guideReviewConfirmationEmail
+        ]);
+    }
+
+    public function searchGuidings(Request $request)
+    {
+        $perPage = (int) $request->input('per_page', 20);
+        $perPage = max(5, min(50, $perPage));
+
+        $page = max((int) $request->input('page', 1), 1);
+        $term = trim((string) $request->input('q', ''));
+
+        $query = Guiding::query()
+            ->with('user')
+            ->select(['id', 'title', 'location', 'user_id', 'thumbnail_path'])
+            ->where('status', 1)
+            ->orderBy('title');
+
+        if ($term !== '') {
+            $termLower = Str::lower($term);
+
+            // If user types a pure number, prefer exact id match (fast path).
+            if (ctype_digit($term)) {
+                $query->where('id', (int) $term);
+            } else {
+                $query->where(function ($q) use ($termLower) {
+                    $q->whereRaw('LOWER(title) LIKE ?', ["%{$termLower}%"])
+                        ->orWhereRaw('LOWER(location) LIKE ?', ["%{$termLower}%"])
+                        ->orWhereRaw('CAST(id AS CHAR) LIKE ?', ["%{$termLower}%"])
+                        ->orWhereHas('user', function ($uq) use ($termLower) {
+                            $uq->whereRaw('LOWER(firstname) LIKE ?', ["%{$termLower}%"])
+                                ->orWhereRaw('LOWER(lastname) LIKE ?', ["%{$termLower}%"])
+                                ->orWhereRaw("LOWER(CONCAT(firstname, ' ', lastname)) LIKE ?", ["%{$termLower}%"])
+                                ->orWhereRaw("LOWER(CONCAT(lastname, ' ', firstname)) LIKE ?", ["%{$termLower}%"]);
+                        });
+                });
+            }
+        }
+
+        $paginator = $query->paginate($perPage, ['*'], 'page', $page);
+
+        $items = $paginator->getCollection()->map(function (Guiding $guiding) {
+            $guideUser = $guiding->user;
+            $thumbPath = trim((string) ($guiding->thumbnail_path ?? ''));
+
+            $thumbnailUrl = null;
+            if ($thumbPath !== '') {
+                if (str_starts_with($thumbPath, 'http') || str_starts_with($thumbPath, '//')) {
+                    $thumbnailUrl = $thumbPath;
+                } else {
+                    // Some records store just a filename (historical), others store a web path like "storage/..." or "images/..."
+                    $thumbnailUrl = str_contains($thumbPath, '/')
+                        ? asset(ltrim($thumbPath, '/'))
+                        : asset('images/' . ltrim($thumbPath, '/'));
+                }
+            }
+
+            return [
+                'id' => $guiding->id,
+                'title' => (string) $guiding->title,
+                'location' => $guiding->location ? (string) $guiding->location : null,
+                'guide_name' => $guideUser?->full_name,
+                'thumbnail_url' => $thumbnailUrl ?: asset('images/placeholder_guide.jpg'),
+            ];
+        })->values();
+
+        return response()->json([
+            'data' => $items,
+            'current_page' => $paginator->currentPage(),
+            'next_page' => $paginator->hasMorePages() ? $paginator->currentPage() + 1 : null,
+            'total' => $paginator->total(),
         ]);
     }
 }

@@ -400,6 +400,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('special-offers', \App\Http\Controllers\Admin\SpecialOffersController::class);
         Route::get('special-offers/change-status/{id}', [\App\Http\Controllers\Admin\SpecialOffersController::class, 'changeStatus'])->name('special-offers.change-status');
 
+        Route::get('/bookings/guidings-search', [BookingsController::class, 'searchGuidings'])->name('bookings.guidings-search');
         Route::resource('bookings', BookingsController::class);
         Route::get('/bookings/{booking}/email-preview', [BookingsController::class, 'emailPreview'])->name('bookings.email-preview');
         Route::get('/bookings/{booking}/guide-invoice-preview', [BookingsController::class, 'guideInvoicePreview'])->name('bookings.guide-invoice-preview');

@@ -11,11 +11,13 @@
             <!-- PAGE-HEADER -->
             <div class="page-header">
                 <h1 class="page-title">@yield('title')</h1>
-                <div>
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="#">Verwaltung</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">@yield('title')</li>
-                    </ol>
+                <div class="ms-auto d-flex">
+                    <button type="button"
+                            class="btn btn-primary ms-3"
+                            data-bs-toggle="modal"
+                            data-bs-target="#manualBookingModal">
+                        <i class="fa fa-plus"></i> Create Booking
+                    </button>
                 </div>
 
             </div>
@@ -599,6 +601,241 @@
         </div>
     </div>
 
+    <!-- Manual Booking Modal -->
+    <div class="modal fade" id="manualBookingModal" tabindex="-1" aria-labelledby="manualBookingModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="manualBookingModalLabel">Create Booking</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="{{ route('admin.bookings.store') }}">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-lg-7">
+                                <div class="card border-0 shadow-sm mb-4 position-relative">
+                                    <div class="card-header border-0">
+                                        <h5 class="mb-0">Guiding / Trip</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3 position-relative">
+                                            <input type="text"
+                                                   id="guiding-search-input"
+                                                   class="form-control"
+                                                   placeholder="Select guiding…"
+                                                   autocomplete="off">
+                                            <input type="hidden" name="guiding_id" id="guiding-id-input">
+
+                                            <div id="guiding-dropdown"
+                                                 class="card position-absolute w-100 mt-1 d-none"
+                                                 style="z-index: 1055; max-height: 260px; overflow-y: auto;">
+                                                <div id="guiding-dropdown-list"></div>
+
+                                                <div id="guiding-dropdown-loading" class="text-center py-2 small text-muted d-none">
+                                                    Loading guidings…
+                                                </div>
+
+                                                <div id="guiding-dropdown-empty" class="text-center py-2 small text-muted d-none">
+                                                    No guidings found.
+                                                </div>
+                                            </div>
+
+                                            <div class="text-danger small mt-1 d-none" id="guiding-error">
+                                                Please select a guiding.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-header border-0">
+                                        <h5 class="mb-0">Booking details</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Date</label>
+                                                <input type="date"
+                                                       name="date"
+                                                       class="form-control"
+                                                       min="{{ now()->toDateString() }}"
+                                                       required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Number of guests</label>
+                                                <input type="number" name="number_of_guests" class="form-control" min="1" value="1" required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Price override (€)</label>
+                                                <input type="number" step="0.01" name="price_override" class="form-control" placeholder="Auto if empty">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Initial status</label>
+                                                <select name="status" class="form-control">
+                                                    <option value="">Pending (default)</option>
+                                                    <option value="pending">Pending</option>
+                                                    <option value="accepted">Accepted</option>
+                                                    <option value="rejected">Rejected</option>
+                                                    <option value="cancelled">Cancelled</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-12 mb-3">
+                                                <label class="form-label">Internal notes / message</label>
+                                                <textarea name="notes" rows="2" class="form-control"></textarea>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-check mt-2">
+                                            <input type="hidden" name="send_emails" value="0">
+                                            <input class="form-check-input" type="checkbox" id="manual-send-emails" name="send_emails" value="1" checked>
+                                            <label class="form-check-label" for="manual-send-emails">
+                                                Send booking request emails to guest and guide
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-5">
+                                <div class="card border-0 shadow-sm mb-4">
+                                    <div class="card-header border-0">
+                                        <h5 class="mb-0">Guest details</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Guest name</label>
+                                            <input type="text" name="guest_name" class="form-control" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Guest email</label>
+                                            <input type="email" name="guest_email" class="form-control">
+                                            <small class="text-muted">Required if you want to send emails.</small>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Country code</label>
+                                                <input type="text" name="guest_phone_country_code" class="form-control" value="+49">
+                                            </div>
+                                            <div class="col-md-8 mb-3">
+                                                <label class="form-label">Phone</label>
+                                                <input type="text" name="guest_phone" class="form-control">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-header border-0">
+                                        <h5 class="mb-0">How this works</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled mb-0">
+                                            <li class="mb-2">
+                                                <strong>Same flow as frontend:</strong>
+                                                Uses the shared booking service to create a pending booking, blocked event, and calendar entry.
+                                            </li>
+                                            <li class="mb-2">
+                                                <strong>Email simulation:</strong>
+                                                When email sending is enabled, guest/guide/CEO emails are dispatched just like a normal checkout.
+                                            </li>
+                                            <li class="mb-0">
+                                                <strong>Audit:</strong>
+                                                Booking is marked as created by the current admin user with source <code>admin</code>.
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" onclick="return validateManualBookingForm()">
+                            Create booking
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Ensure guiding cards render correctly inside the admin dropdown */
+        #guiding-dropdown {
+            background: #ffffff;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+        }
+
+        #guiding-dropdown .guiding-card {
+            border-radius: 0;
+            border-left: none;
+            border-right: none;
+            box-shadow: none;
+            overflow: visible;
+            contain: initial;
+            cursor: pointer;
+            transition: background-color 120ms ease, transform 120ms ease;
+        }
+
+        /* Subtle row differentiation (striped) */
+        #guiding-dropdown #guiding-dropdown-list .guiding-card:nth-child(odd) {
+            background: #ffffff;
+        }
+
+        #guiding-dropdown #guiding-dropdown-list .guiding-card:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        #guiding-dropdown #guiding-dropdown-list .guiding-card:hover {
+            background: #eef2ff;
+        }
+
+        #guiding-dropdown .guiding-card:first-child {
+            border-top-left-radius: 0.5rem;
+            border-top-right-radius: 0.5rem;
+        }
+
+        #guiding-dropdown .guiding-card:last-child {
+            border-bottom-left-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
+            border-bottom: none;
+        }
+
+        #guiding-dropdown .guiding-card .card-body {
+            padding-top: 0.35rem;
+            padding-bottom: 0.35rem;
+        }
+
+        /* Thumbnail polish */
+        #guiding-dropdown img[alt="Guiding thumbnail"] {
+            border-radius: 10px !important;
+            border: 1px solid rgba(15, 23, 42, 0.10);
+            background: #f1f5f9;
+        }
+
+        /* Make checkbox checked state obvious in modal */
+        #manualBookingModal .form-check-input {
+            width: 1.15rem;
+            height: 1.15rem;
+            margin-top: 0.2rem;
+            border: 1px solid rgba(15, 23, 42, 0.25);
+            background-color: #ffffff;
+            accent-color: #4f46e5; /* modern browsers */
+        }
+
+        #manualBookingModal .form-check-input:checked {
+            background-color: #4f46e5;
+            border-color: #4f46e5;
+        }
+
+        #manualBookingModal .form-check-input:focus {
+            border-color: rgba(79, 70, 229, 0.6);
+            box-shadow: 0 0 0 0.15rem rgba(79, 70, 229, 0.18);
+        }
+    </style>
+
     <!-- Edit Booking Modal -->
     <div class="modal fade" id="editBookingModal" tabindex="-1" role="dialog" aria-labelledby="editBookingModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -638,6 +875,21 @@
     </div>
 
     <script>
+        function validateManualBookingForm() {
+            const guidingId = document.getElementById('guiding-id-input').value;
+            const errorEl = document.getElementById('guiding-error');
+            if (!guidingId) {
+                if (errorEl) {
+                    errorEl.classList.remove('d-none');
+                }
+                return false;
+            }
+            if (errorEl) {
+                errorEl.classList.add('d-none');
+            }
+            return true;
+        }
+
         let currentBookingId = null;
         let currentInvoiceBookingId = null;
 
@@ -647,6 +899,167 @@
                 new bootstrap.Tooltip(tooltipTriggerEl);
             });
         });
+
+        // Guiding dropdown search + selection
+        (function () {
+            const searchInput = document.getElementById('guiding-search-input');
+            const guidingIdInput = document.getElementById('guiding-id-input');
+            const dropdown = document.getElementById('guiding-dropdown');
+            const listEl = document.getElementById('guiding-dropdown-list');
+            const loadingEl = document.getElementById('guiding-dropdown-loading');
+            const emptyEl = document.getElementById('guiding-dropdown-empty');
+            if (!searchInput || !dropdown || !listEl) return;
+
+            const apiUrl = @json(route('admin.bookings.guidings-search'));
+
+            let currentTerm = '';
+            let currentPage = 1;
+            let nextPage = null;
+            let isLoading = false;
+            let debounceTimer = null;
+
+            function openDropdown() {
+                dropdown.classList.remove('d-none');
+            }
+
+            function closeDropdown() {
+                dropdown.classList.add('d-none');
+            }
+
+            function setLoading(state) {
+                isLoading = state;
+                if (loadingEl) loadingEl.classList.toggle('d-none', !state);
+            }
+
+            function clearList() {
+                listEl.innerHTML = '';
+                if (emptyEl) emptyEl.classList.add('d-none');
+            }
+
+            function renderGuidingCard(item) {
+                const div = document.createElement('div');
+                div.className = 'guiding-card border-0 border-bottom';
+                div.dataset.guidingId = item.id;
+                div.dataset.label = item.title;
+                const placeholderUrl = @json(asset('images/placeholder_guide.jpg'));
+                div.innerHTML = `
+                    <div class="card-body py-2 px-2 d-flex align-items-center">
+                        <div class="me-3">
+                            <img src="${item.thumbnail_url}"
+                                 alt="Guiding thumbnail"
+                                 class="rounded"
+                                 loading="lazy"
+                                 onerror="this.onerror=null;this.src='${placeholderUrl}';"
+                                 style="width: 40px; height: 40px; object-fit: cover;">
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold">${item.title}</div>
+                            <div class="text-muted small">
+                                ID #${item.id}${item.location ? ' · ' + item.location : ''}
+                            </div>
+                            ${item.guide_name ? `<div class="text-muted small">Guide: ${item.guide_name}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+
+                div.addEventListener('click', function () {
+                    const id = this.dataset.guidingId;
+                    const label = this.dataset.label || ('ID #' + id);
+                    guidingIdInput.value = id;
+                    searchInput.value = label;
+
+                    const errorEl = document.getElementById('guiding-error');
+                    if (errorEl) errorEl.classList.add('d-none');
+
+                    closeDropdown();
+                });
+
+                return div;
+            }
+
+            function loadGuidings({ reset = false } = {}) {
+                if (isLoading) return;
+
+                if (reset) {
+                    currentPage = 1;
+                    nextPage = null;
+                    clearList();
+                }
+
+                setLoading(true);
+
+                const params = new URLSearchParams();
+                params.set('page', String(currentPage));
+                params.set('per_page', '20');
+                if (currentTerm) params.set('q', currentTerm);
+
+                fetch(apiUrl + '?' + params.toString(), {
+                    headers: { 'Accept': 'application/json' },
+                })
+                    .then(r => r.json())
+                    .then(json => {
+                        const data = Array.isArray(json.data) ? json.data : [];
+
+                        if (reset && data.length === 0) {
+                            if (emptyEl) emptyEl.classList.remove('d-none');
+                        } else {
+                            if (emptyEl) emptyEl.classList.add('d-none');
+                        }
+
+                        data.forEach(item => listEl.appendChild(renderGuidingCard(item)));
+
+                        nextPage = json.next_page || null;
+                        currentPage = json.current_page || currentPage;
+                    })
+                    .catch(() => {
+                        if (reset && emptyEl) {
+                            emptyEl.textContent = 'Failed to load guidings.';
+                            emptyEl.classList.remove('d-none');
+                        }
+                    })
+                    .finally(() => setLoading(false));
+            }
+
+            function ensureInitialLoaded() {
+                if (!listEl.childElementCount && !isLoading) {
+                    loadGuidings({ reset: true });
+                }
+            }
+
+            // Open on focus/click
+            searchInput.addEventListener('focus', function () {
+                openDropdown();
+                ensureInitialLoaded();
+            });
+            searchInput.addEventListener('click', function () {
+                openDropdown();
+                ensureInitialLoaded();
+            });
+
+            // Debounced filter as user types
+            searchInput.addEventListener('input', function () {
+                currentTerm = this.value.toLowerCase().trim();
+                if (debounceTimer) window.clearTimeout(debounceTimer);
+                debounceTimer = window.setTimeout(() => loadGuidings({ reset: true }), 250);
+            });
+
+            // Infinite scroll
+            dropdown.addEventListener('scroll', function () {
+                if (!nextPage || isLoading) return;
+                const threshold = 40;
+                if (dropdown.scrollTop + dropdown.clientHeight + threshold >= dropdown.scrollHeight) {
+                    currentPage = nextPage;
+                    loadGuidings();
+                }
+            });
+
+            // Close when clicking outside
+            document.addEventListener('click', function (e) {
+                if (!dropdown.contains(e.target) && e.target !== searchInput) {
+                    closeDropdown();
+                }
+            });
+        })();
 
         function showResendModal(bookingId, guestName, guestEmail, guideName, guideEmail) {
             currentBookingId = bookingId;
