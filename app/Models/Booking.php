@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Facades\Mail;
 
 class Booking extends Model
@@ -167,6 +168,11 @@ class Booking extends Model
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'created_by_id');
+    }
+
+    public function financeItem(): MorphOne
+    {
+        return $this->morphOne(FinanceItem::class, 'billable');
     }
 
     /**

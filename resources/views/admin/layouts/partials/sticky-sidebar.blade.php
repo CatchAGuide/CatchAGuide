@@ -35,6 +35,18 @@
                     </ul>
                 </li>
 
+                <li class="slide {{ request()->routeIs('admin.finance.*') ? 'is-expanded' : '' }}">
+                    <a class="side-menu__item {{ request()->routeIs('admin.finance.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#">
+                        <i class="side-menu__icon fe fe-briefcase"></i>
+                        <span class="side-menu__label">Finance</span>
+                        <i class="angle fe fe-chevron-right"></i>
+                    </a>
+                    <ul class="slide-menu">
+                        <li><a href="{{ route('admin.finance.analytics') }}" class="slide-item {{ request()->routeIs('admin.finance.analytics') ? 'active' : '' }}"> Analytics</a></li>
+                        <li><a href="{{ route('admin.finance.invoices') }}" class="slide-item {{ request()->routeIs('admin.finance.invoices') ? 'active' : '' }}"> Invoice</a></li>
+                    </ul>
+                </li>
+
                 <li class="sub-category">
                     <h3>Inventory</h3>
                 </li>

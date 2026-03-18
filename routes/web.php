@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\GuidesController;
 use App\Http\Controllers\Admin\GuideAnalyticsController;
 use App\Http\Controllers\Admin\BookingsController;
 use App\Http\Controllers\Admin\CampVacationBookingsController;
+use App\Http\Controllers\Admin\FinanceController;
 use App\Http\Controllers\Admin\CustomersController;
 use App\Http\Controllers\Admin\EmployeesController;
 use App\Http\Controllers\Admin\EmailLogsController;
@@ -424,6 +425,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('trip-bookings/{tripBooking}/status', [\App\Http\Controllers\Admin\TripBookingsController::class, 'updateStatus'])->name('trip-bookings.update-status');
         Route::post('trip-bookings/reply', [\App\Http\Controllers\Admin\TripBookingsController::class, 'sendReply'])->name('trip-bookings.reply');
         Route::get('trip-bookings/{tripBooking}/email-history', [\App\Http\Controllers\Admin\TripBookingsController::class, 'emailHistory'])->name('trip-bookings.email-history');
+
+        Route::prefix('finance')->name('finance.')->group(function () {
+            Route::get('analytics', [FinanceController::class, 'analytics'])->name('analytics');
+            Route::get('invoices', [FinanceController::class, 'invoices'])->name('invoices');
+            Route::patch('{source}/{id}/invoice', [FinanceController::class, 'updateInvoice'])
+                ->where('source', '^(booking|trip|camp_vacation)$')
+                ->name('update-invoice');
+            Route::patch('{source}/{id}/paid', [FinanceController::class, 'updatePaid'])
+                ->where('source', '^(booking|trip|camp_vacation)$')
+                ->name('update-paid');
+        });
         Route::prefix('payments')->name('payments.')->group(function () {
             Route::get('/', [AdminPaymentsController::class, 'index'])->name('index');
             Route::get('/showoutpayments/{id}', [AdminPaymentsController::class, 'showoutpayments'])->name('showoutpayments');

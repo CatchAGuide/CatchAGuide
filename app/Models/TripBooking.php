@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class TripBooking extends Model
 {
@@ -133,6 +134,11 @@ class TripBooking extends Model
             return null;
         }
         return $model->title ?? $model->slug ?? ('#' . $this->source_id);
+    }
+
+    public function financeItem(): MorphOne
+    {
+        return $this->morphOne(FinanceItem::class, 'billable');
     }
 }
 
