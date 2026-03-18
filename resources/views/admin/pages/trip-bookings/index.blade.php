@@ -51,6 +51,37 @@
     .cr-row-contact { display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .meta-pill { display:inline-flex; align-items:center; gap:.35rem; padding:.2rem .5rem; border:1px solid #dee2e6; border-radius:999px; font-size:.8rem; color:#495057; background:#fff; }
     .meta-pill i { color:#6c757d; }
+
+    /* Dropdown polish for manual creation modal */
+    #trip-dropdown {
+        background: #ffffff;
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+    }
+
+    #trip-dropdown .guiding-card {
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        box-shadow: none;
+        cursor: pointer;
+        transition: background-color 120ms ease;
+    }
+
+    #trip-dropdown #trip-dropdown-list .guiding-card:nth-child(odd) { background: #ffffff; }
+    #trip-dropdown #trip-dropdown-list .guiding-card:nth-child(even) { background: #f8fafc; }
+    #trip-dropdown #trip-dropdown-list .guiding-card:hover { background: #eef2ff; }
+
+    #trip-dropdown .guiding-card:first-child {
+        border-top-left-radius: 0.5rem;
+        border-top-right-radius: 0.5rem;
+    }
+
+    #trip-dropdown .guiding-card:last-child {
+        border-bottom-left-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
+        border-bottom: none;
+    }
 </style>
 @endsection
 
@@ -75,11 +106,18 @@
 
         <div class="row row-sm mb-3">
             <div class="col-12">
-                <div class="d-flex flex-wrap gap-3">
-                    <span class="meta-pill"><i class="fa fa-inbox"></i> Total: <strong>{{ $bookingRequests->count() }}</strong></span>
-                    <span class="meta-pill"><i class="fa fa-folder-open"></i> Open: <strong>{{ $statsOpen }}</strong></span>
-                    <span class="meta-pill"><i class="fa fa-spinner"></i> In process: <strong>{{ $statsInProcess }}</strong></span>
-                    <span class="meta-pill"><i class="fa fa-check-circle"></i> Done: <strong>{{ $statsDone }}</strong></span>
+                <div class="d-flex flex-wrap gap-3 align-items-center justify-content-between">
+                    <div class="d-flex flex-wrap gap-3">
+                        <span class="meta-pill"><i class="fa fa-inbox"></i> Total: <strong>{{ $bookingRequests->count() }}</strong></span>
+                        <span class="meta-pill"><i class="fa fa-folder-open"></i> Open: <strong>{{ $statsOpen }}</strong></span>
+                        <span class="meta-pill"><i class="fa fa-spinner"></i> In process: <strong>{{ $statsInProcess }}</strong></span>
+                        <span class="meta-pill"><i class="fa fa-check-circle"></i> Done: <strong>{{ $statsDone }}</strong></span>
+                    </div>
+                    <div class="ms-auto">
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#manualTripBookingModal">
+                            <i class="fa fa-plus me-1"></i> Create request
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -223,6 +261,147 @@
     </div>
 </div>
 
+<!-- Manual Trip Booking Request Modal -->
+<div class="modal fade" id="manualTripBookingModal" tabindex="-1" aria-labelledby="manualTripBookingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="manualTripBookingModalLabel">Create trip booking request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ route('admin.trip-bookings.store') }}" onsubmit="return validateManualTripBookingForm()">
+                @csrf
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-7">
+                            <div class="card border-0 shadow-sm mb-4 position-relative">
+                                <div class="card-header border-0">
+                                    <h5 class="mb-0">Trip</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3 position-relative">
+                                        <input type="text"
+                                               id="trip-search-input"
+                                               class="form-control"
+                                               placeholder="Select trip…"
+                                               autocomplete="off">
+                                        <input type="hidden" name="trip_id" id="trip-id-input">
+
+                                        <div id="trip-dropdown"
+                                             class="card position-absolute w-100 mt-1 d-none"
+                                             style="z-index: 1055; max-height: 260px; overflow-y: auto;">
+                                            <div id="trip-dropdown-list"></div>
+
+                                            <div id="trip-dropdown-loading" class="text-center py-2 small text-muted d-none">
+                                                Loading trips…
+                                            </div>
+
+                                            <div id="trip-dropdown-empty" class="text-center py-2 small text-muted d-none">
+                                                No trips found.
+                                            </div>
+                                        </div>
+
+                                        <div class="text-danger small mt-1 d-none" id="trip-error">
+                                            Please select a trip.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header border-0">
+                                    <h5 class="mb-0">Request details</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Preferred date</label>
+                                            <input type="date"
+                                                   name="preferred_date"
+                                                   class="form-control"
+                                                   min="{{ now()->toDateString() }}"
+                                                   max="{{ now()->copy()->addYears(2)->toDateString() }}"
+                                                   required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Number of persons</label>
+                                            <input type="number" name="number_of_persons" class="form-control" min="1" max="99" value="1" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Initial status</label>
+                                            <select name="status" class="form-control">
+                                                <option value="open" selected>Open</option>
+                                                <option value="in_process">In process</option>
+                                                <option value="done">Done</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12 mb-3">
+                                            <label class="form-label">Message</label>
+                                            <textarea name="message" rows="3" class="form-control" placeholder="Internal details / guest message (optional)"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-5">
+                            <div class="card border-0 shadow-sm mb-4">
+                                <div class="card-header border-0">
+                                    <h5 class="mb-0">Guest details</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Name</label>
+                                        <input type="text" name="name" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Email</label>
+                                        <input type="email" name="email" class="form-control">
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">Country code</label>
+                                            <input type="text" name="phone_country_code" class="form-control" value="+49">
+                                        </div>
+                                        <div class="col-md-8 mb-3">
+                                            <label class="form-label">Phone</label>
+                                            <input type="text" name="phone" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header border-0">
+                                    <h5 class="mb-0">How this works</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="mb-2">
+                                            <strong>DB only:</strong>
+                                            This creates a booking request record without triggering email flows.
+                                        </li>
+                                        <li class="mb-0">
+                                            <strong>Source:</strong>
+                                            The request is linked to the selected trip as <code>source_type=trip</code>.
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        Create request
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Message Modal -->
 <div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -292,6 +471,17 @@
 
 @section('js_after')
 <script>
+function validateManualTripBookingForm() {
+    const tripId = document.getElementById('trip-id-input')?.value;
+    const errorEl = document.getElementById('trip-error');
+    if (!tripId) {
+        if (errorEl) errorEl.classList.remove('d-none');
+        return false;
+    }
+    if (errorEl) errorEl.classList.add('d-none');
+    return true;
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     // WYSIWYG (CKEditor 4 is loaded globally in admin layout)
     if (typeof CKEDITOR !== 'undefined' && !CKEDITOR.instances.trip_reply_body) {
@@ -411,6 +601,174 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
         });
     }
+});
+
+// Trip dropdown search + selection (lazy load + search + infinite scroll)
+(function () {
+    const searchInput = document.getElementById('trip-search-input');
+    const tripIdInput = document.getElementById('trip-id-input');
+    const dropdown = document.getElementById('trip-dropdown');
+    const listEl = document.getElementById('trip-dropdown-list');
+    const loadingEl = document.getElementById('trip-dropdown-loading');
+    const emptyEl = document.getElementById('trip-dropdown-empty');
+    if (!searchInput || !dropdown || !listEl || !tripIdInput) return;
+
+    const apiUrl = @json(route('admin.trip-bookings.trips-search'));
+
+    let currentTerm = '';
+    let currentPage = 1;
+    let nextPage = null;
+    let isLoading = false;
+    let debounceTimer = null;
+
+    function openDropdown() {
+        dropdown.classList.remove('d-none');
+    }
+
+    function closeDropdown() {
+        dropdown.classList.add('d-none');
+    }
+
+    function setLoading(state) {
+        isLoading = state;
+        if (loadingEl) loadingEl.classList.toggle('d-none', !state);
+    }
+
+    function clearList() {
+        listEl.innerHTML = '';
+        if (emptyEl) emptyEl.classList.add('d-none');
+    }
+
+    function renderTripCard(item) {
+        const div = document.createElement('div');
+        div.className = 'guiding-card border-0 border-bottom';
+        div.dataset.tripId = item.id;
+        div.dataset.label = item.title;
+        const placeholderUrl = @json(asset('images/placeholder_guide.jpg'));
+        div.innerHTML = `
+            <div class="card-body py-2 px-2 d-flex align-items-center">
+                <div class="me-3">
+                    <img src="${item.thumbnail_url}"
+                         alt="Trip thumbnail"
+                         class="rounded"
+                         loading="lazy"
+                         onerror="this.onerror=null;this.src='${placeholderUrl}';"
+                         style="width: 40px; height: 40px; object-fit: cover;">
+                </div>
+                <div class="flex-grow-1">
+                    <div class="fw-semibold">${item.title}</div>
+                    <div class="text-muted small">
+                        ID #${item.id}${item.location ? ' · ' + item.location : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        div.addEventListener('click', function () {
+            const id = this.dataset.tripId;
+            const label = this.dataset.label || ('ID #' + id);
+            tripIdInput.value = id;
+            searchInput.value = label;
+
+            const errorEl = document.getElementById('trip-error');
+            if (errorEl) errorEl.classList.add('d-none');
+
+            closeDropdown();
+        });
+
+        return div;
+    }
+
+    function loadTrips({ reset = false } = {}) {
+        if (isLoading) return;
+
+        if (reset) {
+            currentPage = 1;
+            nextPage = null;
+            clearList();
+        }
+
+        setLoading(true);
+
+        const params = new URLSearchParams();
+        params.set('page', String(currentPage));
+        params.set('per_page', '20');
+        if (currentTerm) params.set('q', currentTerm);
+
+        fetch(apiUrl + '?' + params.toString(), {
+            headers: { 'Accept': 'application/json' },
+        })
+            .then(r => r.json())
+            .then(json => {
+                const data = Array.isArray(json.data) ? json.data : [];
+
+                if (reset && data.length === 0) {
+                    if (emptyEl) emptyEl.classList.remove('d-none');
+                } else {
+                    if (emptyEl) emptyEl.classList.add('d-none');
+                }
+
+                data.forEach(item => listEl.appendChild(renderTripCard(item)));
+
+                nextPage = json.next_page || null;
+                currentPage = json.current_page || currentPage;
+            })
+            .catch(() => {
+                if (reset && emptyEl) {
+                    emptyEl.textContent = 'Failed to load trips.';
+                    emptyEl.classList.remove('d-none');
+                }
+            })
+            .finally(() => setLoading(false));
+    }
+
+    function ensureInitialLoaded() {
+        if (!listEl.childElementCount && !isLoading) {
+            loadTrips({ reset: true });
+        }
+    }
+
+    searchInput.addEventListener('focus', function () {
+        openDropdown();
+        ensureInitialLoaded();
+    });
+    searchInput.addEventListener('click', function () {
+        openDropdown();
+        ensureInitialLoaded();
+    });
+
+    searchInput.addEventListener('input', function () {
+        currentTerm = this.value.toLowerCase().trim();
+        if (debounceTimer) window.clearTimeout(debounceTimer);
+        debounceTimer = window.setTimeout(() => loadTrips({ reset: true }), 250);
+    });
+
+    dropdown.addEventListener('scroll', function () {
+        if (!nextPage || isLoading) return;
+        const threshold = 40;
+        if (dropdown.scrollTop + dropdown.clientHeight + threshold >= dropdown.scrollHeight) {
+            currentPage = nextPage;
+            loadTrips();
+        }
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!dropdown.contains(e.target) && e.target !== searchInput) {
+            closeDropdown();
+        }
+    });
+})();
+
+// Prevent double-submit (disable button after first submit)
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('#manualTripBookingModal form');
+    if (!form) return;
+    form.addEventListener('submit', function () {
+        const btn = form.querySelector('button[type="submit"]');
+        if (!btn) return;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Creating…';
+    });
 });
 </script>
 @endsection

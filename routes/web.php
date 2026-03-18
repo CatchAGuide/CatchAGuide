@@ -408,6 +408,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/bookings/{booking}/send-guide-invoice', [BookingsController::class, 'sendGuideInvoice'])->name('bookings.send-guide-invoice');
         Route::post('/bookings/{booking}/update-guide-billing-status', [BookingsController::class, 'updateGuideBillingStatus'])->name('bookings.update-guide-billing-status');
 
+        // Manual creation + admin-select search for trip/camp/vacation booking requests
+        Route::get('trip-bookings/trips-search', [\App\Http\Controllers\Admin\TripBookingsController::class, 'searchTrips'])->name('trip-bookings.trips-search');
+        Route::post('trip-bookings', [\App\Http\Controllers\Admin\TripBookingsController::class, 'storeManual'])->name('trip-bookings.store');
+
+        Route::get('camp-vacation-bookings/sources-search', [CampVacationBookingsController::class, 'searchSources'])->name('camp-vacation-bookings.sources-search');
+        Route::post('camp-vacation-bookings', [CampVacationBookingsController::class, 'storeManual'])->name('camp-vacation-bookings.store');
+
         Route::get('camp-vacation-bookings', [CampVacationBookingsController::class, 'index'])->name('camp-vacation-bookings.index');
         Route::patch('camp-vacation-bookings/{campVacationBooking}/status', [CampVacationBookingsController::class, 'updateStatus'])->name('camp-vacation-bookings.update-status');
         Route::post('camp-vacation-bookings/reply', [CampVacationBookingsController::class, 'sendReply'])->name('camp-vacation-bookings.reply');

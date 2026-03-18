@@ -3,10 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreManualCampVacationBookingRequest;
+use App\Models\Camp;
 use App\Models\CampVacationBooking;
 use App\Models\EmailLog;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class CampVacationBookingsController extends Controller
 {
@@ -39,6 +43,118 @@ class CampVacationBookingsController extends Controller
         return redirect()
             ->route('admin.camp-vacation-bookings.index')
             ->with('success', 'Status updated.');
+    }
+
+    public function storeManual(StoreManualCampVacationBookingRequest $request)
+    {
+        $data = $request->validated();
+
+        $sourceType = strtolower((string) $data['source_type']);
+        $sourceId = (int) $data['source_id'];
+
+        // Camp-only manual creation (vacations excluded)
+        Camp::query()->where('status', 'active')->findOrFail($sourceId);
+
+        // Prevent accidental double-submit duplicates (client retries/double-click)
+        $recentDuplicate = CampVacationBooking::query()
+            ->where('source_type', CampVacationBooking::SOURCE_CAMP)
+            ->where('source_id', $sourceId)
+            ->where('preferred_date', $data['preferred_date'])
+            ->where('number_of_persons', (int) $data['number_of_persons'])
+            ->where('name', $data['name'])
+            ->where('email', $data['email'] ?? null)
+            ->where('phone_country_code', $data['phone_country_code'] ?? null)
+            ->where('phone', $data['phone'] ?? null)
+            ->where('message', $data['message'] ?? null)
+            ->where('created_at', '>=', Carbon::now()->subSeconds(10))
+            ->exists();
+
+        if (!$recentDuplicate) {
+            CampVacationBooking::create([
+                'source_type' => CampVacationBooking::SOURCE_CAMP,
+                'source_id' => $sourceId,
+                'preferred_date' => $data['preferred_date'],
+                'number_of_persons' => (int) $data['number_of_persons'],
+                'name' => $data['name'],
+                'email' => $data['email'] ?? null,
+                'phone_country_code' => $data['phone_country_code'] ?? null,
+                'phone' => $data['phone'] ?? null,
+                'message' => $data['message'] ?? null,
+                'status' => $data['status'] ?? CampVacationBooking::STATUS_OPEN,
+            ]);
+        }
+
+        return redirect()
+            ->route('admin.camp-vacation-bookings.index')
+            ->with('success', 'Camp/Vacation booking request created successfully.');
+    }
+
+    public function searchSources(Request $request)
+    {
+        $perPage = (int) $request->input('per_page', 20);
+        $perPage = max(5, min(50, $perPage));
+
+        $page = max((int) $request->input('page', 1), 1);
+        $term = trim((string) $request->input('q', ''));
+
+        $campQuery = Camp::query()
+            ->select(['id', 'title', 'location', 'thumbnail_path', 'city', 'region', 'country'])
+            ->selectRaw("'camp' as type")
+            ->where('status', 'active');
+
+        if ($term !== '') {
+            $termLower = Str::lower($term);
+
+            $applyTerm = function ($q) use ($termLower, $term) {
+                if (ctype_digit($term)) {
+                    $q->where('id', (int) $term);
+                } else {
+                    $q->where(function ($sq) use ($termLower) {
+                        $sq->whereRaw('LOWER(title) LIKE ?', ["%{$termLower}%"])
+                            ->orWhereRaw('LOWER(location) LIKE ?', ["%{$termLower}%"])
+                            ->orWhereRaw('LOWER(city) LIKE ?', ["%{$termLower}%"])
+                            ->orWhereRaw('LOWER(region) LIKE ?', ["%{$termLower}%"])
+                            ->orWhereRaw('LOWER(country) LIKE ?', ["%{$termLower}%"])
+                            ->orWhereRaw('CAST(id AS CHAR) LIKE ?', ["%{$termLower}%"]);
+                    });
+                }
+            };
+
+            $applyTerm($campQuery);
+        }
+
+        $paginator = $campQuery->orderBy('title')->paginate($perPage, ['*'], 'page', $page);
+
+        $items = $paginator->getCollection()->map(function (Camp $camp) {
+            $thumbPath = trim((string) ($camp->thumbnail_path ?? ''));
+            $thumb = null;
+            if ($thumbPath !== '') {
+                $thumb = str_starts_with($thumbPath, 'http') || str_starts_with($thumbPath, '//')
+                    ? $thumbPath
+                    : asset(ltrim($thumbPath, '/'));
+            }
+
+            $location = $camp->location ?? null;
+            if (!$location) {
+                $parts = array_filter([$camp->city ?? null, $camp->region ?? null, $camp->country ?? null]);
+                $location = $parts ? implode(', ', $parts) : null;
+            }
+
+            return [
+                'type' => 'camp',
+                'id' => $camp->id,
+                'title' => (string) ($camp->title ?? ('#' . $camp->id)),
+                'location' => $location ? (string) $location : null,
+                'thumbnail_url' => $thumb ?: asset('images/placeholder_guide.jpg'),
+            ];
+        })->values();
+
+        return response()->json([
+            'data' => $items,
+            'current_page' => $paginator->currentPage(),
+            'next_page' => $paginator->hasMorePages() ? $paginator->currentPage() + 1 : null,
+            'total' => $paginator->total(),
+        ]);
     }
 
     public function sendReply(Request $request)

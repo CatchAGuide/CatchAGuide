@@ -3,10 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreManualTripBookingRequest;
 use App\Models\EmailLog;
+use App\Models\Trip;
 use App\Models\TripBooking;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class TripBookingsController extends Controller
 {
@@ -39,6 +43,111 @@ class TripBookingsController extends Controller
         return redirect()
             ->route('admin.trip-bookings.index')
             ->with('success', 'Status updated.');
+    }
+
+    public function storeManual(StoreManualTripBookingRequest $request)
+    {
+        $data = $request->validated();
+
+        $trip = Trip::query()->findOrFail((int) $data['trip_id']);
+
+        // Prevent accidental double-submit duplicates (client retries/double-click)
+        $recentDuplicate = TripBooking::query()
+            ->where('source_type', TripBooking::SOURCE_TRIP)
+            ->where('source_id', $trip->id)
+            ->where('preferred_date', $data['preferred_date'])
+            ->where('number_of_persons', (int) $data['number_of_persons'])
+            ->where('name', $data['name'])
+            ->where('email', $data['email'] ?? null)
+            ->where('phone_country_code', $data['phone_country_code'] ?? null)
+            ->where('phone', $data['phone'] ?? null)
+            ->where('message', $data['message'] ?? null)
+            ->where('created_at', '>=', Carbon::now()->subSeconds(10))
+            ->exists();
+
+        if (!$recentDuplicate) {
+            TripBooking::create([
+                'source_type' => TripBooking::SOURCE_TRIP,
+                'source_id' => $trip->id,
+                'preferred_date' => $data['preferred_date'],
+                'number_of_persons' => (int) $data['number_of_persons'],
+                'name' => $data['name'],
+                'email' => $data['email'] ?? null,
+                'phone_country_code' => $data['phone_country_code'] ?? null,
+                'phone' => $data['phone'] ?? null,
+                'message' => $data['message'] ?? null,
+                'status' => $data['status'] ?? TripBooking::STATUS_OPEN,
+            ]);
+        }
+
+        return redirect()
+            ->route('admin.trip-bookings.index')
+            ->with('success', 'Trip booking request created successfully.');
+    }
+
+    public function searchTrips(Request $request)
+    {
+        $perPage = (int) $request->input('per_page', 20);
+        $perPage = max(5, min(50, $perPage));
+
+        $page = max((int) $request->input('page', 1), 1);
+        $term = trim((string) $request->input('q', ''));
+
+        $query = Trip::query()
+            ->select(['id', 'title', 'location', 'thumbnail_path', 'city', 'region', 'country'])
+            ->where('status', 'active')
+            ->orderBy('title');
+
+        if ($term !== '') {
+            $termLower = Str::lower($term);
+
+            if (ctype_digit($term)) {
+                $query->where('id', (int) $term);
+            } else {
+                $query->where(function ($q) use ($termLower) {
+                    $q->whereRaw('LOWER(title) LIKE ?', ["%{$termLower}%"])
+                        ->orWhereRaw('LOWER(location) LIKE ?', ["%{$termLower}%"])
+                        ->orWhereRaw('LOWER(city) LIKE ?', ["%{$termLower}%"])
+                        ->orWhereRaw('LOWER(region) LIKE ?', ["%{$termLower}%"])
+                        ->orWhereRaw('LOWER(country) LIKE ?', ["%{$termLower}%"])
+                        ->orWhereRaw('CAST(id AS CHAR) LIKE ?', ["%{$termLower}%"]);
+                });
+            }
+        }
+
+        $paginator = $query->paginate($perPage, ['*'], 'page', $page);
+
+        $items = $paginator->getCollection()->map(function (Trip $trip) {
+            $thumbPath = trim((string) ($trip->thumbnail_path ?? ''));
+            $thumbnailUrl = null;
+            if ($thumbPath !== '') {
+                if (str_starts_with($thumbPath, 'http') || str_starts_with($thumbPath, '//')) {
+                    $thumbnailUrl = $thumbPath;
+                } else {
+                    $thumbnailUrl = asset(ltrim($thumbPath, '/'));
+                }
+            }
+
+            $location = $trip->location ?: null;
+            if (!$location) {
+                $parts = array_filter([$trip->city ?? null, $trip->region ?? null, $trip->country ?? null]);
+                $location = $parts ? implode(', ', $parts) : null;
+            }
+
+            return [
+                'id' => $trip->id,
+                'title' => (string) $trip->title,
+                'location' => $location,
+                'thumbnail_url' => $thumbnailUrl ?: asset('images/placeholder_guide.jpg'),
+            ];
+        })->values();
+
+        return response()->json([
+            'data' => $items,
+            'current_page' => $paginator->currentPage(),
+            'next_page' => $paginator->hasMorePages() ? $paginator->currentPage() + 1 : null,
+            'total' => $paginator->total(),
+        ]);
     }
 
     public function sendReply(Request $request)
