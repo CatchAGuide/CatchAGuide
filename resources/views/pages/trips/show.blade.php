@@ -767,6 +767,86 @@
             </aside>
         </div>
 
+        <!-- Mobile Sticky Request Card (replaces the floating booking card) -->
+        <div class="trip-offer-page__mobile-sticky-footer" role="region" aria-label="{{ __('trips.request_now') }}">
+            <div class="trip-offer-page__mobile-sticky-inner">
+                <div class="trip-offer-page__mobile-sticky-top">
+                    <div class="trip-offer-page__mobile-sticky-price">
+                        <span class="trip-offer-page__booking-label">
+                            {{ __('trips.price_per_person_short') }}
+                        </span>
+                        <span class="trip-offer-page__booking-amount trip-offer-page__mobile-sticky-amount">
+                            @if($tripView['price']['per_person'])
+                                € {{ number_format($tripView['price']['per_person'], 0) }}
+                            @else
+                                {{ __('trips.pricing_title') }}
+                            @endif
+                        </span>
+                    </div>
+
+                    <div class="trip-offer-page__mobile-sticky-date">
+                        <label class="trip-offer-page__booking-field-label trip-offer-page__mobile-sticky-date-label">
+                            {{ __('trips.select_date') }}
+                        </label>
+                        <select class="trip-offer-page__booking-select trip-offer-page__mobile-sticky-select"
+                                name="departure_date"
+                                data-trip-selected-date
+                                aria-label="{{ __('trips.select_date') }}">
+                            <option value="">{{ __('trips.choose_date') }}</option>
+                            @if(!empty($availabilityCards))
+                                @foreach($availabilityCards as $card)
+                                    @php
+                                        $status = $card['availability_status'] ?? 'available';
+                                        $label = $card['date_formatted'] ?? ($card['day'] ?? '') . '. ' . ($card['month'] ?? '') . ' ' . now()->year;
+                                        if ($status === 'fully_booked') {
+                                            $label .= ' — ' . __('trips.availability_status_fully_booked');
+                                        } elseif ($status === 'almost_full' && isset($card['spots_available'])) {
+                                            $label .= ' — ' . ($card['spots_available'] == 1 ? __('trips.only_x_spot', ['count' => 1]) : __('trips.only_x_spot_plural', ['count' => $card['spots_available']]));
+                                        }
+                                    @endphp
+                                    <option value="{{ $card['departure_date'] ?? '' }}"
+                                            {{ ($status === 'fully_booked') ? 'disabled' : '' }}
+                                            {{ (!empty($selectedDate) && ($card['departure_date'] ?? '') === $selectedDate) ? 'selected' : '' }}>
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+                </div>
+
+                <div class="trip-offer-page__mobile-sticky-bottom">
+                    <div class="trip-offer-page__guest-stepper trip-offer-page__mobile-sticky-guests" data-trip-guests
+                         data-angler="{{ __('trips.angler') }}"
+                         data-anglers="{{ __('trips.anglers') }}">
+                        <button type="button"
+                                class="trip-offer-page__stepper-btn trip-offer-page__stepper-btn--minus"
+                                data-trip-guests-minus
+                                aria-label="{{ __('trips.decrease_guests') }}">
+                            –
+                        </button>
+                        <span class="trip-offer-page__guest-label" data-trip-guests-label>
+                            2 {{ __('trips.anglers') }}
+                        </span>
+                        <button type="button"
+                                class="trip-offer-page__stepper-btn trip-offer-page__stepper-btn--plus"
+                                data-trip-guests-plus
+                                aria-label="{{ __('trips.increase_guests') }}">
+                            +
+                        </button>
+                    </div>
+
+                    <button type="button" class="trip-offer-page__booking-cta trip-offer-page__mobile-sticky-cta">
+                        {{ __('trips.request_now') }}
+                    </button>
+                </div>
+
+                <p class="trip-offer-page__mobile-sticky-footnote">
+                    {{ __('trips.free_cancellation_note') }}
+                </p>
+            </div>
+        </div>
+
         <!-- Gallery Modal (matches Camp offer page) -->
         <div id="galleryModal" class="gallery-modal">
             <div class="gallery-modal__content">
@@ -849,9 +929,15 @@
                                     <textarea name="description" class="form-control" rows="4" placeholder="{{ __('contact.feedback') }}" required></textarea>
                                 </div>
 
-                                <div class="d-flex justify-content-between align-items-center">
-                                    {!! htmlFormSnippet() !!}
-                                    <button type="button" id="tripContactSubmitBtn" class="btn btn-orange">{{ __('contact.btnSend') }}</button>
+                                <div class="trip-contact-submit-row">
+                                    <div class="trip-contact-captcha-wrap">
+                                        {!! htmlFormSnippet() !!}
+                                    </div>
+                                    <div class="trip-contact-submit-wrap">
+                                        <button type="button" id="tripContactSubmitBtn" class="btn btn-orange">
+                                            {{ __('contact.btnSend') }}
+                                        </button>
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -1006,45 +1092,80 @@
                 });
             }
 
-            const guestRoot = page.querySelector('[data-trip-guests]');
-            if (guestRoot) {
-                const minusBtn = guestRoot.querySelector('[data-trip-guests-minus]');
-                const plusBtn = guestRoot.querySelector('[data-trip-guests-plus]');
-                const label = guestRoot.querySelector('[data-trip-guests-label]');
-                let guests = 2;
+            const guestRoots = page.querySelectorAll('[data-trip-guests]');
+            if (guestRoots && guestRoots.length > 0) {
+                // Shared guest count so desktop booking card + mobile footer stay in sync.
+                let guests = parseInt(page.dataset.tripGuests || '2', 10) || 2;
 
-                function updateGuests() {
-                    if (!label || !guestRoot) return;
+                function updateGuestRoot(guestRoot) {
+                    if (!guestRoot) return;
+                    const label = guestRoot.querySelector('[data-trip-guests-label]');
+                    if (!label) return;
+
                     const unit = guests === 1
                         ? (guestRoot.getAttribute('data-angler') || 'Angler')
                         : (guestRoot.getAttribute('data-anglers') || 'Anglers');
                     label.textContent = guests + ' ' + unit;
+                }
+
+                function updateAllGuests() {
+                    guestRoots.forEach(updateGuestRoot);
                     page.dataset.tripGuests = String(guests);
                 }
 
-                if (minusBtn) {
-                    minusBtn.addEventListener('click', function () {
-                        if (guests > 1) {
-                            guests -= 1;
-                            updateGuests();
-                        }
-                    });
-                }
+                guestRoots.forEach((guestRoot) => {
+                    const minusBtn = guestRoot.querySelector('[data-trip-guests-minus]');
+                    const plusBtn = guestRoot.querySelector('[data-trip-guests-plus]');
 
-                if (plusBtn) {
-                    plusBtn.addEventListener('click', function () {
-                        guests += 1;
-                        updateGuests();
-                    });
-                }
+                    if (minusBtn) {
+                        minusBtn.addEventListener('click', function () {
+                            if (guests > 1) {
+                                guests -= 1;
+                                updateAllGuests();
+                            }
+                        });
+                    }
 
-                updateGuests();
+                    if (plusBtn) {
+                        plusBtn.addEventListener('click', function () {
+                            guests += 1;
+                            updateAllGuests();
+                        });
+                    }
+                });
+
+                updateAllGuests();
             }
+
+            // Date select sync (desktop booking card + mobile sticky footer)
+            (function() {
+                const dateSelects = page.querySelectorAll('[data-trip-selected-date]');
+                if (!dateSelects || dateSelects.length < 2) return;
+
+                dateSelects.forEach((selectEl) => {
+                    if (!selectEl) return;
+                    selectEl.addEventListener('change', function () {
+                        const value = selectEl.value || '';
+                        dateSelects.forEach((otherEl) => {
+                            if (otherEl && otherEl !== selectEl) otherEl.value = value;
+                        });
+                    });
+                });
+            })();
 
             // Availability "Reserve now" -> sync floating card date select
             (function() {
-                const dateSelect = page.querySelector('[data-trip-selected-date]');
-                if (!dateSelect) return;
+                const dateSelects = page.querySelectorAll('[data-trip-selected-date]');
+                if (!dateSelects || dateSelects.length === 0) return;
+
+                function setAllDateSelects(date) {
+                    dateSelects.forEach((sel) => {
+                        if (!sel) return;
+                        sel.value = date;
+                        // Trigger change so any dependent UI reacts.
+                        sel.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
+                }
 
                 const reserveButtons = page.querySelectorAll('[data-reserve-date]');
                 reserveButtons.forEach((btn) => {
@@ -1052,22 +1173,23 @@
                         const date = btn.getAttribute('data-reserve-date') || '';
                         if (!date) return;
 
-                        dateSelect.value = date;
-                        dateSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                        setAllDateSelects(date);
 
                         const bookingCard = page.querySelector('.trip-offer-page__booking-card');
-                        if (bookingCard) {
-                            bookingCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }
+                        const mobileFooter = page.querySelector('.trip-offer-page__mobile-sticky-footer');
+                        const isMobileFooterVisible = mobileFooter && mobileFooter.getBoundingClientRect && mobileFooter.getBoundingClientRect().height > 0;
+                        const targetEl = isMobileFooterVisible ? mobileFooter : bookingCard;
+
+                        if (targetEl) targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     });
                 });
             })();
 
             // Floating card "Request now" -> open contact modal and prefill
             (function() {
-                const cta = page.querySelector('.trip-offer-page__booking-cta');
+                const ctas = page.querySelectorAll('.trip-offer-page__booking-cta');
                 const modalEl = document.getElementById('tripContactModal');
-                if (!cta || !modalEl || typeof bootstrap === 'undefined' || !bootstrap.Modal) return;
+                if (!ctas || ctas.length === 0 || !modalEl || typeof bootstrap === 'undefined' || !bootstrap.Modal) return;
 
                 const preferredDateInput = document.getElementById('trip_preferred_date');
                 const personsInput = document.getElementById('trip_number_of_persons');
@@ -1083,18 +1205,22 @@
                 }
 
                 function prefillContactForm() {
-                    const dateSelect = page.querySelector('[data-trip-selected-date]');
-                    const selectedDate = (dateSelect && dateSelect.value) ? dateSelect.value : '';
+                    const dateSelects = page.querySelectorAll('[data-trip-selected-date]');
+                    const selectedDate = Array.from(dateSelects || [])
+                        .map((sel) => (sel && sel.value ? sel.value : ''))
+                        .filter(Boolean)[0] || '';
                     const guests = parseInt(page.dataset.tripGuests || '2', 10) || 2;
 
                     if (personsInput) personsInput.value = String(guests);
                     if (preferredDateInput && selectedDate) preferredDateInput.value = selectedDate;
                 }
 
-                cta.addEventListener('click', function () {
-                    prefillContactForm();
-                    const modal = getModalInstance(modalEl);
-                    modal.show();
+                ctas.forEach((cta) => {
+                    cta.addEventListener('click', function () {
+                        prefillContactForm();
+                        const modal = getModalInstance(modalEl);
+                        modal.show();
+                    });
                 });
 
                 modalEl.addEventListener('shown.bs.modal', function () {
