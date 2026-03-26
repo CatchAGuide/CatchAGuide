@@ -141,6 +141,9 @@ return [
     'choose_date'                  => 'Choose date',
     'guests_label'                 => 'Guests',
     'request_now'                  => 'Request Now',
+    'book_now'                     => 'Book Now',
+    'choose_date_short'            => 'Choose date',
+    'per_person_suffix'            => '/ person',
     'free_cancellation_note'       => 'Free cancellation up to 30 days before departure',
     'deposit_label'                => 'Deposit',
     'contact'                      => 'Contact',
@@ -175,9 +178,12 @@ return [
     'only_x_spot_plural'           => 'Only :count spots available',
     'waitlist_possible'            => 'Waitlist possible',
     'reserve_now'                  => 'Reserve now',
+    'book'                         => 'Book',
     'inquire'                      => 'Inquire',
 
     'return_date_label'            => 'Return:',
+    'outbound_label'               => 'Outbound',
+    'return_label'                 => 'Return',
 
     // Common
     'create'           => 'Create Trip',

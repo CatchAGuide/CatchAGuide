@@ -32,6 +32,11 @@ class TripOfferController extends Controller
         $tripView = $this->cache->rememberTripOfferViewModel($slug, fn () => $this->mapper->map($trip));
 
         $gallery = $this->buildGallery($trip);
+        $presentation = $this->cache->rememberTripOfferPresentationData(
+            $slug,
+            app()->getLocale(),
+            fn () => $this->buildPresentationData($tripView, $gallery)
+        );
         $availabilityCards = $this->buildAvailabilityCards($trip);
         $selectedDate = $this->resolveSelectedDate($request, $availabilityCards);
 
@@ -43,10 +48,11 @@ class TripOfferController extends Controller
         return view('pages.trips.show', [
             'tripView' => $tripView,
             'gallery' => $gallery,
+            ...$presentation,
             'availabilityCards' => $availabilityCards,
             'tripOfferData' => $tripOfferData,
             'selectedDate' => $selectedDate,
-            'contactModalTitle' => "Please provide your details for booking the trip: " . $tripView['title'] ?? __('contact.shareYourQuestion'),
+            'contactModalTitle' => !empty($tripView['title']) ? '' . $tripView['title'] : '',
         ]);
     }
 
@@ -155,13 +161,24 @@ class TripOfferController extends Controller
                 $returnDate = $date->copy()->addDays((int) $durationDays);
             }
 
+            $locale = app()->getLocale();
+            $formatShort = function ($d) use ($locale) {
+                if (!$d) return null;
+                try {
+                    return $d->copy()->locale($locale)->isoFormat('DD. MMM YYYY');
+                } catch (\Throwable $e) {
+                    // Fallback (English month abbreviations)
+                    return $d->format('d. M Y');
+                }
+            };
+
             return [
                 'month' => $date ? $date->format('M') : null,
                 'day' => $date ? $date->format('d') : null,
                 'weekday' => $date ? $date->format('D') : null,
-                'date_formatted' => $date ? $date->format('d. F Y') : null,
+                'date_formatted' => $formatShort($date),
                 'departure_date' => $date?->toDateString(),
-                'return_date_formatted' => $returnDate ? $returnDate->format('d. F Y') : null,
+                'return_date_formatted' => $formatShort($returnDate),
                 'spots_available' => $spots,
                 'availability_status' => $availabilityStatus,
                 'is_limited' => $spots !== null && $spots > 0 && $spots < $this->almostFullThreshold,
@@ -179,7 +196,7 @@ class TripOfferController extends Controller
             return 'fully_booked';
         }
         if ($spots !== null && $spots < $this->almostFullThreshold) {
-            return 'almost_full';
+            return 'limited';
         }
         return 'available';
     }
@@ -195,6 +212,112 @@ class TripOfferController extends Controller
         }
 
         return '/' . ltrim($path, '/');
+    }
+
+    private function buildPresentationData(array $tripView, array $gallery): array
+    {
+        $includedItems = array_values(array_filter((array) ($tripView['included'] ?? []), fn ($item) => $this->isFilled(is_array($item) ? ($item['label'] ?? null) : $item)));
+        $excludedItems = array_values(array_filter((array) ($tripView['excluded'] ?? []), fn ($item) => $this->isFilled(is_array($item) ? ($item['label'] ?? null) : $item)));
+
+        $tripScheduleItems = array_values(array_filter((array) ($tripView['trip_schedule'] ?? []), function ($item): bool {
+            if (!is_array($item)) {
+                return false;
+            }
+
+            return $this->isFilled($item['time'] ?? null)
+                || $this->isFilled($item['day_label'] ?? null)
+                || $this->isFilled($item['description'] ?? null);
+        }));
+
+        $acc = (array) ($tripView['accommodation'] ?? []);
+        $accRoomTypes = array_values(array_filter((array) ($acc['room_types'] ?? []), fn ($rt) => $this->isFilled($rt)));
+        $accCatering = array_values(array_filter((array) ($acc['catering'] ?? []), fn ($meal) => $this->isFilled($meal)));
+        $hasAccommodationContent =
+            $this->isFilled($acc['name'] ?? null) ||
+            $this->isFilled($acc['description'] ?? null) ||
+            !empty($accRoomTypes) ||
+            !empty($accCatering) ||
+            $this->isFilled($acc['distance_to_water'] ?? null) ||
+            $this->isFilled($acc['nearest_airport'] ?? null) ||
+            $this->isFilled($acc['arrival_day'] ?? null) ||
+            $this->isFilled($acc['best_arrival_options'] ?? null) ||
+            $this->isFilled($acc['meeting_point'] ?? null);
+
+        $prov = (array) ($tripView['provider'] ?? []);
+        $provCertifications = array_values(array_filter((array) ($prov['certifications_list'] ?? []), fn ($cert) => $this->isFilled($cert)));
+        $provGuideLanguages = array_values(array_filter((array) ($prov['guide_languages'] ?? []), fn ($lang) => $this->isFilled($lang)));
+        $hasGuideContent =
+            $this->isFilled($prov['photo'] ?? null) ||
+            $this->isFilled($prov['name'] ?? null) ||
+            $this->isFilled($prov['experience'] ?? null) ||
+            !empty($provCertifications) ||
+            !empty($provGuideLanguages);
+
+        $boat = (array) ($tripView['boat'] ?? []);
+        $boatFeatures = array_values(array_filter((array) ($boat['features'] ?? []), fn ($feat) => $this->isFilled($feat)));
+        $hasBoatContent =
+            $this->isFilled($boat['boat_type'] ?? null) ||
+            $this->isFilled($boat['boat_staff'] ?? null) ||
+            !empty($boatFeatures) ||
+            $this->isFilled($boat['boat_information'] ?? null);
+
+        $additionalInfoItems = array_values(array_filter((array) ($tripView['additional_info_structured'] ?? []), function ($item): bool {
+            if (!is_array($item)) {
+                return false;
+            }
+
+            return $this->isFilled($item['label'] ?? null) && $this->isFilled($item['value'] ?? null);
+        }));
+
+        $nonFishingActivities = array_values(array_filter((array) ($tripView['non_fishing_activities_list'] ?? []), fn ($activity) => $this->isFilled($activity)));
+
+        return [
+            'primaryImage' => $gallery['primaryImage'] ?? null,
+            'topRightImages' => $gallery['topRightImages'] ?? [],
+            'bottomStripImages' => $gallery['bottomStripImages'] ?? [],
+            'galleryImages' => $gallery['all'] ?? [],
+            'remainingGalleryCount' => $gallery['remainingGalleryCount'] ?? 0,
+            'includedItems' => $includedItems,
+            'excludedItems' => $excludedItems,
+            'tripScheduleItems' => $tripScheduleItems,
+            'acc' => $acc,
+            'accRoomTypes' => $accRoomTypes,
+            'accCatering' => $accCatering,
+            'hasAccommodationContent' => $hasAccommodationContent,
+            'prov' => $prov,
+            'provCertifications' => $provCertifications,
+            'provGuideLanguages' => $provGuideLanguages,
+            'hasGuideContent' => $hasGuideContent,
+            'boat' => $boat,
+            'boatFeatures' => $boatFeatures,
+            'hasBoatContent' => $hasBoatContent,
+            'additionalInfoItems' => $additionalInfoItems,
+            'nonFishingActivities' => $nonFishingActivities,
+        ];
+    }
+
+    private function isFilled(mixed $value): bool
+    {
+        if ($value === null) {
+            return false;
+        }
+
+        if (is_string($value)) {
+            $normalized = str_replace('&nbsp;', ' ', $value);
+            return trim(strip_tags($normalized)) !== '';
+        }
+
+        if (is_array($value)) {
+            foreach ($value as $item) {
+                if ($this->isFilled($item)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        return true;
     }
 }
 

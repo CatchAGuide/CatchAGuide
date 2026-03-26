@@ -85,6 +85,8 @@ class VacationsController extends Controller
         $destinationId = session('vacation_destination_id');
         $destination = Destination::find($destinationId);
         session()->forget('vacation_destination_id');
+        $vacationTitle = $translatedVacation->title ?? $vacation->title ?? null;
+        $contactModalTitle = trim('Please provide your details for booking the trip' . (!empty($vacationTitle) ? ': ' . $vacationTitle : ''));
             
         return view('pages.vacations.show', compact(
             'vacation', 
@@ -95,7 +97,8 @@ class VacationsController extends Controller
             'translatedBoats',
             'translatedPackages',
             'translatedGuidings',
-            'translatedExtras'
+            'translatedExtras',
+            'contactModalTitle'
         ));
     }
 

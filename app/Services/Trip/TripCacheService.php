@@ -14,6 +14,8 @@ class TripCacheService
     private const TRIP_CACHE_KEY = 'trip_';
     private const TRIP_OFFER_VIEW_CACHE_KEY = 'trip_offer_view_';
     private const TRIP_OFFER_VIEW_CACHE_VERSION = 'v2';
+    private const TRIP_OFFER_PRESENTATION_CACHE_KEY = 'trip_offer_presentation_';
+    private const TRIP_OFFER_PRESENTATION_CACHE_VERSION = 'v1';
     private const FORM_DATA_CACHE_KEY = 'trip_form_data';
 
     public function getTripsList(int $perPage = 15): LengthAwarePaginator
@@ -75,6 +77,15 @@ class TripCacheService
     {
         Cache::forget(self::TRIP_OFFER_VIEW_CACHE_KEY . $slug);
         Cache::forget(self::TRIP_OFFER_VIEW_CACHE_KEY . self::TRIP_OFFER_VIEW_CACHE_VERSION . '_' . $slug);
+        Cache::forget(self::TRIP_OFFER_PRESENTATION_CACHE_KEY . self::TRIP_OFFER_PRESENTATION_CACHE_VERSION . '_' . app()->getLocale() . '_' . $slug);
+    }
+
+    /** Get or compute trip offer render-ready presentation payload (cached). */
+    public function rememberTripOfferPresentationData(string $slug, string $locale, callable $callback): array
+    {
+        $key = self::TRIP_OFFER_PRESENTATION_CACHE_KEY . self::TRIP_OFFER_PRESENTATION_CACHE_VERSION . '_' . $locale . '_' . $slug;
+
+        return Cache::remember($key, self::CACHE_TTL, $callback);
     }
 
     public function clearTripsListCache(): void

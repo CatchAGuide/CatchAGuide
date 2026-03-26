@@ -141,6 +141,9 @@ return [
     'choose_date'                  => 'Datum wählen',
     'guests_label'                 => 'Gäste',
     'request_now'                  => 'Jetzt anfragen',
+    'book_now'                     => 'Jetzt buchen',
+    'choose_date_short'            => 'Datum wählen',
+    'per_person_suffix'            => '/ Person',
     'free_cancellation_note'       => 'Kostenlose Stornierung bis 30 Tage vor Abreise',
     'deposit_label'                => 'Anzahlung',
     'contact'                      => 'Kontakt',
@@ -175,9 +178,12 @@ return [
     'only_x_spot_plural'           => 'Nur :count Plätze verfügbar',
     'waitlist_possible'            => 'Warteliste möglich',
     'reserve_now'                  => 'Jetzt reservieren',
+    'book'                         => 'Buchen',
     'inquire'                      => 'Anfragen',
 
     'return_date_label'            => 'Rückreise:',
+    'outbound_label'               => 'Hinflug',
+    'return_label'                 => 'Rückflug',
 
     // Common
     'create'           => 'Reise erstellen',
