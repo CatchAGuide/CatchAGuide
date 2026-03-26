@@ -497,20 +497,61 @@ class Guiding extends Model
 
     public function getBlockedEvents()
     {
-        $blocked_events = collect($this->user->calendar_schedules)
-            ->filter(function($blocked) {
-                return $blocked->user_id == $this->user->id || 
-                       $blocked->type === 'custom_schedule' || 
-                       $this->bookings()->where('blocked_event_id', $blocked->id)->exists();
-            })
-            ->map(function($blocked) {
+        // IMPORTANT:
+        // CalendarSchedule rows are shared across multiple guidings of the same guide user.
+        // For the guiding PDP we must only lock:
+        // - this guiding's own `tour_schedule` rows (availability-based blocks)
+        // - dates that belong to bookings of THIS guiding
+        // - guide-level blocks like vacation/custom schedules
+        $bookingBlockedEventIds = $this->bookings()
+            ->pluck('blocked_event_id')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        $bookingBlockedEventIdsInt = array_map('intval', $bookingBlockedEventIds);
+
+        // PERF:
+        // Don't load all $this->user->calendar_schedules (could be large).
+        // Fetch only rows relevant for this PDP calendar.
+        $scheduleQuery = CalendarSchedule::query()
+            ->select(['id', 'date', 'type', 'guiding_id', 'user_id'])
+            ->where('user_id', $this->user_id)
+            ->where(function ($q) use ($bookingBlockedEventIdsInt) {
+                $q->whereIn('type', ['vacation_schedule', 'vacation_request', 'custom_schedule']);
+
+                $q->orWhere(function ($q2) {
+                    $q2->where('type', 'tour_schedule')
+                        ->where('guiding_id', $this->id);
+                });
+
+                if (!empty($bookingBlockedEventIdsInt)) {
+                    $q->orWhere(function ($q3) use ($bookingBlockedEventIdsInt) {
+                        $q3->where('type', 'tour_request')
+                            ->whereIn('id', $bookingBlockedEventIdsInt);
+                    });
+                }
+            });
+
+        $blocked_events = $scheduleQuery
+            ->get()
+            ->map(function ($blocked) {
                 return [
-                    "from" => date('Y-m-d', strtotime($blocked->date)),
-                    "due" => date('Y-m-d', strtotime($blocked->date)),
-                    "id" => $blocked->id
+                    'from' => date('Y-m-d', strtotime($blocked->date)),
+                    'due' => date('Y-m-d', strtotime($blocked->date)),
+                    'id' => $blocked->id,
                 ];
             })
             ->toArray();
+
+        // Safety net:
+        // The PDP calendar must always reflect *this guiding's* weekday/month availability even if
+        // calendar_schedule generation is missing/outdated. We therefore derive additional blocked
+        // ranges directly from the guiding settings and merge them in.
+        foreach ($this->getAvailabilityDerivedBlockedRanges(12) as $range) {
+            $blocked_events[] = $range;
+        }
 
         // dd($blocked_events);
 
@@ -552,6 +593,72 @@ class Guiding extends Model
         }
 
         return $blocked_events;
+    }
+
+    /**
+     * Derive blocked date ranges from this guiding's month/weekday availability.
+     * This enforces per-guiding availability on the PDP even if calendar_schedule rows
+     * are missing or stale.
+     *
+     * @param int $monthsAhead
+     * @return array<int, array{from:string,due:string}>
+     */
+    private function getAvailabilityDerivedBlockedRanges(int $monthsAhead = 12): array
+    {
+        $availableMonths = decode_if_json($this->months, true) ?? [];
+        $availableWeekdays = decode_if_json($this->weekdays, true) ?? [];
+
+        // Normalize: if not configured, treat as "all allowed"
+        $availableMonths = array_values(array_filter(array_map('strtolower', (array) $availableMonths)));
+        $availableWeekdays = array_values(array_filter(array_map('strtolower', (array) $availableWeekdays)));
+
+        if (empty($availableMonths)) {
+            $availableMonths = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+        }
+        if (empty($availableWeekdays)) {
+            $availableWeekdays = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+        }
+
+        $start = \Carbon\Carbon::today();
+        $end = \Carbon\Carbon::today()->addMonths($monthsAhead);
+
+        $blockedDates = [];
+        for ($d = $start->copy(); $d->lte($end); $d->addDay()) {
+            $month = strtolower($d->format('F'));
+            $weekday = strtolower($d->format('l'));
+
+            $monthAvailable = in_array($month, $availableMonths, true);
+            $weekdayAvailable = in_array($weekday, $availableWeekdays, true);
+
+            if (!$monthAvailable || !$weekdayAvailable) {
+                $blockedDates[] = $d->format('Y-m-d');
+            }
+        }
+
+        if (empty($blockedDates)) {
+            return [];
+        }
+
+        // Compress consecutive blocked dates into ranges to keep payload small.
+        sort($blockedDates);
+        $ranges = [];
+        $rangeStart = $blockedDates[0];
+        $prev = $blockedDates[0];
+
+        for ($i = 1; $i < count($blockedDates); $i++) {
+            $cur = $blockedDates[$i];
+            $prevDate = \Carbon\Carbon::createFromFormat('Y-m-d', $prev);
+            $expected = $prevDate->copy()->addDay()->format('Y-m-d');
+
+            if ($cur !== $expected) {
+                $ranges[] = ['from' => $rangeStart, 'due' => $prev];
+                $rangeStart = $cur;
+            }
+            $prev = $cur;
+        }
+        $ranges[] = ['from' => $rangeStart, 'due' => $prev];
+
+        return $ranges;
     }
 
     /**
