@@ -22,11 +22,12 @@ class FinanceAggregationService
      */
     public function getInvoiceRows(Request $request): array
     {
-        [$from, $to] = $this->getReservationDateRange($request);
+        $dateFilter = $this->getDateFilterMode($request);
+        [$from, $to] = $this->getDateRange($request);
 
-        $bookingRows = $this->getGuidingBookingRows($from, $to);
-        $tripRows = $this->getTripRequestRows($from, $to);
-        $campVacationRows = $this->getCampVacationRequestRows($from, $to);
+        $bookingRows = $this->getGuidingBookingRows($from, $to, $dateFilter);
+        $tripRows = $this->getTripRequestRows($from, $to, $dateFilter);
+        $campVacationRows = $this->getCampVacationRequestRows($from, $to, $dateFilter);
 
         $rows = array_merge($bookingRows, $tripRows, $campVacationRows);
 
@@ -40,18 +41,15 @@ class FinanceAggregationService
     /**
      * Returns [from,to] date range (inclusive) or [null,null].
      *
-     * Filters are based on Reservation Date:
-     * - Booking: calendar_schedule.date OR blocked_event.from OR bookings.book_date
-     * - TripBooking/CampVacationBooking: preferred_date
-     *
      * Supported query params:
      * - year=YYYY
      * - month=1..12 (requires year; if omitted we assume current year)
      * - quarter=1..4 (requires year; if omitted we assume current year)
+     * - date_filter=reservation|booking (controls which date field is filtered; default reservation)
      *
      * @return array{0: Carbon|null, 1: Carbon|null}
      */
-    private function getReservationDateRange(Request $request): array
+    private function getDateRange(Request $request): array
     {
         $year = trim((string) $request->query('year', ''));
         $month = trim((string) $request->query('month', ''));
@@ -92,9 +90,18 @@ class FinanceAggregationService
     }
 
     /**
+     * @return 'reservation'|'booking'
+     */
+    private function getDateFilterMode(Request $request): string
+    {
+        $mode = strtolower(trim((string) $request->query('date_filter', 'reservation')));
+        return in_array($mode, ['reservation', 'booking'], true) ? $mode : 'reservation';
+    }
+
+    /**
      * @return array<int, array<string, mixed>>
      */
-    private function getGuidingBookingRows(?Carbon $from, ?Carbon $to): array
+    private function getGuidingBookingRows(?Carbon $from, ?Carbon $to, string $dateFilter): array
     {
         $bookingsQuery = Booking::query()
             ->with(['guiding.user', 'user', 'financeItem', 'calendar_schedule', 'blocked_event'])
@@ -102,13 +109,19 @@ class FinanceAggregationService
             ->latest();
 
         if ($from && $to) {
-            $bookingsQuery->where(function ($q) use ($from, $to) {
-                $q->whereHas('calendar_schedule', function ($sq) use ($from, $to) {
-                    $sq->whereBetween('date', [$from->toDateString(), $to->toDateString()]);
-                })->orWhereHas('blocked_event', function ($sq) use ($from, $to) {
-                    $sq->whereBetween('from', [$from, $to]);
-                })->orWhereBetween('book_date', [$from, $to]);
-            });
+            if ($dateFilter === 'booking') {
+                $bookingsQuery->whereBetween('created_at', [$from, $to]);
+            } else {
+                // Reservation Date:
+                // - Booking: calendar_schedule.date OR blocked_event.from OR bookings.book_date
+                $bookingsQuery->where(function ($q) use ($from, $to) {
+                    $q->whereHas('calendar_schedule', function ($sq) use ($from, $to) {
+                        $sq->whereBetween('date', [$from->toDateString(), $to->toDateString()]);
+                    })->orWhereHas('blocked_event', function ($sq) use ($from, $to) {
+                        $sq->whereBetween('from', [$from, $to]);
+                    })->orWhereBetween('book_date', [$from, $to]);
+                });
+            }
         }
 
         $bookings = $bookingsQuery->get();
@@ -148,6 +161,7 @@ class FinanceAggregationService
                 'booking_no' => 'B-' . $booking->id,
                 'source' => 'Guiding' . ($booking->created_source ? (' (' . $booking->created_source . ')') : ''),
                 'booking_date' => optional($booking->created_at)->format('Y-m-d H:i') ?? '—',
+                'booking_date_iso' => optional($booking->created_at)->format('Y-m-d') ?? null,
                 'booking_date_sort' => optional($booking->created_at)->timestamp ?? 0,
                 'guest_name' => $guestName ?: '—',
                 'guest_email' => $guestEmail ?: '—',
@@ -163,6 +177,7 @@ class FinanceAggregationService
                 'paid_status' => $finance?->paid_status ?? 'unpaid',
                 'paid_at' => $finance?->paid_at,
                 'reservation_date' => $reservationDate ? $reservationDate->format('Y-m-d') : '—',
+                'reservation_date_iso' => $reservationDate ? $reservationDate->format('Y-m-d') : null,
             ];
         })->values()->all();
     }
@@ -170,7 +185,7 @@ class FinanceAggregationService
     /**
      * @return array<int, array<string, mixed>>
      */
-    private function getTripRequestRows(?Carbon $from, ?Carbon $to): array
+    private function getTripRequestRows(?Carbon $from, ?Carbon $to, string $dateFilter): array
     {
         $requestsQuery = TripBooking::query()
             ->with(['financeItem'])
@@ -178,7 +193,11 @@ class FinanceAggregationService
             ->latest();
 
         if ($from && $to) {
-            $requestsQuery->whereBetween('preferred_date', [$from->toDateString(), $to->toDateString()]);
+            if ($dateFilter === 'booking') {
+                $requestsQuery->whereBetween('created_at', [$from, $to]);
+            } else {
+                $requestsQuery->whereBetween('preferred_date', [$from->toDateString(), $to->toDateString()]);
+            }
         }
 
         $requests = $requestsQuery->get();
@@ -210,6 +229,7 @@ class FinanceAggregationService
                 'booking_no' => 'T-' . $req->id,
                 'source' => 'Trip',
                 'booking_date' => optional($req->created_at)->format('Y-m-d H:i') ?? '—',
+                'booking_date_iso' => optional($req->created_at)->format('Y-m-d') ?? null,
                 'booking_date_sort' => optional($req->created_at)->timestamp ?? 0,
                 'guest_name' => $req->name ?: '—',
                 'guest_email' => $req->email ?: '—',
@@ -225,6 +245,7 @@ class FinanceAggregationService
                 'paid_status' => $finance?->paid_status ?? 'unpaid',
                 'paid_at' => $finance?->paid_at,
                 'reservation_date' => optional($req->preferred_date)->format('Y-m-d') ?: '—',
+                'reservation_date_iso' => optional($req->preferred_date)->format('Y-m-d') ?: null,
             ];
         })->values()->all();
     }
@@ -232,7 +253,7 @@ class FinanceAggregationService
     /**
      * @return array<int, array<string, mixed>>
      */
-    private function getCampVacationRequestRows(?Carbon $from, ?Carbon $to): array
+    private function getCampVacationRequestRows(?Carbon $from, ?Carbon $to, string $dateFilter): array
     {
         $requestsQuery = CampVacationBooking::query()
             ->with(['financeItem'])
@@ -240,7 +261,11 @@ class FinanceAggregationService
             ->latest();
 
         if ($from && $to) {
-            $requestsQuery->whereBetween('preferred_date', [$from->toDateString(), $to->toDateString()]);
+            if ($dateFilter === 'booking') {
+                $requestsQuery->whereBetween('created_at', [$from, $to]);
+            } else {
+                $requestsQuery->whereBetween('preferred_date', [$from->toDateString(), $to->toDateString()]);
+            }
         }
 
         $requests = $requestsQuery->get();
@@ -283,6 +308,7 @@ class FinanceAggregationService
                 'booking_no' => 'CV-' . $req->id,
                 'source' => $sourceLabel,
                 'booking_date' => optional($req->created_at)->format('Y-m-d H:i') ?? '—',
+                'booking_date_iso' => optional($req->created_at)->format('Y-m-d') ?? null,
                 'booking_date_sort' => optional($req->created_at)->timestamp ?? 0,
                 'guest_name' => $req->name ?: '—',
                 'guest_email' => $req->email ?: '—',
@@ -298,6 +324,7 @@ class FinanceAggregationService
                 'paid_status' => $finance?->paid_status ?? 'unpaid',
                 'paid_at' => $finance?->paid_at,
                 'reservation_date' => optional($req->preferred_date)->format('Y-m-d') ?: '—',
+                'reservation_date_iso' => optional($req->preferred_date)->format('Y-m-d') ?: null,
             ];
         })->values()->all();
     }

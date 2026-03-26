@@ -15,6 +15,20 @@
                         <div class="card-body">
                             <div class="d-flex flex-wrap gap-2 align-items-end justify-content-between mb-3">
                                 <form class="d-flex flex-wrap gap-2 align-items-end" method="GET" action="{{ route('admin.finance.invoices') }}" id="finance-filter-form">
+                                    @php
+                                        $dateFilter = request('date_filter', 'reservation');
+                                        $dateFilter = in_array($dateFilter, ['reservation', 'booking'], true) ? $dateFilter : 'reservation';
+                                    @endphp
+                                    <div class="me-2">
+                                        <label class="form-label mb-1 small text-muted">Filter dates by</label>
+                                        <div class="btn-group btn-group-sm" role="group" aria-label="Date filter mode">
+                                            <input type="radio" class="btn-check" name="date_filter" id="date-filter-reservation" value="reservation" autocomplete="off" {{ $dateFilter === 'reservation' ? 'checked' : '' }}>
+                                            <label class="btn btn-outline-primary" for="date-filter-reservation">Reservation date</label>
+
+                                            <input type="radio" class="btn-check" name="date_filter" id="date-filter-booking" value="booking" autocomplete="off" {{ $dateFilter === 'booking' ? 'checked' : '' }}>
+                                            <label class="btn btn-outline-primary" for="date-filter-booking">Booking date</label>
+                                        </div>
+                                    </div>
                                     <div>
                                         <label class="form-label mb-1 small text-muted">Month</label>
                                         <select class="form-select form-select-sm" id="finance-filter-month" name="month" style="min-width: 160px;">
@@ -48,22 +62,22 @@
                                                 $q = request('quarter');
                                             @endphp
                                             <a class="btn btn-outline-primary {{ $q === null || $q === '' ? 'active' : '' }}"
-                                               href="{{ route('admin.finance.invoices', array_filter(['year' => request('year'), 'month' => request('month')])) }}">All</a>
+                                               href="{{ route('admin.finance.invoices', array_filter(['date_filter' => $dateFilter, 'year' => request('year'), 'month' => request('month')])) }}">All</a>
                                             <a class="btn btn-outline-primary {{ $q == '1' ? 'active' : '' }}"
-                                               href="{{ route('admin.finance.invoices', array_filter(['year' => request('year') ?: now()->format('Y'), 'quarter' => 1])) }}">Q1</a>
+                                               href="{{ route('admin.finance.invoices', array_filter(['date_filter' => $dateFilter, 'year' => request('year') ?: now()->format('Y'), 'quarter' => 1])) }}">Q1</a>
                                             <a class="btn btn-outline-primary {{ $q == '2' ? 'active' : '' }}"
-                                               href="{{ route('admin.finance.invoices', array_filter(['year' => request('year') ?: now()->format('Y'), 'quarter' => 2])) }}">Q2</a>
+                                               href="{{ route('admin.finance.invoices', array_filter(['date_filter' => $dateFilter, 'year' => request('year') ?: now()->format('Y'), 'quarter' => 2])) }}">Q2</a>
                                             <a class="btn btn-outline-primary {{ $q == '3' ? 'active' : '' }}"
-                                               href="{{ route('admin.finance.invoices', array_filter(['year' => request('year') ?: now()->format('Y'), 'quarter' => 3])) }}">Q3</a>
+                                               href="{{ route('admin.finance.invoices', array_filter(['date_filter' => $dateFilter, 'year' => request('year') ?: now()->format('Y'), 'quarter' => 3])) }}">Q3</a>
                                             <a class="btn btn-outline-primary {{ $q == '4' ? 'active' : '' }}"
-                                               href="{{ route('admin.finance.invoices', array_filter(['year' => request('year') ?: now()->format('Y'), 'quarter' => 4])) }}">Q4</a>
+                                               href="{{ route('admin.finance.invoices', array_filter(['date_filter' => $dateFilter, 'year' => request('year') ?: now()->format('Y'), 'quarter' => 4])) }}">Q4</a>
                                         </div>
                                     </div>
                                     <input type="hidden" name="quarter" value="{{ request('quarter') }}">
                                 </form>
 
                                 <div class="text-muted small">
-                                    Filters apply to <strong>Reservation date</strong>.
+                                    Filters apply to <strong>{{ $dateFilter === 'booking' ? 'Booking date' : 'Reservation date' }}</strong>.
                                 </div>
                             </div>
 
@@ -72,7 +86,7 @@
                                     <thead>
                                     <tr>
                                         <th>Booking #</th>
-                                        <th>Booking date</th>
+                                        <th>Reservation date</th>
                                         <th>Guest</th>
                                         <th>Guide</th>
                                         <th class="text-end">Price</th>
@@ -80,7 +94,7 @@
                                         <th class="text-end">Tax (19%)</th>
                                         <th>Invoice sent</th>
                                         <th>Paid status</th>
-                                        <th>Reservation date</th>
+                                        <th>Booking date</th>
                                         <th class="text-end">Actions</th>
                                     </tr>
                                     </thead>
@@ -129,7 +143,13 @@
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td>{{ $row['booking_date'] ?? '—' }}</td>
+                                            <td>
+                                                @php
+                                                    $resDate = $row['reservation_date'] ?? '—';
+                                                    $resIso = $row['reservation_date_iso'] ?? (($resDate && $resDate !== '—') ? $resDate : '');
+                                                @endphp
+                                                <span class="js-reservation-date" data-date="{{ $resIso }}">{{ $resDate }}</span>
+                                            </td>
                                             <td>
                                                 <div class="fw-semibold">{{ $row['guest_name'] ?? '—' }}</div>
                                             </td>
@@ -177,10 +197,10 @@
                                             </td>
                                             <td>
                                                 @php
-                                                    $resDate = $row['reservation_date'] ?? '—';
-                                                    $resIso = ($resDate && $resDate !== '—') ? $resDate : '';
+                                                    $bookDate = $row['booking_date'] ?? '—';
+                                                    $bookIso = $row['booking_date_iso'] ?? '';
                                                 @endphp
-                                                <span class="js-reservation-date" data-date="{{ $resIso }}">{{ $resDate }}</span>
+                                                <span class="js-booking-date" data-date="{{ $bookIso }}">{{ $bookDate }}</span>
                                             </td>
                                             <td class="text-end">
                                                 <div class="btn-group btn-group-sm">
@@ -308,14 +328,15 @@
                 var existing = new Set();
                 Array.from(yearEl.options).forEach(function (o) { existing.add(o.value); });
 
-                // Reservation date column index (0-based):
-                // Booking#, BookingDate, Guest, Guide, Price, Provision, Tax, InvoiceSent, PaidStatus, ReservationDate, Actions
-                var reservationColIdx = 9;
+                var dateFilter = "{{ $dateFilter }}";
+                // 0-based:
+                // Booking#, ReservationDate, Guest, Guide, Price, Provision, Tax, InvoiceSent, PaidStatus, BookingDate, Actions
+                var activeDateColIdx = dateFilter === 'booking' ? 9 : 1;
 
                 var years = new Set();
-                dt.column(reservationColIdx).nodes().each(function (td) {
-                    var span = td.querySelector('.js-reservation-date');
-                    var v = span?.getAttribute('data-date') || '';
+                dt.column(activeDateColIdx).nodes().each(function (td) {
+                    var span = td.querySelector(dateFilter === 'booking' ? '.js-booking-date' : '.js-reservation-date');
+                    var v = span && span.getAttribute('data-date') ? span.getAttribute('data-date') : '';
                     var m = /^(\d{4})-/.exec(v);
                     if (m) years.add(parseInt(m[1], 10));
                 });
@@ -342,6 +363,7 @@
 
                 var monthEl = document.getElementById('finance-filter-month');
                 var yearEl = document.getElementById('finance-filter-year');
+                var dateRadios = form.querySelectorAll('input[name="date_filter"]');
                 if (!monthEl && !yearEl) return;
 
                 function onChange(e) {
@@ -352,6 +374,9 @@
 
                 if (monthEl) monthEl.addEventListener('change', onChange);
                 if (yearEl) yearEl.addEventListener('change', onChange);
+                if (dateRadios && dateRadios.length) {
+                    dateRadios.forEach(function (r) { r.addEventListener('change', onChange); });
+                }
             })();
 
             function getCsrfToken() {

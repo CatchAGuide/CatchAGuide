@@ -31,7 +31,7 @@
                         <li><a href="{{ route('admin.bookings.index') }}" class="slide-item  {{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}"> Guidings</a></li>
                         <li><a href="{{ route('admin.camp-vacation-bookings.index') }}" class="slide-item {{ request()->routeIs('admin.camp-vacation-bookings.*') ? 'active' : '' }}"> Camps/Vacations</a></li>
                         <li><a href="{{ route('admin.trip-bookings.index') }}" class="slide-item {{ request()->routeIs('admin.trip-bookings.*') ? 'active' : '' }}"> Trips</a></li>
-                        <li><a href="{{ route('admin.vacations.bookings') }}" class="slide-item  {{ request()->routeIs('admin.vacations.bookings') ? 'active' : '' }} text-secondary"> Vacations (Old)</a></li>
+                        {{-- <li><a href="{{ route('admin.vacations.bookings') }}" class="slide-item  {{ request()->routeIs('admin.vacations.bookings') ? 'active' : '' }} text-secondary"> Vacations (Old)</a></li> --}}
                     </ul>
                 </li>
 
@@ -66,7 +66,7 @@
                     <a class="side-menu__item {{ request()->routeIs('admin.special-offers.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.special-offers.index') }}"><i class="side-menu__icon fas fa-gift"></i><span class="side-menu__label">Special Offers</span></a>
                     <a class="side-menu__item {{ request()->routeIs('admin.camps.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.camps.index') }}"><i class="side-menu__icon fas fa-campground"></i><span class="side-menu__label">Camps</span></a>
                     <a class="side-menu__item {{ request()->routeIs('admin.trips.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.trips.index') }}"><i class="side-menu__icon fas fa-suitcase-rolling"></i><span class="side-menu__label">Trips</span></a>
-                    <a class="side-menu__item {{ request()->routeIs('admin.holidays.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.vacations.index') }}"><i class="side-menu__icon fe fe-book-open"></i><span class="side-menu__label">Vacations (Old)</span></a>
+                    {{-- <a class="side-menu__item {{ request()->routeIs('admin.holidays.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.vacations.index') }}"><i class="side-menu__icon fe fe-book-open"></i><span class="side-menu__label">Vacations (Old)</span></a> --}}
                 </li>
 
                 <li class="sub-category">
