@@ -90,6 +90,7 @@ return [
     'Reviews' => 'Bewertungen',
     'over_10' => 'von 10',
     'no_reviews' => 'Noch keine Bewertungen',
+    'automatic_review_badge' => 'Automatische Bewertung von Catch A Guide',
 
     'Excellent' => 'Ausgezeichnet',
     'Very_Good' => 'Sehr Gut',

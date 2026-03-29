@@ -276,6 +276,89 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             margin-bottom: 15px;
             user-select: none; /* Prevent text selection during drag */
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        /* Review card (comment section layout) */
+        :root {
+            --review-card-accent: #8b2332;
+        }
+        .review-card__header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .review-card__avatar {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: #f0f0f0;
+            color: var(--review-card-accent);
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        .review-card__meta {
+            flex: 1;
+            min-width: 0;
+        }
+        .review-card__name {
+            font-weight: 700;
+            margin: 0 0 2px;
+            color: #111;
+            font-size: 1rem;
+        }
+        .review-card__date {
+            margin: 0;
+            font-size: 0.72rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #9a9a9a;
+        }
+        .review-card__score {
+            flex-shrink: 0;
+            text-align: right;
+            line-height: 1.1;
+        }
+        .review-card__score-val {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--review-card-accent);
+        }
+        .review-card__score-den {
+            font-size: 0.8rem;
+            color: #9a9a9a;
+            font-weight: 500;
+        }
+        .review-card__divider {
+            border: 0;
+            border-top: 1px solid #e8e8e8;
+            margin: 0 0 12px;
+            opacity: 1;
+        }
+        .review-card__quote {
+            font-style: italic;
+            color: #111;
+            margin: 0 0 12px;
+            font-size: 0.95rem;
+            line-height: 1.45;
+        }
+        .review-card__quote .description {
+            margin: 0;
+        }
+        .review-card__badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: #f3f3f3;
+            color: #6f6f6f;
+            font-size: 0.75rem;
+            font-weight: 500;
         }
         
         /* Hide navigation buttons */
@@ -696,6 +779,13 @@
             border-radius: 10px;
             font-size: 11px;
             font-weight: 500;
+        }
+
+        /* Same-guide block: index listing cards; show every card on mobile (desktop uses .show + See more) */
+        @media (max-width: 767px) {
+            #same-guide-guidings-list .guiding-list-item {
+                display: flex !important;
+            }
         }
     </style>
 @endsection
@@ -1792,23 +1882,35 @@
             <!-- Horizontal scrolling reviews container -->
             <div class="ratings-container" id="ratings-container">
                 @foreach($reviews as $review)
+                @php
+                    $bookingForDate = $review->booking;
+                    $reviewDateStr = $bookingForDate
+                        ? $bookingForDate->getFormattedBookingDate('M j, Y')
+                        : (($review->created_at != null) ? \Carbon\Carbon::parse($review->created_at)->format('M j, Y') : null);
+                    $initial = $review->user && $review->user->firstname
+                        ? mb_strtoupper(mb_substr($review->user->firstname, 0, 1, 'UTF-8'), 'UTF-8')
+                        : '?';
+                @endphp
                 <div class="ratings-item">
-                    <div class="ratings-comment">
-                        <div class="ratings-comment-top">
-                            <div class="user-info">
-                                <p class="user">{{$review->user->firstname}}</p>
-                                <p class="date">{{ ($review->created_at != null) ? Carbon\Carbon::parse($review->created_at)->format('F j, Y') : "-" }}</p>
-                            </div>
-                            <p>
-                                <span class="text-warning">★</span> {{ number_format($review->grandtotal_score, 1) }}/10
-                            </p>
+                    <div class="review-card__header">
+                        <div class="review-card__avatar" aria-hidden="true">{{ $initial }}</div>
+                        <div class="review-card__meta">
+                            <p class="review-card__name">{{ $review->user->firstname ?? '—' }}</p>
+                            <p class="review-card__date">{{ $reviewDateStr ? strtoupper($reviewDateStr) : '—' }}</p>
                         </div>
-                        <div class="comment-content">
-                            <p class="description">{{ translate($review->comment) }}</p>
-                            <small class="see-more text-orange">{{ __('guidings.See_More') }}</small>
-                            <small class="show-less text-orange">{{ __('guidings.Show_Less') }}</small>
+                        <div class="review-card__score">
+                            <span class="review-card__score-val">{{ number_format($review->grandtotal_score, 1) }}</span><span class="review-card__score-den">/10</span>
                         </div>
                     </div>
+                    <hr class="review-card__divider">
+                    <div class="review-card__quote comment-content">
+                        <p class="description">&ldquo;{{ translate($review->comment) }}&rdquo;</p>
+                        <small class="see-more text-orange">{{ __('guidings.See_More') }}</small>
+                        <small class="show-less text-orange">{{ __('guidings.Show_Less') }}</small>
+                    </div>
+                    @if($review->is_automatic)
+                        <span class="review-card__badge">@lang('guidings.automatic_review_badge')</span>
+                    @endif
                 </div>
                 @endforeach
             </div>
@@ -1828,165 +1930,17 @@
                 <div class="col-lg-12 col-sm-12">
                     <h3 class="tour-details-two__title">@lang('guidings.More_Fishing') {{$guiding->user->firstname}}</h3>
                     <div class="tours-list__right">
-                        <!-- Desktop view (row-based layout) -->
-                        <div class="tours-list__inner desktop-view">
-                            @foreach($same_guiding as $index => $other_guiding)
-                            <div class="row m-0 mb-2 guiding-list-item {{ $index < 2 ? 'show' : '' }}">
-                                <div class="col-md-12">
-                                    <div class="row p-2 border shadow-sm bg-white rounded">
-                                        <!-- Existing desktop layout -->
-                                        <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-0">
-                                            <div id="carouselExampleControls-{{$other_guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false" style="aspect-ratio: 4/3; overflow: hidden;">
-                                                <div class="carousel-inner h-100">
-                                                    @if(count(get_galleries_image_link($other_guiding)))
-                                                        @foreach(get_galleries_image_link($other_guiding) as $index => $gallery_image_link)
-                                                            <div class="carousel-item @if($index == 0) active @endif h-100">
-                                                                <img class="d-block w-100 h-100" src="{{$gallery_image_link}}" alt="{{ $other_guiding->title }}" style="object-fit: cover;">
-                                                            </div>
-                                                        @endforeach
-                                                    @endif
-                                                </div>
-                                                @if(count(get_galleries_image_link($other_guiding)) > 1)
-                                                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls-{{$other_guiding->id}}" data-bs-slide="prev">
-                                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                                        <span class="visually-hidden">Previous</span>
-                                                    </button>
-                                                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls-{{$other_guiding->id}}" data-bs-slide="next">
-                                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                                        <span class="visually-hidden">Next</span>
-                                                    </button>
-                                                @endif
-                                            </div>
-                                        </div>
-                                        <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 p-md-3 mt-md-1">
-                                            <!-- Existing content -->
-                                            <a href="{{ route('guidings.show', [$other_guiding->id, $other_guiding->slug]) }}">
-                                                <!-- Existing content structure -->
-                                                <div class="guidings-item">
-                                                    <div class="guidings-item-title">
-                                                        <h5 class="fw-bolder text-truncate">{{$other_guiding->title}}</h5>
-                                                        <span class="text-center"><i class="fas fa-map-marker-alt me-2"></i>{{ $other_guiding->location }}</span>                                      
-                                                    </div>
-                                                    @if ($other_guiding->user->average_rating())
-                                                    <div class="guidings-item-ratings">
-                                                    <div class="ratings-score">
-                                                    <span class="text-warning">★</span>
-                                                            <span>{{one($other_guiding->user->average_rating(), 1)}} </span>
-                                                        </div>
-                                                    </div>
-                                                    @endif
-                                                </div>
-                                                <div class="guidings-item-icon">
-                                                    <div class="guidings-icon-container"> 
-                                                        <img src="{{asset('assets/images/icons/clock-new.svg')}}" height="20" width="20" alt="" />
-                                                        <div class="">
-                                                            {{ $other_guiding->duration }} @if($other_guiding->duration_type == "multi_day") {{__('guidings.days')}} @elseif($other_guiding->duration != 1) {{__('guidings.hours')}} @else {{__('guidings.hour')}} @endif
-                                                        </div>
-                                                    </div>
-                                                    <div class="guidings-icon-container"> 
-                                                        <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" />
-                                                        <div class="">
-                                                        {{ $other_guiding->max_guests }} @if($other_guiding->max_guests != 1) {{__('guidings.persons')}} @else {{__('guidings.person')}} @endif
-                                                        </div>
-                                                    </div>
-                                                    <div class="guidings-icon-container"> 
-                                                        <img src="{{asset('assets/images/icons/fish-new.svg')}}" height="20" width="20" alt="" />
-                                                        <div class="">
-                                                            <div class="tours-list__content__trait__text" >
-                                                                @php
-                                                                $otherGuidingTargets = collect($other_guiding->cached_target_fish_names ?? $other_guiding->getTargetFishNames($targetsMap ?? null))->pluck('name')->toArray();
-                                                                @endphp
-                                                                @if(!empty($otherGuidingTargets))
-                                                                    {{ implode(', ', $otherGuidingTargets) }}
-                                                                @endif
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="guidings-icon-container">
-                                                        <img src="{{asset('assets/images/icons/fishing-tool-new.svg')}}" height="20" width="20" alt="" />
-                                                        <div class="">
-                                                            <div class="tours-list__content__trait__text" >
-                                                                {{$other_guiding->is_boat ? ($other_guiding->boatType && $other_guiding->boatType->name !== null ? $other_guiding->boatType->name : __('guidings.boat')) : __('guidings.shore')}}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="inclusions-price">
-                                                        <div class="guidings-inclusions-container">
-                                                            @if(!empty($other_guiding->getInclusionNames()))
-                                                            <div class="guidings-included">
-                                                                <strong>@lang('guidings.Whats_Included')</strong>
-                                                                <div class="inclusions-list">
-                                                                    @php
-                                                                        $otherInclusions = $other_guiding->getInclusionNames();
-                                                                        $maxToShow = 3;
-                                                                    @endphp
-                                                                    @foreach ($otherInclusions as $incIndex => $inclussion)
-                                                                        @if ($incIndex < $maxToShow && is_array($inclussion) && isset($inclussion['name']))
-                                                                            <span class="inclusion-item"><i class="fa fa-check"></i>{{ $inclussion['name'] }}</span>
-                                                                        @endif
-                                                                    @endforeach
-                                                                    @if (count($otherInclusions) > $maxToShow)
-                                                                        <span class="inclusion-item">+{{ count($otherInclusions) - $maxToShow }} more</span>
-                                                                    @endif
-                                                                </div>
-                                                            </div>
-                                                            @endif
-                                                        </div>
-                                                        <div class="guiding-item-price">
-                                                            <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$other_guiding->getLowestPrice()}}€ p.P.</span></h5>
-                                                            <div class="d-none d-flex flex-column mt-4">
-                                                            </div>
-                                                        </div>
-                                                </div>    
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            @endforeach
+                        <div class="tours-list__inner" id="same-guide-guidings-list">
+                            @include('pages.guidings.partials.guiding-card', [
+                                'guidings' => $same_guiding,
+                                'collapseShowMore' => $same_guiding->count() > 2,
+                            ])
                         </div>
-                        
-                        <!-- Mobile view (scroll layout) – enhanced tiles -->
-                        <div class="tours-list__inner mobile-view">
-                            @foreach($same_guiding as $other_guiding)
-                                @php
-                                    $tile_img = $other_guiding->thumbnail_path ? asset($other_guiding->thumbnail_path) : null;
-                                    if (!$tile_img && count(get_galleries_image_link($other_guiding)) > 0) {
-                                        $tile_img = get_galleries_image_link($other_guiding)[0];
-                                    }
-                                    $tile_rating = $other_guiding->user ? $other_guiding->user->average_rating() : null;
-                                    $tile_reviews = $other_guiding->user && $other_guiding->user->reviews ? $other_guiding->user->reviews->count() : 0;
-                                @endphp
-                                <a href="{{ route('guidings.show', [$other_guiding->id, $other_guiding->slug]) }}" class="guiding-tile text-decoration-none">
-                                    <div class="guiding-tile__img-wrap">
-                                        @if($tile_img)
-                                            <img src="{{ $tile_img }}" alt="{{ $other_guiding->title }}" loading="lazy">
-                                        @endif
-                                        @if($tile_rating)
-                                            <span class="guiding-tile__rating">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                                {{ number_format($tile_rating, 1) }}@if($tile_reviews) ({{ $tile_reviews }})@endif
-                                            </span>
-                                        @endif
-                                    </div>
-                                    <div class="guiding-tile__body">
-                                        <h3 class="guiding-tile__title">{{ $other_guiding->title ? translate(Str::limit($other_guiding->title, 55)) : translate($other_guiding->title) }}</h3>
-                                        <div class="guiding-tile__location"><i class="fas fa-map-marker-alt"></i> {{ $other_guiding->location }}</div>
-                                        <div class="guiding-tile__meta">
-                                            <span>{{ $other_guiding->duration }} @if($other_guiding->duration_type == 'multi_day') {{ __('guidings.days') }} @else {{ __('guidings.hours') }} @endif</span>
-                                            <span>{{ $other_guiding->max_guests }} @if($other_guiding->max_guests != 1) {{ __('guidings.persons') }} @else {{ __('guidings.person') }} @endif</span>
-                                        </div>
-                                        <div class="guiding-tile__price"><span class="from">@lang('message.from')</span> {{ $other_guiding->getLowestPrice() }}€</div>
-                                    </div>
-                                </a>
-                            @endforeach
-                        </div>
-
+                        @if($same_guiding->count() > 2)
                         <div class="text-center desktop-view">
-                            <button id="showMoreBtn" class="btn btn-orange mt-3 text-center">{{ __('guidings.See_More') }}</button>
+                            <button id="showMoreBtn" type="button" class="btn btn-orange mt-3 text-center">{{ __('guidings.See_More') }}</button>
                         </div>
-                        
+                        @endif
                     </div>
                 </div>
             </div>
@@ -2267,51 +2221,22 @@ $(document).ready(function(){
         // Mobile touch events are already handled by the browser
     }
     
-    // "Show More" button functionality for desktop
+    // "See more" for same-guide listing (index-style cards; first two visible until expanded)
     const showMoreBtn = document.getElementById("showMoreBtn");
-    const items = document.querySelectorAll(".guiding-list-item");
+    const sameGuideList = document.getElementById("same-guide-guidings-list");
+    const items = sameGuideList ? sameGuideList.querySelectorAll(".guiding-list-item") : [];
     let isExpanded = false;
 
-    if (showMoreBtn) {
+    if (showMoreBtn && sameGuideList) {
         showMoreBtn.addEventListener("click", function () {
             isExpanded = !isExpanded;
             items.forEach((item, index) => {
-                // Show all items if expanded, otherwise show only the first two
                 item.classList.toggle("show", isExpanded || index < 2);
             });
-            // Toggle button text
-            showMoreBtn.textContent = isExpanded ? "Show Less" : "Show More";
+            showMoreBtn.textContent = isExpanded
+                ? @json(__('guidings.Show_Less'))
+                : @json(__('guidings.See_More'));
         });
-    }
-
-    function initOwlCarousel() {
-        const $toursList = $(".tours-list__inner");
-
-        if ($(window).width() < 768) {
-            // Initialize Owl Carousel for mobile
-            if (!$toursList.hasClass("owl-carousel")) {
-                $toursList.addClass("owl-carousel").owlCarousel({
-                    items: 1,
-                    loop: false,
-                    margin: 10,
-                    nav: true,
-                    dots: true,
-                });
-            }
-            $("#showMoreBtn").hide(); // Hide "Show More" button on mobile
-            $(".guiding-list-item").addClass("show"); // Show all items
-        } else {
-            // Destroy Owl Carousel for desktop
-            if ($toursList.hasClass("owl-carousel")) {
-                $toursList.trigger("destroy.owl.carousel").removeClass("owl-carousel owl-loaded");
-                $toursList.find(".owl-stage-outer").children().unwrap();
-            }
-            $("#showMoreBtn").show(); // Show "Show More" button on desktop
-            $(".guiding-list-item").each(function (index) {
-                // Show only the first two items on desktop
-                $(this).toggleClass("show", index < 2);
-            });
-        }
     }
 
     // Horizontal scrolling for reviews
@@ -2681,6 +2606,84 @@ async function initMap() {
 function initCheckNumberOfColumns() {
     return window.innerWidth < 768 ? 1 : 2;
 }
+</script>
+
+{{-- Guiding listing cards: mobile 1/N counter + gallery lightbox (matches guidings index) --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-counter-for]').forEach(function (counter) {
+        var carouselId = counter.getAttribute('data-counter-for');
+        var total      = parseInt(counter.getAttribute('data-total'), 10);
+        var carousel   = document.getElementById(carouselId);
+
+        if (!carousel) return;
+
+        carousel.addEventListener('slide.bs.carousel', function (e) {
+            counter.textContent = (e.to + 1) + '/' + total;
+        });
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-guiding-gallery]').forEach(function (carousel) {
+        var guidingId = carousel.getAttribute('data-guiding-gallery');
+        var images    = JSON.parse(carousel.getAttribute('data-gallery-images') || '[]');
+        var modal     = document.querySelector('[data-guiding-modal="' + guidingId + '"]');
+
+        if (!modal || images.length === 0) return;
+
+        var modalImage   = modal.querySelector('.guiding-gallery-modal__image');
+        var modalPrev    = modal.querySelector('.guiding-gallery-modal__prev');
+        var modalNext    = modal.querySelector('.guiding-gallery-modal__next');
+        var modalClose   = modal.querySelector('.guiding-gallery-modal__close');
+        var modalCurrent = modal.querySelector('.guiding-gallery-modal__current');
+
+        var currentIndex = 0;
+
+        function showImage(index) {
+            if (index < 0) index = images.length - 1;
+            if (index >= images.length) index = 0;
+            currentIndex = index;
+            if (modalImage)   modalImage.src = images[currentIndex];
+            if (modalCurrent) modalCurrent.textContent = currentIndex + 1;
+        }
+
+        function openModal(index) {
+            showImage(index);
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        carousel.addEventListener('slide.bs.carousel', function (e) {
+            currentIndex = e.to;
+        });
+
+        carousel.querySelectorAll('[data-guiding-open-modal]').forEach(function (img, idx) {
+            img.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                openModal(idx);
+            });
+        });
+
+        if (modalClose) modalClose.addEventListener('click', closeModal);
+        if (modalPrev)  modalPrev.addEventListener('click', function () { showImage(currentIndex - 1); });
+        if (modalNext)  modalNext.addEventListener('click', function () { showImage(currentIndex + 1); });
+
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) closeModal();
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
+        });
+    });
+});
 </script>
 @endsection
 

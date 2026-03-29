@@ -1,4 +1,7 @@
 {{-- Guiding listing cards (mobile-updated). Used on guidings index and destination pages. --}}
+@php
+    $collapseShowMore = $collapseShowMore ?? false;
+@endphp
 @foreach($guidings as $guiding)
 @php
     $targetsMap = $targetsMap ?? null;
@@ -20,7 +23,7 @@
     $inclussions    = $guiding->cached_inclusion_names ?? $guiding->getInclusionNames();
     $totalImages    = count($galleryImages);
 @endphp
-<div class="row m-0 mb-3 guiding-list-item">
+<div class="row m-0 mb-3 guiding-list-item {{ $collapseShowMore ? ($loop->index < 2 ? 'show' : '') : 'show' }}">
     <div class="col-md-12">
         <div class="row p-2 border shadow-sm bg-white rounded guiding-card-wrapper">
             <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4 col-xxl-4 mt-1 p-0">

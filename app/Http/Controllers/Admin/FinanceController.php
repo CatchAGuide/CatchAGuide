@@ -8,15 +8,18 @@ use App\Models\CampVacationBooking;
 use App\Models\FinanceItem;
 use App\Models\TripBooking;
 use App\Services\Finance\FinanceAggregationService;
+use App\Services\Finance\FinanceAnalyticsService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
 
 class FinanceController extends Controller
 {
-    public function analytics()
+    public function analytics(FinanceAnalyticsService $financeAnalytics)
     {
-        return view('admin.pages.finance.analytics.index');
+        return view('admin.pages.finance.analytics.index', [
+            'analytics' => $financeAnalytics->buildPayload(),
+        ]);
     }
 
     public function invoices(Request $request, FinanceAggregationService $aggregation)

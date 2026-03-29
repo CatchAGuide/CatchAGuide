@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Facades\Mail;
 
@@ -86,9 +87,9 @@ class Booking extends Model
         return $this->belongsTo(Rating::class);
     }
 
-    public function review(): BelongsTo
+    public function review(): HasOne
     {
-        return $this->belongsTo(Review::class);
+        return $this->hasOne(Review::class);
     }
 
     public function isBookingOver()

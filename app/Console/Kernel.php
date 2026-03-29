@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('update:booking-status')->hourly();
         $schedule->command('bookings:send-guest-reviews')->hourly();
+        $schedule->command('bookings:create-automatic-reviews')->dailyAt('02:15');
         $schedule->command('bookings:send-guest-tour-reminders')->hourly();
         $schedule->command('bookings:send-guide-reminders')->hourly();
         // $schedule->command('bookings:send-guide-reminders-12hrs')->hourly();

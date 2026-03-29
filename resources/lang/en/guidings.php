@@ -90,6 +90,7 @@ return [
     'Reviews' => 'Reviews',
     'over_10' => 'over 10',
     'no_reviews' => 'No reviews yet',
+    'automatic_review_badge' => 'Automatic review by Catch A Guide',
 
 
     'Excellent' => 'Excellent',

@@ -13,13 +13,18 @@ class Review extends Model
     protected $fillable = [
         'comment',
         'overall_score',
-        'guide_score', 
+        'guide_score',
         'region_water_score',
         'grandtotal_score',
         'user_id',
         'guide_id',
         'booking_id',
         'guiding_id',
+        'is_automatic',
+    ];
+
+    protected $casts = [
+        'is_automatic' => 'boolean',
     ];
 
     protected static function boot()

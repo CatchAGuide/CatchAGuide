@@ -717,7 +717,9 @@ class GuidingsController extends Controller
 
         // Get reviews instead of ratings
         // $reviews = $guiding->reviews;
-        $reviews = Review::where('guide_id', $guiding->user_id)->with('booking', 'booking.user')->get();
+        $reviews = Review::where('guide_id', $guiding->user_id)
+            ->with('booking', 'booking.user', 'booking.calendar_schedule', 'booking.blocked_event')
+            ->get();
         $reviews_count = $reviews->count();
 
         // Calculate average scores
