@@ -29,6 +29,20 @@ class AutomaticReviewService
     }
 
     /**
+     * Comment text for storage; :name is replaced when firstname is available (member or guest).
+     */
+    private static function commentForBooking(Booking $booking): string
+    {
+        $booking->loadMissing('user');
+        $name = trim((string) optional($booking->user)->firstname);
+        if ($name === '') {
+            return 'Successfully completed fishing tour';
+        }
+
+        return str_replace(':name', $name, self::defaultComment());
+    }
+
+    /**
      * @return array{overall_score: float, guide_score: float, region_water_score: float}
      */
     private static function automaticCategoryScores(): array
@@ -121,7 +135,7 @@ class AutomaticReviewService
             $scores = self::automaticCategoryScores();
 
             $review = Review::create([
-                'comment' => str_replace(':name', $booking->user->firstname, self::defaultComment()),
+                'comment' => self::commentForBooking($booking),
                 'overall_score' => $scores['overall_score'],
                 'guide_score' => $scores['guide_score'],
                 'region_water_score' => $scores['region_water_score'],
